@@ -1,11 +1,9 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 import type { UserRole } from "@/src/lib/constants";
-import { Sidebar } from "@/src/components/shared/Sidebar";
-import { MobileSidebar } from "@/src/components/shared/MobileSidebar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -18,34 +16,28 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return decoded?.role ?? null;
   }, []);
 
-  // ✅ Redirect using Router component (allowed)
-  if (!role && typeof window !== "undefined") {
-    router.replace("/login");
-    return <p className="p-4">Redirecting to login...</p>;
-  }
+  useEffect(() => {
+    if (typeof window !== "undefined" && !role) {
+      router.replace("/login");
+    }
+  }, [role, router]);
 
   // ✅ Prevent server mismatch
   if (typeof window === "undefined") {
     return null;
   }
 
+  if (!role) {
+    return (
+      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
+        <p className="text-muted-foreground">Redirecting to login...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block">
-        <Sidebar role={role!} />
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col">
-        {/* Mobile Header */}
-        <header className="flex items-center gap-2 border-b px-4 py-2 md:hidden">
-          <MobileSidebar role={role!} />
-          <h1 className="font-semibold">Dashboard</h1>
-        </header>
-
-        <main className="flex-1 p-4">{children}</main>
-      </div>
+    <div className="container mx-auto px-4 py-12 max-w-7xl">
+      {children}
     </div>
   );
 }

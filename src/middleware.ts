@@ -9,12 +9,23 @@ interface JwtPayload {
 
 const AUTH_ROUTES = ["/login", "/register", "/verify-otp"];
 
+/** Redirect authenticated user by role. STUDENT → /profile/reading; others → dashboard. */
+function redirectByRole(role: JwtPayload["role"], request: NextRequest) {
+  const base = request.url;
+  if (role === "ADMIN") {
+    return NextResponse.redirect(new URL("/dashboard/admin", base));
+  }
+  if (role === "INSTRUCTOR") {
+    return NextResponse.redirect(new URL("/dashboard/instructor", base));
+  }
+  return NextResponse.redirect(new URL("/profile/reading", base));
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
   const token = request.cookies.get("ielts_habib_token")?.value;
 
-  // 1️⃣ Public auth pages
+  // 1️⃣ Public auth pages: if already logged in, redirect by role
   if (AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
     if (token) {
       try {
@@ -27,33 +38,54 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2️⃣ Protect dashboard routes
+  // 2️⃣ Protected onboarding: require auth
+  if (pathname.startsWith("/onboarding")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    try {
+      jwtDecode<JwtPayload>(token);
+      return NextResponse.next();
+    } catch {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
+
+  // 3️⃣ Protected profile routes: require auth; redirect to login if no token
+  if (pathname.startsWith("/profile")) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    try {
+      jwtDecode<JwtPayload>(token);
+      return NextResponse.next();
+    } catch {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
+
+  // 4️⃣ Protect dashboard routes (legacy)
   if (pathname.startsWith("/dashboard")) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-
     try {
       const decoded = jwtDecode<JwtPayload>(token);
-
       if (pathname.startsWith("/dashboard/admin") && decoded.role !== "ADMIN") {
         return redirectByRole(decoded.role, request);
       }
-
       if (
         pathname.startsWith("/dashboard/instructor") &&
         decoded.role !== "INSTRUCTOR"
       ) {
         return redirectByRole(decoded.role, request);
       }
-
       if (
         pathname.startsWith("/dashboard/student") &&
         decoded.role !== "STUDENT"
       ) {
         return redirectByRole(decoded.role, request);
       }
-
       return NextResponse.next();
     } catch {
       return NextResponse.redirect(new URL("/login", request.url));
@@ -63,20 +95,13 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-function redirectByRole(role: JwtPayload["role"], request: NextRequest) {
-  const base = request.url;
-
-  if (role === "ADMIN") {
-    return NextResponse.redirect(new URL("/dashboard/admin", base));
-  }
-
-  if (role === "INSTRUCTOR") {
-    return NextResponse.redirect(new URL("/dashboard/instructor", base));
-  }
-
-  return NextResponse.redirect(new URL("/dashboard/student", base));
-}
-
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register", "/verify-otp"],
+  matcher: [
+    "/onboarding/:path*",
+    "/profile/:path*",
+    "/dashboard/:path*",
+    "/login",
+    "/register",
+    "/verify-otp",
+  ],
 };

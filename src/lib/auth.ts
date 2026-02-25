@@ -14,6 +14,11 @@ export function setAccessToken(token: string): void {
 
   // optional: localStorage (for client utilities)
   localStorage.setItem(TOKEN_KEY, token);
+  
+  // Dispatch custom event for auth state change
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("auth-state-changed"));
+  }
 }
 
 export function getAccessToken(): string | null {
@@ -30,6 +35,10 @@ export function clearAuth(): void {
 
 export function logout(): void {
   clearAuth();
+  // Dispatch custom event for auth state change
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("auth-state-changed"));
+  }
   window.location.href = "/login";
 }
 

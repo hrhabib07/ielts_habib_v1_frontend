@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "@/src/auth/hooks";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const { handleLogin, loading, error } = useLogin();
@@ -12,42 +14,84 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <form
-        className="w-full max-w-sm space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleLogin(email, password);
-        }}
-      >
-        <h1 className="text-2xl font-bold">Login</h1>
-
-        <div>
-          <Label>Email</Label>
-          <Input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+          <p className="text-muted-foreground">
+            Sign in to your IELTS Habib account
+          </p>
         </div>
 
-        <div>
-          <Label>Password</Label>
-          <Input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <div className="rounded-lg border bg-card p-8 shadow-sm">
+          <form
+            className="space-y-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin(email, password);
+            }}
+          >
+            <div className="space-y-2">
+              <Label htmlFor="email">Email address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+
+            <Button type="submit" disabled={loading} className="w-full" size="lg">
+              {loading ? (
+                "Signing in..."
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center text-sm">
+            <span className="text-muted-foreground">Don't have an account? </span>
+            <Link
+              href="/register"
+              className="font-medium text-primary hover:underline"
+            >
+              Create account
+            </Link>
+          </div>
         </div>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Logging in..." : "Login"}
-        </Button>
-      </form>
-    </main>
+      </div>
+    </div>
   );
 }

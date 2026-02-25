@@ -4,16 +4,20 @@ import type { PendingInstructorRequest } from "./types";
 export async function getPendingInstructorRequests(): Promise<
   PendingInstructorRequest[]
 > {
-  const { data } = await apiClient.get<PendingInstructorRequest[]>(
-    "/instructor-request/pending",
+  const res = await apiClient.get<{ data?: PendingInstructorRequest[] } | PendingInstructorRequest[]>(
+    "/instructor-requests/pending",
   );
-  return data;
+  if (Array.isArray((res as { data?: PendingInstructorRequest[] }).data)) {
+    return (res as { data: PendingInstructorRequest[] }).data;
+  }
+  if (Array.isArray(res)) return res;
+  return [];
 }
 
 export async function approveInstructorRequest(id: string): Promise<void> {
-  await apiClient.patch(`/instructor-request/admin/${id}/approve`);
+  await apiClient.patch(`/instructor-requests/admin/${id}/approve`);
 }
 
 export async function rejectInstructorRequest(id: string): Promise<void> {
-  await apiClient.patch(`/instructor-request/admin/${id}/reject`);
+  await apiClient.patch(`/instructor-requests/admin/${id}/reject`);
 }

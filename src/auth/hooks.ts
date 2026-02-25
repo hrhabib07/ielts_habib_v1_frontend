@@ -40,15 +40,32 @@ export function useRegister() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleRegister = async (email: string, password: string) => {
+  const handleRegister = async (email: string) => {
     setLoading(true);
     setError(null);
 
     try {
-      await register({ email, password });
+      await register({ email });
       window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
-    } catch {
-      setError("Registration failed");
+    } catch (err: unknown) {
+      const ax = err && typeof err === "object" && "response" in err
+        ? (err as { response?: { data?: { message?: string; errorSources?: { message?: string }[] }; status?: number } })
+        : null;
+      const msg =
+        ax?.response?.data?.message ??
+        ax?.response?.data?.errorSources?.[0]?.message ??
+        null;
+      if (msg) {
+        setError(msg);
+      } else if (ax?.response) {
+        setError(ax.response.status === 409
+          ? "An account with this email already exists. Please sign in."
+          : "Something went wrong. Please try again.");
+      } else {
+        setError(
+          "Could not reach the server. Check your connection and that the app is running.",
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -61,15 +78,34 @@ export function useVerifyOtp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleVerifyOtp = async (email: string, otp: string) => {
+  const handleVerifyOtp = async (
+    email: string,
+    otp: string,
+    password: string,
+  ) => {
     setLoading(true);
     setError(null);
 
     try {
-      await verifyOtp({ email, otp });
-      window.location.href = "/login";
-    } catch {
-      setError("Invalid or expired OTP");
+      const res = await verifyOtp({ email, otp, password });
+      const token = res?.data?.token;
+      if (token) {
+        setAccessToken(token);
+      }
+      const role = res?.data?.user?.role;
+      if (role === "ADMIN") {
+        window.location.href = "/dashboard/admin";
+      } else if (role === "INSTRUCTOR") {
+        window.location.href = "/dashboard/instructor";
+      } else {
+        window.location.href = "/onboarding";
+      }
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
+      setError(msg ?? "Invalid or expired OTP. Please try again.");
     } finally {
       setLoading(false);
     }
