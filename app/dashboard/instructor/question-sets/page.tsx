@@ -13,104 +13,121 @@ import {
   updateQuestionSet,
   deleteQuestionSet,
   type CreateQuestionSetPayload,
+  type Passage,
   type QuestionSet,
 } from "@/src/lib/api/instructor";
-import { ArrowLeft, Plus, Loader2, Pencil, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Loader2,
+  Pencil,
+  Trash2,
+  Eye,
+  Save,
+  AlertCircle,
+} from "lucide-react";
+import MetaFormFields from "@/src/components/instructor/MetaFormFields";
+import QuestionSetPreviewModal from "@/src/components/shared/QuestionSetPreviewModal";
+import {
+  QUESTION_TYPE_CONFIG,
+  QUESTION_TYPE_KEYS,
+} from "@/src/lib/questionTypeConfig";
 
-const QUESTION_TYPES: { value: CreateQuestionSetPayload["questionType"]; label: string }[] = [
-  { value: "MCQ_SINGLE", label: "MCQ Single" },
-  { value: "MCQ_MULTIPLE", label: "MCQ Multiple" },
-  { value: "TRUE_FALSE_NOT_GIVEN", label: "True/False/Not Given" },
-  { value: "YES_NO_NOT_GIVEN", label: "Yes/No/Not Given" },
-  { value: "MATCHING_HEADINGS", label: "Matching Headings" },
-  { value: "MATCHING_INFORMATION", label: "Matching Information" },
-  { value: "MATCHING_FEATURES", label: "Matching Features" },
-  { value: "MATCHING_SENTENCE_ENDINGS", label: "Matching Sentence Endings" },
-  { value: "SENTENCE_COMPLETION", label: "Sentence Completion" },
-  { value: "SUMMARY_COMPLETION", label: "Summary Completion" },
-  { value: "NOTE_COMPLETION", label: "Note Completion" },
-  { value: "TABLE_COMPLETION", label: "Table Completion" },
-  { value: "FLOW_CHART_COMPLETION", label: "Flow Chart Completion" },
-  { value: "SHORT_ANSWER", label: "Short Answer" },
-  { value: "DIAGRAM_LABEL_COMPLETION", label: "Diagram Label" },
-];
+/* ─────────────────────────────────── helpers ──── */
 
-function getDefaultMeta(type: CreateQuestionSetPayload["questionType"]): CreateQuestionSetPayload["meta"] {
-  switch (type) {
-    case "MCQ_SINGLE":
-    case "MCQ_MULTIPLE":
-      return { options: ["A", "B", "C", "D"], selectCount: 1 };
-    case "TRUE_FALSE_NOT_GIVEN":
-      return { labels: ["TRUE", "FALSE", "NOT GIVEN"] };
-    case "YES_NO_NOT_GIVEN":
-      return { labels: ["YES", "NO", "NOT GIVEN"] };
-    case "MATCHING_HEADINGS":
-      return { headings: ["Heading A", "Heading B"], allowReuse: false };
-    case "MATCHING_INFORMATION":
-      return { paragraphs: ["A", "B", "C"] };
-    case "MATCHING_FEATURES":
-      return { features: ["Feature A", "Feature B"] };
-    case "MATCHING_SENTENCE_ENDINGS":
-      return { endings: ["ending A", "ending B"] };
-    case "SENTENCE_COMPLETION":
-    case "SUMMARY_COMPLETION":
-    case "NOTE_COMPLETION":
-    case "TABLE_COMPLETION":
-    case "FLOW_CHART_COMPLETION":
-      return { wordLimit: 2 };
-    case "SHORT_ANSWER":
-      return { wordLimit: 3 };
-    case "DIAGRAM_LABEL_COMPLETION":
-      return { labels: ["label1", "label2"] };
-    default:
-      return { options: ["A", "B"], selectCount: 1 };
-  }
+function getPassageId(s: QuestionSet): string {
+  return typeof s.passageId === "object"
+    ? (s.passageId as { _id: string })._id
+    : s.passageId;
 }
+
+function nextOrderForPassage(sets: QuestionSet[], passageId: string): number {
+  const max = sets
+    .filter((s) => getPassageId(s) === passageId)
+    .reduce((m, s) => Math.max(m, s.order), 0);
+  return max + 1;
+}
+
+function makeDefaultForm(
+  passages: Passage[],
+  sets: QuestionSet[],
+): CreateQuestionSetPayload {
+  const firstId = passages[0]?._id ?? "";
+  const type: CreateQuestionSetPayload["questionType"] = "MCQ_SINGLE";
+  const cfg = QUESTION_TYPE_CONFIG[type];
+  return {
+    passageId: firstId,
+    passageNumber: 1,
+    order: firstId ? nextOrderForPassage(sets, firstId) : 1,
+    instruction: cfg.defaultInstruction,
+    startQuestionNumber: 1,
+    endQuestionNumber: 5,
+    questionType: type,
+    meta: cfg.defaultMeta,
+  };
+}
+
+/* ─────────────────────────────────── page ──── */
 
 export default function QuestionSetsPage() {
   const [sets, setSets] = useState<QuestionSet[]>([]);
-  const [passages, setPassages] = useState<Awaited<ReturnType<typeof getMyPassages>>>([]);
+  const [passages, setPassages] = useState<Passage[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<CreateQuestionSetPayload>({
-    passageId: "",
-    passageNumber: 1,
-    order: 1,
-    instruction: "Choose the correct letter, A, B, C or D.",
-    startQuestionNumber: 1,
-    endQuestionNumber: 5,
-    questionType: "MCQ_SINGLE",
-    meta: { options: ["A", "B", "C", "D"], selectCount: 1 },
-  });
+
+  const [form, setForm] = useState<CreateQuestionSetPayload>(() =>
+    makeDefaultForm([], []),
+  );
+
+  // Preview state: (passage + questionSet)
+  const [preview, setPreview] = useState<{
+    passage: Passage;
+    questionSet: QuestionSet;
+  } | null>(null);
 
   useEffect(() => {
     Promise.all([getMyQuestionSets(), getMyPassages()])
       .then(([s, p]) => {
         setSets(s);
         setPassages(p);
+        setForm(makeDefaultForm(p, s));
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
+  /* ── when passage changes, auto-suggest order ── */
+  const handlePassageChange = (passageId: string) => {
+    setForm((f) => ({
+      ...f,
+      passageId,
+      order: nextOrderForPassage(sets, passageId),
+    }));
+  };
+
+  /* ── when question type changes → reset instruction + meta ── */
+  const handleTypeChange = (t: CreateQuestionSetPayload["questionType"]) => {
+    const cfg = QUESTION_TYPE_CONFIG[t];
+    setForm((f) => ({
+      ...f,
+      questionType: t,
+      instruction: cfg.defaultInstruction,
+      meta: cfg.defaultMeta,
+    }));
+  };
+
   const resetForm = () => {
-    setForm({
-      passageId: passages[0]?._id ?? "",
-      passageNumber: 1,
-      order: 1,
-      instruction: "Choose the correct letter, A, B, C or D.",
-      startQuestionNumber: 1,
-      endQuestionNumber: 5,
-      questionType: "MCQ_SINGLE",
-      meta: getDefaultMeta("MCQ_SINGLE"),
-    });
     setEditingId(null);
+    setSubmitError(null);
+    setForm(makeDefaultForm(passages, sets));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.passageId) return;
+    setSubmitError(null);
     setSubmitting(true);
     try {
       if (editingId) {
@@ -124,8 +141,11 @@ export default function QuestionSetsPage() {
         setSets((prev) => [created, ...prev]);
         resetForm();
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? "An unexpected error occurred. Please try again.";
+      setSubmitError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -142,41 +162,44 @@ export default function QuestionSetsPage() {
   };
 
   const startEdit = (s: QuestionSet) => {
-    const passageId =
-      typeof s.passageId === "object"
-        ? (s.passageId as { _id: string })._id
-        : s.passageId;
+    setSubmitError(null);
     setForm({
-      passageId,
+      passageId: getPassageId(s),
       passageNumber: s.passageNumber as 1 | 2 | 3,
       order: s.order,
       instruction: s.instruction,
       startQuestionNumber: s.startQuestionNumber,
       endQuestionNumber: s.endQuestionNumber,
       questionType: s.questionType,
-      meta: s.meta ?? getDefaultMeta(s.questionType as CreateQuestionSetPayload["questionType"]),
+      meta:
+        s.meta ??
+        QUESTION_TYPE_CONFIG[
+          s.questionType as CreateQuestionSetPayload["questionType"]
+        ]?.defaultMeta ??
+        {},
     });
     setEditingId(s._id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const onQuestionTypeChange = (t: CreateQuestionSetPayload["questionType"]) => {
-    setForm((f) => ({
-      ...f,
-      questionType: t,
-      meta: getDefaultMeta(t),
-    }));
+  const openPreview = (s: QuestionSet) => {
+    const pid = getPassageId(s);
+    const passage = passages.find((p) => p._id === pid);
+    if (!passage) return;
+    setPreview({ passage, questionSet: s });
   };
 
-  const passageTitle = (id: string) =>
-    passages.find((p) => p._id === id)?.title ?? id;
+  const passageTitle = (pid: string) =>
+    passages.find((p) => p._id === pid)?.title ?? pid;
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
+      {/* ── page header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Question sets</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create question groups for passages. Each group has a type and meta.
+            Create and manage question groups. Each group belongs to a passage and has a type, instruction and meta.
           </p>
         </div>
         <Link href="/dashboard/instructor">
@@ -187,19 +210,20 @@ export default function QuestionSetsPage() {
         </Link>
       </div>
 
+      {/* ── create / edit form ── */}
       <Card className="p-6">
-        <h2 className="mb-4 text-lg font-semibold">
+        <h2 className="mb-5 text-lg font-semibold">
           {editingId ? "Edit question set" : "Create question set"}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* passage */}
           <div>
             <Label htmlFor="passageId">Passage</Label>
             <select
               id="passageId"
               value={form.passageId}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, passageId: e.target.value }))
-              }
+              onChange={(e) => handlePassageChange(e.target.value)}
               className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
               required
             >
@@ -219,9 +243,10 @@ export default function QuestionSetsPage() {
             )}
           </div>
 
+          {/* passage number + order */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label>Passage number (1, 2, 3)</Label>
+              <Label>Passage number</Label>
               <select
                 value={form.passageNumber}
                 onChange={(e) =>
@@ -238,30 +263,88 @@ export default function QuestionSetsPage() {
               </select>
             </div>
             <div>
-              <Label>Order</Label>
+              <Label>
+                Order
+                <span className="ml-1 text-xs font-normal text-muted-foreground">
+                  (must be unique within passage)
+                </span>
+              </Label>
               <Input
                 type="number"
                 min={1}
                 value={form.order}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, order: parseInt(e.target.value, 10) || 1 }))
+                  setForm((f) => ({
+                    ...f,
+                    order: parseInt(e.target.value, 10) || 1,
+                  }))
                 }
+                className="mt-1"
               />
+              {form.passageId && (
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  Suggested next order:{" "}
+                  <button
+                    type="button"
+                    className="font-semibold underline decoration-dotted"
+                    onClick={() =>
+                      setForm((f) => ({
+                        ...f,
+                        order: nextOrderForPassage(sets, f.passageId),
+                      }))
+                    }
+                  >
+                    {nextOrderForPassage(
+                      sets.filter((s) => s._id !== editingId),
+                      form.passageId,
+                    )}
+                  </button>
+                </p>
+              )}
             </div>
           </div>
 
+          {/* question type */}
           <div>
-            <Label>Instruction</Label>
-            <Input
+            <Label>Question type</Label>
+            <select
+              value={form.questionType}
+              onChange={(e) =>
+                handleTypeChange(
+                  e.target.value as CreateQuestionSetPayload["questionType"],
+                )
+              }
+              className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+            >
+              {QUESTION_TYPE_KEYS.map((key) => (
+                <option key={key} value={key}>
+                  {QUESTION_TYPE_CONFIG[key].label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* instruction (editable, auto-filled) */}
+          <div>
+            <Label>
+              Instruction
+              <span className="ml-1 text-xs font-normal text-muted-foreground">
+                (auto-filled from type — override if needed)
+              </span>
+            </Label>
+            <textarea
               value={form.instruction}
               onChange={(e) =>
                 setForm((f) => ({ ...f, instruction: e.target.value }))
               }
-              placeholder="e.g. Choose the correct letter"
+              rows={2}
+              placeholder="e.g. Choose the correct letter, A, B, C or D."
               required
+              className="mt-1 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm"
             />
           </div>
 
+          {/* question range */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Start question number</Label>
@@ -275,6 +358,7 @@ export default function QuestionSetsPage() {
                     startQuestionNumber: parseInt(e.target.value, 10) || 1,
                   }))
                 }
+                className="mt-1"
               />
             </div>
             <div>
@@ -289,55 +373,46 @@ export default function QuestionSetsPage() {
                     endQuestionNumber: parseInt(e.target.value, 10) || 1,
                   }))
                 }
+                className="mt-1"
               />
             </div>
           </div>
 
-          <div>
-            <Label>Question type</Label>
-            <select
-              value={form.questionType}
-              onChange={(e) =>
-                onQuestionTypeChange(
-                  e.target.value as CreateQuestionSetPayload["questionType"],
-                )
-              }
-              className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-            >
-              {QUESTION_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <Label>Meta (JSON)</Label>
-            <textarea
-              value={JSON.stringify(form.meta ?? {}, null, 2)}
-              onChange={(e) => {
-                try {
-                  setForm((f) => ({
-                    ...f,
-                    meta: JSON.parse(e.target.value || "{}"),
-                  }));
-                } catch {}
-              }}
-              rows={4}
-              className="mt-1 w-full rounded-md border border-input bg-transparent px-3 py-2 font-mono text-sm"
-              placeholder='{"options": ["A","B","C","D"], "selectCount": 1}'
+          {/* meta fields (structured, per-type) */}
+          <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <p className="mb-3 text-sm font-medium">
+              Meta fields
+              <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                – specific to{" "}
+                {QUESTION_TYPE_CONFIG[form.questionType]?.label ?? form.questionType}
+              </span>
+            </p>
+            <MetaFormFields
+              questionType={form.questionType}
+              meta={form.meta ?? {}}
+              onChange={(meta) => setForm((f) => ({ ...f, meta }))}
             />
           </div>
 
-          <div className="flex gap-2">
+          {/* error banner */}
+          {submitError && (
+            <div className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
+
+          {/* actions */}
+          <div className="flex gap-2 border-t pt-4">
             <Button type="submit" disabled={submitting} className="gap-2">
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : editingId ? (
+                <Save className="h-4 w-4" />
               ) : (
                 <Plus className="h-4 w-4" />
               )}
-              {editingId ? "Update" : "Create"} question set
+              {editingId ? "Save changes" : "Create question set"}
             </Button>
             {editingId && (
               <Button type="button" variant="outline" onClick={resetForm}>
@@ -348,6 +423,7 @@ export default function QuestionSetsPage() {
         </form>
       </Card>
 
+      {/* ── list of question sets ── */}
       <Card className="overflow-hidden">
         <h2 className="border-b bg-muted/40 px-4 py-3 font-semibold">
           My question sets
@@ -362,39 +438,72 @@ export default function QuestionSetsPage() {
           </div>
         ) : (
           <ul className="divide-y">
-            {sets.map((s) => (
-              <li
-                key={s._id}
-                className="flex items-center justify-between px-4 py-3 hover:bg-muted/20"
-              >
-                <div>
-                  <p className="font-medium">{s.instruction}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {passageTitle(
-                      typeof s.passageId === "object"
-                        ? (s.passageId as { _id: string })._id
-                        : s.passageId,
-                    )} · P{s.passageNumber} · Q{s.startQuestionNumber}–{s.endQuestionNumber} · {s.questionType}
-                    {s.isPublished && " · Published"}
-                  </p>
-                </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => startEdit(s)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(s._id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </li>
-            ))}
+            {sets.map((s) => {
+              const pid = getPassageId(s);
+              const canPreview = passages.some((p) => p._id === pid);
+              return (
+                <li
+                  key={s._id}
+                  className="flex items-start justify-between gap-4 px-4 py-3 hover:bg-muted/20"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{s.instruction}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {passageTitle(pid)} · P{s.passageNumber} · Order{" "}
+                      {s.order} · Q{s.startQuestionNumber}–
+                      {s.endQuestionNumber} ·{" "}
+                      {QUESTION_TYPE_CONFIG[
+                        s.questionType as CreateQuestionSetPayload["questionType"]
+                      ]?.label ?? s.questionType}
+                      {s.isPublished && " · Published"}
+                    </p>
+                  </div>
+                  <div className="flex flex-shrink-0 gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openPreview(s)}
+                      disabled={!canPreview}
+                      title={
+                        canPreview
+                          ? "Preview with passage"
+                          : "Passage data not loaded"
+                      }
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => startEdit(s)}
+                      title="Edit question set"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(s._id)}
+                      title="Delete question set"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>
+
+      {/* ── preview modal ── */}
+      {preview && (
+        <QuestionSetPreviewModal
+          passage={preview.passage}
+          questionSet={preview.questionSet}
+          onClose={() => setPreview(null)}
+        />
+      )}
     </div>
   );
 }

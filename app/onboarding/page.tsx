@@ -135,6 +135,7 @@ export default function OnboardingPage() {
                 <Input
                   id="name"
                   type="text"
+                  autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
@@ -150,6 +151,7 @@ export default function OnboardingPage() {
                   <Input
                     id="city"
                     type="text"
+                    autoComplete="address-level2"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="City"
@@ -164,6 +166,7 @@ export default function OnboardingPage() {
                   <Input
                     id="country"
                     type="text"
+                    autoComplete="country-name"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
                     placeholder="Country"
@@ -179,6 +182,7 @@ export default function OnboardingPage() {
                 <Input
                   id="phone"
                   type="tel"
+                  autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Phone number"

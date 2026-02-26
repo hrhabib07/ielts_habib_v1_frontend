@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Menu, User, LogOut, ChevronDown, Sparkles } from "lucide-react";
+import { Moon, Sun, Menu, User, LogOut, ChevronDown, Sparkles, Layers, FileQuestion, Tag, BarChart2 } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { getDecodedTokenClient, logout } from "@/src/lib/auth";
 import type { UserRole } from "@/src/lib/constants";
@@ -52,7 +52,7 @@ export function Header() {
 
   const publicNav = [
     { href: "/about", label: "About" },
-    { href: "/pricing", label: "Get VIP access" },
+    { href: "/pricing", label: "Plans & Pricing" },
   ];
 
   const studentNav = [
@@ -135,35 +135,94 @@ export function Header() {
                 <ChevronDown className="h-4 w-4" />
               </Button>
               {profileOpen && (
-                <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border bg-card py-1 shadow-lg">
-                  {user.role === "STUDENT" && (
-                    <Link
-                      href="/profile/reading"
-                      className="block px-4 py-2 text-sm hover:bg-muted"
-                      onClick={() => setProfileOpen(false)}
-                    >
-                      Profile
-                    </Link>
+                <div className="absolute right-0 top-full mt-1 w-56 rounded-xl border border-stone-200 bg-card py-1 shadow-lg dark:border-stone-800">
+                  {user.role === "INSTRUCTOR" ? (
+                    <>
+                      <Link
+                        href="/dashboard/instructor/profile"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <User className="h-4 w-4" />
+                        My Profile
+                      </Link>
+                      <Link
+                        href="/dashboard/instructor/levels"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <Layers className="h-4 w-4" />
+                        Manage Levels
+                      </Link>
+                      <Link
+                        href="/dashboard/instructor/questions"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <FileQuestion className="h-4 w-4" />
+                        Manage Questions
+                      </Link>
+                      <Link
+                        href="/dashboard/instructor/weakness-tags"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <Tag className="h-4 w-4" />
+                        Manage Weakness/Trap Tags
+                      </Link>
+                      <Link
+                        href="/dashboard/instructor"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <BarChart2 className="h-4 w-4" />
+                        Analytics
+                      </Link>
+                      <div className="my-1 border-t border-stone-200 dark:border-stone-800" />
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-stone-600 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          logout();
+                        }}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {user.role === "STUDENT" && (
+                        <Link
+                          href="/profile/reading"
+                          className="block px-4 py-2 text-sm hover:bg-muted"
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          Profile
+                        </Link>
+                      )}
+                      <Link
+                        href="/pricing"
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        Subscription plans
+                      </Link>
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          logout();
+                        }}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
+                    </>
                   )}
-                  <Link
-                    href="/pricing"
-                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Get VIP access
-                  </Link>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                    onClick={() => {
-                      setProfileOpen(false);
-                      logout();
-                    }}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </button>
                 </div>
               )}
             </div>
@@ -226,21 +285,50 @@ export function Header() {
                 <div className="border-t pt-4 space-y-2">
                   {user ? (
                     <>
-                      {user.role === "STUDENT" && (
-                        <Link href="/profile/reading" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm">
-                          Profile
-                        </Link>
+                      {user.role === "INSTRUCTOR" ? (
+                        <>
+                          <Link href="/dashboard/instructor/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-2 text-sm">
+                            <User className="h-4 w-4" /> My Profile
+                          </Link>
+                          <Link href="/dashboard/instructor/levels" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-2 text-sm">
+                            <Layers className="h-4 w-4" /> Manage Levels
+                          </Link>
+                          <Link href="/dashboard/instructor/questions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-2 text-sm">
+                            <FileQuestion className="h-4 w-4" /> Manage Questions
+                          </Link>
+                          <Link href="/dashboard/instructor/weakness-tags" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-2 text-sm">
+                            <Tag className="h-4 w-4" /> Manage Weakness/Trap Tags
+                          </Link>
+                          <Link href="/dashboard/instructor" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-2 text-sm">
+                            <BarChart2 className="h-4 w-4" /> Analytics
+                          </Link>
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 py-2 text-sm text-muted-foreground"
+                            onClick={() => { setMobileMenuOpen(false); logout(); }}
+                          >
+                            <LogOut className="h-4 w-4" /> Logout
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {user.role === "STUDENT" && (
+                            <Link href="/profile/reading" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm">
+                              Profile
+                            </Link>
+                          )}
+                          <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-2 text-sm">
+                            <Sparkles className="h-4 w-4" /> Subscription plans
+                          </Link>
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 py-2 text-sm text-muted-foreground"
+                            onClick={() => { setMobileMenuOpen(false); logout(); }}
+                          >
+                            <LogOut className="h-4 w-4" /> Logout
+                          </button>
+                        </>
                       )}
-                      <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-2 text-sm">
-                        <Sparkles className="h-4 w-4" /> Get VIP access
-                      </Link>
-                      <button
-                        type="button"
-                        className="flex items-center gap-2 py-2 text-sm text-muted-foreground"
-                        onClick={() => { setMobileMenuOpen(false); logout(); }}
-                      >
-                        <LogOut className="h-4 w-4" /> Logout
-                      </button>
                     </>
                   ) : (
                     <>

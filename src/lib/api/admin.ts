@@ -1,4 +1,5 @@
 import apiClient from "../api-client";
+import type { SubscriptionPlan } from "./subscription";
 
 const BASE = "/admin";
 
@@ -10,10 +11,9 @@ export interface SubscriptionRequestItem {
   planId: {
     _id: string;
     name?: string;
-    moduleAccess?: string[];
-    durationInMonths?: number;
+    modulesIncluded?: string[];
+    durationInDays?: number;
     price?: number;
-    isFounderPlan?: boolean;
   } | string;
   paymentMethod: string;
   transactionId: string;
@@ -26,6 +26,31 @@ export interface SubscriptionRequestItem {
   rejectionReason?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreatePlanPayload {
+  name: string;
+  slug: string;
+  description: string;
+  modulesIncluded: string[];
+  durationInDays: number;
+  price: number;
+  discountPrice?: number;
+  isActive?: boolean;
+  isPublic?: boolean;
+  isWholePackage?: boolean;
+}
+
+export interface UpdatePlanPayload {
+  name?: string;
+  slug?: string;
+  description?: string;
+  modulesIncluded?: string[];
+  durationInDays?: number;
+  price?: number;
+  discountPrice?: number | null;
+  isPublic?: boolean;
+  isWholePackage?: boolean;
 }
 
 export async function listSubscriptionRequests(params?: {
@@ -54,4 +79,38 @@ export async function rejectSubscriptionRequest(
     body ?? {},
   );
   return res.data?.data;
+}
+
+/* ────────────────────────────────────────────────────────────
+   Subscription Plan management
+──────────────────────────────────────────────────────────── */
+
+export async function adminListAllPlans(): Promise<SubscriptionPlan[]> {
+  const res = await apiClient.get<{ success: boolean; data: SubscriptionPlan[] }>(
+    `${BASE}/subscription-plans`,
+  );
+  return res.data?.data ?? [];
+}
+
+export async function adminCreatePlan(payload: CreatePlanPayload): Promise<SubscriptionPlan> {
+  const res = await apiClient.post<{ success: boolean; data: SubscriptionPlan }>(
+    `${BASE}/subscription-plans`,
+    payload,
+  );
+  return res.data.data;
+}
+
+export async function adminUpdatePlan(id: string, payload: UpdatePlanPayload): Promise<SubscriptionPlan> {
+  const res = await apiClient.patch<{ success: boolean; data: SubscriptionPlan }>(
+    `${BASE}/subscription-plans/${id}`,
+    payload,
+  );
+  return res.data.data;
+}
+
+export async function adminTogglePlan(id: string): Promise<SubscriptionPlan> {
+  const res = await apiClient.patch<{ success: boolean; data: SubscriptionPlan }>(
+    `${BASE}/subscription-plans/${id}/toggle`,
+  );
+  return res.data.data;
 }

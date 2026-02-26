@@ -6,14 +6,18 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getProfileSummary } from "@/src/lib/api/profile";
+import { getWeaknessAnalytics } from "@/src/lib/api/testAttempts";
+import { getDecodedTokenClient } from "@/src/lib/auth";
 import type { ProfileSummary } from "@/src/lib/api/types";
+import type { WeaknessAnalyticsItem } from "@/src/lib/api/testAttempts";
 import { ProfileSummarySkeleton } from "./ProfileSummarySkeleton";
-import { Target, TrendingUp, BookOpen, ArrowRight } from "lucide-react";
+import { Target, TrendingUp, BookOpen, ArrowRight, AlertTriangle, BarChart2 } from "lucide-react";
 
 /** Client section: fetches and displays profile summary. */
 export function ProfileSummarySection() {
   const router = useRouter();
   const [data, setData] = useState<ProfileSummary | null>(null);
+  const [weaknessAnalytics, setWeaknessAnalytics] = useState<WeaknessAnalyticsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
@@ -43,6 +47,13 @@ export function ProfileSummarySection() {
       cancelled = true;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (!data) return;
+    getWeaknessAnalytics()
+      .then(setWeaknessAnalytics)
+      .catch(() => {});
+  }, [data]);
 
   if (loading || redirecting) return <ProfileSummarySkeleton />;
   if (error) {
@@ -130,13 +141,15 @@ export function ProfileSummarySection() {
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
-          <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
-            Get VIP access
-          </Link>
+          {getDecodedTokenClient()?.role !== "INSTRUCTOR" && (
+            <Link href="/pricing" className="text-sm font-medium text-primary hover:underline">
+              View subscription plans
+            </Link>
+          )}
         </div>
       </Card>
 
-      {/* Weaknesses */}
+      {/* Weaknesses — question type accuracy */}
       {weaknesses.length > 0 && (
         <Card className="p-6">
           <h2 className="text-lg font-semibold text-foreground">
@@ -147,17 +160,138 @@ export function ProfileSummarySection() {
           </p>
           <ul className="mt-4 space-y-2">
             {weaknesses.slice(0, 5).map((w) => (
-              <li
-                key={w.questionType}
-                className="flex items-center justify-between rounded-lg border bg-muted/40 px-4 py-2 text-sm"
-              >
-                <span className="font-medium text-foreground">{w.questionType}</span>
-                <span className="text-muted-foreground">
-                  {Math.round(w.accuracy * 100)}%
-                </span>
+              <li key={w.questionType} className="space-y-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-foreground">{w.questionType}</span>
+                  <span className="text-muted-foreground">
+                    {Math.round(w.accuracy * 100)}%
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${Math.round(w.accuracy * 100)}%` }}
+                  />
+                </div>
               </li>
             ))}
           </ul>
+        </Card>
+      )}
+
+      {/* Weakness tag analytics — mistake pattern distribution */}
+      {weaknessAnalytics.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2">
+            <BarChart2 className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold text-foreground">
+              Mistake pattern analysis
+            </h2>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Common traps and error patterns identified from your incorrect answers.
+          </p>
+
+          {/* Category breakdown */}
+          {(() => {
+            const categoryTotals: Record<string, number> = {};
+            for (const item of weaknessAnalytics) {
+              categoryTotals[item.category] =
+                (categoryTotals[item.category] ?? 0) + item.count;
+            }
+            const maxCount = Math.max(...Object.values(categoryTotals), 1);
+            const CATEGORY_LABELS: Record<string, string> = {
+              VOCABULARY: "Vocabulary",
+              LOGIC_TRAP: "Logic Trap",
+              QUESTION_MISREAD: "Question Misread",
+              INFERENCE: "Inference",
+              NOT_GIVEN_CONFUSION: "Not Given Confusion",
+              TIME_PRESSURE: "Time Pressure",
+            };
+            const CATEGORY_COLORS: Record<string, string> = {
+              VOCABULARY: "bg-blue-500",
+              LOGIC_TRAP: "bg-red-500",
+              QUESTION_MISREAD: "bg-orange-500",
+              INFERENCE: "bg-purple-500",
+              NOT_GIVEN_CONFUSION: "bg-yellow-500",
+              TIME_PRESSURE: "bg-green-500",
+            };
+            return (
+              <div className="mt-5 space-y-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  By category
+                </p>
+                {Object.entries(categoryTotals)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([cat, count]) => (
+                    <div key={cat} className="space-y-1">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-foreground">
+                          {CATEGORY_LABELS[cat] ?? cat}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {count} {count === 1 ? "mistake" : "mistakes"}
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full transition-all ${CATEGORY_COLORS[cat] ?? "bg-primary"}`}
+                          style={{ width: `${Math.round((count / maxCount) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            );
+          })()}
+
+          {/* Top individual tags */}
+          <div className="mt-6">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Top mistake tags
+            </p>
+            <ul className="mt-3 space-y-2">
+              {weaknessAnalytics.slice(0, 6).map((item) => (
+                <li
+                  key={item.tagId}
+                  className="flex items-center justify-between rounded-lg border bg-muted/40 px-3 py-2 text-sm"
+                >
+                  <div>
+                    <span className="font-medium text-foreground">{item.name}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {item.category.replace(/_/g, " ")}
+                    </span>
+                  </div>
+                  <span className="ml-4 shrink-0 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
+                    ×{item.count}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {weaknessAnalytics.length > 0 && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  <strong>Focus area:</strong>{" "}
+                  {(() => {
+                    const top = weaknessAnalytics[0];
+                    const CATEGORY_LABELS: Record<string, string> = {
+                      VOCABULARY: "Vocabulary",
+                      LOGIC_TRAP: "Logic Trap",
+                      QUESTION_MISREAD: "Question Misread",
+                      INFERENCE: "Inference",
+                      NOT_GIVEN_CONFUSION: "Not Given Confusion",
+                      TIME_PRESSURE: "Time Pressure",
+                    };
+                    return `You most frequently struggle with "${top.name}" (${CATEGORY_LABELS[top.category] ?? top.category} category). Review explanation notes after each incorrect answer.`;
+                  })()}
+                </p>
+              </div>
+            </div>
+          )}
         </Card>
       )}
 
@@ -179,7 +313,8 @@ export function ProfileSummarySection() {
                   <th className="pb-2 pr-4">Type</th>
                   <th className="pb-2 pr-4">Band</th>
                   <th className="pb-2 pr-4">Score</th>
-                  <th className="pb-2">Date</th>
+                  <th className="pb-2 pr-4">Date</th>
+                  <th className="pb-2">Review</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,10 +331,22 @@ export function ProfileSummarySection() {
                         ? `${a.correctAnswers}/${a.totalQuestions}`
                         : "—"}
                     </td>
-                    <td className="py-2 text-muted-foreground">
+                    <td className="py-2 pr-4 text-muted-foreground">
                       {a.createdAt
                         ? new Date(a.createdAt).toLocaleDateString()
                         : "—"}
+                    </td>
+                    <td className="py-2">
+                      {a._id ? (
+                        <Link
+                          href={`/profile/reading/attempt/${a._id}`}
+                          className="text-sm font-medium text-primary hover:underline"
+                        >
+                          Review
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                   </tr>
                 ))}

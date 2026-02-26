@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { InstructorRequestCard } from "@/src/features/instructor-request/components/InstructorRequestCard";
+import { SubscriptionStatusCard } from "@/src/components/subscription/SubscriptionStatusCard";
 import { BookOpen, TrendingUp, Target } from "lucide-react";
 
 export default function StudentDashboard() {
@@ -15,6 +16,9 @@ export default function StudentDashboard() {
         </p>
       </div>
 
+      {/* Subscription status */}
+      <SubscriptionStatusCard />
+
       <div className="grid gap-6 md:grid-cols-3">
         <div className="rounded-lg border bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
@@ -24,11 +28,13 @@ export default function StudentDashboard() {
             <h3 className="font-semibold">Reading Module</h3>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            Practice tests and exercises coming soon
+            Level-based reading practice and band tracking
           </p>
-          <Button variant="outline" size="sm" disabled>
-            Coming Soon
-          </Button>
+          <Link href="/profile/reading">
+            <Button variant="outline" size="sm">
+              Go to Reading
+            </Button>
+          </Link>
         </div>
 
         <div className="rounded-lg border bg-card p-6">

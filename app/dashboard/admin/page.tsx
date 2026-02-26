@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SubscriptionRequestsTable } from "@/src/features/admin-approval/components/SubscriptionRequestsTable";
 import { PendingInstructorRequests } from "@/src/features/admin-approval/components/PendingInstructorRequests";
-import { Shield, CreditCard, Users, ArrowLeft, FileText, ChevronRight } from "lucide-react";
+import { Shield, CreditCard, Users, ArrowLeft, FileText, ChevronRight, Tag, PackageCheck, Layers } from "lucide-react";
 
 export default function AdminDashboardPage() {
   return (
@@ -28,6 +28,26 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Link href="/dashboard/admin/levels">
+          <Card className="h-full p-6 transition-shadow hover:shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                <Layers className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Level progression
+                </p>
+                <p className="text-lg font-semibold text-foreground">
+                  Manage levels
+                </p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="mt-3 gap-2">
+              Manage <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Card>
+        </Link>
         <Link href="/dashboard/admin/content">
           <Card className="h-full p-6 transition-shadow hover:shadow-md">
             <div className="flex items-center gap-3">
@@ -40,6 +60,46 @@ export default function AdminDashboardPage() {
                 </p>
                 <p className="text-lg font-semibold text-foreground">
                   Publish content
+                </p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="mt-3 gap-2">
+              Manage <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Card>
+        </Link>
+        <Link href="/dashboard/admin/weakness-tags">
+          <Card className="h-full p-6 transition-shadow hover:shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+                <Tag className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Weakness tags
+                </p>
+                <p className="text-lg font-semibold text-foreground">
+                  Trap taxonomy
+                </p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="mt-3 gap-2">
+              Manage <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Card>
+        </Link>
+        <Link href="/dashboard/admin/subscription-plans">
+          <Card className="h-full p-6 transition-shadow hover:shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
+                <PackageCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Subscription plans
+                </p>
+                <p className="text-lg font-semibold text-foreground">
+                  Manage plans
                 </p>
               </div>
             </div>

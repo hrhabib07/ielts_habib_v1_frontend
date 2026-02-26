@@ -23,6 +23,11 @@ export const DASHBOARD_MENU: MenuItem[] = [
     roles: ["INSTRUCTOR"],
   },
   {
+    label: "Level Management",
+    href: "/dashboard/instructor/levels",
+    roles: ["INSTRUCTOR"],
+  },
+  {
     label: "Admin Dashboard",
     href: "/dashboard/admin",
     roles: ["ADMIN"],

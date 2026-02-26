@@ -2,6 +2,7 @@ import apiClient from "../api-client";
 
 const PASSAGE_BASE = "/reading/passage";
 const QUESTION_BASE = "/reading/question";
+const WEAKNESS_TAGS_BASE = "/weakness-tags";
 const QUESTION_SET_BASE = "/reading/questionSet";
 const PASSAGE_QSET_BASE = "/reading/passageQSet";
 const PASSAGE_CODE_BASE = "/passage-codes";
@@ -37,9 +38,18 @@ export async function listPassageCodes(): Promise<PassageCode[]> {
 }
 
 /* ----- Passages ----- */
+
+/** Shape returned by the API — paragraphLabel is always present (server-generated). */
 export interface PassageParagraph {
   paragraphIndex: number;
-  paragraphLabel?: string;
+  paragraphLabel: string;
+  text: string;
+}
+
+/** Shape sent to the API when creating or updating a passage.
+ *  paragraphLabel is intentionally omitted — the server generates it. */
+export interface PassageParagraphInput {
+  paragraphIndex: number;
   text: string;
 }
 
@@ -82,7 +92,7 @@ export interface CreatePassagePayload {
   title: string;
   subTitle?: string;
   passageCode: string;
-  content: PassageParagraph[];
+  content: PassageParagraphInput[];
   images?: PassageImage[];
   glossary?: PassageGlossary[];
   source: PassageSource;
@@ -142,7 +152,7 @@ export interface QuestionSetMeta {
   selectCount?: 1 | 2;
   labels?: string[];
   headings?: string[];
-  paragraphs?: string[];
+  paragraphCount?: number;
   features?: string[];
   endings?: string[];
   wordLimit?: number;
@@ -218,6 +228,21 @@ export interface QuestionBlank {
   options?: string[];
 }
 
+export interface WeaknessTag {
+  _id: string;
+  name: string;
+  category: string;
+  description: string;
+  isActive: boolean;
+}
+
+export async function getActiveWeaknessTags(): Promise<WeaknessTag[]> {
+  const res = await apiClient.get<{ success: boolean; data: WeaknessTag[] }>(
+    `${WEAKNESS_TAGS_BASE}/active`,
+  );
+  return res.data?.data ?? [];
+}
+
 export interface Question {
   _id: string;
   passageId: string | { _id: string };
@@ -228,6 +253,7 @@ export interface Question {
   blanks?: QuestionBlank[];
   options?: string[];
   correctAnswer?: string | string[];
+  weaknessTags?: string[] | { _id: string; name: string; category: string }[];
   explanation?: string;
   difficulty: PassageDifficulty;
   isPublished?: boolean;
@@ -237,11 +263,12 @@ export interface CreateQuestionPayload {
   passageId: string;
   questionSetId: string;
   questionNumber: number;
-  type: ReadingQuestionType;
+  // type is intentionally absent — the backend derives it from the question set
   questionBody: QuestionBody;
   blanks?: QuestionBlank[];
   options?: string[];
   correctAnswer?: string | string[];
+  weaknessTags?: string[];
   explanation?: string;
   difficulty: PassageDifficulty;
 }

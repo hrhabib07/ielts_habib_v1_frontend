@@ -1,20 +1,15 @@
-import { Suspense } from "react";
-import { ProfileSummarySection } from "@/src/components/profile/ProfileSummarySection";
-import { ProfileSummarySkeleton } from "@/src/components/profile/ProfileSummarySkeleton";
+"use client";
+
+import { RedirectToLevels } from "./RedirectToLevels";
 
 /**
- * Profile summary (reading) — core intelligence screen.
- * Displays: target band, current band, streak, level, progress %, continue, weaknesses, recent attempts.
+ * Reading entry: redirects to levels list so students always see
+ * levels when they open Reading. Levels are fetched on /profile/reading/levels.
  */
 export default function ProfileReadingPage() {
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold text-foreground">
-        Reading summary
-      </h1>
-      <Suspense fallback={<ProfileSummarySkeleton />}>
-        <ProfileSummarySection />
-      </Suspense>
+      <RedirectToLevels />
     </div>
   );
 }

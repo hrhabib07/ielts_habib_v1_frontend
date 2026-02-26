@@ -1,36 +1,45 @@
 "use client";
 
-import { ReactNode, useMemo, useEffect } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 import type { UserRole } from "@/src/lib/constants";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const [role, setRole] = useState<UserRole | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // ✅ ESLint-safe, SSR-safe, hydration-safe
-  const role = useMemo<UserRole | null>(() => {
-    if (typeof window === "undefined") return null;
-
+  useEffect(() => {
     const decoded = getDecodedTokenClient();
-    return decoded?.role ?? null;
+    setRole(decoded?.role ?? null);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && !role) {
+    if (!mounted) return;
+    if (!role) {
       router.replace("/login");
     }
-  }, [role, router]);
+  }, [mounted, role, router]);
 
-  // ✅ Prevent server mismatch
-  if (typeof window === "undefined") {
-    return null;
+  // Same structure on server and first client render to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </div>
+      </div>
+    );
   }
 
   if (!role) {
     return (
-      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
-        <p className="text-muted-foreground">Redirecting to login...</p>
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
+          <p className="text-muted-foreground">Redirecting to login…</p>
+        </div>
       </div>
     );
   }

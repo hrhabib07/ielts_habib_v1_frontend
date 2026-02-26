@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   createPassage,
+  createPassageCode,
   getMyPassages,
   listPassageCodes,
   updatePassage,
@@ -15,7 +16,28 @@ import {
   type Passage,
   type PassageCode,
 } from "@/src/lib/api/instructor";
-import { ArrowLeft, Plus, Loader2, Pencil } from "lucide-react";
+import { ArrowLeft, Plus, Loader2, Pencil, Save, Eye } from "lucide-react";
+import PassagePreviewModal from "@/src/components/shared/PassagePreviewModal";
+
+/** Resolve passageCode ID from book/test/passage: find existing or create. */
+async function resolvePassageCode(
+  book: string,
+  test: string,
+  passage: string,
+  source: string,
+  existingCodes: PassageCode[],
+): Promise<string> {
+  const b = book.trim();
+  const t = test.trim();
+  const p = passage.trim();
+  if (!b || !t || !p) throw new Error("Book, Test and Passage are required");
+  const found = existingCodes.find(
+    (c) => c.book === b && c.test === t && c.passage === p,
+  );
+  if (found) return found._id;
+  const created = await createPassageCode({ book: b, test: t, passage: p, source });
+  return created._id;
+}
 
 export default function PassagesPage() {
   const [passages, setPassages] = useState<Passage[]>([]);
@@ -23,6 +45,10 @@ export default function PassagesPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewPassage, setPreviewPassage] = useState<Passage | null>(null);
+  const [book, setBook] = useState("");
+  const [test, setTest] = useState("");
+  const [passageNum, setPassageNum] = useState("");
   const [form, setForm] = useState<CreatePassagePayload>({
     title: "",
     passageCode: "",
@@ -44,9 +70,12 @@ export default function PassagesPage() {
   }, []);
 
   const resetForm = () => {
+    setBook("");
+    setTest("");
+    setPassageNum("");
     setForm({
       title: "",
-      passageCode: codes[0]?._id ?? "",
+      passageCode: "",
       content: [{ paragraphIndex: 0, text: "" }],
       source: "CAMBRIDGE",
       difficulty: "MEDIUM",
@@ -58,16 +87,58 @@ export default function PassagesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title.trim() || !form.passageCode) return;
+    if (!form.title.trim()) return;
     const paragraphs = form.content
       .filter((p) => p.text.trim())
       .map((p, i) => ({ ...p, paragraphIndex: i }));
     if (paragraphs.length === 0) return;
     setSubmitting(true);
     try {
-      const payload = { ...form, content: paragraphs };
+      let passageCodeId = form.passageCode;
+      if (!passageCodeId && book.trim() && test.trim() && passageNum.trim()) {
+        passageCodeId = await resolvePassageCode(
+          book,
+          test,
+          passageNum,
+          form.source,
+          codes,
+        );
+        setCodes((prev) => {
+          const already = prev.some(
+            (c) =>
+              c.book === book.trim() &&
+              c.test === test.trim() &&
+              c.passage === passageNum.trim(),
+          );
+          if (already) return prev;
+          return [{ _id: passageCodeId!, book: book.trim(), test: test.trim(), passage: passageNum.trim(), source: form.source }, ...prev];
+        });
+      }
+      if (!passageCodeId) {
+        setSubmitting(false);
+        return;
+      }
+      const payload: CreatePassagePayload = {
+        ...form,
+        passageCode: passageCodeId,
+        content: paragraphs,
+      };
       if (editingId) {
-        const updated = await updatePassage(editingId, payload);
+        const updatePayload = {
+          title: payload.title,
+          subTitle: payload.subTitle,
+          passageCode: payload.passageCode,
+          content: payload.content,
+          source: payload.source,
+          difficulty: payload.difficulty,
+          moduleType: payload.moduleType,
+          estimatedReadingTime: payload.estimatedReadingTime,
+          videoExplanationUrl: payload.videoExplanationUrl,
+          tags: payload.tags,
+          glossary: payload.glossary,
+          images: payload.images,
+        };
+        const updated = await updatePassage(editingId, updatePayload);
         setPassages((prev) =>
           prev.map((p) => (p._id === editingId ? updated : p)),
         );
@@ -117,6 +188,16 @@ export default function PassagesPage() {
       typeof p.passageCode === "object"
         ? (p.passageCode as { _id: string })._id
         : p.passageCode;
+    const code = codes.find((c) => c._id === passageCodeId);
+    if (code) {
+      setBook(code.book);
+      setTest(code.test);
+      setPassageNum(code.passage);
+    } else {
+      setBook("");
+      setTest("");
+      setPassageNum("");
+    }
     setForm({
       title: p.title,
       subTitle: p.subTitle,
@@ -125,7 +206,6 @@ export default function PassagesPage() {
         p.content.length > 0
           ? p.content.map((c, i) => ({
               paragraphIndex: i,
-              paragraphLabel: c.paragraphLabel,
               text: c.text,
             }))
           : [{ paragraphIndex: 0, text: "" }],
@@ -163,45 +243,59 @@ export default function PassagesPage() {
           {editingId ? "Edit passage" : "Create passage"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={form.title}
-                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                placeholder="e.g. The future of artificial intelligence"
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="passageCode">Passage code</Label>
-              <select
-                id="passageCode"
-                value={form.passageCode}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, passageCode: e.target.value }))
-                }
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-                required
-              >
-                <option value="">Select…</option>
-                {codes.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.book} / {c.test} / {c.passage}
-                  </option>
-                ))}
-              </select>
-              {codes.length === 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  <Link
-                    href="/dashboard/instructor/passage-codes"
-                    className="underline"
-                  >
-                    Create passage codes first
-                  </Link>
-                </p>
-              )}
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="e.g. The future of artificial intelligence"
+              required
+              className="mt-1 max-w-xl"
+            />
+          </div>
+
+          <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <p className="mb-3 text-sm font-medium text-foreground">
+              Book, Test & Passage
+            </p>
+            <p className="mb-3 text-xs text-muted-foreground">
+              e.g. Book 19, Test 2, Passage 1. If the combination does not exist, it will be created automatically.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="book">Book</Label>
+                <Input
+                  id="book"
+                  value={book}
+                  onChange={(e) => setBook(e.target.value)}
+                  placeholder="e.g. 19"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="test">Test</Label>
+                <Input
+                  id="test"
+                  value={test}
+                  onChange={(e) => setTest(e.target.value)}
+                  placeholder="e.g. 2"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="passageNum">Passage</Label>
+                <Input
+                  id="passageNum"
+                  value={passageNum}
+                  onChange={(e) => setPassageNum(e.target.value)}
+                  placeholder="e.g. 1"
+                  required
+                  className="mt-1"
+                />
+              </div>
             </div>
           </div>
 
@@ -276,51 +370,76 @@ export default function PassagesPage() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between">
-              <Label>Content (paragraphs)</Label>
-              <Button type="button" variant="ghost" size="sm" onClick={addParagraph}>
-                <Plus className="h-4 w-4" /> Add
-              </Button>
-            </div>
-            <div className="mt-2 space-y-2">
+            <Label className="block">Content (paragraphs)</Label>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Add 5–10 paragraphs. Use &quot;Add paragraph&quot; below the list when you need more.
+            </p>
+            <div className="mt-3 space-y-3">
               {form.content.map((p, i) => (
                 <div key={i} className="flex gap-2">
-                  <textarea
-                    value={p.text}
-                    onChange={(e) => updateParagraph(i, e.target.value)}
-                    placeholder={`Paragraph ${i + 1}`}
-                    rows={3}
-                    className="flex-1 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeParagraph(i)}
-                    disabled={form.content.length <= 1}
-                  >
-                    ×
-                  </Button>
+                  <div className="flex-1">
+                    <span className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Paragraph {i + 1}
+                    </span>
+                    <textarea
+                      value={p.text}
+                      onChange={(e) => updateParagraph(i, e.target.value)}
+                      placeholder={`Paragraph ${i + 1} text…`}
+                      rows={3}
+                      spellCheck={false}
+                      autoComplete="off"
+                      className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col justify-end pb-6">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeParagraph(i)}
+                      disabled={form.content.length <= 1}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 </div>
               ))}
+              <div className="pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addParagraph}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add paragraph
+                </Button>
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button type="submit" disabled={submitting} className="gap-2">
-              {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-              {editingId ? "Update passage" : "Create passage"}
-            </Button>
-            {editingId && (
-              <Button type="button" variant="outline" onClick={resetForm}>
-                Cancel
+          <div className="flex flex-col gap-3 border-t pt-6">
+            <p className="text-sm font-medium text-foreground">
+              {editingId ? "Save changes" : "Create passage"}
+            </p>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={submitting} className="gap-2">
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {editingId ? "Save passage" : "Create passage"}
               </Button>
-            )}
+              {editingId && (
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  Cancel
+                </Button>
+              )}
+            </div>
           </div>
         </form>
       </Card>
@@ -352,14 +471,31 @@ export default function PassagesPage() {
                     {p.isArchived && " · Archived"}
                   </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => startEdit(p)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPreviewPassage(p)}
+                    title="Preview passage"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => startEdit(p)} title="Edit passage">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </Card>
+
+      {previewPassage && (
+        <PassagePreviewModal
+          passage={previewPassage}
+          onClose={() => setPreviewPassage(null)}
+        />
+      )}
     </div>
   );
 }
