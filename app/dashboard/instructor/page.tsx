@@ -5,12 +5,47 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   BookOpen,
-  Users,
-  BarChart3,
   FileText,
   ArrowLeft,
   ChevronRight,
+  Hash,
+  List,
+  FileQuestion,
+  Layers,
 } from "lucide-react";
+
+const contentLinks = [
+  {
+    href: "/dashboard/instructor/passage-codes",
+    icon: <Hash className="h-5 w-5 text-primary" />,
+    title: "Passage codes",
+    desc: "Create passage identifiers (book, test, passage). Required first step.",
+  },
+  {
+    href: "/dashboard/instructor/passages",
+    icon: <FileText className="h-5 w-5 text-primary" />,
+    title: "Passages",
+    desc: "Create and edit reading passages with paragraphs and metadata.",
+  },
+  {
+    href: "/dashboard/instructor/question-sets",
+    icon: <List className="h-5 w-5 text-primary" />,
+    title: "Question sets",
+    desc: "Create question groups (MCQ, TFNG, matching, etc.) for passages.",
+  },
+  {
+    href: "/dashboard/instructor/questions",
+    icon: <FileQuestion className="h-5 w-5 text-primary" />,
+    title: "Questions",
+    desc: "Add individual questions to question sets.",
+  },
+  {
+    href: "/dashboard/instructor/passage-question-sets",
+    icon: <Layers className="h-5 w-5 text-primary" />,
+    title: "Passage question sets",
+    desc: "Link passages + codes + question groups. Creates tests for students.",
+  },
+];
 
 export default function InstructorDashboardPage() {
   return (
@@ -21,7 +56,7 @@ export default function InstructorDashboardPage() {
             Instructor dashboard
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage reading content and track student progress
+            Manage reading content. Create passage codes → passages → question sets → questions → passage question sets.
           </p>
         </div>
         <Link href="/profile/reading">
@@ -32,97 +67,40 @@ export default function InstructorDashboardPage() {
         </Link>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <BookOpen className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Reading module
-              </p>
-              <p className="text-lg font-semibold text-foreground">Content</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Passages & questions
-              </p>
-              <p className="text-lg font-semibold text-foreground">Manage</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Users className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Students
-              </p>
-              <p className="text-lg font-semibold text-foreground">—</p>
-            </div>
-          </div>
-        </Card>
-        <Card className="p-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <BarChart3 className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Analytics
-              </p>
-              <p className="text-lg font-semibold text-foreground">—</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            Reading module
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Access reading content, passages, and question sets. You have full
-            access to create and edit content for the reading module.
-          </p>
-          <Link href="/profile/reading" className="mt-4 inline-flex">
-            <Button variant="outline" size="sm" className="gap-2">
-              View reading summary
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {contentLinks.map((link) => (
+          <Link key={link.href} href={link.href}>
+            <Card className="h-full p-6 transition-shadow hover:shadow-md">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  {link.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-semibold text-foreground">{link.title}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">{link.desc}</p>
+                  <Button variant="ghost" size="sm" className="mt-3 gap-2">
+                    Manage
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </Link>
-        </Card>
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            Content management
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Manage passages, question groups, and reading tests. Content
-            management APIs are available; frontend tools can be added here.
-          </p>
-          <Button variant="outline" size="sm" className="mt-4" disabled>
-            Coming soon
-          </Button>
-        </Card>
+        ))}
       </div>
 
       <Card className="border-muted bg-muted/20 p-6">
-        <p className="text-sm text-muted-foreground">
-          As an instructor you have elevated access to reading content. Student
-          management and analytics dashboards will be available in a future
-          update.
+        <h3 className="font-semibold text-foreground">Content creation order</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          1. Passage codes → 2. Passages → 3. Question sets → 4. Questions → 5. Passage question sets.
+          Admins can publish content so students can take tests.
         </p>
+        <Link href="/profile/reading" className="mt-4 inline-flex">
+          <Button variant="outline" size="sm" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            View reading summary
+          </Button>
+        </Link>
       </Card>
     </div>
   );

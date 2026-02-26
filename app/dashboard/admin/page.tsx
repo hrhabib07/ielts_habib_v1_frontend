@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SubscriptionRequestsTable } from "@/src/features/admin-approval/components/SubscriptionRequestsTable";
 import { PendingInstructorRequests } from "@/src/features/admin-approval/components/PendingInstructorRequests";
-import { Shield, CreditCard, Users, ArrowLeft } from "lucide-react";
+import { Shield, CreditCard, Users, ArrowLeft, FileText, ChevronRight } from "lucide-react";
 
 export default function AdminDashboardPage() {
   return (
@@ -16,7 +16,7 @@ export default function AdminDashboardPage() {
             Admin dashboard
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage subscription requests and instructor applications
+            Manage subscription requests, instructor applications, and content
           </p>
         </div>
         <Link href="/profile/reading">
@@ -27,7 +27,27 @@ export default function AdminDashboardPage() {
         </Link>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Link href="/dashboard/admin/content">
+          <Card className="h-full p-6 transition-shadow hover:shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Content management
+                </p>
+                <p className="text-lg font-semibold text-foreground">
+                  Publish content
+                </p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="mt-3 gap-2">
+              Manage <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Card>
+        </Link>
         <Card className="p-6">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
