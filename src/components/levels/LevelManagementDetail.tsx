@@ -7,14 +7,26 @@ import { Button } from "@/components/ui/button";
 import {
   adminGetLevelDetail,
   adminUpdateLevel,
-  type LevelWithSteps,
+  adminAddLevelStep,
+  adminUpdateLevelStep,
+  adminDeleteLevelStep,
+  instructorGetLevelDetail,
+  instructorUpdateLevel,
+  instructorAddLevelStep,
+  instructorUpdateLevelStep,
+  instructorDeleteLevelStep,
+  type LevelWithFlows,
   type LevelStep,
+  type CreateLevelStepPayload,
+  type UpdateLevelStepPayload,
   type LevelModule,
   type LevelStage,
   type LevelAccessType,
   type UpdateLevelPayload,
 } from "@/src/lib/api/levels";
 import { StepBuilder } from "./StepBuilder";
+import { FullTestBuilder } from "./FullTestBuilder";
+import { LevelStepFlow } from "./LevelStepFlow";
 import {
   ArrowLeft,
   Pencil,
@@ -23,6 +35,7 @@ import {
   X,
   Lock,
   Unlock,
+  Eye,
 } from "lucide-react";
 
 const MODULES: LevelModule[] = ["READING", "LISTENING"];
@@ -35,19 +48,47 @@ const STAGES: LevelStage[] = [
 ];
 
 /* ─── Main Component ─── */
+export type LevelApiContext = "admin" | "instructor";
+
 interface LevelManagementDetailProps {
-  id: string;
+  /** Level ID from route params (string or string[] in Next.js dynamic segment). */
+  id: string | string[];
   /** Link for "Back" button, e.g. /dashboard/instructor/levels */
   backHref: string;
   backLabel: string;
+  /** Use instructor API routes (/api/instructor/levels). Default "admin". */
+  apiContext?: LevelApiContext;
 }
 
 export function LevelManagementDetail({
   id,
   backHref,
   backLabel,
+  apiContext = "admin",
 }: LevelManagementDetailProps) {
-  const [level, setLevel] = useState<LevelWithSteps | null>(null);
+  const effectiveId = (Array.isArray(id) ? id[0] : id) ?? "";
+  if (typeof process !== "undefined" && process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-console
+    console.log("ID from params:", id);
+    // eslint-disable-next-line no-console
+    console.log("Effective ID:", effectiveId, "type:", typeof effectiveId);
+  }
+  const getLevelDetail = apiContext === "instructor" ? instructorGetLevelDetail : adminGetLevelDetail;
+  const updateLevelFn = apiContext === "instructor" ? instructorUpdateLevel : adminUpdateLevel;
+  const addLevelStepFn =
+    apiContext === "instructor"
+      ? (lid: string, payload: CreateLevelStepPayload) => instructorAddLevelStep(lid, payload)
+      : adminAddLevelStep;
+  const updateLevelStepFn =
+    apiContext === "instructor"
+      ? (lid: string, stepId: string, payload: UpdateLevelStepPayload) =>
+          instructorUpdateLevelStep(lid, stepId, payload)
+      : adminUpdateLevelStep;
+  const deleteLevelStepFn =
+    apiContext === "instructor"
+      ? (lid: string, stepId: string) => instructorDeleteLevelStep(lid, stepId)
+      : adminDeleteLevelStep;
+  const [level, setLevel] = useState<LevelWithFlows | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,16 +106,24 @@ export function LevelManagementDetail({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const [showAddStep, setShowAddStep] = useState(false);
-  const [steps, setSteps] = useState<LevelStep[]>([]);
+  const [showAddLearning, setShowAddLearning] = useState(false);
+  const [showAddPractice, setShowAddPractice] = useState(false);
+  const [learningSteps, setLearningSteps] = useState<LevelStep[]>([]);
+  const [practiceSteps, setPracticeSteps] = useState<LevelStep[]>([]);
+  const [fullTestSteps, setFullTestSteps] = useState<LevelStep[]>([]);
+
+  /** All steps in level for unique order when adding (avoids duplicate order 400 from backend). */
+  const allStepsForOrder = [...learningSteps, ...practiceSteps, ...fullTestSteps];
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await adminGetLevelDetail(id);
+      const data = await getLevelDetail(effectiveId);
       setLevel(data);
-      setSteps(data.steps ?? []);
+      setLearningSteps(data.learningSteps ?? []);
+      setPracticeSteps(data.practiceSteps ?? []);
+      setFullTestSteps(data.fullTestSteps ?? []);
       setEditTitle(data.title);
       setEditSlug(data.slug);
       setEditModule(data.module);
@@ -94,7 +143,7 @@ export function LevelManagementDetail({
 
   useEffect(() => {
     load();
-  }, [id]);
+  }, [effectiveId]);
 
   const handleSaveLevel = async () => {
     if (!editTitle || !editSlug || !editOrder) {
@@ -116,7 +165,7 @@ export function LevelManagementDetail({
         isMaster: editIsMaster,
         isTimed: editIsTimed,
       };
-      const updated = await adminUpdateLevel(id, payload);
+      const updated = await updateLevelFn(effectiveId, payload);
       setLevel((prev) => (prev ? { ...prev, ...updated } : null));
       setEditing(false);
     } catch (err: unknown) {
@@ -179,15 +228,23 @@ export function LevelManagementDetail({
           </div>
         </div>
         {!editing && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => setEditing(true)}
-          >
-            <Pencil className="h-4 w-4" />
-            Edit level
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href={`${backHref}/${effectiveId}/preview`}>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Eye className="h-4 w-4" />
+                Preview as student
+              </Button>
+            </Link>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setEditing(true)}
+            >
+              <Pencil className="h-4 w-4" />
+              Edit level
+            </Button>
+          </div>
         )}
       </div>
 
@@ -399,14 +456,74 @@ export function LevelManagementDetail({
         )}
       </Card>
 
-      {/* Step Builder (ordered steps: intro, video, quiz, etc.) */}
-      <StepBuilder
-        levelId={id}
-        steps={steps}
-        onStepsChange={setSteps}
-        showAddForm={showAddStep}
-        onShowAddForm={setShowAddStep}
-      />
+      {/* Level flow visualization */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-medium text-muted-foreground">
+          Level flow
+        </h2>
+        <LevelStepFlow
+          learningSteps={learningSteps}
+          assessmentSteps={[...practiceSteps, ...fullTestSteps]}
+          fullTestSteps={fullTestSteps.length > 0 ? fullTestSteps : undefined}
+          onStepClick={(stepId) => {
+            document
+              .getElementById(`step-${stepId}`)
+              ?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+        />
+      </div>
+
+      {/* 📘 Learning Flow */}
+      <Card className="p-6">
+        <StepBuilder
+          levelId={effectiveId}
+          steps={learningSteps}
+          onStepsChange={setLearningSteps}
+          showAddForm={showAddLearning}
+          onShowAddForm={setShowAddLearning}
+          flow="learning"
+          sectionTitle="📘 Learning Flow"
+          sectionDescription="Intro, video, note, analytics. Reorderable."
+          emptyMessage="No learning steps. Add intro, video, note, or analytics."
+          allStepsForOrder={allStepsForOrder}
+          onStepAdded={load}
+          addLevelStepFn={addLevelStepFn}
+          updateLevelStepFn={updateLevelStepFn}
+          deleteLevelStepFn={deleteLevelStepFn}
+        />
+      </Card>
+
+      {/* 📝 Practice Flow */}
+      <Card className="p-6">
+        <StepBuilder
+          levelId={effectiveId}
+          steps={practiceSteps}
+          onStepsChange={setPracticeSteps}
+          showAddForm={showAddPractice}
+          onShowAddForm={setShowAddPractice}
+          flow="practice"
+          sectionTitle="📝 Practice Flow"
+          sectionDescription="Practice (untimed/timed). Reorderable. Cannot mix with Full Test."
+          emptyMessage="No practice steps. Add practice untimed or timed."
+          allStepsForOrder={allStepsForOrder}
+          onStepAdded={load}
+          addLevelStepFn={addLevelStepFn}
+          updateLevelStepFn={updateLevelStepFn}
+          deleteLevelStepFn={deleteLevelStepFn}
+        />
+      </Card>
+
+      {/* 🧪 Full Test Flow — Determines level completion */}
+      <Card className="p-6">
+        <FullTestBuilder
+          levelId={effectiveId}
+          fullTestSteps={fullTestSteps}
+          isLevelPublished={level.isActive}
+          onFullTestStepsChange={setFullTestSteps}
+          addLevelStepFn={addLevelStepFn}
+          updateLevelStepFn={updateLevelStepFn}
+        />
+      </Card>
     </div>
   );
 }

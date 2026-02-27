@@ -10,6 +10,7 @@ export default function InstructorLevelDetailPage() {
       id={params.id}
       backHref="/dashboard/instructor/levels"
       backLabel="Levels"
+      apiContext="instructor"
     />
   );
 }

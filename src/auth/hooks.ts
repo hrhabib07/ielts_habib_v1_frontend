@@ -12,12 +12,17 @@ export function useLogin() {
 
     try {
       const res = await login({ email, password });
-
-      // ✅ EXACT PATH FROM BACKEND
-      setAccessToken(res.data.token);
-
-      // ✅ role-based redirect (optional improvement)
+      const token = res.data.token;
       const role = res.data.user.role;
+
+      setAccessToken(token);
+
+      await fetch("/api/auth/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+        credentials: "same-origin",
+      });
 
       if (role === "ADMIN") {
         window.location.href = "/dashboard/admin";
@@ -89,10 +94,18 @@ export function useVerifyOtp() {
     try {
       const res = await verifyOtp({ email, otp, password });
       const token = res?.data?.token;
+      const role = res?.data?.user?.role;
+
       if (token) {
         setAccessToken(token);
+        await fetch("/api/auth/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+          credentials: "same-origin",
+        });
       }
-      const role = res?.data?.user?.role;
+
       if (role === "ADMIN") {
         window.location.href = "/dashboard/admin";
       } else if (role === "INSTRUCTOR") {

@@ -8,25 +8,30 @@ import { Moon, Sun, Menu, User, LogOut, ChevronDown, Sparkles, Layers, FileQuest
 import { useTheme } from "./ThemeProvider";
 import { getDecodedTokenClient, logout } from "@/src/lib/auth";
 import type { UserRole } from "@/src/lib/constants";
+import type { CurrentUser } from "@/src/lib/auth-server";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-export function Header() {
+interface HeaderProps {
+  initialUser?: CurrentUser | null;
+}
+
+export function Header({ initialUser = null }: HeaderProps) {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
-  const [user, setUser] = useState<{ role: UserRole; userId: string } | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [clientUser, setClientUser] = useState<{ role: UserRole; userId: string } | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
+  const user = initialUser ?? clientUser;
+
   useEffect(() => {
-    setMounted(true);
     const updateUser = () => {
       const decoded = getDecodedTokenClient();
       if (decoded) {
-        setUser({ role: decoded.role, userId: decoded.userId });
+        setClientUser({ role: decoded.role, userId: decoded.userId });
       } else {
-        setUser(null);
+        setClientUser(null);
       }
     };
     updateUser();
@@ -57,12 +62,8 @@ export function Header() {
 
   const studentNav = [
     { href: "/profile/reading", label: "Reading" },
-    { href: "/profile/reading", label: "Analytics" }, // same page, could add #analytics later
+    { href: "/profile/reading", label: "Analytics" },
   ];
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

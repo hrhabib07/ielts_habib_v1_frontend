@@ -24,11 +24,13 @@ import {
   Video,
   Lightbulb,
   BarChart2,
+  Eye,
 } from "lucide-react";
 
 const TYPE_ICONS: Record<LearningContentType, React.ReactNode> = {
   INTRO: <FileText className="h-4 w-4" />,
   NOTE: <Lightbulb className="h-4 w-4" />,
+  STRATEGY: <Lightbulb className="h-4 w-4" />,
   VIDEO: <Video className="h-4 w-4" />,
   ANALYTICS: <BarChart2 className="h-4 w-4" />,
 };
@@ -36,6 +38,7 @@ const TYPE_ICONS: Record<LearningContentType, React.ReactNode> = {
 const TYPE_LABELS: Record<LearningContentType, string> = {
   INTRO: "Intro",
   NOTE: "Note",
+  STRATEGY: "Strategy",
   VIDEO: "Video",
   ANALYTICS: "Analytics",
 };
@@ -216,6 +219,18 @@ export default function InstructorContentsPage() {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Link
+                          href={`/dashboard/instructor/contents/${item._id}/preview`}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 gap-1.5 text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            Preview
+                          </Button>
+                        </Link>
                         <Button
                           variant="ghost"
                           size="sm"

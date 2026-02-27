@@ -5,10 +5,18 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getProfileSummary, getMyProfile } from "@/src/lib/api/profile";
 import { ArrowRight, BookOpen } from "lucide-react";
+import type { CurrentUser } from "@/src/lib/auth-server";
 
 type HeroMode = "minimal" | "band" | "loading";
 
-export function HomeHero({ children }: { children?: React.ReactNode }) {
+interface HomeHeroProps {
+  children?: React.ReactNode;
+  initialUser?: CurrentUser | null;
+  roleCtaHref?: string | null;
+  roleCtaLabel?: string | null;
+}
+
+export function HomeHero({ children, initialUser = null, roleCtaHref = null, roleCtaLabel = null }: HomeHeroProps) {
   const [mode, setMode] = useState<HeroMode>("loading");
   const [targetBand, setTargetBand] = useState<number | null>(null);
   const [currentEstimatedBand, setCurrentEstimatedBand] = useState<number | null>(null);
@@ -59,13 +67,25 @@ export function HomeHero({ children }: { children?: React.ReactNode }) {
 
   return (
     <>
-      <MinimalHero />
+      <MinimalHero
+        roleCtaHref={roleCtaHref}
+        roleCtaLabel={roleCtaLabel}
+        isAuthenticated={!!initialUser}
+      />
       {children}
     </>
   );
 }
 
-function MinimalHero() {
+interface MinimalHeroProps {
+  roleCtaHref?: string | null;
+  roleCtaLabel?: string | null;
+  isAuthenticated: boolean;
+}
+
+function MinimalHero({ roleCtaHref, roleCtaLabel, isAuthenticated }: MinimalHeroProps) {
+  const showAuthCtas = !isAuthenticated || !roleCtaHref || !roleCtaLabel;
+
   return (
     <section className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-6 text-center">
       <div className="max-w-2xl space-y-10">
@@ -81,17 +101,28 @@ function MinimalHero() {
           A focused IELTS preparation platform for students. Start with Reading.
         </p>
         <div className="flex flex-col gap-4 sm:flex-row justify-center pt-4">
-          <Link href="/register">
-            <Button size="lg" className="gap-2">
-              Get Started
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Link href="/login">
-            <Button size="lg" variant="outline">
-              Login
-            </Button>
-          </Link>
+          {showAuthCtas ? (
+            <>
+              <Link href="/register">
+                <Button size="lg" className="gap-2">
+                  Get Started
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button size="lg" variant="outline">
+                  Login
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link href={roleCtaHref}>
+              <Button size="lg" className="gap-2">
+                {roleCtaLabel}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </section>

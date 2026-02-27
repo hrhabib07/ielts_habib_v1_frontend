@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { CurrentUser } from "@/src/lib/auth-server";
 
-export function Footer() {
+interface FooterProps {
+  initialUser?: CurrentUser | null;
+}
+
+export function Footer({ initialUser = null }: FooterProps) {
   const pathname = usePathname();
 
   // Home page: only copyright line (minimal, clean)
@@ -61,28 +66,30 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Resources */}
-          <div>
-            <h4 className="mb-4 text-sm font-semibold">Resources</h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="/login"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/register"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Register
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {/* Resources - hide auth links when authenticated */}
+          {!initialUser && (
+            <div>
+              <h4 className="mb-4 text-sm font-semibold">Resources</h4>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link
+                    href="/login"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/register"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Register
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
 
           {/* Contact */}
           <div>

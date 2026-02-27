@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/src/components/shared/ThemeProvider";
 import { Header } from "@/src/components/shared/Header";
 import { Footer } from "@/src/components/shared/Footer";
+import { SyncAuthCookie } from "@/src/components/auth/SyncAuthCookie";
+import { getCurrentUser } from "@/src/lib/auth-server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,21 +22,25 @@ export const metadata: Metadata = {
   description: "Prepare for IELTS with clarity, strategy, and confidence. Focused IELTS Reading module preparation platform.",
 };
 
-export default function RootLayout({
+export const dynamic = "force-dynamic";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialUser = await getCurrentUser();
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
+          <SyncAuthCookie initialUser={initialUser} />
           <div className="flex min-h-screen flex-col">
-            <Header />
+            <Header initialUser={initialUser} />
             <main className="flex-1">{children}</main>
-            <Footer />
+            <Footer initialUser={initialUser} />
           </div>
         </ThemeProvider>
       </body>

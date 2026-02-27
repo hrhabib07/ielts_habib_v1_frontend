@@ -7,8 +7,11 @@ import {
   adminAddLevelStep,
   adminUpdateLevelStep,
   adminDeleteLevelStep,
+  getAddStepErrorMessage,
   type LevelStep,
   type LevelStepContentType,
+  type CreateLevelStepPayload,
+  type UpdateLevelStepPayload,
 } from "@/src/lib/api/levels";
 import { listAdminQuestionSets, type AdminQuestionSet } from "@/src/lib/api/admin-content";
 import { getMyQuestionSets } from "@/src/lib/api/instructor";
@@ -50,24 +53,37 @@ const STEP_TYPE_ICONS: Record<LevelStepType, React.ReactNode> = {
 };
 
 /* ─── Add Step Form (dynamic content by type) ─── */
+type AddLevelStepFn = (levelId: string, payload: CreateLevelStepPayload) => Promise<LevelStep>;
+
 interface StepBuilderAddFormProps {
   levelId: string;
   existingSteps: LevelStep[];
+  /** All steps in the level (learning + practice + fullTest) for unique order. Avoids 400 from duplicate (levelId, order). */
+  allStepsForOrder?: LevelStep[];
   questionSets: AdminQuestionSet[];
   learningContents: LearningContent[];
   onSave: (step: LevelStep) => void;
   onCancel: () => void;
+  allowedStepTypes: LevelStepType[];
+  /** When provided (e.g. instructor dashboard), use this instead of admin API. */
+  addLevelStepFn?: AddLevelStepFn;
 }
 
 export function StepBuilderAddForm({
   levelId,
   existingSteps,
+  allStepsForOrder,
   questionSets,
   learningContents,
   onSave,
   onCancel,
+  allowedStepTypes,
+  addLevelStepFn,
 }: StepBuilderAddFormProps) {
-  const [stepType, setStepType] = useState<LevelStepType>("INTRO_TEXT");
+  const addStep = addLevelStepFn ?? adminAddLevelStep;
+  const [stepType, setStepType] = useState<LevelStepType>(
+    () => allowedStepTypes[0] ?? "INTRO_TEXT",
+  );
   const [title, setTitle] = useState("");
   const [contentId, setContentId] = useState("");
   const [isMandatory, setIsMandatory] = useState(true);
@@ -77,9 +93,10 @@ export function StepBuilderAddForm({
   const [questionSetId, setQuestionSetId] = useState("");
   const [instructionText, setInstructionText] = useState("");
 
+  const stepsForOrder = allStepsForOrder && allStepsForOrder.length > 0 ? allStepsForOrder : existingSteps;
   const nextOrder =
-    existingSteps.length > 0
-      ? Math.max(...existingSteps.map((s) => s.order)) + 1
+    stepsForOrder.length > 0
+      ? Math.max(...stepsForOrder.map((s) => s.order)) + 1
       : 1;
 
   const needsQuestionSet =
@@ -105,17 +122,31 @@ export function StepBuilderAddForm({
     setError(null);
     try {
       const contentType = stepTypeToContentType(stepType);
-      const step = await adminAddLevelStep(levelId, {
+      const payload = {
         contentId: effectiveContentId.trim(),
         contentType,
         title: title.trim(),
         order: nextOrder,
         isMandatory,
-        unlockAfterStepId: null,
-      });
+        unlockAfterStepId: null as string | null,
+      };
+      const step = await addStep(levelId, payload);
       onSave(step);
+      if (typeof process !== "undefined" && process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("STEP CREATED SUCCESSFULLY", step);
+      }
+      setTitle("");
+      setContentId("");
+      setQuestionSetId("");
+      setInstructionText("");
+      setError(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to add step.");
+      if (typeof process !== "undefined" && process.env.NODE_ENV === "development" && err && typeof err === "object" && "response" in err) {
+        // eslint-disable-next-line no-console
+        console.log("Add step error:", (err as { response?: { data?: unknown } }).response?.data);
+      }
+      setError(getAddStepErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -145,7 +176,7 @@ export function StepBuilderAddForm({
             onChange={(e) => setStepType(e.target.value as LevelStepType)}
             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
           >
-            {LEVEL_STEP_TYPES.map((t) => (
+            {allowedStepTypes.map((t) => (
               <option key={t} value={t}>
                 {LEVEL_STEP_TYPE_LABELS[t]}
               </option>
@@ -285,6 +316,8 @@ export function StepBuilderAddForm({
 }
 
 /* ─── Step card (order, type badge, title, edit, delete, move) ─── */
+type UpdateLevelStepFn = (levelId: string, stepId: string, payload: UpdateLevelStepPayload) => Promise<LevelStep>;
+
 interface StepBuilderStepRowProps {
   step: LevelStep;
   levelId: string;
@@ -294,6 +327,8 @@ interface StepBuilderStepRowProps {
   onMoveUp: (stepId: string) => void;
   onMoveDown: (stepId: string) => void;
   onStepUpdated: (stepId: string, updates: Partial<LevelStep>) => void;
+  allowedStepTypes: LevelStepType[];
+  updateLevelStepFn?: UpdateLevelStepFn;
 }
 
 export function StepBuilderStepRow({
@@ -305,12 +340,16 @@ export function StepBuilderStepRow({
   onMoveUp,
   onMoveDown,
   onStepUpdated,
+  allowedStepTypes,
+  updateLevelStepFn,
 }: StepBuilderStepRowProps) {
+  const updateStep = updateLevelStepFn ?? adminUpdateLevelStep;
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(step.title);
-  const [stepType, setStepType] = useState<LevelStepType>(
-    () => contentTypeToStepType(step.contentType),
-  );
+  const [stepType, setStepType] = useState<LevelStepType>(() => {
+    const t = contentTypeToStepType(step.contentType);
+    return allowedStepTypes.includes(t) ? t : allowedStepTypes[0] ?? "INTRO_TEXT";
+  });
   const [isMandatory, setIsMandatory] = useState(step.isMandatory);
   const [saving, setSaving] = useState(false);
 
@@ -321,7 +360,7 @@ export function StepBuilderStepRow({
     setEditing(false);
     setSaving(true);
     try {
-      await adminUpdateLevelStep(levelId, step._id, {
+      await updateStep(levelId, step._id, {
         title,
         contentType,
         isMandatory,
@@ -338,7 +377,10 @@ export function StepBuilderStepRow({
   const displayType = contentTypeToStepType(step.contentType);
 
   return (
-    <div className="flex items-start gap-3 rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+    <div
+      id={`step-${step._id}`}
+      className="flex items-start gap-3 rounded-lg border bg-card p-4 shadow-sm transition-shadow hover:shadow-md scroll-mt-24"
+    >
       <div className="flex flex-col items-center gap-0.5">
         <button
           type="button"
@@ -378,7 +420,7 @@ export function StepBuilderStepRow({
                 onChange={(e) => setStepType(e.target.value as LevelStepType)}
                 className="rounded-md border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
-                {LEVEL_STEP_TYPES.map((t) => (
+                {allowedStepTypes.map((t) => (
                   <option key={t} value={t}>
                     {LEVEL_STEP_TYPE_LABELS[t]}
                   </option>
@@ -461,13 +503,30 @@ export function StepBuilderStepRow({
   );
 }
 
-/* ─── Step Builder section (list + add form + optimistic reorder) ─── */
+/** "learning" = LEARNING flow only (INTRO, VIDEO, NOTE, ANALYTICS). "practice" = PRACTICE_UNTIMED, PRACTICE_TIMED only (no FULL_TEST). */
+export type StepBuilderFlow = "learning" | "practice";
+
+const LEARNING_STEP_TYPES: LevelStepType[] = ["INTRO_TEXT", "VIDEO", "NOTE", "ANALYTICS"];
+const PRACTICE_STEP_TYPES: LevelStepType[] = ["QUIZ", "PRACTICE"];
+
+/* ─── Step Builder section (single flow: Learning or Practice) ─── */
 interface StepBuilderProps {
   levelId: string;
   steps: LevelStep[];
   onStepsChange: (steps: LevelStep[]) => void;
   showAddForm: boolean;
   onShowAddForm: (show: boolean) => void;
+  flow: StepBuilderFlow;
+  sectionTitle: string;
+  sectionDescription: string;
+  emptyMessage: string;
+  /** All steps in the level for unique order when adding (avoids duplicate order 400). */
+  allStepsForOrder?: LevelStep[];
+  /** Called after a step is successfully added; use to refetch level so order/steps stay in sync. */
+  onStepAdded?: () => void;
+  addLevelStepFn?: AddLevelStepFn;
+  updateLevelStepFn?: UpdateLevelStepFn;
+  deleteLevelStepFn?: (levelId: string, stepId: string) => Promise<void>;
 }
 
 export function StepBuilder({
@@ -476,10 +535,24 @@ export function StepBuilder({
   onStepsChange,
   showAddForm,
   onShowAddForm,
+  flow,
+  sectionTitle,
+  sectionDescription,
+  emptyMessage,
+  allStepsForOrder,
+  onStepAdded,
+  addLevelStepFn,
+  updateLevelStepFn,
+  deleteLevelStepFn,
 }: StepBuilderProps) {
+  const addStep = addLevelStepFn ?? adminAddLevelStep;
+  const updateStep = updateLevelStepFn ?? adminUpdateLevelStep;
+  const deleteStep = deleteLevelStepFn ?? adminDeleteLevelStep;
   const [questionSets, setQuestionSets] = useState<AdminQuestionSet[]>([]);
   const [learningContents, setLearningContents] = useState<LearningContent[]>([]);
   const [reordering, setReordering] = useState(false);
+
+  const allowedStepTypes = flow === "learning" ? LEARNING_STEP_TYPES : PRACTICE_STEP_TYPES;
 
   useEffect(() => {
     if (showAddForm) {
@@ -505,11 +578,10 @@ export function StepBuilder({
     }
   }, [showAddForm]);
 
-  const sortedSteps = [...steps].sort((a, b) => a.order - b.order);
-
   const handleAddStep = (step: LevelStep) => {
     onStepsChange([...steps, step]);
-    onShowAddForm(false);
+    onStepAdded?.();
+    // Keep form open so user can add another step; nextOrder will update from parent state/refetch
   };
 
   const handleDeleteStep = async (stepId: string) => {
@@ -517,7 +589,7 @@ export function StepBuilder({
     const prev = steps;
     onStepsChange(steps.filter((s) => s._id !== stepId));
     try {
-      await adminDeleteLevelStep(levelId, stepId);
+      await deleteStep(levelId, stepId);
     } catch {
       onStepsChange(prev);
       alert("Failed to delete step.");
@@ -530,15 +602,19 @@ export function StepBuilder({
     );
   };
 
-  const handleReorder = async (stepId: string, direction: "up" | "down") => {
+  const handleReorder = async (
+    stepId: string,
+    direction: "up" | "down",
+  ) => {
     const sorted = [...steps].sort((a, b) => a.order - b.order);
     const idx = sorted.findIndex((s) => s._id === stepId);
+    if (idx === -1) return;
     if (direction === "up" && idx === 0) return;
     if (direction === "down" && idx === sorted.length - 1) return;
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
     const newOrder = sorted[swapIdx].order;
     const swapOrder = sorted[idx].order;
-    const prev = steps;
+    const prev = [...steps];
     onStepsChange(
       steps.map((s) => {
         if (s._id === stepId) return { ...s, order: newOrder };
@@ -548,8 +624,10 @@ export function StepBuilder({
     );
     setReordering(true);
     try {
-      await adminUpdateLevelStep(levelId, stepId, { order: newOrder });
-      await adminUpdateLevelStep(levelId, sorted[swapIdx]._id, { order: swapOrder });
+      await updateStep(levelId, stepId, { order: newOrder });
+      await updateStep(levelId, sorted[swapIdx]._id, {
+        order: swapOrder,
+      });
     } catch {
       onStepsChange(prev);
       alert("Failed to reorder step.");
@@ -558,16 +636,17 @@ export function StepBuilder({
     }
   };
 
+  const sortedSteps = [...steps].sort((a, b) => a.order - b.order);
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-foreground">
-            Step builder
-          </h2>
+          <h3 className="text-sm font-semibold text-foreground">
+            {sectionTitle}
+          </h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {sortedSteps.length} step{sortedSteps.length !== 1 ? "s" : ""} in order ·
-            Students complete these in sequence
+            {sectionDescription}
           </p>
         </div>
         <Button
@@ -577,7 +656,7 @@ export function StepBuilder({
           disabled={reordering}
         >
           <Plus className="h-4 w-4" />
-          Add new step
+          Add step
         </Button>
       </div>
 
@@ -585,16 +664,19 @@ export function StepBuilder({
         <StepBuilderAddForm
           levelId={levelId}
           existingSteps={steps}
+          allStepsForOrder={allStepsForOrder}
           questionSets={questionSets}
           learningContents={learningContents}
           onSave={handleAddStep}
           onCancel={() => onShowAddForm(false)}
+          allowedStepTypes={allowedStepTypes}
+          addLevelStepFn={addLevelStepFn}
         />
       )}
 
       {sortedSteps.length === 0 && !showAddForm ? (
-        <Card className="p-8 text-center text-muted-foreground">
-          <p className="text-sm">No steps yet. Add intro, video, quiz, or practice to build the flow.</p>
+        <Card className="p-6 text-center">
+          <p className="text-sm text-muted-foreground">{emptyMessage}</p>
         </Card>
       ) : (
         <div className="space-y-3">
@@ -606,9 +688,11 @@ export function StepBuilder({
               isFirst={idx === 0}
               isLast={idx === sortedSteps.length - 1}
               onDelete={handleDeleteStep}
-              onMoveUp={(id) => handleReorder(id, "up")}
-              onMoveDown={(id) => handleReorder(id, "down")}
+              onMoveUp={(stepId) => handleReorder(stepId, "up")}
+              onMoveDown={(stepId) => handleReorder(stepId, "down")}
               onStepUpdated={handleStepUpdated}
+              allowedStepTypes={allowedStepTypes}
+              updateLevelStepFn={updateLevelStepFn}
             />
           ))}
         </div>

@@ -1,12 +1,16 @@
-import { BookOpen, Clock, TrendingUp, CheckCircle2 } from "lucide-react";
+import { BookOpen, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getCurrentUser } from "@/src/lib/auth-server";
+import { getRedirectPathForRole } from "@/src/lib/auth-redirects";
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const user = await getCurrentUser();
+  const ctaHref = user ? getRedirectPathForRole(user.role) : null;
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
       <div className="space-y-12">
-        {/* Hero Section */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
             IELTS Courses
@@ -17,7 +21,6 @@ export default function CoursesPage() {
           </p>
         </div>
 
-        {/* Coming Soon Notice */}
         <div className="rounded-lg border bg-card p-8 text-center space-y-6">
           <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
             <BookOpen className="h-8 w-8 text-primary" />
@@ -25,15 +28,21 @@ export default function CoursesPage() {
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">Courses Coming Soon</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              We're currently building our course content. The IELTS Reading
+              We&apos;re currently building our course content. The IELTS Reading
               module will be available soon with comprehensive practice tests,
               mock exams, and instructor-guided learning.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg">Create Account</Button>
-            </Link>
+            {ctaHref ? (
+              <Link href={ctaHref}>
+                <Button size="lg">Go to Dashboard</Button>
+              </Link>
+            ) : (
+              <Link href="/register">
+                <Button size="lg">Create Account</Button>
+              </Link>
+            )}
             <Link href="/about">
               <Button variant="outline" size="lg">
                 Learn More

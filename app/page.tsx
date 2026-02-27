@@ -2,11 +2,26 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Target, TrendingUp, ArrowRight } from "lucide-react";
 import { HomeHero } from "@/src/components/home/HomeHero";
+import { getCurrentUser } from "@/src/lib/auth-server";
+import { getRedirectPathForRole } from "@/src/lib/auth-redirects";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const initialUser = await getCurrentUser();
+  const roleCtaHref = initialUser ? getRedirectPathForRole(initialUser.role) : null;
+  const roleCtaLabel =
+    initialUser?.role === "STUDENT"
+      ? "Go to Practice"
+      : initialUser?.role === "ADMIN"
+        ? "Go to Admin Panel"
+        : initialUser?.role === "INSTRUCTOR"
+          ? "Go to Dashboard"
+          : null;
+
   return (
     <main className="flex flex-col">
-      <HomeHero>
+      <HomeHero initialUser={initialUser} roleCtaHref={roleCtaHref} roleCtaLabel={roleCtaLabel}>
         {/* When logged in with band set, only the hero shows; these sections show only when not logged in / no band */}
         {/* WHY IELTS HABIB — students only */}
       <section className="border-t bg-muted/40 py-20">
@@ -78,16 +93,34 @@ export default function HomePage() {
             Start Your IELTS Preparation the Right Way
           </h2>
           <p className="text-lg text-muted-foreground">
-            Create an account and begin with focused IELTS Reading practice.
+            {roleCtaHref
+              ? "Continue to your dashboard and keep improving."
+              : "Create an account and begin with focused IELTS Reading practice."}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" className="gap-2">
-                Create Free Account
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+            {roleCtaHref && roleCtaLabel ? (
+              <Link href={roleCtaHref}>
+                <Button size="lg" className="gap-2">
+                  {roleCtaLabel}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/register">
+                  <Button size="lg" className="gap-2">
+                    Create Free Account
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button size="lg" variant="outline">
+                    Login
+                  </Button>
+                </Link>
+              </>
+            )}
             <Link href="/about">
               <Button size="lg" variant="outline">
                 Learn More

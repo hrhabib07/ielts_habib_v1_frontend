@@ -9,49 +9,13 @@ import {
   getLevelById,
   getCurrentLevel,
   completeStep,
-  type LevelWithSteps,
+  type LevelWithFlows,
   type LevelStep,
   type StudentLevelProgress,
-  type LevelStepContentType,
 } from "@/src/lib/api/levels";
 import { getMySubscription, type ActiveSubscription } from "@/src/lib/api/subscription";
-import {
-  ArrowLeft,
-  Lock,
-  CheckCircle2,
-  Circle,
-  Loader2,
-  Video,
-  FileText,
-  Lightbulb,
-  BookOpen,
-  Clock,
-  BarChart2,
-  Trophy,
-  Zap,
-  ChevronRight,
-  Play,
-} from "lucide-react";
-
-const STEP_ICONS: Record<LevelStepContentType, React.ReactNode> = {
-  VIDEO: <Video className="h-4 w-4" />,
-  NOTE: <FileText className="h-4 w-4" />,
-  STRATEGY: <Lightbulb className="h-4 w-4" />,
-  PRACTICE_UNTIMED: <BookOpen className="h-4 w-4" />,
-  PRACTICE_TIMED: <Clock className="h-4 w-4" />,
-  FULL_TEST: <Play className="h-4 w-4" />,
-  ANALYTICS: <BarChart2 className="h-4 w-4" />,
-};
-
-const STEP_LABELS: Record<LevelStepContentType, string> = {
-  VIDEO: "Video",
-  NOTE: "Study note",
-  STRATEGY: "Strategy",
-  PRACTICE_UNTIMED: "Practice",
-  PRACTICE_TIMED: "Timed practice",
-  FULL_TEST: "Full test",
-  ANALYTICS: "Analytics",
-};
+import { LevelStepCard } from "@/src/components/levels/LevelStepCard";
+import { ArrowLeft, Lock, CheckCircle2, Loader2, Trophy, Zap } from "lucide-react";
 
 function hasReadingAccess(sub: ActiveSubscription | null): boolean {
   if (!sub || sub.status !== "ACTIVE") return false;
@@ -64,95 +28,11 @@ function hasReadingAccess(sub: ActiveSubscription | null): boolean {
   );
 }
 
-interface StepCardProps {
-  step: LevelStep;
-  isCompleted: boolean;
-  isLocked: boolean;
-  isCurrent: boolean;
-  levelId: string;
-  onComplete: (stepId: string) => void;
-  completing: boolean;
-}
-
-function StepCard({ step, isCompleted, isLocked, isCurrent, levelId, onComplete, completing }: StepCardProps) {
-  return (
-    <div
-      className={`flex items-start gap-4 rounded-lg border p-4 transition-colors ${
-        isCompleted
-          ? "border-green-200 bg-green-50/30 dark:border-green-800/30 dark:bg-green-950/10"
-          : isCurrent
-            ? "border-primary/50 bg-primary/5"
-            : isLocked
-              ? "border-border/50 bg-muted/20 opacity-60"
-              : "border-border bg-card"
-      }`}
-    >
-      {/* Status icon */}
-      <div className={`mt-0.5 shrink-0 ${isCompleted ? "text-green-600 dark:text-green-400" : isLocked ? "text-muted-foreground/40" : "text-primary"}`}>
-        {isCompleted ? (
-          <CheckCircle2 className="h-5 w-5" />
-        ) : isLocked ? (
-          <Lock className="h-5 w-5" />
-        ) : (
-          <Circle className="h-5 w-5" />
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">{STEP_ICONS[step.contentType]}</span>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-            {STEP_LABELS[step.contentType]}
-          </span>
-          {step.isMandatory && (
-            <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-700 dark:text-blue-400">
-              Required
-            </span>
-          )}
-        </div>
-        <p className={`mt-1 font-medium text-sm ${isLocked ? "text-muted-foreground" : "text-foreground"}`}>
-          {step.title}
-        </p>
-      </div>
-
-      {/* Action */}
-      {!isLocked && (
-        <div className="shrink-0">
-          {isCompleted ? (
-            <span className="text-xs text-green-600 dark:text-green-400 font-medium">Done</span>
-          ) : isCurrent ? (
-            <Button
-              size="sm"
-              className="h-7 gap-1.5 text-xs"
-              onClick={() => onComplete(step._id)}
-              disabled={completing}
-            >
-              {completing ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <>
-                  Complete
-                  <ChevronRight className="h-3 w-3" />
-                </>
-              )}
-            </Button>
-          ) : (
-            <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground">
-              Locked <Lock className="ml-1 h-3 w-3" />
-            </Button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function ReadingLevelDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
 
-  const [level, setLevel] = useState<LevelWithSteps | null>(null);
+  const [level, setLevel] = useState<LevelWithFlows | null>(null);
   const [progress, setProgress] = useState<StudentLevelProgress | null>(null);
   const [subscription, setSubscription] = useState<ActiveSubscription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -237,18 +117,27 @@ export default function ReadingLevelDetailPage() {
 
   const isLevelCompleted = progress?.isCompleted && isCurrentLevel;
 
-  const sortedSteps = [...(level.steps ?? [])].sort((a, b) => a.order - b.order);
+  const learningSteps = [...(level.learningSteps ?? [])].sort((a, b) => a.order - b.order);
+  const assessmentSteps = [...(level.assessmentSteps ?? [])].sort((a, b) => a.order - b.order);
+  const allSteps = [...learningSteps, ...assessmentSteps];
+  const completedCount = allSteps.filter((s) => localCompleted.has(s._id)).length;
+  const progressPct =
+    allSteps.length > 0 ? Math.round((completedCount / allSteps.length) * 100) : 0;
 
-  const getStepState = (step: LevelStep, idx: number) => {
+  const getStepState = (
+    step: LevelStep,
+    idx: number,
+    stepsInFlow: LevelStep[],
+  ) => {
     const isStepCompleted = localCompleted.has(step._id);
-    const prevStepCompleted = idx === 0 || localCompleted.has(sortedSteps[idx - 1]._id);
-    const isCurrent = !isStepCompleted && prevStepCompleted && isCurrentLevel;
-    const isLocked = !isStepCompleted && (!prevStepCompleted || !isCurrentLevel);
+    const prevStepCompleted =
+      idx === 0 || localCompleted.has(stepsInFlow[idx - 1]._id);
+    const isCurrent =
+      !isStepCompleted && prevStepCompleted && isCurrentLevel;
+    const isLocked =
+      !isStepCompleted && (!prevStepCompleted || !isCurrentLevel);
     return { isCompleted: isStepCompleted, isCurrent, isLocked };
   };
-
-  const completedCount = sortedSteps.filter((s) => localCompleted.has(s._id)).length;
-  const progressPct = sortedSteps.length > 0 ? Math.round((completedCount / sortedSteps.length) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -312,12 +201,12 @@ export default function ReadingLevelDetailPage() {
       )}
 
       {/* Progress bar (only when accessible and has steps) */}
-      {isLevelAccessible && sortedSteps.length > 0 && (
+      {isLevelAccessible && allSteps.length > 0 && (
         <Card className="p-4">
           <div className="flex items-center justify-between text-sm mb-2">
             <span className="font-medium text-foreground">Progress</span>
             <span className="text-muted-foreground">
-              {completedCount} / {sortedSteps.length} steps
+              {completedCount} / {allSteps.length} steps
             </span>
           </div>
           <div className="h-2 w-full rounded-full bg-muted">
@@ -335,28 +224,72 @@ export default function ReadingLevelDetailPage() {
         </Card>
       )}
 
-      {/* Steps */}
+      {/* Learning section */}
       {isLevelAccessible && (
         <section>
           <h2 className="mb-3 text-base font-semibold text-foreground">
-            Level content
+            📘 Learning
             <span className="ml-2 text-sm font-normal text-muted-foreground">
-              ({sortedSteps.length} step{sortedSteps.length !== 1 ? "s" : ""})
+              ({learningSteps.length} step{learningSteps.length !== 1 ? "s" : ""})
             </span>
           </h2>
-
-          {sortedSteps.length === 0 ? (
-            <Card className="p-8 text-center">
+          {learningSteps.length === 0 ? (
+            <Card className="p-6 text-center">
               <p className="text-sm text-muted-foreground">
-                No content added to this level yet.
+                No learning steps in this level.
               </p>
             </Card>
           ) : (
             <div className="space-y-2">
-              {sortedSteps.map((step, idx) => {
-                const { isCompleted, isCurrent, isLocked } = getStepState(step, idx);
+              {learningSteps.map((step, idx) => {
+                const { isCompleted, isCurrent, isLocked } = getStepState(
+                  step,
+                  idx,
+                  learningSteps,
+                );
                 return (
-                  <StepCard
+                  <LevelStepCard
+                    key={step._id}
+                    step={step}
+                    isCompleted={isCompleted}
+                    isLocked={isLocked}
+                    isCurrent={isCurrent}
+                    levelId={id}
+                    onComplete={handleCompleteStep}
+                    completing={completing && completingStepId === step._id}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Assessment section */}
+      {isLevelAccessible && (
+        <section>
+          <h2 className="mb-3 text-base font-semibold text-foreground">
+            📝 Assessment
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              ({assessmentSteps.length} step{assessmentSteps.length !== 1 ? "s" : ""})
+            </span>
+          </h2>
+          {assessmentSteps.length === 0 ? (
+            <Card className="p-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                No assessment steps in this level.
+              </p>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {assessmentSteps.map((step, idx) => {
+                const { isCompleted, isCurrent, isLocked } = getStepState(
+                  step,
+                  idx,
+                  assessmentSteps,
+                );
+                return (
+                  <LevelStepCard
                     key={step._id}
                     step={step}
                     isCompleted={isCompleted}

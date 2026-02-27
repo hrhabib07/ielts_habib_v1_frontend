@@ -9,8 +9,7 @@ export interface JwtPayload {
 }
 
 export function setAccessToken(token: string): void {
-  // cookie (for middleware)
-  document.cookie = `${TOKEN_KEY}=${token}; path=/`;
+  document.cookie = `${TOKEN_KEY}=${token}; path=/; SameSite=Lax`;
 
   // optional: localStorage (for client utilities)
   localStorage.setItem(TOKEN_KEY, token);
@@ -35,11 +34,13 @@ export function clearAuth(): void {
 
 export function logout(): void {
   clearAuth();
-  // Dispatch custom event for auth state change
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("auth-state-changed"));
-  }
-  window.location.href = "/login";
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("auth-state-changed"));
+  fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" }).finally(
+    () => {
+      window.location.href = "/login";
+    }
+  );
 }
 
 export function getTokenFromClient(): string | null {

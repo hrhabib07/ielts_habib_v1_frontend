@@ -2,7 +2,12 @@ import apiClient from "../api-client";
 
 const BASE = "/learning-contents";
 
-export type LearningContentType = "INTRO" | "NOTE" | "VIDEO" | "ANALYTICS";
+export type LearningContentType =
+  | "INTRO"
+  | "NOTE"
+  | "STRATEGY"
+  | "VIDEO"
+  | "ANALYTICS";
 
 export interface LearningContent {
   _id: string;
@@ -17,6 +22,12 @@ export interface LearningContent {
   createdAt?: string;
   updatedAt?: string;
 }
+
+/** Shape returned by content preview API (no createdBy/updatedBy). */
+export interface LearningContentPreview extends Pick<
+  LearningContent,
+  "_id" | "title" | "type" | "body" | "videoUrl" | "isPublished" | "createdAt" | "updatedAt"
+> {}
 
 export interface CreateLearningContentPayload {
   title: string;
@@ -39,6 +50,7 @@ export interface UpdateLearningContentPayload {
 export const LEARNING_CONTENT_TYPES: { value: LearningContentType; label: string }[] = [
   { value: "INTRO", label: "Intro" },
   { value: "NOTE", label: "Note" },
+  { value: "STRATEGY", label: "Strategy" },
   { value: "VIDEO", label: "Video" },
   { value: "ANALYTICS", label: "Analytics" },
 ];
@@ -86,4 +98,16 @@ export async function updateLearningContent(
 /** Delete content */
 export async function deleteLearningContent(id: string): Promise<void> {
   await apiClient.delete(`${BASE}/${id}`);
+}
+
+/** Get content preview (ADMIN/INSTRUCTOR; allows draft). Uses admin API. */
+export async function getContentPreview(
+  id: string,
+): Promise<LearningContentPreview> {
+  const res = await apiClient.get<{
+    success: boolean;
+    message?: string;
+    data: LearningContentPreview;
+  }>(`/admin/contents/${id}/preview`);
+  return res.data.data;
 }
