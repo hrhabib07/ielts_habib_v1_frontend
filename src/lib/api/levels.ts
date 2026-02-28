@@ -60,6 +60,12 @@ export interface LevelStep {
   updatedAt?: string;
 }
 
+export interface EvaluationConfig {
+  maxAttempts?: number;
+  miniTestsPerSet?: number;
+  strictMode?: boolean;
+}
+
 export interface Level {
   _id: string;
   title: string;
@@ -75,6 +81,7 @@ export interface Level {
   isTimed?: boolean;
   isMaster: boolean;
   isActive: boolean;
+  evaluationConfig?: EvaluationConfig;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -241,6 +248,49 @@ export async function instructorGetLevelDetail(id: string): Promise<LevelWithFlo
   return res.data.data;
 }
 
+export interface ManageLevelResponse {
+  level: Level;
+  learningSteps: (LevelStep & { resolvedContent?: Record<string, unknown> | null })[];
+  assessmentSteps: (LevelStep & { resolvedContent?: Record<string, unknown> | null })[];
+  practiceSteps: (LevelStep & { resolvedContent?: Record<string, unknown> | null })[];
+  fullTestSteps: (LevelStep & { resolvedContent?: Record<string, unknown> | null })[];
+}
+
+export interface UpdateLevelSettingsPayload {
+  title?: string;
+  slug?: string;
+  description?: string;
+  accessType?: LevelAccessType;
+  isActive?: boolean;
+  isTimed?: boolean;
+  isMaster?: boolean;
+  evaluationConfig?: {
+    maxAttempts?: number;
+    miniTestsPerSet?: number;
+    strictMode?: boolean;
+  };
+}
+
+export async function instructorGetLevelManage(
+  id: string,
+): Promise<ManageLevelResponse> {
+  const res = await apiClient.get<{ success: boolean; data: ManageLevelResponse }>(
+    `${INSTRUCTOR_LEVELS}/${id}/manage`,
+  );
+  return res.data.data;
+}
+
+export async function instructorUpdateLevelSettings(
+  id: string,
+  payload: UpdateLevelSettingsPayload,
+): Promise<Level> {
+  const res = await apiClient.patch<{ success: boolean; data: Level }>(
+    `${INSTRUCTOR_LEVELS}/${id}/settings`,
+    payload,
+  );
+  return res.data.data;
+}
+
 export async function instructorCreateLevel(payload: CreateLevelPayload): Promise<Level> {
   const res = await apiClient.post<{ success: boolean; data: Level }>(
     INSTRUCTOR_LEVELS,
@@ -315,6 +365,30 @@ export async function instructorDeleteLevelStep(
 ): Promise<void> {
   const effectiveLevelId = typeof levelId === "string" ? levelId : (levelId as string[])?.[0];
   await apiClient.delete(`${INSTRUCTOR_LEVELS}/${effectiveLevelId}/steps/${stepId}`);
+}
+
+export async function instructorGetLevelSteps(
+  levelId: string,
+): Promise<LevelStep[]> {
+  const effectiveLevelId =
+    typeof levelId === "string" ? levelId : (levelId as string[])?.[0] ?? "";
+  const res = await apiClient.get<{ success: boolean; data: LevelStep[] }>(
+    `${INSTRUCTOR_LEVELS}/${effectiveLevelId}/steps`,
+  );
+  return res.data?.data ?? [];
+}
+
+export async function instructorReorderLevelSteps(
+  levelId: string,
+  steps: { stepId: string; order: number }[],
+): Promise<LevelStep[]> {
+  const effectiveLevelId =
+    typeof levelId === "string" ? levelId : (levelId as string[])?.[0] ?? "";
+  const res = await apiClient.patch<{ success: boolean; data: LevelStep[] }>(
+    `${INSTRUCTOR_LEVELS}/${effectiveLevelId}/steps/reorder`,
+    { steps },
+  );
+  return res.data?.data ?? [];
 }
 
 export async function instructorGetLevelPreview(id: string): Promise<LevelPreviewResponse> {

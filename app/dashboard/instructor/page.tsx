@@ -21,9 +21,9 @@ const contentLinks = [
     href: "/dashboard/instructor/levels",
     icon: <BookOpen className="h-5 w-5 text-stone-600 dark:text-stone-400" />,
     title: "Level Management",
-    desc: "View, create, and edit levels. Manage steps (intro, video, quiz, practice, full test) and reorder them.",
+    desc: "Create levels, add learning steps (video, note, quiz), configure assessment, and preview.",
     accent: "bg-stone-100 dark:bg-stone-800",
-    cta: "Manage Levels",
+    cta: "Manage",
   },
   {
     href: "/dashboard/instructor/contents",

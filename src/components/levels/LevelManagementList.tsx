@@ -9,6 +9,9 @@ import {
   adminListAllLevels,
   adminCreateLevel,
   adminDeleteLevel,
+  instructorListAllLevels,
+  instructorCreateLevel,
+  instructorDeleteLevel,
   type Level,
   type LevelModule,
   type LevelStage,
@@ -63,7 +66,11 @@ interface CreateLevelFormProps {
   onCancel: () => void;
 }
 
-function CreateLevelForm({ existingOrders, onSave, onCancel }: CreateLevelFormProps) {
+function CreateLevelForm({
+  existingOrders,
+  onSave,
+  onCancel,
+}: CreateLevelFormProps) {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [module, setModule] = useState<LevelModule>("READING");
@@ -159,7 +166,9 @@ function CreateLevelForm({ existingOrders, onSave, onCancel }: CreateLevelFormPr
             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
           >
             {MODULES.map((m) => (
-              <option key={m} value={m}>{m}</option>
+              <option key={m} value={m}>
+                {m}
+              </option>
             ))}
           </select>
         </div>
@@ -173,7 +182,9 @@ function CreateLevelForm({ existingOrders, onSave, onCancel }: CreateLevelFormPr
             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
           >
             {STAGES.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>
+                {s}
+              </option>
             ))}
           </select>
         </div>
@@ -237,7 +248,9 @@ function CreateLevelForm({ existingOrders, onSave, onCancel }: CreateLevelFormPr
       </div>
 
       <div>
-        <label className="text-sm font-medium text-foreground">Description</label>
+        <label className="text-sm font-medium text-foreground">
+          Description
+        </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -298,12 +311,17 @@ interface LevelManagementListProps {
   backLabel: string;
   /** Base path for the level detail route, e.g. /dashboard/instructor/levels */
   detailBasePath: string;
+  /** Optional suffix for detail link, e.g. /manage for /levels/123/manage */
+  detailPathSuffix?: string;
+  apiContext?: "admin" | "instructor";
 }
 
 export function LevelManagementList({
   backHref,
   backLabel,
   detailBasePath,
+  detailPathSuffix = "",
+  apiContext = "admin",
 }: LevelManagementListProps) {
   const router = useRouter();
   const [levels, setLevels] = useState<Level[]>([]);
@@ -317,7 +335,12 @@ export function LevelManagementList({
     setLoading(true);
     setError(null);
     try {
-      setLevels(await adminListAllLevels());
+      const listLevels =
+        apiContext === "instructor"
+          ? instructorListAllLevels
+          : adminListAllLevels;
+
+      setLevels(await listLevels());
     } catch {
       setError("Failed to load levels.");
     } finally {
@@ -348,7 +371,10 @@ export function LevelManagementList({
   }, {});
 
   const handleCreate = async (payload: CreateLevelPayload) => {
-    await adminCreateLevel(payload);
+    const createLevel =
+      apiContext === "instructor" ? instructorCreateLevel : adminCreateLevel;
+
+    await createLevel(payload);
     setShowCreate(false);
     await load();
   };
@@ -362,7 +388,10 @@ export function LevelManagementList({
       return;
     setDeletingId(id);
     try {
-      await adminDeleteLevel(id);
+      const deleteLevel =
+        apiContext === "instructor" ? instructorDeleteLevel : adminDeleteLevel;
+
+      await deleteLevel(id);
       setLevels((prev) => prev.filter((l) => l._id !== id));
     } catch {
       alert("Failed to delete level.");
@@ -558,7 +587,9 @@ export function LevelManagementList({
                               size="sm"
                               className="h-8 w-8 p-0"
                               onClick={() =>
-                                router.push(`${detailBasePath}/${level._id}`)
+                                router.push(
+                                  `${detailBasePath}/${level._id}${detailPathSuffix}`,
+                                )
                               }
                               title="Edit level"
                             >

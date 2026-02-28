@@ -35,7 +35,12 @@ async function resolvePassageCode(
     (c) => c.book === b && c.test === t && c.passage === p,
   );
   if (found) return found._id;
-  const created = await createPassageCode({ book: b, test: t, passage: p, source });
+  const created = await createPassageCode({
+    book: b,
+    test: t,
+    passage: p,
+    source,
+  });
   return created._id;
 }
 
@@ -111,7 +116,16 @@ export default function PassagesPage() {
               c.passage === passageNum.trim(),
           );
           if (already) return prev;
-          return [{ _id: passageCodeId!, book: book.trim(), test: test.trim(), passage: passageNum.trim(), source: form.source }, ...prev];
+          return [
+            {
+              _id: passageCodeId!,
+              book: book.trim(),
+              test: test.trim(),
+              passage: passageNum.trim(),
+              source: form.source,
+            },
+            ...prev,
+          ];
         });
       }
       if (!passageCodeId) {
@@ -124,19 +138,21 @@ export default function PassagesPage() {
         content: paragraphs,
       };
       if (editingId) {
-        const updatePayload = {
+        const updatePayload: Partial<CreatePassagePayload> = {
           title: payload.title,
-          subTitle: payload.subTitle,
           passageCode: payload.passageCode,
           content: payload.content,
           source: payload.source,
           difficulty: payload.difficulty,
           moduleType: payload.moduleType,
           estimatedReadingTime: payload.estimatedReadingTime,
-          videoExplanationUrl: payload.videoExplanationUrl,
-          tags: payload.tags,
-          glossary: payload.glossary,
-          images: payload.images,
+          ...(payload.tags ? { tags: payload.tags } : {}),
+          ...(payload.glossary ? { glossary: payload.glossary } : {}),
+          ...(payload.subTitle ? { subTitle: payload.subTitle } : {}),
+          ...(payload.videoExplanationUrl
+            ? { videoExplanationUrl: payload.videoExplanationUrl }
+            : {}),
+          ...(payload.images ? { images: payload.images } : {}),
         };
         const updated = await updatePassage(editingId, updatePayload);
         setPassages((prev) =>
@@ -158,19 +174,14 @@ export default function PassagesPage() {
   const addParagraph = () => {
     setForm((f) => ({
       ...f,
-      content: [
-        ...f.content,
-        { paragraphIndex: f.content.length, text: "" },
-      ],
+      content: [...f.content, { paragraphIndex: f.content.length, text: "" }],
     }));
   };
 
   const updateParagraph = (i: number, text: string) => {
     setForm((f) => ({
       ...f,
-      content: f.content.map((p, idx) =>
-        idx === i ? { ...p, text } : p,
-      ),
+      content: f.content.map((p, idx) => (idx === i ? { ...p, text } : p)),
     }));
   };
 
@@ -198,9 +209,10 @@ export default function PassagesPage() {
       setTest("");
       setPassageNum("");
     }
+    // rebuild form payload only including defined optional props
     setForm({
       title: p.title,
-      subTitle: p.subTitle,
+      ...(p.subTitle ? { subTitle: p.subTitle } : {}),
       passageCode: passageCodeId,
       content:
         p.content.length > 0
@@ -209,15 +221,17 @@ export default function PassagesPage() {
               text: c.text,
             }))
           : [{ paragraphIndex: 0, text: "" }],
-      images: p.images,
-      glossary: p.glossary,
+      ...(p.images ? { images: p.images } : {}),
+      ...(p.glossary ? { glossary: p.glossary } : {}),
       source: p.source,
       difficulty: p.difficulty,
       moduleType: p.moduleType,
       estimatedReadingTime: p.estimatedReadingTime,
-      videoExplanationUrl: p.videoExplanationUrl,
-      tags: p.tags,
-    });
+      ...(p.videoExplanationUrl
+        ? { videoExplanationUrl: p.videoExplanationUrl }
+        : {}),
+      ...(p.tags ? { tags: p.tags } : {}),
+    } as CreatePassagePayload);
     setEditingId(p._id);
   };
 
@@ -248,7 +262,9 @@ export default function PassagesPage() {
             <Input
               id="title"
               value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, title: e.target.value }))
+              }
               placeholder="e.g. The future of artificial intelligence"
               required
               className="mt-1 max-w-xl"
@@ -260,7 +276,8 @@ export default function PassagesPage() {
               Book, Test & Passage
             </p>
             <p className="mb-3 text-xs text-muted-foreground">
-              e.g. Book 19, Test 2, Passage 1. If the combination does not exist, it will be created automatically.
+              e.g. Book 19, Test 2, Passage 1. If the combination does not
+              exist, it will be created automatically.
             </p>
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
@@ -372,7 +389,8 @@ export default function PassagesPage() {
           <div>
             <Label className="block">Content (paragraphs)</Label>
             <p className="mt-1 text-xs text-muted-foreground">
-              Add 5–10 paragraphs. Use &quot;Add paragraph&quot; below the list when you need more.
+              Add 5–10 paragraphs. Use &quot;Add paragraph&quot; below the list
+              when you need more.
             </p>
             <div className="mt-3 space-y-3">
               {form.content.map((p, i) => (
@@ -466,7 +484,8 @@ export default function PassagesPage() {
                 <div>
                   <p className="font-medium">{p.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {p.difficulty} · {p.moduleType} · {p.estimatedReadingTime} min
+                    {p.difficulty} · {p.moduleType} · {p.estimatedReadingTime}{" "}
+                    min
                     {p.isPublished && " · Published"}
                     {p.isArchived && " · Archived"}
                   </p>
@@ -480,7 +499,12 @@ export default function PassagesPage() {
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => startEdit(p)} title="Edit passage">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => startEdit(p)}
+                    title="Edit passage"
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
                 </div>

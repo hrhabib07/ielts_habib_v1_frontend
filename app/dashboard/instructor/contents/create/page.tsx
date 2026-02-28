@@ -40,18 +40,21 @@ export default function CreateContentPage() {
     try {
       let metadata: Record<string, unknown> = {};
       try {
-        if (metadataRaw.trim()) metadata = JSON.parse(metadataRaw) as Record<string, unknown>;
+        if (metadataRaw.trim())
+          metadata = JSON.parse(metadataRaw) as Record<string, unknown>;
       } catch {
         setError("Metadata must be valid JSON.");
         setSubmitting(false);
         return;
       }
-      const payload: CreateLearningContentPayload = {
+      const payload = {
         title: title.trim(),
         type,
-        body: showBody ? body : undefined,
-        videoUrl: showVideoUrl ? (videoUrl.trim() || undefined) : undefined,
-        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
+        ...(showBody ? { body: body.trim() } : {}),
+        ...(showVideoUrl && videoUrl.trim()
+          ? { videoUrl: videoUrl.trim() }
+          : {}),
+        ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
         isPublished,
       };
       const created = await createLearningContent(payload);

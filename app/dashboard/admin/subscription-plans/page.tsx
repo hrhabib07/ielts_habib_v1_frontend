@@ -42,14 +42,20 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
   const [name, setName] = useState(initial?.name ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
-  const [modules, setModules] = useState<string[]>(initial?.modulesIncluded ?? ["READING"]);
-  const [durationInDays, setDurationInDays] = useState(String(initial?.durationInDays ?? 180));
+  const [modules, setModules] = useState<string[]>(
+    initial?.modulesIncluded ?? ["READING"],
+  );
+  const [durationInDays, setDurationInDays] = useState(
+    String(initial?.durationInDays ?? 180),
+  );
   const [price, setPrice] = useState(String(initial?.price ?? ""));
   const [discountPrice, setDiscountPrice] = useState(
     initial?.discountPrice != null ? String(initial.discountPrice) : "",
   );
   const [isPublic, setIsPublic] = useState(initial?.isPublic ?? true);
-  const [isWholePackage, setIsWholePackage] = useState(initial?.isWholePackage ?? false);
+  const [isWholePackage, setIsWholePackage] = useState(
+    initial?.isWholePackage ?? false,
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -86,13 +92,12 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
         modulesIncluded: modules,
         durationInDays: Number(durationInDays),
         price: Number(price),
-        discountPrice: discountPrice ? Number(discountPrice) : undefined,
+        ...(discountPrice ? { discountPrice: Number(discountPrice) } : {}),
         isPublic,
         isWholePackage,
       });
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Failed to save plan.";
+      const msg = err instanceof Error ? err.message : "Failed to save plan.";
       setError(msg);
     } finally {
       setSubmitting(false);
@@ -120,7 +125,9 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
           </label>
           <input
             value={slug}
-            onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+            onChange={(e) =>
+              setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
+            }
             placeholder="reading-6-months"
             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50"
             required
@@ -158,7 +165,9 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
                   : "border-border text-muted-foreground hover:border-primary/40"
               }`}
             >
-              {modules.includes(mod) && <Check className="mr-1 inline h-3 w-3" />}
+              {modules.includes(mod) && (
+                <Check className="mr-1 inline h-3 w-3" />
+              )}
               {mod}
             </button>
           ))}
@@ -216,7 +225,9 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
             onChange={(e) => setIsPublic(e.target.checked)}
             className="rounded border-border"
           />
-          <span className="font-medium text-foreground">Public (visible to students)</span>
+          <span className="font-medium text-foreground">
+            Public (visible to students)
+          </span>
         </label>
         <label className="flex cursor-pointer items-center gap-2 text-sm">
           <input
@@ -225,7 +236,9 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
             onChange={(e) => setIsWholePackage(e.target.checked)}
             className="rounded border-border"
           />
-          <span className="font-medium text-foreground">Whole package (all modules)</span>
+          <span className="font-medium text-foreground">
+            Whole package (all modules)
+          </span>
         </label>
       </div>
 
@@ -316,7 +329,11 @@ export default function SubscriptionPlansAdminPage() {
             </Button>
           </Link>
           {!showCreate && !editingPlan && (
-            <Button size="sm" className="gap-2" onClick={() => setShowCreate(true)}>
+            <Button
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowCreate(true)}
+            >
               <Plus className="h-4 w-4" />
               New plan
             </Button>
@@ -336,8 +353,13 @@ export default function SubscriptionPlansAdminPage() {
       {/* Create form */}
       {showCreate && (
         <Card className="p-6">
-          <h2 className="mb-4 text-base font-semibold text-foreground">Create new plan</h2>
-          <PlanForm onSave={handleCreate} onCancel={() => setShowCreate(false)} />
+          <h2 className="mb-4 text-base font-semibold text-foreground">
+            Create new plan
+          </h2>
+          <PlanForm
+            onSave={handleCreate}
+            onCancel={() => setShowCreate(false)}
+          />
         </Card>
       )}
 
@@ -371,7 +393,9 @@ export default function SubscriptionPlansAdminPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-foreground">{plan.name}</span>
+                    <span className="font-semibold text-foreground">
+                      {plan.name}
+                    </span>
                     <span className="font-mono text-xs text-muted-foreground bg-muted rounded px-1.5 py-0.5">
                       {plan.slug}
                     </span>
@@ -395,7 +419,9 @@ export default function SubscriptionPlansAdminPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{plan.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {plan.description}
+                  </p>
                   <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                     <span>{formatDuration(plan.durationInDays)} access</span>
                     <span>·</span>
@@ -407,7 +433,9 @@ export default function SubscriptionPlansAdminPage() {
                           <span className="font-medium text-foreground">
                             {plan.discountPrice.toLocaleString()} BDT
                           </span>{" "}
-                          <span className="line-through">{plan.price.toLocaleString()} BDT</span>
+                          <span className="line-through">
+                            {plan.price.toLocaleString()} BDT
+                          </span>
                         </>
                       ) : (
                         <span className="font-medium text-foreground">
