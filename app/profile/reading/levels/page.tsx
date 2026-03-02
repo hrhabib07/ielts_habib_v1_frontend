@@ -146,7 +146,7 @@ function LevelCard({ level, isUnlocked, isCompleted, isCurrent, isAccessible, su
               </div>
             ) : (
               <div className="mt-3">
-                <Link href={`/profile/reading/levels/${level._id}`}>
+                <Link href={`/profile/reading/strict-levels/${level._id}`}>
                   <Button
                     size="sm"
                     variant={isCurrent ? "default" : isCompleted ? "outline" : "secondary"}
@@ -155,11 +155,11 @@ function LevelCard({ level, isUnlocked, isCompleted, isCurrent, isAccessible, su
                     {isCompleted ? (
                       <>Review <ChevronRight className="h-3 w-3" /></>
                     ) : isCurrent ? (
-                      <>Continue <ArrowRight className="h-3 w-3" /></>
+                      <>Do level <ArrowRight className="h-3 w-3" /></>
                     ) : isUnlocked ? (
                       <>Start <ArrowRight className="h-3 w-3" /></>
                     ) : (
-                      <>Preview <ChevronRight className="h-3 w-3" /></>
+                      <>View <ChevronRight className="h-3 w-3" /></>
                     )}
                   </Button>
                 </Link>

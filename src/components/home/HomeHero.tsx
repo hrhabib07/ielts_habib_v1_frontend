@@ -198,7 +198,7 @@ function BandHero({
         <p className="text-muted-foreground">in Reading module</p>
 
         <div className="pt-8">
-          <Link href="/dashboard">
+          <Link href="/profile/reading">
             <Button size="lg" className="gap-2">
               <BookOpen className="h-4 w-4" />
               Improve your reading skills

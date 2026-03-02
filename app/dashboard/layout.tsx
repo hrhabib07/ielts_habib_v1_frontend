@@ -4,11 +4,14 @@ import { ReactNode, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 import type { UserRole } from "@/src/lib/constants";
+import { DashboardSidebar } from "@/src/components/dashboard/DashboardSidebar";
+import { DashboardTopbar } from "@/src/components/dashboard/DashboardTopbar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [role, setRole] = useState<UserRole | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const decoded = getDecodedTokenClient();
@@ -23,30 +26,37 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
   }, [mounted, role, router]);
 
-  // Same structure on server and first client render to avoid hydration mismatch
   if (!mounted) {
     return (
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <p className="text-sm text-muted-foreground">Loading…</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <p className="text-sm text-zinc-500">Loading…</p>
       </div>
     );
   }
 
   if (!role) {
     return (
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
-          <p className="text-muted-foreground">Redirecting to login…</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <p className="text-zinc-500">Redirecting to login…</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-7xl">
-      {children}
+    <div className="min-h-screen bg-zinc-50 text-zinc-900">
+      <DashboardSidebar
+        role={role}
+        isMobileOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <div className="lg:pl-64 flex min-h-screen flex-col">
+        <DashboardTopbar onOpenSidebar={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-auto">
+          <div className="mx-auto max-w-7xl px-6 py-6">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

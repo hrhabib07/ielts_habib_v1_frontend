@@ -67,7 +67,7 @@ export function ProfileSummarySection() {
     return (
       <Card className="p-8 text-center text-muted-foreground">
         <p>No profile data yet. Complete a reading attempt to see your summary.</p>
-        <Link href="/profile/reading/level/1" className="mt-4 inline-block">
+        <Link href="/profile/reading/levels" className="mt-4 inline-block">
           <Button>Start reading</Button>
         </Link>
       </Card>
@@ -135,7 +135,7 @@ export function ProfileSummarySection() {
           Pick up where you left off.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Link href="/profile/reading/level/1">
+          <Link href="/profile/reading/levels">
             <Button className="gap-2">
               Continue
               <ArrowRight className="h-4 w-4" />

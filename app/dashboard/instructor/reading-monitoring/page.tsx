@@ -1,21 +1,21 @@
 import Link from "next/link";
-import { ReadingLevelsListClient } from "./ReadingLevelsListClient";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { ReadingMonitoringClient } from "./ReadingMonitoringClient";
 
-export default function InstructorReadingLevelsPage() {
+export default function ReadingMonitoringPage() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="space-y-2">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/dashboard/instructor" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
             Dashboard
           </Link>
         </Button>
+        <h1 className="text-2xl font-semibold">Reading monitoring</h1>
       </div>
-      <h1 className="text-2xl font-semibold">Reading levels</h1>
-      <ReadingLevelsListClient />
+      <ReadingMonitoringClient />
     </div>
   );
 }
