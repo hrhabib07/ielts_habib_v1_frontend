@@ -23,13 +23,22 @@ import {
   updateLevel,
   deleteLevel,
   getVersionsByLevelId,
+  publishVersion,
   type ReadingLevel,
   type CreateLevelPayload,
   type UpdateLevelPayload,
   type ReadingLevelType,
   type ReadingLevelDifficulty,
+  type ReadingLevelVersion,
 } from "@/src/lib/api/adminReadingVersions";
-import { Loader2, ChevronRight, Plus, Pencil, Trash2, X } from "lucide-react";
+import { Loader2, ChevronRight, Plus, Pencil, Trash2, X, Eye, Upload } from "lucide-react";
+
+export interface LevelVersionSummary {
+  publishedVersion?: number;
+  publishedUpdatedAt?: string;
+  hasDraft: boolean;
+  draftVersionId?: string;
+}
 
 export function ReadingLevelsListClient() {
   const router = useRouter();
@@ -41,6 +50,9 @@ export function ReadingLevelsListClient() {
   const [deleteLevelId, setDeleteLevelId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [versionCounts, setVersionCounts] = useState<Record<string, number>>({});
+  const [versionSummaries, setVersionSummaries] = useState<
+    Record<string, LevelVersionSummary>
+  >({});
 
   const loadLevels = useCallback(async () => {
     const data = await getReadingLevels();
@@ -67,17 +79,31 @@ export function ReadingLevelsListClient() {
 
   useEffect(() => {
     if (levels.length === 0) return;
-    const map: Record<string, number> = {};
+    const countMap: Record<string, number> = {};
+    const summaryMap: Record<string, LevelVersionSummary> = {};
     Promise.all(
       levels.map(async (l) => {
         try {
-          const v = await getVersionsByLevelId(l._id);
-          map[l._id] = v.length;
+          const versions: ReadingLevelVersion[] =
+            await getVersionsByLevelId(l._id);
+          countMap[l._id] = versions.length;
+          const published = versions.find((v) => v.status === "PUBLISHED");
+          const draft = versions.find((v) => v.status === "DRAFT");
+          summaryMap[l._id] = {
+            publishedVersion: published?.version,
+            publishedUpdatedAt: published?.updatedAt,
+            hasDraft: !!draft,
+            draftVersionId: draft?._id,
+          };
         } catch {
-          map[l._id] = 0;
+          countMap[l._id] = 0;
+          summaryMap[l._id] = { hasDraft: false };
         }
       }),
-    ).then(() => setVersionCounts(map));
+    ).then(() => {
+      setVersionCounts(countMap);
+      setVersionSummaries(summaryMap);
+    });
   }, [levels]);
 
   const handleCreate = async (payload: CreateLevelPayload) => {
@@ -126,6 +152,40 @@ export function ReadingLevelsListClient() {
     }
   };
 
+  const handlePublish = async (levelId: string, versionId: string) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await publishVersion(levelId, versionId);
+      await loadLevels();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to publish");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const levelStatus = (level: ReadingLevel) =>
+    level.status === "published" ? "published" : "draft";
+  const summary = (levelId: string) => versionSummaries[levelId] ?? { hasDraft: false };
+  const lastUpdated = (level: ReadingLevel, levelId: string) => {
+    const s = summary(levelId);
+    if (s.publishedUpdatedAt) return formatDate(s.publishedUpdatedAt);
+    return level.updatedAt ? formatDate(level.updatedAt) : "—";
+  };
+  function formatDate(iso: string) {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return "—";
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -146,9 +206,11 @@ export function ReadingLevelsListClient() {
 
   return (
     <>
-      <Card className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+      <Card className="rounded-2xl border border-border bg-card shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-6">
-          <CardTitle className="text-lg font-semibold">Reading levels</CardTitle>
+          <CardTitle className="text-lg font-semibold text-foreground">
+            Reading levels
+          </CardTitle>
           <Button
             type="button"
             variant="outline"
@@ -165,61 +227,121 @@ export function ReadingLevelsListClient() {
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
-          <ul className="divide-y">
-            {levels.map((level) => (
-              <li key={level._id}>
-                <div className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-zinc-50">
-                  <Link
-                    href={`/dashboard/instructor/reading-levels/${level._id}/edit`}
-                    className="min-w-0 flex-1"
-                  >
-                    <div>
-                      <p className="font-medium text-zinc-900">{level.title}</p>
-                      <p className="text-sm text-zinc-500">
+          <ul className="divide-y divide-border">
+            {levels.map((level) => {
+              const status = levelStatus(level);
+              const s = summary(level._id);
+              const lastUpd = lastUpdated(level, level._id);
+              return (
+                <li key={level._id}>
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 transition-colors hover:bg-muted/50">
+                    <Link
+                      href={`/dashboard/instructor/reading-levels/${level._id}/edit`}
+                      className="min-w-0 flex-1"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium text-foreground">
+                          {level.title}
+                        </p>
+                        <span
+                          className={
+                            status === "published"
+                              ? "rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400"
+                              : "rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400"
+                          }
+                        >
+                          {status === "published" ? "Published" : "Draft"}
+                        </span>
+                        {!level.isActive && (
+                          <span className="text-xs text-amber-600 dark:text-amber-400">
+                            (inactive)
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
                         {level.levelType}
                         {level.difficulty ? ` · ${level.difficulty}` : ""} · {level.slug}
-                        {!level.isActive && <span className="ml-2 text-amber-600">(inactive)</span>}
+                        {" · "}
+                        v{s.publishedVersion ?? "—"}
+                        {" · "}
+                        {lastUpd}
                       </p>
-                    </div>
-                  </Link>
-                  <div className="ml-2 flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setEditLevel(level);
-                      }}
-                      disabled={busy}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => setDeleteLevelId(level._id)}
-                      disabled={
-                        busy ||
-                        (versionCounts[level._id] ?? 0) > 0
-                      }
-                      title={
-                        (versionCounts[level._id] ?? 0) > 0
-                          ? "Cannot delete: level has versions"
-                          : "Delete level"
-                      }
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                    <Link href={`/dashboard/instructor/reading-levels/${level._id}/edit`}>
-                      <Button variant="ghost" size="icon" className="h-9 w-9">
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
                     </Link>
+                    <div className="flex items-center gap-1">
+                      <Link
+                        href={`/dashboard/instructor/reading-levels/${level._id}/preview`}
+                        className="inline-flex"
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-9 gap-1.5"
+                          disabled={status !== "published"}
+                          title={
+                            status !== "published"
+                              ? "Publish a version to preview"
+                              : "Preview published version"
+                          }
+                        >
+                          <Eye className="h-4 w-4" />
+                          Preview
+                        </Button>
+                      </Link>
+                      <Link
+                        href={`/dashboard/instructor/reading-levels/${level._id}/edit`}
+                      >
+                        <Button variant="outline" size="sm" className="h-9">
+                          Edit
+                        </Button>
+                      </Link>
+                      {s.hasDraft && s.draftVersionId && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="h-9 gap-1.5"
+                          disabled={busy}
+                          onClick={() =>
+                            handlePublish(level._id, s.draftVersionId!)
+                          }
+                        >
+                          <Upload className="h-4 w-4" />
+                          Publish
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setEditLevel(level);
+                        }}
+                        disabled={busy}
+                        title="Edit metadata"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-destructive hover:text-destructive"
+                        onClick={() => setDeleteLevelId(level._id)}
+                        disabled={
+                          busy || (versionCounts[level._id] ?? 0) > 0
+                        }
+                        title={
+                          (versionCounts[level._id] ?? 0) > 0
+                            ? "Cannot delete: level has versions"
+                            : "Delete level"
+                        }
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
           {levels.length === 0 && (
             <div className="px-6 py-12 text-center text-muted-foreground">

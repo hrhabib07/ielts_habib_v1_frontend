@@ -17,6 +17,8 @@ export type FinalEvaluationType = "GROUP_TEST" | "FINAL_QUIZ";
 export type StepQuizPassType = "PERCENTAGE" | "BAND";
 export type StepQuizAttemptPolicy = "SINGLE" | "UNLIMITED" | "LIMITED";
 
+export type ReadingLevelStatus = "draft" | "published";
+
 export interface ReadingLevel {
   _id: string;
   title: string;
@@ -26,6 +28,8 @@ export interface ReadingLevel {
   difficulty?: ReadingLevelDifficulty;
   description?: string;
   isActive: boolean;
+  currentVersionId?: string | null;
+  status?: ReadingLevelStatus;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -193,6 +197,26 @@ export async function getVersionsByLevelId(
     data: ReadingLevelVersion[];
   }>(`${LEVELS_BASE}/${levelId}/versions`);
   return unwrap(res) ?? [];
+}
+
+export async function ensureEditVersion(
+  levelId: string,
+): Promise<VersionDetail> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: VersionDetail;
+  }>(`${LEVELS_BASE}/${levelId}/versions/for-edit`);
+  return unwrap(res);
+}
+
+export async function getPublishedVersionDetail(
+  levelId: string,
+): Promise<VersionDetail> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: VersionDetail;
+  }>(`${LEVELS_BASE}/${levelId}/versions/published-detail`);
+  return unwrap(res);
 }
 
 export async function getVersionDetail(

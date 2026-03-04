@@ -17,7 +17,7 @@ export const devAccounts: DevAccount[] = [
   },
   {
     label: "Student",
-    email: "b2ielts@gmail.com",
-    password: "password123",
+    email: "next.level.english.bd@gmail.com",
+    password: "next.level.english.bd@gmail.com",
   },
 ];

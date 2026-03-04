@@ -16,7 +16,13 @@ export interface LevelDetailStep {
 }
 
 export interface LevelDetailForStudent {
-  level: { _id: string; title: string; slug: string; order: number; levelType: string };
+  level: {
+    _id: string;
+    title: string;
+    slug: string;
+    order: number;
+    levelType: string;
+  };
   progress: {
     _id: string;
     levelId: string;
@@ -30,12 +36,26 @@ export interface LevelDetailForStudent {
   steps: LevelDetailStep[];
 }
 
+export interface QuizAttemptReviewItem {
+  questionId: string;
+  questionText: string;
+  options?: string[];
+  correctAnswer: string | string[];
+  selectedAnswer: string[];
+  isCorrect: boolean;
+}
+
 export interface StepQuizStatus {
   canSubmit: boolean;
   attemptCount: number;
   remainingAttempts: number | null;
   passed: boolean;
   isQuizStep: boolean;
+  hasAttempt: boolean;
+  score?: number;
+  total?: number;
+  percentage?: number;
+  answers?: QuizAttemptReviewItem[];
 }
 
 /** Student-facing quiz content (no correct answers). */
@@ -76,6 +96,9 @@ export interface SubmitStepQuizResponse {
   passed: boolean;
   attemptNumber: number;
   remainingAttempts: number | null;
+  score?: number;
+  total?: number;
+  percentage: number;
   progress: {
     _id: string;
     levelId: string;
@@ -86,6 +109,8 @@ export interface SubmitStepQuizResponse {
     evaluationMode: string;
     [key: string]: unknown;
   };
+  /** Per-question review when quiz content was submitted. */
+  review?: QuizAttemptReviewItem[];
 }
 
 function unwrap<T>(res: { data?: { data?: T } }): T {
@@ -138,5 +163,37 @@ export async function submitStepQuiz(
     success: boolean;
     data: SubmitStepQuizResponse;
   }>(`${BASE}/levels/${levelId}/steps/${stepId}/submit-quiz`, payload);
+  return unwrap(res);
+}
+
+/** Resolved learning content from LearningContent collection (INSTRUCTION / VIDEO steps). */
+export interface LearningStepContent {
+  title: string;
+  type: string;
+  body: string;
+  videoUrl: string;
+}
+
+/**
+ * Safe quiz content for student view — same shape as StepQuizContentResponse.
+ * correctAnswer is NEVER present: stripped server-side by toStudentQuizContent().
+ */
+export type QuizStepContent = StepQuizContentResponse;
+
+/**
+ * Normalised step-content envelope returned by GET /levels/:levelId/steps/:stepId/content.
+ * Discriminated union — narrow on `type` to get the correct `content` shape.
+ */
+export type StepContent =
+  | { id: string; type: "INSTRUCTION" | "VIDEO"; content: LearningStepContent }
+  | { id: string; type: "QUIZ" | "VOCABULARY_TEST"; content: QuizStepContent };
+
+export async function getStepContent(
+  levelId: string,
+  stepId: string,
+): Promise<StepContent> {
+  const res = await apiClient.get<{ success: boolean; data: StepContent }>(
+    `${BASE}/levels/${levelId}/steps/${stepId}/content`,
+  );
   return unwrap(res);
 }

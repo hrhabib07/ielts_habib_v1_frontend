@@ -28,22 +28,22 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   if (!mounted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-        <p className="text-sm text-zinc-500">Loading…</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading…</p>
       </div>
     );
   }
 
   if (!role) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-        <p className="text-zinc-500">Redirecting to login…</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-muted-foreground">Redirecting to login…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
+    <div className="min-h-screen bg-background text-foreground">
       <DashboardSidebar
         role={role}
         isMobileOpen={sidebarOpen}
