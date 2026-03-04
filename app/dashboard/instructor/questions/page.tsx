@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   createQuestion,
+  createBulkQuestions,
   getMyQuestions,
   getMyPassages,
   getMyQuestionSets,
@@ -17,10 +19,194 @@ import {
   type Question,
   type WeaknessTag,
   type QuestionSet,
+  type BulkQuestionItem,
 } from "@/src/lib/api/instructor";
 import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
-import { ArrowLeft, Plus, Loader2, Pencil, Eye, X, ChevronDown } from "lucide-react";
+import type { ReadingQuestionType } from "@/src/lib/api/instructor";
+import { ArrowLeft, Plus, Loader2, Pencil, Eye, X, ChevronDown, FileJson, ChevronRight, Copy } from "lucide-react";
 import QuestionPreviewModal from "@/src/components/shared/QuestionPreviewModal";
+
+/** Sample JSON per question type. Metadata matches the type (MCQ=options+correctAnswer, TFNG=correctAnswer only, gap=blanks). */
+function getSampleJsonForQuestionType(questionType: string): string {
+  const t = questionType as ReadingQuestionType;
+  switch (t) {
+    case "MCQ_SINGLE":
+    case "MCQ_MULTIPLE":
+      return `{
+  "questions": [
+    {
+      "questionBody": { "layout": "TEXT", "content": "What is the main idea of the first paragraph?" },
+      "explanation": "The main idea is stated in the opening sentence of the paragraph.",
+      "options": ["A", "B", "C", "D"],
+      "correctAnswer": "A"
+    },
+    {
+      "questionBody": { "layout": "TEXT", "content": "According to the passage, which factor contributed most?" },
+      "explanation": "The passage identifies this factor in the second paragraph.",
+      "options": ["Economic", "Social", "Environmental", "Political"],
+      "correctAnswer": "B"
+    }
+  ]
+}`;
+    case "TRUE_FALSE_NOT_GIVEN":
+      return `{
+  "questions": [
+    {
+      "questionBody": { "layout": "TEXT", "content": "The author believes that climate change is reversible." },
+      "explanation": "The passage states that the author considers it irreversible.",
+      "correctAnswer": "FALSE"
+    },
+    {
+      "questionBody": { "layout": "TEXT", "content": "Research funding has increased in the past decade." },
+      "explanation": "Paragraph 2 mentions the increase in funding.",
+      "correctAnswer": "TRUE"
+    },
+    {
+      "questionBody": { "layout": "TEXT", "content": "The study was conducted over five years." },
+      "explanation": "The duration of the study is not mentioned in the passage.",
+      "correctAnswer": "NOT GIVEN"
+    }
+  ]
+}`;
+    case "YES_NO_NOT_GIVEN":
+      return `{
+  "questions": [
+    {
+      "questionBody": { "layout": "TEXT", "content": "Does the writer agree that technology will replace teachers?" },
+      "explanation": "The writer argues that technology will supplement, not replace, teachers.",
+      "correctAnswer": "NO"
+    },
+    {
+      "questionBody": { "layout": "TEXT", "content": "Does the writer support the use of AI in education?" },
+      "explanation": "The passage clearly supports AI integration in classrooms.",
+      "correctAnswer": "YES"
+    },
+    {
+      "questionBody": { "layout": "TEXT", "content": "Does the writer believe exams should be abolished?" },
+      "explanation": "The writer does not express this view in the passage.",
+      "correctAnswer": "NOT GIVEN"
+    }
+  ]
+}`;
+    case "SENTENCE_COMPLETION":
+    case "SUMMARY_COMPLETION":
+    case "NOTE_COMPLETION":
+    case "TABLE_COMPLETION":
+    case "FLOW_CHART_COMPLETION":
+    case "DIAGRAM_LABEL_COMPLETION":
+      return `{
+  "questions": [
+    {
+      "questionBody": { "layout": "TEXT", "content": "The study concluded that _____ and _____ were the main factors." },
+      "explanation": "Paragraph 3 identifies these two factors as primary.",
+      "blanks": [
+        { "id": 1, "correctAnswer": "funding", "wordLimit": 2 },
+        { "id": 2, "correctAnswer": "policy", "wordLimit": 2 }
+      ]
+    },
+    {
+      "questionBody": { "layout": "TEXT", "content": "Participants were asked to complete a _____ lasting approximately _____ minutes." },
+      "explanation": "The method section describes the questionnaire and its duration.",
+      "blanks": [
+        { "id": 1, "correctAnswer": "questionnaire", "wordLimit": 2 },
+        { "id": 2, "correctAnswer": "thirty", "wordLimit": 2 }
+      ]
+    }
+  ]
+}`;
+    case "SHORT_ANSWER":
+      return `{
+  "questions": [
+    {
+      "questionBody": { "layout": "TEXT", "content": "What year was the study published?" },
+      "explanation": "The publication year is given in the first paragraph.",
+      "correctAnswer": "2020"
+    },
+    {
+      "questionBody": { "layout": "TEXT", "content": "How many participants took part in the research?" },
+      "explanation": "The sample size is stated in the methodology section.",
+      "correctAnswer": "150"
+    }
+  ]
+}`;
+    default:
+      return `{
+  "questions": [
+    {
+      "questionBody": { "layout": "TEXT", "content": "What is the main idea of the passage?" },
+      "explanation": "The main idea is stated in the opening paragraph.",
+      "correctAnswer": "A"
+    }
+  ]
+}`;
+  }
+}
+
+/** Parse bulk questions JSON. Returns questions array or error. */
+function parseBulkQuestionsJson(
+  raw: string,
+): { success: true; questions: BulkQuestionItem[] } | { success: false; error: string } {
+  if (!raw.trim()) return { success: false, error: "Paste your questions JSON." };
+  let data: unknown;
+  try {
+    data = JSON.parse(raw.trim());
+  } catch {
+    return { success: false, error: "Invalid JSON. Check brackets and commas." };
+  }
+  const arr = Array.isArray(data) ? data : (data as { questions?: unknown })?.questions;
+  if (!Array.isArray(arr) || arr.length === 0) {
+    return {
+      success: false,
+      error: 'JSON must be { "questions": [ ... ] } or an array. At least one question required.',
+    };
+  }
+  const questions: BulkQuestionItem[] = [];
+  const layouts = ["TEXT", "PASSAGE", "TABLE", "FLOWCHART", "DIAGRAM"];
+  for (let i = 0; i < arr.length; i++) {
+    const q = arr[i] as Record<string, unknown>;
+    const body = q?.questionBody;
+    if (!body || typeof body !== "object") {
+      return { success: false, error: `Question ${i + 1}: questionBody is required (object with layout and content).` };
+    }
+    const layout = layouts.includes(String((body as Record<string, unknown>)?.layout)) ? (body as Record<string, unknown>).layout : "TEXT";
+    const content = (body as Record<string, unknown>).content;
+    if (content === undefined || content === null) {
+      return { success: false, error: `Question ${i + 1}: questionBody.content is required.` };
+    }
+    const questionBody = { layout, content } as BulkQuestionItem["questionBody"];
+    const explanation = typeof q?.explanation === "string" ? (q.explanation as string).trim() : "";
+    if (explanation.length < 5) {
+      return { success: false, error: `Question ${i + 1}: explanation is required (min 5 characters).` };
+    }
+    const item: BulkQuestionItem = { questionBody, explanation };
+    if (Array.isArray(q?.options) && q.options.length > 0) {
+      item.options = (q.options as unknown[]).map(String).filter(Boolean);
+    }
+    if (q?.correctAnswer !== undefined) {
+      item.correctAnswer = Array.isArray(q.correctAnswer)
+        ? (q.correctAnswer as unknown[]).map(String).filter(Boolean)
+        : String(q.correctAnswer);
+    }
+    if (Array.isArray(q?.blanks) && q.blanks.length > 0) {
+      item.blanks = (q.blanks as unknown[]).map((b) => {
+        const x = b as Record<string, unknown>;
+        return {
+          id: typeof x?.id === "number" ? x.id : parseInt(String(x?.id ?? 0), 10) || 1,
+          correctAnswer: Array.isArray(x?.correctAnswer)
+            ? (x.correctAnswer as unknown[]).map(String)
+            : String(x?.correctAnswer ?? ""),
+          ...(x?.wordLimit != null && { wordLimit: Number(x.wordLimit) }),
+          ...(Array.isArray(x?.options) && { options: (x.options as unknown[]).map(String) }),
+        };
+      });
+    }
+    if (Array.isArray(q?.weaknessTags) && q.weaknessTags.length > 0) {
+      item.weaknessTags = (q.weaknessTags as unknown[]).map(String).filter(Boolean);
+    }
+    questions.push(item);
+  }
+  return { success: true, questions };
+}
 
 /* ─── Weakness tag chip multi-select ─────────────────────────────────────── */
 
@@ -136,6 +322,16 @@ export default function QuestionsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewQuestion, setPreviewQuestion] = useState<Question | null>(null);
 
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkPassageId, setBulkPassageId] = useState("");
+  const [bulkQuestionSetId, setBulkQuestionSetId] = useState("");
+  const [bulkDifficulty, setBulkDifficulty] = useState<"EASY" | "MEDIUM" | "HARD">("MEDIUM");
+  const [bulkJson, setBulkJson] = useState("");
+  const [bulkError, setBulkError] = useState<string | null>(null);
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
+  const [bulkResult, setBulkResult] = useState<string | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState(false);
+
   const [form, setForm] = useState<CreateQuestionPayload>({
     passageId: "",
     questionSetId: "",
@@ -148,7 +344,8 @@ export default function QuestionsPage() {
     difficulty: "MEDIUM",
   });
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
     Promise.all([
       getMyQuestions(),
       getMyPassages(),
@@ -163,7 +360,59 @@ export default function QuestionsPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
   }, []);
+
+  const handleBulkSubmit = async () => {
+    setBulkError(null);
+    setBulkResult(null);
+    const parsed = parseBulkQuestionsJson(bulkJson);
+    if (!parsed.success) {
+      setBulkError(parsed.error);
+      return;
+    }
+    if (!bulkPassageId || !bulkQuestionSetId) {
+      setBulkError("Select passage and question set above.");
+      return;
+    }
+    setBulkSubmitting(true);
+    try {
+      const created = await createBulkQuestions({
+        passageId: bulkPassageId,
+        questionSetId: bulkQuestionSetId,
+        difficulty: bulkDifficulty,
+        questions: parsed.questions,
+      });
+      setBulkResult(`${created.length} question(s) created.`);
+      setBulkJson("");
+      load();
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Bulk create failed.";
+      setBulkError(msg);
+    } finally {
+      setBulkSubmitting(false);
+    }
+  };
+
+  const bulkDerivedType = bulkQuestionSetId
+    ? (questionSets.find((s) => s._id === bulkQuestionSetId)?.questionType ?? null)
+    : null;
+  const bulkSampleJson = bulkDerivedType
+    ? getSampleJsonForQuestionType(bulkDerivedType)
+    : getSampleJsonForQuestionType("MCQ_SINGLE");
+
+  const copyBulkSample = async () => {
+    try {
+      await navigator.clipboard.writeText(bulkSampleJson);
+      setCopyFeedback(true);
+      setTimeout(() => setCopyFeedback(false), 2000);
+    } catch {
+      setBulkError("Could not copy to clipboard.");
+    }
+  };
 
   const resetForm = () => {
     setForm({
@@ -303,9 +552,136 @@ export default function QuestionsPage() {
         </Link>
       </div>
 
+      <Card className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <button
+          type="button"
+          onClick={() => setBulkOpen((o) => !o)}
+          className="flex w-full items-center justify-between gap-2 px-6 py-4 text-left font-medium text-foreground hover:bg-muted/50 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <FileJson className="h-5 w-5 text-muted-foreground" />
+            Bulk add questions (paste JSON)
+          </span>
+          <ChevronRight className={`h-5 w-5 shrink-0 transition-transform ${bulkOpen ? "rotate-90" : ""}`} />
+        </button>
+        {bulkOpen && (
+          <div className="border-t border-border px-6 pb-6 pt-4 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Select passage and question set above. The JSON format depends on the question type (MCQ needs options + correctAnswer; True/False/Not Given needs correctAnswer only; gap filling needs blanks). Each question requires <strong>questionBody</strong> (layout + content) and <strong>explanation</strong> (min 5 chars).
+            </p>
+            {!bulkQuestionSetId && (
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+                Select a question set to see the correct JSON format for that type.
+              </p>
+            )}
+            {bulkDerivedType && bulkQuestionSetId && (
+              <p className="text-xs font-medium text-muted-foreground">
+                Format for: <span className="rounded bg-muted px-2 py-0.5 font-semibold text-foreground">
+                  {QUESTION_TYPE_CONFIG[bulkDerivedType as keyof typeof QUESTION_TYPE_CONFIG]?.label ?? bulkDerivedType}
+                </span>
+              </p>
+            )}
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <Label>Passage</Label>
+                <select
+                  value={bulkPassageId}
+                  onChange={(e) => {
+                    const pid = e.target.value;
+                    const sets = questionSets.filter((s) => {
+                      const sid = typeof s.passageId === "object" ? (s.passageId as { _id: string })._id : s.passageId;
+                      return sid === pid;
+                    });
+                    setBulkPassageId(pid);
+                    setBulkQuestionSetId(sets[0]?._id ?? "");
+                  }}
+                  className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                >
+                  <option value="">Select passage…</option>
+                  {passageOptions.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label>Question set</Label>
+                <select
+                  value={bulkQuestionSetId}
+                  onChange={(e) => setBulkQuestionSetId(e.target.value)}
+                  className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                >
+                  <option value="">Select question set…</option>
+                  {setsForPassage(bulkPassageId).map((s) => (
+                    <option key={s._id} value={s._id}>
+                      Q{s.startQuestionNumber}–{s.endQuestionNumber}: {s.instruction.slice(0, 35)}…
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label>Difficulty</Label>
+                <select
+                  value={bulkDifficulty}
+                  onChange={(e) => setBulkDifficulty(e.target.value as "EASY" | "MEDIUM" | "HARD")}
+                  className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                >
+                  <option value="EASY">EASY</option>
+                  <option value="MEDIUM">MEDIUM</option>
+                  <option value="HARD">HARD</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <Label className="text-xs font-medium text-muted-foreground">JSON format</Label>
+                <Button type="button" variant="outline" size="sm" onClick={copyBulkSample} className="gap-1.5 h-8">
+                  {copyFeedback ? "Copied!" : <><Copy className="h-3.5 w-3.5" /> Copy sample</>}
+                </Button>
+              </div>
+              <pre className="mb-3 rounded-lg border border-border bg-muted/30 p-3 text-xs font-mono overflow-x-auto max-h-52 overflow-y-auto">
+                {bulkSampleJson}
+              </pre>
+              <Label htmlFor="bulk-json">Your questions JSON</Label>
+              <Textarea
+                id="bulk-json"
+                value={bulkJson}
+                onChange={(e) => { setBulkJson(e.target.value); setBulkError(null); setBulkResult(null); }}
+                placeholder='Paste { "questions": [ { "questionBody": { "layout": "TEXT", "content": "..." }, "explanation": "..." } ] }'
+                className="mt-1.5 min-h-[160px] font-mono text-sm resize-y"
+                rows={8}
+              />
+              {bulkError && <p className="mt-1.5 text-sm text-destructive" role="alert">{bulkError}</p>}
+              {bulkResult && <p className="mt-1.5 text-sm text-muted-foreground">{bulkResult}</p>}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setBulkJson(bulkSampleJson); setBulkError(null); }}
+                >
+                  Load sample into editor
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleBulkSubmit}
+                  disabled={!bulkJson.trim() || !bulkPassageId || !bulkQuestionSetId || bulkSubmitting}
+                  className="gap-2"
+                >
+                  {bulkSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                  Validate & create questions
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Card>
+
       <Card className="p-6">
         <h2 className="mb-4 text-lg font-semibold">
-          {editingId ? "Edit question" : "Create question"}
+          {editingId ? "Edit question" : "Create question (single)"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Passage + Question Set */}

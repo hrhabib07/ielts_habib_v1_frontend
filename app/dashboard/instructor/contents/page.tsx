@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   listLearningContents,
-  deleteLearningContent,
   type LearningContent,
   type LearningContentType,
 } from "@/src/lib/api/learningContents";
@@ -15,7 +14,6 @@ import {
   ArrowLeft,
   Plus,
   Pencil,
-  Trash2,
   Loader2,
   AlertCircle,
   RefreshCw,
@@ -60,7 +58,6 @@ export default function InstructorContentsPage() {
   const [items, setItems] = useState<LearningContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -80,19 +77,6 @@ export default function InstructorContentsPage() {
     load();
   }, [load]);
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    setDeletingId(id);
-    try {
-      await deleteLearningContent(id);
-      setItems((prev) => prev.filter((c) => c._id !== id));
-    } catch {
-      setError("Failed to delete content.");
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -101,7 +85,10 @@ export default function InstructorContentsPage() {
             Content Management
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Create and manage learning content (intro, note, strategy, video, analytics) for use in Reading Level steps. Each content has a code (e.g. INTRO-1, NOTE-2) for easy reference when adding steps; codes are instructor-only and not shown to students.
+            Create and manage learning content (intro, note, strategy, video, analytics) for use in Reading Level steps. Set a <strong>content code</strong> (e.g. L0C1, L1C3) — each code is unique across all content (learning, quiz, practice test, group test). For <strong>Quiz</strong> and <strong>Practice Test</strong> steps, use{" "}
+            <Link href="/dashboard/instructor/quiz-content" className="underline font-medium text-primary hover:no-underline">Quiz Content</Link>
+            {" "}and{" "}
+            <Link href="/dashboard/instructor/practice-tests" className="underline font-medium text-primary hover:no-underline">Practice Tests</Link>.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
@@ -176,7 +163,7 @@ export default function InstructorContentsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/20 text-left text-muted-foreground">
-                  <th className="px-6 py-3 font-medium">Code</th>
+                  <th className="px-6 py-3 font-medium">Content code</th>
                   <th className="px-6 py-3 font-medium">Title</th>
                   <th className="px-6 py-3 font-medium">Type</th>
                   <th className="px-6 py-3 font-medium">Created</th>
@@ -191,7 +178,7 @@ export default function InstructorContentsPage() {
                     className="border-b transition-colors last:border-0 hover:bg-muted/30"
                   >
                     <td className="px-6 py-4">
-                      <span className="font-mono text-xs font-medium text-muted-foreground">
+                      <span className="font-mono text-sm font-medium tabular-nums" title="Unique across all content types">
                         {item.contentCode ?? "—"}
                       </span>
                     </td>
@@ -241,20 +228,6 @@ export default function InstructorContentsPage() {
                         >
                           <Pencil className="h-3.5 w-3.5" />
                           Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                          disabled={deletingId === item._id}
-                          onClick={() => handleDelete(item._id, item.title)}
-                        >
-                          {deletingId === item._id ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-3.5 w-3.5" />
-                          )}
-                          Delete
                         </Button>
                       </div>
                     </td>

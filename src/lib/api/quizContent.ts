@@ -19,6 +19,11 @@ export interface QuizGroup {
   questions: QuizQuestion[];
 }
 
+/** Instructor hint: practice vs final. */
+export type QuizUseType = "PRACTICE" | "FINAL";
+/** How pass is evaluated when used in a step. Percentage only (pass mark set on step). */
+export type QuizEvaluationType = "PERCENTAGE";
+
 export interface ReadingQuizContent {
   _id: string;
   /** Instructor-only code e.g. L1C1. Unique across all content (learning + quiz). */
@@ -29,6 +34,8 @@ export interface ReadingQuizContent {
   totalMarks?: number;
   groups: QuizGroup[];
   isActive: boolean;
+  quizUseType?: QuizUseType;
+  evaluationType?: QuizEvaluationType;
   createdBy?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -41,6 +48,8 @@ export interface CreateQuizContentPayload {
   timeLimit?: number;
   groups: QuizGroup[];
   isActive?: boolean;
+  quizUseType?: QuizUseType;
+  evaluationType?: QuizEvaluationType;
 }
 
 export interface UpdateQuizContentPayload {
@@ -50,6 +59,8 @@ export interface UpdateQuizContentPayload {
   timeLimit?: number;
   groups?: QuizGroup[];
   isActive?: boolean;
+  quizUseType?: QuizUseType;
+  evaluationType?: QuizEvaluationType;
 }
 
 function unwrap<T>(res: { data?: { data?: T } }): T {

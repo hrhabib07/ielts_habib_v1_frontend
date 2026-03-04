@@ -58,12 +58,18 @@ export interface ReadingLevelStep {
   title: string;
   order: number;
   contentId?: string | null;
+  /** For PRACTICE_TEST steps. */
+  practiceTestId?: string | null;
+  /** Quiz pool: attempt 1 → contentIds[0], etc. Used for final test with multiple quizzes. */
+  contentIds?: string[] | null;
   attemptLimit?: number;
   isFinalQuiz?: boolean;
   passType?: StepQuizPassType;
   passValue?: number;
   attemptPolicy?: StepQuizAttemptPolicy;
   maxAttempts?: number;
+  /** When true, after exhausting all attempts without passing, student still advances with average score. */
+  advanceOnMaxAttemptsExhausted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -71,8 +77,24 @@ export interface ReadingLevelStep {
 export interface GroupTest {
   _id: string;
   levelVersionId: string;
+  /** Unified content code e.g. L2C6. Unique across all content types. */
+  contentCode?: string;
   orderInPool: number;
   miniTestIds: [string, string, string];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PracticeTest {
+  _id: string;
+  levelVersionId: string;
+  title: string;
+  contentCode?: string;
+  miniTestId: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  order: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -81,6 +103,7 @@ export interface VersionDetail {
   version: ReadingLevelVersion;
   steps: ReadingLevelStep[];
   groupTests: GroupTest[];
+  practiceTests: PracticeTest[];
 }
 
 export interface CreateStepPayload {
@@ -88,12 +111,15 @@ export interface CreateStepPayload {
   title: string;
   order: number;
   contentId?: string | null;
+  contentIds?: string[] | null;
+  practiceTestId?: string | null;
   attemptLimit?: number;
   isFinalQuiz?: boolean;
   passType?: StepQuizPassType;
   passValue?: number;
   attemptPolicy?: StepQuizAttemptPolicy;
   maxAttempts?: number;
+  advanceOnMaxAttemptsExhausted?: boolean;
 }
 
 export interface UpdateStepPayload {
@@ -101,12 +127,15 @@ export interface UpdateStepPayload {
   title?: string;
   order?: number;
   contentId?: string | null;
+  contentIds?: string[] | null;
+  practiceTestId?: string | null;
   attemptLimit?: number;
   isFinalQuiz?: boolean;
   passType?: StepQuizPassType;
   passValue?: number;
   attemptPolicy?: StepQuizAttemptPolicy;
   maxAttempts?: number;
+  advanceOnMaxAttemptsExhausted?: boolean;
 }
 
 export interface UpdateEvaluationConfigPayload {
@@ -117,6 +146,8 @@ export interface UpdateEvaluationConfigPayload {
 
 export interface CreateGroupTestPayload {
   orderInPool: number;
+  /** Unified content code e.g. L2C6. Unique across learning, quiz, practice test, group test. */
+  contentCode?: string;
   /** Exactly 3 MiniTest IDs (legacy). */
   miniTestIds?: [string, string, string];
   /** Exactly 3 Passage Question Set IDs; backend creates MiniTests and then the GroupTest. */
@@ -125,6 +156,7 @@ export interface CreateGroupTestPayload {
 
 export interface UpdateGroupTestPayload {
   orderInPool?: number;
+  contentCode?: string | null;
   miniTestIds?: [string, string, string];
 }
 
@@ -311,8 +343,41 @@ export async function updateStep(
   return unwrap(res);
 }
 
-export async function deleteStep(stepId: string): Promise<void> {
-  await apiClient.delete(`${BASE}/steps/${stepId}`);
+/** Delete a step and compact orders. Returns updated steps for the version. */
+export async function deleteStep(stepId: string): Promise<ReadingLevelStep[]> {
+  const res = await apiClient.delete<{
+    success: boolean;
+    data: { steps: ReadingLevelStep[] };
+  }>(`${BASE}/steps/${stepId}`);
+  const data = res.data?.data?.steps;
+  return Array.isArray(data) ? data : [];
+}
+
+/** Insert a step at 1-based position; existing steps at position and above shift by 1. Returns updated steps. Payload omits order. */
+export async function insertStepAt(
+  versionId: string,
+  position: number,
+  payload: Omit<CreateStepPayload, "order">,
+): Promise<ReadingLevelStep[]> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: { steps: ReadingLevelStep[] };
+  }>(`${BASE}/versions/${versionId}/steps/insert-at/${position}`, payload);
+  const data = res.data?.data?.steps;
+  return Array.isArray(data) ? data : [];
+}
+
+/** Reorder steps; stepIds must be all step IDs for this version in the desired order. */
+export async function reorderSteps(
+  versionId: string,
+  stepIds: string[],
+): Promise<ReadingLevelStep[]> {
+  const res = await apiClient.patch<{
+    success: boolean;
+    data: { steps: ReadingLevelStep[] };
+  }>(`${BASE}/versions/${versionId}/steps/reorder`, { stepIds });
+  const data = res.data?.data?.steps;
+  return Array.isArray(data) ? data : [];
 }
 
 export async function createGroupTest(
@@ -339,6 +404,90 @@ export async function updateGroupTest(
 
 export async function deleteGroupTest(groupTestId: string): Promise<void> {
   await apiClient.delete(`${BASE}/group-tests/${groupTestId}`);
+}
+
+/** Assign unique content codes to group tests that currently have none. Returns updated group tests. */
+export async function assignGroupTestContentCodes(
+  versionId: string,
+): Promise<GroupTest[]> {
+  const res = await apiClient.post<{ data: { groupTests: GroupTest[] } }>(
+    `${BASE}/versions/${versionId}/group-tests/assign-content-codes`,
+    {},
+  );
+  const out = unwrap<{ groupTests: GroupTest[] }>(res);
+  return out?.groupTests ?? [];
+}
+
+export interface CreatePracticeTestPayload {
+  title: string;
+  contentCode?: string;
+  passageQuestionSetId: string;
+  timeLimitMinutes?: number;
+  passType?: string;
+  passValue: number;
+  order?: number;
+}
+
+export interface UpdatePracticeTestPayload {
+  title?: string;
+  contentCode?: string;
+  timeLimitMinutes?: number;
+  passType?: string;
+  passValue?: number;
+  order?: number;
+}
+
+export async function listPracticeTests(versionId: string): Promise<PracticeTest[]> {
+  const res = await apiClient.get<{ success: boolean; data: PracticeTest[] }>(
+    `${BASE}/versions/${versionId}/practice-tests`,
+  );
+  return res.data?.data ?? [];
+}
+
+export async function createPracticeTest(
+  versionId: string,
+  payload: CreatePracticeTestPayload,
+): Promise<PracticeTest> {
+  const res = await apiClient.post<{ success: boolean; data: PracticeTest }>(
+    `${BASE}/versions/${versionId}/practice-tests`,
+    payload,
+  );
+  return unwrap(res);
+}
+
+export async function updatePracticeTest(
+  practiceTestId: string,
+  payload: UpdatePracticeTestPayload,
+): Promise<PracticeTest> {
+  const res = await apiClient.patch<{ success: boolean; data: PracticeTest }>(
+    `${BASE}/practice-tests/${practiceTestId}`,
+    payload,
+  );
+  return unwrap(res);
+}
+
+export async function deletePracticeTest(practiceTestId: string): Promise<void> {
+  await apiClient.delete(`${BASE}/practice-tests/${practiceTestId}`);
+}
+
+export interface PracticeTestContentForPreview {
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  miniTest: GroupTestMiniTestForPreview;
+}
+
+export async function getPracticeTestPreviewContent(
+  versionId: string,
+  practiceTestId: string,
+): Promise<PracticeTestContentForPreview> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: PracticeTestContentForPreview;
+  }>(`${BASE}/versions/${versionId}/practice-tests/${practiceTestId}/preview-content`);
+  return unwrap(res);
 }
 
 /** Instructor preview: group test content with correct answers (read-only, not submittable) */

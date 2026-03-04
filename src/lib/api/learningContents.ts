@@ -53,12 +53,11 @@ export interface UpdateLearningContentPayload {
   isPublished?: boolean;
 }
 
+/** Types shown in create/edit content. Strategy & Analytics omitted to reduce confusion. */
 export const LEARNING_CONTENT_TYPES: { value: LearningContentType; label: string }[] = [
-  { value: "INTRO", label: "Intro" },
+  { value: "INTRO", label: "Introduction" },
   { value: "NOTE", label: "Note" },
-  { value: "STRATEGY", label: "Strategy" },
   { value: "VIDEO", label: "Video" },
-  { value: "ANALYTICS", label: "Analytics" },
 ];
 
 /** List content (ADMIN: all, INSTRUCTOR: own). Optional ?type=INTRO|NOTE|VIDEO|ANALYTICS */

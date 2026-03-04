@@ -13,6 +13,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Users,
+  ClipboardCheck,
+  ListChecks,
 } from "lucide-react";
 import { getReadingLevels } from "@/src/lib/api/adminReadingVersions";
 import {
@@ -108,6 +110,18 @@ export default function InstructorDashboardPage() {
       icon: BookOpen,
     },
     {
+      title: "Practice Test Manager",
+      description: "Create and manage mini practice tests (one passage + questions). Unlimited attempts until pass.",
+      href: "/dashboard/instructor/practice-tests",
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Group Tests",
+      description: "Configure level final evaluations (3 passage question sets per group test)",
+      href: "/dashboard/instructor/group-tests",
+      icon: ListChecks,
+    },
+    {
       title: "Reading Monitoring",
       description: "Review failed students, approve restart requests, view locks",
       href: "/dashboard/instructor/reading-monitoring",
@@ -147,7 +161,7 @@ export default function InstructorDashboardPage() {
           Welcome back
         </h2>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Manage your IELTS Reading curriculum, monitor student progress, and handle restarts from this dashboard.
+          Manage your Reading curriculum, monitor student progress, and handle restarts from this dashboard.
         </p>
       </section>
 
@@ -224,9 +238,10 @@ export default function InstructorDashboardPage() {
         <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
           <li>1. Create Passages and Question Sets, then add Questions to sets.</li>
           <li>2. Create Quiz Content for QUIZ / VOCABULARY_TEST steps.</li>
-          <li>3. Create Learning Content for INSTRUCTION / VIDEO steps.</li>
-          <li>4. Create a Reading Level → Add Versions → Add Steps (link content) → Add Group Tests (link passages + question sets).</li>
-          <li>5. Publish the version to make it live for students.</li>
+          <li>3. Create Practice Tests (Practice Test Manager) from one passage question set each; add a &quot;Practice Test&quot; step in Level Builder and attach one.</li>
+          <li>4. Create Learning Content for INSTRUCTION / VIDEO steps.</li>
+          <li>5. Create a Reading Level → Add Versions → Add Steps (link content) → Add Group Tests (link passages + question sets).</li>
+          <li>6. Publish the version to make it live for students.</li>
         </ul>
       </section>
     </div>

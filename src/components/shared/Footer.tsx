@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CurrentUser } from "@/src/lib/auth-server";
+import { GamlishLogo } from "./GamlishLogo";
 
 interface FooterProps {
   initialUser?: CurrentUser | null;
@@ -15,7 +16,7 @@ export function Footer({ initialUser = null }: FooterProps) {
   if (pathname === "/") {
     return (
       <footer className="py-6 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} IELTS Habib. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Gamlish. All rights reserved.</p>
       </footer>
     );
   }
@@ -26,12 +27,10 @@ export function Footer({ initialUser = null }: FooterProps) {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              IELTS Habib
-            </h3>
+            <GamlishLogo className="text-lg" />
             <p className="text-sm text-muted-foreground">
-              Your trusted partner for IELTS preparation. Focused on excellence,
-              built for success.
+              The world's first performance-driven English mastery engine.
+              Data-backed mastery. Levels to clear.
             </p>
           </div>
 
@@ -102,7 +101,7 @@ export function Footer({ initialUser = null }: FooterProps) {
         </div>
 
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} IELTS Habib. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Gamlish. All rights reserved.</p>
         </div>
       </div>
     </footer>

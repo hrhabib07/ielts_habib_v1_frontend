@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IELTS Habib - Your IELTS Preparation Partner",
-  description: "Prepare for IELTS with clarity, strategy, and confidence. Focused IELTS Reading module preparation platform.",
+  title: "GAMLISH — The Game of English",
+  description: "Master English through focused practice. GAMLISH offers structured Reading and Writing modules with clarity, strategy, and confidence.",
 };
 
 export const dynamic = "force-dynamic";

@@ -17,6 +17,8 @@ export default function EditQuizContentPage() {
     title: string;
     description: string;
     timeLimit: string;
+    quizUseType?: "" | "PRACTICE" | "FINAL";
+    evaluationType?: "" | "PERCENTAGE";
     groups: { title: string; order: number; questions: unknown[] }[];
   } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -32,6 +34,8 @@ export default function EditQuizContentPage() {
           title: quiz.title,
           description: quiz.description ?? "",
           timeLimit: quiz.timeLimit != null ? String(quiz.timeLimit) : "",
+          quizUseType: quiz.quizUseType ?? "",
+          evaluationType: quiz.evaluationType ?? "PERCENTAGE",
           groups: quiz.groups ?? [],
         });
       })
@@ -43,6 +47,8 @@ export default function EditQuizContentPage() {
     title: string;
     description?: string;
     timeLimit?: number;
+    quizUseType?: "PRACTICE" | "FINAL";
+    evaluationType?: "PERCENTAGE";
     groups: { title: string; order: number; questions: unknown[] }[];
   }) => {
     if (!id) return;

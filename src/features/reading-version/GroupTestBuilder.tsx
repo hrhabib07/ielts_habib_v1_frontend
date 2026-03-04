@@ -9,6 +9,7 @@ import {
   createGroupTest,
   updateGroupTest,
   deleteGroupTest,
+  assignGroupTestContentCodes,
   type GroupTest,
   type CreateGroupTestPayload,
   type UpdateGroupTestPayload,
@@ -32,7 +33,29 @@ export function GroupTestBuilder({
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [assigningCodes, setAssigningCodes] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const someWithoutCode =
+    groupTests.length > 0 &&
+    groupTests.some(
+      (g) => g.contentCode == null || String(g.contentCode).trim() === "",
+    );
+
+  const handleAssignContentCodes = async () => {
+    setError(null);
+    setAssigningCodes(true);
+    try {
+      const updated = await assignGroupTestContentCodes(versionId);
+      onGroupTestsChange(
+        updated.sort((a, b) => a.orderInPool - b.orderInPool),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to assign content codes");
+    } finally {
+      setAssigningCodes(false);
+    }
+  };
 
   const handleCreate = async (payload: CreateGroupTestPayload) => {
     setError(null);
@@ -85,17 +108,34 @@ export function GroupTestBuilder({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>Group tests</CardTitle>
-        {!disabled && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setAdding(true)}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Add group test
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {!disabled && someWithoutCode && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={handleAssignContentCodes}
+              disabled={assigningCodes}
+            >
+              {assigningCodes ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Assign content codes"
+              )}
+            </Button>
+          )}
+          {!disabled && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setAdding(true)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add group test
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {error && <p className="text-sm text-destructive">{error}</p>}
@@ -125,9 +165,13 @@ export function GroupTestBuilder({
                   />
                 ) : (
                   <>
+                    <span className="shrink-0 font-mono text-xs font-medium text-muted-foreground tabular-nums">
+                      {gt.contentCode ?? "—"}
+                    </span>
                     <span className="text-muted-foreground">Order {gt.orderInPool}</span>
-                    <span className="text-sm flex-1">
-                      MiniTests: [{gt.miniTestIds.join(", ")}]
+                    <span className="text-sm flex-1 min-w-0 truncate">
+                      {gt.contentCode ? `[${gt.contentCode}] ` : ""}
+                      MiniTests: [{gt.miniTestIds.slice(0, 1).map((id) => id.slice(-8)).join(", ")}…]
                     </span>
                     {!disabled && (
                       <div className="flex gap-1">
@@ -169,6 +213,8 @@ interface GroupTestFormProps {
   disabled: boolean;
 }
 
+const CONTENT_CODE_HINT = "L{level}C{content} e.g. L2C6. Unique across all content types.";
+
 function GroupTestForm({
   nextOrderInPool,
   onSave,
@@ -176,6 +222,7 @@ function GroupTestForm({
   disabled,
 }: GroupTestFormProps) {
   const [orderInPool, setOrderInPool] = useState(nextOrderInPool);
+  const [contentCode, setContentCode] = useState("");
   const [pqsList, setPqsList] = useState<PassageQuestionSet[]>([]);
   const [loadingPqs, setLoadingPqs] = useState(true);
   const [pqs0, setPqs0] = useState("");
@@ -200,12 +247,15 @@ function GroupTestForm({
     try {
       await onSave({
         orderInPool,
+        contentCode: contentCode.trim() || undefined,
         passageQuestionSetIds: [pqs0, pqs1, pqs2],
       });
     } finally {
       setSubmitting(false);
     }
   };
+
+  const contentCodeValid = !contentCode.trim() || /^L\d+C\d+$/i.test(contentCode.trim().replace(/\s/g, ""));
 
   const options = pqsList.map((p) => {
     const meta = `P${p.passageNumber} · ${p.expectedTotalQuestions ?? p.totalQuestions ?? 0} q · ${p.recommendedTime ?? 0} min`;
@@ -226,6 +276,21 @@ function GroupTestForm({
             disabled={disabled}
             className="mt-1"
           />
+        </div>
+        <div>
+          <Label htmlFor="gt-content-code">Content code (optional)</Label>
+          <Input
+            id="gt-content-code"
+            value={contentCode}
+            onChange={(e) => setContentCode(e.target.value.toUpperCase().replace(/\s/g, ""))}
+            placeholder="e.g. L2C6"
+            disabled={disabled}
+            className="mt-1 max-w-[10rem] font-mono"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">{CONTENT_CODE_HINT}</p>
+          {contentCode.trim() && !contentCodeValid && (
+            <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-500">Use format L2C6 (level + content number)</p>
+          )}
         </div>
       </div>
       <div>
@@ -288,7 +353,7 @@ function GroupTestForm({
         )}
       </div>
       <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={submitting || disabled || loadingPqs || pqsList.length === 0}>
+        <Button type="submit" size="sm" disabled={submitting || disabled || loadingPqs || pqsList.length === 0 || !contentCodeValid}>
           {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
           Create group test
         </Button>
@@ -314,6 +379,7 @@ function GroupTestEditForm({
   busy,
 }: GroupTestEditFormProps) {
   const [orderInPool, setOrderInPool] = useState(groupTest.orderInPool);
+  const [contentCode, setContentCode] = useState(groupTest.contentCode ?? "");
   const [id0, setId0] = useState(groupTest.miniTestIds[0] ?? "");
   const [id1, setId1] = useState(groupTest.miniTestIds[1] ?? "");
   const [id2, setId2] = useState(groupTest.miniTestIds[2] ?? "");
@@ -326,6 +392,7 @@ function GroupTestEditForm({
     try {
       await onSave({
         orderInPool,
+        contentCode: contentCode.trim() || null,
         miniTestIds: [id0.trim(), id1.trim(), id2.trim()],
       });
     } finally {
@@ -335,6 +402,16 @@ function GroupTestEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2 w-full">
+      <div className="w-24">
+        <Label className="text-xs">Code</Label>
+        <Input
+          value={contentCode}
+          onChange={(e) => setContentCode(e.target.value.toUpperCase().replace(/\s/g, ""))}
+          placeholder="L2C6"
+          disabled={busy}
+          className="mt-1 font-mono text-xs"
+        />
+      </div>
       <div>
         <Label className="text-xs">Order</Label>
         <Input

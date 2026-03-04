@@ -28,7 +28,7 @@ export function LoginForm() {
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
           <p className="text-muted-foreground">
-            Sign in to your IELTS Habib account
+            Sign in to your GAMLISH account
           </p>
         </div>
 

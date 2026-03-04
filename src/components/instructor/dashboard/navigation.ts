@@ -10,6 +10,7 @@ import {
   Tag,
   ClipboardList,
   ListChecks,
+  ClipboardCheck,
   type LucideIcon,
 } from "lucide-react";
 
@@ -36,6 +37,7 @@ export const instructorNavGroups: InstructorNavGroup[] = [
   {
     title: "CONTENT",
     items: [
+      { label: "Practice Test Manager", href: "/dashboard/instructor/practice-tests", icon: ClipboardCheck },
       { label: "Content Management", href: "/dashboard/instructor/contents", icon: FolderKanban },
       { label: "Quiz Content", href: "/dashboard/instructor/quiz-content", icon: ClipboardList },
       { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
@@ -55,6 +57,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/instructor/reading-monitoring": "Reading Monitoring",
   "/dashboard/instructor/contents": "Content Management",
   "/dashboard/instructor/quiz-content": "Quiz Content",
+  "/dashboard/instructor/practice-tests": "Practice Test Manager",
   "/dashboard/instructor/group-tests": "Group Tests",
   "/dashboard/instructor/passage-codes": "Passage Codes",
   "/dashboard/instructor/passages": "Passages",

@@ -30,8 +30,7 @@ export default function InstructorRequestPage() {
           </div>
           <h1 className="text-4xl font-bold tracking-tight">Become an Instructor</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Share your expertise and help students excel in their IELTS preparation.
-            Apply to become an instructor on IELTS Habib.
+            Share your expertise and help students excel. Apply to become an instructor on GAMLISH.
           </p>
         </div>
 
@@ -44,7 +43,7 @@ export default function InstructorRequestPage() {
           <ul className="space-y-2 text-muted-foreground">
             <li className="flex items-start gap-2">
               <span className="text-primary mt-1">•</span>
-              <span>Guide students through structured IELTS Reading practice</span>
+              <span>Guide students through structured Reading practice</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary mt-1">•</span>

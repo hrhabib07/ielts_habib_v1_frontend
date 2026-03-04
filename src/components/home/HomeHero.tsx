@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { getProfileSummary, getMyProfile } from "@/src/lib/api/profile";
 import { ArrowRight, BookOpen } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
+import { GamlishLogo } from "@/src/components/shared/GamlishLogo";
+import { BRAND } from "@/src/lib/constants";
 
 type HeroMode = "minimal" | "band" | "loading";
 
@@ -16,7 +18,12 @@ interface HomeHeroProps {
   roleCtaLabel?: string | null;
 }
 
-export function HomeHero({ children, initialUser = null, roleCtaHref = null, roleCtaLabel = null }: HomeHeroProps) {
+export function HomeHero({
+  children,
+  initialUser = null,
+  roleCtaHref = null,
+  roleCtaLabel = null,
+}: HomeHeroProps) {
   const [mode, setMode] = useState<HeroMode>("loading");
   const [targetBand, setTargetBand] = useState<number | null>(null);
   const [currentEstimatedBand, setCurrentEstimatedBand] = useState<number | null>(null);
@@ -24,10 +31,11 @@ export function HomeHero({ children, initialUser = null, roleCtaHref = null, rol
 
   useEffect(() => {
     let cancelled = false;
+    const isStudent = initialUser?.role === "STUDENT";
     getProfileSummary()
       .then((res) => {
         if (cancelled) return;
-        if (res?.targetBand != null) {
+        if (isStudent && res?.targetBand != null) {
           setMode("band");
           setTargetBand(res.targetBand);
           setCurrentEstimatedBand(res.currentEstimatedBand ?? null);
@@ -44,7 +52,7 @@ export function HomeHero({ children, initialUser = null, roleCtaHref = null, rol
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialUser?.role]);
 
   if (mode === "loading") {
     return (
@@ -83,29 +91,41 @@ interface MinimalHeroProps {
   isAuthenticated: boolean;
 }
 
-function MinimalHero({ roleCtaHref, roleCtaLabel, isAuthenticated }: MinimalHeroProps) {
+function MinimalHero({
+  roleCtaHref,
+  roleCtaLabel,
+  isAuthenticated,
+}: MinimalHeroProps) {
   const showAuthCtas = !isAuthenticated || !roleCtaHref || !roleCtaLabel;
 
   return (
-    <section className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-6 text-center">
-      <div className="max-w-2xl space-y-10">
+    <section className="relative flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center overflow-hidden px-6 py-20 text-center">
+      {/* Premium gradient backdrop */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-primary/5 dark:from-primary/10 dark:to-primary/10"
+        aria-hidden
+      />
+      <div className="relative z-10 mx-auto max-w-3xl space-y-10">
+        <div className="flex justify-center">
+          <GamlishLogo showWordmark={false} variant="hero" />
+        </div>
         <div className="space-y-6">
-          <h1 className="animate-hero-fade-in-up text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-            IELTS HABIB
+          <h1 className="animate-hero-fade-in-up text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
+            {BRAND.tagline}
           </h1>
-          <p className="animate-slogan-reveal text-xl font-medium tracking-[0.12em] text-muted-foreground uppercase md:text-2xl">
-            Quietly Exceptional
+          <p className="animate-slogan-reveal mx-auto max-w-xl text-base font-medium tracking-wide text-muted-foreground md:text-lg">
+            {BRAND.subheadline}
           </p>
         </div>
         <p className="mx-auto max-w-md text-sm text-muted-foreground">
-          A focused IELTS preparation platform for students. Start with Reading.
+          {BRAND.heroSubtext}
         </p>
-        <div className="flex flex-col gap-4 sm:flex-row justify-center pt-4">
+        <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:justify-center">
           {showAuthCtas ? (
             <>
               <Link href="/register">
-                <Button size="lg" className="gap-2">
-                  Get Started
+                <Button size="lg" className="gap-2 shadow-lg">
+                  {BRAND.cta}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -116,8 +136,8 @@ function MinimalHero({ roleCtaHref, roleCtaLabel, isAuthenticated }: MinimalHero
               </Link>
             </>
           ) : (
-            <Link href={roleCtaHref}>
-              <Button size="lg" className="gap-2">
+            <Link href={roleCtaHref ?? "#"}>
+              <Button size="lg" className="gap-2 shadow-lg">
                 {roleCtaLabel}
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -129,8 +149,8 @@ function MinimalHero({ roleCtaHref, roleCtaLabel, isAuthenticated }: MinimalHero
   );
 }
 
-const FILL_MIN_PCT = 12; // never zero — little bit to motivate
-const FILL_MAX_PCT = 88; // never full — room to grow
+const FILL_MIN_PCT = 12;
+const FILL_MAX_PCT = 88;
 
 function BandHero({
   band,
@@ -144,7 +164,6 @@ function BandHero({
   const bandLabel = Number.isInteger(band) ? String(band) : band.toFixed(1);
   const topLine = userName ? `${userName} can achieve` : "You can achieve";
 
-  // Fill % from progress: current/target, clamped between FILL_MIN and FILL_MAX
   const targetFillPct = (() => {
     if (currentEstimatedBand == null || currentEstimatedBand <= 0) return FILL_MIN_PCT;
     const ratio = Math.min(1, currentEstimatedBand / band);
@@ -196,6 +215,9 @@ function BandHero({
         </div>
 
         <p className="text-muted-foreground">in Reading module</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          You're {fillPct}% of the way to your target.
+        </p>
 
         <div className="pt-8">
           <Link href="/profile/reading">

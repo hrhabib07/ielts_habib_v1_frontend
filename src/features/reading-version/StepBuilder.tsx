@@ -9,19 +9,22 @@ import {
   createStep,
   updateStep,
   deleteStep,
+  insertStepAt,
+  reorderSteps,
   type ReadingLevelStep,
   type ReadingStepType,
   type CreateStepPayload,
   type UpdateStepPayload,
   type StepQuizPassType,
   type StepQuizAttemptPolicy,
+  type PracticeTest,
 } from "@/src/lib/api/adminReadingVersions";
 import {
   listLearningContents,
   type LearningContent,
 } from "@/src/lib/api/learningContents";
 import { listQuizContent, type ReadingQuizContent } from "@/src/lib/api/quizContent";
-import { Pencil, Trash2, Plus, Loader2, X, Check } from "lucide-react";
+import { Pencil, Trash2, Plus, Loader2, X, Check, ChevronUp, ChevronDown } from "lucide-react";
 
 const STEP_TYPE_LABELS: Record<ReadingStepType, string> = {
   INSTRUCTION: "Instruction",
@@ -43,6 +46,7 @@ function optionToStepType(option: StepTypeOption): ReadingStepType {
 interface StepBuilderProps {
   versionId: string;
   steps: ReadingLevelStep[];
+  practiceTests?: PracticeTest[];
   disabled: boolean;
   onStepsChange: (steps: ReadingLevelStep[]) => void;
 }
@@ -50,6 +54,7 @@ interface StepBuilderProps {
 export function StepBuilder({
   versionId,
   steps,
+  practiceTests = [],
   disabled,
   onStepsChange,
 }: StepBuilderProps) {
@@ -57,6 +62,7 @@ export function StepBuilder({
   const [quizContents, setQuizContents] = useState<ReadingQuizContent[]>([]);
   const [contentsLoaded, setContentsLoaded] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [insertAfterOrder, setInsertAfterOrder] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -97,17 +103,6 @@ export function StepBuilder({
     setAdding(true);
   };
 
-  const handleCreate = async (payload: CreateStepPayload) => {
-    setError(null);
-    try {
-      const created = await createStep(versionId, payload);
-      onStepsChange([...steps, created].sort((a, b) => a.order - b.order));
-      setAdding(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to create step");
-    }
-  };
-
   const handleUpdate = async (stepId: string, payload: UpdateStepPayload) => {
     setError(null);
     setBusyId(stepId);
@@ -128,12 +123,66 @@ export function StepBuilder({
     setError(null);
     setBusyId(stepId);
     try {
-      await deleteStep(stepId);
-      onStepsChange(steps.filter((s) => s._id !== stepId));
+      const updatedSteps = await deleteStep(stepId);
+      onStepsChange(updatedSteps.length > 0 ? updatedSteps : steps.filter((s) => s._id !== stepId));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to delete step");
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const sortedStepIds = [...steps].sort((a, b) => a.order - b.order).map((s) => s._id);
+
+  const handleMoveUp = async (stepId: string) => {
+    const idx = sortedStepIds.indexOf(stepId);
+    if (idx <= 0) return;
+    setError(null);
+    setBusyId(stepId);
+    try {
+      const reordered = [...sortedStepIds];
+      [reordered[idx - 1], reordered[idx]] = [reordered[idx], reordered[idx - 1]];
+      const updated = await reorderSteps(versionId, reordered);
+      onStepsChange(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to reorder");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleMoveDown = async (stepId: string) => {
+    const idx = sortedStepIds.indexOf(stepId);
+    if (idx < 0 || idx >= sortedStepIds.length - 1) return;
+    setError(null);
+    setBusyId(stepId);
+    try {
+      const reordered = [...sortedStepIds];
+      [reordered[idx], reordered[idx + 1]] = [reordered[idx + 1], reordered[idx]];
+      const updated = await reorderSteps(versionId, reordered);
+      onStepsChange(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to reorder");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleCreate = async (payload: CreateStepPayload, opts?: { insertAtPosition?: number }) => {
+    setError(null);
+    try {
+      if (opts?.insertAtPosition != null) {
+        const { order: _o, ...rest } = payload;
+        const updatedSteps = await insertStepAt(versionId, opts.insertAtPosition, rest);
+        onStepsChange(updatedSteps.length > 0 ? updatedSteps : [...steps]);
+      } else {
+        const created = await createStep(versionId, payload);
+        onStepsChange([...steps, created].sort((a, b) => a.order - b.order));
+      }
+      setAdding(false);
+      setInsertAfterOrder(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to create step");
     }
   };
 
@@ -160,11 +209,17 @@ export function StepBuilder({
         )}
         {adding && (
           <StepForm
+            steps={steps}
             nextOrder={steps.length > 0 ? Math.max(...steps.map((s) => s.order)) + 1 : 1}
+            insertAtPositionDefault={insertAfterOrder != null ? insertAfterOrder + 1 : undefined}
             contents={contents}
             quizContents={quizContents}
+            practiceTests={practiceTests}
             onSave={handleCreate}
-            onCancel={() => setAdding(false)}
+            onCancel={() => {
+              setAdding(false);
+              setInsertAfterOrder(null);
+            }}
             onRetryQuizzes={loadQuizzesOnly}
             disabled={disabled}
           />
@@ -179,6 +234,7 @@ export function StepBuilder({
                     step={step}
                     contents={contents}
                     quizContents={quizContents}
+                    practiceTests={practiceTests}
                     onSave={(p) => handleUpdate(step._id, p)}
                     onCancel={() => setEditingId(null)}
                     onLoadContents={loadContents}
@@ -187,7 +243,7 @@ export function StepBuilder({
                 ) : (
                   <>
                     <span className="text-muted-foreground w-8">#{step.order}</span>
-                    <span className="font-medium flex-1">
+                    <span className="font-medium flex-1 min-w-0">
                       {step.stepType === "QUIZ" && step.isFinalQuiz === true ? (
                         <span className="mr-2 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
                           FINAL_QUIZ
@@ -196,10 +252,44 @@ export function StepBuilder({
                       {STEP_TYPE_LABELS[step.stepType] ?? step.stepType} — {step.title}
                     </span>
                     {!disabled && (
-                      <div className="flex gap-1">
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={() => {
+                            setInsertAfterOrder(step.order);
+                            setAdding(true);
+                            loadContents(true);
+                          }}
+                        >
+                          Insert after
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon-xs"
+                          title="Move up"
+                          onClick={() => handleMoveUp(step._id)}
+                          disabled={busyId === step._id || sortedStepIds.indexOf(step._id) <= 0}
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          title="Move down"
+                          onClick={() => handleMoveDown(step._id)}
+                          disabled={
+                            busyId === step._id ||
+                            sortedStepIds.indexOf(step._id) >= sortedStepIds.length - 1
+                          }
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          title="Edit"
                           onClick={async () => {
                             await loadContents(true);
                             setEditingId(step._id);
@@ -210,6 +300,7 @@ export function StepBuilder({
                         <Button
                           variant="ghost"
                           size="icon-xs"
+                          title="Delete"
                           onClick={() => handleDelete(step._id)}
                           disabled={busyId === step._id}
                         >
@@ -239,10 +330,14 @@ function quizSummary(q: ReadingQuizContent): string {
 }
 
 interface StepFormProps {
+  steps: ReadingLevelStep[];
   nextOrder: number;
+  /** When set, position dropdown defaults to "After step N" (insert at this 1-based position). */
+  insertAtPositionDefault?: number;
   contents: LearningContent[];
   quizContents: ReadingQuizContent[];
-  onSave: (p: CreateStepPayload) => Promise<void>;
+  practiceTests: PracticeTest[];
+  onSave: (p: CreateStepPayload, opts?: { insertAtPosition?: number }) => Promise<void>;
   onCancel: () => void;
   onRetryQuizzes?: () => Promise<void>;
   disabled: boolean;
@@ -250,20 +345,40 @@ interface StepFormProps {
 
 const QUIZ_STEP_TYPES: ReadingStepType[] = ["QUIZ", "VOCABULARY_TEST"];
 
+const POS_AT_END = 0;
+
 function StepForm({
+  steps,
   nextOrder,
+  insertAtPositionDefault,
   contents,
   quizContents,
+  practiceTests,
   onSave,
   onCancel,
   onRetryQuizzes,
   disabled,
 }: StepFormProps) {
+  const sortedSteps = [...steps].sort((a, b) => a.order - b.order);
+  const positionOptions: { label: string; value: number }[] = [
+    { label: "At end", value: POS_AT_END },
+    ...sortedSteps.map((s) => ({
+      label: `After step ${s.order}`,
+      value: s.order + 1,
+    })),
+  ];
   const [typeSelectValue, setTypeSelectValue] = useState<StepTypeOption>("INSTRUCTION");
   const stepType = optionToStepType(typeSelectValue);
   const [title, setTitle] = useState("");
-  const [order, setOrder] = useState(nextOrder);
+  const [insertPosition, setInsertPosition] = useState<number>(
+    insertAtPositionDefault ?? POS_AT_END,
+  );
+  const order = insertPosition === POS_AT_END ? nextOrder : insertPosition;
   const [contentId, setContentId] = useState("");
+  const [practiceTestId, setPracticeTestId] = useState("");
+  const [useQuizPool, setUseQuizPool] = useState(false);
+  const [contentIds, setContentIds] = useState<string[]>([]);
+  const [advanceOnMaxAttemptsExhausted, setAdvanceOnMaxAttemptsExhausted] = useState(false);
   const [isFinalQuiz, setIsFinalQuiz] = useState(false);
   const [passType, setPassType] = useState<StepQuizPassType>("PERCENTAGE");
   const [passValue, setPassValue] = useState(60);
@@ -272,30 +387,64 @@ function StepForm({
   const [submitting, setSubmitting] = useState(false);
 
   const showQuizConfig = QUIZ_STEP_TYPES.includes(stepType);
+  const showPracticeTestConfig = stepType === "PRACTICE_TEST";
   const isFinalQuizPresetSelected = typeSelectValue === FINAL_QUIZ_PRESET;
+  const quizPoolValid = !useQuizPool || contentIds.length >= 1;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    if (showQuizConfig && !contentId.trim()) return;
+    if (showQuizConfig && !useQuizPool && !contentId.trim()) return;
+    if (showQuizConfig && useQuizPool && contentIds.length < 1) return;
+    if (showPracticeTestConfig && !practiceTestId.trim()) return;
     setSubmitting(true);
     try {
-      await onSave({
-        stepType,
-        title: title.trim(),
-        order,
-        contentId: contentId || null,
-        ...(showQuizConfig && {
-          isFinalQuiz,
-          passType,
-          passValue,
-          attemptPolicy,
-          maxAttempts: attemptPolicy === "LIMITED" ? maxAttempts : undefined,
-        }),
-      });
+      await onSave(
+        {
+          stepType,
+          title: title.trim(),
+          order,
+          contentId: showPracticeTestConfig ? null : (useQuizPool ? null : (contentId || null)),
+          contentIds: useQuizPool && contentIds.length > 0 ? contentIds : null,
+          practiceTestId: showPracticeTestConfig ? (practiceTestId || null) : null,
+          ...(showQuizConfig && {
+            isFinalQuiz,
+            passType,
+            passValue,
+            attemptPolicy: useQuizPool ? "LIMITED" : attemptPolicy,
+            maxAttempts: useQuizPool ? contentIds.length : (attemptPolicy === "LIMITED" ? maxAttempts : undefined),
+            advanceOnMaxAttemptsExhausted: useQuizPool ? advanceOnMaxAttemptsExhausted : undefined,
+          }),
+        },
+        insertPosition > 0 ? { insertAtPosition: insertPosition } : undefined,
+      );
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const addQuizToPool = () => {
+    const firstId = quizContents[0]?._id;
+    if (firstId) setContentIds((prev) => [...prev, firstId]);
+  };
+  const removeFromPool = (index: number) => {
+    setContentIds((prev) => prev.filter((_, i) => i !== index));
+  };
+  const setPoolQuizAt = (index: number, quizId: string) => {
+    setContentIds((prev) => {
+      const next = [...prev];
+      next[index] = quizId;
+      return next;
+    });
+  };
+  const movePoolQuiz = (index: number, dir: 1 | -1) => {
+    const next = index + dir;
+    if (next < 0 || next >= contentIds.length) return;
+    setContentIds((prev) => {
+      const arr = [...prev];
+      [arr[index], arr[next]] = [arr[next], arr[index]];
+      return arr;
+    });
   };
 
   return (
@@ -321,8 +470,13 @@ function StepForm({
               }
 
               const nextStepType = optionToStepType(v);
-              if (!QUIZ_STEP_TYPES.includes(nextStepType)) {
+              if (nextStepType === "PRACTICE_TEST") {
                 setContentId("");
+                setPracticeTestId("");
+                setIsFinalQuiz(false);
+              } else if (!QUIZ_STEP_TYPES.includes(nextStepType)) {
+                setContentId("");
+                setPracticeTestId("");
                 setIsFinalQuiz(false);
               }
             }}
@@ -337,14 +491,22 @@ function StepForm({
           </select>
         </div>
         <div>
-          <Label>Order</Label>
-          <Input
-            type="number"
-            min={1}
-            value={order}
-            onChange={(e) => setOrder(Number(e.target.value) || 1)}
+          <Label>Position</Label>
+          <select
+            className="mt-1 h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+            value={insertPosition}
+            onChange={(e) => setInsertPosition(Number(e.target.value))}
             disabled={disabled}
-          />
+          >
+            {positionOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {insertPosition === POS_AT_END ? "New step will be added at the end." : `New step will be inserted at position ${insertPosition}.`}
+          </p>
         </div>
       </div>
       <div>
@@ -356,34 +518,128 @@ function StepForm({
           disabled={disabled}
         />
       </div>
-      {showQuizConfig ? (
+      {showPracticeTestConfig ? (
         <div className="space-y-1">
-          <Label>Quiz Content (required)</Label>
+          <Label>Practice Test (required)</Label>
           <select
             className="mt-1 h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-            value={contentId}
-            onChange={(e) => setContentId(e.target.value)}
+            value={practiceTestId}
+            onChange={(e) => setPracticeTestId(e.target.value)}
             disabled={disabled}
             required
           >
-            <option value="">— Select quiz —</option>
-            {quizContents.map((q) => (
-              <option key={q._id} value={q._id}>
-                {quizSummary(q)}
+            <option value="">— Select practice test —</option>
+            {practiceTests.map((pt) => (
+              <option key={pt._id} value={pt._id}>
+                {pt.contentCode ? `[${pt.contentCode}] ` : ""}{pt.title} ({pt.timeLimitMinutes} min · pass {pt.passType === "PERCENTAGE" ? `${pt.passValue}%` : `band ${pt.passValue}`})
               </option>
             ))}
           </select>
+          {practiceTests.length === 0 && (
+            <p className="text-xs text-muted-foreground">
+              No practice tests for this version. Create them in Dashboard → Practice Tests first.
+            </p>
+          )}
+        </div>
+      ) : showQuizConfig ? (
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="radio"
+                id="quiz-mode-single"
+                checked={!useQuizPool}
+                onChange={() => setUseQuizPool(false)}
+                disabled={disabled}
+                className="rounded border-input"
+              />
+              <label htmlFor="quiz-mode-single" className="text-sm">Single quiz</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="radio"
+                id="quiz-mode-pool"
+                checked={useQuizPool}
+                onChange={() => setUseQuizPool(true)}
+                disabled={disabled}
+                className="rounded border-input"
+              />
+              <label htmlFor="quiz-mode-pool" className="text-sm">Quiz pool (different quiz per attempt, final test)</label>
+            </div>
+          </div>
+          {!useQuizPool ? (
+            <div className="space-y-1">
+              <Label>Quiz Content (required)</Label>
+              <select
+                className="mt-1 h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                value={contentId}
+                onChange={(e) => setContentId(e.target.value)}
+                disabled={disabled}
+                required
+              >
+                <option value="">— Select quiz —</option>
+                {quizContents.map((q) => (
+                  <option key={q._id} value={q._id}>
+                    {quizSummary(q)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>Quiz pool (attempt 1 → first, attempt 2 → second, …)</Label>
+              <p className="text-xs text-muted-foreground">
+                Add 5–10 quizzes; student gets one per attempt. Pass any to advance. If you enable &quot;Advance with average&quot;, they advance after all attempts with average score.
+              </p>
+              {contentIds.map((id, idx) => (
+                <div key={`${id}-${idx}`} className="flex items-center gap-2">
+                  <span className="w-6 text-sm font-medium text-muted-foreground">{idx + 1}.</span>
+                  <select
+                    className="h-9 flex-1 rounded-md border border-input bg-transparent px-2 text-sm"
+                    value={id}
+                    onChange={(e) => setPoolQuizAt(idx, e.target.value)}
+                    disabled={disabled}
+                  >
+                    <option value="">— Select quiz —</option>
+                    {quizContents.map((q) => (
+                      <option key={q._id} value={q._id}>
+                        {quizSummary(q)}
+                      </option>
+                    ))}
+                  </select>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => movePoolQuiz(idx, -1)} disabled={idx === 0 || disabled}>
+                    <ChevronUp className="h-4 w-4" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => movePoolQuiz(idx, 1)} disabled={idx === contentIds.length - 1 || disabled}>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeFromPool(idx)} disabled={contentIds.length <= 1 || disabled}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" variant="outline" size="sm" onClick={addQuizToPool} disabled={quizContents.length === 0 || contentIds.length >= 20 || disabled}>
+                <Plus className="h-4 w-4 mr-1" />
+                Add quiz to pool
+              </Button>
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="advance-on-exhausted-new"
+                  checked={advanceOnMaxAttemptsExhausted}
+                  onChange={(e) => setAdvanceOnMaxAttemptsExhausted(e.target.checked)}
+                  disabled={disabled}
+                  className="rounded border-input"
+                />
+                <label htmlFor="advance-on-exhausted-new" className="text-sm">Advance with average score when all attempts used (without passing)</label>
+              </div>
+            </div>
+          )}
           {quizContents.length === 0 && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>No quizzes loaded.</span>
               {onRetryQuizzes ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onRetryQuizzes()}
-                  disabled={disabled}
-                >
+                <Button type="button" variant="outline" size="sm" onClick={() => onRetryQuizzes()} disabled={disabled}>
                   Retry
                 </Button>
               ) : null}
@@ -488,7 +744,7 @@ function StepForm({
         </div>
       )}
       <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={submitting || disabled}>
+        <Button type="submit" size="sm" disabled={submitting || disabled || (showQuizConfig && !quizPoolValid) || (showPracticeTestConfig && !practiceTestId.trim())}>
           {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
           Save
         </Button>
@@ -504,6 +760,7 @@ interface StepEditFormProps {
   step: ReadingLevelStep;
   contents: LearningContent[];
   quizContents: ReadingQuizContent[];
+  practiceTests: PracticeTest[];
   onSave: (p: UpdateStepPayload) => Promise<void>;
   onCancel: () => void;
   onLoadContents: () => void;
@@ -514,6 +771,7 @@ function StepEditForm({
   step,
   contents,
   quizContents,
+  practiceTests,
   onSave,
   onCancel,
   onLoadContents,
@@ -526,6 +784,10 @@ function StepEditForm({
   const [title, setTitle] = useState(step.title);
   const [order, setOrder] = useState(step.order);
   const [contentId, setContentId] = useState(step.contentId ?? "");
+  const [practiceTestId, setPracticeTestId] = useState(step.practiceTestId ?? "");
+  const [useQuizPool, setUseQuizPool] = useState((step.contentIds?.length ?? 0) > 0);
+  const [contentIds, setContentIds] = useState<string[]>(step.contentIds ?? []);
+  const [advanceOnMaxAttemptsExhausted, setAdvanceOnMaxAttemptsExhausted] = useState(step.advanceOnMaxAttemptsExhausted ?? false);
   const [isFinalQuiz, setIsFinalQuiz] = useState(step.isFinalQuiz ?? false);
   const [passType, setPassType] = useState<StepQuizPassType>(step.passType ?? "PERCENTAGE");
   const [passValue, setPassValue] = useState(step.passValue ?? 60);
@@ -534,30 +796,61 @@ function StepEditForm({
   const [submitting, setSubmitting] = useState(false);
 
   const showQuizConfig = QUIZ_STEP_TYPES.includes(stepType);
+  const showPracticeTestConfig = stepType === "PRACTICE_TEST";
   const isFinalQuizPresetSelected = typeSelectValue === FINAL_QUIZ_PRESET;
+  const quizPoolValid = !useQuizPool || contentIds.length >= 1;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    if (showQuizConfig && !contentId.trim()) return;
+    if (showQuizConfig && !useQuizPool && !contentId.trim()) return;
+    if (showQuizConfig && useQuizPool && contentIds.length < 1) return;
+    if (showPracticeTestConfig && !practiceTestId.trim()) return;
     setSubmitting(true);
     try {
       await onSave({
         stepType,
         title: title.trim(),
         order,
-        contentId: contentId || null,
+        contentId: showPracticeTestConfig ? null : (useQuizPool ? null : (contentId || null)),
+        contentIds: useQuizPool && contentIds.length > 0 ? contentIds : null,
+        practiceTestId: showPracticeTestConfig ? (practiceTestId || null) : null,
         ...(showQuizConfig && {
           isFinalQuiz,
           passType,
           passValue,
-          attemptPolicy,
-          maxAttempts: attemptPolicy === "LIMITED" ? maxAttempts : undefined,
+          attemptPolicy: useQuizPool ? "LIMITED" : attemptPolicy,
+          maxAttempts: useQuizPool ? contentIds.length : (attemptPolicy === "LIMITED" ? maxAttempts : undefined),
+          advanceOnMaxAttemptsExhausted: useQuizPool ? advanceOnMaxAttemptsExhausted : undefined,
         }),
       });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const addQuizToPoolEdit = () => {
+    const firstId = quizContents[0]?._id;
+    if (firstId) setContentIds((prev) => [...prev, firstId]);
+  };
+  const removeFromPoolEdit = (index: number) => {
+    setContentIds((prev) => prev.filter((_, i) => i !== index));
+  };
+  const setPoolQuizAtEdit = (index: number, quizId: string) => {
+    setContentIds((prev) => {
+      const next = [...prev];
+      next[index] = quizId;
+      return next;
+    });
+  };
+  const movePoolQuizEdit = (index: number, dir: 1 | -1) => {
+    const next = index + dir;
+    if (next < 0 || next >= contentIds.length) return;
+    setContentIds((prev) => {
+      const arr = [...prev];
+      [arr[index], arr[next]] = [arr[next], arr[index]];
+      return arr;
+    });
   };
 
   return (
@@ -581,8 +874,13 @@ function StepEditForm({
             }
 
             const nextStepType = optionToStepType(v);
-            if (!QUIZ_STEP_TYPES.includes(nextStepType)) {
+            if (nextStepType === "PRACTICE_TEST") {
               setContentId("");
+              setPracticeTestId("");
+              setIsFinalQuiz(false);
+            } else if (!QUIZ_STEP_TYPES.includes(nextStepType)) {
+              setContentId("");
+              setPracticeTestId("");
               setIsFinalQuiz(false);
             }
           }}
@@ -595,6 +893,21 @@ function StepEditForm({
             </option>
           ))}
         </select>
+        {showPracticeTestConfig ? (
+          <select
+            className="h-9 rounded-md border border-input bg-transparent px-2 text-sm min-w-[200px]"
+            value={practiceTestId}
+            onChange={(e) => setPracticeTestId(e.target.value)}
+            disabled={busy}
+          >
+            <option value="">— Practice test —</option>
+            {practiceTests.map((pt) => (
+              <option key={pt._id} value={pt._id}>
+                {pt.contentCode ? `[${pt.contentCode}] ` : ""}{pt.title}
+              </option>
+            ))}
+          </select>
+        ) : null}
         <Input
           className="flex-1 min-w-32"
           value={title}
@@ -610,22 +923,28 @@ function StepEditForm({
           onChange={(e) => setOrder(Number(e.target.value) || 1)}
           disabled={busy}
         />
-        {showQuizConfig ? (
-          <select
-            className="h-9 rounded-md border border-input bg-transparent px-2 text-sm min-w-[220px]"
-            value={contentId}
-            onChange={(e) => setContentId(e.target.value)}
-            onFocus={onLoadContents}
-            disabled={busy}
-            title="Quiz Content (required)"
-          >
-            <option value="">— Select quiz —</option>
-            {quizContents.map((q) => (
-              <option key={q._id} value={q._id}>
-                {quizSummary(q)}
-              </option>
-            ))}
-          </select>
+        {showPracticeTestConfig ? null : showQuizConfig ? (
+          useQuizPool ? (
+            <span className="text-xs text-muted-foreground min-w-[120px]">
+              Pool: {contentIds.length} quiz{contentIds.length !== 1 ? "zes" : ""}
+            </span>
+          ) : (
+            <select
+              className="h-9 rounded-md border border-input bg-transparent px-2 text-sm min-w-[220px]"
+              value={contentId}
+              onChange={(e) => setContentId(e.target.value)}
+              onFocus={onLoadContents}
+              disabled={busy}
+              title="Quiz Content (required)"
+            >
+              <option value="">— Select quiz —</option>
+              {quizContents.map((q) => (
+                <option key={q._id} value={q._id}>
+                  {quizSummary(q)}
+                </option>
+              ))}
+            </select>
+          )
         ) : (
           <select
             className="h-9 rounded-md border border-input bg-transparent px-2 text-sm w-44"
@@ -642,7 +961,7 @@ function StepEditForm({
             ))}
           </select>
         )}
-        <Button type="submit" size="sm" disabled={submitting || busy}>
+        <Button type="submit" size="sm" disabled={submitting || busy || (showQuizConfig && !quizPoolValid) || (showPracticeTestConfig && !practiceTestId.trim())}>
           {submitting || busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
@@ -650,61 +969,70 @@ function StepEditForm({
         </Button>
       </form>
       {showQuizConfig && (
-        <div className="flex flex-wrap items-center gap-3 rounded-md border border-border/50 bg-muted/30 p-2 text-sm">
-          {isFinalQuizPresetSelected && (
-            <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-              FINAL_QUIZ preset
-            </span>
-          )}
-          <div className="flex items-center gap-1.5">
-            <input
-              type="checkbox"
-              id={`isFinalQuiz-${step._id}`}
-              checked={isFinalQuiz}
-              onChange={(e) => setIsFinalQuiz(e.target.checked)}
-              disabled={busy}
-              className="rounded border-input"
-            />
-            <label htmlFor={`isFinalQuiz-${step._id}`}>Final quiz</label>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3 rounded-md border border-border/50 bg-muted/30 p-2 text-sm">
+            {isFinalQuizPresetSelected && (
+              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                FINAL_QUIZ preset
+              </span>
+            )}
+            <div className="flex items-center gap-2">
+              <input type="radio" id={`quiz-edit-single-${step._id}`} checked={!useQuizPool} onChange={() => setUseQuizPool(false)} disabled={busy} className="rounded border-input" />
+              <label htmlFor={`quiz-edit-single-${step._id}`}>Single</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="radio" id={`quiz-edit-pool-${step._id}`} checked={useQuizPool} onChange={() => setUseQuizPool(true)} disabled={busy} className="rounded border-input" />
+              <label htmlFor={`quiz-edit-pool-${step._id}`}>Pool</label>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <input type="checkbox" id={`isFinalQuiz-${step._id}`} checked={isFinalQuiz} onChange={(e) => setIsFinalQuiz(e.target.checked)} disabled={busy} className="rounded border-input" />
+              <label htmlFor={`isFinalQuiz-${step._id}`}>Final quiz</label>
+            </div>
+            <select className="h-8 rounded-md border border-input bg-transparent px-2 text-xs w-28" value={passType} onChange={(e) => setPassType(e.target.value as StepQuizPassType)} disabled={busy}>
+              <option value="PERCENTAGE">%</option>
+              <option value="BAND">Band</option>
+            </select>
+            <Input type="number" min={0} max={passType === "PERCENTAGE" ? 100 : 9} value={passValue} onChange={(e) => setPassValue(Number(e.target.value) ?? 0)} disabled={busy} className="h-8 w-16" />
+            {!useQuizPool && (
+              <>
+                <select className="h-8 rounded-md border border-input bg-transparent px-2 text-xs w-24" value={attemptPolicy} onChange={(e) => setAttemptPolicy(e.target.value as StepQuizAttemptPolicy)} disabled={busy}>
+                  <option value="SINGLE">Single</option>
+                  <option value="UNLIMITED">Unlimited</option>
+                  <option value="LIMITED">Limited</option>
+                </select>
+                {attemptPolicy === "LIMITED" && (
+                  <Input type="number" min={1} value={maxAttempts} onChange={(e) => setMaxAttempts(Number(e.target.value) || 1)} disabled={busy} className="h-8 w-14" placeholder="Max" />
+                )}
+              </>
+            )}
+            {useQuizPool && (
+              <div className="flex items-center gap-1.5">
+                <input type="checkbox" id={`advance-exhausted-${step._id}`} checked={advanceOnMaxAttemptsExhausted} onChange={(e) => setAdvanceOnMaxAttemptsExhausted(e.target.checked)} disabled={busy} className="rounded border-input" />
+                <label htmlFor={`advance-exhausted-${step._id}`}>Advance with avg when exhausted</label>
+              </div>
+            )}
           </div>
-          <select
-            className="h-8 rounded-md border border-input bg-transparent px-2 text-xs w-28"
-            value={passType}
-            onChange={(e) => setPassType(e.target.value as StepQuizPassType)}
-            disabled={busy}
-          >
-            <option value="PERCENTAGE">%</option>
-            <option value="BAND">Band</option>
-          </select>
-          <Input
-            type="number"
-            min={0}
-            max={passType === "PERCENTAGE" ? 100 : 9}
-            value={passValue}
-            onChange={(e) => setPassValue(Number(e.target.value) ?? 0)}
-            disabled={busy}
-            className="h-8 w-16"
-          />
-          <select
-            className="h-8 rounded-md border border-input bg-transparent px-2 text-xs w-24"
-            value={attemptPolicy}
-            onChange={(e) => setAttemptPolicy(e.target.value as StepQuizAttemptPolicy)}
-            disabled={busy}
-          >
-            <option value="SINGLE">Single</option>
-            <option value="UNLIMITED">Unlimited</option>
-            <option value="LIMITED">Limited</option>
-          </select>
-          {attemptPolicy === "LIMITED" && (
-            <Input
-              type="number"
-              min={1}
-              value={maxAttempts}
-              onChange={(e) => setMaxAttempts(Number(e.target.value) || 1)}
-              disabled={busy}
-              className="h-8 w-14"
-              placeholder="Max"
-            />
+          {useQuizPool && (
+            <div className="rounded-md border border-border/50 bg-muted/20 p-2 space-y-2">
+              <span className="text-xs font-medium">Quiz pool (order = attempt order)</span>
+              {contentIds.map((id, idx) => (
+                <div key={`${step._id}-${idx}-${id}`} className="flex items-center gap-2">
+                  <span className="w-5 text-xs text-muted-foreground">{idx + 1}.</span>
+                  <select className="h-8 flex-1 rounded-md border border-input bg-transparent px-2 text-xs" value={id} onChange={(e) => setPoolQuizAtEdit(idx, e.target.value)} disabled={busy}>
+                    <option value="">— Select —</option>
+                    {quizContents.map((q) => (
+                      <option key={q._id} value={q._id}>{quizSummary(q)}</option>
+                    ))}
+                  </select>
+                  <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => movePoolQuizEdit(idx, -1)} disabled={idx === 0 || busy}><ChevronUp className="h-3.5 w-3.5" /></Button>
+                  <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => movePoolQuizEdit(idx, 1)} disabled={idx === contentIds.length - 1 || busy}><ChevronDown className="h-3.5 w-3.5" /></Button>
+                  <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeFromPoolEdit(idx)} disabled={contentIds.length <= 1 || busy}><Trash2 className="h-3.5 w-3.5" /></Button>
+                </div>
+              ))}
+              <Button type="button" variant="outline" size="sm" onClick={addQuizToPoolEdit} disabled={quizContents.length === 0 || contentIds.length >= 20 || busy}>
+                <Plus className="h-3.5 w-3.5 mr-1" /> Add to pool
+              </Button>
+            </div>
           )}
         </div>
       )}

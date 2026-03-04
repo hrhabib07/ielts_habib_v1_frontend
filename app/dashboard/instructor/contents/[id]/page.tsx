@@ -53,7 +53,7 @@ export default function EditContentPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const showBody = type === "INTRO" || type === "NOTE";
+  const showBody = type === "INTRO" || type === "NOTE" || type === "STRATEGY" || type === "ANALYTICS";
   const showVideoUrl = type === "VIDEO";
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,7 +180,12 @@ export default function EditContentPage() {
               onChange={(e) => setType(e.target.value as LearningContentType)}
               className="mt-1 flex h-9 w-full rounded-md border border-stone-300 bg-transparent px-3 py-1 text-sm dark:border-stone-700"
             >
-              {LEARNING_CONTENT_TYPES.map(({ value, label }) => (
+              {[
+                ...LEARNING_CONTENT_TYPES,
+                ...(item && (type === "STRATEGY" || type === "ANALYTICS")
+                  ? [{ value: type, label: type === "STRATEGY" ? "Strategy (legacy)" : "Analytics (legacy)" } as const]
+                  : []),
+              ].map(({ value, label }) => (
                 <option key={value} value={value}>
                   {label}
                 </option>

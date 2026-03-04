@@ -12,8 +12,8 @@ interface SidebarProps {
 
 export function Sidebar({ role, onNavigate }: SidebarProps) {
   return (
-    <aside className="h-full w-64 bg-slate-900 text-white">
-      <div className="p-4 text-xl font-bold">IELTS Habib</div>
+    <aside className="h-full w-64 bg-card text-card-foreground border-r border-border">
+      <div className="p-4 text-xl font-bold text-primary">GAMLISH</div>
 
       <nav className="space-y-1 px-2">
         {DASHBOARD_MENU.filter((item) => item.roles.includes(role)).map(
@@ -22,7 +22,7 @@ export function Sidebar({ role, onNavigate }: SidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "block rounded-md px-3 py-2 text-sm hover:bg-slate-800",
+                "block rounded-md px-3 py-2 text-sm hover:bg-muted",
               )}
               {...(onNavigate && {
                 onClick: () => onNavigate(),
@@ -39,7 +39,7 @@ export function Sidebar({ role, onNavigate }: SidebarProps) {
       <div className="mt-auto px-2 pb-4">
         <button
           onClick={logout}
-          className="w-full rounded-md px-3 py-2 text-left text-sm text-red-400 hover:bg-slate-800"
+          className="w-full rounded-md px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
         >
           Logout
         </button>

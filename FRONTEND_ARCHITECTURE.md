@@ -1,6 +1,6 @@
-# IELTS HABIB — Frontend Architecture (Next.js App Router)
+# GAMLISH — Frontend Architecture (Next.js App Router)
 
-Production-grade, minimalistic frontend for IELTS HABIB. Backend: JWT auth, manual subscription, level-based mastery, reading module (MVP), band-based unlock, profile summary, content gating.
+The Game of English. Production-grade, minimalistic frontend for GAMLISH. Backend: JWT auth, manual subscription, level-based mastery, reading module (MVP), band-based unlock, profile summary, content gating.
 
 ---
 

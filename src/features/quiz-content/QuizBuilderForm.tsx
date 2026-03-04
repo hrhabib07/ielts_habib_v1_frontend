@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { QuizGroup, QuizQuestion, QuizQuestionType } from "@/src/lib/api/quizContent";
+import type { QuizGroup, QuizQuestion, QuizQuestionType, QuizUseType, QuizEvaluationType } from "@/src/lib/api/quizContent";
 import {
   Plus,
   Trash2,
@@ -25,6 +25,9 @@ import {
   Circle,
   ListChecks,
   FileText,
+  Copy,
+  FileJson,
+  ChevronRight,
 } from "lucide-react";
 
 const QUESTION_TYPES: { value: QuizQuestionType; label: string }[] = [
@@ -50,11 +53,18 @@ const newGroup = (order: number): QuizGroup => ({
   questions: [newQuestion(0)],
 });
 
+const QUIZ_USE_OPTIONS: { value: QuizUseType; label: string }[] = [
+  { value: "PRACTICE", label: "Practice (e.g. vocabulary, level 0 evaluation)" },
+  { value: "FINAL", label: "Final test (used in step; pass mark & attempts set on step)" },
+];
+
 export interface QuizBuilderFormState {
   contentCode: string;
   title: string;
   description: string;
   timeLimit: string;
+  quizUseType: QuizUseType | "";
+  evaluationType: QuizEvaluationType | "";
   groups: QuizGroup[];
 }
 
@@ -63,6 +73,8 @@ const defaultState: QuizBuilderFormState = {
   title: "",
   description: "",
   timeLimit: "",
+  quizUseType: "",
+  evaluationType: "PERCENTAGE",
   groups: [newGroup(0)],
 };
 
@@ -70,8 +82,133 @@ function normalizeGroups(groups: QuizGroup[]): QuizGroup[] {
   return groups.map((g, i) => ({
     ...g,
     order: i,
-    questions: g.questions.map((q, j) => ({ ...q, marks: q.marks || 1 })),
+    questions: g.questions.map((q) => ({ ...q, marks: q.marks || 1 })),
   }));
+}
+
+/** Sample payload for bulk question input. Matches API shape exactly. */
+export const SAMPLE_BULK_QUESTIONS_PAYLOAD = `{
+  "groups": [
+    {
+      "title": "Section 1 - Vocabulary",
+      "order": 0,
+      "questions": [
+        {
+          "type": "MCQ",
+          "questionText": "What is the meaning of 'profound'?",
+          "options": ["Deep", "Shallow", "Brief", "Simple"],
+          "correctAnswer": "Deep",
+          "marks": 1
+        },
+        {
+          "type": "TFNG",
+          "questionText": "The author suggests that practice is sufficient for improvement.",
+          "correctAnswer": "False",
+          "marks": 1
+        },
+        {
+          "type": "FILL_BLANK",
+          "questionText": "The _____ of the study was to measure reading speed.",
+          "correctAnswer": "aim",
+          "marks": 1
+        }
+      ]
+    },
+    {
+      "title": "Section 2 - Comprehension",
+      "order": 1,
+      "questions": [
+        {
+          "type": "MCQ",
+          "questionText": "According to the passage, the main cause was:",
+          "options": ["A", "B", "C", "D"],
+          "correctAnswer": "B",
+          "marks": 2
+        }
+      ]
+    }
+  ]
+}`;
+
+const VALID_QUESTION_TYPES = ["MCQ", "TFNG", "FILL_BLANK", "MATCHING"] as const;
+
+function parseBulkPayload(
+  raw: string,
+): { success: true; groups: QuizGroup[] } | { success: false; error: string } {
+  let data: unknown;
+  try {
+    data = JSON.parse(raw.trim());
+  } catch {
+    return { success: false, error: "Invalid JSON. Check brackets and commas." };
+  }
+  const groupsRaw = Array.isArray(data)
+    ? data
+    : (data as Record<string, unknown>)?.groups;
+  if (!Array.isArray(groupsRaw) || groupsRaw.length === 0) {
+    return {
+      success: false,
+      error: 'Payload must be { "groups": [ ... ] } or an array of groups. At least one group required.',
+    };
+  }
+  const groups: QuizGroup[] = [];
+  for (let i = 0; i < groupsRaw.length; i++) {
+    const g = groupsRaw[i] as Record<string, unknown>;
+    const title = typeof g?.title === "string" ? g.title.trim() : "";
+    const order = typeof g?.order === "number" ? g.order : i;
+    const questionsRaw = g?.questions;
+    if (!Array.isArray(questionsRaw) || questionsRaw.length === 0) {
+      return {
+        success: false,
+        error: `Group "${title || i + 1}" must have a "questions" array with at least one question.`,
+      };
+    }
+    const questions: QuizQuestion[] = [];
+    for (let j = 0; j < questionsRaw.length; j++) {
+      const q = questionsRaw[j] as Record<string, unknown>;
+      const type = q?.type as string;
+      if (!VALID_QUESTION_TYPES.includes(type as (typeof VALID_QUESTION_TYPES)[number])) {
+        return {
+          success: false,
+          error: `Question ${j + 1} in group "${title || i + 1}": type must be one of MCQ, TFNG, FILL_BLANK, MATCHING.`,
+        };
+      }
+      const questionText = typeof q?.questionText === "string" ? q.questionText.trim() : "";
+      if (!questionText) {
+        return {
+          success: false,
+          error: `Question ${j + 1} in group "${title || i + 1}": questionText is required.`,
+        };
+      }
+      const options = Array.isArray(q?.options)
+        ? (q.options as unknown[]).map((o) => String(o))
+        : type === "MCQ"
+          ? []
+          : undefined;
+      const correctAnswer = q?.correctAnswer;
+      const correct =
+        typeof correctAnswer === "string"
+          ? correctAnswer
+          : Array.isArray(correctAnswer)
+            ? correctAnswer.map((c) => String(c))
+            : undefined;
+      if (correct === undefined || (Array.isArray(correct) && correct.length === 0)) {
+        return {
+          success: false,
+          error: `Question ${j + 1} in group "${title || i + 1}": correctAnswer is required (string or array for MATCHING).`,
+        };
+      }
+      const marks = typeof q?.marks === "number" && q.marks >= 0 ? q.marks : 1;
+      questions.push({
+        type: type as QuizQuestion["type"],
+        questionText,
+        options: options?.length ? options : undefined,
+        correctAnswer: correct as string | string[],
+        marks,
+      });
+    }
+    groups.push({ title, order, questions });
+  }
+  return { success: true, groups: groups.map((g, i) => ({ ...g, order: i })) };
 }
 
 export interface QuizBuilderFormProps {
@@ -81,6 +218,8 @@ export interface QuizBuilderFormProps {
     title: string;
     description?: string;
     timeLimit?: number;
+    quizUseType?: QuizUseType;
+    evaluationType?: QuizEvaluationType;
     groups: QuizGroup[];
   }) => Promise<void>;
   submitLabel?: string;
@@ -104,6 +243,10 @@ export function QuizBuilderForm({
   const [activeStep, setActiveStep] = useState<1 | 2>(1);
   const [expandedGroup, setExpandedGroup] = useState<number>(0);
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(() => "g0-q0");
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkInput, setBulkInput] = useState("");
+  const [bulkError, setBulkError] = useState<string | null>(null);
+  const [copyFeedback, setCopyFeedback] = useState(false);
 
   const update = (patch: Partial<QuizBuilderFormState>) => {
     setForm((prev) => ({ ...prev, ...patch }));
@@ -190,6 +333,29 @@ export function QuizBuilderForm({
     });
   };
 
+  const applyBulk = () => {
+    setBulkError(null);
+    const result = parseBulkPayload(bulkInput);
+    if (!result.success) {
+      setBulkError(result.error);
+      return;
+    }
+    setForm((prev) => ({ ...prev, groups: result.groups }));
+    setExpandedGroup(0);
+    setExpandedQuestion("g0-q0");
+    setBulkError(null);
+  };
+
+  const copySample = async () => {
+    try {
+      await navigator.clipboard.writeText(SAMPLE_BULK_QUESTIONS_PAYLOAD);
+      setCopyFeedback(true);
+      setTimeout(() => setCopyFeedback(false), 2000);
+    } catch {
+      setBulkError("Could not copy to clipboard.");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const codeTrimmed = form.contentCode.trim().replace(/\s+/g, "");
@@ -201,6 +367,8 @@ export function QuizBuilderForm({
       title: form.title.trim(),
       description: form.description.trim() || undefined,
       timeLimit: timeLimit && timeLimit > 0 ? timeLimit : undefined,
+      quizUseType: form.quizUseType || undefined,
+      evaluationType: form.evaluationType || undefined,
       groups,
     });
   };
@@ -347,6 +515,33 @@ export function QuizBuilderForm({
               rows={2}
             />
           </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Quiz use</Label>
+              <Select
+                value={form.quizUseType || "none"}
+                onValueChange={(v) => update({ quizUseType: v === "none" ? "" : (v as QuizUseType) })}
+              >
+                <SelectTrigger className="max-w-xs">
+                  <SelectValue placeholder="Optional" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Optional</SelectItem>
+                  {QUIZ_USE_OPTIONS.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                Practice = vocabulary / level 0. Final = use as final test in step.
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-stone-500 dark:text-stone-400">
+            Pass mark (%) and max attempts are set per step in the Level Builder, not on the quiz.
+          </p>
           <Button
             type="button"
             variant="secondary"
@@ -386,6 +581,70 @@ export function QuizBuilderForm({
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Bulk add questions */}
+          <div className="rounded-xl border border-stone-200 bg-stone-50/80 dark:border-stone-700 dark:bg-stone-900/50 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setBulkOpen((o) => !o)}
+              className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left font-medium text-stone-800 dark:text-stone-200 hover:bg-stone-100/80 dark:hover:bg-stone-800/50 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <FileJson className="h-5 w-5 text-stone-500" />
+                Bulk add questions (paste JSON)
+              </span>
+              <ChevronRight className={`h-5 w-5 shrink-0 transition-transform ${bulkOpen ? "rotate-90" : ""}`} />
+            </button>
+            {bulkOpen && (
+              <div className="border-t border-stone-200 dark:border-stone-700 p-4 space-y-4">
+                <p className="text-sm text-stone-600 dark:text-stone-400">
+                  Paste a JSON payload that matches the shape below. You can add many question sets and questions at once. <strong>Apply</strong> replaces all current question sets with the parsed data.
+                </p>
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <Label className="text-xs font-medium text-stone-500 dark:text-stone-400">Sample payload (copy and edit)</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={copySample} className="gap-1.5 h-8">
+                      {copyFeedback ? (
+                        <>Copied!</>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" />
+                          Copy sample
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <pre className="rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-950 p-3 text-xs font-mono text-stone-700 dark:text-stone-300 overflow-x-auto max-h-48 overflow-y-auto">
+                    {SAMPLE_BULK_QUESTIONS_PAYLOAD}
+                  </pre>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="bulk-json">Your JSON</Label>
+                  <Textarea
+                    id="bulk-json"
+                    value={bulkInput}
+                    onChange={(e) => { setBulkInput(e.target.value); setBulkError(null); }}
+                    placeholder='Paste { "groups": [ { "title": "...", "order": 0, "questions": [ ... ] } ] }'
+                    className="min-h-[140px] font-mono text-sm resize-y"
+                    rows={6}
+                  />
+                  {bulkError && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {bulkError}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => { setBulkInput(SAMPLE_BULK_QUESTIONS_PAYLOAD); setBulkError(null); }}>
+                      Load sample into editor
+                    </Button>
+                    <Button type="button" variant="secondary" onClick={applyBulk} disabled={!bulkInput.trim()}>
+                      Validate & apply bulk (replaces current question sets)
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {form.groups.map((group, gIdx) => {
             const isGroupExpanded = expandedGroup === gIdx;
             const groupTotalMarks = groupMarks(group);

@@ -13,11 +13,11 @@ export default async function CoursesPage() {
       <div className="space-y-12">
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            IELTS Courses
+            GAMLISH Courses
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive IELTS preparation courses designed to help you achieve
-            your target band score.
+            The Game of English — comprehensive preparation designed to help you
+            achieve your goals.
           </p>
         </div>
 
@@ -28,9 +28,8 @@ export default async function CoursesPage() {
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">Courses Coming Soon</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              We&apos;re currently building our course content. The IELTS Reading
-              module will be available soon with comprehensive practice tests,
-              mock exams, and instructor-guided learning.
+              We&apos;re building our course content. The Reading module is
+              available with practice tests, mock exams, and instructor-guided learning.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -58,11 +57,10 @@ export default async function CoursesPage() {
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                 <BookOpen className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="font-semibold text-lg">IELTS Reading Module</h3>
+              <h3 className="font-semibold text-lg">Reading Module</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Comprehensive preparation for the IELTS Reading test with practice
-              tests, strategies, and expert feedback.
+              Comprehensive preparation with practice tests, strategies, and expert feedback.
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
@@ -80,11 +78,10 @@ export default async function CoursesPage() {
               <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
                 <BookOpen className="h-5 w-5 text-muted-foreground" />
               </div>
-              <h3 className="font-semibold text-lg">IELTS Writing Module</h3>
+              <h3 className="font-semibold text-lg">Writing Module</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Master IELTS Writing with structured practice and detailed
-              feedback.
+              Master Writing with structured practice and detailed feedback.
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">

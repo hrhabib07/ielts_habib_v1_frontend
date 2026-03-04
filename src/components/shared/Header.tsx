@@ -10,6 +10,7 @@ import { getDecodedTokenClient, logout } from "@/src/lib/auth";
 import type { UserRole } from "@/src/lib/constants";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { GamlishLogo } from "./GamlishLogo";
 
 interface HeaderProps {
   initialUser?: CurrentUser | null;
@@ -68,10 +69,8 @@ export function Header({ initialUser = null }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center space-x-2 shrink-0">
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            IELTS Habib
-          </span>
+        <Link href="/" className="flex h-full min-h-[2.5rem] items-center shrink-0 py-1">
+          <GamlishLogo className="flex items-center" />
         </Link>
 
         {/* Desktop */}

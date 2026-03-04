@@ -111,6 +111,39 @@ export async function createPassage(data: CreatePassagePayload): Promise<Passage
   return res.data.data;
 }
 
+/** Single passage for bulk create. book/test/passage are numbers (passage code created if needed). */
+export interface BulkPassageItem {
+  title: string;
+  subTitle?: string;
+  book: number;
+  test: number;
+  passage: number;
+  source: PassageSource;
+  difficulty: PassageDifficulty;
+  moduleType: PassageModuleType;
+  estimatedReadingTime: number;
+  content: PassageParagraphInput[];
+  images?: PassageImage[];
+  glossary?: PassageGlossary[];
+  videoExplanationUrl?: string;
+  tags?: string[];
+}
+
+export interface BulkCreatePassagesResult {
+  created: Passage[];
+  errors: Array<{ index: number; message: string }>;
+}
+
+export async function createBulkPassages(
+  passages: BulkPassageItem[],
+): Promise<BulkCreatePassagesResult> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: BulkCreatePassagesResult;
+  }>(`${PASSAGE_BASE}/bulk`, { passages });
+  return res.data.data;
+}
+
 export async function getMyPassages(): Promise<Passage[]> {
   const res = await apiClient.get<{ success: boolean; data: Passage[] }>(
     `${PASSAGE_BASE}/my`,
@@ -276,6 +309,30 @@ export interface CreateQuestionPayload {
 export async function createQuestion(data: CreateQuestionPayload): Promise<Question> {
   const res = await apiClient.post<{ success: boolean; data: Question }>(
     QUESTION_BASE,
+    data,
+  );
+  return res.data.data;
+}
+
+/** Single question for bulk create. questionBody and explanation required. */
+export interface BulkQuestionItem {
+  questionBody: QuestionBody;
+  explanation: string;
+  options?: string[];
+  correctAnswer?: string | string[];
+  blanks?: QuestionBlank[];
+  weaknessTags?: string[];
+}
+
+/** Bulk create questions. passageId, questionSetId, difficulty from form; questions from JSON. */
+export async function createBulkQuestions(data: {
+  passageId: string;
+  questionSetId: string;
+  difficulty: PassageDifficulty;
+  questions: BulkQuestionItem[];
+}): Promise<Question[]> {
+  const res = await apiClient.post<{ success: boolean; data: Question[] }>(
+    `${QUESTION_BASE}/bulk`,
     data,
   );
   return res.data.data;

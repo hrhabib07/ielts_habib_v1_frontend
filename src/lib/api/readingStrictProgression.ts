@@ -8,6 +8,7 @@ export interface LevelDetailStep {
   title: string;
   order: number;
   contentId?: string | null;
+  practiceTestId?: string | null;
   isFinalQuiz?: boolean;
   passType?: string;
   passValue?: number;
@@ -166,6 +167,29 @@ export async function submitStepQuiz(
   return unwrap(res);
 }
 
+export interface SubmitPracticeTestPayload {
+  answers: Array<{ questionId: string; studentAnswer: string }>;
+}
+
+export interface SubmitPracticeTestResponse {
+  passed: boolean;
+  scorePercent: number;
+  bandScore: number;
+  progress: { _id: string; currentStepIndex: number; completedStepIds: string[]; [key: string]: unknown };
+}
+
+export async function submitPracticeTest(
+  levelId: string,
+  stepId: string,
+  payload: SubmitPracticeTestPayload,
+): Promise<SubmitPracticeTestResponse> {
+  const res = await apiClient.post<{ success: boolean; data: SubmitPracticeTestResponse }>(
+    `${BASE}/levels/${levelId}/steps/${stepId}/submit-practice-test`,
+    payload,
+  );
+  return unwrap(res);
+}
+
 /** Resolved learning content from LearningContent collection (INSTRUCTION / VIDEO steps). */
 export interface LearningStepContent {
   title: string;
@@ -199,6 +223,27 @@ export interface PassageQuestionContent {
   }>;
 }
 
+/** One mini test (passage + questions) for practice test or group test. */
+export interface PracticeTestMiniTestContent {
+  miniTestId: string;
+  passageId: string;
+  questionSetId: string;
+  order: number;
+  passage: GroupTestPassageContent;
+  questions: GroupTestQuestionForStudent[];
+  questionGroups?: GroupTestQuestionGroup[];
+}
+
+/** Practice test step content: one mini test, time limit, pass criteria. */
+export interface PracticeTestStepContent {
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  miniTest: PracticeTestMiniTestContent;
+}
+
 /**
  * Normalised step-content envelope returned by GET /levels/:levelId/steps/:stepId/content.
  * Discriminated union — narrow on `type` to get the correct `content` shape.
@@ -206,7 +251,8 @@ export interface PassageQuestionContent {
 export type StepContent =
   | { id: string; type: "INSTRUCTION" | "VIDEO"; content: LearningStepContent }
   | { id: string; type: "QUIZ" | "VOCABULARY_TEST"; content: QuizStepContent }
-  | { id: string; type: "PASSAGE_QUESTION_SET"; content: PassageQuestionContent };
+  | { id: string; type: "PASSAGE_QUESTION_SET"; content: PassageQuestionContent }
+  | { id: string; type: "PRACTICE_TEST"; content: PracticeTestStepContent };
 
 /** Group test content for FINAL_EVALUATION step. */
 export interface GroupTestPassageContent {

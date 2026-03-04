@@ -75,7 +75,7 @@ export default function QuizContentListPage() {
             Quiz Content
           </h1>
           <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-            Create standalone quizzes with embedded questions. Attach to Level steps (QUIZ / Vocabulary Test).
+            Create standalone quizzes with embedded questions. Set a <strong>content code</strong> (e.g. L0C1, L1C3) — each code is unique across all content (learning, quiz, practice test, group test). Attach to Level steps (QUIZ / Vocabulary Test).
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
@@ -145,7 +145,7 @@ export default function QuizContentListPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-200 text-left text-stone-500 dark:border-stone-800 dark:text-stone-400">
-                  <th className="p-4 font-medium">Code</th>
+                  <th className="p-4 font-medium">Content code</th>
                   <th className="p-4 font-medium">Title</th>
                   <th className="p-4 font-medium">Groups</th>
                   <th className="p-4 font-medium">Questions</th>
@@ -160,7 +160,7 @@ export default function QuizContentListPage() {
                     key={item._id}
                     className="border-b border-stone-100 last:border-0 hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900/50"
                   >
-                    <td className="p-4 font-mono text-xs text-stone-600 dark:text-stone-400">
+                    <td className="p-4 font-mono text-sm font-medium tabular-nums text-stone-700 dark:text-stone-300" title="Unique across all content types">
                       {item.contentCode ?? "—"}
                     </td>
                     <td className="p-4 font-medium text-stone-900 dark:text-stone-100">

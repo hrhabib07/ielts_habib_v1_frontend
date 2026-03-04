@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, X, BarChart3, BookOpen, Activity, FolderKanban, Hash, FileText, Layers, FileQuestion, Tag, LayoutDashboard, Settings, Users, ClipboardList, ListChecks } from "lucide-react";
+import { GraduationCap, X, BarChart3, BookOpen, Activity, FolderKanban, Hash, FileText, Layers, FileQuestion, Tag, LayoutDashboard, Settings, Users, ClipboardList, ListChecks, ClipboardCheck } from "lucide-react";
 import type { UserRole } from "@/src/lib/constants";
 
 function isNavItemActive(pathname: string, href: string): boolean {
@@ -37,6 +37,7 @@ const INSTRUCTOR_CONTENT: DashboardNavGroup = {
   title: "CONTENT",
   roles: ["INSTRUCTOR", "ADMIN"],
   items: [
+    { label: "Practice Test Manager", href: "/dashboard/instructor/practice-tests", icon: ClipboardCheck },
     { label: "Content Management", href: "/dashboard/instructor/contents", icon: FolderKanban },
     { label: "Quiz Content", href: "/dashboard/instructor/quiz-content", icon: ClipboardList },
     { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
@@ -95,7 +96,7 @@ export function DashboardSidebar({ role, isMobileOpen, onClose }: DashboardSideb
               <GraduationCap className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">IELTS Habib</p>
+              <p className="text-sm font-semibold text-foreground">GAMLISH</p>
               <p className="text-xs text-muted-foreground">Dashboard</p>
             </div>
           </div>

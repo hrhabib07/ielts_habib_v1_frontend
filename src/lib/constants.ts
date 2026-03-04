@@ -1,5 +1,16 @@
 export type UserRole = "STUDENT" | "INSTRUCTOR" | "ADMIN";
 
+export const BRAND = {
+  logoUrl:
+    "https://res.cloudinary.com/daqvhd097/image/upload/v1772646945/gamlish_logo-no-bg_rr1d5e.png",
+  tagline: "The Game of English",
+  headline: "The Game of English",
+  subheadline:
+    "Performance-driven English mastery. Skill trees. Clearance. Proof.",
+  cta: "Begin Initial Calibration",
+  heroSubtext: "No videos to watch. Only levels to clear.",
+} as const;
+
 interface MenuItem {
   label: string;
   href: string;

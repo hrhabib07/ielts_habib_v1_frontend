@@ -44,6 +44,22 @@ const StepQuizSubmitCard = dynamic(
   },
 );
 
+const PracticeTestStepCard = dynamic(
+  () =>
+    import("@/src/components/reading/PracticeTestStepCard").then(
+      (m) => m.PracticeTestStepCard,
+    ),
+  {
+    loading: () => (
+      <div className="flex items-center gap-2 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 text-sm text-gray-400 dark:text-gray-500">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading practice test…
+      </div>
+    ),
+    ssr: false,
+  },
+);
+
 function FinalEvaluationStartCard({ levelId }: { levelId: string }) {
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
@@ -322,13 +338,13 @@ export function LevelContent({
       setContentLoading(false);
       return;
     }
-    if (step.contentId) {
+    if (step.contentId || step.stepType === "PRACTICE_TEST") {
       fetchContent(step._id);
     } else {
       setContent(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step?._id, step?.contentId, isLocked, fetchContent]);
+  }, [step?._id, step?.contentId, step?.stepType, isLocked, fetchContent]);
 
   const visible = step !== null && visibleStepId === step._id;
 
@@ -496,6 +512,35 @@ export function LevelContent({
                   onLevelPassed={onLevelPassed}
                   onProgressUpdate={onProgressUpdate}
                 />
+              )}
+
+            {/* PRACTICE_TEST: one mini test, unlimited attempts until pass */}
+            {!contentLoading &&
+              !contentError &&
+              content !== null &&
+              content.type === "PRACTICE_TEST" &&
+              !isPreview && (
+                <PracticeTestStepCard
+                  levelId={levelId}
+                  stepId={step._id}
+                  content={content.content}
+                  onComplete={onComplete}
+                  onProgressUpdate={onProgressUpdate}
+                />
+              )}
+            {!contentLoading &&
+              !contentError &&
+              content !== null &&
+              content.type === "PRACTICE_TEST" &&
+              isPreview && (
+                <div className="rounded-2xl border border-dashed border-teal-300 dark:border-teal-700 bg-teal-50/50 dark:bg-teal-950/30 p-6">
+                  <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">
+                    Practice test: {content.content.title}
+                  </p>
+                  <p className="mt-2 text-sm text-teal-700 dark:text-teal-300">
+                    {content.content.timeLimitMinutes} min · Pass: {content.content.passType === "PERCENTAGE" ? `${content.content.passValue}%` : `band ${content.content.passValue}`} · {content.content.miniTest?.questions?.length ?? 0} questions. Students get unlimited attempts until they reach the pass score.
+                  </p>
+                </div>
               )}
 
             {/* FINAL_EVALUATION: Start button only — actual test runs in dedicated mock environment */}

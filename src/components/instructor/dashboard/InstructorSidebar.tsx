@@ -39,7 +39,7 @@ export default function InstructorSidebar({
             </div>
             <div>
               <p className="text-sm font-semibold text-zinc-900">Instructor Panel</p>
-              <p className="text-xs text-zinc-500">IELTS Habib</p>
+              <p className="text-xs text-zinc-500">GAMLISH</p>
             </div>
           </div>
 

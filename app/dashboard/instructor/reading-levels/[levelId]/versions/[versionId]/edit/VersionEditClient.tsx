@@ -77,7 +77,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
     );
   }
 
-  const { version, steps, groupTests } = data;
+  const { version, steps, groupTests, practiceTests } = data;
   const disabled = version.status === "PUBLISHED";
   const isPublished = version.status === "PUBLISHED";
   const finalEvalType = version.evaluationConfig?.finalEvaluationType ?? "";
@@ -157,6 +157,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
           <StepBuilder
             versionId={versionId}
             steps={steps}
+            practiceTests={practiceTests ?? []}
             disabled={disabled}
             onStepsChange={handleStepsChange}
           />

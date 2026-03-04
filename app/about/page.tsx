@@ -7,11 +7,11 @@ export default function AboutPage() {
         {/* Hero Section */}
         <div className="text-center space-y-6">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            About IELTS Habib
+            About GAMLISH
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            We're dedicated to providing focused, high-quality IELTS preparation
-            that helps students achieve their goals with clarity and confidence.
+            The Game of English — we're dedicated to focused, high-quality
+            preparation that helps students achieve their goals with clarity and confidence.
           </p>
         </div>
 
@@ -19,8 +19,8 @@ export default function AboutPage() {
         <section className="space-y-6">
           <h2 className="text-3xl font-bold">Our Mission</h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            IELTS Habib was created with a simple goal: to provide students with
-            a focused, exam-oriented platform for IELTS preparation. We believe
+            GAMLISH was created with a simple goal: to provide students with
+            a focused, exam-oriented platform for English preparation. We believe
             that targeted practice, expert guidance, and systematic progress
             tracking are the keys to success.
           </p>
@@ -47,7 +47,7 @@ export default function AboutPage() {
               </div>
               <h3 className="font-semibold mb-2">Quality Content</h3>
               <p className="text-sm text-muted-foreground">
-                Every practice test and exercise is designed around actual IELTS
+                Every practice test and exercise is designed around actual exam
                 requirements.
               </p>
             </div>
@@ -78,10 +78,10 @@ export default function AboutPage() {
 
         {/* Phase 1 Focus */}
         <section className="rounded-lg border bg-card p-8 space-y-4">
-          <h2 className="text-3xl font-bold">Phase 1: IELTS Reading Module</h2>
+          <h2 className="text-3xl font-bold">Phase 1: Reading Module</h2>
           <p className="text-muted-foreground text-lg">
-            We're starting with the IELTS Reading module because it's one of the
-            most strategic parts of the exam. Our platform will include:
+            We're starting with the Reading module because it's one of the
+            most strategic parts of the journey. Our platform includes:
           </p>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
             <li>Structured practice tests aligned with IELTS format</li>
