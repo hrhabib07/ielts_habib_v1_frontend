@@ -251,7 +251,7 @@ export function StepQuizSubmitCard({
               <AlertCircle className="h-5 w-5 shrink-0" />
             )}
             <span className="font-medium">
-              {passed ? "You passed!" : "Not passed"}
+              {passed ? "You passed!" : "Not passed this time"}
             </span>
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs">
@@ -259,6 +259,11 @@ export function StepQuizSubmitCard({
             {pctStr && <span>Percentage: {pctStr}</span>}
             <span>Status: {passed ? "Passed" : "Failed"}</span>
           </div>
+          {passed && (
+            <p className="mt-1.5 text-xs opacity-90">
+              If this was the final quiz, the next level is now unlocked. Check above for &quot;Continue to next level&quot;.
+            </p>
+          )}
         </div>
 
         {status.answers && status.answers.length > 0 && (
@@ -267,12 +272,15 @@ export function StepQuizSubmitCard({
 
         {!passed && !status.canSubmit && (
           <p className="text-xs text-amber-700 dark:text-amber-300">
-            No attempts remaining. This quiz allows only one attempt.
+            No attempts remaining for this quiz.
           </p>
         )}
 
         {!passed && status.canSubmit && (
           <div className="pt-2">
+            <p className="mb-2 text-xs font-medium text-amber-800 dark:text-amber-200">
+              You can retake the quiz below.
+            </p>
             {showQuizForm ? (
               <QuizFlowOneByOne
                 quiz={effectiveQuizContent as StepQuizContentResponse}

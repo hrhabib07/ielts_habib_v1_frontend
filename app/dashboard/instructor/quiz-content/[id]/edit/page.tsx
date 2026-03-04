@@ -6,13 +6,14 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { QuizBuilderForm } from "@/src/features/quiz-content/QuizBuilderForm";
 import { getQuizContentById, updateQuizContent } from "@/src/lib/api/quizContent";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Eye } from "lucide-react";
 
 export default function EditQuizContentPage() {
   const params = useParams();
   const router = useRouter();
   const id = typeof params.id === "string" ? params.id : "";
   const [initial, setInitial] = useState<{
+    contentCode: string;
     title: string;
     description: string;
     timeLimit: string;
@@ -27,6 +28,7 @@ export default function EditQuizContentPage() {
     getQuizContentById(id)
       .then((quiz) => {
         setInitial({
+          contentCode: quiz.contentCode ?? "",
           title: quiz.title,
           description: quiz.description ?? "",
           timeLimit: quiz.timeLimit != null ? String(quiz.timeLimit) : "",
@@ -37,6 +39,7 @@ export default function EditQuizContentPage() {
   }, [id]);
 
   const handleSubmit = async (payload: {
+    contentCode: string;
     title: string;
     description?: string;
     timeLimit?: number;
@@ -79,16 +82,24 @@ export default function EditQuizContentPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/instructor/quiz-content">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/instructor/quiz-content">
+            <Button variant="outline" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
+            Edit Quiz
+          </h1>
+        </div>
+        <Link href={`/dashboard/instructor/quiz-content/${id}/preview`}>
           <Button variant="outline" size="sm" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
+            <Eye className="h-4 w-4" />
+            Preview
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
-          Edit Quiz
-        </h1>
       </div>
       {submitError && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">

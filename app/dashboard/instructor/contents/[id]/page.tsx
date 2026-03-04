@@ -23,6 +23,7 @@ export default function EditContentPage() {
   const id = params.id as string;
   const [item, setItem] = useState<LearningContent | null>(null);
   const [loading, setLoading] = useState(true);
+  const [contentCode, setContentCode] = useState("");
   const [title, setTitle] = useState("");
   const [type, setType] = useState<LearningContentType>("INTRO");
   const [body, setBody] = useState("");
@@ -36,6 +37,7 @@ export default function EditContentPage() {
     getLearningContentById(id)
       .then((data) => {
         setItem(data);
+        setContentCode(data.contentCode ?? "");
         setTitle(data.title);
         setType(data.type);
         setBody(data.body ?? "");
@@ -70,7 +72,9 @@ export default function EditContentPage() {
         return;
       }
       // build object with conditional props to avoid assigning undefined
+      const codeTrimmed = contentCode.trim().replace(/\s+/g, "");
       const payload = {
+        ...(codeTrimmed && /^L\d+C\d+$/i.test(codeTrimmed) ? { contentCode: codeTrimmed } : {}),
         title: title.trim(),
         type,
         ...(showBody ? { body: body.trim() } : {}),
@@ -138,6 +142,20 @@ export default function EditContentPage() {
               {error}
             </div>
           )}
+
+          <div>
+            <Label htmlFor="contentCode">Content code</Label>
+            <Input
+              id="contentCode"
+              value={contentCode}
+              onChange={(e) => setContentCode(e.target.value.toUpperCase().replace(/\s/g, ""))}
+              placeholder="e.g. L1C1"
+              className="mt-1 max-w-[8rem] font-mono border-stone-300 dark:border-stone-700"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Level and content number. Must be unique (e.g. L1C1). No duplicates.
+            </p>
+          </div>
 
           <div>
             <Label htmlFor="title">

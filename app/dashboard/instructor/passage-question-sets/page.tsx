@@ -30,6 +30,7 @@ export default function PassageQuestionSetsPage() {
     passageId: "",
     passageCode: "",
     passageNumber: 1,
+    title: "",
     difficulty: "MEDIUM",
     questionGroupIds: [],
     expectedTotalQuestions: 5,
@@ -58,6 +59,7 @@ export default function PassageQuestionSetsPage() {
       passageId: passages[0]?._id ?? "",
       passageCode: codes[0]?._id ?? "",
       passageNumber: 1,
+      title: "",
       difficulty: "MEDIUM",
       questionGroupIds: [],
       expectedTotalQuestions: 5,
@@ -124,9 +126,10 @@ export default function PassageQuestionSetsPage() {
       passageId,
       passageCode: passageCodeId,
       passageNumber: s.passageNumber as 1 | 2 | 3,
+      title: s.title ?? "",
       difficulty: s.difficulty,
       questionGroupIds: ids,
-      expectedTotalQuestions: s.expectedTotalQuestions,
+      expectedTotalQuestions: s.expectedTotalQuestions ?? s.totalQuestions ?? 5,
       recommendedTime: s.recommendedTime,
     });
     setEditingId(s._id);
@@ -163,6 +166,21 @@ export default function PassageQuestionSetsPage() {
           {editingId ? "Edit passage question set" : "Create passage question set"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="pqs-title">Title / name</Label>
+            <Input
+              id="pqs-title"
+              placeholder="e.g. Cambridge 18 Test 2 Passage 1"
+              value={form.title ?? ""}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, title: e.target.value.trim() }))
+              }
+              className="mt-1 max-w-md"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              A short name to identify this question set in the dashboard and when building group tests.
+            </p>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Passage</Label>
@@ -347,18 +365,20 @@ export default function PassageQuestionSetsPage() {
               >
                 <div>
                   <p className="font-medium">
-                    {passageTitle(
-                      typeof s.passageId === "object"
-                        ? (s.passageId as { _id: string })._id
-                        : s.passageId,
-                    )} · P{s.passageNumber} · {codeLabel(
-                      typeof s.passageCode === "object"
-                        ? (s.passageCode as { _id: string })._id
-                        : s.passageCode,
-                    )}
+                    {s.title?.trim()
+                      ? s.title
+                      : `${passageTitle(
+                          typeof s.passageId === "object"
+                            ? (s.passageId as { _id: string })._id
+                            : s.passageId,
+                        )} · P${s.passageNumber} · ${codeLabel(
+                          typeof s.passageCode === "object"
+                            ? (s.passageCode as { _id: string })._id
+                            : s.passageCode,
+                        )}`}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {s.expectedTotalQuestions} questions · {s.recommendedTime} min
+                    {(s.expectedTotalQuestions ?? s.totalQuestions) ?? 0} questions · {s.recommendedTime} min
                     · {s.difficulty}
                     {s.isPublished && " · Published"}
                   </p>

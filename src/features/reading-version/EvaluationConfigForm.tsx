@@ -106,6 +106,11 @@ export function EvaluationConfigForm({
                 </option>
               ))}
             </select>
+            {finalEvaluationType === "GROUP_TEST" && (
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Add at least one Group test below (each with 3 passage question sets). Steps above are optional.
+              </p>
+            )}
           </div>
           <div>
             <Label>Pass mark % (0–100)</Label>

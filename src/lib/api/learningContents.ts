@@ -11,6 +11,8 @@ export type LearningContentType =
 
 export interface LearningContent {
   _id: string;
+  /** Instructor-only tag e.g. INTRO-1, NOTE-2. Not shown to students. */
+  contentCode?: string;
   title: string;
   type: LearningContentType;
   body?: string;
@@ -26,10 +28,12 @@ export interface LearningContent {
 /** Shape returned by content preview API (no createdBy/updatedBy). */
 export interface LearningContentPreview extends Pick<
   LearningContent,
-  "_id" | "title" | "type" | "body" | "videoUrl" | "isPublished" | "createdAt" | "updatedAt"
+  "_id" | "contentCode" | "title" | "type" | "body" | "videoUrl" | "isPublished" | "createdAt" | "updatedAt"
 > {}
 
 export interface CreateLearningContentPayload {
+  /** Level and content number e.g. L1C1 (unique, required). */
+  contentCode: string;
   title: string;
   type: LearningContentType;
   body?: string;
@@ -39,6 +43,8 @@ export interface CreateLearningContentPayload {
 }
 
 export interface UpdateLearningContentPayload {
+  /** Level and content number e.g. L1C1 (unique). */
+  contentCode?: string;
   title?: string;
   type?: LearningContentType;
   body?: string;

@@ -11,6 +11,7 @@ import {
 import { LevelMetadataCard } from "@/src/features/reading-level-builder/LevelMetadataCard";
 import { StepsBuilderSection } from "@/src/features/reading-level-builder/StepsBuilderSection";
 import { PublishWorkflowCard } from "@/src/features/reading-level-builder/PublishWorkflowCard";
+import { PublishChecklist } from "@/src/features/reading-level-builder/PublishChecklist";
 import { ArrowLeft, Loader2 } from "lucide-react";
 
 interface LevelBuilderClientProps {
@@ -83,15 +84,34 @@ export function LevelBuilderClient({ levelId }: LevelBuilderClientProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-4">
-        <Link
-          href="/dashboard/instructor/reading-levels"
-          className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Levels
-        </Link>
-        <h1 className="text-xl font-semibold text-foreground">Level Builder</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/dashboard/instructor/reading-levels"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Levels
+          </Link>
+          <Link
+            href={`/dashboard/instructor/reading-levels/${levelId}/versions`}
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground"
+          >
+            Versions
+          </Link>
+        </div>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">Level Builder</h1>
+          <span
+            className={
+              isPublished
+                ? "rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400"
+                : "rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400"
+            }
+          >
+            {isPublished ? `Published v${version.version}` : `Editing draft v${version.version}`}
+          </span>
+        </div>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
@@ -102,6 +122,7 @@ export function LevelBuilderClient({ levelId }: LevelBuilderClientProps) {
             onLevelChange={handleLevelChange}
             onVersionChange={(v) => setDetail((prev) => (prev ? { ...prev, version: v } : null))}
           />
+          <PublishChecklist level={level} detail={detail} />
           {!isPublished && (
             <PublishWorkflowCard
               levelId={levelId}

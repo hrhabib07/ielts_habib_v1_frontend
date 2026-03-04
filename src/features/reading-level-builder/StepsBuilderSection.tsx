@@ -53,10 +53,13 @@ export function StepsBuilderSection({
   return (
     <div className="space-y-8">
       <Card className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <CardHeader className="p-0 pb-6">
+        <CardHeader className="p-0 pb-2">
           <CardTitle className="text-lg font-semibold">Steps</CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Add learning steps (optional). For <strong>Skill levels with Group test</strong>, the final evaluation is the group tests you add below — no separate step needed.
+          </p>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 pt-6">
           {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
           <StepBuilder
             versionId={versionId}
@@ -77,10 +80,13 @@ export function StepsBuilderSection({
 
       {showGroupTests && (
         <Card className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <CardHeader className="p-0 pb-6">
-            <CardTitle className="text-lg font-semibold">Group tests</CardTitle>
+          <CardHeader className="p-0 pb-2">
+            <CardTitle className="text-lg font-semibold">Group tests (final evaluation)</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Each group test = 3 passage question sets (3 mini tests). Students attempt them in order. Add at least one group test to publish this level.
+            </p>
           </CardHeader>
-          <CardContent className="p-0">
+          <CardContent className="p-0 pt-6">
             <GroupTestBuilder
               versionId={versionId}
               groupTests={groupTests}

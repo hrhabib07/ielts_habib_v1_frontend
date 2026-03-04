@@ -1,4 +1,5 @@
 import apiClient from "../api-client";
+import type { StepContent } from "./readingStrictProgression";
 
 const BASE = "/admin/reading";
 
@@ -116,7 +117,10 @@ export interface UpdateEvaluationConfigPayload {
 
 export interface CreateGroupTestPayload {
   orderInPool: number;
-  miniTestIds: [string, string, string];
+  /** Exactly 3 MiniTest IDs (legacy). */
+  miniTestIds?: [string, string, string];
+  /** Exactly 3 Passage Question Set IDs; backend creates MiniTests and then the GroupTest. */
+  passageQuestionSetIds?: [string, string, string];
 }
 
 export interface UpdateGroupTestPayload {
@@ -335,4 +339,75 @@ export async function updateGroupTest(
 
 export async function deleteGroupTest(groupTestId: string): Promise<void> {
   await apiClient.delete(`${BASE}/group-tests/${groupTestId}`);
+}
+
+/** Instructor preview: group test content with correct answers (read-only, not submittable) */
+export interface GroupTestQuestionForPreview {
+  _id: string;
+  questionNumber: number;
+  type: string;
+  questionBody: unknown;
+  blanks?: { id: number; wordLimit?: number; options?: string[] }[];
+  options?: string[];
+  correctAnswer?: string | string[];
+}
+
+/** One question type block (e.g. "Questions 1–7: True/False/Not Given") */
+export interface GroupTestQuestionGroupForPreview {
+  questionType: string;
+  startQuestionNumber: number;
+  endQuestionNumber: number;
+  instruction?: string;
+  questions: GroupTestQuestionForPreview[];
+}
+
+export interface GroupTestMiniTestForPreview {
+  miniTestId: string;
+  passageId: string;
+  questionSetId: string;
+  order: number;
+  passage: {
+    _id: string;
+    title: string;
+    subTitle?: string;
+    content: unknown;
+    wordCount?: number;
+  };
+  questions: GroupTestQuestionForPreview[];
+  /** Grouped by question type for IELTS-style display */
+  questionGroups?: GroupTestQuestionGroupForPreview[];
+}
+
+export interface GroupTestContentForPreview {
+  groupTestId: string;
+  orderInPool: number;
+  miniTests: [
+    GroupTestMiniTestForPreview,
+    GroupTestMiniTestForPreview,
+    GroupTestMiniTestForPreview,
+  ];
+}
+
+export async function getGroupTestPreviewContent(
+  versionId: string,
+  groupTestId: string,
+): Promise<GroupTestContentForPreview> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: GroupTestContentForPreview;
+  }>(`${BASE}/versions/${versionId}/group-tests/${groupTestId}/preview-content`);
+  return unwrap(res);
+}
+
+/** Step content for instructor level preview (no student progress required). Same shape as student step content. */
+export async function getStepContentForPreview(
+  versionId: string,
+  stepId: string,
+): Promise<StepContent> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: StepContent;
+  }>(`${BASE}/versions/${versionId}/steps/${stepId}/preview-content`);
+  const data = unwrap(res);
+  return { ...data, id: (data as { id?: string }).id ?? stepId };
 }

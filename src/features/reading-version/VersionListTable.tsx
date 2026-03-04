@@ -8,7 +8,7 @@ import type {
   ReadingLevelVersion,
   ReadingLevel,
 } from "@/src/lib/api/adminReadingVersions";
-import { Pencil, Copy, Trash2, Plus } from "lucide-react";
+import { Pencil, Copy, Trash2, Plus, Eye } from "lucide-react";
 
 interface VersionListTableProps {
   level: ReadingLevel;
@@ -74,33 +74,51 @@ export function VersionListTable({
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
-                          size="icon-xs"
+                          size="sm"
+                          className="gap-1"
                           asChild
                         >
                           <Link
                             href={`/dashboard/instructor/reading-levels/${level._id}/versions/${v._id}/edit`}
+                            title={v.status === "PUBLISHED" ? "View (read-only)" : "Edit this draft"}
                           >
-                            <Pencil className="h-4 w-4" />
+                            {v.status === "PUBLISHED" ? (
+                              <>
+                                <Eye className="h-4 w-4" />
+                                View
+                              </>
+                            ) : (
+                              <>
+                                <Pencil className="h-4 w-4" />
+                                Edit
+                              </>
+                            )}
                           </Link>
                         </Button>
                         {v.status === "PUBLISHED" && (
                           <Button
                             variant="ghost"
-                            size="icon-xs"
+                            size="sm"
+                            className="gap-1"
                             onClick={() => onClone(v._id)}
                             disabled={isBusy(v._id)}
+                            title="Clone into new draft to make changes"
                           >
                             <Copy className="h-4 w-4" />
+                            Clone
                           </Button>
                         )}
                         {v.status === "DRAFT" && (
                           <Button
                             variant="ghost"
-                            size="icon-xs"
+                            size="sm"
+                            className="gap-1 text-destructive hover:text-destructive"
                             onClick={() => onDeleteDraft(v._id)}
                             disabled={isBusy(v._id)}
+                            title="Delete this draft"
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4" />
+                            Delete
                           </Button>
                         )}
                       </div>

@@ -8,6 +8,8 @@ import {
   Layers,
   FileQuestion,
   Tag,
+  ClipboardList,
+  ListChecks,
   type LucideIcon,
 } from "lucide-react";
 
@@ -35,10 +37,13 @@ export const instructorNavGroups: InstructorNavGroup[] = [
     title: "CONTENT",
     items: [
       { label: "Content Management", href: "/dashboard/instructor/contents", icon: FolderKanban },
+      { label: "Quiz Content", href: "/dashboard/instructor/quiz-content", icon: ClipboardList },
+      { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
       { label: "Passage Codes", href: "/dashboard/instructor/passage-codes", icon: Hash },
       { label: "Passages", href: "/dashboard/instructor/passages", icon: FileText },
       { label: "Question Sets", href: "/dashboard/instructor/question-sets", icon: Layers },
       { label: "Questions", href: "/dashboard/instructor/questions", icon: FileQuestion },
+      { label: "Passage Question Sets", href: "/dashboard/instructor/passage-question-sets", icon: Layers },
       { label: "Weakness Tags", href: "/dashboard/instructor/weakness-tags", icon: Tag },
     ],
   },
@@ -49,10 +54,13 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/instructor/reading-levels": "Reading Levels",
   "/dashboard/instructor/reading-monitoring": "Reading Monitoring",
   "/dashboard/instructor/contents": "Content Management",
+  "/dashboard/instructor/quiz-content": "Quiz Content",
+  "/dashboard/instructor/group-tests": "Group Tests",
   "/dashboard/instructor/passage-codes": "Passage Codes",
   "/dashboard/instructor/passages": "Passages",
   "/dashboard/instructor/question-sets": "Question Sets",
   "/dashboard/instructor/questions": "Questions",
+  "/dashboard/instructor/passage-question-sets": "Passage Question Sets",
   "/dashboard/instructor/weakness-tags": "Weakness Tags",
   "/dashboard/instructor/profile": "Profile",
 };
@@ -60,6 +68,11 @@ const PAGE_TITLES: Record<string, string> = {
 export function getInstructorPageTitle(pathname: string): string {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
   if (pathname.match(/\/reading-levels\/[^/]+\/edit$/)) return "Level Builder";
+  if (pathname.match(/\/reading-levels\/[^/]+\/versions\/[^/]+\/edit$/)) return "Edit Version";
+  if (pathname.match(/\/reading-levels\/[^/]+\/versions$/)) return "Version History";
+  if (pathname.match(/\/quiz-content\/[^/]+\/preview$/)) return "Quiz Preview";
+  if (pathname.match(/\/quiz-content\/[^/]+\/edit$/)) return "Edit Quiz";
+  if (pathname.match(/\/quiz-content\/create$/)) return "Create Quiz";
   const matchedPath = Object.keys(PAGE_TITLES)
     .filter((path) => path !== "/dashboard/instructor" && pathname.startsWith(`${path}/`))
     .sort((a, b) => b.length - a.length)[0];

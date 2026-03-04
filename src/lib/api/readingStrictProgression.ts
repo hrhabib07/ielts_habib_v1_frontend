@@ -180,13 +180,113 @@ export interface LearningStepContent {
  */
 export type QuizStepContent = StepQuizContentResponse;
 
+/** Passage + questions for PASSAGE_QUESTION_SET step. */
+export interface PassageQuestionContent {
+  passage: {
+    _id: string;
+    title: string;
+    subTitle?: string;
+    content: unknown;
+    wordCount?: number;
+  };
+  questions: Array<{
+    _id: string;
+    questionNumber: number;
+    type: string;
+    questionBody: unknown;
+    blanks?: { id: number; wordLimit?: number; options?: string[] }[];
+    options?: string[];
+  }>;
+}
+
 /**
  * Normalised step-content envelope returned by GET /levels/:levelId/steps/:stepId/content.
  * Discriminated union — narrow on `type` to get the correct `content` shape.
  */
 export type StepContent =
   | { id: string; type: "INSTRUCTION" | "VIDEO"; content: LearningStepContent }
-  | { id: string; type: "QUIZ" | "VOCABULARY_TEST"; content: QuizStepContent };
+  | { id: string; type: "QUIZ" | "VOCABULARY_TEST"; content: QuizStepContent }
+  | { id: string; type: "PASSAGE_QUESTION_SET"; content: PassageQuestionContent };
+
+/** Group test content for FINAL_EVALUATION step. */
+export interface GroupTestPassageContent {
+  _id: string;
+  title: string;
+  subTitle?: string;
+  content: unknown;
+  wordCount?: number;
+}
+
+export interface GroupTestQuestionForStudent {
+  _id: string;
+  questionNumber: number;
+  type: string;
+  questionBody: unknown;
+  blanks?: { id: number; wordLimit?: number; options?: string[] }[];
+  options?: string[];
+}
+
+/** One question type block (e.g. "Questions 1–7: True/False/Not Given") */
+export interface GroupTestQuestionGroup {
+  questionType: string;
+  startQuestionNumber: number;
+  endQuestionNumber: number;
+  instruction?: string;
+  questions: GroupTestQuestionForStudent[];
+}
+
+export interface GroupTestMiniTestContent {
+  miniTestId: string;
+  passageId: string;
+  questionSetId: string;
+  order: number;
+  passage: GroupTestPassageContent;
+  questions: GroupTestQuestionForStudent[];
+  /** Grouped by question type for IELTS-style display */
+  questionGroups?: GroupTestQuestionGroup[];
+}
+
+export interface GroupTestContentForStudent {
+  groupTestId: string;
+  miniTests: [GroupTestMiniTestContent, GroupTestMiniTestContent, GroupTestMiniTestContent];
+}
+
+export interface SubmitGroupTestPayload {
+  miniTestAnswers: [
+    { answers: Array<{ questionId: string; studentAnswer: string }> },
+    { answers: Array<{ questionId: string; studentAnswer: string }> },
+    { answers: Array<{ questionId: string; studentAnswer: string }> },
+  ];
+}
+
+export interface SubmitGroupTestResponse {
+  overallPass: boolean;
+  miniTestResults: Array<{ bandScore: number; passed: boolean }>;
+  newPassStatus: string;
+  newEvaluationMode: string;
+}
+
+export async function getNextGroupTestContent(
+  levelId: string,
+): Promise<GroupTestContentForStudent | null> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: GroupTestContentForStudent | null;
+  }>(`${BASE}/levels/${levelId}/group-tests/next`);
+  return res.data?.data ?? null;
+}
+
+export async function submitGroupTest(
+  levelId: string,
+  groupTestId: string,
+  payload: SubmitGroupTestPayload,
+): Promise<SubmitGroupTestResponse> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: SubmitGroupTestResponse;
+  }>(`${BASE}/levels/${levelId}/group-tests/${groupTestId}/submit`, payload);
+  return unwrap(res);
+}
 
 export async function getStepContent(
   levelId: string,
@@ -196,4 +296,25 @@ export async function getStepContent(
     `${BASE}/levels/${levelId}/steps/${stepId}/content`,
   );
   return unwrap(res);
+}
+
+/** GET reading target band (4–9). Null if not set yet (required before Level 1). */
+export async function getReadingTargetBand(): Promise<number | null> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: { readingTargetBand: number | null };
+  }>(`${BASE}/target-band`);
+  const data = res.data?.data;
+  return data?.readingTargetBand ?? null;
+}
+
+/** POST set reading target band (4–9). Required before entering first skill level. */
+export async function setReadingTargetBand(
+  targetBand: number,
+): Promise<number> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: { readingTargetBand: number };
+  }>(`${BASE}/target-band`, { targetBand });
+  return unwrap(res).readingTargetBand;
 }

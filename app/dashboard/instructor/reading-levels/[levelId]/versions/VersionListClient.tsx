@@ -116,7 +116,18 @@ export function VersionListClient({ levelId }: VersionListClientProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">{level.title} — Versions</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold">{level.title} — Versions</h2>
+        <Link
+          href={`/dashboard/instructor/reading-levels/${levelId}/edit`}
+          className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+        >
+          Level builder (edit draft)
+        </Link>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        View published versions (read-only) or edit drafts. Clone a published version to create a new draft and make changes.
+      </p>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <VersionListTable
         level={level}

@@ -30,6 +30,10 @@ interface LevelLayoutProps {
   hideSidebar?: boolean;
   /** When level is passed, show "Continue to Level X" or "You completed all levels!" */
   nextLevelInfo?: NextLevelInfo | null;
+  /** Instructor preview mode: show read-only content, no real API calls for group tests */
+  isPreview?: boolean;
+  /** In preview, number of group tests (for final evaluation step message) */
+  previewGroupTestsCount?: number;
 }
 
 export function LevelLayout({
@@ -43,6 +47,8 @@ export function LevelLayout({
   onNavigate,
   hideSidebar = false,
   nextLevelInfo = null,
+  isPreview = false,
+  previewGroupTestsCount,
 }: LevelLayoutProps) {
   const router = useRouter();
   const { progress, steps } = detail;
@@ -134,7 +140,10 @@ export function LevelLayout({
         {/* Content area */}
         <main className="min-w-0 flex-1">
           {isLevelPassed && (
-            <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-linear-to-r from-emerald-50 to-white dark:from-emerald-900/20 dark:to-gray-900 px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div
+              data-level-completed-banner
+              className="mb-6 flex flex-col gap-3 rounded-2xl border-2 border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-5 py-4 shadow-md sm:flex-row sm:items-center sm:justify-between"
+            >
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
                 <div>
@@ -143,7 +152,7 @@ export function LevelLayout({
                   </p>
                   <p className="text-xs text-emerald-600 dark:text-emerald-500">
                     {nextLevelInfo
-                      ? "Continue to the next level below."
+                      ? "Next level is unlocked. Use the button below to continue."
                       : "Great work. You've passed all steps in this level."}
                   </p>
                 </div>
@@ -151,11 +160,14 @@ export function LevelLayout({
               {nextLevelInfo ? (
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    const stepParam = nextLevelInfo.firstStepId
+                      ? `?step=${encodeURIComponent(nextLevelInfo.firstStepId)}`
+                      : "";
                     router.push(
-                      `/profile/reading/strict-levels/${nextLevelInfo.levelId}?step=${encodeURIComponent(nextLevelInfo.firstStepId)}`,
-                    )
-                  }
+                      `/profile/reading/strict-levels/${nextLevelInfo.levelId}${stepParam}`,
+                    );
+                  }}
                   className="flex shrink-0 items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
                 >
                   Continue to {nextLevelInfo.title}
@@ -188,6 +200,23 @@ export function LevelLayout({
                   onProgressUpdate={onProgressUpdate}
                   onNavigate={handleNavigate}
                   allSteps={steps}
+                  isPreview={isPreview}
+                  versionId={isPreview ? detail.progress.versionId : undefined}
+                  previewGroupTestsCount={previewGroupTestsCount}
+                  isLevelPassed={isLevelPassed}
+                  nextLevelInfo={nextLevelInfo}
+                  onNavigateToNextLevel={
+                    nextLevelInfo
+                      ? () => {
+                          const stepParam = nextLevelInfo.firstStepId
+                            ? `?step=${encodeURIComponent(nextLevelInfo.firstStepId)}`
+                            : "";
+                          router.push(
+                            `/profile/reading/strict-levels/${nextLevelInfo.levelId}${stepParam}`,
+                          );
+                        }
+                      : undefined
+                  }
                 />
               )}
             </div>

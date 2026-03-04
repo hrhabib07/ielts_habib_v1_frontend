@@ -14,6 +14,7 @@ export default function CreateQuizContentPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (payload: {
+    contentCode: string;
     title: string;
     description?: string;
     timeLimit?: number;
@@ -35,26 +36,35 @@ export default function CreateQuizContentPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/instructor/quiz-content">
-          <Button variant="outline" size="sm" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
-          Create Quiz
-        </h1>
+    <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/instructor/quiz-content">
+            <Button variant="ghost" size="icon" className="shrink-0" aria-label="Back to quizzes">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-stone-900 dark:text-stone-100 sm:text-2xl">
+              Create quiz
+            </h1>
+            <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">
+              Add a unique content code, title, and question sets. One code per level (e.g. L1C1).
+            </p>
+          </div>
+        </div>
       </div>
       {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div
+          className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          role="alert"
+        >
           {error}
         </div>
       )}
       <QuizBuilderForm
         onSubmit={handleSubmit}
-        submitLabel="Create Quiz"
+        submitLabel="Create quiz"
         isSubmitting={isSubmitting}
       />
     </div>

@@ -21,6 +21,8 @@ export interface QuizGroup {
 
 export interface ReadingQuizContent {
   _id: string;
+  /** Instructor-only code e.g. L1C1. Unique across all content (learning + quiz). */
+  contentCode?: string;
   title: string;
   description?: string;
   timeLimit?: number;
@@ -33,6 +35,7 @@ export interface ReadingQuizContent {
 }
 
 export interface CreateQuizContentPayload {
+  contentCode: string;
   title: string;
   description?: string;
   timeLimit?: number;
@@ -41,6 +44,7 @@ export interface CreateQuizContentPayload {
 }
 
 export interface UpdateQuizContentPayload {
+  contentCode?: string;
   title?: string;
   description?: string;
   timeLimit?: number;

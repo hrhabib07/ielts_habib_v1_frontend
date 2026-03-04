@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -15,7 +16,9 @@ export default function ReadingMonitoringPage() {
         </Button>
         <h1 className="text-2xl font-semibold">Reading monitoring</h1>
       </div>
-      <ReadingMonitoringClient />
+      <Suspense fallback={<div className="py-8 text-center text-sm text-muted-foreground">Loading…</div>}>
+        <ReadingMonitoringClient />
+      </Suspense>
     </div>
   );
 }

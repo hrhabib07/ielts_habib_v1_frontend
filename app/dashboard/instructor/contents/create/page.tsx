@@ -17,6 +17,7 @@ import { ArrowLeft, Loader2, Save } from "lucide-react";
 
 export default function CreateContentPage() {
   const router = useRouter();
+  const [contentCode, setContentCode] = useState("");
   const [title, setTitle] = useState("");
   const [type, setType] = useState<LearningContentType>("INTRO");
   const [body, setBody] = useState("");
@@ -31,6 +32,15 @@ export default function CreateContentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const codeTrimmed = contentCode.trim().replace(/\s+/g, "");
+    if (!codeTrimmed) {
+      setError("Content code is required (e.g. L1C1).");
+      return;
+    }
+    if (!/^L\d+C\d+$/i.test(codeTrimmed)) {
+      setError("Content code must be like L1C1 (level number + C + content number).");
+      return;
+    }
     if (!title.trim()) {
       setError("Title is required.");
       return;
@@ -48,6 +58,7 @@ export default function CreateContentPage() {
         return;
       }
       const payload = {
+        contentCode: codeTrimmed,
         title: title.trim(),
         type,
         ...(showBody ? { body: body.trim() } : {}),
@@ -94,6 +105,23 @@ export default function CreateContentPage() {
               {error}
             </div>
           )}
+
+          <div>
+            <Label htmlFor="contentCode">
+              Content code <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="contentCode"
+              value={contentCode}
+              onChange={(e) => setContentCode(e.target.value.toUpperCase().replace(/\s/g, ""))}
+              placeholder="e.g. L1C1"
+              className="mt-1 max-w-[8rem] font-mono border-stone-300 dark:border-stone-700"
+              required
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Level and content number. Must be unique (e.g. L1C1, L2C3). No duplicates.
+            </p>
+          </div>
 
           <div>
             <Label htmlFor="title">
@@ -188,7 +216,7 @@ export default function CreateContentPage() {
             <Button
               type="submit"
               size="sm"
-              disabled={submitting || !title.trim()}
+              disabled={submitting || !contentCode.trim() || !title.trim()}
               className="gap-2 bg-stone-700 text-white hover:bg-stone-800 dark:bg-stone-600 dark:hover:bg-stone-700"
             >
               {submitting ? (

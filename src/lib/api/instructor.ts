@@ -305,9 +305,12 @@ export interface PassageQuestionSet {
   passageId: string | { _id: string };
   passageCode: string | { _id: string };
   passageNumber: 1 | 2 | 3;
+  /** Human-readable name for the question set */
+  title?: string;
   difficulty: PassageDifficulty;
   questionGroupIds: (string | { _id: string })[];
-  expectedTotalQuestions: number;
+  expectedTotalQuestions?: number;
+  totalQuestions?: number;
   recommendedTime: number;
   isPublished?: boolean;
 }
@@ -316,6 +319,7 @@ export interface CreatePassageQuestionSetPayload {
   passageId: string;
   passageCode: string;
   passageNumber: 1 | 2 | 3;
+  title?: string;
   difficulty: PassageDifficulty;
   questionGroupIds: string[];
   expectedTotalQuestions: number;

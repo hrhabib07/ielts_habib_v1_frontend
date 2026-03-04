@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   type CreateGroupTestPayload,
   type UpdateGroupTestPayload,
 } from "@/src/lib/api/adminReadingVersions";
+import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
 import { Trash2, Plus, Loader2, X, Check, Pencil } from "lucide-react";
 
 interface GroupTestBuilderProps {
@@ -175,64 +176,121 @@ function GroupTestForm({
   disabled,
 }: GroupTestFormProps) {
   const [orderInPool, setOrderInPool] = useState(nextOrderInPool);
-  const [id0, setId0] = useState("");
-  const [id1, setId1] = useState("");
-  const [id2, setId2] = useState("");
+  const [pqsList, setPqsList] = useState<PassageQuestionSet[]>([]);
+  const [loadingPqs, setLoadingPqs] = useState(true);
+  const [pqs0, setPqs0] = useState("");
+  const [pqs1, setPqs1] = useState("");
+  const [pqs2, setPqs2] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    getMyPassageQuestionSets()
+      .then((list) => setPqsList(list.filter((p) => p.questionGroupIds?.length)))
+      .catch(() => setPqsList([]))
+      .finally(() => setLoadingPqs(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id0.trim() || !id1.trim() || !id2.trim()) return;
+    if (!pqs0 || !pqs1 || !pqs2) return;
+    if (new Set([pqs0, pqs1, pqs2]).size !== 3) {
+      return;
+    }
     setSubmitting(true);
     try {
       await onSave({
         orderInPool,
-        miniTestIds: [id0.trim(), id1.trim(), id2.trim()],
+        passageQuestionSetIds: [pqs0, pqs1, pqs2],
       });
     } finally {
       setSubmitting(false);
     }
   };
 
+  const options = pqsList.map((p) => {
+    const meta = `P${p.passageNumber} · ${p.expectedTotalQuestions ?? p.totalQuestions ?? 0} q · ${p.recommendedTime ?? 0} min`;
+    const label = p.title?.trim() ? `${p.title} (${meta})` : `Passage ${p.passageNumber} · ${meta}`;
+    return { value: p._id, label };
+  });
+
   return (
-    <form onSubmit={handleSubmit} className="grid gap-3 rounded-md border p-3">
-      <div>
-        <Label>Order in pool</Label>
-        <Input
-          type="number"
-          min={1}
-          value={orderInPool}
-          onChange={(e) => setOrderInPool(Number(e.target.value) || 1)}
-          disabled={disabled}
-        />
-      </div>
-      <div>
-        <Label>MiniTest IDs (exactly 3)</Label>
-        <div className="grid grid-cols-3 gap-2 mt-1">
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border bg-muted/20 p-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label>Order in pool</Label>
           <Input
-            value={id0}
-            onChange={(e) => setId0(e.target.value)}
-            placeholder="ID 1"
+            type="number"
+            min={1}
+            value={orderInPool}
+            onChange={(e) => setOrderInPool(Number(e.target.value) || 1)}
             disabled={disabled}
-          />
-          <Input
-            value={id1}
-            onChange={(e) => setId1(e.target.value)}
-            placeholder="ID 2"
-            disabled={disabled}
-          />
-          <Input
-            value={id2}
-            onChange={(e) => setId2(e.target.value)}
-            placeholder="ID 3"
-            disabled={disabled}
+            className="mt-1"
           />
         </div>
       </div>
+      <div>
+        <Label className="mb-2 block">Select 3 Passage Question Sets (one per mini test)</Label>
+        {loadingPqs ? (
+          <p className="text-sm text-muted-foreground">Loading passage question sets…</p>
+        ) : pqsList.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No passage question sets with question groups. Create them under Passage Question Sets first.</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Mini test 1</Label>
+              <select
+                value={pqs0}
+                onChange={(e) => setPqs0(e.target.value)}
+                disabled={disabled}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select…</option>
+                {options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Mini test 2</Label>
+              <select
+                value={pqs1}
+                onChange={(e) => setPqs1(e.target.value)}
+                disabled={disabled}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select…</option>
+                {options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Mini test 3</Label>
+              <select
+                value={pqs2}
+                onChange={(e) => setPqs2(e.target.value)}
+                disabled={disabled}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select…</option>
+                {options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
       <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={submitting || disabled}>
+        <Button type="submit" size="sm" disabled={submitting || disabled || loadingPqs || pqsList.length === 0}>
           {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-          Save
+          Create group test
         </Button>
         <Button type="button" variant="outline" size="sm" onClick={onCancel}>
           <X className="h-4 w-4" /> Cancel

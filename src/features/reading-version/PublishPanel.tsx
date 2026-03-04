@@ -61,11 +61,18 @@ export function PublishPanel({
         <CardTitle>Publish</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {validateError && (
-          <p className="text-sm text-destructive">{validateError}</p>
-        )}
-        {publishError && (
-          <p className="text-sm text-destructive">{publishError}</p>
+        {(validateError || publishError) && (
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {(validateError || publishError)
+              ?.replace(
+                "Skill level with GROUP_TEST evaluation must have at least one GroupTest",
+                "Add at least one Group test in the Group tests section.",
+              )
+              ?.replace(
+                "Each GroupTest must have exactly 3 MiniTests",
+                "Each group test must use exactly 3 passage question sets.",
+              ) ?? (validateError || publishError)}
+          </div>
         )}
         <div className="flex flex-wrap gap-2">
           <Button

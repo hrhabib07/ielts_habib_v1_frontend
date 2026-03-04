@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import {
   listLearningContents,
   deleteLearningContent,
-  LEARNING_CONTENT_TYPES,
   type LearningContent,
   type LearningContentType,
 } from "@/src/lib/api/learningContents";
@@ -96,44 +95,34 @@ export default function InstructorContentsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Content Management
           </h1>
-          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-            Create and manage intro, note, video, and analytics content. Reuse in Level → Step Builder.
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Create and manage learning content (intro, note, strategy, video, analytics) for use in Reading Level steps. Each content has a code (e.g. INTRO-1, NOTE-2) for easy reference when adding steps; codes are instructor-only and not shown to students.
           </p>
         </div>
-        <div className="flex shrink-0 gap-2">
-          <Link href="/dashboard/instructor">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 border-stone-300 text-stone-700 dark:border-stone-700 dark:text-stone-300"
-            >
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard/instructor" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </Link>
-          <Link href="/dashboard/instructor/quiz-content/create">
-            <Button variant="outline" size="sm" className="gap-2 border-stone-300 text-stone-700 dark:border-stone-600 dark:text-stone-300">
-              <Plus className="h-4 w-4" />
-              Create Quiz
-            </Button>
-          </Link>
-          <Link href="/dashboard/instructor/contents/create">
-            <Button size="sm" className="gap-2 bg-stone-700 text-white hover:bg-stone-800 dark:bg-stone-600 dark:hover:bg-stone-700">
+              Dashboard
+            </Link>
+          </Button>
+          <Button size="sm" asChild className="gap-2">
+            <Link href="/dashboard/instructor/contents/create">
               <Plus className="h-4 w-4" />
               Create Content
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
 
-      <Card className="overflow-hidden rounded-2xl border-stone-200 shadow-sm dark:border-stone-800">
-        <div className="flex items-center justify-between border-b border-stone-200 bg-stone-50/50 px-6 py-4 dark:border-stone-800 dark:bg-stone-900/30">
-          <h2 className="font-semibold text-stone-900 dark:text-stone-100">
+      <Card className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b bg-muted/30 px-6 py-4">
+          <h2 className="text-sm font-medium text-foreground">
             All content
           </h2>
           {error && (
@@ -145,15 +134,15 @@ export default function InstructorContentsPage() {
         </div>
 
         {loading && (
-          <div className="flex items-center justify-center py-16 text-stone-500 dark:text-stone-400">
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Loading…
+          <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span className="text-sm">Loading content…</span>
           </div>
         )}
 
         {!loading && error && (
           <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-            <AlertCircle className="h-8 w-8 text-destructive" />
+            <AlertCircle className="h-9 w-9 text-destructive" />
             <p className="text-sm font-medium text-destructive">{error}</p>
             <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
               <RefreshCw className="h-3.5 w-3.5" />
@@ -163,22 +152,22 @@ export default function InstructorContentsPage() {
         )}
 
         {!loading && !error && items.length === 0 && (
-          <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <FileText className="h-12 w-12 text-stone-400 dark:text-stone-500" />
+          <div className="flex flex-col items-center gap-5 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+              <FileText className="h-7 w-7 text-muted-foreground" />
+            </div>
             <div>
-              <p className="font-medium text-stone-900 dark:text-stone-100">
-                No content yet
-              </p>
-              <p className="mt-1 max-w-sm text-sm text-stone-500 dark:text-stone-400">
-                Create intro, note, video, or analytics content to reuse in level steps.
+              <p className="font-medium text-foreground">No content yet</p>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                Create intro, note, video, or analytics content to attach to level steps.
               </p>
             </div>
-            <Link href="/dashboard/instructor/contents/create">
-              <Button size="sm" className="gap-2 bg-stone-700 text-white hover:bg-stone-800">
+            <Button size="sm" asChild>
+              <Link href="/dashboard/instructor/contents/create" className="gap-2">
                 <Plus className="h-4 w-4" />
                 Create Content
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         )}
 
@@ -186,61 +175,66 @@ export default function InstructorContentsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-stone-200 text-left text-stone-500 dark:border-stone-800 dark:text-stone-400">
-                  <th className="p-4 font-medium">Title</th>
-                  <th className="p-4 font-medium">Type</th>
-                  <th className="p-4 font-medium">Created</th>
-                  <th className="p-4 font-medium">Status</th>
-                  <th className="p-4 text-right font-medium">Actions</th>
+                <tr className="border-b bg-muted/20 text-left text-muted-foreground">
+                  <th className="px-6 py-3 font-medium">Code</th>
+                  <th className="px-6 py-3 font-medium">Title</th>
+                  <th className="px-6 py-3 font-medium">Type</th>
+                  <th className="px-6 py-3 font-medium">Created</th>
+                  <th className="px-6 py-3 font-medium">Status</th>
+                  <th className="px-6 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item) => (
                   <tr
                     key={item._id}
-                    className="border-b border-stone-100 last:border-0 hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900/50"
+                    className="border-b transition-colors last:border-0 hover:bg-muted/30"
                   >
-                    <td className="p-4 font-medium text-stone-900 dark:text-stone-100">
+                    <td className="px-6 py-4">
+                      <span className="font-mono text-xs font-medium text-muted-foreground">
+                        {item.contentCode ?? "—"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 font-medium text-foreground">
                       {item.title}
                     </td>
-                    <td className="p-4">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                         {TYPE_ICONS[item.type]}
                         {TYPE_LABELS[item.type]}
                       </span>
                     </td>
-                    <td className="p-4 text-stone-500 dark:text-stone-400">
+                    <td className="px-6 py-4 text-muted-foreground">
                       {formatDate(item.createdAt)}
                     </td>
-                    <td className="p-4">
+                    <td className="px-6 py-4">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           item.isPublished
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                            : "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400"
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300"
+                            : "bg-muted text-muted-foreground"
                         }`}
                       >
                         {item.isPublished ? "Published" : "Draft"}
                       </span>
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-1">
-                        <Link
-                          href={`/dashboard/instructor/contents/${item._id}/preview`}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 gap-1.5 text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            Preview
-                          </Button>
-                        </Link>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 gap-1.5 text-stone-600 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800"
+                          className="h-8 gap-1.5"
+                          asChild
+                        >
+                          <Link href={`/dashboard/instructor/contents/${item._id}/preview`}>
+                            <Eye className="h-3.5 w-3.5" />
+                            Preview
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 gap-1.5"
                           onClick={() =>
                             router.push(`/dashboard/instructor/contents/${item._id}`)
                           }
@@ -251,7 +245,7 @@ export default function InstructorContentsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 gap-1.5 text-destructive hover:bg-destructive/10"
+                          className="h-8 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
                           disabled={deletingId === item._id}
                           onClick={() => handleDelete(item._id, item.title)}
                         >

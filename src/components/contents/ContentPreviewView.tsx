@@ -92,6 +92,11 @@ export function ContentPreviewView({
 
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
+          {content.contentCode && (
+            <span className="font-mono rounded-full border bg-muted/50 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {content.contentCode}
+            </span>
+          )}
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
             {TYPE_ICONS[type]}
             {TYPE_LABELS[type]}

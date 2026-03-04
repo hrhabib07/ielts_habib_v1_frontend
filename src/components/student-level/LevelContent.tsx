@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import {
   CheckCircle2,
@@ -22,8 +23,10 @@ import type {
   SubmitStepQuizResponse,
   StepContent,
   StepQuizContentResponse,
+  PassageQuestionContent,
 } from "@/src/lib/api/readingStrictProgression";
 import { getStepContent } from "@/src/lib/api/readingStrictProgression";
+import { getStepContentForPreview } from "@/src/lib/api/adminReadingVersions";
 
 const StepQuizSubmitCard = dynamic(
   () =>
@@ -40,6 +43,27 @@ const StepQuizSubmitCard = dynamic(
     ssr: false,
   },
 );
+
+function FinalEvaluationStartCard({ levelId }: { levelId: string }) {
+  return (
+    <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        Final Evaluation
+      </h3>
+      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        This is a full Reading mock test in exam conditions: three passages with
+        questions. You will complete it in a dedicated test environment.
+      </p>
+      <Link
+        href={`/profile/reading/strict-levels/${levelId}/final-evaluation`}
+        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+      >
+        Start Final Evaluation
+        <ChevronRight className="h-4 w-4" />
+      </Link>
+    </div>
+  );
+}
 
 const QUIZ_STEP_TYPES = ["QUIZ", "VOCABULARY_TEST"];
 
@@ -203,6 +227,15 @@ export interface LevelContentProps {
   onProgressUpdate: (progress: SubmitStepQuizResponse["progress"]) => void;
   onNavigate?: (stepId: string) => void;
   allSteps?: LevelDetailStep[];
+  /** Instructor preview: use admin step preview API and show final evaluation link */
+  isPreview?: boolean;
+  /** Required when isPreview: used to fetch step content without student progress */
+  versionId?: string;
+  previewGroupTestsCount?: number;
+  /** When level is passed, show inline "Continue to next level" (student view) */
+  isLevelPassed?: boolean;
+  nextLevelInfo?: { levelId: string; title: string; firstStepId: string } | null;
+  onNavigateToNextLevel?: () => void;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -223,6 +256,12 @@ export function LevelContent({
   onProgressUpdate,
   onNavigate,
   allSteps,
+  isPreview = false,
+  versionId,
+  previewGroupTestsCount,
+  isLevelPassed,
+  nextLevelInfo,
+  onNavigateToNextLevel,
 }: LevelContentProps) {
   const [visibleStepId, setVisibleStepId] = useState<string | null>(null);
   const [content, setContent] = useState<StepContent | null>(null);
@@ -244,14 +283,21 @@ export function LevelContent({
       setContentError(null);
       setContent(null);
       try {
-        const data = await getStepContent(levelId, stepId);
+        const data =
+          isPreview && versionId
+            ? await getStepContentForPreview(versionId, stepId)
+            : await getStepContent(levelId, stepId);
         setContent(data);
       } catch (err) {
-        // Show a friendly message for 403 — previous step not yet completed.
-        const status = (err as { response?: { status?: number } })?.response
-          ?.status;
+        const ax = err as {
+          response?: { status?: number; data?: { message?: string } };
+        };
+        const status = ax?.response?.status;
+        const backendMessage = ax?.response?.data?.message;
         if (status === 403) {
           setContentError("Complete previous step to unlock this content.");
+        } else if (backendMessage && backendMessage.trim()) {
+          setContentError(backendMessage);
         } else {
           setContentError(
             err instanceof Error ? err.message : "Failed to load content",
@@ -261,13 +307,19 @@ export function LevelContent({
         setContentLoading(false);
       }
     },
-    [levelId],
+    [levelId, isPreview, versionId],
   );
 
   useEffect(() => {
     if (!step || isLocked) {
       setContent(null);
       setContentError(null);
+      return;
+    }
+    if (step.stepType === "FINAL_EVALUATION") {
+      setContent(null);
+      setContentError(null);
+      setContentLoading(false);
       return;
     }
     if (step.contentId) {
@@ -446,6 +498,45 @@ export function LevelContent({
                 />
               )}
 
+            {/* FINAL_EVALUATION: Start button only — actual test runs in dedicated mock environment */}
+            {!contentLoading &&
+              !contentError &&
+              step.stepType === "FINAL_EVALUATION" &&
+              (isPreview ? (
+                <div className="rounded-2xl border border-dashed border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/30 p-6 text-center">
+                  <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                    Final evaluation (group tests)
+                  </p>
+                  <p className="mt-2 text-sm text-emerald-700 dark:text-emerald-300">
+                    {previewGroupTestsCount != null && previewGroupTestsCount > 0
+                      ? `This level has ${previewGroupTestsCount} group test(s). Each group test has 3 passage-based mini tests. Students will see and attempt them here after completing the steps above.`
+                      : "This level uses group tests for the final evaluation. Students will see the group test content here."}
+                  </p>
+                  {versionId && (
+                    <Link
+                      href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/final-evaluation-preview`}
+                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                    >
+                      Preview final evaluation
+                      <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  )}
+                  <p className="mt-3 text-xs text-emerald-600 dark:text-emerald-400">
+                    Preview only — submission is disabled.
+                  </p>
+                </div>
+              ) : (
+                <FinalEvaluationStartCard levelId={levelId} />
+              ))}
+
+            {/* PASSAGE_QUESTION_SET: passage + questions */}
+            {!contentLoading &&
+              !contentError &&
+              content !== null &&
+              content.type === "PASSAGE_QUESTION_SET" && (
+                <PassageQuestionContentRenderer content={content.content} />
+              )}
+
             {/* No contentId — step has no linked content */}
             {!contentLoading &&
               !contentError &&
@@ -457,8 +548,8 @@ export function LevelContent({
               )}
           </div>
 
-          {/* Mark complete button */}
-          {!isQuizStep && isCurrent && !isCompleted && (
+          {/* Mark complete button (not for quiz steps or FINAL_EVALUATION) */}
+          {!isQuizStep && step.stepType !== "FINAL_EVALUATION" && isCurrent && !isCompleted && (
             <div className="flex items-center gap-4 rounded-2xl border border-gray-100 dark:border-gray-700 bg-linear-to-r from-indigo-50 to-white dark:from-indigo-950/30 dark:to-gray-800/50 p-5">
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -501,7 +592,27 @@ export function LevelContent({
             </div>
           )}
 
-          {/* Prev / Next navigation */}
+          {/* Level passed — inline Next level button (visible without scrolling to banner) */}
+          {isLevelPassed && nextLevelInfo && onNavigateToNextLevel && (
+            <div className="rounded-2xl border-2 border-emerald-400 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 p-5 shadow-sm">
+              <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                Level complete! Next level is unlocked.
+              </p>
+              <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
+                Continue to {nextLevelInfo.title} to keep going.
+              </p>
+              <button
+                type="button"
+                onClick={onNavigateToNextLevel}
+                className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+              >
+                Next: {nextLevelInfo.title}
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Prev / Next navigation — Next goes to next step or, on last step, to next level */}
           {onNavigate && allSteps && (
             <div className="flex items-center justify-between pt-2">
               {prevStep ? (
@@ -525,6 +636,15 @@ export function LevelContent({
                   Next
                   <ChevronRight className="h-4 w-4" />
                 </button>
+              ) : nextLevelInfo && onNavigateToNextLevel ? (
+                <button
+                  type="button"
+                  onClick={onNavigateToNextLevel}
+                  className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98]"
+                >
+                  Next: {nextLevelInfo.title}
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               ) : (
                 <div />
               )}
@@ -532,6 +652,43 @@ export function LevelContent({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+type PassageParagraph = { paragraphIndex: number; paragraphLabel: string; text: string };
+
+function PassageQuestionContentRenderer({
+  content,
+}: {
+  content: PassageQuestionContent;
+}) {
+  const paragraphs = Array.isArray(content.passage.content)
+    ? (content.passage.content as PassageParagraph[])
+    : [];
+  const passageContent = paragraphs.map((p) => (
+    <p key={p.paragraphIndex} className="mb-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+      {p.paragraphLabel && (
+        <span className="font-medium text-gray-500 dark:text-gray-400 mr-1">{p.paragraphLabel}</span>
+      )}
+      {p.text}
+    </p>
+  ));
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <h3 className="text-lg font-semibold mb-2">{content.passage.title}</h3>
+        {content.passage.subTitle && (
+          <p className="text-sm text-gray-500 mb-3">{content.passage.subTitle}</p>
+        )}
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          {passageContent}
+        </div>
+      </div>
+      <p className="text-sm text-gray-500">
+        Read the passage above. Answer the questions in the next steps or in the Final Evaluation.
+      </p>
     </div>
   );
 }

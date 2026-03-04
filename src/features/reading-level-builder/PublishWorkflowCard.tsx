@@ -63,17 +63,31 @@ export function PublishWorkflowCard({
     }
   };
 
+  const friendlyError =
+    validateError || publishError
+      ? (validateError || publishError)?.replace(
+          "Skill level with GROUP_TEST evaluation must have at least one GroupTest",
+          "Add at least one Group test in the Group tests section below.",
+        )?.replace(
+          "Each GroupTest must have exactly 3 MiniTests",
+          "Each group test must use exactly 3 passage question sets.",
+        ) ?? null
+      : null;
+
   return (
     <Card className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
       <CardHeader className="p-0 pb-4">
         <CardTitle className="text-lg font-semibold">Publish level</CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          Use the checklist above. Validate then publish. Published versions are read-only; use Clone from Versions to create a new draft.
+        </p>
       </CardHeader>
       <CardContent className="space-y-4 p-0">
-        {validateError && <p className="text-sm text-destructive">{validateError}</p>}
-        {publishError && <p className="text-sm text-destructive">{publishError}</p>}
-        <p className="text-sm text-zinc-600">
-          Validate steps and content, then publish. Published versions cannot be edited.
-        </p>
+        {friendlyError && (
+          <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {friendlyError}
+          </div>
+        )}
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"

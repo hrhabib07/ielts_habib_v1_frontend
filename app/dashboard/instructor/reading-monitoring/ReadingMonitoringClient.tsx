@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   getFailedStudents,
@@ -39,7 +40,14 @@ const TABS: { id: TabId; label: string }[] = [
 const PAGE_SIZE = 20;
 
 export function ReadingMonitoringClient() {
-  const [activeTab, setActiveTab] = useState<TabId>("failed");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const validTab: TabId = ["failed", "restart", "locks", "version-usage"].includes(tabParam ?? "") ? (tabParam as TabId) : "failed";
+  const [activeTab, setActiveTab] = useState<TabId>(validTab);
+
+  useEffect(() => {
+    setActiveTab(validTab);
+  }, [validTab]);
   const [failed, setFailed] = useState<FailedStudentItem[]>([]);
   const [failedMeta, setFailedMeta] = useState<MonitoringMeta | null>(null);
   const [failedPage, setFailedPage] = useState(1);

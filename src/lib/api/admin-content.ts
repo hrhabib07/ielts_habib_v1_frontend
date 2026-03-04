@@ -45,6 +45,7 @@ export interface AdminPassageQuestionSet {
   passageId: string | { _id: string };
   passageCode: string | { _id: string };
   passageNumber: number;
+  title?: string;
   totalQuestions: number;
   recommendedTime: number;
   isPublished?: boolean;

@@ -127,7 +127,7 @@ export default function InstructorProfilePage() {
               <ArrowRight className="h-4 w-4 text-stone-400" />
             </div>
           </Link>
-          <Link href="/dashboard/instructor/levels">
+          <Link href="/dashboard/instructor/reading-levels">
             <div className="flex items-center justify-between rounded-xl border border-stone-200 bg-white p-4 transition-colors hover:border-stone-300 hover:bg-stone-50 dark:border-stone-800 dark:bg-stone-900/50 dark:hover:border-stone-700 dark:hover:bg-stone-800/50">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-stone-100 dark:bg-stone-800">

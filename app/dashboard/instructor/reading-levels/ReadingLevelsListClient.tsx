@@ -31,7 +31,7 @@ import {
   type ReadingLevelDifficulty,
   type ReadingLevelVersion,
 } from "@/src/lib/api/adminReadingVersions";
-import { Loader2, ChevronRight, Plus, Pencil, Trash2, X, Eye, Upload } from "lucide-react";
+import { Loader2, ChevronRight, Plus, Pencil, Trash2, X, Eye, Upload, GitBranch } from "lucide-react";
 
 export interface LevelVersionSummary {
   publishedVersion?: number;
@@ -269,6 +269,20 @@ export function ReadingLevelsListClient() {
                     </Link>
                     <div className="flex items-center gap-1">
                       <Link
+                        href={`/dashboard/instructor/reading-levels/${level._id}/versions`}
+                        className="inline-flex"
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-9 gap-1.5"
+                          title="View and manage versions (published v1, draft v2, etc.)"
+                        >
+                          <GitBranch className="h-4 w-4" />
+                          Versions
+                        </Button>
+                      </Link>
+                      <Link
                         href={`/dashboard/instructor/reading-levels/${level._id}/preview`}
                         className="inline-flex"
                       >
@@ -291,7 +305,7 @@ export function ReadingLevelsListClient() {
                         href={`/dashboard/instructor/reading-levels/${level._id}/edit`}
                       >
                         <Button variant="outline" size="sm" className="h-9">
-                          Edit
+                          Edit draft
                         </Button>
                       </Link>
                       {s.hasDraft && s.draftVersionId && (

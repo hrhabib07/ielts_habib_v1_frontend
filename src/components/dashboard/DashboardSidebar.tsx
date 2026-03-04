@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, X, BarChart3, BookOpen, Activity, FolderKanban, Hash, FileText, Layers, FileQuestion, Tag, LayoutDashboard, Settings, Users } from "lucide-react";
+import { GraduationCap, X, BarChart3, BookOpen, Activity, FolderKanban, Hash, FileText, Layers, FileQuestion, Tag, LayoutDashboard, Settings, Users, ClipboardList, ListChecks } from "lucide-react";
 import type { UserRole } from "@/src/lib/constants";
 
 function isNavItemActive(pathname: string, href: string): boolean {
@@ -38,10 +38,13 @@ const INSTRUCTOR_CONTENT: DashboardNavGroup = {
   roles: ["INSTRUCTOR", "ADMIN"],
   items: [
     { label: "Content Management", href: "/dashboard/instructor/contents", icon: FolderKanban },
+    { label: "Quiz Content", href: "/dashboard/instructor/quiz-content", icon: ClipboardList },
+    { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
     { label: "Passage Codes", href: "/dashboard/instructor/passage-codes", icon: Hash },
     { label: "Passages", href: "/dashboard/instructor/passages", icon: FileText },
     { label: "Question Sets", href: "/dashboard/instructor/question-sets", icon: Layers },
     { label: "Questions", href: "/dashboard/instructor/questions", icon: FileQuestion },
+    { label: "Passage Question Sets", href: "/dashboard/instructor/passage-question-sets", icon: Layers },
     { label: "Weakness Tags", href: "/dashboard/instructor/weakness-tags", icon: Tag },
   ],
 };

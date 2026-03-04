@@ -232,9 +232,10 @@ export function StepBuilder({
 }
 
 function quizSummary(q: ReadingQuizContent): string {
+  const code = q.contentCode ? `[${q.contentCode}] ` : "";
   const groups = q.groups?.length ?? 0;
   const questions = q.groups?.reduce((s, g) => s + (g.questions?.length ?? 0), 0) ?? 0;
-  return `${q.title} — ${groups} group(s), ${questions} question(s)`;
+  return `${code}${q.title} — ${groups} group(s), ${questions} question(s)`;
 }
 
 interface StepFormProps {
@@ -402,7 +403,7 @@ function StepForm({
             <option value="">— None —</option>
             {contents.map((c) => (
               <option key={c._id} value={c._id}>
-                {c.title}
+                {c.contentCode ? `[${c.contentCode}] ` : ""}{c.title}
               </option>
             ))}
           </select>
@@ -636,7 +637,7 @@ function StepEditForm({
             <option value="">— None —</option>
             {contents.map((c) => (
               <option key={c._id} value={c._id}>
-                {c.title}
+                {c.contentCode ? `[${c.contentCode}] ` : ""}{c.title}
               </option>
             ))}
           </select>
