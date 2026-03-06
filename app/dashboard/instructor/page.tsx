@@ -15,6 +15,7 @@ import {
   Users,
   ClipboardCheck,
   ListChecks,
+  MessageSquare,
 } from "lucide-react";
 import { getReadingLevels } from "@/src/lib/api/adminReadingVersions";
 import {
@@ -126,6 +127,12 @@ export default function InstructorDashboardPage() {
       description: "Review failed students, approve restart requests, view locks",
       href: "/dashboard/instructor/reading-monitoring",
       icon: Activity,
+    },
+    {
+      title: "Level feedback",
+      description: "View student feedback per level (quality, recommend, video) and analytics",
+      href: "/dashboard/instructor/level-feedback",
+      icon: MessageSquare,
     },
     {
       title: "Quiz Content",

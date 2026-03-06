@@ -9,6 +9,7 @@ import {
   type GroupTestQuestionForStudent,
 } from "@/src/lib/api/readingStrictProgression";
 import { InstructionBlock } from "./InstructionBlock";
+import { GapFillingQuestionInput, hasGapPlaceholders, isStructuredNoteQuestion } from "./GapFillingQuestionInput";
 
 const QUESTION_TYPE_LABEL: Record<string, string> = {
   TRUE_FALSE_NOT_GIVEN: "True / False / Not Given",
@@ -124,14 +125,29 @@ function QuestionBlock({
 }: {
   question: GroupTestQuestionForStudent;
   displayNumber: number;
-  value: string;
-  onChange: (v: string) => void;
+  value: string | string[];
+  onChange: (v: string | string[]) => void;
   disabled?: boolean;
 }) {
   const qBody = question.questionBody;
-  const text = (extractQuestionText(qBody) as string).trim() || `Question ${displayNumber}`;
+  const rawText = extractQuestionText(qBody);
+  const text = (rawText as string).trim() || `Question ${displayNumber}`;
+
+  if (question.blanks?.length && (isStructuredNoteQuestion(question) || hasGapPlaceholders(rawText) || question.blanks.length > 1)) {
+    return (
+      <GapFillingQuestionInput
+        question={question}
+        displayNumber={displayNumber}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        inputClassName={`min-w-[140px] max-w-[220px] ${QUESTION_INPUT_BASE}`}
+      />
+    );
+  }
 
   if (question.options?.length) {
+    const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
     return (
       <div className="mb-6">
         <p className={`mb-2.5 ${QUESTION_TEXT_CLASS}`}>
@@ -147,7 +163,7 @@ function QuestionBlock({
                 type="radio"
                 name={question._id}
                 value={opt}
-                checked={value === opt}
+                checked={singleVal === opt}
                 onChange={() => onChange(opt)}
                 disabled={disabled}
                 className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -161,6 +177,7 @@ function QuestionBlock({
   }
 
   if (question.blanks?.length) {
+    const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
     return (
       <div className="mb-6">
         <p className={`mb-2.5 ${QUESTION_TEXT_CLASS}`}>
@@ -169,7 +186,7 @@ function QuestionBlock({
         <div className="flex flex-wrap items-center gap-2">
           <input
             type="text"
-            value={value}
+            value={singleVal}
             onChange={(e) => onChange(e.target.value)}
             placeholder={
               question.blanks[0]?.options?.length
@@ -184,6 +201,7 @@ function QuestionBlock({
     );
   }
 
+  const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
   return (
     <div className="mb-6">
       <p className={`mb-2.5 ${QUESTION_TEXT_CLASS}`}>
@@ -191,7 +209,7 @@ function QuestionBlock({
       </p>
       <input
         type="text"
-        value={value}
+        value={singleVal}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Your answer"
         disabled={disabled}
@@ -223,7 +241,7 @@ export function ReadingMockTestView({
   onProgressUpdate,
 }: ReadingMockTestViewProps) {
   const [passageIndex, setPassageIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [passageWidthPct, setPassageWidthPct] = useState(DEFAULT_PASSAGE_WIDTH_PCT);
@@ -279,7 +297,7 @@ export function ReadingMockTestView({
     }
   }, [miniTest.questions]);
 
-  const setAnswer = useCallback((questionId: string, value: string) => {
+  const setAnswer = useCallback((questionId: string, value: string | string[]) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   }, []);
 
@@ -312,14 +330,22 @@ export function ReadingMockTestView({
     setSubmitting(true);
     try {
       const miniTestAnswers = content.miniTests.map((mt) => ({
-        answers: mt.questions.map((q) => ({
-          questionId: q._id,
-          studentAnswer: answers[q._id]?.trim() ?? "",
-        })),
+        answers: mt.questions.map((q) => {
+          const val = answers[q._id];
+          if (Array.isArray(val)) {
+            return { questionId: q._id, studentAnswers: val.map((s) => String(s).trim()) };
+          }
+          return { questionId: q._id, studentAnswer: String(val ?? "").trim() };
+        }),
       }));
 
       const allAnswered = miniTestAnswers.every((ma) =>
-        ma.answers.every((a) => a.studentAnswer !== ""),
+        ma.answers.every((a) => {
+          if ("studentAnswers" in a && Array.isArray(a.studentAnswers)) {
+            return a.studentAnswers.every((s) => s !== "");
+          }
+          return (a.studentAnswer ?? "") !== "";
+        }),
       );
       if (!allAnswered) {
         setError("Please answer all questions before submitting.");
@@ -328,11 +354,7 @@ export function ReadingMockTestView({
       }
 
       const res = await submitGroupTest(levelId, content.groupTestId, {
-        miniTestAnswers: miniTestAnswers as [
-          { answers: Array<{ questionId: string; studentAnswer: string }> },
-          { answers: Array<{ questionId: string; studentAnswer: string }> },
-          { answers: Array<{ questionId: string; studentAnswer: string }> },
-        ],
+        miniTestAnswers,
       });
       onProgressUpdate?.();
       onSubmitted({
@@ -528,7 +550,7 @@ export function ReadingMockTestView({
                           <QuestionBlock
                             question={q}
                             displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
-                            value={answers[q._id] ?? ""}
+                            value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
                             onChange={(v) => setAnswer(q._id, v)}
                             disabled={submitting}
                           />
@@ -548,7 +570,7 @@ export function ReadingMockTestView({
                     <QuestionBlock
                       question={q}
                       displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
-                      value={answers[q._id] ?? ""}
+                      value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
                       onChange={(v) => setAnswer(q._id, v)}
                       disabled={submitting}
                     />
@@ -565,9 +587,11 @@ export function ReadingMockTestView({
         {content.miniTests.map((_, idx) => {
           const isActive = passageIndex === idx;
           const mt = content.miniTests[idx] as GroupTestMiniTestContent;
-          const answeredCount = mt.questions.filter(
-            (q) => (answers[q._id] ?? "").trim() !== "",
-          ).length;
+          const answeredCount = mt.questions.filter((q) => {
+            const v = answers[q._id];
+            if (Array.isArray(v)) return v.every((s) => String(s).trim() !== "");
+            return String(v ?? "").trim() !== "";
+          }).length;
           const total = mt.questions.length;
           return (
             <div
@@ -584,7 +608,10 @@ export function ReadingMockTestView({
               {isActive ? (
                 <div className="flex flex-wrap items-center gap-1">
                   {mt.questions.map((q) => {
-                    const answered = (answers[q._id] ?? "").trim() !== "";
+                    const v = answers[q._id];
+                    const answered = Array.isArray(v)
+                      ? v.every((s) => String(s).trim() !== "")
+                      : String(v ?? "").trim() !== "";
                     const displayNum =
                       isActive && displayNumberByQuestionId[q._id] != null
                         ? displayNumberByQuestionId[q._id]

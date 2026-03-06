@@ -64,6 +64,7 @@ export function StepsBuilderSection({
           <StepBuilder
             versionId={versionId}
             steps={steps}
+            practiceTests={currentDetail.practiceTests ?? []}
             disabled={disabled}
             onStepsChange={handleStepsChange}
           />

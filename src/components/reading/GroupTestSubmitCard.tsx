@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import {
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
 } from "@/src/lib/api/readingStrictProgression";
+import { GapFillingQuestionInput, hasGapPlaceholders, isStructuredNoteQuestion } from "./GapFillingQuestionInput";
 import { Loader2, CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 export interface GroupTestSubmitCardProps {
@@ -49,11 +50,27 @@ function MiniTestSection({
 }: {
   miniTest: GroupTestMiniTestContent;
   index: number;
-  answers: Record<string, string>;
-  setAnswer: (qId: string, value: string) => void;
+  answers: Record<string, string | string[]>;
+  setAnswer: (qId: string, value: string | string[]) => void;
   disabled?: boolean;
 }) {
   const [expanded, setExpanded] = useState(index === 0);
+
+  const displayNumberByQuestionId = useMemo(() => {
+    const map: Record<string, number> = {};
+    if (miniTest.questionGroups && miniTest.questionGroups.length > 0) {
+      for (const group of miniTest.questionGroups) {
+        group.questions.forEach((q, idx) => {
+          map[q._id] = group.startQuestionNumber + idx;
+        });
+      }
+    } else {
+      miniTest.questions.forEach((q, idx) => {
+        map[q._id] = q.questionNumber ?? idx + 1;
+      });
+    }
+    return map;
+  }, [miniTest.questionGroups, miniTest.questions]);
 
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -87,7 +104,8 @@ function MiniTestSection({
                 <QuestionInput
                   key={q._id}
                   question={q}
-                  value={answers[q._id] ?? ""}
+                  displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
+                  value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
                   onChange={(v) => setAnswer(q._id, v)}
                   disabled={disabled}
                 />
@@ -114,43 +132,59 @@ function extractQuestionText(qBody: unknown): string {
 
 function QuestionInput({
   question,
+  displayNumber,
   value,
   onChange,
   disabled,
 }: {
   question: GroupTestQuestionForStudent;
-  value: string;
-  onChange: (v: string) => void;
+  displayNumber: number;
+  value: string | string[];
+  onChange: (v: string | string[]) => void;
   disabled?: boolean;
 }) {
   const qBody = question.questionBody;
   const rawText = extractQuestionText(qBody);
-  const text = rawText.trim() || `Question ${question.questionNumber}`;
+
+  if (question.blanks?.length && (isStructuredNoteQuestion(question) || hasGapPlaceholders(rawText) || question.blanks.length > 1)) {
+    return (
+      <GapFillingQuestionInput
+        question={question}
+        displayNumber={displayNumber}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        inputClassName="min-w-[100px] max-w-[180px] inline-flex rounded border border-gray-300 bg-white px-2 py-1.5 text-sm align-baseline dark:border-gray-600 dark:bg-gray-800"
+      />
+    );
+  }
 
   if (question.blanks?.length) {
+    const text = rawText.trim() || `Question ${displayNumber}`;
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{question.questionNumber}. {text}</Label>
-        {question.blanks.map((b) => (
-          <div key={b.id} className="flex items-center gap-2">
-            <Input
-              type="text"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder={b.options?.length ? `Choose: ${b.options.join(", ")}` : `Answer (max ${b.wordLimit ?? "—"} words)`}
-              disabled={disabled}
-              className="max-w-md"
-            />
-          </div>
-        ))}
+        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
+        <div className="flex items-center gap-2">
+          <Input
+            type="text"
+            value={Array.isArray(value) ? value[0] ?? "" : value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={question.blanks[0]?.options?.length ? `Choose: ${question.blanks[0].options.join(", ")}` : `Answer (max ${question.blanks[0]?.wordLimit ?? "—"} words)`}
+            disabled={disabled}
+            className="max-w-md"
+          />
+        </div>
       </div>
     );
   }
 
+  const text = rawText.trim() || `Question ${displayNumber}`;
+
   if (question.options?.length) {
+    const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{question.questionNumber}. {text}</Label>
+        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
         <div className="space-y-1.5 pl-2">
           {question.options.map((opt, i) => (
             <label key={i} className="flex items-center gap-2 cursor-pointer">
@@ -158,7 +192,7 @@ function QuestionInput({
                 type="radio"
                 name={question._id}
                 value={opt}
-                checked={value === opt}
+                checked={singleVal === opt}
                 onChange={() => onChange(opt)}
                 disabled={disabled}
                 className="rounded border-gray-300"
@@ -174,12 +208,12 @@ function QuestionInput({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={question._id} className="text-sm font-medium">
-        Q{question.questionNumber}. {text}
+        Q{displayNumber}. {text}
       </Label>
       <Input
         id={question._id}
         type="text"
-        value={value}
+        value={Array.isArray(value) ? value[0] ?? "" : value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Your answer"
         disabled={disabled}
@@ -203,7 +237,7 @@ export function GroupTestSubmitCard({
     overallPass: boolean;
     miniTestResults: Array<{ bandScore: number; passed: boolean }>;
   } | null>(null);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -229,14 +263,22 @@ export function GroupTestSubmitCard({
     if (!content || submitting || disabled) return;
 
     const miniTestAnswers = content.miniTests.map((mt) => ({
-      answers: mt.questions.map((q) => ({
-        questionId: q._id,
-        studentAnswer: answers[q._id]?.trim() ?? "",
-      })),
+      answers: mt.questions.map((q) => {
+        const val = answers[q._id];
+        if (Array.isArray(val)) {
+          return { questionId: q._id, studentAnswers: val.map((s) => String(s).trim()) };
+        }
+        return { questionId: q._id, studentAnswer: String(val ?? "").trim() };
+      }),
     }));
 
     const allAnswered = miniTestAnswers.every((ma) =>
-      ma.answers.every((a) => a.studentAnswer !== ""),
+      ma.answers.every((a) => {
+        if ("studentAnswers" in a && Array.isArray(a.studentAnswers)) {
+          return a.studentAnswers.every((s) => s !== "");
+        }
+        return (a.studentAnswer ?? "") !== "";
+      }),
     );
     if (!allAnswered) {
       setError("Please answer all questions before submitting.");
@@ -247,11 +289,7 @@ export function GroupTestSubmitCard({
     setSubmitting(true);
     try {
       const res = await submitGroupTest(levelId, content.groupTestId, {
-        miniTestAnswers: miniTestAnswers as [
-          { answers: Array<{ questionId: string; studentAnswer: string }> },
-          { answers: Array<{ questionId: string; studentAnswer: string }> },
-          { answers: Array<{ questionId: string; studentAnswer: string }> },
-        ],
+        miniTestAnswers,
       });
       setResult({
         overallPass: res.overallPass,

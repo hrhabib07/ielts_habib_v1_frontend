@@ -9,8 +9,10 @@ import { Loader2, ArrowLeft, FileText } from "lucide-react";
 
 export default function FinalEvaluationPreviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ levelId: string; versionId: string }>;
+  searchParams: Promise<{ groupTestId?: string }>;
 }) {
   const [levelId, setLevelId] = useState<string>("");
   const [versionId, setVersionId] = useState<string>("");
@@ -32,16 +34,20 @@ export default function FinalEvaluationPreviewPage({
     if (!versionId) return;
     setLoadingVersion(true);
     setError(null);
-    getVersionDetail(versionId)
-      .then((detail) => {
-        setGroupTests(detail.groupTests ?? []);
-        if (detail.groupTests?.length && !selectedGroupTestId) {
-          setSelectedGroupTestId(detail.groupTests[0]._id);
+    Promise.all([getVersionDetail(versionId), searchParams])
+      .then(([detail, sp]) => {
+        const tests = detail.groupTests ?? [];
+        setGroupTests(tests);
+        const queryId = sp.groupTestId;
+        if (queryId && tests.some((t) => t._id === queryId)) {
+          setSelectedGroupTestId(queryId);
+        } else if (tests.length) {
+          setSelectedGroupTestId(tests[0]._id);
         }
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed to load version"))
       .finally(() => setLoadingVersion(false));
-  }, [versionId]);
+  }, [versionId, searchParams]);
 
   useEffect(() => {
     if (!versionId || !selectedGroupTestId) {

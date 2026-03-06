@@ -29,35 +29,37 @@ function getDisplayNumber(question: Question, questionSet: QuestionSet): number 
  * an array of React nodes: regular text segments rendered as raw HTML spans,
  * gap tokens rendered as styled preview boxes.
  *
- * Gap box design rules (Tailwind):
- * - inline-block, min-w-[120px], rounded border, neutral background
- * - vertically aligned to the text baseline
- * - left/right margin so it flows naturally in sentences
+ * For multi-gap (e.g. note completion Q8-13), pass displayNumberStart and gapIndex
+ * to show exam-style question numbers (8, 9, 10...) inside each gap box.
  */
-function renderWithGaps(text: string): ReactNode[] {
+function renderWithGaps(
+  text: string,
+  options?: { displayNumberStart?: number; gapIndexRef?: { current: number } }
+): ReactNode[] {
   const GAP_RE = /({{gap\d+}})/g;
   const parts = text.split(GAP_RE);
+  const gapIndexRef = options?.gapIndexRef ?? { current: 0 };
+  const displayNumberStart = options?.displayNumberStart;
 
   return parts.map((part, i) => {
-    if (GAP_RE.test(part)) {
-      // Reset lastIndex after .test() to avoid alternating match behaviour
-      GAP_RE.lastIndex = 0;
+    if (/{{gap\d+}}/.test(part)) {
+      const num = displayNumberStart != null ? displayNumberStart + gapIndexRef.current++ : null;
       return (
         <span
           key={i}
-          className="mx-1 inline-block min-w-[120px] rounded border border-stone-400 bg-stone-50 px-2 py-px align-middle text-[13px] text-stone-300"
+          className="mx-1 inline-flex min-w-[100px] items-center justify-center rounded border-2 border-dashed border-stone-400 bg-stone-50 px-3 py-1 align-middle text-[13px] text-stone-600"
           aria-label="answer gap"
         >
-          &nbsp;
+          {num != null ? (
+            <span className="font-medium">{num}.</span>
+          ) : (
+            <span className="text-stone-400">&nbsp;</span>
+          )}
         </span>
       );
     }
-    // Non-gap segment — may still contain HTML formatting from the editor
     return (
-      <span
-        key={i}
-        dangerouslySetInnerHTML={{ __html: part }}
-      />
+      <span key={i} dangerouslySetInnerHTML={{ __html: part }} />
     );
   });
 }
@@ -321,6 +323,18 @@ function QuestionBody({ question, questionSet }: { question: Question; questionS
     type === "FLOW_CHART_COMPLETION"
   ) {
     const wordLimit = meta?.wordLimit as number | undefined;
+    const qBody = question.questionBody as { layout?: string; content?: unknown };
+    const rawContent = qBody?.content;
+    const isStructuredNote =
+      type === "NOTE_COMPLETION" &&
+      qBody?.layout === "NOTE" &&
+      rawContent &&
+      typeof rawContent === "object" &&
+      Array.isArray((rawContent as { sections?: unknown }).sections);
+    const structuredNote = isStructuredNote
+      ? (rawContent as { heading?: string; sections: Array<{ subheading?: string; lines: string[] }> })
+      : null;
+
     return (
       <div className="space-y-2">
         {wordLimit && (
@@ -332,7 +346,41 @@ function QuestionBody({ question, questionSet }: { question: Question; questionS
             {wordLimit > 1 ? "s" : ""} from the passage for each answer.
           </p>
         )}
-        {content && (
+        {structuredNote ? (
+          (() => {
+            const displayStart = getDisplayNumber(question, questionSet);
+            const blankCount = question.blanks?.length ?? 0;
+            const usePerGapNumbers = blankCount > 1;
+            const gapIndexRef = { current: 0 };
+            return (
+              <div className="space-y-4 rounded-lg border border-stone-200 bg-stone-50/80 p-4" style={{ fontFamily: "Georgia, serif" }}>
+                {structuredNote.heading && (
+                  <h4 className="text-base font-semibold text-stone-800 border-b border-stone-200 pb-2">
+                    {structuredNote.heading}
+                  </h4>
+                )}
+                {structuredNote.sections.map((sec, sIdx) => (
+                  <div key={sIdx} className="space-y-1.5">
+                    {sec.subheading && (
+                      <p className="text-sm font-medium text-stone-600">{sec.subheading}</p>
+                    )}
+                    <ul className="list-none space-y-1 text-[14px] leading-relaxed text-stone-800">
+                      {sec.lines.map((line, lIdx) => (
+                        <li key={lIdx} className="flex flex-wrap items-baseline gap-0.5">
+                          {hasGaps(line)
+                            ? renderWithGaps(line, usePerGapNumbers
+                                ? { displayNumberStart: displayStart, gapIndexRef }
+                                : undefined)
+                            : line}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            );
+          })()
+        ) : content ? (
           <p
             className="text-[14px] leading-relaxed text-stone-800"
             style={{ fontFamily: "Georgia, serif" }}
@@ -341,9 +389,9 @@ function QuestionBody({ question, questionSet }: { question: Question; questionS
               ? renderWithGaps(content)
               : <span dangerouslySetInnerHTML={{ __html: content }} />}
           </p>
-        )}
+        ) : null}
         {/* Fallback blank lines for legacy questions that use blanks[] without {{gapN}} tokens */}
-        {!content && question.blanks && question.blanks.length > 0 && (
+        {!structuredNote && !content && question.blanks && question.blanks.length > 0 && (
           <div className="mt-3 space-y-1.5">
             {question.blanks.map((blank) => (
               <div key={blank.id} className="flex items-center gap-2">
@@ -479,6 +527,14 @@ export default function QuestionPreviewModal({
       ?.label ?? question.type;
 
   const displayNumber = getDisplayNumber(question, questionSet);
+  const blankCount = question.blanks?.length ?? 0;
+  const isMultiGapNote =
+    question.type === "NOTE_COMPLETION" &&
+    blankCount > 1;
+  const displayNumberEnd = displayNumber + blankCount - 1;
+  const displayNumberLabel = isMultiGapNote
+    ? `Q${displayNumber}–${displayNumberEnd}`
+    : `Q${displayNumber}`;
 
   return (
     <div
@@ -502,7 +558,7 @@ export default function QuestionPreviewModal({
               {typeLabel}
             </span>
             <span className="rounded-full bg-stone-200 px-2.5 py-0.5 text-[11px] font-medium text-stone-600">
-              Q{displayNumber}
+              {displayNumberLabel}
             </span>
             <span className="rounded-full bg-stone-200 px-2.5 py-0.5 text-[11px] font-medium text-stone-600">
               {question.difficulty}

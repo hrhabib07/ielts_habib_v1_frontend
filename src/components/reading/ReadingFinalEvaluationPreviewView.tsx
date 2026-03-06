@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type {
   GroupTestContentForPreview,
   GroupTestMiniTestForPreview,
@@ -64,6 +64,51 @@ function extractQuestionText(qBody: unknown): string {
   return layout ? `Question (${layout})` : "";
 }
 
+/** Structured note: heading + sections with subheadings and lines (lines may contain {{gap1}}, {{gap2}}). */
+function getStructuredNoteContent(qBody: unknown): { heading?: string; sections: Array<{ subheading?: string; lines: string[] }> } | null {
+  if (!qBody || typeof qBody !== "object") return null;
+  const layout = (qBody as { layout?: string }).layout;
+  const c = (qBody as { content?: unknown }).content;
+  if (layout !== "NOTE" || !c || typeof c !== "object") return null;
+  const note = c as { heading?: string; sections?: unknown };
+  if (!Array.isArray(note.sections) || note.sections.length === 0) return null;
+  return {
+    heading: typeof note.heading === "string" ? note.heading : undefined,
+    sections: note.sections as Array<{ subheading?: string; lines: string[] }>,
+  };
+}
+
+function hasGaps(text: string): boolean {
+  return /\{\{gap\d+\}\}/.test(text);
+}
+
+function renderLineWithGapBoxes(
+  text: string,
+  options?: { displayNumberStart?: number; gapIndexRef?: { current: number } }
+): ReactNode {
+  if (!hasGaps(text)) return text;
+  const GAP_RE = /(\{\{gap\d+\}\})/g;
+  const parts = text.split(GAP_RE);
+  const gapIndexRef = options?.gapIndexRef ?? { current: 0 };
+  const displayNumberStart = options?.displayNumberStart;
+
+  return parts.map((part, i) => {
+    if (/{{gap\d+}}/.test(part)) {
+      const num = displayNumberStart != null ? displayNumberStart + gapIndexRef.current++ : null;
+      return (
+        <span
+          key={i}
+          className="mx-1 inline-flex min-w-[90px] items-center justify-center rounded border-2 border-dashed border-slate-400 bg-slate-100 px-2 py-0.5 align-baseline text-sm text-slate-600 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-300"
+          aria-label="Gap"
+        >
+          {num != null ? <span className="font-medium">{num}.</span> : <span className="text-slate-400">&nbsp;</span>}
+        </span>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 function formatCorrectAnswer(correctAnswer: string | string[] | undefined): string {
   if (correctAnswer == null) return "—";
   if (Array.isArray(correctAnswer)) return correctAnswer.join(", ");
@@ -77,15 +122,65 @@ function QuestionPreviewBlock({
   question: GroupTestQuestionForPreview;
   displayNumber: number;
 }) {
-  const text =
-    (extractQuestionText(question.questionBody) as string).trim() ||
-    `Question ${displayNumber}`;
-  const correct = formatCorrectAnswer(question.correctAnswer);
+  const qBody = question.questionBody;
+  const structuredNote = getStructuredNoteContent(qBody);
+  const rawText = (extractQuestionText(qBody) as string).trim() || `Question ${displayNumber}`;
+
+  const blanks = (question as { blanks?: Array<{ id: number; correctAnswer?: string | string[] }> }).blanks ?? [];
+  const blanksWithAnswer = blanks.filter((b) => b.correctAnswer != null);
+  const correct = blanksWithAnswer.length
+    ? blanksWithAnswer.map((b) => formatCorrectAnswer(b.correctAnswer)).join("  ·  ")
+    : formatCorrectAnswer(question.correctAnswer);
+
+  const blankCount = blanks.length;
+  const usePerGapNumbers = structuredNote != null && blankCount > 1;
+  const displayNumberEnd = displayNumber + blankCount - 1;
+  const displayLabel = usePerGapNumbers ? `${displayNumber}–${displayNumberEnd}` : String(displayNumber);
+  const gapIndexRef = { current: 0 };
+
+  if (structuredNote) {
+    return (
+      <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-4">
+        <p className="mb-3 text-[16px] font-medium text-slate-900 dark:text-slate-100">
+          {displayLabel}.
+        </p>
+        <div className="space-y-3 rounded-lg border border-slate-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+          {structuredNote.heading && (
+            <h4 className="text-base font-semibold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">
+              {structuredNote.heading}
+            </h4>
+          )}
+          {structuredNote.sections.map((sec, sIdx) => (
+            <div key={sIdx} className="space-y-1">
+              {sec.subheading && (
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{sec.subheading}</p>
+              )}
+              <ul className="list-none space-y-1 text-[15px] text-slate-800 dark:text-slate-200">
+                {sec.lines.map((line, lIdx) => (
+                  <li key={lIdx} className="flex flex-wrap items-baseline gap-0.5">
+                    {renderLineWithGapBoxes(line, usePerGapNumbers ? { displayNumberStart: displayNumber, gapIndexRef } : undefined)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 dark:border-emerald-800 dark:bg-emerald-950/40">
+          <span className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">
+            Correct answer{blanksWithAnswer.length > 1 ? "s" : ""}:
+          </span>
+          <span className="text-[15px] font-medium text-emerald-800 dark:text-emerald-200">
+            {correct}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-4">
       <p className="mb-2 text-[16px] font-medium text-slate-900 dark:text-slate-100">
-        {displayNumber}. {text}
+        {displayNumber}. {rawText}
       </p>
       <div className="flex flex-wrap items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-3 py-2">
         <span className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">

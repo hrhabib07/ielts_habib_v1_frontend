@@ -9,13 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createPassage,
-  createPassageCode,
   getMyPassages,
   listPassageCodes,
   updatePassage,
   type CreatePassagePayload,
   type Passage,
   type PassageCode,
+  type PassageGlossary,
 } from "@/src/lib/api/instructor";
 import { ArrowLeft, Loader2, Pencil, Save, Eye, FileJson, Copy } from "lucide-react";
 import PassagePreviewModal from "@/src/components/shared/PassagePreviewModal";
@@ -27,30 +27,15 @@ const SAMPLE_PARAGRAPHS_JSON = `[
   { "paragraphIndex": 2, "text": "Third paragraph. The server will use paragraphIndex for order; text must be at least 10 characters." }
 ]`;
 
-/** Resolve passageCode ID from book/test/passage: find existing or create. */
-async function resolvePassageCode(
-  book: string,
-  test: string,
-  passage: string,
-  source: string,
-  existingCodes: PassageCode[],
-): Promise<string> {
-  const b = book.trim();
-  const t = test.trim();
-  const p = passage.trim();
-  if (!b || !t || !p) throw new Error("Book, Test and Passage are required");
-  const found = existingCodes.find(
-    (c) =>
-      String(c.book) === b && String(c.test) === t && String(c.passage) === p,
-  );
-  if (found) return found._id;
-  const created = await createPassageCode({
-    book: b,
-    test: t,
-    passage: p,
-    source,
-  });
-  return created._id;
+/** Sample for glossary JSON. Each entry: term (1–100 chars), definition (3–500 chars), order (0-based). */
+const SAMPLE_GLOSSARY_JSON = `[
+  { "term": "caravel", "definition": "A small, fast Spanish or Portuguese ship used for long voyages from the 15th to 17th centuries.", "order": 0 },
+  { "term": "navigate", "definition": "To plan and direct the route of a ship or other vehicle.", "order": 1 }
+]`;
+
+/** Format passage code for dropdown label. */
+function passageCodeLabel(c: PassageCode): string {
+  return `Book ${c.book} · Test ${c.test} · Passage ${c.passage} (${c.source})`;
 }
 
 /** Parse paragraphs JSON (array of { paragraphIndex, text }). Used for hybrid: metadata from form, body from JSON. */
@@ -83,6 +68,44 @@ function parseParagraphsJson(
   return { success: true, content };
 }
 
+/** Parse glossary JSON (array of { term, definition, order }). */
+function parseGlossaryJson(
+  raw: string,
+): { success: true; content: PassageGlossary[] } | { success: false; error: string } {
+  if (!raw.trim()) return { success: false, error: "Glossary JSON is empty. Add entries or turn off \"Has glossary\"." };
+  let data: unknown;
+  try {
+    data = JSON.parse(raw.trim());
+  } catch {
+    return { success: false, error: "Invalid JSON. Check brackets and commas." };
+  }
+  const arr = Array.isArray(data) ? data : (data as { glossary?: unknown })?.glossary;
+  if (!Array.isArray(arr)) {
+    return { success: false, error: "JSON must be an array of { term, definition, order }." };
+  }
+  const content: PassageGlossary[] = [];
+  for (let i = 0; i < arr.length; i++) {
+    const item = arr[i] as Record<string, unknown>;
+    const term = typeof item?.term === "string" ? item.term.trim() : "";
+    const definition = typeof item?.definition === "string" ? item.definition.trim() : "";
+    const order = typeof item?.order === "number" && Number.isInteger(item.order) ? item.order : i;
+    if (term.length < 1) {
+      return { success: false, error: `Glossary entry ${i + 1}: term is required (1–100 characters).` };
+    }
+    if (term.length > 100) {
+      return { success: false, error: `Glossary entry ${i + 1}: term must be at most 100 characters.` };
+    }
+    if (definition.length < 3) {
+      return { success: false, error: `Glossary entry ${i + 1}: definition must be at least 3 characters.` };
+    }
+    if (definition.length > 500) {
+      return { success: false, error: `Glossary entry ${i + 1}: definition must be at most 500 characters.` };
+    }
+    content.push({ term, definition, order });
+  }
+  return { success: true, content };
+}
+
 export default function PassagesPage() {
   const [passages, setPassages] = useState<Passage[]>([]);
   const [codes, setCodes] = useState<PassageCode[]>([]);
@@ -90,14 +113,17 @@ export default function PassagesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewPassage, setPreviewPassage] = useState<Passage | null>(null);
-  const [book, setBook] = useState("");
-  const [test, setTest] = useState("");
-  const [passageNum, setPassageNum] = useState("");
   const [paragraphsJson, setParagraphsJson] = useState("");
   const [paragraphsError, setParagraphsError] = useState<string | null>(null);
+  const [hasGlossary, setHasGlossary] = useState(false);
+  const [glossaryJson, setGlossaryJson] = useState("");
+  const [glossaryError, setGlossaryError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const [copyGlossaryFeedback, setCopyGlossaryFeedback] = useState(false);
   const [form, setForm] = useState<CreatePassagePayload>({
     title: "",
+    subTitle: "",
     passageCode: "",
     content: [],
     source: "CAMBRIDGE",
@@ -128,13 +154,15 @@ export default function PassagesPage() {
   };
 
   const resetForm = () => {
-    setBook("");
-    setTest("");
-    setPassageNum("");
     setParagraphsJson("");
     setParagraphsError(null);
+    setFormError(null);
+    setHasGlossary(false);
+    setGlossaryJson("");
+    setGlossaryError(null);
     setForm({
       title: "",
+      subTitle: "",
       passageCode: "",
       content: [],
       source: "CAMBRIDGE",
@@ -145,55 +173,60 @@ export default function PassagesPage() {
     setEditingId(null);
   };
 
+  const copyGlossarySample = async () => {
+    try {
+      await navigator.clipboard.writeText(SAMPLE_GLOSSARY_JSON);
+      setCopyGlossaryFeedback(true);
+      setTimeout(() => setCopyGlossaryFeedback(false), 2000);
+    } catch {
+      setGlossaryError("Could not copy to clipboard.");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setParagraphsError(null);
-    if (!form.title.trim()) return;
+    setGlossaryError(null);
+    setFormError(null);
+    if (!form.title.trim()) {
+      setFormError("Title is required.");
+      return;
+    }
+    if (form.title.trim().length < 5) {
+      setFormError("Title must be at least 5 characters.");
+      return;
+    }
+    if (!form.passageCode.trim()) {
+      setFormError("Select a passage code.");
+      return;
+    }
     const parsed = parseParagraphsJson(paragraphsJson);
     if (!parsed.success) {
       setParagraphsError(parsed.error);
       return;
     }
     const paragraphs = parsed.content.map((p, i) => ({ ...p, paragraphIndex: i }));
-    setSubmitting(true);
-    try {
-      let passageCodeId = form.passageCode;
-      if (!passageCodeId && book.trim() && test.trim() && passageNum.trim()) {
-        passageCodeId = await resolvePassageCode(
-          book,
-          test,
-          passageNum,
-          form.source,
-          codes,
-        );
-        setCodes((prev) => {
-          const already = prev.some(
-            (c) =>
-              String(c.book) === book.trim() &&
-              String(c.test) === test.trim() &&
-              String(c.passage) === passageNum.trim(),
-          );
-          if (already) return prev;
-          return [
-            {
-              _id: passageCodeId!,
-              book: book.trim(),
-              test: test.trim(),
-              passage: passageNum.trim(),
-              source: form.source,
-            },
-            ...prev,
-          ];
-        });
-      }
-      if (!passageCodeId) {
-        setSubmitting(false);
+    let glossary: PassageGlossary[] | undefined;
+    if (hasGlossary) {
+      const glossParsed = parseGlossaryJson(glossaryJson);
+      if (!glossParsed.success) {
+        setGlossaryError(glossParsed.error);
         return;
       }
+      glossary = glossParsed.content.map((g, i) => ({ ...g, order: g.order ?? i }));
+    } else {
+      glossary = [];
+    }
+    setSubmitting(true);
+    try {
+      const subTitleTrimmed = form.subTitle?.trim();
       const payload: CreatePassagePayload = {
         ...form,
-        passageCode: passageCodeId,
+        passageCode: form.passageCode,
         content: paragraphs,
+        glossary,
+        estimatedReadingTime: Number(form.estimatedReadingTime) || 15,
+        ...(subTitleTrimmed ? { subTitle: subTitleTrimmed } : {}),
       };
       if (editingId) {
         const updatePayload: Partial<CreatePassagePayload> = {
@@ -205,7 +238,7 @@ export default function PassagesPage() {
           moduleType: payload.moduleType,
           estimatedReadingTime: payload.estimatedReadingTime,
           ...(payload.tags ? { tags: payload.tags } : {}),
-          ...(payload.glossary ? { glossary: payload.glossary } : {}),
+          glossary: payload.glossary ?? [],
           ...(payload.subTitle ? { subTitle: payload.subTitle } : {}),
           ...(payload.videoExplanationUrl
             ? { videoExplanationUrl: payload.videoExplanationUrl }
@@ -222,8 +255,10 @@ export default function PassagesPage() {
         setPassages((prev) => [created, ...prev]);
         resetForm();
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      const res = (err as { response?: { data?: { message?: string; errorSources?: { path?: string; message?: string }[] } } })?.response?.data;
+      const msg = res?.errorSources?.[0]?.message ?? res?.message ?? "Failed to save passage. Check your data and try again.";
+      setFormError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -234,16 +269,6 @@ export default function PassagesPage() {
       typeof p.passageCode === "object"
         ? (p.passageCode as { _id: string })._id
         : p.passageCode;
-    const code = codes.find((c) => c._id === passageCodeId);
-    if (code) {
-      setBook(String(code.book));
-      setTest(String(code.test));
-      setPassageNum(String(code.passage));
-    } else {
-      setBook("");
-      setTest("");
-      setPassageNum("");
-    }
     setParagraphsJson(
       JSON.stringify(
         p.content.length > 0
@@ -254,6 +279,18 @@ export default function PassagesPage() {
       ),
     );
     setParagraphsError(null);
+    const hasExistingGlossary = p.glossary && p.glossary.length > 0;
+    setHasGlossary(hasExistingGlossary);
+    setGlossaryJson(
+      hasExistingGlossary
+        ? JSON.stringify(
+            p.glossary!.map((g, i) => ({ term: g.term, definition: g.definition, order: g.order ?? i })),
+            null,
+            2,
+          )
+        : "",
+    );
+    setGlossaryError(null);
     setForm({
       title: p.title,
       ...(p.subTitle ? { subTitle: p.subTitle } : {}),
@@ -295,8 +332,13 @@ export default function PassagesPage() {
           {editingId ? "Edit passage" : "Create passage"}
         </h2>
         <p className="mb-6 text-sm text-muted-foreground">
-          Enter title, book/test/passage, source, difficulty, and module type above. Paragraphs (body) go in the JSON section below.
+          Select a passage code first (create codes in Passage Codes if needed). Enter title, source, difficulty, and module type. Paragraphs (body) go in the JSON section below.
         </p>
+        {formError && (
+          <p className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive" role="alert">
+            {formError}
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="title">Title</Label>
@@ -312,49 +354,49 @@ export default function PassagesPage() {
             />
           </div>
 
-          <div className="rounded-lg border border-border bg-muted/30 p-4">
-            <p className="mb-3 text-sm font-medium text-foreground">
-              Book, Test & Passage
+          <div>
+            <Label htmlFor="subTitle">Subtitle (optional)</Label>
+            <Input
+              id="subTitle"
+              value={form.subTitle ?? ""}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, subTitle: e.target.value }))
+              }
+              placeholder="e.g. How technology is changing the way we learn"
+              className="mt-1 max-w-xl"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Add a subheading if the passage has one; leave blank otherwise.
             </p>
-            <p className="mb-3 text-xs text-muted-foreground">
-              e.g. Book 19, Test 2, Passage 1. If the combination does not
-              exist, it will be created automatically.
-            </p>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <Label htmlFor="book">Book</Label>
-                <Input
-                  id="book"
-                  value={book}
-                  onChange={(e) => setBook(e.target.value)}
-                  placeholder="e.g. 19"
-                  required
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="test">Test</Label>
-                <Input
-                  id="test"
-                  value={test}
-                  onChange={(e) => setTest(e.target.value)}
-                  placeholder="e.g. 2"
-                  required
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="passageNum">Passage</Label>
-                <Input
-                  id="passageNum"
-                  value={passageNum}
-                  onChange={(e) => setPassageNum(e.target.value)}
-                  placeholder="e.g. 1"
-                  required
-                  className="mt-1"
-                />
-              </div>
-            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="passageCode">Passage code (required)</Label>
+            <select
+              id="passageCode"
+              value={form.passageCode}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, passageCode: e.target.value }))
+              }
+              required
+              className="mt-1 flex h-9 w-full max-w-xl rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+            >
+              <option value="">Select a passage code…</option>
+              {codes.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {passageCodeLabel(c)}
+                </option>
+              ))}
+            </select>
+            {codes.length === 0 && (
+              <p className="mt-1.5 text-sm text-amber-600 dark:text-amber-500">
+                No passage codes yet. Create at least one in{" "}
+                <Link href="/dashboard/instructor/passage-codes" className="underline font-medium">
+                  Passage Codes
+                </Link>{" "}
+                before creating a passage.
+              </p>
+            )}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -467,12 +509,74 @@ export default function PassagesPage() {
             </Button>
           </div>
 
+          <div className="rounded-lg border border-border bg-muted/20 p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={hasGlossary}
+                  onChange={(e) => {
+                    setHasGlossary(e.target.checked);
+                    if (!e.target.checked) {
+                      setGlossaryJson("");
+                      setGlossaryError(null);
+                    }
+                  }}
+                  className="h-4 w-4 rounded border-input"
+                />
+                <span className="text-sm font-medium">Has glossary</span>
+              </label>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              When enabled, you can add term–definition pairs (short meanings) for this passage. Paste a JSON array of{" "}
+              <code className="rounded bg-muted px-1">{"{ term, definition, order }"}</code>. Term: 1–100 chars; definition: 3–500 chars.
+            </p>
+            {hasGlossary && (
+              <>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium text-muted-foreground">Format</span>
+                  <Button type="button" variant="outline" size="sm" onClick={copyGlossarySample} className="gap-1.5 h-8">
+                    {copyGlossaryFeedback ? "Copied!" : <><Copy className="h-3.5 w-3.5" /> Copy sample</>}
+                  </Button>
+                </div>
+                <pre className="mb-3 rounded-lg border border-border bg-muted/30 p-3 text-xs font-mono overflow-x-auto max-h-24 overflow-y-auto">
+                  {SAMPLE_GLOSSARY_JSON}
+                </pre>
+                <Label htmlFor="glossary-json">Glossary JSON</Label>
+                <Textarea
+                  id="glossary-json"
+                  value={glossaryJson}
+                  onChange={(e) => { setGlossaryJson(e.target.value); setGlossaryError(null); }}
+                  placeholder='[ { "term": "word", "definition": "Short meaning here.", "order": 0 }, ... ]'
+                  className="mt-1.5 min-h-[120px] font-mono text-sm resize-y"
+                  rows={5}
+                />
+                {glossaryError && (
+                  <p className="mt-1.5 text-sm text-destructive" role="alert">{glossaryError}</p>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 gap-1.5"
+                  onClick={() => { setGlossaryJson(SAMPLE_GLOSSARY_JSON); setGlossaryError(null); }}
+                >
+                  Load sample into editor
+                </Button>
+              </>
+            )}
+          </div>
+
           <div className="flex flex-col gap-3 border-t pt-6">
             <p className="text-sm font-medium text-foreground">
               {editingId ? "Save changes" : "Create passage"}
             </p>
             <div className="flex gap-2">
-              <Button type="submit" disabled={submitting} className="gap-2">
+              <Button
+                type="submit"
+                disabled={submitting || codes.length === 0}
+                className="gap-2"
+              >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (

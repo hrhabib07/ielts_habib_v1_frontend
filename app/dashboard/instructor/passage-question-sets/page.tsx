@@ -25,12 +25,14 @@ export default function PassageQuestionSetsPage() {
   const [codes, setCodes] = useState<Awaited<ReturnType<typeof listPassageCodes>>>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<CreatePassageQuestionSetPayload>({
     passageId: "",
     passageCode: "",
     passageNumber: 1,
     title: "",
+    hasParagraphIndexing: false,
     difficulty: "MEDIUM",
     questionGroupIds: [],
     expectedTotalQuestions: 5,
@@ -60,6 +62,7 @@ export default function PassageQuestionSetsPage() {
       passageCode: codes[0]?._id ?? "",
       passageNumber: 1,
       title: "",
+      hasParagraphIndexing: false,
       difficulty: "MEDIUM",
       questionGroupIds: [],
       expectedTotalQuestions: 5,
@@ -70,8 +73,11 @@ export default function PassageQuestionSetsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.passageId || !form.passageCode || form.questionGroupIds.length === 0)
+    setError(null);
+    if (!form.passageId || !form.passageCode || form.questionGroupIds.length === 0) {
+      setError("Select a passage, passage code, and at least one question group.");
       return;
+    }
     setSubmitting(true);
     try {
       if (editingId) {
@@ -81,12 +87,20 @@ export default function PassageQuestionSetsPage() {
         );
         resetForm();
       } else {
-        const created = await createPassageQuestionSet(form);
+        const payload: CreatePassageQuestionSetPayload = {
+          ...form,
+          expectedTotalQuestions: computedExpectedTotal > 0 ? computedExpectedTotal : form.expectedTotalQuestions,
+        };
+        const created = await createPassageQuestionSet(payload);
         setSets((prev) => [created, ...prev]);
         resetForm();
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
+      setError(msg || (err instanceof Error ? err.message : "Failed to save. Check passage, passage code, and that question groups belong to this passage."));
     } finally {
       setSubmitting(false);
     }
@@ -110,6 +124,15 @@ export default function PassageQuestionSetsPage() {
       return pid === passageId;
     });
 
+  /** Compute total questions from selected groups (start/end range per group). Backend requires this to match. */
+  const computedExpectedTotal = (() => {
+    const selected = questionSets.filter((qs) => form.questionGroupIds.includes(qs._id));
+    return selected.reduce(
+      (sum, g) => sum + (g.endQuestionNumber - g.startQuestionNumber + 1),
+      0,
+    );
+  })();
+
   const startEdit = (s: PassageQuestionSet) => {
     const passageId =
       typeof s.passageId === "object"
@@ -127,6 +150,7 @@ export default function PassageQuestionSetsPage() {
       passageCode: passageCodeId,
       passageNumber: s.passageNumber as 1 | 2 | 3,
       title: s.title ?? "",
+      hasParagraphIndexing: s.hasParagraphIndexing ?? false,
       difficulty: s.difficulty,
       questionGroupIds: ids,
       expectedTotalQuestions: s.expectedTotalQuestions ?? s.totalQuestions ?? 5,
@@ -272,18 +296,44 @@ export default function PassageQuestionSetsPage() {
             </div>
           </div>
 
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="hasParagraphIndexing"
+              checked={form.hasParagraphIndexing ?? false}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, hasParagraphIndexing: e.target.checked }))
+              }
+              className="h-4 w-4 rounded border-input"
+            />
+            <Label htmlFor="hasParagraphIndexing" className="font-normal cursor-pointer">
+              Has paragraph indexing (A, B, C, D)
+            </Label>
+          </div>
+          <p className="text-xs text-muted-foreground -mt-2">
+            Enable only for question types that need paragraph labels (e.g. list of headings, which paragraph contains the following information). Default: No.
+          </p>
+
           <div>
-            <Label>Expected total questions</Label>
+            <Label>
+              Expected total questions
+              {form.questionGroupIds.length > 0 && (
+                <span className="ml-1 font-normal text-muted-foreground">
+                  (auto from selected groups: {computedExpectedTotal})
+                </span>
+              )}
+            </Label>
             <Input
               type="number"
               min={1}
-              value={form.expectedTotalQuestions}
+              value={form.questionGroupIds.length > 0 ? computedExpectedTotal : form.expectedTotalQuestions}
               onChange={(e) =>
                 setForm((f) => ({
                   ...f,
                   expectedTotalQuestions: parseInt(e.target.value, 10) || 5,
                 }))
               }
+              readOnly={form.questionGroupIds.length > 0}
               className="w-24"
             />
           </div>
@@ -325,6 +375,12 @@ export default function PassageQuestionSetsPage() {
               )}
             </div>
           </div>
+
+          {error && (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          )}
 
           <div className="flex gap-2">
             <Button type="submit" disabled={submitting} className="gap-2">
@@ -380,6 +436,7 @@ export default function PassageQuestionSetsPage() {
                   <p className="text-xs text-muted-foreground">
                     {(s.expectedTotalQuestions ?? s.totalQuestions) ?? 0} questions · {s.recommendedTime} min
                     · {s.difficulty}
+                    {s.hasParagraphIndexing && " · A/B/C/D"}
                     {s.isPublished && " · Published"}
                   </p>
                 </div>

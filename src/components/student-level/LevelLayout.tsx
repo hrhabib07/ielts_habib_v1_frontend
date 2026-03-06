@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, ChevronRight, Menu } from "lucide-react";
 import { LevelSidebar } from "./LevelSidebar";
 import { LevelContent, LevelContentSkeleton } from "./LevelContent";
+import { LevelFeedbackForm } from "./LevelFeedbackForm";
 import type {
   LevelDetailForStudent,
   SubmitStepQuizResponse,
@@ -34,6 +35,10 @@ interface LevelLayoutProps {
   isPreview?: boolean;
   /** In preview, number of group tests (for final evaluation step message) */
   previewGroupTestsCount?: number;
+  /** When level passed: true = show Continue, false = show feedback form, null/undefined = loading (show neither) */
+  hasFeedbackSubmitted?: boolean | null;
+  /** Called after feedback is submitted so parent can show Continue button */
+  onFeedbackSuccess?: () => void;
 }
 
 export function LevelLayout({
@@ -49,7 +54,11 @@ export function LevelLayout({
   nextLevelInfo = null,
   isPreview = false,
   previewGroupTestsCount,
+  hasFeedbackSubmitted,
+  onFeedbackSuccess,
 }: LevelLayoutProps) {
+  const showContinue = hasFeedbackSubmitted === true;
+  const showFeedbackForm = hasFeedbackSubmitted === false;
   const router = useRouter();
   const { progress, steps } = detail;
   const currentIndex = progress.currentStepIndex ?? 0;
@@ -81,6 +90,8 @@ export function LevelLayout({
     (stepId: string) => {
       if (onNavigate) {
         onNavigate(stepId);
+      } else {
+        setInternalStepId(stepId);
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
@@ -142,41 +153,58 @@ export function LevelLayout({
           {isLevelPassed && (
             <div
               data-level-completed-banner
-              className="mb-6 flex flex-col gap-3 rounded-2xl border-2 border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-5 py-4 shadow-md sm:flex-row sm:items-center sm:justify-between"
+              className="mb-6 flex flex-col gap-4 rounded-2xl border-2 border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-5 py-4 shadow-md"
             >
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
-                <div>
-                  <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">
-                    Level completed!
-                  </p>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-500">
-                    {nextLevelInfo
-                      ? "Next level is unlocked. Use the button below to continue."
-                      : "Great work. You've passed all steps in this level."}
-                  </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">
+                      Level completed!
+                    </p>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-500">
+                      {showFeedbackForm
+                        ? "Share quick feedback to continue to the next level."
+                        : showContinue
+                          ? nextLevelInfo
+                            ? "Next level is unlocked. Use the button below to continue."
+                            : "Great work. You've passed all steps in this level."
+                          : "Checking…"}
+                    </p>
+                  </div>
                 </div>
+                {showContinue && (
+                  nextLevelInfo ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const stepParam = nextLevelInfo.firstStepId
+                          ? `?step=${encodeURIComponent(nextLevelInfo.firstStepId)}`
+                          : "";
+                        router.push(
+                          `/profile/reading/strict-levels/${nextLevelInfo.levelId}${stepParam}`,
+                        );
+                      }}
+                      className="flex shrink-0 items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                    >
+                      Continue to {nextLevelInfo.title}
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                      🎉 You completed all levels!
+                    </p>
+                  )
+                )}
               </div>
-              {nextLevelInfo ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const stepParam = nextLevelInfo.firstStepId
-                      ? `?step=${encodeURIComponent(nextLevelInfo.firstStepId)}`
-                      : "";
-                    router.push(
-                      `/profile/reading/strict-levels/${nextLevelInfo.levelId}${stepParam}`,
-                    );
-                  }}
-                  className="flex shrink-0 items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
-                >
-                  Continue to {nextLevelInfo.title}
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              ) : (
-                <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                  🎉 You completed all levels!
-                </p>
+              {isLevelPassed && showFeedbackForm && onFeedbackSuccess && (
+                <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 p-4">
+                  <LevelFeedbackForm
+                    levelId={detail.level._id}
+                    onSuccess={onFeedbackSuccess}
+                    showVideoQuestion
+                  />
+                </div>
               )}
             </div>
           )}

@@ -249,9 +249,19 @@ export async function deleteQuestionSet(id: string): Promise<void> {
 }
 
 /* ----- Questions ----- */
+/** Structured note completion: heading, subheadings (e.g. 1930s, 1940s), lines with {{gapN}}. */
+export interface NoteStructuredContent {
+  heading?: string;
+  sections: Array<{ subheading?: string; lines: string[] }>;
+}
+
 export interface QuestionBody {
-  layout: "TEXT" | "PASSAGE" | "TABLE" | "FLOWCHART" | "DIAGRAM";
-  content: string | string[][] | { label: string; next?: number }[];
+  layout: "TEXT" | "PASSAGE" | "TABLE" | "FLOWCHART" | "DIAGRAM" | "NOTE";
+  content:
+    | string
+    | string[][]
+    | { label: string; next?: number }[]
+    | NoteStructuredContent;
 }
 
 export interface QuestionBlank {
@@ -356,6 +366,10 @@ export async function updateQuestion(
   return res.data.data;
 }
 
+export async function deleteQuestion(id: string): Promise<void> {
+  await apiClient.delete(`${QUESTION_BASE}/${id}`);
+}
+
 /* ----- Passage Question Sets ----- */
 export interface PassageQuestionSet {
   _id: string;
@@ -364,6 +378,8 @@ export interface PassageQuestionSet {
   passageNumber: 1 | 2 | 3;
   /** Human-readable name for the question set */
   title?: string;
+  /** When true, passage paragraphs show A, B, C, D labels (e.g. list of headings). Default false. */
+  hasParagraphIndexing?: boolean;
   difficulty: PassageDifficulty;
   questionGroupIds: (string | { _id: string })[];
   expectedTotalQuestions?: number;
@@ -377,6 +393,8 @@ export interface CreatePassageQuestionSetPayload {
   passageCode: string;
   passageNumber: 1 | 2 | 3;
   title?: string;
+  /** When true, passage paragraphs show A, B, C, D (e.g. list of headings). Set Yes only for such question types. */
+  hasParagraphIndexing?: boolean;
   difficulty: PassageDifficulty;
   questionGroupIds: string[];
   expectedTotalQuestions: number;
@@ -410,4 +428,60 @@ export async function updatePassageQuestionSet(
     data: PassageQuestionSet;
   }>(`${PASSAGE_QSET_BASE}/${questionSetId}`, data);
   return res.data.data;
+}
+
+/* ----- Level feedback (instructor view) ----- */
+const LEVEL_FEEDBACK_BASE = "/instructor/level-feedback";
+
+export interface LevelFeedbackItem {
+  _id: string;
+  userId: string | { _id: string; name?: string; email?: string };
+  levelId: string | { _id: string; title?: string; slug?: string; order?: number };
+  qualityOfQuestions: string;
+  recommendToOthers: string;
+  qualityOfVideo?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LevelFeedbackListResponse {
+  data: LevelFeedbackItem[];
+  meta?: { page: number; limit: number; total: number; totalPage: number };
+}
+
+export interface LevelFeedbackAnalyticsItem {
+  levelId: string;
+  levelTitle?: string;
+  totalResponses: number;
+  qualityOfQuestions: Record<string, number>;
+  recommendToOthers: Record<string, number>;
+  qualityOfVideo: Record<string, number>;
+}
+
+export async function listLevelFeedback(params: {
+  levelId?: string;
+  page?: number;
+  limit?: number;
+}): Promise<LevelFeedbackListResponse> {
+  const q = new URLSearchParams();
+  if (params.levelId) q.set("levelId", params.levelId);
+  if (params.page != null) q.set("page", String(params.page));
+  if (params.limit != null) q.set("limit", String(params.limit));
+  const res = await apiClient.get<{
+    success: boolean;
+    data: LevelFeedbackItem[];
+    meta?: { page: number; limit: number; total: number; totalPage: number };
+  }>(`${LEVEL_FEEDBACK_BASE}?${q.toString()}`);
+  return {
+    data: res.data?.data ?? [],
+    meta: res.data?.meta,
+  };
+}
+
+export async function getLevelFeedbackAnalytics(levelId?: string): Promise<LevelFeedbackAnalyticsItem[]> {
+  const q = levelId ? `?levelId=${encodeURIComponent(levelId)}` : "";
+  const res = await apiClient.get<{ success: boolean; data: LevelFeedbackAnalyticsItem[] }>(
+    `${LEVEL_FEEDBACK_BASE}/analytics${q}`,
+  );
+  return res.data?.data ?? [];
 }

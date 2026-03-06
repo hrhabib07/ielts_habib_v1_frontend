@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Loader2, ArrowLeft, AlertTriangle } from "lucide-react";
 import {
   getLevelDetail,
+  getLevelFeedback,
   getReadingTargetBand,
   type LevelDetailForStudent,
   type SubmitStepQuizResponse,
@@ -30,6 +31,7 @@ export default function ReadingStrictLevelPage() {
   const [targetBandRequired, setTargetBandRequired] = useState(false);
   const [completingStepId, setCompletingStepId] = useState<string | null>(null);
   const [nextLevelInfo, setNextLevelInfo] = useState<NextLevelInfo | null>(null);
+  const [hasFeedbackSubmitted, setHasFeedbackSubmitted] = useState<boolean | null>(null);
   const [readingTargetBand, setReadingTargetBandState] = useState<
     number | null | undefined
   >(undefined);
@@ -90,6 +92,24 @@ export default function ReadingStrictLevelPage() {
       );
     }
   }, [detail, loading, stepIdFromUrl, id, router]);
+
+  useEffect(() => {
+    if (!detail || detail.progress.passStatus !== "PASSED") {
+      setHasFeedbackSubmitted(true);
+      return;
+    }
+    let cancelled = false;
+    getLevelFeedback(detail.level._id)
+      .then((feedback) => {
+        if (!cancelled) setHasFeedbackSubmitted(Boolean(feedback));
+      })
+      .catch(() => {
+        if (!cancelled) setHasFeedbackSubmitted(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [detail?.level._id, detail?.progress.passStatus]);
 
   useEffect(() => {
     if (!detail || detail.progress.passStatus !== "PASSED") {
@@ -312,6 +332,8 @@ export default function ReadingStrictLevelPage() {
       onNavigate={handleNavigate}
       hideSidebar
       nextLevelInfo={nextLevelInfo}
+      hasFeedbackSubmitted={hasFeedbackSubmitted}
+      onFeedbackSuccess={() => setHasFeedbackSubmitted(true)}
     />
     </>
   );

@@ -193,17 +193,28 @@ export default function PracticeTestsPage() {
 
           {detail && !loadingVersion && selectedLevelId && selectedLevel && (
             <div className="space-y-6">
-              <div className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-stone-50/50 p-4 dark:border-stone-800 dark:bg-stone-900/30 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-stone-600 dark:text-stone-400">
-                  <span className="font-medium text-stone-900 dark:text-stone-100">
-                    {selectedLevel.title}
-                  </span>
-                  {" "}· Version {detail.version.version} (draft)
-                </p>
+              <div className="flex flex-col gap-4 rounded-xl border border-stone-200 bg-stone-50/50 p-4 dark:border-stone-800 dark:bg-stone-900/30 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold text-stone-900 dark:text-stone-100">
+                      {selectedLevel.title}
+                    </h3>
+                    <span className="rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-medium text-stone-600 dark:bg-stone-600 dark:text-stone-300">
+                      Version {detail.version.version} (draft)
+                    </span>
+                    <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-600 dark:bg-stone-700 dark:text-stone-300">
+                      {(detail.practiceTests ?? []).length} practice test{(detail.practiceTests ?? []).length === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
+                    Preview any test to see its passage and questions. Attach tests to steps in the Level Builder.
+                  </p>
+                </div>
                 <Link
                   href={`/dashboard/instructor/reading-levels/${selectedLevelId}/versions/${detail.version._id}/edit`}
+                  className="shrink-0"
                 >
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2 w-full sm:w-auto">
                     Open Level Builder
                     <ChevronRight className="h-3.5 w-3.5" />
                   </Button>

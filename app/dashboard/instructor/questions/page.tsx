@@ -15,6 +15,7 @@ import {
   getMyQuestionSets,
   getActiveWeaknessTags,
   updateQuestion,
+  deleteQuestion,
   type CreateQuestionPayload,
   type Question,
   type WeaknessTag,
@@ -23,8 +24,28 @@ import {
 } from "@/src/lib/api/instructor";
 import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 import type { ReadingQuestionType } from "@/src/lib/api/instructor";
-import { ArrowLeft, Plus, Loader2, Pencil, Eye, X, ChevronDown, FileJson, ChevronRight, Copy } from "lucide-react";
+import { ArrowLeft, Plus, Loader2, Pencil, Eye, X, ChevronDown, FileJson, ChevronRight, Copy, Trash2 } from "lucide-react";
 import QuestionPreviewModal from "@/src/components/shared/QuestionPreviewModal";
+
+const DELETE_CONFIRM_PHRASE = "delete question";
+
+/** Get a short summary for the question list. NOTE layout: show heading or "Note completion (X gaps)". */
+function getQuestionListSummary(q: Question): string {
+  const body = q.questionBody as { layout?: string; content?: unknown };
+  if (q.type === "NOTE_COMPLETION" && body?.layout === "NOTE" && body?.content && typeof body.content === "object") {
+    const note = body.content as { heading?: string; sections?: unknown[] };
+    const gapCount = q.blanks?.length ?? 0;
+    if (typeof note.heading === "string" && note.heading.trim()) {
+      return `${note.heading.trim().slice(0, 50)}${note.heading.length > 50 ? "…" : ""} (${gapCount} gap${gapCount !== 1 ? "s" : ""})`;
+    }
+    return `Note completion (${gapCount} gap${gapCount !== 1 ? "s" : ""})`;
+  }
+  const content = body?.content;
+  if (typeof content === "string") {
+    return content.slice(0, 60) + (content.length > 60 ? "…" : "");
+  }
+  return "—";
+}
 
 /** Sample JSON per question type. Metadata matches the type (MCQ=options+correctAnswer, TFNG=correctAnswer only, gap=blanks). */
 function getSampleJsonForQuestionType(questionType: string): string {
@@ -88,16 +109,51 @@ function getSampleJsonForQuestionType(questionType: string): string {
     }
   ]
 }`;
+    case "NOTE_COMPLETION":
+      return `{
+  "questions": [
+    {
+      "questionBody": {
+        "layout": "NOTE",
+        "content": {
+          "heading": "Timeline of Solar Cell Development",
+          "sections": [
+            {
+              "subheading": "1930s",
+              "lines": [
+                "First photovoltaic cell was developed in {{gap1}}",
+                "Efficiency reached {{gap2}}%"
+              ]
+            },
+            {
+              "subheading": "1940s",
+              "lines": [
+                "Research focused on {{gap3}}",
+                "Bell Labs created first silicon cell in {{gap4}}"
+              ]
+            }
+          ]
+        }
+      },
+      "explanation": "The passage describes the history of solar cell technology by decade.",
+      "blanks": [
+        { "id": 1, "correctAnswer": "1839", "wordLimit": 1 },
+        { "id": 2, "correctAnswer": "1", "wordLimit": 1 },
+        { "id": 3, "correctAnswer": "space applications", "wordLimit": 2 },
+        { "id": 4, "correctAnswer": "1954", "wordLimit": 1 }
+      ]
+    }
+  ]
+}`;
     case "SENTENCE_COMPLETION":
     case "SUMMARY_COMPLETION":
-    case "NOTE_COMPLETION":
     case "TABLE_COMPLETION":
     case "FLOW_CHART_COMPLETION":
     case "DIAGRAM_LABEL_COMPLETION":
       return `{
   "questions": [
     {
-      "questionBody": { "layout": "TEXT", "content": "The study concluded that _____ and _____ were the main factors." },
+      "questionBody": { "layout": "TEXT", "content": "The study concluded that {{gap1}} and {{gap2}} were the main factors." },
       "explanation": "Paragraph 3 identifies these two factors as primary.",
       "blanks": [
         { "id": 1, "correctAnswer": "funding", "wordLimit": 2 },
@@ -105,7 +161,7 @@ function getSampleJsonForQuestionType(questionType: string): string {
       ]
     },
     {
-      "questionBody": { "layout": "TEXT", "content": "Participants were asked to complete a _____ lasting approximately _____ minutes." },
+      "questionBody": { "layout": "TEXT", "content": "Participants were asked to complete a {{gap1}} lasting approximately {{gap2}} minutes." },
       "explanation": "The method section describes the questionnaire and its duration.",
       "blanks": [
         { "id": 1, "correctAnswer": "questionnaire", "wordLimit": 2 },
@@ -161,7 +217,7 @@ function parseBulkQuestionsJson(
     };
   }
   const questions: BulkQuestionItem[] = [];
-  const layouts = ["TEXT", "PASSAGE", "TABLE", "FLOWCHART", "DIAGRAM"];
+  const layouts = ["TEXT", "PASSAGE", "TABLE", "FLOWCHART", "DIAGRAM", "NOTE"];
   for (let i = 0; i < arr.length; i++) {
     const q = arr[i] as Record<string, unknown>;
     const body = q?.questionBody;
@@ -332,6 +388,11 @@ export default function QuestionsPage() {
   const [bulkResult, setBulkResult] = useState<string | null>(null);
   const [copyFeedback, setCopyFeedback] = useState(false);
 
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
+  const [deleteTypedValue, setDeleteTypedValue] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
+
   const [form, setForm] = useState<CreateQuestionPayload>({
     passageId: "",
     questionSetId: "",
@@ -411,6 +472,33 @@ export default function QuestionsPage() {
       setTimeout(() => setCopyFeedback(false), 2000);
     } catch {
       setBulkError("Could not copy to clipboard.");
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteConfirmId(id);
+    setDeleteStep(1);
+    setDeleteTypedValue("");
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmId) return;
+    if (deleteStep === 1) {
+      setDeleteStep(2);
+      return;
+    }
+    if (deleteTypedValue.trim().toLowerCase() !== DELETE_CONFIRM_PHRASE) return;
+    setDeleteBusy(true);
+    try {
+      await deleteQuestion(deleteConfirmId);
+      setQuestions((prev) => prev.filter((q) => q._id !== deleteConfirmId));
+      setDeleteConfirmId(null);
+      setDeleteStep(1);
+      setDeleteTypedValue("");
+    } catch {
+      setDeleteTypedValue("");
+    } finally {
+      setDeleteBusy(false);
     }
   };
 
@@ -567,7 +655,7 @@ export default function QuestionsPage() {
         {bulkOpen && (
           <div className="border-t border-border px-6 pb-6 pt-4 space-y-4">
             <p className="text-sm text-muted-foreground">
-              Select passage and question set above. The JSON format depends on the question type (MCQ needs options + correctAnswer; True/False/Not Given needs correctAnswer only; gap filling needs blanks). Each question requires <strong>questionBody</strong> (layout + content) and <strong>explanation</strong> (min 5 chars).
+              Select passage and question set above. The JSON format depends on the question type (MCQ needs options + correctAnswer; True/False/Not Given needs correctAnswer only; gap filling needs <strong>blanks</strong> and in content use <strong>{`{{gap1}}`}, {`{{gap2}}`}</strong>, etc. for each gap so students see a box per gap). Each question requires <strong>questionBody</strong> (layout + content) and <strong>explanation</strong> (min 5 chars).
             </p>
             {!bulkQuestionSetId && (
               <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
@@ -923,11 +1011,7 @@ export default function QuestionsPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">
-                      Q{q.questionNumber}:{" "}
-                      {typeof q.questionBody.content === "string"
-                        ? q.questionBody.content.slice(0, 60) +
-                          (q.questionBody.content.length > 60 ? "…" : "")
-                        : "—"}
+                      Q{q.questionNumber}: {getQuestionListSummary(q)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {passageTitle(qPassageId)} · {typeLabel} · {q.difficulty}
@@ -951,6 +1035,15 @@ export default function QuestionsPage() {
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      title="Delete question"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeleteClick(q._id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </li>
               );
@@ -958,6 +1051,75 @@ export default function QuestionsPage() {
           </ul>
         )}
       </Card>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirmId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-dialog-title"
+        >
+          <div
+            className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="delete-dialog-title" className="text-lg font-semibold text-stone-900">
+              {deleteStep === 1 ? "Delete question?" : "Confirm deletion"}
+            </h2>
+            {deleteStep === 1 ? (
+              <p className="mt-2 text-sm text-stone-600">
+                This action cannot be undone. Are you sure you want to delete this question?
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-stone-600">
+                Type <strong>&quot;{DELETE_CONFIRM_PHRASE}&quot;</strong> below to confirm:
+              </p>
+            )}
+            {deleteStep === 2 && (
+              <Input
+                type="text"
+                value={deleteTypedValue}
+                onChange={(e) => setDeleteTypedValue(e.target.value)}
+                placeholder={`Type "${DELETE_CONFIRM_PHRASE}"`}
+                className="mt-3"
+                disabled={deleteBusy}
+                autoFocus
+              />
+            )}
+            <div className="mt-6 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteConfirmId(null);
+                  setDeleteStep(1);
+                  setDeleteTypedValue("");
+                }}
+                disabled={deleteBusy}
+              >
+                {deleteStep === 1 ? "Cancel" : "Go back"}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={
+                  deleteBusy ||
+                  (deleteStep === 2 &&
+                    deleteTypedValue.trim().toLowerCase() !== DELETE_CONFIRM_PHRASE)
+                }
+              >
+                {deleteBusy ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : deleteStep === 1 ? (
+                  "Continue"
+                ) : (
+                  "Delete question"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Question preview modal */}
       {previewQuestion && (() => {

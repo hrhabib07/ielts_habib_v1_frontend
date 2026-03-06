@@ -168,7 +168,14 @@ export async function submitStepQuiz(
 }
 
 export interface SubmitPracticeTestPayload {
-  answers: Array<{ questionId: string; studentAnswer: string }>;
+  answers: Array<{
+    questionId: string;
+    studentAnswer?: string;
+    /** For multi-gap questions: one value per gap in order (gap1, gap2, ...). */
+    studentAnswers?: string[];
+  }>;
+  /** Required when practice test pass type is BAND: student's desired/target band (becomes their pass mark). */
+  targetBandScore?: number;
 }
 
 export interface SubmitPracticeTestResponse {
@@ -240,7 +247,9 @@ export interface PracticeTestStepContent {
   title: string;
   timeLimitMinutes: number;
   passType: string;
+  /** Min pass % when passType is PERCENTAGE; 0 when BAND (student chooses target). */
   passValue: number;
+  maxAttempts?: number | null;
   miniTest: PracticeTestMiniTestContent;
 }
 
@@ -299,9 +308,9 @@ export interface GroupTestContentForStudent {
 
 export interface SubmitGroupTestPayload {
   miniTestAnswers: [
-    { answers: Array<{ questionId: string; studentAnswer: string }> },
-    { answers: Array<{ questionId: string; studentAnswer: string }> },
-    { answers: Array<{ questionId: string; studentAnswer: string }> },
+    { answers: Array<{ questionId: string; studentAnswer?: string; studentAnswers?: string[] }> },
+    { answers: Array<{ questionId: string; studentAnswer?: string; studentAnswers?: string[] }> },
+    { answers: Array<{ questionId: string; studentAnswer?: string; studentAnswers?: string[] }> },
   ];
 }
 
@@ -363,4 +372,46 @@ export async function setReadingTargetBand(
     data: { readingTargetBand: number };
   }>(`${BASE}/target-band`, { targetBand });
   return unwrap(res).readingTargetBand;
+}
+
+/* ----- Level feedback (after level completed) ----- */
+export type QualityOfQuestions = "BELOW_STANDARD" | "STANDARD" | "GOOD" | "VERY_DIFFICULT";
+export type RecommendToOthers = "YES" | "MAYBE" | "NO";
+export type QualityOfVideo = "POOR" | "FAIR" | "GOOD" | "VERY_GOOD" | "NOT_APPLICABLE";
+
+export interface LevelFeedbackResponse {
+  _id: string;
+  userId: string;
+  levelId: string;
+  qualityOfQuestions: QualityOfQuestions;
+  recommendToOthers: RecommendToOthers;
+  qualityOfVideo?: QualityOfVideo;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmitLevelFeedbackPayload {
+  qualityOfQuestions: QualityOfQuestions;
+  recommendToOthers: RecommendToOthers;
+  qualityOfVideo?: QualityOfVideo;
+}
+
+/** GET feedback for current user and level. Returns null if not submitted yet. */
+export async function getLevelFeedback(levelId: string): Promise<LevelFeedbackResponse | null> {
+  const res = await apiClient.get<{ success: boolean; data: LevelFeedbackResponse | null }>(
+    `${BASE}/levels/${levelId}/feedback`,
+  );
+  return res.data?.data ?? null;
+}
+
+/** POST submit level feedback. Level must be completed. One submission per user per level. */
+export async function submitLevelFeedback(
+  levelId: string,
+  payload: SubmitLevelFeedbackPayload,
+): Promise<LevelFeedbackResponse> {
+  const res = await apiClient.post<{ success: boolean; data: LevelFeedbackResponse }>(
+    `${BASE}/levels/${levelId}/feedback`,
+    payload,
+  );
+  return res.data.data;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ import {
   type GroupTestQuestionForStudent,
   type SubmitPracticeTestResponse,
 } from "@/src/lib/api/readingStrictProgression";
+import { GapFillingQuestionInput, hasGapPlaceholders, isStructuredNoteQuestion } from "./GapFillingQuestionInput";
 import { Loader2, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 
 type PassageParagraph = { paragraphIndex: number; paragraphLabel: string; text: string };
@@ -44,29 +45,58 @@ function extractQuestionText(qBody: unknown): string {
   return layout ? `Question (${layout})` : "";
 }
 
+function getDisplayNumberForQuestion(
+  miniTest: PracticeTestStepContent["miniTest"],
+  question: GroupTestQuestionForStudent
+): number {
+  const groups = miniTest.questionGroups;
+  if (groups?.length) {
+    for (const group of groups) {
+      const idx = group.questions.findIndex((q) => q._id === question._id);
+      if (idx >= 0) return group.startQuestionNumber + idx;
+    }
+  }
+  return question.questionNumber ?? 1;
+}
+
 function QuestionInput({
   question,
+  displayNumber,
   value,
   onChange,
   disabled,
 }: {
   question: GroupTestQuestionForStudent;
-  value: string;
-  onChange: (v: string) => void;
+  displayNumber: number;
+  value: string | string[];
+  onChange: (v: string | string[]) => void;
   disabled?: boolean;
 }) {
   const qBody = question.questionBody;
   const rawText = extractQuestionText(qBody);
-  const text = rawText.trim() || `Question ${question.questionNumber}`;
+  const text = rawText.trim() || `Question ${displayNumber}`;
+
+  if (question.blanks?.length && (isStructuredNoteQuestion(question) || hasGapPlaceholders(rawText) || question.blanks.length > 1)) {
+    return (
+      <GapFillingQuestionInput
+        question={question}
+        displayNumber={displayNumber}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        inputClassName="min-w-[100px] max-w-[180px] inline-flex rounded border border-gray-300 bg-white px-2 py-1.5 text-sm align-baseline dark:border-gray-600 dark:bg-gray-800"
+      />
+    );
+  }
 
   if (question.blanks?.length) {
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{question.questionNumber}. {text}</Label>
+        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
         <div className="flex items-center gap-2">
           <Input
             type="text"
-            value={value}
+            value={Array.isArray(value) ? value[0] ?? "" : value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={question.blanks[0]?.options?.length ? `Choose: ${question.blanks[0].options.join(", ")}` : "Answer"}
             disabled={disabled}
@@ -80,7 +110,7 @@ function QuestionInput({
   if (question.options?.length) {
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{question.questionNumber}. {text}</Label>
+        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
         <div className="space-y-1.5 pl-2">
           {question.options.map((opt, i) => (
             <label key={i} className="flex items-center gap-2 cursor-pointer">
@@ -104,7 +134,7 @@ function QuestionInput({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={question._id} className="text-sm font-medium">
-        Q{question.questionNumber}. {text}
+        Q{displayNumber}. {text}
       </Label>
       <Input
         id={question._id}
@@ -127,6 +157,8 @@ export interface PracticeTestStepCardProps {
   onProgressUpdate: (progress: SubmitPracticeTestResponse["progress"]) => void;
 }
 
+const BAND_OPTIONS = [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9];
+
 export function PracticeTestStepCard({
   levelId,
   stepId,
@@ -135,25 +167,33 @@ export function PracticeTestStepCard({
   onProgressUpdate,
 }: PracticeTestStepCardProps) {
   const { title, timeLimitMinutes, passType, passValue, miniTest } = content;
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
+  const [targetBandScore, setTargetBandScore] = useState<number>(6);
   const [submitting, setSubmitting] = useState(false);
   const [lastResult, setLastResult] = useState<{ passed: boolean; scorePercent: number; bandScore: number } | null>(null);
+  const isBandPass = passType === "BAND";
 
-  const setAnswer = useCallback((qId: string, value: string) => {
+  const setAnswer = useCallback((qId: string, value: string | string[]) => {
     setAnswers((prev) => ({ ...prev, [qId]: value }));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const answerList = Object.entries(answers).map(([questionId, studentAnswer]) => ({
-      questionId,
-      studentAnswer: String(studentAnswer).trim(),
-    }));
+    const answerList = Object.entries(answers).map(([questionId, val]) => {
+      if (Array.isArray(val)) {
+        return { questionId, studentAnswers: val.map((s) => String(s).trim()) };
+      }
+      return { questionId, studentAnswer: String(val).trim() };
+    });
     if (answerList.length === 0) return;
+    if (isBandPass && (targetBandScore < 0 || targetBandScore > 9)) return;
     setSubmitting(true);
     setLastResult(null);
     try {
-      const result = await submitPracticeTest(levelId, stepId, { answers: answerList });
+      const result = await submitPracticeTest(levelId, stepId, {
+        answers: answerList,
+        ...(isBandPass && { targetBandScore }),
+      });
       setLastResult({
         passed: result.passed,
         scorePercent: result.scorePercent,
@@ -170,7 +210,9 @@ export function PracticeTestStepCard({
     }
   };
 
-  const passLabel = passType === "PERCENTAGE" ? `${passValue}%` : `band ${passValue}`;
+  const passLabel = isBandPass
+    ? "reach your target band (choose below)"
+    : `≥ ${passValue}%`;
 
   return (
     <div className="space-y-4">
@@ -181,6 +223,26 @@ export function PracticeTestStepCard({
         </span>
         <span>Pass: {passLabel}</span>
       </div>
+      {isBandPass && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/50">
+          <Label className="text-sm font-medium">Your target band score</Label>
+          <p className="text-xs text-muted-foreground mt-0.5 mb-2">
+            You need to score at least this band to pass. Choose the band you are aiming for.
+          </p>
+          <select
+            value={targetBandScore}
+            onChange={(e) => setTargetBandScore(Number(e.target.value))}
+            disabled={submitting}
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[6rem]"
+          >
+            {BAND_OPTIONS.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       {lastResult && (
         <div
           className={`flex items-center gap-3 rounded-xl border p-4 ${
@@ -196,7 +258,7 @@ export function PracticeTestStepCard({
           )}
           <div>
             <p className={`font-medium ${lastResult.passed ? "text-emerald-800 dark:text-emerald-200" : "text-amber-800 dark:text-amber-200"}`}>
-              {lastResult.passed ? "Passed! You can proceed to the next step." : "Not yet. Try again — unlimited attempts allowed."}
+              {lastResult.passed ? "Passed! You can proceed to the next step." : "Not yet. Try again."}
             </p>
             <p className="text-sm text-muted-foreground mt-0.5">
               Score: {lastResult.scorePercent}% · Band: {lastResult.bandScore}
@@ -223,7 +285,8 @@ export function PracticeTestStepCard({
               <QuestionInput
                 key={q._id}
                 question={q}
-                value={answers[q._id] ?? ""}
+                displayNumber={getDisplayNumberForQuestion(miniTest, q)}
+                value={answers[q._id] ?? (q.blanks?.length ? (q.blanks.length > 1 ? [] : "") : "")}
                 onChange={(v) => setAnswer(q._id, v)}
                 disabled={submitting}
               />

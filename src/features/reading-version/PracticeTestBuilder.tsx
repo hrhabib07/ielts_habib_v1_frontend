@@ -10,6 +10,7 @@ import {
   createPracticeTest,
   updatePracticeTest,
   deletePracticeTest,
+  reorderPracticeTests,
   getPracticeTestPreviewContent,
   type PracticeTest,
   type CreatePracticeTestPayload,
@@ -17,7 +18,12 @@ import {
   type PracticeTestContentForPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
-import { Trash2, Plus, Loader2, X, Check, Pencil, Eye } from "lucide-react";
+import { Trash2, Plus, Loader2, X, Check, Pencil, Eye, ChevronUp, ChevronDown } from "lucide-react";
+
+const MAX_ATTEMPTS_OPTIONS = [
+  { value: "unlimited", label: "Unlimited" },
+  ...Array.from({ length: 10 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })),
+];
 
 interface PracticeTestBuilderProps {
   versionId: string;
@@ -35,6 +41,7 @@ export function PracticeTestBuilder({
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [reorderBusy, setReorderBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<PracticeTestContentForPreview | null>(null);
@@ -98,6 +105,25 @@ export function PracticeTestBuilder({
     }
   };
 
+  const sortedList = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
+  const handleReorder = async (direction: "up" | "down", index: number) => {
+    if (direction === "up" && index <= 0) return;
+    if (direction === "down" && index >= sortedList.length - 1) return;
+    setError(null);
+    setReorderBusy(true);
+    try {
+      const reordered = [...sortedList];
+      const swap = direction === "up" ? index - 1 : index + 1;
+      [reordered[index], reordered[swap]] = [reordered[swap], reordered[index]];
+      const updated = await reorderPracticeTests(versionId, reordered.map((p) => p._id));
+      onPracticeTestsChange(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to reorder");
+    } finally {
+      setReorderBusy(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -132,9 +158,7 @@ export function PracticeTestBuilder({
           />
         )}
         <ul className="space-y-2">
-          {(practiceTests ?? [])
-            .sort((a, b) => a.order - b.order)
-            .map((pt) => (
+          {sortedList.map((pt, index) => (
               <li key={pt._id} className="flex items-center gap-2 rounded-md border p-3">
                 {editingId === pt._id ? (
                   <PracticeTestEditForm
@@ -145,13 +169,38 @@ export function PracticeTestBuilder({
                   />
                 ) : (
                   <>
-                    <span className="text-muted-foreground w-8">#{pt.order}</span>
+                    <div className="flex flex-col items-center w-10 gap-0">
+                      <span className="text-muted-foreground text-xs">#{pt.order}</span>
+                      {!disabled && sortedList.length > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleReorder("up", index)}
+                            disabled={reorderBusy || index === 0}
+                            className="p-0.5 rounded hover:bg-muted"
+                            title="Move up"
+                          >
+                            <ChevronUp className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleReorder("down", index)}
+                            disabled={reorderBusy || index === sortedList.length - 1}
+                            className="p-0.5 rounded hover:bg-muted"
+                            title="Move down"
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                     <span className="text-sm flex-1 font-medium">
                       {pt.contentCode ? `[${pt.contentCode}] ` : ""}
                       {pt.title}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {pt.timeLimitMinutes} min · pass {pt.passType === "PERCENTAGE" ? `${pt.passValue}%` : `band ${pt.passValue}`}
+                      {pt.maxAttempts != null ? ` · ${pt.maxAttempts} attempts` : " · unlimited"}
                     </span>
                     {!disabled && (
                       <div className="flex gap-1">
@@ -190,7 +239,7 @@ export function PracticeTestBuilder({
                   </>
                 )}
               </li>
-            ))}
+          ))}
         </ul>
         {previewId && (
           <PracticeTestPreview
@@ -225,6 +274,7 @@ function PracticeTestForm({
   const [timeLimitMinutes, setTimeLimitMinutes] = useState(3);
   const [passType, setPassType] = useState<"PERCENTAGE" | "BAND">("PERCENTAGE");
   const [passValue, setPassValue] = useState(60);
+  const [maxAttemptsRaw, setMaxAttemptsRaw] = useState("unlimited");
   const [order, setOrder] = useState(nextOrder);
   const [pqsList, setPqsList] = useState<PassageQuestionSet[]>([]);
   const [loadingPqs, setLoadingPqs] = useState(true);
@@ -242,13 +292,19 @@ function PracticeTestForm({
     if (!title.trim() || !passageQuestionSetId) return;
     setSubmitting(true);
     try {
+      const maxAttempts =
+        maxAttemptsRaw === "unlimited"
+          ? null
+          : Math.max(1, Math.min(99, parseInt(maxAttemptsRaw, 10) || 1));
+      const effectivePassValue = passType === "BAND" ? 0 : Math.max(0, Math.min(100, passValue));
       await onSave({
         title: title.trim(),
         contentCode: contentCode.trim() || undefined,
         passageQuestionSetId,
         timeLimitMinutes,
         passType,
-        passValue,
+        passValue: effectivePassValue,
+        maxAttempts,
         order,
       });
     } finally {
@@ -322,6 +378,21 @@ function PracticeTestForm({
           />
         </div>
         <div>
+          <Label>Max attempts</Label>
+          <select
+            value={maxAttemptsRaw}
+            onChange={(e) => setMaxAttemptsRaw(e.target.value)}
+            disabled={disabled}
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
+            {MAX_ATTEMPTS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
           <Label>Pass type</Label>
           <select
             value={passType}
@@ -329,22 +400,24 @@ function PracticeTestForm({
             disabled={disabled}
             className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           >
-            <option value="PERCENTAGE">Percentage</option>
-            <option value="BAND">Band score</option>
+            <option value="PERCENTAGE">Percentage (min pass %)</option>
+            <option value="BAND">Band score (student chooses target)</option>
           </select>
         </div>
-        <div>
-          <Label>Pass value ({passType === "PERCENTAGE" ? "min %" : "min band"})</Label>
-          <Input
-            type="number"
-            min={0}
-            max={passType === "PERCENTAGE" ? 100 : 9}
-            value={passValue}
-            onChange={(e) => setPassValue(Number(e.target.value) ?? 0)}
-            disabled={disabled}
-            className="mt-1"
-          />
-        </div>
+        {passType === "PERCENTAGE" && (
+          <div>
+            <Label>Minimum pass %</Label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={passValue}
+              onChange={(e) => setPassValue(Number(e.target.value) ?? 0)}
+              disabled={disabled}
+              className="mt-1"
+            />
+          </div>
+        )}
         <div>
           <Label>Order</Label>
           <Input
@@ -388,6 +461,11 @@ function PracticeTestEditForm({
   const [timeLimitMinutes, setTimeLimitMinutes] = useState(practiceTest.timeLimitMinutes);
   const [passType, setPassType] = useState(practiceTest.passType as "PERCENTAGE" | "BAND");
   const [passValue, setPassValue] = useState(practiceTest.passValue);
+  const [maxAttemptsRaw, setMaxAttemptsRaw] = useState(
+    practiceTest.maxAttempts == null || practiceTest.maxAttempts === undefined
+      ? "unlimited"
+      : String(practiceTest.maxAttempts),
+  );
   const [order, setOrder] = useState(practiceTest.order);
   const [submitting, setSubmitting] = useState(false);
 
@@ -395,12 +473,18 @@ function PracticeTestEditForm({
     e.preventDefault();
     setSubmitting(true);
     try {
+      const maxAttempts =
+        maxAttemptsRaw === "unlimited"
+          ? null
+          : Math.max(1, Math.min(99, parseInt(maxAttemptsRaw, 10) || 1));
+      const effectivePassValue = passType === "BAND" ? 0 : Math.max(0, Math.min(100, passValue));
       await onSave({
         title,
         contentCode: contentCode.trim() || undefined,
         timeLimitMinutes,
         passType,
-        passValue,
+        passValue: effectivePassValue,
+        maxAttempts,
         order,
       });
     } finally {
@@ -443,6 +527,21 @@ function PracticeTestEditForm({
         />
       </div>
       <div className="w-24">
+        <Label className="text-xs">Attempts</Label>
+        <select
+          value={maxAttemptsRaw}
+          onChange={(e) => setMaxAttemptsRaw(e.target.value)}
+          disabled={busy}
+          className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
+        >
+          {MAX_ATTEMPTS_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="w-24">
         <Label className="text-xs">Pass</Label>
         <select
           value={passType}
@@ -454,17 +553,20 @@ function PracticeTestEditForm({
           <option value="BAND">Band</option>
         </select>
       </div>
-      <div className="w-16">
-        <Input
-          type="number"
-          min={0}
-          max={passType === "PERCENTAGE" ? 100 : 9}
-          value={passValue}
-          onChange={(e) => setPassValue(Number(e.target.value) ?? 0)}
-          disabled={busy}
-          className="mt-1"
-        />
-      </div>
+      {passType === "PERCENTAGE" && (
+        <div className="w-16">
+          <Label className="text-xs">Min %</Label>
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={passValue}
+            onChange={(e) => setPassValue(Number(e.target.value) ?? 0)}
+            disabled={busy}
+            className="mt-1"
+          />
+        </div>
+      )}
       <div className="w-14">
         <Label className="text-xs">Order</Label>
         <Input

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,19 +10,23 @@ import {
   createGroupTest,
   updateGroupTest,
   deleteGroupTest,
-  assignGroupTestContentCodes,
+  getGroupTest,
   type GroupTest,
   type CreateGroupTestPayload,
   type UpdateGroupTestPayload,
 } from "@/src/lib/api/adminReadingVersions";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
-import { Trash2, Plus, Loader2, X, Check, Pencil } from "lucide-react";
+import { Trash2, Plus, Loader2, X, Check, Pencil, Eye, MoreVertical } from "lucide-react";
 
 interface GroupTestBuilderProps {
   versionId: string;
   groupTests: GroupTest[];
   disabled: boolean;
   onGroupTestsChange: (groupTests: GroupTest[]) => void;
+  /** Level title for display (e.g. "Level 2 - Skill"). */
+  levelTitle?: string;
+  /** Level ID for preview URL. */
+  levelId?: string;
 }
 
 export function GroupTestBuilder({
@@ -29,33 +34,14 @@ export function GroupTestBuilder({
   groupTests,
   disabled,
   onGroupTestsChange,
+  levelTitle,
+  levelId,
 }: GroupTestBuilderProps) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [assigningCodes, setAssigningCodes] = useState(false);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const someWithoutCode =
-    groupTests.length > 0 &&
-    groupTests.some(
-      (g) => g.contentCode == null || String(g.contentCode).trim() === "",
-    );
-
-  const handleAssignContentCodes = async () => {
-    setError(null);
-    setAssigningCodes(true);
-    try {
-      const updated = await assignGroupTestContentCodes(versionId);
-      onGroupTestsChange(
-        updated.sort((a, b) => a.orderInPool - b.orderInPool),
-      );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to assign content codes");
-    } finally {
-      setAssigningCodes(false);
-    }
-  };
 
   const handleCreate = async (payload: CreateGroupTestPayload) => {
     setError(null);
@@ -104,38 +90,34 @@ export function GroupTestBuilder({
     }
   };
 
+  const sortedTests = [...groupTests].sort((a, b) => a.orderInPool - b.orderInPool);
+  const previewBaseUrl =
+    levelId && versionId
+      ? `/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/final-evaluation-preview`
+      : null;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>Group tests</CardTitle>
-        <div className="flex items-center gap-2">
-          {!disabled && someWithoutCode && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleAssignContentCodes}
-              disabled={assigningCodes}
-            >
-              {assigningCodes ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Assign content codes"
-              )}
-            </Button>
-          )}
-          {!disabled && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setAdding(true)}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add group test
-            </Button>
+        <div>
+          <CardTitle>Group tests</CardTitle>
+          {levelTitle && (
+            <p className="mt-1 text-sm font-normal text-muted-foreground">
+              Level: {levelTitle}
+            </p>
           )}
         </div>
+        {!disabled && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setAdding(true)}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Add group test
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         {error && <p className="text-sm text-destructive">{error}</p>}
@@ -152,54 +134,104 @@ export function GroupTestBuilder({
           />
         )}
         <ul className="space-y-2">
-          {groupTests
-            .sort((a, b) => a.orderInPool - b.orderInPool)
-            .map((gt) => (
-              <li key={gt._id} className="flex items-center gap-2 rounded-md border p-3">
-                {editingId === gt._id ? (
-                  <GroupTestEditForm
-                    groupTest={gt}
-                    onSave={(p) => handleUpdate(gt._id, p)}
-                    onCancel={() => setEditingId(null)}
-                    busy={busyId === gt._id}
-                  />
-                ) : (
-                  <>
-                    <span className="shrink-0 font-mono text-xs font-medium text-muted-foreground tabular-nums">
-                      {gt.contentCode ?? "—"}
-                    </span>
-                    <span className="text-muted-foreground">Order {gt.orderInPool}</span>
-                    <span className="text-sm flex-1 min-w-0 truncate">
-                      {gt.contentCode ? `[${gt.contentCode}] ` : ""}
-                      MiniTests: [{gt.miniTestIds.slice(0, 1).map((id) => id.slice(-8)).join(", ")}…]
-                    </span>
+          {sortedTests.map((gt, idx) => (
+            <li
+              key={gt._id}
+              className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3 shadow-sm"
+            >
+              {editingId === gt._id ? (
+                <GroupTestEditForm
+                  groupTestId={gt._id}
+                  displayLabel={`Group Test ${idx + 1}`}
+                  initialOrderInPool={gt.orderInPool}
+                  onSave={(p) => handleUpdate(gt._id, p)}
+                  onCancel={() => setEditingId(null)}
+                  busy={busyId === gt._id}
+                />
+              ) : (
+                <>
+                  <span className="shrink-0 font-medium text-foreground">
+                    Group Test {idx + 1}
+                  </span>
+                  <span className="text-muted-foreground text-sm">
+                    (order {gt.orderInPool})
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    · 3 mini tests
+                  </span>
+                  <div className="ml-auto flex gap-1">
+                    {previewBaseUrl && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <Link
+                          href={`${previewBaseUrl}?groupTestId=${encodeURIComponent(gt._id)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Preview
+                        </Link>
+                      </Button>
+                    )}
                     {!disabled && (
-                      <div className="flex gap-1">
+                      <>
                         <Button
                           variant="ghost"
-                          size="icon-xs"
+                          size="icon"
                           onClick={() => setEditingId(gt._id)}
+                          title="Edit"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => handleDelete(gt._id)}
-                          disabled={busyId === gt._id}
-                        >
-                          {busyId === gt._id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                        <div className="relative">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setMenuOpenId(menuOpenId === gt._id ? null : gt._id)}
+                            title="More options"
+                            aria-expanded={menuOpenId === gt._id}
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                          {menuOpenId === gt._id && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-10"
+                                aria-hidden
+                                onClick={() => setMenuOpenId(null)}
+                              />
+                              <div className="absolute right-0 top-full z-20 mt-1 min-w-[10rem] rounded-md border bg-popover py-1 shadow-md">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setMenuOpenId(null);
+                                    handleDelete(gt._id);
+                                  }}
+                                  disabled={busyId === gt._id}
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                                >
+                                  {busyId === gt._id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                  Delete group test
+                                </button>
+                              </div>
+                            </>
                           )}
-                        </Button>
-                      </div>
+                        </div>
+                      </>
                     )}
-                  </>
-                )}
-              </li>
-            ))}
+                  </div>
+                </>
+              )}
+            </li>
+          ))}
         </ul>
       </CardContent>
     </Card>
@@ -213,8 +245,6 @@ interface GroupTestFormProps {
   disabled: boolean;
 }
 
-const CONTENT_CODE_HINT = "L{level}C{content} e.g. L2C6. Unique across all content types.";
-
 function GroupTestForm({
   nextOrderInPool,
   onSave,
@@ -222,7 +252,6 @@ function GroupTestForm({
   disabled,
 }: GroupTestFormProps) {
   const [orderInPool, setOrderInPool] = useState(nextOrderInPool);
-  const [contentCode, setContentCode] = useState("");
   const [pqsList, setPqsList] = useState<PassageQuestionSet[]>([]);
   const [loadingPqs, setLoadingPqs] = useState(true);
   const [pqs0, setPqs0] = useState("");
@@ -247,15 +276,12 @@ function GroupTestForm({
     try {
       await onSave({
         orderInPool,
-        contentCode: contentCode.trim() || undefined,
         passageQuestionSetIds: [pqs0, pqs1, pqs2],
       });
     } finally {
       setSubmitting(false);
     }
   };
-
-  const contentCodeValid = !contentCode.trim() || /^L\d+C\d+$/i.test(contentCode.trim().replace(/\s/g, ""));
 
   const options = pqsList.map((p) => {
     const meta = `P${p.passageNumber} · ${p.expectedTotalQuestions ?? p.totalQuestions ?? 0} q · ${p.recommendedTime ?? 0} min`;
@@ -265,33 +291,16 @@ function GroupTestForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border bg-muted/20 p-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <Label>Order in pool</Label>
-          <Input
-            type="number"
-            min={1}
-            value={orderInPool}
-            onChange={(e) => setOrderInPool(Number(e.target.value) || 1)}
-            disabled={disabled}
-            className="mt-1"
-          />
-        </div>
-        <div>
-          <Label htmlFor="gt-content-code">Content code (optional)</Label>
-          <Input
-            id="gt-content-code"
-            value={contentCode}
-            onChange={(e) => setContentCode(e.target.value.toUpperCase().replace(/\s/g, ""))}
-            placeholder="e.g. L2C6"
-            disabled={disabled}
-            className="mt-1 max-w-[10rem] font-mono"
-          />
-          <p className="mt-1 text-xs text-muted-foreground">{CONTENT_CODE_HINT}</p>
-          {contentCode.trim() && !contentCodeValid && (
-            <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-500">Use format L2C6 (level + content number)</p>
-          )}
-        </div>
+      <div>
+        <Label>Order in pool</Label>
+        <Input
+          type="number"
+          min={1}
+          value={orderInPool}
+          onChange={(e) => setOrderInPool(Number(e.target.value) || 1)}
+          disabled={disabled}
+          className="mt-1 max-w-[8rem]"
+        />
       </div>
       <div>
         <Label className="mb-2 block">Select 3 Passage Question Sets (one per mini test)</Label>
@@ -353,7 +362,7 @@ function GroupTestForm({
         )}
       </div>
       <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={submitting || disabled || loadingPqs || pqsList.length === 0 || !contentCodeValid}>
+        <Button type="submit" size="sm" disabled={submitting || disabled || loadingPqs || pqsList.length === 0}>
           {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
           Create group test
         </Button>
@@ -366,89 +375,166 @@ function GroupTestForm({
 }
 
 interface GroupTestEditFormProps {
-  groupTest: GroupTest;
+  groupTestId: string;
+  displayLabel: string;
+  initialOrderInPool: number;
   onSave: (p: UpdateGroupTestPayload) => Promise<void>;
   onCancel: () => void;
   busy: boolean;
 }
 
 function GroupTestEditForm({
-  groupTest,
+  groupTestId,
+  displayLabel,
+  initialOrderInPool,
   onSave,
   onCancel,
   busy,
 }: GroupTestEditFormProps) {
-  const [orderInPool, setOrderInPool] = useState(groupTest.orderInPool);
-  const [contentCode, setContentCode] = useState(groupTest.contentCode ?? "");
-  const [id0, setId0] = useState(groupTest.miniTestIds[0] ?? "");
-  const [id1, setId1] = useState(groupTest.miniTestIds[1] ?? "");
-  const [id2, setId2] = useState(groupTest.miniTestIds[2] ?? "");
+  const [orderInPool, setOrderInPool] = useState(initialOrderInPool);
+  const [pqsList, setPqsList] = useState<PassageQuestionSet[]>([]);
+  const [loadingPqs, setLoadingPqs] = useState(true);
+  const [loadingDetail, setLoadingDetail] = useState(true);
+  const [pqs0, setPqs0] = useState("");
+  const [pqs1, setPqs1] = useState("");
+  const [pqs2, setPqs2] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    getMyPassageQuestionSets()
+      .then((list) => setPqsList(list.filter((p) => p.questionGroupIds?.length)))
+      .catch(() => setPqsList([]))
+      .finally(() => setLoadingPqs(false));
+  }, []);
+
+  useEffect(() => {
+    setLoadingDetail(true);
+    getGroupTest(groupTestId)
+      .then((detail) => {
+        setOrderInPool(detail.orderInPool);
+        const ids = detail.passageQuestionSetIds ?? [];
+        if (ids.length >= 3) {
+          setPqs0(ids[0] ?? "");
+          setPqs1(ids[1] ?? "");
+          setPqs2(ids[2] ?? "");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingDetail(false));
+  }, [groupTestId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id0.trim() || !id1.trim() || !id2.trim()) return;
+    if (!pqs0 || !pqs1 || !pqs2) return;
+    if (new Set([pqs0, pqs1, pqs2]).size !== 3) return;
     setSubmitting(true);
     try {
       await onSave({
         orderInPool,
-        contentCode: contentCode.trim() || null,
-        miniTestIds: [id0.trim(), id1.trim(), id2.trim()],
+        passageQuestionSetIds: [pqs0, pqs1, pqs2],
       });
     } finally {
       setSubmitting(false);
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-2 w-full">
-      <div className="w-24">
-        <Label className="text-xs">Code</Label>
-        <Input
-          value={contentCode}
-          onChange={(e) => setContentCode(e.target.value.toUpperCase().replace(/\s/g, ""))}
-          placeholder="L2C6"
-          disabled={busy}
-          className="mt-1 font-mono text-xs"
-        />
+  const options = pqsList.map((p) => {
+    const meta = `P${p.passageNumber} · ${p.expectedTotalQuestions ?? p.totalQuestions ?? 0} q · ${p.recommendedTime ?? 0} min`;
+    const label = p.title?.trim() ? `${p.title} (${meta})` : `Passage ${p.passageNumber} · ${meta}`;
+    return { value: p._id, label };
+  });
+
+  if (loadingDetail) {
+    return (
+      <div className="flex w-full items-center gap-2 py-2 text-sm text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading…
       </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="w-full space-y-4 rounded-xl border bg-muted/20 p-4">
+      <p className="text-sm font-medium text-muted-foreground">{displayLabel}</p>
       <div>
-        <Label className="text-xs">Order</Label>
+        <Label>Order in pool</Label>
         <Input
           type="number"
           min={1}
-          className="w-20"
           value={orderInPool}
           onChange={(e) => setOrderInPool(Number(e.target.value) || 1)}
           disabled={busy}
+          className="mt-1 max-w-[8rem]"
         />
       </div>
-      <div className="flex-1 grid grid-cols-3 gap-1 min-w-0">
-        <Input
-          value={id0}
-          onChange={(e) => setId0(e.target.value)}
-          placeholder="MiniTest 1"
-          disabled={busy}
-        />
-        <Input
-          value={id1}
-          onChange={(e) => setId1(e.target.value)}
-          placeholder="MiniTest 2"
-          disabled={busy}
-        />
-        <Input
-          value={id2}
-          onChange={(e) => setId2(e.target.value)}
-          placeholder="MiniTest 3"
-          disabled={busy}
-        />
+      <div>
+        <Label className="mb-2 block">Mini tests (3 Passage Question Sets)</Label>
+        {loadingPqs ? (
+          <p className="text-sm text-muted-foreground">Loading passage question sets…</p>
+        ) : pqsList.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No passage question sets available.</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Mini test 1</Label>
+              <select
+                value={pqs0}
+                onChange={(e) => setPqs0(e.target.value)}
+                disabled={busy}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select…</option>
+                {options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Mini test 2</Label>
+              <select
+                value={pqs1}
+                onChange={(e) => setPqs1(e.target.value)}
+                disabled={busy}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select…</option>
+                {options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Mini test 3</Label>
+              <select
+                value={pqs2}
+                onChange={(e) => setPqs2(e.target.value)}
+                disabled={busy}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select…</option>
+                {options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
-      <Button type="submit" size="sm" disabled={submitting || busy}>
-        {submitting || busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-      </Button>
-      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-        <X className="h-4 w-4" />
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" size="sm" disabled={submitting || busy || loadingPqs || pqsList.length === 0 || !pqs0 || !pqs1 || !pqs2}>
+          {submitting || busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+          Save
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+          <X className="h-4 w-4" /> Cancel
+        </Button>
+      </div>
     </form>
   );
 }

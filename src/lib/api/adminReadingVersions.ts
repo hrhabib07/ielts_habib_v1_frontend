@@ -77,8 +77,6 @@ export interface ReadingLevelStep {
 export interface GroupTest {
   _id: string;
   levelVersionId: string;
-  /** Unified content code e.g. L2C6. Unique across all content types. */
-  contentCode?: string;
   orderInPool: number;
   miniTestIds: [string, string, string];
   createdAt?: string;
@@ -94,6 +92,8 @@ export interface PracticeTest {
   timeLimitMinutes: number;
   passType: string;
   passValue: number;
+  /** Max attempts per student. null/undefined = unlimited. */
+  maxAttempts?: number | null;
   order: number;
   createdAt?: string;
   updatedAt?: string;
@@ -146,8 +146,6 @@ export interface UpdateEvaluationConfigPayload {
 
 export interface CreateGroupTestPayload {
   orderInPool: number;
-  /** Unified content code e.g. L2C6. Unique across learning, quiz, practice test, group test. */
-  contentCode?: string;
   /** Exactly 3 MiniTest IDs (legacy). */
   miniTestIds?: [string, string, string];
   /** Exactly 3 Passage Question Set IDs; backend creates MiniTests and then the GroupTest. */
@@ -156,8 +154,13 @@ export interface CreateGroupTestPayload {
 
 export interface UpdateGroupTestPayload {
   orderInPool?: number;
-  contentCode?: string | null;
   miniTestIds?: [string, string, string];
+  /** Replace the 3 mini tests with new ones from these PQS IDs. */
+  passageQuestionSetIds?: [string, string, string];
+}
+
+export interface GroupTestWithPqsIds extends GroupTest {
+  passageQuestionSetIds: [string, string, string];
 }
 
 function unwrap<T>(res: { data?: { data?: T } }): T {
@@ -402,11 +405,21 @@ export async function updateGroupTest(
   return unwrap(res);
 }
 
+export async function getGroupTest(
+  groupTestId: string,
+): Promise<GroupTestWithPqsIds> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: GroupTestWithPqsIds;
+  }>(`${BASE}/group-tests/${groupTestId}`);
+  return unwrap(res);
+}
+
 export async function deleteGroupTest(groupTestId: string): Promise<void> {
   await apiClient.delete(`${BASE}/group-tests/${groupTestId}`);
 }
 
-/** Assign unique content codes to group tests that currently have none. Returns updated group tests. */
+/** Returns group tests for the version (sorted by orderInPool). Kept for compatibility. */
 export async function assignGroupTestContentCodes(
   versionId: string,
 ): Promise<GroupTest[]> {
@@ -425,6 +438,8 @@ export interface CreatePracticeTestPayload {
   timeLimitMinutes?: number;
   passType?: string;
   passValue: number;
+  /** Max attempts; null = unlimited. */
+  maxAttempts?: number | null;
   order?: number;
 }
 
@@ -434,6 +449,7 @@ export interface UpdatePracticeTestPayload {
   timeLimitMinutes?: number;
   passType?: string;
   passValue?: number;
+  maxAttempts?: number | null;
   order?: number;
 }
 
@@ -470,12 +486,24 @@ export async function deletePracticeTest(practiceTestId: string): Promise<void> 
   await apiClient.delete(`${BASE}/practice-tests/${practiceTestId}`);
 }
 
+export async function reorderPracticeTests(
+  versionId: string,
+  practiceTestIds: string[],
+): Promise<PracticeTest[]> {
+  const res = await apiClient.patch<{ success: boolean; data: PracticeTest[] }>(
+    `${BASE}/versions/${versionId}/practice-tests/reorder`,
+    { practiceTestIds },
+  );
+  return res.data?.data ?? [];
+}
+
 export interface PracticeTestContentForPreview {
   practiceTestId: string;
   title: string;
   timeLimitMinutes: number;
   passType: string;
   passValue: number;
+  maxAttempts: number | null;
   miniTest: GroupTestMiniTestForPreview;
 }
 

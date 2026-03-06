@@ -69,7 +69,7 @@ export default function GroupTestsPage() {
             Group Tests
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Create group tests from 3 passage question sets (3 mini tests). Each group test is the level’s final evaluation. Set a content code (e.g. L2C6) — unique across all content types. Select a level and add at least one group test; set evaluation type to Group test in Level Builder to publish.
+            Create group tests from 3 passage question sets (3 mini tests). Each group test is the level’s final evaluation. Select a level and add at least one group test; set evaluation type to Group test in Level Builder to publish.
           </p>
         </div>
         <Button variant="outline" size="sm" asChild>
@@ -139,6 +139,8 @@ export default function GroupTestsPage() {
                   groupTests={detail.groupTests ?? []}
                   disabled={detail.version.status === "PUBLISHED"}
                   onGroupTestsChange={handleGroupTestsChange}
+                  levelTitle={levels.find((l) => l._id === selectedLevelId)?.title}
+                  levelId={selectedLevelId}
                 />
               </div>
             )}
