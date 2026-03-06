@@ -10,6 +10,7 @@ import {
   getReadingTargetBand,
   type LevelDetailForStudent,
   type SubmitStepQuizResponse,
+  type LevelCompletionScore,
 } from "@/src/lib/api/readingStrictProgression";
 import { getLevelsByModule } from "@/src/lib/api/levels";
 import { completeStep } from "@/src/lib/api/levels";
@@ -31,6 +32,7 @@ export default function ReadingStrictLevelPage() {
   const [targetBandRequired, setTargetBandRequired] = useState(false);
   const [completingStepId, setCompletingStepId] = useState<string | null>(null);
   const [nextLevelInfo, setNextLevelInfo] = useState<NextLevelInfo | null>(null);
+  const [completionScore, setCompletionScore] = useState<LevelCompletionScore | null>(null);
   const [hasFeedbackSubmitted, setHasFeedbackSubmitted] = useState<boolean | null>(null);
   const [readingTargetBand, setReadingTargetBandState] = useState<
     number | null | undefined
@@ -192,8 +194,12 @@ export default function ReadingStrictLevelPage() {
   );
 
   const handleProgressUpdate = useCallback(
-    (progress: SubmitStepQuizResponse["progress"]) => {
+    (
+      progress: SubmitStepQuizResponse["progress"],
+      levelCompletionScore?: LevelCompletionScore,
+    ) => {
       setDetail((prev) => (prev ? { ...prev, progress } : null));
+      if (levelCompletionScore) setCompletionScore(levelCompletionScore);
       if (progress?.passStatus === "PASSED") {
         setTimeout(() => {
           const banner = document.querySelector("[data-level-completed-banner]");
@@ -332,6 +338,7 @@ export default function ReadingStrictLevelPage() {
       onNavigate={handleNavigate}
       hideSidebar
       nextLevelInfo={nextLevelInfo}
+      completionScore={completionScore}
       hasFeedbackSubmitted={hasFeedbackSubmitted}
       onFeedbackSuccess={() => setHasFeedbackSubmitted(true)}
     />

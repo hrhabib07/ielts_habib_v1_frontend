@@ -100,6 +100,13 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
           >
             Level builder
           </Link>
+          <Link
+            href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/preview`}
+            className="inline-flex items-center gap-2 rounded-xl border border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/30 px-3 py-2 text-sm font-medium text-teal-800 dark:text-teal-200 hover:bg-teal-100 dark:hover:bg-teal-900/40"
+          >
+            <Eye className="h-4 w-4" />
+            Preview level
+          </Link>
           {showGroupTests && (groupTests?.length ?? 0) > 0 && (
             <Link
               href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/final-evaluation-preview`}

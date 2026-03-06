@@ -159,6 +159,42 @@ function QuestionInput({
     );
   }
 
+  /* TRUE/FALSE/NOT GIVEN and YES/NO/NOT GIVEN — official IELTS style radio buttons */
+  if (question.type === "TRUE_FALSE_NOT_GIVEN" || question.type === "YES_NO_NOT_GIVEN") {
+    const options =
+      question.options?.length
+        ? question.options
+        : question.type === "TRUE_FALSE_NOT_GIVEN"
+          ? ["TRUE", "FALSE", "NOT GIVEN"]
+          : ["YES", "NO", "NOT GIVEN"];
+    const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
+    const text = rawText.trim() || `Question ${displayNumber}`;
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
+        <div className="mt-2 flex flex-wrap gap-3">
+          {options.map((opt) => (
+            <label
+              key={opt}
+              className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 px-4 py-2.5 transition-colors hover:border-indigo-300 dark:hover:border-indigo-600 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50/60 dark:has-[:checked]:bg-indigo-950/40"
+            >
+              <input
+                type="radio"
+                name={question._id}
+                value={opt}
+                checked={singleVal === opt}
+                onChange={() => onChange(opt)}
+                disabled={disabled}
+                className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <span className="font-medium text-gray-800 dark:text-gray-200">{opt}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (question.blanks?.length) {
     const text = rawText.trim() || `Question ${displayNumber}`;
     return (

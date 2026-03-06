@@ -1,305 +1,106 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  submitPracticeTest,
-  type PracticeTestStepContent,
-  type GroupTestQuestionForStudent,
-  type SubmitPracticeTestResponse,
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FileText, Trophy, Eye, RotateCcw } from "lucide-react";
+import type {
+  PracticeTestStepContent,
+  PracticeTestStepStatus,
 } from "@/src/lib/api/readingStrictProgression";
-import { GapFillingQuestionInput, hasGapPlaceholders, isStructuredNoteQuestion } from "./GapFillingQuestionInput";
-import { Loader2, CheckCircle2, AlertCircle, Clock } from "lucide-react";
-
-type PassageParagraph = { paragraphIndex: number; paragraphLabel: string; text: string };
-
-function renderPassageContent(content: unknown): React.ReactNode {
-  if (!content || !Array.isArray(content)) return null;
-  return (
-    <div className="space-y-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-      {(content as PassageParagraph[]).map((p) => (
-        <p key={p.paragraphIndex}>
-          {p.paragraphLabel && (
-            <span className="font-medium text-gray-500 dark:text-gray-400 mr-1">
-              {p.paragraphLabel}
-            </span>
-          )}
-          {p.text}
-        </p>
-      ))}
-    </div>
-  );
-}
-
-function extractQuestionText(qBody: unknown): string {
-  if (!qBody || typeof qBody !== "object") return "";
-  const c = (qBody as { content?: unknown }).content;
-  if (typeof c === "string") return c;
-  if (Array.isArray(c) && c.length > 0) {
-    if (typeof c[0] === "string") return c[0];
-    if (Array.isArray(c[0])) return (c[0] as string[]).join(" ");
-  }
-  const layout = (qBody as { layout?: string }).layout;
-  return layout ? `Question (${layout})` : "";
-}
-
-function getDisplayNumberForQuestion(
-  miniTest: PracticeTestStepContent["miniTest"],
-  question: GroupTestQuestionForStudent
-): number {
-  const groups = miniTest.questionGroups;
-  if (groups?.length) {
-    for (const group of groups) {
-      const idx = group.questions.findIndex((q) => q._id === question._id);
-      if (idx >= 0) return group.startQuestionNumber + idx;
-    }
-  }
-  return question.questionNumber ?? 1;
-}
-
-function QuestionInput({
-  question,
-  displayNumber,
-  value,
-  onChange,
-  disabled,
-}: {
-  question: GroupTestQuestionForStudent;
-  displayNumber: number;
-  value: string | string[];
-  onChange: (v: string | string[]) => void;
-  disabled?: boolean;
-}) {
-  const qBody = question.questionBody;
-  const rawText = extractQuestionText(qBody);
-  const text = rawText.trim() || `Question ${displayNumber}`;
-
-  if (question.blanks?.length && (isStructuredNoteQuestion(question) || hasGapPlaceholders(rawText) || question.blanks.length > 1)) {
-    return (
-      <GapFillingQuestionInput
-        question={question}
-        displayNumber={displayNumber}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        inputClassName="min-w-[100px] max-w-[180px] inline-flex rounded border border-gray-300 bg-white px-2 py-1.5 text-sm align-baseline dark:border-gray-600 dark:bg-gray-800"
-      />
-    );
-  }
-
-  if (question.blanks?.length) {
-    return (
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
-        <div className="flex items-center gap-2">
-          <Input
-            type="text"
-            value={Array.isArray(value) ? value[0] ?? "" : value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={question.blanks[0]?.options?.length ? `Choose: ${question.blanks[0].options.join(", ")}` : "Answer"}
-            disabled={disabled}
-            className="max-w-md"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (question.options?.length) {
-    return (
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
-        <div className="space-y-1.5 pl-2">
-          {question.options.map((opt, i) => (
-            <label key={i} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name={question._id}
-                value={opt}
-                checked={value === opt}
-                onChange={() => onChange(opt)}
-                disabled={disabled}
-                className="rounded border-gray-300"
-              />
-              <span className="text-sm">{opt}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-1.5">
-      <Label htmlFor={question._id} className="text-sm font-medium">
-        Q{displayNumber}. {text}
-      </Label>
-      <Input
-        id={question._id}
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Your answer"
-        disabled={disabled}
-        className="max-w-md"
-      />
-    </div>
-  );
-}
+import { getPracticeTestStepStatus } from "@/src/lib/api/readingStrictProgression";
 
 export interface PracticeTestStepCardProps {
   levelId: string;
   stepId: string;
   content: PracticeTestStepContent;
   onComplete: (stepId: string) => void;
-  onProgressUpdate: (progress: SubmitPracticeTestResponse["progress"]) => void;
+  onProgressUpdate: (progress: unknown) => void;
 }
 
-const BAND_OPTIONS = [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9];
-
+/**
+ * Intro card for practice test. Shows best score so far, review link if attempted,
+ * and Start test / Try again button.
+ */
 export function PracticeTestStepCard({
   levelId,
   stepId,
   content,
-  onComplete,
-  onProgressUpdate,
 }: PracticeTestStepCardProps) {
-  const { title, timeLimitMinutes, passType, passValue, miniTest } = content;
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
-  const [targetBandScore, setTargetBandScore] = useState<number>(6);
-  const [submitting, setSubmitting] = useState(false);
-  const [lastResult, setLastResult] = useState<{ passed: boolean; scorePercent: number; bandScore: number } | null>(null);
-  const isBandPass = passType === "BAND";
+  const router = useRouter();
+  const [status, setStatus] = useState<PracticeTestStepStatus | null>(null);
 
-  const setAnswer = useCallback((qId: string, value: string | string[]) => {
-    setAnswers((prev) => ({ ...prev, [qId]: value }));
-  }, []);
+  useEffect(() => {
+    getPracticeTestStepStatus(levelId, stepId)
+      .then(setStatus)
+      .catch(() => setStatus(null));
+  }, [levelId, stepId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const answerList = Object.entries(answers).map(([questionId, val]) => {
-      if (Array.isArray(val)) {
-        return { questionId, studentAnswers: val.map((s) => String(s).trim()) };
-      }
-      return { questionId, studentAnswer: String(val).trim() };
-    });
-    if (answerList.length === 0) return;
-    if (isBandPass && (targetBandScore < 0 || targetBandScore > 9)) return;
-    setSubmitting(true);
-    setLastResult(null);
-    try {
-      const result = await submitPracticeTest(levelId, stepId, {
-        answers: answerList,
-        ...(isBandPass && { targetBandScore }),
-      });
-      setLastResult({
-        passed: result.passed,
-        scorePercent: result.scorePercent,
-        bandScore: result.bandScore,
-      });
-      onProgressUpdate(result.progress);
-      if (result.passed) {
-        onComplete(stepId);
-      }
-    } catch {
-      setLastResult({ passed: false, scorePercent: 0, bandScore: 0 });
-    } finally {
-      setSubmitting(false);
-    }
+  const handleStartTest = () => {
+    router.push(
+      `/profile/reading/strict-levels/${levelId}/practice-test?step=${encodeURIComponent(stepId)}`
+    );
   };
 
-  const passLabel = isBandPass
-    ? "reach your target band (choose below)"
-    : `≥ ${passValue}%`;
+  const hasAttempts = status && status.attemptCount > 0;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Clock className="h-4 w-4" />
-          {timeLimitMinutes} min
-        </span>
-        <span>Pass: {passLabel}</span>
-      </div>
-      {isBandPass && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/50">
-          <Label className="text-sm font-medium">Your target band score</Label>
-          <p className="text-xs text-muted-foreground mt-0.5 mb-2">
-            You need to score at least this band to pass. Choose the band you are aiming for.
-          </p>
-          <select
-            value={targetBandScore}
-            onChange={(e) => setTargetBandScore(Number(e.target.value))}
-            disabled={submitting}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[6rem]"
-          >
-            {BAND_OPTIONS.map((b) => (
-              <option key={b} value={b}>
-                {b}
-              </option>
-            ))}
-          </select>
+    <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-8 shadow-sm">
+      <div className="flex flex-col items-center text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-500/10 dark:bg-indigo-400/10">
+          <FileText className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
         </div>
-      )}
-      {lastResult && (
-        <div
-          className={`flex items-center gap-3 rounded-xl border p-4 ${
-            lastResult.passed
-              ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30"
-              : "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30"
-          }`}
-        >
-          {lastResult.passed ? (
-            <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          ) : (
-            <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400 shrink-0" />
-          )}
-          <div>
-            <p className={`font-medium ${lastResult.passed ? "text-emerald-800 dark:text-emerald-200" : "text-amber-800 dark:text-amber-200"}`}>
-              {lastResult.passed ? "Passed! You can proceed to the next step." : "Not yet. Try again."}
-            </p>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Score: {lastResult.scorePercent}% · Band: {lastResult.bandScore}
-            </p>
-          </div>
-        </div>
-      )}
-      <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
-          <span className="font-medium">{title}</span>
-          {miniTest.passage?.title && (
-            <span className="text-muted-foreground ml-2">— {miniTest.passage.title}</span>
-          )}
-        </div>
-        <form onSubmit={handleSubmit} className="p-4 space-y-6">
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            {renderPassageContent(miniTest.passage?.content)}
-          </div>
-          <div className="space-y-4">
-            <h4 className="text-sm font-semibold">
-              Questions {miniTest.questions?.length > 0 && `(${miniTest.questions.length})`}
-            </h4>
-            {(miniTest.questions ?? []).map((q) => (
-              <QuestionInput
-                key={q._id}
-                question={q}
-                displayNumber={getDisplayNumberForQuestion(miniTest, q)}
-                value={answers[q._id] ?? (q.blanks?.length ? (q.blanks.length > 1 ? [] : "") : "")}
-                onChange={(v) => setAnswer(q._id, v)}
-                disabled={submitting}
-              />
-            ))}
-          </div>
-          <Button type="submit" disabled={submitting || (miniTest.questions?.length ?? 0) === 0}>
-            {submitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              lastResult?.passed ? "Completed" : "Submit practice test"
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          Reading Practice Test
+        </h3>
+        {content.title && (
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{content.title}</p>
+        )}
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+          {content.timeLimitMinutes} minutes. One passage with questions. Your reading target band
+          will be used to determine pass/fail. Unlimited attempts until you pass.
+        </p>
+
+        {hasAttempts && (
+          <div className="mt-5 flex w-full max-w-sm flex-wrap items-center justify-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-amber-500" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                Best: Band {status!.bestBandScore}
+              </span>
+            </div>
+            <span className="text-slate-400">·</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              {status!.attemptCount} attempt{status!.attemptCount !== 1 ? "s" : ""}
+            </span>
+            {status!.lastAttemptId && (
+              <Link
+                href={`/profile/reading/practice-attempt/${status!.lastAttemptId}`}
+                className="flex items-center gap-1.5 rounded-lg border border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/50 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                Review answers
+              </Link>
             )}
-          </Button>
-        </form>
+          </div>
+        )}
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={handleStartTest}
+            className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md active:scale-[0.98]"
+          >
+            {hasAttempts ? (
+              <>
+                <RotateCcw className="h-4 w-4" />
+                Try again
+              </>
+            ) : (
+              "Start test"
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

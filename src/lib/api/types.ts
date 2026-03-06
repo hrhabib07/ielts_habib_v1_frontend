@@ -39,13 +39,24 @@ export interface ProfileSummaryPerformanceTrend {
   [key: string]: unknown;
 }
 
+export interface ProfileSummaryPracticeAttempt {
+  _id: string;
+  bandScore: number;
+  scorePercent: number;
+  passed: boolean;
+  createdAt: string;
+}
+
 export interface ProfileSummary {
   targetBand: number | null;
   currentEstimatedBand: number | null;
   currentLevel: ProfileSummaryLevel | null;
+  totalLevels?: number;
+  overallProgressPct?: number;
   streakInfo: ProfileSummaryStreak | null;
   weaknesses: ProfileSummaryWeakness[];
   recentAttempts: ProfileSummaryRecentAttempt[];
+  recentPracticeAttempts?: ProfileSummaryPracticeAttempt[];
   performanceTrend: ProfileSummaryPerformanceTrend | null;
 }
 

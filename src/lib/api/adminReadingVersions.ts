@@ -524,9 +524,10 @@ export interface GroupTestQuestionForPreview {
   questionNumber: number;
   type: string;
   questionBody: unknown;
-  blanks?: { id: number; wordLimit?: number; options?: string[] }[];
+  blanks?: { id: number; wordLimit?: number; options?: string[]; correctAnswer?: string | string[] }[];
   options?: string[];
   correctAnswer?: string | string[];
+  explanation?: string;
 }
 
 /** One question type block (e.g. "Questions 1–7: True/False/Not Given") */

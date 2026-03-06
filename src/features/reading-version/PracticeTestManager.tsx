@@ -1070,6 +1070,16 @@ function PracticeTestQuestionBlock({
           {correct}
         </span>
       </div>
+      {(question as GroupTestQuestionForPreview).explanation && (
+        <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50/80 px-3 py-2 dark:border-blue-800 dark:bg-blue-950/40">
+          <span className="text-xs font-semibold uppercase text-blue-700 dark:text-blue-400">
+            Explanation:
+          </span>
+          <p className="mt-1 text-[14px] text-blue-900 dark:text-blue-200">
+            {(question as GroupTestQuestionForPreview).explanation}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

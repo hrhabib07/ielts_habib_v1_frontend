@@ -9,6 +9,7 @@ import { LevelFeedbackForm } from "./LevelFeedbackForm";
 import type {
   LevelDetailForStudent,
   SubmitStepQuizResponse,
+  LevelCompletionScore,
 } from "@/src/lib/api/readingStrictProgression";
 
 export interface NextLevelInfo {
@@ -23,7 +24,10 @@ interface LevelLayoutProps {
   completingStepId: string | null;
   onComplete: (stepId: string) => void;
   onLevelPassed: () => void;
-  onProgressUpdate: (progress: SubmitStepQuizResponse["progress"]) => void;
+  onProgressUpdate: (
+    progress: SubmitStepQuizResponse["progress"],
+    completionScore?: LevelCompletionScore,
+  ) => void;
   /** When set, step is driven by URL; no in-page sidebar (global sidebar used). */
   activeStepId?: string;
   onNavigate?: (stepId: string) => void;
@@ -31,6 +35,8 @@ interface LevelLayoutProps {
   hideSidebar?: boolean;
   /** When level is passed, show "Continue to Level X" or "You completed all levels!" */
   nextLevelInfo?: NextLevelInfo | null;
+  /** Score shown in completion banner when level passed via quiz (e.g. 8/10, 80%) */
+  completionScore?: LevelCompletionScore | null;
   /** Instructor preview mode: show read-only content, no real API calls for group tests */
   isPreview?: boolean;
   /** In preview, number of group tests (for final evaluation step message) */
@@ -52,6 +58,7 @@ export function LevelLayout({
   onNavigate,
   hideSidebar = false,
   nextLevelInfo = null,
+  completionScore = null,
   isPreview = false,
   previewGroupTestsCount,
   hasFeedbackSubmitted,
@@ -173,6 +180,20 @@ export function LevelLayout({
                     </p>
                   </div>
                 </div>
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                  {completionScore != null && (
+                    <div className="rounded-xl bg-emerald-200/60 dark:bg-emerald-800/40 px-4 py-2 text-right">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                        Score
+                      </p>
+                      <p className="text-lg font-bold tabular-nums text-emerald-800 dark:text-emerald-300">
+                        {completionScore.score}/{completionScore.total}
+                        <span className="ml-1.5 text-sm font-semibold">
+                          ({Math.round(completionScore.percentage)}%)
+                        </span>
+                      </p>
+                    </div>
+                  )}
                 {showContinue && (
                   nextLevelInfo ? (
                     <button
@@ -196,6 +217,7 @@ export function LevelLayout({
                     </p>
                   )
                 )}
+                </div>
               </div>
               {isLevelPassed && showFeedbackForm && onFeedbackSuccess && (
                 <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 p-4">

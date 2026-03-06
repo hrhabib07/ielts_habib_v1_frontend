@@ -1,10 +1,26 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { Clock, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, FileEdit, X, Search, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import Link from "next/link";
 import {
-  submitGroupTest,
-  type GroupTestContentForStudent,
+  Clock,
+  ZoomIn,
+  ZoomOut,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Minimize2,
+  FileEdit,
+  X,
+  Search,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from "lucide-react";
+import {
+  submitPracticeTest,
+  type PracticeTestStepContent,
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
 } from "@/src/lib/api/readingStrictProgression";
@@ -21,7 +37,6 @@ import {
   type TextHighlightRange,
   type TextNote,
 } from "./SelectableTextWithTools";
-import type { QuestionHighlightRange, QuestionNote } from "./PracticeTestReadingView";
 
 const QUESTION_TYPE_LABEL: Record<string, string> = {
   TRUE_FALSE_NOT_GIVEN: "True / False / Not Given",
@@ -41,24 +56,24 @@ const QUESTION_TYPE_LABEL: Record<string, string> = {
   SHORT_ANSWER: "Short answer",
 };
 
-const READING_TEST_MINUTES = 60;
-const STORAGE_KEY_TIME = "ielts-reading-mock-remaining-seconds";
+const STORAGE_KEY_TIME = "ielts-reading-practice-remaining-seconds";
 
-function useReadingTimer(groupTestId: string) {
+function usePracticeTimer(stepId: string, timeLimitMinutes: number) {
+  const totalSeconds = timeLimitMinutes * 60;
   const [remainingSeconds, setRemainingSeconds] = useState(() => {
-    if (typeof window === "undefined") return READING_TEST_MINUTES * 60;
-    const stored = sessionStorage.getItem(`${STORAGE_KEY_TIME}-${groupTestId}`);
+    if (typeof window === "undefined") return totalSeconds;
+    const stored = sessionStorage.getItem(`${STORAGE_KEY_TIME}-${stepId}`);
     if (stored) {
       const n = parseInt(stored, 10);
       if (!Number.isNaN(n) && n > 0) return n;
     }
-    return READING_TEST_MINUTES * 60;
+    return totalSeconds;
   });
 
   useEffect(() => {
-    const key = `${STORAGE_KEY_TIME}-${groupTestId}`;
+    const key = `${STORAGE_KEY_TIME}-${stepId}`;
     sessionStorage.setItem(key, String(remainingSeconds));
-  }, [groupTestId, remainingSeconds]);
+  }, [stepId, remainingSeconds]);
 
   useEffect(() => {
     if (remainingSeconds <= 0) return;
@@ -73,7 +88,14 @@ function useReadingTimer(groupTestId: string) {
 }
 
 const ZOOM_LEVELS = [80, 90, 100, 110, 120, 130, 140];
-const DEFAULT_ZOOM_INDEX = 2; // 100%
+const DEFAULT_ZOOM_INDEX = 2;
+const MIN_PASSAGE_WIDTH_PCT = 25;
+const MAX_PASSAGE_WIDTH_PCT = 75;
+const DEFAULT_PASSAGE_WIDTH_PCT = 48;
+const QUESTION_BASE_PX = 16;
+const QUESTION_TEXT_CLASS = "font-medium text-slate-900 dark:text-slate-100";
+const QUESTION_INPUT_BASE =
+  "rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-slate-900 dark:text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
 
 function extractQuestionText(qBody: unknown): string {
   if (!qBody || typeof qBody !== "object") return "";
@@ -83,14 +105,18 @@ function extractQuestionText(qBody: unknown): string {
     if (typeof c[0] === "string") return c[0];
     if (Array.isArray(c[0])) return (c[0] as string[]).join(" ");
   }
-  const layout = (qBody as { layout?: string }).layout;
-  return layout ? `Question (${layout})` : "";
+  return (qBody as { layout?: string }).layout ? `Question` : "";
 }
 
-const QUESTION_BASE_PX = 16;
-const QUESTION_TEXT_CLASS = "font-medium text-slate-900 dark:text-slate-100";
-const QUESTION_INPUT_BASE =
-  "rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-slate-900 dark:text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+export type QuestionHighlightRange = { questionId: string; start: number; end: number };
+export type QuestionNote = {
+  id: string;
+  questionId: string;
+  start: number;
+  end: number;
+  text: string;
+  snippet?: string;
+};
 
 function QuestionBlock({
   question,
@@ -227,20 +253,18 @@ function QuestionBlock({
         <p className="mb-2.5">
           {displayNumber}. {renderQuestionText()}
         </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            type="text"
-            value={singleVal}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={
-              question.blanks[0]?.options?.length
-                ? `Choose: ${question.blanks[0].options.join(", ")}`
-                : `Answer (max ${question.blanks[0]?.wordLimit ?? "—"} words)`
-            }
-            disabled={disabled}
-            className={`min-w-[200px] ${QUESTION_INPUT_BASE}`}
-          />
-        </div>
+        <input
+          type="text"
+          value={singleVal}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={
+            question.blanks[0]?.options?.length
+              ? `Choose: ${question.blanks[0].options.join(", ")}`
+              : `Answer (max ${question.blanks[0]?.wordLimit ?? "—"} words)`
+          }
+          disabled={disabled}
+          className={`min-w-[200px] ${QUESTION_INPUT_BASE}`}
+        />
       </div>
     );
   }
@@ -263,28 +287,29 @@ function QuestionBlock({
   );
 }
 
-export interface ReadingMockTestViewProps {
+export interface PracticeTestReadingViewProps {
   levelId: string;
-  content: GroupTestContentForStudent;
+  stepId: string;
+  content: PracticeTestStepContent;
   onSubmitted: (result: {
-    overallPass: boolean;
-    miniTestResults: Array<{ bandScore: number; passed: boolean }>;
-    newPassStatus: string;
+    passed: boolean;
+    scorePercent: number;
+    bandScore: number;
+    attemptId?: string;
+    attemptNumber?: number;
+    bestBandScore?: number;
+    isNewBest?: boolean;
   }) => void;
   onProgressUpdate?: () => void;
 }
 
-const MIN_PASSAGE_WIDTH_PCT = 25;
-const MAX_PASSAGE_WIDTH_PCT = 75;
-const DEFAULT_PASSAGE_WIDTH_PCT = 48;
-
-export function ReadingMockTestView({
+export function PracticeTestReadingView({
   levelId,
+  stepId,
   content,
   onSubmitted,
   onProgressUpdate,
-}: ReadingMockTestViewProps) {
-  const [passageIndex, setPassageIndex] = useState(0);
+}: PracticeTestReadingViewProps) {
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -301,7 +326,59 @@ export function ReadingMockTestView({
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editNoteText, setEditNoteText] = useState("");
   const [noteMenuOpenId, setNoteMenuOpenId] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const miniTest = content.miniTest as GroupTestMiniTestContent;
+  const zoomFactor = ZOOM_LEVELS[zoomIndex] / 100;
+  const canZoomIn = zoomIndex < ZOOM_LEVELS.length - 1;
+  const canZoomOut = zoomIndex > 0;
+  const { display: timeDisplay } = usePracticeTimer(stepId, content.timeLimitMinutes);
+  const totalQuestions = miniTest.questions?.length ?? 0;
+  const canPrevQuestion = focusedQuestionIndex > 0;
+  const canNextQuestion = focusedQuestionIndex < totalQuestions - 1 && totalQuestions > 0;
+
+  const displayNumberByQuestionId = useMemo(() => {
+    const map: Record<string, number> = {};
+    if (miniTest.questionGroups?.length) {
+      for (const group of miniTest.questionGroups) {
+        group.questions.forEach((q, idx) => {
+          map[q._id] = group.startQuestionNumber + idx;
+        });
+      }
+    } else {
+      (miniTest.questions ?? []).forEach((q, idx) => {
+        map[q._id] = idx + 1;
+      });
+    }
+    return map;
+  }, [miniTest.questionGroups, miniTest.questions]);
+
+  const passageTitle =
+    miniTest.passage?.title != null
+      ? String(miniTest.passage.title).replace(/\?+$/, "").trim() || "Reading Passage"
+      : "Reading Passage";
+
+  const scrollToQuestion = useCallback(
+    (index: number) => {
+      const qs = miniTest.questions ?? [];
+      const q = qs[index];
+      if (q) {
+        setFocusedQuestionIndex(index);
+        document.getElementById(`q-${q._id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    },
+    [miniTest.questions]
+  );
+
+  const setAnswer = useCallback((questionId: string, value: string | string[]) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  }, []);
+
+  const handleSplitterMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setDragging(true);
+  }, []);
 
   const addHighlight = useCallback((r: HighlightRange) => {
     setHighlights((prev) => [...prev, r]);
@@ -386,67 +463,21 @@ export function ReadingMockTestView({
     setEditingNoteId(null);
   }, [deleteQuestionNote]);
 
-  const zoomFactor = ZOOM_LEVELS[zoomIndex] / 100;
-  const canZoomIn = zoomIndex < ZOOM_LEVELS.length - 1;
-  const canZoomOut = zoomIndex > 0;
-
-  const { display: timeDisplay } = useReadingTimer(content.groupTestId);
-  const miniTest = content.miniTests[passageIndex] as GroupTestMiniTestContent;
-  const isFirst = passageIndex === 0;
-  const isLast = passageIndex === content.miniTests.length - 1;
-
-  const totalQuestionsInPassage = miniTest.questions.length;
-  const canPrevQuestion = focusedQuestionIndex > 0;
-  const canNextQuestion = focusedQuestionIndex < totalQuestionsInPassage - 1 && totalQuestionsInPassage > 0;
-
-  const displayNumberByQuestionId = useMemo(() => {
-    const map: Record<string, number> = {};
-    if (miniTest.questionGroups && miniTest.questionGroups.length > 0) {
-      for (const group of miniTest.questionGroups) {
-        group.questions.forEach((q, idx) => {
-          map[q._id] = group.startQuestionNumber + idx;
-        });
-      }
+  const toggleFullscreen = useCallback(() => {
+    if (!containerRef.current?.requestFullscreen) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+      setIsFullscreen(false);
     } else {
-      miniTest.questions.forEach((q, idx) => {
-        map[q._id] = idx + 1;
-      });
+      containerRef.current.requestFullscreen();
+      setIsFullscreen(true);
     }
-    return map;
-  }, [miniTest.questionGroups, miniTest.questions]);
-
-  const passageTitle =
-    miniTest.passage.title != null
-      ? String(miniTest.passage.title).replace(/\?+$/, "").trim() || `Passage ${passageIndex + 1}`
-      : `Passage ${passageIndex + 1}`;
-
-  useEffect(() => {
-    setFocusedQuestionIndex(0);
-  }, [passageIndex]);
-
-  useEffect(() => {
-    setHighlights([]);
-    setNotes([]);
-    setQuestionHighlights([]);
-    setQuestionNotes([]);
-  }, [passageIndex]);
-
-  const scrollToQuestion = useCallback((index: number) => {
-    const q = miniTest.questions[index];
-    if (q) {
-      setFocusedQuestionIndex(index);
-      const el = document.getElementById(`q-${q._id}`);
-      el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [miniTest.questions]);
-
-  const setAnswer = useCallback((questionId: string, value: string | string[]) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
   }, []);
 
-  const handleSplitterMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setDragging(true);
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
 
   useEffect(() => {
@@ -472,38 +503,29 @@ export function ReadingMockTestView({
     setError(null);
     setSubmitting(true);
     try {
-      const miniTestAnswers = content.miniTests.map((mt) => ({
-        answers: mt.questions.map((q) => {
-          const val = answers[q._id];
-          if (Array.isArray(val)) {
-            return { questionId: q._id, studentAnswers: val.map((s) => String(s).trim()) };
-          }
-          return { questionId: q._id, studentAnswer: String(val ?? "").trim() };
-        }),
-      }));
-
-      const allAnswered = miniTestAnswers.every((ma) =>
-        ma.answers.every((a) => {
-          if ("studentAnswers" in a && Array.isArray(a.studentAnswers)) {
-            return a.studentAnswers.every((s) => s !== "");
-          }
-          return (a.studentAnswer ?? "") !== "";
-        }),
-      );
-      if (!allAnswered) {
-        setError("Please answer all questions before submitting.");
+      const answerList = (miniTest.questions ?? []).map((q) => {
+        const val = answers[q._id];
+        if (Array.isArray(val)) {
+          return { questionId: q._id, studentAnswers: val.map((s) => String(s).trim()) };
+        }
+        return { questionId: q._id, studentAnswer: String(val ?? "").trim() };
+      });
+      if (answerList.length === 0) {
+        setError("Please answer at least one question before submitting.");
         setSubmitting(false);
         return;
       }
 
-      const res = await submitGroupTest(levelId, content.groupTestId, {
-        miniTestAnswers,
-      });
+      const res = await submitPracticeTest(levelId, stepId, { answers: answerList });
       onProgressUpdate?.();
       onSubmitted({
-        overallPass: res.overallPass,
-        miniTestResults: res.miniTestResults,
-        newPassStatus: res.newPassStatus,
+        passed: res.passed,
+        scorePercent: res.scorePercent,
+        bandScore: res.bandScore,
+        attemptId: res.attemptId,
+        attemptNumber: res.attemptNumber,
+        bestBandScore: res.bestBandScore,
+        isNewBest: res.isNewBest,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submit failed");
@@ -517,14 +539,13 @@ export function ReadingMockTestView({
       ref={containerRef}
       className={`relative flex h-full min-h-0 flex-col bg-slate-50 dark:bg-slate-950 ${dragging ? "select-none" : ""}`}
     >
-      {/* Header: logo/title, timer, controls */}
       <header className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5">
         <div className="flex items-center gap-4">
           <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-            GAMLISH Reading
+            IELTS Reading Practice Test
           </span>
           <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
-            Passage {passageIndex + 1} of {content.miniTests.length}
+            {content.timeLimitMinutes} minutes
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -540,14 +561,27 @@ export function ReadingMockTestView({
           >
             <FileEdit className="h-4 w-4" aria-hidden />
           </button>
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen mode"}
+            className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-2.5 py-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" aria-hidden />
+            ) : (
+              <Maximize2 className="h-4 w-4" aria-hidden />
+            )}
+            <span className="text-xs font-medium hidden sm:inline">
+              {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+            </span>
+          </button>
           <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5">
             <Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
             <span className="text-sm font-semibold tabular-nums text-slate-700 dark:text-slate-300">
               {timeDisplay}
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              remaining
-            </span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">remaining</span>
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-1.5 py-1">
             <button
@@ -575,23 +609,20 @@ export function ReadingMockTestView({
         </div>
       </header>
 
-      {/* Resizable two-column: passage | splitter | questions */}
       <div className="flex min-h-0 flex-1 flex-row">
-        {/* Left: passage */}
         <aside
           className="flex shrink-0 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
           style={{ width: `${passageWidthPct}%`, minWidth: 280 }}
         >
           <div className="border-b border-emerald-200/50 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3.5">
             <h2 className="text-xl font-bold text-emerald-800 dark:text-emerald-200">
-              Reading {passageTitle}
+              {passageTitle}
             </h2>
-            {miniTest.passage.subTitle != null &&
-              String(miniTest.passage.subTitle).trim() !== "" && (
-                <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-400">
-                  {miniTest.passage.subTitle}
-                </p>
-              )}
+            {miniTest.passage?.subTitle != null && String(miniTest.passage.subTitle).trim() !== "" && (
+              <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-400">
+                {String(miniTest.passage.subTitle)}
+              </p>
+            )}
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
               Select text in passage or questions for <span className="font-medium">Note</span>,{" "}
               <span className="font-medium">Highlight</span> or <span className="font-medium">Eraser</span> · Open notepad from header
@@ -599,7 +630,7 @@ export function ReadingMockTestView({
           </div>
           <div className="flex flex-1 flex-col min-h-0">
             <div className="flex-1 overflow-y-auto px-4 py-5">
-              {miniTest.passage.content && Array.isArray(miniTest.passage.content) ? (
+              {miniTest.passage?.content && Array.isArray(miniTest.passage.content) ? (
                 <PassageWithHighlightNotes
                   content={miniTest.passage.content as PassageParagraph[]}
                   zoomFactor={zoomFactor}
@@ -614,7 +645,6 @@ export function ReadingMockTestView({
           </div>
         </aside>
 
-        {/* Draggable splitter */}
         <div
           role="separator"
           aria-label="Resize passage and questions"
@@ -629,41 +659,25 @@ export function ReadingMockTestView({
           </div>
         </div>
 
-        {/* Right: questions */}
         <main className="flex min-h-0 flex-1 flex-col bg-white dark:bg-slate-900" style={{ minWidth: 280 }}>
-          {/* Compact row: passage nav + submit + prev/next question (same row as questions) */}
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 px-4 py-2">
-            <div className="flex items-center gap-1.5">
-              {!isFirst && (
-                <button
-                  type="button"
-                  onClick={() => setPassageIndex((i) => i - 1)}
-                  className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-                >
-                  <ChevronLeft className="mr-0.5 inline h-3.5 w-3.5" /> Prev passage
-                </button>
-              )}
-              {!isLast && (
-                <button
-                  type="button"
-                  onClick={() => setPassageIndex((i) => i + 1)}
-                  className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-                >
-                  Next passage <ChevronRight className="ml-0.5 inline h-3.5 w-3.5" />
-                </button>
-              )}
-              {isLast && (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={submitting}
-                  className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
-                >
-                  Submit test
-                </button>
-              )}
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/profile/reading/strict-levels/${levelId}`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" /> Back to level
+              </Link>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+              >
+                Submit test
+              </button>
             </div>
-            {totalQuestionsInPassage > 0 && (
+            {totalQuestions > 0 && (
               <div className="flex items-center gap-0.5">
                 <button
                   type="button"
@@ -693,16 +707,15 @@ export function ReadingMockTestView({
             className="flex-1 overflow-y-auto px-4 py-4 lg:px-6"
             style={{ fontSize: `${QUESTION_BASE_PX * zoomFactor}px` }}
           >
-            {miniTest.questions.length === 0 ? (
+            {!miniTest.questions?.length ? (
               <p className="text-sm text-amber-600 dark:text-amber-400">
-                No questions for this passage.
+                No questions available for this passage. Please contact your instructor.
               </p>
-            ) : miniTest.questionGroups && miniTest.questionGroups.length > 0 ? (
+            ) : miniTest.questionGroups?.length ? (
               <div className="space-y-8">
                 {miniTest.questionGroups.map((group, gIdx) => {
                   const typeLabel =
-                    QUESTION_TYPE_LABEL[group.questionType] ??
-                    group.questionType.replace(/_/g, " ");
+                    QUESTION_TYPE_LABEL[group.questionType] ?? group.questionType.replace(/_/g, " ");
                   return (
                     <section key={gIdx} className="mb-8">
                       <h3 className="mb-3 text-lg font-bold text-emerald-800 dark:text-emerald-200">
@@ -720,7 +733,7 @@ export function ReadingMockTestView({
                         <div key={q._id} id={`q-${q._id}`} className="scroll-mt-4">
                           <QuestionBlock
                             question={q}
-                            displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
+                            displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber ?? 0}
                             value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
                             onChange={(v) => setAnswer(q._id, v)}
                             disabled={submitting}
@@ -747,13 +760,13 @@ export function ReadingMockTestView({
             ) : (
               <>
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Questions {miniTest.questions.length > 0 && `(1–${miniTest.questions.length})`}
+                  Questions {totalQuestions > 0 && `(1–${totalQuestions})`}
                 </h3>
-                {miniTest.questions.map((q) => (
+                {(miniTest.questions ?? []).map((q, idx) => (
                   <div key={q._id} id={`q-${q._id}`} className="scroll-mt-4">
                     <QuestionBlock
                       question={q}
-                      displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
+                      displayNumber={displayNumberByQuestionId[q._id] ?? idx + 1}
                       value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
                       onChange={(v) => setAnswer(q._id, v)}
                       disabled={submitting}
@@ -1024,65 +1037,31 @@ export function ReadingMockTestView({
         </div>
       )}
 
-      {/* Bottom bar: Part 1 (question circles) | Part 2: X of 13 | Part 3: X of 14 */}
-      <div className="flex shrink-0 flex-wrap items-center gap-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
-        {content.miniTests.map((_, idx) => {
-          const isActive = passageIndex === idx;
-          const mt = content.miniTests[idx] as GroupTestMiniTestContent;
-          const answeredCount = mt.questions.filter((q) => {
+      {totalQuestions > 0 && (
+        <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5">
+          {(miniTest.questions ?? []).map((q) => {
             const v = answers[q._id];
-            if (Array.isArray(v)) return v.every((s) => String(s).trim() !== "");
-            return String(v ?? "").trim() !== "";
-          }).length;
-          const total = mt.questions.length;
-          return (
-            <div
-              key={idx}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${
-                isActive
-                  ? "border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/30"
-                  : "border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30"
-              }`}
-            >
-              <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                Part {idx + 1}
-              </span>
-              {isActive ? (
-                <div className="flex flex-wrap items-center gap-1">
-                  {mt.questions.map((q) => {
-                    const v = answers[q._id];
-                    const answered = Array.isArray(v)
-                      ? v.every((s) => String(s).trim() !== "")
-                      : String(v ?? "").trim() !== "";
-                    const displayNum =
-                      isActive && displayNumberByQuestionId[q._id] != null
-                        ? displayNumberByQuestionId[q._id]
-                        : mt.questions.indexOf(q) + 1;
-                    return (
-                      <button
-                        key={q._id}
-                        type="button"
-                        onClick={() => scrollToQuestion(mt.questions.indexOf(q))}
-                        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-all ${
-                          answered
-                            ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                            : "border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-500"
-                        }`}
-                      >
-                        {displayNum}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <span className="text-xs text-slate-600 dark:text-slate-400">
-                  {answeredCount} of {total} questions
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
+            const answered = Array.isArray(v)
+              ? v.every((s) => String(s).trim() !== "")
+              : String(v ?? "").trim() !== "";
+            const displayNum = displayNumberByQuestionId[q._id] ?? miniTest.questions!.indexOf(q) + 1;
+            return (
+              <button
+                key={q._id}
+                type="button"
+                onClick={() => scrollToQuestion(miniTest.questions!.indexOf(q))}
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all ${
+                  answered
+                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                    : "border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-500"
+                }`}
+              >
+                {displayNum}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

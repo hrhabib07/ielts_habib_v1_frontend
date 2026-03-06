@@ -25,6 +25,7 @@ import type {
   StepQuizContentResponse,
   PassageQuestionContent,
 } from "@/src/lib/api/readingStrictProgression";
+import type { GroupTestMiniTestForPreview } from "@/src/lib/api/adminReadingVersions";
 import { getStepContent } from "@/src/lib/api/readingStrictProgression";
 import { getStepContentForPreview } from "@/src/lib/api/adminReadingVersions";
 
@@ -38,6 +39,22 @@ const StepQuizSubmitCard = dynamic(
       <div className="flex items-center gap-2 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 text-sm text-gray-400 dark:text-gray-500">
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading quiz…
+      </div>
+    ),
+    ssr: false,
+  },
+);
+
+const PracticeTestPreviewInline = dynamic(
+  () =>
+    import("@/src/components/reading/PracticeTestPreviewInline").then(
+      (m) => m.PracticeTestPreviewInline,
+    ),
+  {
+    loading: () => (
+      <div className="flex items-center gap-2 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 text-sm text-gray-400 dark:text-gray-500">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Loading preview…
       </div>
     ),
     ssr: false,
@@ -240,7 +257,10 @@ export interface LevelContentProps {
   completingStepId: string | null;
   onComplete: (stepId: string) => void;
   onLevelPassed: () => void;
-  onProgressUpdate: (progress: SubmitStepQuizResponse["progress"]) => void;
+  onProgressUpdate: (
+    progress: SubmitStepQuizResponse["progress"],
+    completionScore?: { score: number; total: number; percentage: number },
+  ) => void;
   onNavigate?: (stepId: string) => void;
   allSteps?: LevelDetailStep[];
   /** Instructor preview: use admin step preview API and show final evaluation link */
@@ -533,14 +553,13 @@ export function LevelContent({
               content !== null &&
               content.type === "PRACTICE_TEST" &&
               isPreview && (
-                <div className="rounded-2xl border border-dashed border-teal-300 dark:border-teal-700 bg-teal-50/50 dark:bg-teal-950/30 p-6">
-                  <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">
-                    Practice test: {content.content.title}
-                  </p>
-                  <p className="mt-2 text-sm text-teal-700 dark:text-teal-300">
-                    {content.content.timeLimitMinutes} min · Pass: {content.content.passType === "PERCENTAGE" ? `${content.content.passValue}%` : `band ${content.content.passValue}`} · {content.content.miniTest?.questions?.length ?? 0} questions. Students get unlimited attempts until they reach the pass score.
-                  </p>
-                </div>
+                <PracticeTestPreviewInline
+                  title={content.content.title}
+                  timeLimitMinutes={content.content.timeLimitMinutes}
+                  passType={content.content.passType}
+                  passValue={content.content.passValue}
+                  miniTest={content.content.miniTest as GroupTestMiniTestForPreview}
+                />
               )}
 
             {/* FINAL_EVALUATION: Start button only — actual test runs in dedicated mock environment */}
@@ -582,19 +601,21 @@ export function LevelContent({
                 <PassageQuestionContentRenderer content={content.content} />
               )}
 
-            {/* No contentId — step has no linked content */}
+            {/* No contentId — step has no linked content (exclude steps with their own UI) */}
             {!contentLoading &&
               !contentError &&
               content === null &&
-              !step.contentId && (
+              !step.contentId &&
+              step.stepType !== "FINAL_EVALUATION" &&
+              step.stepType !== "PRACTICE_TEST" && (
                 <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-8">
                   No content attached to this step.
                 </p>
               )}
           </div>
 
-          {/* Mark complete button (not for quiz steps or FINAL_EVALUATION) */}
-          {!isQuizStep && step.stepType !== "FINAL_EVALUATION" && isCurrent && !isCompleted && (
+          {/* Mark complete button (not for quiz, practice test, or FINAL_EVALUATION — practice test uses submit + unlimited tries) */}
+          {!isQuizStep && step.stepType !== "PRACTICE_TEST" && step.stepType !== "FINAL_EVALUATION" && isCurrent && !isCompleted && (
             <div className="flex items-center gap-4 rounded-2xl border border-gray-100 dark:border-gray-700 bg-linear-to-r from-indigo-50 to-white dark:from-indigo-950/30 dark:to-gray-800/50 p-5">
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -627,8 +648,8 @@ export function LevelContent({
             </div>
           )}
 
-          {/* Completed state */}
-          {isCompleted && !isQuizStep && (
+          {/* Completed state (not for practice test — completion comes from passing the test; they can keep trying) */}
+          {isCompleted && !isQuizStep && step.stepType !== "PRACTICE_TEST" && (
             <div className="flex items-center gap-3 rounded-2xl border border-emerald-100 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 px-5 py-4">
               <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
               <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
@@ -657,14 +678,14 @@ export function LevelContent({
             </div>
           )}
 
-          {/* Prev / Next navigation — Next goes to next step or, on last step, to next level */}
+          {/* Prev / Next navigation — Previous = muted (go back); Next = primary (move forward) */}
           {onNavigate && allSteps && (
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between gap-4 pt-2">
               {prevStep ? (
                 <button
                   type="button"
                   onClick={() => onNavigate(prevStep._id)}
-                  className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98]"
+                  className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 shadow-sm transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-300 active:scale-[0.98]"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Previous
@@ -676,7 +697,7 @@ export function LevelContent({
                 <button
                   type="button"
                   onClick={() => onNavigate(nextStep._id)}
-                  className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98]"
+                  className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md active:scale-[0.98]"
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -685,7 +706,7 @@ export function LevelContent({
                 <button
                   type="button"
                   onClick={onNavigateToNextLevel}
-                  className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-[0.98]"
+                  className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md active:scale-[0.98]"
                 >
                   Next: {nextLevelInfo.title}
                   <ChevronRight className="h-4 w-4" />

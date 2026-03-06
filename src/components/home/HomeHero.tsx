@@ -26,7 +26,7 @@ export function HomeHero({
 }: HomeHeroProps) {
   const [mode, setMode] = useState<HeroMode>("loading");
   const [targetBand, setTargetBand] = useState<number | null>(null);
-  const [currentEstimatedBand, setCurrentEstimatedBand] = useState<number | null>(null);
+  const [overallProgressPct, setOverallProgressPct] = useState<number>(0);
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export function HomeHero({
         if (isStudent && res?.targetBand != null) {
           setMode("band");
           setTargetBand(res.targetBand);
-          setCurrentEstimatedBand(res.currentEstimatedBand ?? null);
+          setOverallProgressPct(res.overallProgressPct ?? 0);
           getMyProfile().then((p) => {
             if (!cancelled && p?.name) setUserName(p.name);
           });
@@ -67,7 +67,7 @@ export function HomeHero({
     return (
       <BandHero
         band={targetBand}
-        currentEstimatedBand={currentEstimatedBand}
+        overallProgressPct={overallProgressPct}
         userName={userName}
       />
     );
@@ -149,26 +149,24 @@ function MinimalHero({
   );
 }
 
-const FILL_MIN_PCT = 12;
-const FILL_MAX_PCT = 88;
+const FILL_MIN_PCT = 15;
+const FILL_MAX_PCT = 95;
 
 function BandHero({
   band,
-  currentEstimatedBand,
+  overallProgressPct,
   userName,
 }: {
   band: number;
-  currentEstimatedBand: number | null;
+  overallProgressPct: number;
   userName: string | null;
 }) {
   const bandLabel = Number.isInteger(band) ? String(band) : band.toFixed(1);
   const topLine = userName ? `${userName} can achieve` : "You can achieve";
 
-  const targetFillPct = (() => {
-    if (currentEstimatedBand == null || currentEstimatedBand <= 0) return FILL_MIN_PCT;
-    const ratio = Math.min(1, currentEstimatedBand / band);
-    return Math.round(FILL_MIN_PCT + ratio * (FILL_MAX_PCT - FILL_MIN_PCT));
-  })();
+  const targetFillPct = Math.round(
+    Math.min(FILL_MAX_PCT, Math.max(FILL_MIN_PCT, overallProgressPct))
+  );
 
   const [fillPct, setFillPct] = useState(FILL_MIN_PCT);
 
@@ -216,7 +214,7 @@ function BandHero({
 
         <p className="text-muted-foreground">in Reading module</p>
         <p className="mt-2 text-sm text-muted-foreground">
-          You're {fillPct}% of the way to your target.
+          {overallProgressPct}% through your journey — complete levels to fill the bar.
         </p>
 
         <div className="pt-8">

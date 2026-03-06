@@ -93,6 +93,12 @@ export interface SubmitStepQuizPayload {
   answers?: Array<{ questionId: string; value: string | string[] }>;
 }
 
+export interface LevelCompletionScore {
+  score: number;
+  total: number;
+  percentage: number;
+}
+
 export interface SubmitStepQuizResponse {
   passed: boolean;
   attemptNumber: number;
@@ -182,6 +188,10 @@ export interface SubmitPracticeTestResponse {
   passed: boolean;
   scorePercent: number;
   bandScore: number;
+  attemptId?: string;
+  attemptNumber?: number;
+  bestBandScore?: number;
+  isNewBest?: boolean;
   progress: { _id: string; currentStepIndex: number; completedStepIds: string[]; [key: string]: unknown };
 }
 
@@ -349,6 +359,53 @@ export async function getStepContent(
 ): Promise<StepContent> {
   const res = await apiClient.get<{ success: boolean; data: StepContent }>(
     `${BASE}/levels/${levelId}/steps/${stepId}/content`,
+  );
+  return unwrap(res);
+}
+
+/** Practice test attempt review with per-question feedback. */
+export interface PracticeTestAttemptReview {
+  attemptId: string;
+  levelId: string;
+  stepId: string;
+  passed: boolean;
+  bandScore: number;
+  scorePercent: number;
+  correctCount: number;
+  totalQuestions: number;
+  createdAt: string;
+  review: Array<{
+    questionId: string;
+    questionNumber: number;
+    questionType: string;
+    correctAnswer: string | string[];
+    yourAnswer: string | string[];
+    isCorrect: boolean;
+  }>;
+}
+
+export interface PracticeTestStepStatus {
+  bestBandScore: number;
+  lastAttemptId: string | null;
+  attemptCount: number;
+  passed: boolean;
+}
+
+export async function getPracticeTestStepStatus(
+  levelId: string,
+  stepId: string,
+): Promise<PracticeTestStepStatus> {
+  const res = await apiClient.get<{ success: boolean; data: PracticeTestStepStatus }>(
+    `${BASE}/levels/${levelId}/steps/${stepId}/practice-test-status`,
+  );
+  return unwrap(res);
+}
+
+export async function getPracticeTestAttemptReview(
+  attemptId: string,
+): Promise<PracticeTestAttemptReview> {
+  const res = await apiClient.get<{ success: boolean; data: PracticeTestAttemptReview }>(
+    `${BASE}/attempts/${attemptId}/review`,
   );
   return unwrap(res);
 }

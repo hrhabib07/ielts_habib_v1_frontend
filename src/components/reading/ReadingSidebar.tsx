@@ -119,6 +119,58 @@ export function ReadingSidebar() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!levelIdFromPath || levels.length === 0) return;
+    let cancelled = false;
+    getCurrentLevel("READING")
+      .then((progress) => {
+        if (cancelled) return;
+        const levelId =
+          progress?.levelId && typeof progress.levelId === "object"
+            ? (progress.levelId as Level)._id
+            : typeof progress?.levelId === "string"
+              ? progress.levelId
+              : null;
+        setCurrentLevelId(levelId ?? null);
+        setCurrentStepId(progress?.currentStepId ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [levelIdFromPath, levels.length]);
+
+  useEffect(() => {
+    if (
+      contextDetail?.progress.passStatus === "PASSED" &&
+      contextDetail?.level._id === levelIdFromPath &&
+      levels.length > 0
+    ) {
+      let cancelled = false;
+      getCurrentLevel("READING")
+        .then((progress) => {
+          if (cancelled) return;
+          const levelId =
+            progress?.levelId && typeof progress.levelId === "object"
+              ? (progress.levelId as Level)._id
+              : typeof progress?.levelId === "string"
+                ? progress.levelId
+                : null;
+          setCurrentLevelId(levelId ?? null);
+          setCurrentStepId(progress?.currentStepId ?? null);
+        })
+        .catch(() => {});
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [
+    contextDetail?.progress.passStatus,
+    contextDetail?.level._id,
+    levelIdFromPath,
+    levels.length,
+  ]);
+
   const currentOrder = getCurrentLevelOrder(levels, currentLevelId);
 
   const loadLevelDetail = useCallback((levelId: string) => {
@@ -163,13 +215,13 @@ export function ReadingSidebar() {
       <div className="border-b border-border px-4 py-3">
         <h2 className="text-sm font-semibold text-foreground">Reading</h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          {levels.length} level{levels.length !== 1 ? "s" : ""}
+          Your path · {levels.length} level{levels.length !== 1 ? "s" : ""}
         </p>
       </div>
       <nav className="flex-1 overflow-y-auto py-2 scrollbar-thin">
         {levels.map((level) => {
           const isExpanded = expandedLevelIds.has(level._id);
-          const isFirstLevel = level.order === 1;
+          const isFirstLevel = levels[0] ? level.order === levels[0].order : level.order === 0;
           const unlocked = isLevelUnlocked(
             level.order,
             currentOrder,
@@ -180,6 +232,11 @@ export function ReadingSidebar() {
             level._id === levelIdFromPath && contextDetail
               ? contextDetail
               : detailCache[level._id];
+          const stepCount = detail?.steps?.length ?? 0;
+          const completedCount = detail
+            ? (detail.progress.completedStepIds ?? []).length
+            : 0;
+          const isLevelPassed = detail?.progress.passStatus === "PASSED";
 
           return (
             <div key={level._id} className="border-b border-border/50 last:border-0">
@@ -199,10 +256,28 @@ export function ReadingSidebar() {
                 ) : (
                   <ChevronRight className="h-4 w-4 shrink-0" />
                 )}
-                <span className="min-w-0 truncate">Level {level.order}</span>
-                <span className="min-w-0 truncate text-muted-foreground">
+                <span
+                  className={cn(
+                    "flex h-6 min-w-[1.5rem] shrink-0 items-center justify-center rounded-md text-xs font-bold tabular-nums",
+                    isLevelPassed
+                      ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"
+                      : isCurrentLevel
+                        ? "bg-primary text-primary-foreground"
+                        : unlocked
+                          ? "bg-muted text-muted-foreground"
+                          : "bg-muted/60 text-muted-foreground",
+                  )}
+                >
+                  {level.order}
+                </span>
+                <span className="min-w-0 flex-1 truncate font-medium">
                   {level.title}
                 </span>
+                {stepCount > 0 && (
+                  <span className="shrink-0 text-[10px] text-muted-foreground tabular-nums">
+                    {isLevelPassed ? "✓" : `${completedCount}/${stepCount}`}
+                  </span>
+                )}
                 {!unlocked && (
                   <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                 )}

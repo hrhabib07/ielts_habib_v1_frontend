@@ -11,6 +11,7 @@ import {
   type StepQuizStatus,
   type LevelDetailStep,
   type SubmitStepQuizResponse,
+  type LevelCompletionScore,
   type StepQuizContentResponse,
   type StepQuizContentQuestion,
   type QuizAttemptReviewItem,
@@ -29,7 +30,10 @@ export interface StepQuizSubmitCardProps {
   levelId: string;
   step: LevelDetailStep;
   onLevelPassed?: () => void;
-  onProgressUpdate?: (progress: SubmitStepQuizResponse["progress"]) => void;
+  onProgressUpdate?: (
+    progress: SubmitStepQuizResponse["progress"],
+    completionScore?: LevelCompletionScore,
+  ) => void;
   disabled?: boolean;
   /**
    * Pre-fetched quiz content from the /content endpoint (already stripped of correctAnswer).
@@ -159,7 +163,13 @@ export function StepQuizSubmitCard({
         answers: res.review,
       });
       setQuizStarted(false);
-      onProgressUpdate?.(res.progress);
+      const completionScore =
+        res.progress.passStatus === "PASSED" &&
+        res.score != null &&
+        res.total != null
+          ? { score: res.score, total: res.total, percentage: res.percentage }
+          : undefined;
+      onProgressUpdate?.(res.progress, completionScore);
       // Do not redirect after submit — stay on page and show review mode.
       // User can navigate back via sidebar or "Back to levels" when done.
     } catch (err: unknown) {
@@ -198,7 +208,13 @@ export function StepQuizSubmitCard({
         percentage: res.percentage,
         canSubmit: res.remainingAttempts === null || res.remainingAttempts > 0,
       });
-      onProgressUpdate?.(res.progress);
+      const completionScore =
+        res.progress.passStatus === "PASSED" &&
+        res.score != null &&
+        res.total != null
+          ? { score: res.score, total: res.total, percentage: res.percentage }
+          : undefined;
+      onProgressUpdate?.(res.progress, completionScore);
       if (res.passed && res.progress.passStatus === "PASSED" && onLevelPassed) {
         onLevelPassed();
       }

@@ -13,9 +13,9 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname() ?? "";
-  const isMockTestPage = pathname.includes("/final-evaluation");
+  const isExamPage = pathname.includes("/final-evaluation") || pathname.includes("/practice-test");
 
-  if (isMockTestPage) {
+  if (isExamPage) {
     return <>{children}</>;
   }
 

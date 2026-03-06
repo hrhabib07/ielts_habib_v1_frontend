@@ -10,11 +10,11 @@ export default function ReadingLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname() ?? "";
-  const isMockTestPage = pathname.includes("/final-evaluation");
+  const isExamPage = pathname.includes("/final-evaluation") || pathname.includes("/practice-test");
 
   return (
     <ReadingLevelDetailProvider>
-      {isMockTestPage ? (
+      {isExamPage ? (
         <div className="min-h-screen w-full">{children}</div>
       ) : (
         <div className="flex gap-6">

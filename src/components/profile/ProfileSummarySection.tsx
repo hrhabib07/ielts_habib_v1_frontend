@@ -81,6 +81,7 @@ export function ProfileSummarySection() {
     streakInfo,
     weaknesses,
     recentAttempts,
+    recentPracticeAttempts = [],
   } = data;
 
   return (
@@ -295,65 +296,81 @@ export function ProfileSummarySection() {
         </Card>
       )}
 
-      {/* Recent attempts */}
+      {/* Recent attempts — legacy + practice tests */}
       <Card className="p-6">
         <h2 className="text-lg font-semibold text-foreground">Recent attempts</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Your latest reading attempts.
+          Your latest reading attempts. Review answers to track progress.
         </p>
-        {recentAttempts.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">
-            No attempts yet.
-          </p>
-        ) : (
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="pb-2 pr-4">Type</th>
-                  <th className="pb-2 pr-4">Band</th>
-                  <th className="pb-2 pr-4">Score</th>
-                  <th className="pb-2 pr-4">Date</th>
-                  <th className="pb-2">Review</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentAttempts.slice(0, 10).map((a) => (
-                  <tr key={a._id ?? Math.random()} className="border-b">
-                    <td className="py-2 pr-4 text-foreground">
-                      {a.readingTestType ?? "—"}
-                    </td>
-                    <td className="py-2 pr-4 font-medium text-foreground">
-                      {a.bandScore ?? "—"}
-                    </td>
-                    <td className="py-2 pr-4 text-muted-foreground">
-                      {a.correctAnswers != null && a.totalQuestions != null
-                        ? `${a.correctAnswers}/${a.totalQuestions}`
-                        : "—"}
-                    </td>
-                    <td className="py-2 pr-4 text-muted-foreground">
-                      {a.createdAt
-                        ? new Date(a.createdAt).toLocaleDateString()
-                        : "—"}
-                    </td>
-                    <td className="py-2">
-                      {a._id ? (
-                        <Link
-                          href={`/profile/reading/attempt/${a._id}`}
-                          className="text-sm font-medium text-primary hover:underline"
-                        >
-                          Review
-                        </Link>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
+        {(() => {
+          const legacyRows = recentAttempts.map((a) => ({
+            key: `legacy-${a._id ?? Math.random()}`,
+            type: a.readingTestType ?? "—",
+            band: a.bandScore ?? "—",
+            score: a.correctAnswers != null && a.totalQuestions != null
+              ? `${a.correctAnswers}/${a.totalQuestions}`
+              : "—",
+            date: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "—",
+            sortDate: a.createdAt ? new Date(a.createdAt).getTime() : 0,
+            reviewHref: a._id ? `/profile/reading/attempt/${a._id}` : null,
+          }));
+          const practiceRows = recentPracticeAttempts.map((a) => ({
+            key: `practice-${a._id}`,
+            type: "Practice",
+            band: a.bandScore,
+            score: `${a.scorePercent}%`,
+            date: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "—",
+            sortDate: a.createdAt ? new Date(a.createdAt).getTime() : 0,
+            reviewHref: `/profile/reading/practice-attempt/${a._id}`,
+          }));
+          const rows = [...legacyRows, ...practiceRows]
+            .sort((a, b) => b.sortDate - a.sortDate)
+            .slice(0, 10);
+          if (rows.length === 0) {
+            return (
+              <p className="mt-4 text-sm text-muted-foreground">
+                No attempts yet. Complete a practice test to see your band score here.
+              </p>
+            );
+          }
+          return (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-2 pr-4">Type</th>
+                    <th className="pb-2 pr-4">Band</th>
+                    <th className="pb-2 pr-4">Score</th>
+                    <th className="pb-2 pr-4">Date</th>
+                    <th className="pb-2">Review</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.key} className="border-b">
+                      <td className="py-2 pr-4 text-foreground">{r.type}</td>
+                      <td className="py-2 pr-4 font-medium text-foreground">{r.band}</td>
+                      <td className="py-2 pr-4 text-muted-foreground">{r.score}</td>
+                      <td className="py-2 pr-4 text-muted-foreground">{r.date}</td>
+                      <td className="py-2">
+                        {r.reviewHref ? (
+                          <Link
+                            href={r.reviewHref}
+                            className="text-sm font-medium text-primary hover:underline"
+                          >
+                            Review
+                          </Link>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()}
       </Card>
     </div>
   );
