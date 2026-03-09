@@ -26,8 +26,10 @@ export default function OnboardingPage() {
 
   // Step 1
   const [name, setName] = useState("");
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
+  const [currentCity, setCurrentCity] = useState("");
+  const [currentCountry, setCurrentCountry] = useState("");
+  const [dreamCity, setDreamCity] = useState("");
+  const [dreamCountry, setDreamCountry] = useState("");
   const [phone, setPhone] = useState("");
 
   // Step 2
@@ -40,8 +42,14 @@ export default function OnboardingPage() {
         if (cancelled) return;
         setProfile(p ?? null);
         if (p?.name) setName(p.name ?? "");
-        if (p?.profile?.city) setCity(p.profile.city ?? "");
-        if (p?.profile?.country) setCountry(p.profile.country ?? "");
+        if (p?.profile?.currentCity || p?.profile?.city) {
+          setCurrentCity(p.profile.currentCity ?? p.profile.city ?? "");
+        }
+        if (p?.profile?.currentCountry || p?.profile?.country) {
+          setCurrentCountry(p.profile.currentCountry ?? p.profile.country ?? "");
+        }
+        if (p?.profile?.dreamCity) setDreamCity(p.profile.dreamCity ?? "");
+        if (p?.profile?.dreamCountry) setDreamCountry(p.profile.dreamCountry ?? "");
         if (p?.profile?.phone) setPhone(p.profile.phone ?? "");
         // If target band already set, skip onboarding
         if (p?.targetBands?.reading != null) {
@@ -69,8 +77,10 @@ export default function OnboardingPage() {
       await updateProfile({
         name: name.trim() || undefined,
         profile: {
-          city: city.trim() || undefined,
-          country: country.trim() || undefined,
+          currentCity: currentCity.trim() || undefined,
+          currentCountry: currentCountry.trim() || undefined,
+          dreamCity: dreamCity.trim() || undefined,
+          dreamCountry: dreamCountry.trim() || undefined,
           phone: phone.trim() || undefined,
         },
       });
@@ -145,31 +155,61 @@ export default function OnboardingPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="currentCity">Current city</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    id="city"
+                    id="currentCity"
                     type="text"
                     autoComplete="address-level2"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="City"
+                    value={currentCity}
+                    onChange={(e) => setCurrentCity(e.target.value)}
+                    placeholder="Your current city"
                     className="pl-10"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="currentCountry">Current country</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    id="country"
+                    id="currentCountry"
                     type="text"
                     autoComplete="country-name"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    placeholder="Country"
+                    value={currentCountry}
+                    onChange={(e) => setCurrentCountry(e.target.value)}
+                    placeholder="Your current country"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="dreamCity">Dream city</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="dreamCity"
+                    type="text"
+                    value={dreamCity}
+                    onChange={(e) => setDreamCity(e.target.value)}
+                    placeholder="The city you are aiming for"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dreamCountry">Dream country</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="dreamCountry"
+                    type="text"
+                    value={dreamCountry}
+                    onChange={(e) => setDreamCountry(e.target.value)}
+                    placeholder="The country you want to move to"
                     className="pl-10"
                   />
                 </div>

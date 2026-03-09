@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   getFailedStudents,
   getRestartRequests,
   getPermanentLocks,
   getVersionUsage,
   approveRestartRequest,
+  getReadingStudentDetailByEmail,
   type FailedStudentItem,
   type RestartRequestItem,
   type PermanentLockItem,
@@ -39,7 +42,12 @@ const TABS: { id: TabId; label: string }[] = [
 
 const PAGE_SIZE = 20;
 
-export function ReadingMonitoringClient() {
+export function ReadingMonitoringClient({
+  viewBasePath,
+}: {
+  viewBasePath: string;
+}) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const validTab: TabId = ["failed", "restart", "locks", "version-usage"].includes(tabParam ?? "") ? (tabParam as TabId) : "failed";
@@ -69,6 +77,9 @@ export function ReadingMonitoringClient() {
   const [selectedLevelId, setSelectedLevelId] = useState<string>("");
   const [versionUsage, setVersionUsage] = useState<VersionUsageItem[]>([]);
   const [versionUsageLoading, setVersionUsageLoading] = useState(false);
+  const [searchEmail, setSearchEmail] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
 
   const loadFailed = useCallback(async () => {
     setFailedLoading(true);
@@ -174,8 +185,60 @@ export function ReadingMonitoringClient() {
     }
   };
 
+  const handleStudentLookup = async () => {
+    const email = searchEmail.trim();
+    if (!email) {
+      setLookupError("Enter a student email.");
+      return;
+    }
+
+    setLookupLoading(true);
+    setLookupError(null);
+    try {
+      const detail = await getReadingStudentDetailByEmail(email);
+      router.push(`${viewBasePath}/${detail.user.id}`);
+    } catch (error: unknown) {
+      const message =
+        error && typeof error === "object" && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
+      setLookupError(message ?? "Student not found.");
+    } finally {
+      setLookupLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Find student by email</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Input
+              type="email"
+              placeholder="student@example.com"
+              value={searchEmail}
+              onChange={(e) => {
+                setSearchEmail(e.target.value);
+                setLookupError(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void handleStudentLookup();
+                }
+              }}
+            />
+            <Button onClick={() => void handleStudentLookup()} disabled={lookupLoading}>
+              {lookupLoading ? "Searching..." : "Open student"}
+            </Button>
+          </div>
+          {lookupError && <p className="text-sm text-destructive">{lookupError}</p>}
+        </CardContent>
+      </Card>
+
       <div className="border-b">
         <nav className="flex gap-1">
           {TABS.map((tab) => (
@@ -202,7 +265,11 @@ export function ReadingMonitoringClient() {
             <CardTitle>Failed (max attempts)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FailedStudentsTable items={failed} loading={failedLoading} />
+            <FailedStudentsTable
+              items={failed}
+              loading={failedLoading}
+              viewBasePath={viewBasePath}
+            />
             {failedMeta && (
               <MonitoringPagination
                 page={failedMeta.page}
@@ -241,6 +308,7 @@ export function ReadingMonitoringClient() {
               loading={restartLoading}
               onApprove={handleApprove}
               approvingId={approvingId}
+              viewBasePath={viewBasePath}
             />
             {restartMeta && (
               <MonitoringPagination
@@ -262,7 +330,11 @@ export function ReadingMonitoringClient() {
             <CardTitle>Permanent locks</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <PermanentLocksTable items={locks} loading={locksLoading} />
+            <PermanentLocksTable
+              items={locks}
+              loading={locksLoading}
+              viewBasePath={viewBasePath}
+            />
             {locksMeta && (
               <MonitoringPagination
                 page={locksMeta.page}

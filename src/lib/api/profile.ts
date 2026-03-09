@@ -12,11 +12,17 @@ export async function getMyProfile(): Promise<StudentProfile | null> {
 }
 
 /**
- * PATCH /api/students/me — update name and profile (city, country, phone). No target band.
+ * PATCH /api/students/me — update name and profile. No target band.
  */
 export async function updateProfile(payload: {
   name?: string;
-  profile?: { city?: string; country?: string; phone?: string };
+  profile?: {
+    currentCity?: string;
+    currentCountry?: string;
+    dreamCity?: string;
+    dreamCountry?: string;
+    phone?: string;
+  };
 }): Promise<StudentProfile | null> {
   const res = await apiClient.patch<ApiResponse<StudentProfile>>(
     `${BASE}/me`,

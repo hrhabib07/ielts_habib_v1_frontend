@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ProfileSummarySection } from "@/src/components/profile/ProfileSummarySection";
 import { InstructorRequestCard } from "@/src/features/instructor-request/components/InstructorRequestCard";
 import { SubscriptionStatusCard } from "@/src/components/subscription/SubscriptionStatusCard";
-import { BookOpen, TrendingUp, Target } from "lucide-react";
+import { BookOpen, TrendingUp, Target, MapPin } from "lucide-react";
 
 export default function StudentDashboard() {
   return (
@@ -18,6 +19,8 @@ export default function StudentDashboard() {
 
       {/* Subscription status */}
       <SubscriptionStatusCard />
+
+      <ProfileSummarySection />
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="rounded-lg border bg-card p-6">
@@ -47,9 +50,11 @@ export default function StudentDashboard() {
           <p className="text-sm text-muted-foreground mb-4">
             Monitor your improvement over time
           </p>
-          <Button variant="outline" size="sm" disabled>
-            Coming Soon
-          </Button>
+          <Link href="/profile">
+            <Button variant="outline" size="sm">
+              Open profile
+            </Button>
+          </Link>
         </div>
 
         <div className="rounded-lg border bg-card p-6">
@@ -65,6 +70,23 @@ export default function StudentDashboard() {
           <Button variant="outline" size="sm" disabled>
             Coming Soon
           </Button>
+        </div>
+
+        <div className="rounded-lg border bg-card p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <MapPin className="h-5 w-5 text-primary" />
+            </div>
+            <h3 className="font-semibold">Dream destination</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Keep your target city and country visible while you study.
+          </p>
+          <Link href="/profile">
+            <Button variant="outline" size="sm">
+              Update profile
+            </Button>
+          </Link>
         </div>
       </div>
 

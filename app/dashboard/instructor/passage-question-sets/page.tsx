@@ -16,7 +16,8 @@ import {
   type CreatePassageQuestionSetPayload,
   type PassageQuestionSet,
 } from "@/src/lib/api/instructor";
-import { ArrowLeft, Plus, Loader2, Pencil } from "lucide-react";
+import { ArrowLeft, Plus, Loader2, Pencil, Eye } from "lucide-react";
+import PassageQuestionSetPreviewModal from "@/src/components/shared/PassageQuestionSetPreviewModal";
 
 export default function PassageQuestionSetsPage() {
   const [sets, setSets] = useState<PassageQuestionSet[]>([]);
@@ -27,6 +28,7 @@ export default function PassageQuestionSetsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [previewSet, setPreviewSet] = useState<PassageQuestionSet | null>(null);
   const [form, setForm] = useState<CreatePassageQuestionSetPayload>({
     passageId: "",
     passageCode: "",
@@ -55,6 +57,15 @@ export default function PassageQuestionSetsPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (!previewSet || passages.length === 0) return;
+    const pid =
+      typeof previewSet.passageId === "object"
+        ? (previewSet.passageId as { _id: string })._id
+        : previewSet.passageId;
+    if (!passages.find((p) => p._id === pid)) setPreviewSet(null);
+  }, [previewSet, passages]);
 
   const resetForm = () => {
     setForm({
@@ -109,9 +120,19 @@ export default function PassageQuestionSetsPage() {
   const toggleGroup = (id: string) => {
     setForm((f) => ({
       ...f,
-      questionGroupIds: f.questionGroupIds.includes(id)
-        ? f.questionGroupIds.filter((x) => x !== id)
-        : [...f.questionGroupIds, id],
+      questionGroupIds: (
+        f.questionGroupIds.includes(id)
+          ? f.questionGroupIds.filter((x) => x !== id)
+          : [...f.questionGroupIds, id]
+      ).sort((a, b) => {
+        const left = questionSets.find((qs) => qs._id === a);
+        const right = questionSets.find((qs) => qs._id === b);
+        if (!left || !right) return 0;
+        if (left.startQuestionNumber !== right.startQuestionNumber) {
+          return left.startQuestionNumber - right.startQuestionNumber;
+        }
+        return left.endQuestionNumber - right.endQuestionNumber;
+      }),
     }));
   };
 
@@ -122,7 +143,14 @@ export default function PassageQuestionSetsPage() {
           ? (s.passageId as { _id: string })._id
           : s.passageId;
       return pid === passageId;
-    });
+    })
+      .slice()
+      .sort((a, b) => {
+        if (a.startQuestionNumber !== b.startQuestionNumber) {
+          return a.startQuestionNumber - b.startQuestionNumber;
+        }
+        return a.endQuestionNumber - b.endQuestionNumber;
+      });
 
   /** Compute total questions from selected groups (start/end range per group). Backend requires this to match. */
   const computedExpectedTotal = (() => {
@@ -152,7 +180,15 @@ export default function PassageQuestionSetsPage() {
       title: s.title ?? "",
       hasParagraphIndexing: s.hasParagraphIndexing ?? false,
       difficulty: s.difficulty,
-      questionGroupIds: ids,
+      questionGroupIds: ids.slice().sort((a, b) => {
+        const left = questionSets.find((qs) => qs._id === a);
+        const right = questionSets.find((qs) => qs._id === b);
+        if (!left || !right) return 0;
+        if (left.startQuestionNumber !== right.startQuestionNumber) {
+          return left.startQuestionNumber - right.startQuestionNumber;
+        }
+        return left.endQuestionNumber - right.endQuestionNumber;
+      }),
       expectedTotalQuestions: s.expectedTotalQuestions ?? s.totalQuestions ?? 5,
       recommendedTime: s.recommendedTime,
     });
@@ -440,14 +476,52 @@ export default function PassageQuestionSetsPage() {
                     {s.isPublished && " · Published"}
                   </p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => startEdit(s)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPreviewSet(s)}
+                    title="Preview passage question set"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => startEdit(s)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </Card>
+
+      {previewSet && (() => {
+        const passageId =
+          typeof previewSet.passageId === "object"
+            ? (previewSet.passageId as { _id: string })._id
+            : previewSet.passageId;
+        const passage = passages.find((p) => p._id === passageId);
+        const groupIds = (previewSet.questionGroupIds || []).map((g) =>
+          typeof g === "object" ? (g as { _id: string })._id : g,
+        );
+        const groups = questionSets
+          .filter((qs) => groupIds.includes(qs._id))
+          .sort((a, b) => {
+            if (a.startQuestionNumber !== b.startQuestionNumber) {
+              return a.startQuestionNumber - b.startQuestionNumber;
+            }
+            return a.endQuestionNumber - b.endQuestionNumber;
+          });
+        if (!passage) return null;
+        return (
+          <PassageQuestionSetPreviewModal
+            passage={passage}
+            passageQuestionSet={previewSet}
+            questionGroups={groups}
+            onClose={() => setPreviewSet(null)}
+          />
+        );
+      })()}
     </div>
   );
 }

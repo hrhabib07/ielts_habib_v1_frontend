@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SubscriptionRequestsTable } from "@/src/features/admin-approval/components/SubscriptionRequestsTable";
 import { PendingInstructorRequests } from "@/src/features/admin-approval/components/PendingInstructorRequests";
-import { Shield, CreditCard, Users, ArrowLeft, FileText, ChevronRight, Tag, PackageCheck, Layers } from "lucide-react";
+import { Shield, CreditCard, Users, ArrowLeft, FileText, ChevronRight, Tag, PackageCheck, Layers, Activity } from "lucide-react";
 
 export default function AdminDashboardPage() {
   return (
@@ -105,6 +105,26 @@ export default function AdminDashboardPage() {
             </div>
             <Button variant="ghost" size="sm" className="mt-3 gap-2">
               Manage <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Card>
+        </Link>
+        <Link href="/dashboard/admin/reading-monitoring">
+          <Card className="h-full p-6 transition-shadow hover:shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/10">
+                <Activity className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Student progress
+                </p>
+                <p className="text-lg font-semibold text-foreground">
+                  Reading monitoring
+                </p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="mt-3 gap-2">
+              Open <ChevronRight className="h-4 w-4" />
             </Button>
           </Card>
         </Link>

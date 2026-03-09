@@ -81,6 +81,10 @@ export interface StudentProfile {
   profile?: {
     city?: string | null;
     country?: string | null;
+    currentCity?: string | null;
+    currentCountry?: string | null;
+    dreamCity?: string | null;
+    dreamCountry?: string | null;
     phone?: string | null;
   };
   [key: string]: unknown;

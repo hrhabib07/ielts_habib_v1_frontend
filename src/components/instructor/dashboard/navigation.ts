@@ -2,6 +2,7 @@ import {
   BarChart3,
   BookOpen,
   Activity,
+  Users,
   FolderKanban,
   Hash,
   FileText,
@@ -32,6 +33,7 @@ export const instructorNavGroups: InstructorNavGroup[] = [
       { label: "Dashboard", href: "/dashboard/instructor", icon: BarChart3 },
       { label: "Reading Levels", href: "/dashboard/instructor/reading-levels", icon: BookOpen },
       { label: "Reading Monitoring", href: "/dashboard/instructor/reading-monitoring", icon: Activity },
+      { label: "Students", href: "/dashboard/instructor/reading-monitoring", icon: Users },
     ],
   },
   {
@@ -55,6 +57,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/instructor": "Dashboard",
   "/dashboard/instructor/reading-levels": "Reading Levels",
   "/dashboard/instructor/reading-monitoring": "Reading Monitoring",
+  "/dashboard/instructor/students": "Student Detail",
   "/dashboard/instructor/contents": "Content Management",
   "/dashboard/instructor/quiz-content": "Quiz Content",
   "/dashboard/instructor/practice-tests": "Practice Test Manager",
