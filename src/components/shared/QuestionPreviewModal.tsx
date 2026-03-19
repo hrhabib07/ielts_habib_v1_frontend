@@ -4,6 +4,7 @@ import { useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
 import { X, BookOpen, Clock } from "lucide-react";
 import type { Question, Passage, QuestionSet } from "@/src/lib/api/instructor";
+import { GAP_BASED_COMPLETION_TYPES } from "@/src/components/reading/GapFillingQuestionInput";
 import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 
 interface Props {
@@ -45,16 +46,21 @@ function renderWithGaps(
     if (/{{gap\d+}}/.test(part)) {
       const num = displayNumberStart != null ? displayNumberStart + gapIndexRef.current++ : null;
       return (
-        <span
-          key={i}
-          className="mx-1 inline-flex min-w-[100px] items-center justify-center rounded border-2 border-dashed border-stone-400 bg-stone-50 px-3 py-1 align-middle text-[13px] text-stone-600"
-          aria-label="answer gap"
-        >
-          {num != null ? (
-            <span className="font-medium">{num}.</span>
-          ) : (
-            <span className="text-stone-400">&nbsp;</span>
+        <span key={i} className="inline-flex items-center gap-1.5 mx-1 align-middle">
+          {num != null && (
+            <span
+              className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-stone-500 bg-stone-100 px-0.5 text-[10px] font-semibold text-stone-700 dark:border-stone-500 dark:bg-stone-800 dark:text-stone-300"
+              aria-label={`Question ${num}`}
+            >
+              {num}
+            </span>
           )}
+          <span
+            className="inline-flex min-w-[100px] items-center justify-center rounded border-2 border-dashed border-stone-400 bg-stone-50 px-3 py-1 text-[13px] text-stone-600 dark:border-stone-500 dark:bg-stone-800 dark:text-stone-400"
+            aria-label="answer gap"
+          >
+            &nbsp;
+          </span>
         </span>
       );
     }
@@ -386,7 +392,16 @@ function QuestionBody({ question, questionSet }: { question: Question; questionS
             style={{ fontFamily: "Georgia, serif" }}
           >
             {hasGaps(content)
-              ? renderWithGaps(content)
+              ? (() => {
+                  const displayStart = getDisplayNumber(question, questionSet);
+                  const blankCount = question.blanks?.length ?? 0;
+                  const usePerGapNumbers = blankCount > 1;
+                  const gapIndexRef = { current: 0 };
+                  return renderWithGaps(
+                    content,
+                    usePerGapNumbers ? { displayNumberStart: displayStart, gapIndexRef } : undefined
+                  );
+                })()
               : <span dangerouslySetInnerHTML={{ __html: content }} />}
           </p>
         ) : null}
@@ -528,13 +543,15 @@ export default function QuestionPreviewModal({
 
   const displayNumber = getDisplayNumber(question, questionSet);
   const blankCount = question.blanks?.length ?? 0;
-  const isMultiGapNote =
-    question.type === "NOTE_COMPLETION" &&
-    blankCount > 1;
+  const isGapBasedType = GAP_BASED_COMPLETION_TYPES.includes(
+    question.type as (typeof GAP_BASED_COMPLETION_TYPES)[number]
+  );
+  const isMultiGapCompletion = isGapBasedType && blankCount > 1;
   const displayNumberEnd = displayNumber + blankCount - 1;
-  const displayNumberLabel = isMultiGapNote
+  const displayNumberLabel = isMultiGapCompletion
     ? `Q${displayNumber}–${displayNumberEnd}`
     : `Q${displayNumber}`;
+  const hideQuestionBodyNumber = isMultiGapCompletion;
 
   return (
     <div
@@ -638,11 +655,13 @@ export default function QuestionPreviewModal({
               </p>
             </div>
 
-            {/* Question number + body */}
+            {/* Question number + body (hide body number when gaps have their own numbers) */}
             <div className="flex items-start gap-3">
-              <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-stone-100 text-xs font-bold text-stone-600">
-                {displayNumber}
-              </span>
+              {!hideQuestionBodyNumber && (
+                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-stone-100 text-xs font-bold text-stone-600">
+                  {displayNumber}
+                </span>
+              )}
               <div className="flex-1">
                 <QuestionBody question={question} questionSet={questionSet} />
               </div>

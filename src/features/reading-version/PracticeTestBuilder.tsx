@@ -271,9 +271,9 @@ function PracticeTestForm({
   const [title, setTitle] = useState("");
   const [contentCode, setContentCode] = useState("");
   const [passageQuestionSetId, setPassageQuestionSetId] = useState("");
-  const [timeLimitMinutes, setTimeLimitMinutes] = useState(3);
-  const [passType, setPassType] = useState<"PERCENTAGE" | "BAND">("PERCENTAGE");
-  const [passValue, setPassValue] = useState(60);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(20);
+  const [passType, setPassType] = useState<"PERCENTAGE" | "BAND">("BAND");
+  const [passValue, setPassValue] = useState(0);
   const [maxAttemptsRaw, setMaxAttemptsRaw] = useState("unlimited");
   const [order, setOrder] = useState(nextOrder);
   const [pqsList, setPqsList] = useState<PassageQuestionSet[]>([]);

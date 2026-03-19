@@ -39,7 +39,7 @@ export default async function RootLayout({
           <SyncAuthCookie initialUser={initialUser} />
           <div className="flex min-h-screen flex-col">
             <Header initialUser={initialUser} />
-            <main className="flex-1">{children}</main>
+            <main className="min-h-0 flex-1">{children}</main>
             <Footer initialUser={initialUser} />
           </div>
         </ThemeProvider>

@@ -21,6 +21,12 @@ import {
 } from "@/src/lib/api/adminReadingVersions";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
 import {
+  GAP_BASED_COMPLETION_TYPES,
+  buildDisplayNumberStartByQuestionId,
+  DraggableWordBank,
+} from "@/src/components/reading/GapFillingQuestionInput";
+import { PracticeTestsBulkCreateCard } from "./PracticeTestsBulkCreateCard";
+import {
   Trash2,
   Plus,
   Loader2,
@@ -44,6 +50,7 @@ interface PracticeTestManagerProps {
   versionId: string;
   levelId: string;
   levelTitle: string;
+  levelOrder: number;
   practiceTests: PracticeTest[];
   disabled: boolean;
   onPracticeTestsChange: (practiceTests: PracticeTest[]) => void;
@@ -66,6 +73,7 @@ export function PracticeTestManager({
   versionId,
   levelId,
   levelTitle,
+  levelOrder,
   practiceTests,
   disabled,
   onPracticeTestsChange,
@@ -178,6 +186,16 @@ export function PracticeTestManager({
 
   return (
     <div className="space-y-4">
+      <PracticeTestsBulkCreateCard
+        versionId={versionId}
+        levelOrder={levelOrder}
+        disabled={disabled}
+        onMergeCreatedPracticeTests={(created) => {
+          onPracticeTestsChange(
+            [...practiceTests, ...created].sort((a, b) => a.order - b.order),
+          );
+        }}
+      />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="font-semibold text-stone-900 dark:text-stone-100">
@@ -516,9 +534,9 @@ function CreatePracticeTestForm({
   const [title, setTitle] = useState("");
   const [contentCode, setContentCode] = useState("");
   const [passageQuestionSetId, setPassageQuestionSetId] = useState("");
-  const [timeLimitMinutes, setTimeLimitMinutes] = useState(3);
-  const [passType, setPassType] = useState<"PERCENTAGE" | "BAND">("PERCENTAGE");
-  const [passValue, setPassValue] = useState(60);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(20);
+  const [passType, setPassType] = useState<"PERCENTAGE" | "BAND">("BAND");
+  const [passValue, setPassValue] = useState(0);
   const [maxAttemptsRaw, setMaxAttemptsRaw] = useState("unlimited");
   const [order, setOrder] = useState(nextOrder);
   const [pqsList, setPqsList] = useState<PassageQuestionSet[]>([]);
@@ -912,6 +930,7 @@ const QUESTION_TYPE_LABEL: Record<string, string> = {
   MATCHING_SENTENCE_ENDINGS: "Matching sentence endings",
   SENTENCE_COMPLETION: "Sentence completion",
   SUMMARY_COMPLETION: "Summary completion",
+  SUMMARY_COMPLETION_WITH_CLUES: "Summary completion (with clues)",
   NOTE_COMPLETION: "Note completion",
   TABLE_COMPLETION: "Table completion",
   FLOW_CHART_COMPLETION: "Flow chart completion",
@@ -984,12 +1003,21 @@ function renderLineWithGapBoxes(
     if (/{{gap\d+}}/.test(part)) {
       const num = displayNumberStart != null ? displayNumberStart + gapIndexRef.current++ : null;
       return (
-        <span
-          key={i}
-          className="mx-1 inline-flex min-w-[90px] items-center justify-center rounded border-2 border-dashed border-stone-400 bg-stone-100 px-2 py-0.5 align-baseline text-sm text-stone-600 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300"
-          aria-label="Gap"
-        >
-          {num != null ? <span className="font-medium">{num}.</span> : <span className="text-stone-400">&nbsp;</span>}
+        <span key={i} className="inline-flex items-center gap-1.5 mx-1 align-baseline">
+          {num != null && (
+            <span
+              className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-stone-500 bg-stone-100 px-0.5 text-[10px] font-semibold text-stone-700 dark:border-stone-500 dark:bg-stone-800 dark:text-stone-300"
+              aria-label={`Question ${num}`}
+            >
+              {num}
+            </span>
+          )}
+          <span
+            className="inline-flex min-w-[90px] items-center justify-center rounded border-2 border-dashed border-stone-400 bg-stone-100 px-2 py-0.5 text-sm text-stone-600 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300"
+            aria-label="Gap"
+          >
+            &nbsp;
+          </span>
         </span>
       );
     }
@@ -1010,9 +1038,12 @@ function formatCorrectAnswer(correctAnswer: string | string[] | undefined): stri
 function PracticeTestQuestionBlock({
   question,
   displayNumber,
+  displayNumberStart,
 }: {
   question: GroupTestQuestionForPreview;
   displayNumber: number;
+  /** For gap-based types: first gap number (global across question bodies). */
+  displayNumberStart?: number;
 }) {
   const qBody = question.questionBody;
   const structuredNote = getStructuredNoteContent(qBody);
@@ -1025,16 +1056,21 @@ function PracticeTestQuestionBlock({
     : formatCorrectAnswer(question.correctAnswer);
 
   const blankCount = blanks.length;
-  const usePerGapNumbers = structuredNote != null && blankCount > 1;
-  const displayNumberEnd = displayNumber + blankCount - 1;
-  const displayLabel = usePerGapNumbers ? `${displayNumber}–${displayNumberEnd}` : String(displayNumber);
+  const startNum = displayNumberStart ?? displayNumber;
+  const hasGaps = /\{\{gap\d+\}\}/.test(rawText);
+  const usePerGapNumbers = blankCount > 1 && (structuredNote != null || hasGaps);
+  const displayNumberEnd = startNum + blankCount - 1;
+  const displayLabel = usePerGapNumbers ? `${startNum}–${displayNumberEnd}` : String(displayNumber);
+  const hideBodyLabel = displayNumberStart != null && blankCount > 1;
   const gapIndexRef = { current: 0 };
 
   return (
     <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-4 dark:border-stone-700 dark:bg-stone-800/40">
-      <p className="mb-2 text-[15px] font-medium text-stone-900 dark:text-stone-100">
-        {displayLabel}.
-      </p>
+      {!hideBodyLabel && (
+        <p className="mb-2 text-[15px] font-medium text-stone-900 dark:text-stone-100">
+          {displayLabel}.
+        </p>
+      )}
       {structuredNote ? (
         <div className="space-y-3 mb-3 rounded-lg border border-stone-200 bg-white/60 p-4 dark:border-stone-700 dark:bg-stone-900/40">
           {structuredNote.heading && (
@@ -1050,7 +1086,7 @@ function PracticeTestQuestionBlock({
               <ul className="list-none space-y-1 text-[15px] text-stone-800 dark:text-stone-200">
                 {sec.lines.map((line, lIdx) => (
                   <li key={lIdx} className="flex flex-wrap items-baseline gap-0.5">
-                    {renderLineWithGapBoxes(line, usePerGapNumbers ? { displayNumberStart: displayNumber, gapIndexRef } : undefined)}
+                    {renderLineWithGapBoxes(line, usePerGapNumbers ? { displayNumberStart: startNum, gapIndexRef } : undefined)}
                   </li>
                 ))}
               </ul>
@@ -1059,7 +1095,9 @@ function PracticeTestQuestionBlock({
         </div>
       ) : (
         <p className="mb-3 text-[15px] text-stone-800 dark:text-stone-200">
-          {renderQuestionTextWithGaps(rawText)}
+          {hasGaps && usePerGapNumbers
+            ? renderLineWithGapBoxes(rawText, { displayNumberStart: startNum, gapIndexRef })
+            : renderQuestionTextWithGaps(rawText)}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-800 dark:bg-emerald-950/40">
@@ -1209,14 +1247,31 @@ function PracticeTestPreviewModal({
                             {grp.instruction}
                           </p>
                         )}
+                        {grp.questionType === "SUMMARY_COMPLETION_WITH_CLUES" && (
+                          <DraggableWordBank
+                            options={grp.questions[0]?.blanks?.[0]?.options ?? []}
+                          />
+                        )}
                         <div className="space-y-3">
-                          {grp.questions.map((q) => (
-                            <PracticeTestQuestionBlock
-                              key={q._id}
-                              question={q}
-                              displayNumber={q.questionNumber}
-                            />
-                          ))}
+                          {grp.questions.map((q) => {
+                            const displayNumberStartMap = GAP_BASED_COMPLETION_TYPES.includes(
+                              grp.questionType as (typeof GAP_BASED_COMPLETION_TYPES)[number]
+                            )
+                              ? buildDisplayNumberStartByQuestionId(
+                                  grp.questionType,
+                                  grp.questions,
+                                  grp.startQuestionNumber
+                                )
+                              : {};
+                            return (
+                              <PracticeTestQuestionBlock
+                                key={q._id}
+                                question={q}
+                                displayNumber={q.questionNumber}
+                                displayNumberStart={displayNumberStartMap[q._id]}
+                              />
+                            );
+                          })}
                         </div>
                       </div>
                     ))}

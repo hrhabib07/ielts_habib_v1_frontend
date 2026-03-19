@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   AlertCircle,
-  FileText,
 } from "lucide-react";
 import {
   getNextGroupTestContent,
@@ -23,8 +22,9 @@ export default function FinalEvaluationPage() {
   const router = useRouter();
   const levelId = params.id;
 
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("loading");
   const [content, setContent] = useState<GroupTestContentForStudent | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<{
     overallPass: boolean;
     miniTestResults: Array<{ bandScore: number; passed: boolean }>;
@@ -35,6 +35,7 @@ export default function FinalEvaluationPage() {
     if (!levelId) return;
     setPhase("loading");
     setContent(null);
+    setErrorMessage(null);
     getNextGroupTestContent(levelId)
       .then((data) => {
         if (data) {
@@ -44,8 +45,19 @@ export default function FinalEvaluationPage() {
           setPhase("no_test");
         }
       })
-      .catch(() => setPhase("no_test"));
+      .catch((err) => {
+        const msg =
+          err?.response?.data?.message ??
+          err?.message ??
+          "Unable to load the test. Please try again.";
+        setErrorMessage(typeof msg === "string" ? msg : "Unable to load the test.");
+        setPhase("no_test");
+      });
   }, [levelId]);
+
+  useEffect(() => {
+    if (levelId) loadTest();
+  }, [levelId, loadTest]);
 
   const handleSubmitted = useCallback(
     (res: {
@@ -67,44 +79,6 @@ export default function FinalEvaluationPage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-sm text-gray-500">Invalid level.</p>
-      </div>
-    );
-  }
-
-  if (phase === "intro") {
-    return (
-      <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
-        <div className="w-full max-w-md opacity-100 transition-opacity duration-300">
-          <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-xl shadow-slate-200/50 dark:shadow-none">
-            <div className="mb-6 flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 dark:bg-indigo-400/10">
-                <FileText className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-              </div>
-            </div>
-            <h1 className="text-center text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-              Reading Final Evaluation
-            </h1>
-            <p className="mt-3 text-center text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">
-              Full mock test under exam conditions. Three passages, one at a time. Answer all questions before submitting.
-            </p>
-            <div className="mt-8 flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={loadTest}
-                className="w-full rounded-xl bg-indigo-600 py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-md active:scale-[0.99]"
-              >
-                Start test
-              </button>
-              <Link
-                href={`/profile/reading/strict-levels/${levelId}`}
-                className="flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to level
-              </Link>
-            </div>
-          </div>
-        </div>
       </div>
     );
   }
@@ -136,15 +110,25 @@ export default function FinalEvaluationPage() {
             No test available
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            No group tests are ready for this level, or you’ve already completed them. Check back later or continue with the level.
+            {errorMessage ??
+              "No group tests are ready for this level, or you’ve already completed them. Check back later or continue with the level."}
           </p>
-          <Link
-            href={`/profile/reading/strict-levels/${levelId}`}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-[0.99]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to level
-          </Link>
+          <div className="mt-6 flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={loadTest}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-[0.99]"
+            >
+              Try again
+            </button>
+            <Link
+              href={`/profile/reading/strict-levels/${levelId}`}
+              className="inline-flex items-center justify-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to level
+            </Link>
+          </div>
         </div>
       </div>
     );

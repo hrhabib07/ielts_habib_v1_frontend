@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   listLearningContents,
+  deleteLearningContent,
   type LearningContent,
   type LearningContentType,
 } from "@/src/lib/api/learningContents";
@@ -14,6 +15,7 @@ import {
   ArrowLeft,
   Plus,
   Pencil,
+  Trash2,
   Loader2,
   AlertCircle,
   RefreshCw,
@@ -58,6 +60,7 @@ export default function InstructorContentsPage() {
   const [items, setItems] = useState<LearningContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -76,6 +79,20 @@ export default function InstructorContentsPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!window.confirm(`Delete content "${title}"? This cannot be undone.`)) return;
+    setDeletingId(id);
+    setError(null);
+    try {
+      await deleteLearningContent(id);
+      setItems((prev) => prev.filter((c) => c._id !== id));
+    } catch {
+      setError("Failed to delete content.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
@@ -228,6 +245,20 @@ export default function InstructorContentsPage() {
                         >
                           <Pencil className="h-3.5 w-3.5" />
                           Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 gap-1.5 text-destructive hover:bg-destructive/10"
+                          disabled={deletingId === item._id}
+                          onClick={() => handleDelete(item._id, item.title)}
+                        >
+                          {deletingId === item._id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
+                          Delete
                         </Button>
                       </div>
                     </td>

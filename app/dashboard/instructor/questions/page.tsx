@@ -170,6 +170,24 @@ function getSampleJsonForQuestionType(questionType: string): string {
     }
   ]
 }`;
+    case "SUMMARY_COMPLETION_WITH_CLUES":
+      return `{
+  "questions": [
+    {
+      "questionBody": {
+        "layout": "TEXT",
+        "content": "The passage describes several factors affecting climate. The first is {{gap1}} in the atmosphere, which leads to {{gap2}}. Scientists have observed {{gap3}} in weather patterns and recommend measures to ensure {{gap4}}."
+      },
+      "explanation": "Summary completion with clues: answers are chosen from the word bank set in the question set (group) meta. Each blank has id, correctAnswer, and optional wordLimit.",
+      "blanks": [
+        { "id": 1, "correctAnswer": "C. atmospheric", "wordLimit": 2 },
+        { "id": 2, "correctAnswer": "A. breakdown", "wordLimit": 2 },
+        { "id": 3, "correctAnswer": "E. irregularities", "wordLimit": 2 },
+        { "id": 4, "correctAnswer": "J. stability", "wordLimit": 2 }
+      ]
+    }
+  ]
+}`;
     case "SHORT_ANSWER":
       return `{
   "questions": [

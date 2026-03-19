@@ -22,6 +22,7 @@ export function GamlishLogo({
     <span
       className={`inline-flex items-center gap-1 ${className}`}
       aria-label="Gamlish"
+      suppressHydrationWarning
     >
       <Image
         src={BRAND.logoUrl}
@@ -35,6 +36,7 @@ export function GamlishLogo({
         }
         priority={isHero}
         unoptimized={false}
+        suppressHydrationWarning
       />
       {showWordmark && !isHero && (
         <span className="text-lg font-semibold tracking-tight text-foreground leading-none">

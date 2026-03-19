@@ -81,7 +81,8 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
   const disabled = version.status === "PUBLISHED";
   const isPublished = version.status === "PUBLISHED";
   const finalEvalType = version.evaluationConfig?.finalEvaluationType ?? "";
-  const showGroupTests = finalEvalType !== "FINAL_QUIZ";
+  const isGroupTestFinalEval = finalEvalType !== "FINAL_QUIZ";
+  const hasGroupTests = (groupTests?.length ?? 0) > 0;
 
   return (
     <div className="space-y-6">
@@ -107,7 +108,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
             <Eye className="h-4 w-4" />
             Preview level
           </Link>
-          {showGroupTests && (groupTests?.length ?? 0) > 0 && (
+          {hasGroupTests && (
             <Link
               href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/final-evaluation-preview`}
               className="inline-flex items-center gap-2 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2 text-sm font-medium text-emerald-800 dark:text-emerald-200 shadow-sm transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
@@ -162,6 +163,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
         </CardHeader>
         <CardContent className="p-0 pt-0">
           <StepBuilder
+            levelId={levelId}
             versionId={versionId}
             steps={steps}
             practiceTests={practiceTests ?? []}
@@ -171,21 +173,24 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
         </CardContent>
       </Card>
 
-      {showGroupTests && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Group tests</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0 pt-0">
-            <GroupTestBuilder
-              versionId={versionId}
-              groupTests={groupTests}
-              disabled={disabled}
-              onGroupTestsChange={handleGroupTestsChange}
-            />
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Group tests (final evaluation)</CardTitle>
+          {!isGroupTestFinalEval && (
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              Final evaluation is set to Quiz. To use group tests and publish, set Final evaluation type to Group test in Evaluation config above.
+            </p>
+          )}
+        </CardHeader>
+        <CardContent className="p-0 pt-0">
+          <GroupTestBuilder
+            versionId={versionId}
+            groupTests={groupTests ?? []}
+            disabled={disabled}
+            onGroupTestsChange={handleGroupTestsChange}
+          />
+        </CardContent>
+      </Card>
 
       <FinalQuizSettingsCard steps={steps} />
     </div>

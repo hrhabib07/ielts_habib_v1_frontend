@@ -10,8 +10,17 @@ import {
   type GroupTestContentForStudent,
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
+  type GroupTestQuestionGroup,
 } from "@/src/lib/api/readingStrictProgression";
-import { GapFillingQuestionInput, hasGapPlaceholders, isStructuredNoteQuestion } from "./GapFillingQuestionInput";
+import { InstructionBlock } from "./InstructionBlock";
+import {
+  GapFillingQuestionInput,
+  GAP_BASED_COMPLETION_TYPES,
+  buildDisplayNumberStartByQuestionId,
+  hasGapPlaceholders,
+  isStructuredNoteQuestion,
+  DraggableWordBank,
+} from "./GapFillingQuestionInput";
 import { Loader2, CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 export interface GroupTestSubmitCardProps {
@@ -72,6 +81,24 @@ function MiniTestSection({
     return map;
   }, [miniTest.questionGroups, miniTest.questions]);
 
+  const displayNumberStartByQuestionId = useMemo(() => {
+    const map: Record<string, number> = {};
+    if (!miniTest.questionGroups?.length) return map;
+    for (const group of miniTest.questionGroups) {
+      if (GAP_BASED_COMPLETION_TYPES.includes(group.questionType as (typeof GAP_BASED_COMPLETION_TYPES)[number])) {
+        Object.assign(
+          map,
+          buildDisplayNumberStartByQuestionId(
+            group.questionType,
+            group.questions,
+            group.startQuestionNumber
+          )
+        );
+      }
+    }
+    return map;
+  }, [miniTest.questionGroups]);
+
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
       <button
@@ -99,12 +126,51 @@ function MiniTestSection({
               <p className="text-sm text-amber-600 dark:text-amber-400">
                 No questions configured for this passage. Contact your instructor.
               </p>
+            ) : miniTest.questionGroups && miniTest.questionGroups.length > 0 ? (
+              <div className="space-y-6">
+                {miniTest.questionGroups.map((group: GroupTestQuestionGroup, gIdx: number) => (
+                  <section key={gIdx}>
+                    {group.instruction && (
+                      <div
+                        className={
+                          group.questionType === "TRUE_FALSE_NOT_GIVEN" ||
+                          group.questionType === "YES_NO_NOT_GIVEN"
+                            ? "mb-4 px-1 py-2"
+                            : "mb-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-4 py-3"
+                        }
+                      >
+                        <InstructionBlock
+                          instruction={group.instruction}
+                          questionType={group.questionType}
+                        />
+                      </div>
+                    )}
+                    {group.questionType === "SUMMARY_COMPLETION_WITH_CLUES" && (
+                      <DraggableWordBank options={group.questions[0]?.blanks?.[0]?.options ?? []} />
+                    )}
+                    <div className="space-y-3">
+                      {group.questions.map((q) => (
+                        <QuestionInput
+                          key={q._id}
+                          question={q}
+                          displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
+                          displayNumberStart={displayNumberStartByQuestionId[q._id]}
+                          value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
+                          onChange={(v) => setAnswer(q._id, v)}
+                          disabled={disabled}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
             ) : (
               miniTest.questions.map((q) => (
                 <QuestionInput
                   key={q._id}
                   question={q}
                   displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
+                  displayNumberStart={displayNumberStartByQuestionId[q._id]}
                   value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
                   onChange={(v) => setAnswer(q._id, v)}
                   disabled={disabled}
@@ -133,12 +199,14 @@ function extractQuestionText(qBody: unknown): string {
 function QuestionInput({
   question,
   displayNumber,
+  displayNumberStart,
   value,
   onChange,
   disabled,
 }: {
   question: GroupTestQuestionForStudent;
   displayNumber: number;
+  displayNumberStart?: number;
   value: string | string[];
   onChange: (v: string | string[]) => void;
   disabled?: boolean;
@@ -151,6 +219,7 @@ function QuestionInput({
       <GapFillingQuestionInput
         question={question}
         displayNumber={displayNumber}
+        displayNumberStart={displayNumberStart}
         value={value}
         onChange={onChange}
         disabled={disabled}

@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * Renders IELTS-style instruction text with professional formatting:
- * - TRUE/FALSE/NOT GIVEN (and YES/NO/NOT GIVEN) as alternating rows with bold labels
+ * Renders IELTS-style instruction text matching official British Council / IDP exam format:
+ * - TRUE/FALSE/NOT GIVEN (and YES/NO/NOT GIVEN) as uniform light grey blocks with bold labels
  * - "NO MORE THAN X WORDS" highlighted in bold red for completion types
  * - "In boxes X - Y" with bold numbers
  * - Main instruction in italic
@@ -26,12 +26,37 @@ export function InstructionBlock({
     const writeIndex = lines.findIndex((l) => l.toLowerCase().startsWith("in boxes"));
     const mainLines = writeIndex >= 0 ? lines.slice(0, writeIndex) : lines;
     const inBoxesLine = writeIndex >= 0 ? lines[writeIndex] : null;
-    const definitionLines = writeIndex >= 0 ? lines.slice(writeIndex + 1) : [];
+    const rawDefinitionLines = writeIndex >= 0 ? lines.slice(writeIndex + 1) : [];
+
+    const DEFINITIONS = isTFNG
+      ? [
+          { label: "TRUE", desc: "if the statement agrees with the information" },
+          { label: "FALSE", desc: "if the statement contradicts the information" },
+          { label: "NOT GIVEN", desc: "if there is no information on this" },
+        ]
+      : [
+          { label: "YES", desc: "if the statement agrees with the views of the writer" },
+          { label: "NO", desc: "if the statement contradicts the views of the writer" },
+          { label: "NOT GIVEN", desc: "if it is impossible to say what the writer thinks about this" },
+        ];
+
+    const parsedDefinitions = rawDefinitionLines
+      .map((line) => {
+        const m = line.match(/^(TRUE|FALSE|NOT GIVEN|YES|NO)\.?\s*(.*)$/i);
+        if (m) return { label: m[1].toUpperCase(), desc: (m[2] || line).trim() };
+        return null;
+      })
+      .filter(Boolean) as { label: string; desc: string }[];
+
+    const definitions = parsedDefinitions.length >= 3 ? parsedDefinitions : DEFINITIONS;
+
+    const isQuestionsHeading = (s: string) =>
+      /^Questions\s+\d+-\d+$/i.test(s.trim());
 
     return (
-      <div className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+      <div className="space-y-3 text-sm font-sans text-slate-800 dark:text-slate-200">
         {mainLines.map((line, i) => (
-          <p key={i} className="italic">
+          <p key={i} className={isQuestionsHeading(line) ? "font-bold text-slate-900 dark:text-slate-100" : "italic"}>
             {line}
           </p>
         ))}
@@ -48,30 +73,19 @@ export function InstructionBlock({
             )}
           </p>
         )}
-        {definitionLines.length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-            {definitionLines.map((line, i) => {
-              const match = line.match(/^(TRUE|FALSE|NOT GIVEN|YES|NO)\.\s*(.*)$/i);
-              const label = match ? match[1].toUpperCase() + "." : "";
-              const rest = match ? match[2] : line;
-              const bg =
-                i % 2 === 0
-                  ? "bg-slate-100 dark:bg-slate-800/60"
-                  : "bg-white dark:bg-slate-900/40";
-              return (
-                <div
-                  key={i}
-                  className={`flex gap-2 px-4 py-2.5 ${bg} border-b border-slate-200/80 dark:border-slate-700/80 last:border-b-0`}
-                >
-                  <span className="shrink-0 font-bold text-slate-900 dark:text-slate-100">
-                    {label}
-                  </span>
-                  <span>{rest}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className="mt-3 space-y-1">
+          {definitions.map((def, i) => (
+            <div
+              key={i}
+              className="flex flex-wrap gap-x-2 gap-y-0.5 bg-[#f5f5f5] dark:bg-slate-700/50 px-4 py-2.5"
+            >
+              <span className="shrink-0 font-bold text-slate-900 dark:text-slate-100">
+                {def.label}
+              </span>
+              <span className="text-slate-700 dark:text-slate-300">{def.desc}</span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -79,6 +93,7 @@ export function InstructionBlock({
   const completionTypes = [
     "SENTENCE_COMPLETION",
     "SUMMARY_COMPLETION",
+    "SUMMARY_COMPLETION_WITH_CLUES",
     "NOTE_COMPLETION",
     "TABLE_COMPLETION",
     "FLOW_CHART_COMPLETION",

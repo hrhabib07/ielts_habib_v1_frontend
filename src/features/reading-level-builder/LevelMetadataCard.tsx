@@ -117,6 +117,9 @@ export function LevelMetadataCard({
       <CardContent className="space-y-6 p-0">
         {error && <p className="text-sm text-destructive">{error}</p>}
         <form onSubmit={handleSaveLevel} className="space-y-4">
+          <p className="text-xs text-muted-foreground">
+            Level index (0-based): <strong>{level.order - 1}</strong> — steps are numbered from 1.
+          </p>
           <div>
             <Label htmlFor="level-title">Title</Label>
             <Input

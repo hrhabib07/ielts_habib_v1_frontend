@@ -1,10 +1,102 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X } from "lucide-react";
+import { Plus, X, FileJson } from "lucide-react";
 import type { QuestionSetMeta, ReadingQuestionType } from "@/src/lib/api/instructor";
+
+/** Parse bulk clues: JSON array, { "clues": [...] }, or newline-separated lines. */
+export function parseBulkClues(raw: string): string[] {
+  const trimmed = raw.trim();
+  if (!trimmed) return [];
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (Array.isArray(parsed)) {
+      return parsed.filter((x): x is string => typeof x === "string").map((s) => String(s).trim()).filter(Boolean);
+    }
+    if (parsed && typeof parsed === "object" && "clues" in parsed && Array.isArray((parsed as { clues: unknown }).clues)) {
+      const clues = (parsed as { clues: unknown[] }).clues;
+      return clues.filter((x): x is string => typeof x === "string").map((s) => String(s).trim()).filter(Boolean);
+    }
+  } catch {
+    // Fallback: treat as one option per line
+  }
+  return trimmed
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function SummaryWithCluesFields({
+  meta,
+  onChange,
+}: {
+  meta: { options: string[]; wordLimit?: number };
+  onChange: (meta: QuestionSetMeta) => void;
+}) {
+  const [bulkInput, setBulkInput] = useState("");
+  const [bulkError, setBulkError] = useState<string | null>(null);
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Bulk import options / clues
+        </Label>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          Paste a JSON array, or an object with a &quot;clues&quot; array, or one option per line.
+        </p>
+        <textarea
+          value={bulkInput}
+          onChange={(e) => {
+            setBulkInput(e.target.value);
+            setBulkError(null);
+          }}
+          placeholder={'["A. breakdown", "B. malady", "C. atmospheric"]\nOr: { "clues": ["A. breakdown", ...] }\nOr one option per line'}
+          className="mt-2 h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs font-mono placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          rows={4}
+        />
+        <div className="mt-1.5 flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
+            onClick={() => {
+              const parsed = parseBulkClues(bulkInput);
+              if (parsed.length < 2) {
+                setBulkError("At least 2 options required.");
+                return;
+              }
+              onChange({ ...meta, options: parsed });
+              setBulkInput("");
+              setBulkError(null);
+            }}
+          >
+            <FileJson className="h-3.5 w-3.5" />
+            Import options
+          </Button>
+          {bulkError && (
+            <span className="text-xs text-destructive">{bulkError}</span>
+          )}
+        </div>
+      </div>
+      <StringListField
+        label="Word bank (box of words)"
+        items={meta.options ?? []}
+        minItems={2}
+        onChange={(options) => onChange({ ...meta, options })}
+        placeholder="e.g. A. breakdown, B. malady"
+      />
+      <WordLimitField
+        value={meta.wordLimit ?? 2}
+        onChange={(wordLimit) => onChange({ ...meta, wordLimit })}
+        max={3}
+      />
+    </div>
+  );
+}
 
 interface Props {
   questionType: ReadingQuestionType;
@@ -303,11 +395,16 @@ export default function MetaFormFields({ questionType, meta, onChange }: Props) 
       const m = meta as { wordLimit: number };
       return (
         <WordLimitField
-          value={m.wordLimit ?? 2}
+          value={m.wordLimit ?? 1}
           onChange={(wordLimit) => onChange({ ...m, wordLimit })}
           max={5}
         />
       );
+    }
+
+    case "SUMMARY_COMPLETION_WITH_CLUES": {
+      const m = meta as { options: string[]; wordLimit?: number };
+      return <SummaryWithCluesFields meta={m} onChange={onChange} />;
     }
 
     case "DIAGRAM_LABEL_COMPLETION": {

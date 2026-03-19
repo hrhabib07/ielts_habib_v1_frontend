@@ -9,7 +9,14 @@ import {
   type GroupTestQuestionForStudent,
 } from "@/src/lib/api/readingStrictProgression";
 import { InstructionBlock } from "./InstructionBlock";
-import { GapFillingQuestionInput, hasGapPlaceholders, isStructuredNoteQuestion } from "./GapFillingQuestionInput";
+import {
+  GapFillingQuestionInput,
+  GAP_BASED_COMPLETION_TYPES,
+  buildDisplayNumberStartByQuestionId,
+  hasGapPlaceholders,
+  isStructuredNoteQuestion,
+  DraggableWordBank,
+} from "./GapFillingQuestionInput";
 import {
   PassageWithHighlightNotes,
   type HighlightRange,
@@ -34,6 +41,7 @@ const QUESTION_TYPE_LABEL: Record<string, string> = {
   MATCHING_SENTENCE_ENDINGS: "Matching sentence endings",
   SENTENCE_COMPLETION: "Sentence completion",
   SUMMARY_COMPLETION: "Summary completion",
+  SUMMARY_COMPLETION_WITH_CLUES: "Summary completion (with clues)",
   NOTE_COMPLETION: "Note completion",
   TABLE_COMPLETION: "Table completion",
   FLOW_CHART_COMPLETION: "Flow chart completion",
@@ -95,6 +103,7 @@ const QUESTION_INPUT_BASE =
 function QuestionBlock({
   question,
   displayNumber,
+  displayNumberStart,
   value,
   onChange,
   disabled,
@@ -106,6 +115,8 @@ function QuestionBlock({
 }: {
   question: GroupTestQuestionForStudent;
   displayNumber: number;
+  /** For gap-based types: first gap number (global across question bodies). */
+  displayNumberStart?: number;
   value: string | string[];
   onChange: (v: string | string[]) => void;
   disabled?: boolean;
@@ -145,6 +156,7 @@ function QuestionBlock({
       <GapFillingQuestionInput
         question={question}
         displayNumber={displayNumber}
+        displayNumberStart={displayNumberStart}
         value={value}
         onChange={onChange}
         disabled={disabled}
@@ -414,6 +426,24 @@ export function ReadingMockTestView({
     }
     return map;
   }, [miniTest.questionGroups, miniTest.questions]);
+
+  const displayNumberStartByQuestionId = useMemo(() => {
+    const map: Record<string, number> = {};
+    if (!miniTest.questionGroups?.length) return map;
+    for (const group of miniTest.questionGroups) {
+      if (GAP_BASED_COMPLETION_TYPES.includes(group.questionType as (typeof GAP_BASED_COMPLETION_TYPES)[number])) {
+        Object.assign(
+          map,
+          buildDisplayNumberStartByQuestionId(
+            group.questionType,
+            group.questions,
+            group.startQuestionNumber
+          )
+        );
+      }
+    }
+    return map;
+  }, [miniTest.questionGroups]);
 
   const passageTitle =
     miniTest.passage.title != null
@@ -709,18 +739,29 @@ export function ReadingMockTestView({
                         Questions {group.startQuestionNumber}–{group.endQuestionNumber}: {typeLabel}
                       </h3>
                       {group.instruction && (
-                        <div className="mb-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-4 py-3">
+                        <div
+                          className={
+                            group.questionType === "TRUE_FALSE_NOT_GIVEN" ||
+                            group.questionType === "YES_NO_NOT_GIVEN"
+                              ? "mb-4 px-1 py-2"
+                              : "mb-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-4 py-3"
+                          }
+                        >
                           <InstructionBlock
                             instruction={group.instruction}
                             questionType={group.questionType}
                           />
                         </div>
                       )}
+                      {group.questionType === "SUMMARY_COMPLETION_WITH_CLUES" && (
+                        <DraggableWordBank options={group.questions[0]?.blanks?.[0]?.options ?? []} />
+                      )}
                       {group.questions.map((q) => (
                         <div key={q._id} id={`q-${q._id}`} className="scroll-mt-4">
                           <QuestionBlock
                             question={q}
                             displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
+                            displayNumberStart={displayNumberStartByQuestionId[q._id]}
                             value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
                             onChange={(v) => setAnswer(q._id, v)}
                             disabled={submitting}
@@ -754,6 +795,7 @@ export function ReadingMockTestView({
                     <QuestionBlock
                       question={q}
                       displayNumber={displayNumberByQuestionId[q._id] ?? q.questionNumber}
+                      displayNumberStart={displayNumberStartByQuestionId[q._id]}
                       value={answers[q._id] ?? (q.blanks?.length && q.blanks.length > 1 ? [] : "")}
                       onChange={(v) => setAnswer(q._id, v)}
                       disabled={submitting}

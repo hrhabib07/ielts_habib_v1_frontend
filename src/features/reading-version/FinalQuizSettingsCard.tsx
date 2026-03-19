@@ -43,7 +43,7 @@ export function FinalQuizSettingsCard({ steps }: FinalQuizSettingsCardProps) {
                 className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-sm"
               >
                 <span className="font-medium">
-                  #{step.order} {STEP_TYPE_LABELS[step.stepType] ?? step.stepType} — {step.title}
+                  #{step.order + 1} {STEP_TYPE_LABELS[step.stepType] ?? step.stepType} — {step.title}
                 </span>
                 <span className="text-muted-foreground">
                   Pass: {step.passType === "BAND" ? "band" : "percent"} ≥ {step.passValue ?? "—"}

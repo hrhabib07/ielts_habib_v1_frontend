@@ -24,7 +24,8 @@ import {
   type LearningContent,
 } from "@/src/lib/api/learningContents";
 import { listQuizContent, type ReadingQuizContent } from "@/src/lib/api/quizContent";
-import { Pencil, Trash2, Plus, Loader2, X, Check, ChevronUp, ChevronDown } from "lucide-react";
+import { Pencil, Trash2, Plus, Loader2, X, Check, ChevronUp, ChevronDown, Eye } from "lucide-react";
+import Link from "next/link";
 
 const STEP_TYPE_LABELS: Record<ReadingStepType, string> = {
   INSTRUCTION: "Instruction",
@@ -44,6 +45,7 @@ function optionToStepType(option: StepTypeOption): ReadingStepType {
 }
 
 interface StepBuilderProps {
+  levelId: string;
   versionId: string;
   steps: ReadingLevelStep[];
   practiceTests?: PracticeTest[];
@@ -52,6 +54,7 @@ interface StepBuilderProps {
 }
 
 export function StepBuilder({
+  levelId,
   versionId,
   steps,
   practiceTests = [],
@@ -242,7 +245,7 @@ export function StepBuilder({
                   />
                 ) : (
                   <>
-                    <span className="text-muted-foreground w-8">#{step.order}</span>
+                    <span className="text-muted-foreground w-8">#{step.order + 1}</span>
                     <span className="font-medium flex-1 min-w-0">
                       {step.stepType === "QUIZ" && step.isFinalQuiz === true ? (
                         <span className="mr-2 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
@@ -286,6 +289,21 @@ export function StepBuilder({
                         >
                           <ChevronDown className="h-4 w-4" />
                         </Button>
+                        <Link
+                          href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/preview?step=${step.order}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Preview this step (student view)"
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            type="button"
+                            className="text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
                         <Button
                           variant="ghost"
                           size="icon-xs"
@@ -363,7 +381,7 @@ function StepForm({
   const positionOptions: { label: string; value: number }[] = [
     { label: "At end", value: POS_AT_END },
     ...sortedSteps.map((s) => ({
-      label: `After step ${s.order}`,
+      label: `After step ${s.order + 1}`,
       value: s.order + 1,
     })),
   ];

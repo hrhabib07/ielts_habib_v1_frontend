@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ChevronRight, Menu } from "lucide-react";
 import { LevelSidebar } from "./LevelSidebar";
@@ -93,6 +93,7 @@ export function LevelLayout({
     [onNavigate],
   );
 
+  const contentScrollRef = useRef<HTMLDivElement>(null);
   const handleNavigate = useCallback(
     (stepId: string) => {
       if (onNavigate) {
@@ -100,7 +101,7 @@ export function LevelLayout({
       } else {
         setInternalStepId(stepId);
       }
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      contentScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     },
     [onNavigate],
   );
@@ -118,32 +119,36 @@ export function LevelLayout({
     ? !isCompleted && activeStepIndex === currentIndex
     : false;
 
+  useEffect(() => {
+    contentScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeStepId]);
+
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-950">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
       {!hideSidebar && (
-        <div className="sticky top-0 z-40 flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-3 shadow-sm lg:hidden">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm lg:hidden">
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
-            className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
           >
             <Menu className="h-4 w-4" />
             Steps
             {completedSet.size > 0 && (
-              <span className="ml-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 px-1.5 py-0 text-xs font-semibold text-indigo-700 dark:text-indigo-400">
+              <span className="ml-1 rounded-full bg-[#1e3a8a]/10 dark:bg-[#3b82f6]/20 px-1.5 py-0 text-xs font-semibold text-[#1e3a8a] dark:text-[#60a5fa]">
                 {completedSet.size}/{steps.length}
               </span>
             )}
           </button>
           {activeStep && (
-            <p className="max-w-[60%] truncate text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p className="max-w-[60%] truncate text-sm font-medium text-slate-700 dark:text-slate-300">
               {activeStep.title}
             </p>
           )}
         </div>
       )}
-      {/* Main layout */}
-      <div className="mx-auto flex max-w-300 gap-6 px-4 py-6 lg:px-6 lg:py-8">
+      {/* Main layout: full height, scroll inside content only */}
+      <div className="flex min-h-0 flex-1 gap-0 overflow-hidden">
         {!hideSidebar && (
           <LevelSidebar
             detail={detail}
@@ -155,21 +160,26 @@ export function LevelLayout({
           />
         )}
 
-        {/* Content area */}
-        <main className="min-w-0 flex-1">
+        {/* Content area: full-page canvas with inner scroll */}
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-slate-900">
+          <div
+            ref={contentScrollRef}
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain"
+          >
+            <div className="w-full flex-1 p-0">
           {isLevelPassed && (
             <div
               data-level-completed-banner
-              className="mb-6 flex flex-col gap-4 rounded-2xl border-2 border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-5 py-4 shadow-md"
+              className="mb-8 flex flex-col gap-4 rounded-xl border border-[#1e3a8a]/30 dark:border-[#3b82f6]/40 bg-[#1e3a8a]/5 dark:bg-[#1e3a8a]/20 px-6 py-5"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-[#1e3a8a] dark:text-[#60a5fa]" />
                   <div>
-                    <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-400">
+                    <p className="text-sm font-semibold text-[#0f172a] dark:text-slate-100">
                       Level completed!
                     </p>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-500">
+                    <p className="text-xs text-[#1e3a8a]/80 dark:text-slate-400">
                       {showFeedbackForm
                         ? "Share quick feedback to continue to the next level."
                         : showContinue
@@ -182,11 +192,11 @@ export function LevelLayout({
                 </div>
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                   {completionScore != null && (
-                    <div className="rounded-xl bg-emerald-200/60 dark:bg-emerald-800/40 px-4 py-2 text-right">
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    <div className="rounded-xl bg-[#1e3a8a]/15 dark:bg-[#3b82f6]/20 px-4 py-2 text-right">
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-[#1e3a8a] dark:text-[#60a5fa]">
                         Score
                       </p>
-                      <p className="text-lg font-bold tabular-nums text-emerald-800 dark:text-emerald-300">
+                      <p className="text-lg font-bold tabular-nums text-[#0f172a] dark:text-slate-100">
                         {completionScore.score}/{completionScore.total}
                         <span className="ml-1.5 text-sm font-semibold">
                           ({Math.round(completionScore.percentage)}%)
@@ -206,13 +216,13 @@ export function LevelLayout({
                           `/profile/reading/strict-levels/${nextLevelInfo.levelId}${stepParam}`,
                         );
                       }}
-                      className="flex shrink-0 items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                      className="flex shrink-0 items-center gap-2 rounded-xl bg-[#1e3a8a] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
                     >
                       Continue to {nextLevelInfo.title}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   ) : (
-                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                    <p className="text-sm font-medium text-[#1e3a8a] dark:text-[#60a5fa]">
                       🎉 You completed all levels!
                     </p>
                   )
@@ -220,7 +230,7 @@ export function LevelLayout({
                 </div>
               </div>
               {isLevelPassed && showFeedbackForm && onFeedbackSuccess && (
-                <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white dark:bg-gray-900 p-4">
+                <div className="rounded-xl border border-[#1e3a8a]/20 dark:border-[#3b82f6]/30 bg-white dark:bg-slate-900 p-4">
                   <LevelFeedbackForm
                     levelId={detail.level._id}
                     onSuccess={onFeedbackSuccess}
@@ -231,8 +241,7 @@ export function LevelLayout({
             </div>
           )}
 
-          <div className="min-h-100 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-7 shadow-sm lg:px-8 lg:py-9">
-            <div className="mx-auto max-w-200">
+          <div className="rounded-lg bg-slate-50/60 dark:bg-slate-800/30 p-6 lg:p-8">
               {loading ? (
                 <LevelContentSkeleton />
               ) : (
@@ -269,6 +278,7 @@ export function LevelLayout({
                   }
                 />
               )}
+          </div>
             </div>
           </div>
         </main>

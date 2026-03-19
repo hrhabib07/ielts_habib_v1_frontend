@@ -213,6 +213,96 @@ export async function createLevel(
   return unwrap(res);
 }
 
+export interface BulkCreateContentItem {
+  contentCode: string;
+  title: string;
+  type: "INTRO" | "NOTE" | "STRATEGY" | "VIDEO" | "ANALYTICS";
+  body?: string;
+  videoUrl?: string;
+}
+
+export interface BulkCreateQuizItem {
+  contentCode: string;
+  title: string;
+  description?: string;
+  timeLimit?: number;
+  groups: Array<{
+    title: string;
+    order: number;
+    questions: Array<{
+      type: "MCQ" | "TFNG" | "FILL_BLANK" | "MATCHING";
+      questionText: string;
+      options?: string[];
+      correctAnswer: string | string[];
+      marks: number;
+    }>;
+  }>;
+  quizUseType?: "PRACTICE" | "FINAL";
+}
+
+export interface BulkCreateLevelPayload {
+  level: {
+    title: string;
+    slug: string;
+    order: number;
+    levelType: ReadingLevelType;
+    description?: string;
+  };
+  contents: BulkCreateContentItem[];
+  quiz: BulkCreateQuizItem;
+}
+
+export interface BulkCreateLevelResult {
+  level: ReadingLevel;
+  versionId: string;
+  contentIds: string[];
+  quizContentId: string;
+  stepIds: string[];
+}
+
+export async function bulkCreateLevel(
+  payload: BulkCreateLevelPayload,
+): Promise<BulkCreateLevelResult> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: BulkCreateLevelResult;
+  }>(`${LEVELS_BASE}/bulk-create`, payload);
+  return unwrap(res);
+}
+
+export const SAMPLE_BULK_CREATE_PAYLOAD: BulkCreateLevelPayload = {
+  level: {
+    title: "Level 0 – Foundation",
+    slug: "level-0-foundation",
+    order: 0,
+    levelType: "FOUNDATION",
+    description: "Intro and vocabulary foundation. Fill in body/videoUrl for each content, then paste this payload and click Create.",
+  },
+  contents: [
+    { contentCode: "L0C1", title: "Welcome & overview", type: "INTRO", body: "Replace with your instruction text or copy from AI.", videoUrl: "" },
+    { contentCode: "L0C2", title: "Key concepts", type: "NOTE", body: "Replace with your note content.", videoUrl: "" },
+    { contentCode: "L0C3", title: "Strategy guide", type: "STRATEGY", body: "Replace with strategy content.", videoUrl: "" },
+    { contentCode: "L0C4", title: "Video lesson", type: "VIDEO", body: "", videoUrl: "https://example.com/your-video-link" },
+    { contentCode: "L0C5", title: "Summary", type: "NOTE", body: "Replace with summary content.", videoUrl: "" },
+  ],
+  quiz: {
+    contentCode: "L0C6",
+    title: "Level 0 – Final quiz",
+    description: "Quiz after completing the 5 content steps.",
+    timeLimit: 15,
+    quizUseType: "FINAL",
+    groups: [
+      {
+        title: "Vocabulary",
+        order: 0,
+        questions: [
+          { type: "MCQ", questionText: "Sample question – replace with real question.", options: ["A", "B", "C", "D"], correctAnswer: "A", marks: 1 },
+        ],
+      },
+    ],
+  },
+};
+
 export async function updateLevel(
   levelId: string,
   payload: UpdateLevelPayload,

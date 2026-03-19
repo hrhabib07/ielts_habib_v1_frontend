@@ -1,9 +1,133 @@
 "use client";
 
+import { useState, type ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import type { GroupTestQuestionForStudent } from "@/src/lib/api/readingStrictProgression";
 
+const DRAG_TYPE_WORD_BANK = "application/x-ielts-word-bank";
+
+/** Wraps a gap input as a drop target when word-bank drag-and-drop is enabled. */
+function GapDropTarget({
+  gapIndex,
+  gapDisplayNumber,
+  value,
+  onValueChange,
+  disabled,
+  inputClassName,
+  children,
+  hasWordBank,
+}: {
+  gapIndex: number;
+  gapDisplayNumber: number;
+  value: string;
+  onValueChange: (v: string) => void;
+  disabled?: boolean;
+  inputClassName: string;
+  children: ReactNode;
+  hasWordBank: boolean;
+}) {
+  const [isDragOver, setIsDragOver] = useState(false);
+  if (!hasWordBank) {
+    return <>{children}</>;
+  }
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 mx-1 ${isDragOver ? "rounded ring-2 ring-amber-400 ring-offset-1 bg-amber-50/80 dark:bg-amber-950/30" : ""}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = "copy";
+        if (!disabled) setIsDragOver(true);
+      }}
+      onDragLeave={(e) => {
+        e.preventDefault();
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragOver(false);
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+        if (disabled) return;
+        const text = e.dataTransfer.getData("text/plain") || e.dataTransfer.getData(DRAG_TYPE_WORD_BANK);
+        if (text.trim()) onValueChange(text.trim());
+      }}
+      aria-label={`Gap ${gapDisplayNumber} – drop an option here`}
+    >
+      {children}
+    </span>
+  );
+}
+
+/** Renders the word bank as draggable chips for IELTS-style drag-and-drop. Use above the questions. */
+export function DraggableWordBank({ options }: { options: string[] }) {
+  const list = options ?? [];
+  return (
+    <div className="mb-4 rounded-md border border-amber-200 bg-amber-50/70 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/30">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-200">
+        Choose your answers from the box below
+        {list.length > 0 ? " — you can drag options into the gaps" : ""}
+      </p>
+      {list.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+        {list.map((w) => (
+          <span
+            key={w}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("text/plain", w);
+              e.dataTransfer.setData(DRAG_TYPE_WORD_BANK, w);
+              e.dataTransfer.effectAllowed = "copy";
+            }}
+            className="cursor-grab rounded bg-amber-100 px-2.5 py-1 text-sm font-medium text-amber-900 dark:bg-amber-900/50 dark:text-amber-100 active:cursor-grabbing select-none touch-none"
+          >
+            {w}
+          </span>
+        ))}
+      </div>
+      ) : (
+        <p className="text-sm text-amber-700 dark:text-amber-300">
+          Word bank not loaded. Edit the question set (Summary completion with clues) and add options via Bulk import or Word bank list, then save.
+        </p>
+      )}
+    </div>
+  );
+}
+
 const GAP_RE = /\{\{gap(\d+)\}\}/g;
+
+/** Question types that use global gap numbering across multiple question bodies. */
+export const GAP_BASED_COMPLETION_TYPES = [
+  "SUMMARY_COMPLETION",
+  "SUMMARY_COMPLETION_WITH_CLUES",
+  "NOTE_COMPLETION",
+  "SENTENCE_COMPLETION",
+] as const;
+
+/** Count gaps in a question (blanks array length). */
+export function countGapsInQuestion(q: { blanks?: Array<{ id: number }> }): number {
+  return q.blanks?.length ?? 0;
+}
+
+/**
+ * Returns a map of questionId -> displayNumberStart for gap-based groups.
+ * Gap numbering continues across all question bodies: body1 gaps 1-4, body2 gaps 5-6, etc.
+ */
+export function buildDisplayNumberStartByQuestionId(
+  questionType: string,
+  questions: Array<{ _id: string; blanks?: Array<{ id: number }> }>,
+  startQuestionNumber: number
+): Record<string, number> {
+  const map: Record<string, number> = {};
+  if (!GAP_BASED_COMPLETION_TYPES.includes(questionType as (typeof GAP_BASED_COMPLETION_TYPES)[number])) {
+    return map;
+  }
+  let cumulative = 0;
+  for (const q of questions) {
+    map[q._id] = startQuestionNumber + cumulative;
+    cumulative += countGapsInQuestion(q);
+  }
+  return map;
+}
 
 export type NoteStructuredContent = {
   heading?: string;
@@ -50,10 +174,13 @@ export function isStructuredNoteQuestion(question: GroupTestQuestionForStudent):
  * Renders gap-filling question: content string with {{gap1}}, {{gap2}} replaced by
  * inline input boxes. Blanks must be in order (id 1, 2, 3...). Value is string for
  * single-gap or string[] for multi-gap (one per gap in order).
+ * When displayNumberStart is provided (global gap numbering), question body numbers
+ * are hidden and each gap shows a small circle with its sequential number.
  */
 export function GapFillingQuestionInput({
   question,
   displayNumber,
+  displayNumberStart,
   value,
   onChange,
   disabled,
@@ -61,6 +188,8 @@ export function GapFillingQuestionInput({
 }: {
   question: GroupTestQuestionForStudent;
   displayNumber: number;
+  /** For global gap numbering across question bodies: first gap number for this question. */
+  displayNumberStart?: number;
   value: string | string[];
   onChange: (value: string | string[]) => void;
   disabled?: boolean;
@@ -91,9 +220,16 @@ export function GapFillingQuestionInput({
     }
   };
 
-  /** For multi-gap: each gap gets displayNumber + idx (8, 9, 10...). For single-gap: use displayNumber. */
+  /** Use global numbering when displayNumberStart provided; else per-question numbering. */
+  const useGlobalNumbering = displayNumberStart != null && sortedBlanks.length > 0;
   const getGapDisplayNumber = (blankIdx: number) =>
-    sortedBlanks.length > 1 ? displayNumber + blankIdx : displayNumber;
+    useGlobalNumbering
+      ? displayNumberStart + blankIdx
+      : sortedBlanks.length > 1
+        ? displayNumber + blankIdx
+        : displayNumber;
+
+  const hasWordBank = sortedBlanks[0]?.options?.length > 0;
 
   const renderLineWithGaps = (line: string) => {
     const parts: Array<{ type: "text"; value: string } | { type: "gap"; id: number }> = [];
@@ -115,9 +251,14 @@ export function GapFillingQuestionInput({
         ? `Choose: ${blank.options.slice(0, 2).join(", ")}${blank.options.length > 2 ? "…" : ""}`
         : `Max ${blank?.wordLimit ?? 2} words`;
       const gapNum = getGapDisplayNumber(idx);
-      return (
-        <span key={i} className="inline-flex items-baseline gap-1 mx-1">
-          <span className="text-sm font-medium text-stone-600 dark:text-stone-400 shrink-0">{gapNum}.</span>
+      const inner = (
+        <>
+          <span
+            className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-stone-500 bg-stone-100 px-0.5 text-[10px] font-semibold text-stone-700 dark:border-stone-500 dark:bg-stone-800 dark:text-stone-300"
+            aria-label={`Question ${gapNum}`}
+          >
+            {gapNum}
+          </span>
           <input
             type="text"
             value={values[idx] ?? ""}
@@ -127,7 +268,21 @@ export function GapFillingQuestionInput({
             className={inputClassName}
             aria-label={`Question ${gapNum}`}
           />
-        </span>
+        </>
+      );
+      return (
+        <GapDropTarget
+          key={i}
+          gapIndex={idx}
+          gapDisplayNumber={gapNum}
+          value={values[idx] ?? ""}
+          onValueChange={(v) => setGapValue(idx, v)}
+          disabled={disabled}
+          inputClassName={inputClassName}
+          hasWordBank={hasWordBank}
+        >
+          {inner}
+        </GapDropTarget>
       );
     });
   };
@@ -168,29 +323,40 @@ export function GapFillingQuestionInput({
       <div className="space-y-2">
         {sortedBlanks.length <= 1 && (
           <p className="text-sm font-medium text-stone-900 dark:text-stone-100">
-            {displayNumber}. {text}
+            {useGlobalNumbering ? text : `${displayNumber}. ${text}`}
           </p>
         )}
         <div className="flex flex-wrap items-center gap-3">
           {sortedBlanks.map((b, i) => (
-            <span key={b.id} className="flex items-center gap-1.5">
-              <span className="text-sm font-medium text-stone-600 dark:text-stone-400 shrink-0">
-                {getGapDisplayNumber(i)}.
+            <GapDropTarget
+              key={b.id}
+              gapIndex={i}
+              gapDisplayNumber={getGapDisplayNumber(i)}
+              value={values[i] ?? ""}
+              onValueChange={(v) => setGapValue(i, v)}
+              disabled={disabled}
+              inputClassName={inputClassName}
+              hasWordBank={hasWordBank}
+            >
+              <span className="flex items-center gap-1.5">
+                <span className="text-sm font-medium text-stone-600 dark:text-stone-400 shrink-0">
+                  {getGapDisplayNumber(i)}.
+                </span>
+                <input
+                  type="text"
+                  value={values[i] ?? ""}
+                  onChange={(e) => setGapValue(i, e.target.value)}
+                  disabled={disabled}
+                  placeholder={
+                    b.options?.length
+                      ? `Choose: ${b.options.slice(0, 3).join(", ")}${b.options.length > 3 ? "…" : ""}`
+                      : `Max ${b.wordLimit ?? 2} words`
+                  }
+                  className={inputClassName}
+                  aria-label={`Gap ${b.id}`}
+                />
               </span>
-              <input
-                type="text"
-                value={values[i] ?? ""}
-                onChange={(e) => setGapValue(i, e.target.value)}
-                disabled={disabled}
-                placeholder={
-                  b.options?.length
-                    ? `Choose: ${b.options.slice(0, 3).join(", ")}${b.options.length > 3 ? "…" : ""}`
-                    : `Max ${b.wordLimit ?? 2} words`
-                }
-                className={inputClassName}
-                aria-label={`Gap ${b.id}`}
-              />
-            </span>
+            </GapDropTarget>
           ))}
         </div>
       </div>
@@ -216,7 +382,7 @@ export function GapFillingQuestionInput({
 
   return (
     <div className="mb-4">
-      {sortedBlanks.length <= 1 && (
+      {!useGlobalNumbering && sortedBlanks.length <= 1 && (
         <p className="text-sm font-medium text-stone-900 dark:text-stone-100 mb-2">
           {displayNumber}.
         </p>
@@ -232,9 +398,14 @@ export function GapFillingQuestionInput({
             ? `Choose: ${blank.options.slice(0, 2).join(", ")}${blank.options.length > 2 ? "…" : ""}`
             : `Max ${blank?.wordLimit ?? 2} words`;
           const gapNum = getGapDisplayNumber(idx);
-          return (
-            <span key={i} className="inline-flex items-baseline gap-1 mx-1">
-              <span className="text-sm font-medium text-stone-600 dark:text-stone-400 shrink-0">{gapNum}.</span>
+          const inner = (
+            <>
+              <span
+                className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-stone-500 bg-stone-100 px-0.5 text-[10px] font-semibold text-stone-700 dark:border-stone-500 dark:bg-stone-800 dark:text-stone-300"
+                aria-label={`Question ${gapNum}`}
+              >
+                {gapNum}
+              </span>
               <input
                 type="text"
                 value={values[idx] ?? ""}
@@ -244,7 +415,21 @@ export function GapFillingQuestionInput({
                 className={inputClassName}
                 aria-label={`Question ${gapNum}`}
               />
-            </span>
+            </>
+          );
+          return (
+            <GapDropTarget
+              key={i}
+              gapIndex={idx}
+              gapDisplayNumber={gapNum}
+              value={values[idx] ?? ""}
+              onValueChange={(v) => setGapValue(idx, v)}
+              disabled={disabled}
+              inputClassName={inputClassName}
+              hasWordBank={hasWordBank}
+            >
+              {inner}
+            </GapDropTarget>
           );
         })}
       </p>

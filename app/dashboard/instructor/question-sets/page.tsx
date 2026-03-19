@@ -31,6 +31,8 @@ import QuestionSetPreviewModal from "@/src/components/shared/QuestionSetPreviewM
 import {
   QUESTION_TYPE_CONFIG,
   QUESTION_TYPE_KEYS,
+  isWordLimitQuestionType,
+  buildInstructionFromWordLimit,
 } from "@/src/lib/questionTypeConfig";
 
 /* ─────────────────────────────────── helpers ──── */
@@ -163,20 +165,29 @@ export default function QuestionSetsPage() {
 
   const startEdit = (s: QuestionSet) => {
     setSubmitError(null);
+    const meta =
+      s.meta ??
+      QUESTION_TYPE_CONFIG[
+        s.questionType as CreateQuestionSetPayload["questionType"]
+      ]?.defaultMeta ??
+      {};
+    const wordLimit = (meta as { wordLimit?: number }).wordLimit;
+    let instruction = s.instruction;
+    if (
+      isWordLimitQuestionType(s.questionType) &&
+      wordLimit != null
+    ) {
+      instruction = buildInstructionFromWordLimit(s.questionType, wordLimit);
+    }
     setForm({
       passageId: getPassageId(s),
       passageNumber: s.passageNumber as 1 | 2 | 3,
       order: s.order,
-      instruction: s.instruction,
+      instruction,
       startQuestionNumber: s.startQuestionNumber,
       endQuestionNumber: s.endQuestionNumber,
       questionType: s.questionType,
-      meta:
-        s.meta ??
-        QUESTION_TYPE_CONFIG[
-          s.questionType as CreateQuestionSetPayload["questionType"]
-        ]?.defaultMeta ??
-        {},
+      meta,
     });
     setEditingId(s._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -390,7 +401,21 @@ export default function QuestionSetsPage() {
             <MetaFormFields
               questionType={form.questionType}
               meta={form.meta ?? {}}
-              onChange={(meta) => setForm((f) => ({ ...f, meta }))}
+              onChange={(meta) => {
+                setForm((f) => {
+                  const next = { ...f, meta };
+                  if (
+                    isWordLimitQuestionType(f.questionType) &&
+                    meta?.wordLimit != null
+                  ) {
+                    next.instruction = buildInstructionFromWordLimit(
+                      f.questionType,
+                      meta.wordLimit,
+                    );
+                  }
+                  return next;
+                });
+              }}
             />
           </div>
 

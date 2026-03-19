@@ -6,6 +6,11 @@ import type {
   GroupTestMiniTestForPreview,
   GroupTestQuestionForPreview,
 } from "@/src/lib/api/adminReadingVersions";
+import {
+  GAP_BASED_COMPLETION_TYPES,
+  buildDisplayNumberStartByQuestionId,
+  DraggableWordBank,
+} from "./GapFillingQuestionInput";
 import { InstructionBlock } from "./InstructionBlock";
 
 /** IELTS-style labels for question types (e.g. for section headers) */
@@ -20,6 +25,7 @@ const QUESTION_TYPE_LABEL: Record<string, string> = {
   MATCHING_SENTENCE_ENDINGS: "Matching sentence endings",
   SENTENCE_COMPLETION: "Sentence completion",
   SUMMARY_COMPLETION: "Summary completion",
+  SUMMARY_COMPLETION_WITH_CLUES: "Summary completion (with clues)",
   NOTE_COMPLETION: "Note completion",
   TABLE_COMPLETION: "Table completion",
   FLOW_CHART_COMPLETION: "Flow chart completion",
@@ -96,12 +102,21 @@ function renderLineWithGapBoxes(
     if (/{{gap\d+}}/.test(part)) {
       const num = displayNumberStart != null ? displayNumberStart + gapIndexRef.current++ : null;
       return (
-        <span
-          key={i}
-          className="mx-1 inline-flex min-w-[90px] items-center justify-center rounded border-2 border-dashed border-slate-400 bg-slate-100 px-2 py-0.5 align-baseline text-sm text-slate-600 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-300"
-          aria-label="Gap"
-        >
-          {num != null ? <span className="font-medium">{num}.</span> : <span className="text-slate-400">&nbsp;</span>}
+        <span key={i} className="inline-flex items-center gap-1.5 mx-1 align-baseline">
+          {num != null && (
+            <span
+              className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-slate-500 bg-slate-100 px-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-300"
+              aria-label={`Question ${num}`}
+            >
+              {num}
+            </span>
+          )}
+          <span
+            className="inline-flex min-w-[90px] items-center justify-center rounded border-2 border-dashed border-slate-400 bg-slate-100 px-2 py-0.5 text-sm text-slate-600 dark:border-slate-500 dark:bg-slate-700 dark:text-slate-300"
+            aria-label="Gap"
+          >
+            &nbsp;
+          </span>
         </span>
       );
     }
@@ -118,9 +133,12 @@ function formatCorrectAnswer(correctAnswer: string | string[] | undefined): stri
 function QuestionPreviewBlock({
   question,
   displayNumber,
+  displayNumberStart,
 }: {
   question: GroupTestQuestionForPreview;
   displayNumber: number;
+  /** For gap-based types: first gap number (global across question bodies). */
+  displayNumberStart?: number;
 }) {
   const qBody = question.questionBody;
   const structuredNote = getStructuredNoteContent(qBody);
@@ -133,17 +151,21 @@ function QuestionPreviewBlock({
     : formatCorrectAnswer(question.correctAnswer);
 
   const blankCount = blanks.length;
-  const usePerGapNumbers = structuredNote != null && blankCount > 1;
-  const displayNumberEnd = displayNumber + blankCount - 1;
-  const displayLabel = usePerGapNumbers ? `${displayNumber}–${displayNumberEnd}` : String(displayNumber);
+  const startNum = displayNumberStart ?? displayNumber;
+  const usePerGapNumbers = blankCount > 1 && (structuredNote != null || /\{\{gap\d+\}\}/.test(rawText));
+  const displayNumberEnd = startNum + blankCount - 1;
+  const displayLabel = usePerGapNumbers ? `${startNum}–${displayNumberEnd}` : String(displayNumber);
+  const hideBodyLabel = displayNumberStart != null && blankCount > 1;
   const gapIndexRef = { current: 0 };
 
   if (structuredNote) {
     return (
       <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-4">
-        <p className="mb-3 text-[16px] font-medium text-slate-900 dark:text-slate-100">
-          {displayLabel}.
-        </p>
+        {!hideBodyLabel && (
+          <p className="mb-3 text-[16px] font-medium text-slate-900 dark:text-slate-100">
+            {displayLabel}.
+          </p>
+        )}
         <div className="space-y-3 rounded-lg border border-slate-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/50">
           {structuredNote.heading && (
             <h4 className="text-base font-semibold text-slate-800 dark:text-slate-200 border-b border-slate-200 dark:border-slate-700 pb-2">
@@ -158,7 +180,7 @@ function QuestionPreviewBlock({
               <ul className="list-none space-y-1 text-[15px] text-slate-800 dark:text-slate-200">
                 {sec.lines.map((line, lIdx) => (
                   <li key={lIdx} className="flex flex-wrap items-baseline gap-0.5">
-                    {renderLineWithGapBoxes(line, usePerGapNumbers ? { displayNumberStart: displayNumber, gapIndexRef } : undefined)}
+                    {renderLineWithGapBoxes(line, usePerGapNumbers ? { displayNumberStart: startNum, gapIndexRef } : undefined)}
                   </li>
                 ))}
               </ul>
@@ -177,11 +199,23 @@ function QuestionPreviewBlock({
     );
   }
 
+  const textWithGaps = hasGaps(rawText) ? (
+    renderLineWithGapBoxes(rawText, usePerGapNumbers ? { displayNumberStart: startNum, gapIndexRef } : undefined)
+  ) : (
+    rawText
+  );
+
   return (
     <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-4">
-      <p className="mb-2 text-[16px] font-medium text-slate-900 dark:text-slate-100">
-        {displayNumber}. {rawText}
-      </p>
+      {hideBodyLabel ? (
+        <p className="mb-2 text-[16px] leading-relaxed text-slate-900 dark:text-slate-100">
+          {textWithGaps}
+        </p>
+      ) : (
+        <p className="mb-2 text-[16px] font-medium text-slate-900 dark:text-slate-100">
+          {displayNumber}. {rawText}
+        </p>
+      )}
       <div className="flex flex-wrap items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-3 py-2">
         <span className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">
           Correct answer:
@@ -271,20 +305,40 @@ export function ReadingFinalEvaluationPreviewView({
                         Questions {group.startQuestionNumber}–{group.endQuestionNumber}: {typeLabel}
                       </h3>
                       {group.instruction && (
-                        <div className="mb-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-4 py-3">
+                        <div
+                          className={
+                            group.questionType === "TRUE_FALSE_NOT_GIVEN" ||
+                            group.questionType === "YES_NO_NOT_GIVEN"
+                              ? "mb-4 px-1 py-2"
+                              : "mb-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-4 py-3"
+                          }
+                        >
                           <InstructionBlock
                             instruction={group.instruction}
                             questionType={group.questionType}
                           />
                         </div>
                       )}
+                      {group.questionType === "SUMMARY_COMPLETION_WITH_CLUES" && (
+                        <DraggableWordBank options={group.questions[0]?.blanks?.[0]?.options ?? []} />
+                      )}
                       {group.questions.map((q, qIdx) => {
                         const displayNumber = group.startQuestionNumber + qIdx;
+                        const displayNumberStartMap = GAP_BASED_COMPLETION_TYPES.includes(
+                          group.questionType as (typeof GAP_BASED_COMPLETION_TYPES)[number]
+                        )
+                          ? buildDisplayNumberStartByQuestionId(
+                              group.questionType,
+                              group.questions,
+                              group.startQuestionNumber
+                            )
+                          : {};
                         return (
                           <QuestionPreviewBlock
                             key={q._id}
                             question={q}
                             displayNumber={displayNumber}
+                            displayNumberStart={displayNumberStartMap[q._id]}
                           />
                         );
                       })}

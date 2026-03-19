@@ -89,7 +89,7 @@ function FinalEvaluationStartCard({ levelId }: { levelId: string }) {
       </p>
       <Link
         href={`/profile/reading/strict-levels/${levelId}/final-evaluation`}
-        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
       >
         Start Final Evaluation
         <ChevronRight className="h-4 w-4" />
@@ -131,14 +131,14 @@ const STEP_TYPE_META: Record<
   VOCABULARY_TEST: {
     label: "Vocabulary Test",
     Icon: BookOpen,
-    bg: "bg-green-50 dark:bg-green-950/40",
-    iconColor: "text-green-500",
+    bg: "bg-[#1e3a8a]/10 dark:bg-[#3b82f6]/20",
+    iconColor: "text-[#1e3a8a] dark:text-[#60a5fa]",
   },
   PASSAGE_QUESTION: {
     label: "Passage",
     Icon: FileText,
-    bg: "bg-indigo-50 dark:bg-indigo-950/40",
-    iconColor: "text-indigo-500",
+    bg: "bg-[#1e3a8a]/10 dark:bg-[#3b82f6]/20",
+    iconColor: "text-[#1e3a8a] dark:text-[#60a5fa]",
   },
   FINAL_EVALUATION: {
     label: "Final Evaluation",
@@ -408,7 +408,7 @@ export function LevelContent({
               </span>
             )}
             {isCompleted && (
-              <span className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="flex items-center gap-1 rounded-full bg-[#1e3a8a]/10 dark:bg-[#3b82f6]/20 px-2.5 py-0.5 text-xs font-medium text-[#1e3a8a] dark:text-[#60a5fa]">
                 <CheckCircle2 className="h-3 w-3" />
                 Completed
               </span>
@@ -567,11 +567,11 @@ export function LevelContent({
               !contentError &&
               step.stepType === "FINAL_EVALUATION" &&
               (isPreview ? (
-                <div className="rounded-2xl border border-dashed border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/30 p-6 text-center">
-                  <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                <div className="rounded-2xl border border-dashed border-[#1e3a8a]/40 dark:border-[#3b82f6]/50 bg-[#1e3a8a]/5 dark:bg-[#1e3a8a]/20 p-6 text-center">
+                  <p className="text-sm font-semibold text-[#0f172a] dark:text-slate-100">
                     Final evaluation (group tests)
                   </p>
-                  <p className="mt-2 text-sm text-emerald-700 dark:text-emerald-300">
+                  <p className="mt-2 text-sm text-[#1e3a8a]/80 dark:text-slate-400">
                     {previewGroupTestsCount != null && previewGroupTestsCount > 0
                       ? `This level has ${previewGroupTestsCount} group test(s). Each group test has 3 passage-based mini tests. Students will see and attempt them here after completing the steps above.`
                       : "This level uses group tests for the final evaluation. Students will see the group test content here."}
@@ -579,13 +579,13 @@ export function LevelContent({
                   {versionId && (
                     <Link
                       href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/final-evaluation-preview`}
-                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
                     >
                       Preview final evaluation
                       <ChevronRight className="h-4 w-4" />
                     </Link>
                   )}
-                  <p className="mt-3 text-xs text-emerald-600 dark:text-emerald-400">
+                  <p className="mt-3 text-xs text-[#1e3a8a]/70 dark:text-slate-400">
                     Preview only — submission is disabled.
                   </p>
                 </div>
@@ -616,7 +616,7 @@ export function LevelContent({
 
           {/* Mark complete button (not for quiz, practice test, or FINAL_EVALUATION — practice test uses submit + unlimited tries) */}
           {!isQuizStep && step.stepType !== "PRACTICE_TEST" && step.stepType !== "FINAL_EVALUATION" && isCurrent && !isCompleted && (
-            <div className="flex items-center gap-4 rounded-2xl border border-gray-100 dark:border-gray-700 bg-linear-to-r from-indigo-50 to-white dark:from-indigo-950/30 dark:to-gray-800/50 p-5">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-gradient-to-r from-[#1e3a8a]/5 to-white dark:from-[#1e3a8a]/10 dark:to-slate-800/50 p-5">
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Finished with this step?
@@ -631,8 +631,8 @@ export function LevelContent({
                 onClick={() => onComplete(step._id)}
                 className={[
                   "flex shrink-0 items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold",
-                  "bg-indigo-600 text-white shadow-sm",
-                  "transition-all duration-200 hover:bg-indigo-700 hover:shadow-md active:scale-[0.98]",
+                  "bg-[#1e3a8a] text-white shadow-sm dark:bg-[#3b82f6]",
+                  "transition-all duration-200 hover:bg-[#0f172a] hover:shadow-md active:scale-[0.98] dark:hover:bg-[#2563eb]",
                   "disabled:opacity-60 disabled:cursor-not-allowed",
                 ].join(" ")}
               >
@@ -650,9 +650,9 @@ export function LevelContent({
 
           {/* Completed state (not for practice test — completion comes from passing the test; they can keep trying) */}
           {isCompleted && !isQuizStep && step.stepType !== "PRACTICE_TEST" && (
-            <div className="flex items-center gap-3 rounded-2xl border border-emerald-100 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 px-5 py-4">
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
-              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#1e3a8a]/20 dark:border-[#3b82f6]/30 bg-[#1e3a8a]/5 dark:bg-[#1e3a8a]/15 px-5 py-4">
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-[#1e3a8a] dark:text-[#60a5fa]" />
+              <p className="text-sm font-medium text-[#1e3a8a] dark:text-[#60a5fa]">
                 You&apos;ve completed this step.
               </p>
             </div>
@@ -660,17 +660,17 @@ export function LevelContent({
 
           {/* Level passed — inline Next level button (visible without scrolling to banner) */}
           {isLevelPassed && nextLevelInfo && onNavigateToNextLevel && (
-            <div className="rounded-2xl border-2 border-emerald-400 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 p-5 shadow-sm">
-              <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+            <div className="rounded-2xl border-2 border-[#1e3a8a]/40 dark:border-[#3b82f6]/50 bg-[#1e3a8a]/5 dark:bg-[#1e3a8a]/20 p-5 shadow-sm">
+              <p className="text-sm font-semibold text-[#0f172a] dark:text-slate-100">
                 Level complete! Next level is unlocked.
               </p>
-              <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
+              <p className="mt-1 text-xs text-[#1e3a8a]/80 dark:text-slate-400">
                 Continue to {nextLevelInfo.title} to keep going.
               </p>
               <button
                 type="button"
                 onClick={onNavigateToNextLevel}
-                className="mt-4 flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                className="mt-4 flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
               >
                 Next: {nextLevelInfo.title}
                 <ChevronRight className="h-4 w-4" />
@@ -697,7 +697,7 @@ export function LevelContent({
                 <button
                   type="button"
                   onClick={() => onNavigate(nextStep._id)}
-                  className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md active:scale-[0.98]"
+                  className="flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0f172a] hover:shadow-md active:scale-[0.98] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -706,7 +706,7 @@ export function LevelContent({
                 <button
                   type="button"
                   onClick={onNavigateToNextLevel}
-                  className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md active:scale-[0.98]"
+                  className="flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0f172a] hover:shadow-md active:scale-[0.98] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
                 >
                   Next: {nextLevelInfo.title}
                   <ChevronRight className="h-4 w-4" />

@@ -272,3 +272,8 @@
   text-stroke: 2px var(--muted-foreground);
   paint-order: stroke fill;
 }
+
+/* Dashboard: independent scroll areas, no scroll chaining */
+[data-reading-dashboard] {
+  isolation: isolate;
+}

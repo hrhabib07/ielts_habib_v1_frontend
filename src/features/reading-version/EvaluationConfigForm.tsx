@@ -33,18 +33,25 @@ export function EvaluationConfigForm({
     config.maxAttempts != null ? String(config.maxAttempts) : "",
   );
   const [finalEvaluationType, setFinalEvaluationType] = useState<string>(
-    config.finalEvaluationType ?? "",
+    config.finalEvaluationType && config.finalEvaluationType !== ""
+      ? config.finalEvaluationType
+      : "GROUP_TEST",
   );
   const [passMarkPercent, setPassMarkPercent] = useState<string>(
     config.passMarkPercent != null ? String(config.passMarkPercent) : "",
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isGroupTest = (finalEvaluationType || "GROUP_TEST") === "GROUP_TEST";
 
   useEffect(() => {
     const c = version.evaluationConfig ?? {};
     setMaxAttempts(c.maxAttempts != null ? String(c.maxAttempts) : "");
-    setFinalEvaluationType(c.finalEvaluationType ?? "");
+    setFinalEvaluationType(
+      c.finalEvaluationType && c.finalEvaluationType !== ""
+        ? c.finalEvaluationType
+        : "GROUP_TEST",
+    );
     setPassMarkPercent(c.passMarkPercent != null ? String(c.passMarkPercent) : "");
   }, [version.evaluationConfig]);
 
@@ -57,11 +64,13 @@ export function EvaluationConfigForm({
       const n = Number(maxAttempts);
       if (Number.isFinite(n) && n >= 1) payload.maxAttempts = n;
     }
-    if (finalEvaluationType) payload.finalEvaluationType = finalEvaluationType;
-    if (passMarkPercent.trim() !== "") {
+    payload.finalEvaluationType = finalEvaluationType || "GROUP_TEST";
+    // Pass mark % only applies to Final quiz; group tests pass by student's target band.
+    if (!isGroupTest && passMarkPercent.trim() !== "") {
       const n = Number(passMarkPercent);
       if (Number.isFinite(n) && n >= 0 && n <= 100) payload.passMarkPercent = n;
     }
+    if (isGroupTest) payload.passMarkPercent = undefined;
     try {
       const updated = await updateEvaluationConfig(version._id, payload);
       onVersionChange(updated);
@@ -95,11 +104,10 @@ export function EvaluationConfigForm({
             <Label>Final evaluation type</Label>
             <select
               className="mt-1 h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-              value={finalEvaluationType}
+              value={finalEvaluationType || "GROUP_TEST"}
               onChange={(e) => setFinalEvaluationType(e.target.value)}
               disabled={disabled}
             >
-              <option value="">— Select —</option>
               {FINAL_EVAL_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
@@ -111,19 +119,29 @@ export function EvaluationConfigForm({
                 Add at least one Group test below (each with 3 passage question sets). Steps above are optional.
               </p>
             )}
+            {finalEvaluationType === "GROUP_TEST" && (
+              <p className="mt-1.5 rounded-md bg-primary/5 px-2 py-1.5 text-xs text-primary">
+                Group tests are <strong>band-based</strong>: students pass when their score meets their target band (e.g. 5.5). No percentage pass mark.
+              </p>
+            )}
           </div>
-          <div>
-            <Label>Pass mark % (0–100)</Label>
-            <Input
-              type="number"
-              min={0}
-              max={100}
-              value={passMarkPercent}
-              onChange={(e) => setPassMarkPercent(e.target.value)}
-              placeholder="e.g. 60"
-              disabled={disabled}
-            />
-          </div>
+          {!isGroupTest && (
+            <div>
+              <Label>Pass mark % (0–100)</Label>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={passMarkPercent}
+                onChange={(e) => setPassMarkPercent(e.target.value)}
+                placeholder="e.g. 60"
+                disabled={disabled}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Used for Final quiz steps (percentage to pass).
+              </p>
+            </div>
+          )}
           {!disabled && (
             <Button type="submit" size="sm" disabled={submitting}>
               {submitting ? (

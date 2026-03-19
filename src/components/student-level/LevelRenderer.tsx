@@ -7,9 +7,15 @@ import type { ReadingLevel, VersionDetail } from "@/src/lib/api/adminReadingVers
 export interface LevelRendererPreviewProps {
   level: ReadingLevel;
   detail: VersionDetail;
+  /** 0-based step index to show as current (student view). Omit to show all steps completed. */
+  initialStepIndex?: number;
 }
 
-function buildPreviewDetail(level: ReadingLevel, detail: VersionDetail): LevelDetailForStudent & { previewGroupTestsCount?: number } {
+function buildPreviewDetail(
+  level: ReadingLevel,
+  detail: VersionDetail,
+  initialStepIndex?: number,
+): LevelDetailForStudent & { previewGroupTestsCount?: number } {
   const steps = detail.steps.map((s) => ({
     _id: s._id,
     stepType: s.stepType,
@@ -33,6 +39,12 @@ function buildPreviewDetail(level: ReadingLevel, detail: VersionDetail): LevelDe
   let currentStepIndex = steps.length;
   let completedStepIds = steps.map((s) => s._id);
 
+  if (initialStepIndex != null && initialStepIndex >= 0) {
+    const clamped = Math.min(initialStepIndex, steps.length);
+    currentStepIndex = clamped;
+    completedStepIds = steps.slice(0, clamped).map((s) => s._id);
+  }
+
   if (!hasFinalEvalStep && isSkillWithGroupTests) {
     const syntheticId = `preview-final-${detail.version._id}`;
     finalSteps = [
@@ -50,8 +62,10 @@ function buildPreviewDetail(level: ReadingLevel, detail: VersionDetail): LevelDe
         maxAttempts: undefined,
       },
     ];
-    currentStepIndex = steps.length;
-    completedStepIds = steps.map((s) => s._id);
+    if (initialStepIndex == null) {
+      currentStepIndex = steps.length;
+      completedStepIds = steps.map((s) => s._id);
+    }
   }
 
   return {
@@ -76,8 +90,8 @@ function buildPreviewDetail(level: ReadingLevel, detail: VersionDetail): LevelDe
   };
 }
 
-export function LevelRenderer({ level, detail }: LevelRendererPreviewProps) {
-  const previewDetail = buildPreviewDetail(level, detail);
+export function LevelRenderer({ level, detail, initialStepIndex }: LevelRendererPreviewProps) {
+  const previewDetail = buildPreviewDetail(level, detail, initialStepIndex);
   return (
     <LevelLayout
       detail={previewDetail}

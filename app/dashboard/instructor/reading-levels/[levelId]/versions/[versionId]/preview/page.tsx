@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   getLevelById,
   getVersionDetail,
@@ -14,12 +14,21 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 
 export default function VersionPreviewPage() {
   const params = useParams<{ levelId: string; versionId: string }>();
+  const searchParams = useSearchParams();
   const levelId = params.levelId;
   const versionId = params.versionId;
   const [level, setLevel] = useState<ReadingLevel | null>(null);
   const [detail, setDetail] = useState<VersionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const stepParam = searchParams.get("step");
+  const initialStepIndex = useMemo(() => {
+    if (stepParam == null) return undefined;
+    const oneBased = parseInt(stepParam, 10);
+    if (!Number.isFinite(oneBased) || oneBased < 1) return undefined;
+    return oneBased - 1;
+  }, [stepParam]);
 
   const load = useCallback(async () => {
     if (!levelId || !versionId) return;
@@ -85,9 +94,18 @@ export default function VersionPreviewPage() {
         </span>
         <h1 className="truncate text-sm font-medium text-muted-foreground">
           {level.title} · Version {detail.version.version}
+          {initialStepIndex != null && (
+            <span className="ml-2 text-xs">
+              (viewing step {initialStepIndex + 1})
+            </span>
+          )}
         </h1>
       </div>
-      <LevelRenderer level={level} detail={detail} />
+      <LevelRenderer
+        level={level}
+        detail={detail}
+        initialStepIndex={initialStepIndex}
+      />
     </div>
   );
 }

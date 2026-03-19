@@ -1,5 +1,13 @@
 import apiClient from "../api-client";
 
+/**
+ * Backend mounts under /api. baseURL must end with /api so these resolve to:
+ *   POST /api/reading/passage, POST /api/reading/passage/bulk
+ *   POST /api/reading/question, POST /api/reading/question/bulk
+ *   POST /api/reading/questionSet
+ *   POST /api/reading/passageQSet, GET /api/reading/passageQSet/my
+ *   GET/POST/PATCH /api/passage-codes
+ */
 const PASSAGE_BASE = "/reading/passage";
 const QUESTION_BASE = "/reading/question";
 const WEAKNESS_TAGS_BASE = "/weakness-tags";
@@ -35,6 +43,22 @@ export async function listPassageCodes(): Promise<PassageCode[]> {
     PASSAGE_CODE_BASE,
   );
   return res.data?.data ?? [];
+}
+
+export async function updatePassageCode(
+  id: string,
+  data: {
+    book: string;
+    test: string;
+    passage: string;
+    source: PassageSource;
+  },
+): Promise<PassageCode> {
+  const res = await apiClient.patch<{ success: boolean; data: PassageCode }>(
+    `${PASSAGE_CODE_BASE}/${id}`,
+    data,
+  );
+  return res.data.data;
 }
 
 /* ----- Passages ----- */
@@ -174,6 +198,7 @@ export type ReadingQuestionType =
   | "MATCHING_SENTENCE_ENDINGS"
   | "SENTENCE_COMPLETION"
   | "SUMMARY_COMPLETION"
+  | "SUMMARY_COMPLETION_WITH_CLUES"
   | "NOTE_COMPLETION"
   | "TABLE_COMPLETION"
   | "FLOW_CHART_COMPLETION"

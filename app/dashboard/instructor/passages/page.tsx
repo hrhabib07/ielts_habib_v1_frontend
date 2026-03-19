@@ -129,7 +129,7 @@ export default function PassagesPage() {
     source: "CAMBRIDGE",
     difficulty: "MEDIUM",
     moduleType: "ACADEMIC",
-    estimatedReadingTime: 15,
+    estimatedReadingTime: 20,
   });
 
   useEffect(() => {
@@ -168,7 +168,7 @@ export default function PassagesPage() {
       source: "CAMBRIDGE",
       difficulty: "MEDIUM",
       moduleType: "ACADEMIC",
-      estimatedReadingTime: 15,
+      estimatedReadingTime: 20,
     });
     setEditingId(null);
   };
@@ -225,7 +225,7 @@ export default function PassagesPage() {
         passageCode: form.passageCode,
         content: paragraphs,
         glossary,
-        estimatedReadingTime: Number(form.estimatedReadingTime) || 15,
+        estimatedReadingTime: Number(form.estimatedReadingTime) || 20,
         ...(subTitleTrimmed ? { subTitle: subTitleTrimmed } : {}),
       };
       if (editingId) {
@@ -462,7 +462,7 @@ export default function PassagesPage() {
               onChange={(e) =>
                 setForm((f) => ({
                   ...f,
-                  estimatedReadingTime: parseInt(e.target.value, 10) || 15,
+                  estimatedReadingTime: parseInt(e.target.value, 10) || 20,
                 }))
               }
               className="mt-1 w-24"

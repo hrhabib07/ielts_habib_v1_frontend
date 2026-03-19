@@ -12,6 +12,11 @@ interface FooterProps {
 export function Footer({ initialUser = null }: FooterProps) {
   const pathname = usePathname();
 
+  // Reading dashboard: no footer (full professional dashboard experience)
+  if (pathname?.includes("/profile/reading/strict-levels")) {
+    return null;
+  }
+
   // Home page: only copyright line (minimal, clean)
   if (pathname === "/") {
     return (
