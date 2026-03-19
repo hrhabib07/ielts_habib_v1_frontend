@@ -17,7 +17,8 @@ import {
   PublishPanel,
   FinalQuizSettingsCard,
 } from "@/src/features/reading-version";
-import { Loader2, ArrowLeft, Eye, FileText } from "lucide-react";
+import { Loader2, ArrowLeft, Eye, FileText, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface VersionEditClientProps {
@@ -29,10 +30,20 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
   const [data, setData] = useState<VersionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [syncBusy, setSyncBusy] = useState(false);
 
   const load = async () => {
     const detail = await getVersionDetail(versionId);
     setData(detail);
+  };
+
+  const syncFromServer = async () => {
+    setSyncBusy(true);
+    try {
+      await load();
+    } finally {
+      setSyncBusy(false);
+    }
   };
 
   useEffect(() => {
@@ -158,8 +169,26 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
       </div>
 
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Steps</CardTitle>
+        <CardHeader className="pb-2 flex flex-row flex-wrap items-center justify-between gap-2">
+          <div>
+            <CardTitle className="text-base">Steps</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1 max-w-xl">
+              After creating practice tests elsewhere, use refresh so the Practice Test dropdown updates.
+            </p>
+          </div>
+          {!disabled && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2 shrink-0"
+              disabled={syncBusy}
+              onClick={() => void syncFromServer()}
+            >
+              {syncBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              Refresh
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="p-0 pt-0">
           <StepBuilder

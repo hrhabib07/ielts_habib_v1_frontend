@@ -12,6 +12,11 @@ import type { BulkCreatePassagesResult } from "@/src/lib/api/instructor";
 import type { BulkPassageInput, BulkPassageQuestionSetInput } from "./strictReadingBulkUtils";
 import { createPassageQuestionSetFromBulkInput } from "./strictReadingBulkUtils";
 import { createPracticeTest } from "@/src/lib/api/adminReadingVersions";
+import {
+  MULTI_TYPE_LEVEL_ORDERS,
+  stripPracticeBulkWrapper,
+  buildMultiTypePracticeSamplePayload,
+} from "./multiTypeBulkTemplate";
 
 type BulkPracticeTestItemInput = {
   title?: string;
@@ -25,8 +30,8 @@ export type BulkPracticeTestsCreatePayload = {
   practiceTests: BulkPracticeTestItemInput[];
 };
 
-// L15–L18 = Passage 2 Practice, Passage 3 Practice, Full Reading Test, Master Level (multi-type)
-const MULTI_TYPE_LEVELS = new Set([15, 16, 17, 18]);
+/** L15–L19: Passage 2 / 3 / full test / master (and extended pool) — multi-type passage question sets */
+const MULTI_TYPE_LEVELS = MULTI_TYPE_LEVEL_ORDERS;
 const SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL: Partial<Record<number, string>> = {
   9: "MCQ_SINGLE",
   10: "MCQ_MULTIPLE",
@@ -75,14 +80,6 @@ function validatePracticeBulkPayload(params: {
       if (!Array.isArray(groups) || groups.length < 2) {
         throw new Error(`Level ${levelOrder} is multi-type: practiceTests[${idx}].passageQuestionSet.questionGroups must have at least 2 groups.`);
       }
-      const hasMatchingHeadingOrInfo = groups.some(
-        (g) => g.questionType === "MATCHING_HEADINGS" || g.questionType === "MATCHING_INFORMATION",
-      );
-      if (!hasMatchingHeadingOrInfo) {
-        throw new Error(
-          `Level ${levelOrder} is multi-type: practiceTests[${idx}].passageQuestionSet.questionGroups must include at least one MATCHING_HEADINGS or MATCHING_INFORMATION group.`,
-        );
-      }
       const total = t.passageQuestionSet?.expectedTotalQuestions;
       if (total !== 13 && total !== 14) {
         throw new Error(`Level ${levelOrder} multi-type expectedTotalQuestions must be 13 or 14 (got ${total}).`);
@@ -107,6 +104,9 @@ export function PracticeTestsBulkCreateCard(props: {
 
   const sample = useMemo(() => {
     const isMulti = MULTI_TYPE_LEVELS.has(levelOrder);
+    if (isMulti) {
+      return JSON.stringify(buildMultiTypePracticeSamplePayload(levelOrder), null, 2);
+    }
     return JSON.stringify(
       {
         practiceTests: [
@@ -121,74 +121,44 @@ export function PracticeTestsBulkCreateCard(props: {
             },
             passageQuestionSet: {
               difficulty: "MEDIUM",
-              expectedTotalQuestions: isMulti ? 14 : 7,
+              expectedTotalQuestions: 7,
               recommendedTimeMinutes: 20,
-              questionGroups: isMulti
-                ? [
-                    {
-                      order: 1,
-                      startQuestionNumber: 1,
-                      endQuestionNumber: 7,
-                      questionType: "MATCHING_HEADINGS",
-                      instruction: "",
-                      meta: { headings: ["Heading i", "Heading ii"], allowReuse: false },
-                      questions: Array.from({ length: 7 }, (_, i) => ({
-                        questionBody: { layout: "TEXT", content: `Statement ${i + 1}` },
-                        correctAnswer: "i",
-                        explanation: "Explanation for question.",
-                      })),
-                    },
-                    {
-                      order: 2,
-                      startQuestionNumber: 8,
-                      endQuestionNumber: 14,
-                      questionType: "YES_NO_NOT_GIVEN",
-                      instruction: "",
-                      meta: { labels: ["YES", "NO", "NOT GIVEN"] },
-                      questions: Array.from({ length: 7 }, (_, i) => ({
-                        questionBody: { layout: "TEXT", content: `Statement ${i + 1}` },
-                        correctAnswer: "NOT GIVEN",
-                        explanation: "Explanation for question.",
-                      })),
-                    },
-                  ]
-                : [
-                    {
-                      order: 1,
-                      startQuestionNumber: 1,
-                      endQuestionNumber: 7,
-                      questionType: SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE",
-                      instruction: "",
-                      meta:
-                        levelOrder === 10
-                          ? { options: ["A", "B", "C", "D", "E"], selectCount: 2 }
-                          : levelOrder === 9
-                            ? { options: ["A", "B", "C", "D"], selectCount: 1 }
-                            : levelOrder === 11
-                              ? { endings: ["Ending A", "Ending B"] }
-                              : levelOrder === 12
-                                ? { features: ["Feature A", "Feature B"] }
-                                : levelOrder === 13
-                                  ? { paragraphCount: 4 }
-                                  : levelOrder === 14
-                                    ? { headings: ["Heading i", "Heading ii"], allowReuse: false }
-                                    : { options: ["A", "B", "C", "D"], selectCount: 1 },
-                      questions: Array.from({ length: 7 }, (_, i) => ({
-                        questionBody: { layout: "TEXT", content: `Question ${i + 1} stem text here.` },
-                        ...(levelOrder === 10 || levelOrder === 9
-                          ? { options: ["A", "B", "C", "D"], correctAnswer: levelOrder === 10 ? ["A"] : "A" }
-                          : levelOrder === 14
-                            ? { correctAnswer: "i" }
-                            : levelOrder === 11
-                              ? { correctAnswer: "A" }
-                              : { correctAnswer: "A" }),
-                        explanation: "Explanation for this question (min 5 characters).",
-                      })),
-                    },
-                  ],
+              questionGroups: [
+                {
+                  order: 1,
+                  startQuestionNumber: 1,
+                  endQuestionNumber: 7,
+                  questionType: SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE",
+                  instruction: "",
+                  meta:
+                    levelOrder === 10
+                      ? { options: ["A", "B", "C", "D", "E"], selectCount: 2 }
+                      : levelOrder === 9
+                        ? { options: ["A", "B", "C", "D"], selectCount: 1 }
+                        : levelOrder === 11
+                          ? { endings: ["Ending A", "Ending B"] }
+                          : levelOrder === 12
+                            ? { features: ["Feature A", "Feature B"] }
+                            : levelOrder === 13
+                              ? { paragraphCount: 4 }
+                              : levelOrder === 14
+                                ? { headings: ["Heading i", "Heading ii"], allowReuse: false }
+                                : { options: ["A", "B", "C", "D"], selectCount: 1 },
+                  questions: Array.from({ length: 7 }, (_, i) => ({
+                    questionBody: { layout: "TEXT", content: `Question ${i + 1} stem text here.` },
+                    ...(levelOrder === 10 || levelOrder === 9
+                      ? { options: ["A", "B", "C", "D"], correctAnswer: levelOrder === 10 ? ["A"] : "A" }
+                      : levelOrder === 14
+                        ? { correctAnswer: "i" }
+                        : levelOrder === 11
+                          ? { correctAnswer: "A" }
+                          : { correctAnswer: "A" }),
+                    explanation: "Explanation for this question (min 5 characters).",
+                  })),
+                },
+              ],
             },
           },
-          // PT2 (repeat same structure)
           {
             title: `Practice Test 2 · (L${levelOrder})`,
             passage: {
@@ -200,7 +170,7 @@ export function PracticeTestsBulkCreateCard(props: {
             },
             passageQuestionSet: {
               difficulty: "MEDIUM",
-              expectedTotalQuestions: isMulti ? 14 : 7,
+              expectedTotalQuestions: 7,
               recommendedTimeMinutes: 20,
               questionGroups: [],
             },
@@ -216,7 +186,7 @@ export function PracticeTestsBulkCreateCard(props: {
             },
             passageQuestionSet: {
               difficulty: "MEDIUM",
-              expectedTotalQuestions: isMulti ? 14 : 7,
+              expectedTotalQuestions: 7,
               recommendedTimeMinutes: 20,
               questionGroups: [],
             },
@@ -242,9 +212,11 @@ export function PracticeTestsBulkCreateCard(props: {
       return;
     }
 
+    const stripped = stripPracticeBulkWrapper(parsed.value);
+
     let validated: BulkPracticeTestsCreatePayload;
     try {
-      validated = validatePracticeBulkPayload({ payload: parsed.value, levelOrder }).payload;
+      validated = validatePracticeBulkPayload({ payload: stripped, levelOrder }).payload;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid payload");
       return;
@@ -280,21 +252,25 @@ export function PracticeTestsBulkCreateCard(props: {
       }
 
       const passageQuestionSets = await Promise.all(
-        createdPassagesResult.created.map((passage, idx) =>
-          createPassageQuestionSetFromBulkInput({
+        createdPassagesResult.created.map((passage, idx) => {
+          const pt = validated.practiceTests[idx];
+          if (!pt) throw new Error(`Missing practiceTests[${idx}]`);
+          return createPassageQuestionSetFromBulkInput({
             passage,
             passageNumber: 1,
-            questionSetInput: validated.practiceTests[idx].passageQuestionSet,
-          }),
-        ),
+            questionSetInput: pt.passageQuestionSet,
+          });
+        }),
       );
 
       const createdPracticeTests: PracticeTest[] = [];
       for (let i = 0; i < count; i++) {
         const t = validated.practiceTests[i];
+        const pqs = passageQuestionSets[i];
+        if (!t || !pqs) throw new Error(`Missing practice test or passage set at index ${i}`);
         const created = await createPracticeTest(versionId, {
           title: t.title ?? `Practice Test ${i + 1}`,
-          passageQuestionSetId: passageQuestionSets[i]._id,
+          passageQuestionSetId: pqs._id,
           timeLimitMinutes: t.timeLimitMinutes ?? 20,
           passType: "BAND",
           passValue: 0,
@@ -374,7 +350,9 @@ export function PracticeTestsBulkCreateCard(props: {
             </Button>
           </div>
           <p className="text-xs text-stone-500">
-            For multi-type levels {Array.from(MULTI_TYPE_LEVELS).join(", ")}, expectedTotalQuestions must be 13 or 14.
+            Multi-type levels {[...MULTI_TYPE_LEVELS].sort((a, b) => a - b).join(", ")}: use ≥2 question groups per
+            passage set; totals must be 13 or 14. Load template includes <code className="text-[11px]">__instructions</code>{" "}
+            and <code className="text-[11px]">__questionTypeCatalog</code> (reference only — stripped before API calls).
           </p>
         </CardContent>
       )}

@@ -555,7 +555,8 @@ function StepForm({
           </select>
           {practiceTests.length === 0 && (
             <p className="text-xs text-muted-foreground">
-              No practice tests for this version. Create them in Dashboard → Practice Tests first.
+              No practice tests on this draft version yet. Create them under Dashboard → Practice Test Manager (same level),
+              then in Level Builder use <strong>Sync from server</strong> / <strong>Refresh</strong> above so this list updates.
             </p>
           )}
         </div>

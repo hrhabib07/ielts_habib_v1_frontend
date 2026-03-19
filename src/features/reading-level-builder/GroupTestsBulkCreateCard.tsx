@@ -12,6 +12,11 @@ import { createBulkPassages } from "@/src/lib/api/instructor";
 import type { BulkCreatePassagesResult } from "@/src/lib/api/instructor";
 import type { BulkPassageInput, BulkPassageQuestionSetInput } from "../reading-version/strictReadingBulkUtils";
 import { createPassageQuestionSetFromBulkInput } from "../reading-version/strictReadingBulkUtils";
+import {
+  MULTI_TYPE_LEVEL_ORDERS,
+  stripGroupBulkWrapper,
+  buildMultiTypeGroupSamplePayload,
+} from "../reading-version/multiTypeBulkTemplate";
 
 type BulkMiniTestItemInput = {
   title?: string;
@@ -26,8 +31,7 @@ export type BulkGroupTestCreatePayload = {
   };
 };
 
-// L15–L18 = Passage 2 Practice, Passage 3 Practice, Full Reading Test, Master Level (multi-type)
-const MULTI_TYPE_LEVELS = new Set([15, 16, 17, 18]);
+const MULTI_TYPE_LEVELS = MULTI_TYPE_LEVEL_ORDERS;
 const SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL: Partial<Record<number, string>> = {
   9: "MCQ_SINGLE",
   10: "MCQ_MULTIPLE",
@@ -78,14 +82,6 @@ function validateGroupBulkPayload(params: { payload: unknown; levelOrder: number
       if (!Array.isArray(groups) || groups.length < 2) {
         throw new Error(`Level ${levelOrder} multi-type: miniTests[${idx}].passageQuestionSet.questionGroups must have at least 2 groups.`);
       }
-      const hasMatchingHeadingOrInfo = groups.some(
-        (g) => g.questionType === "MATCHING_HEADINGS" || g.questionType === "MATCHING_INFORMATION",
-      );
-      if (!hasMatchingHeadingOrInfo) {
-        throw new Error(
-          `Level ${levelOrder} multi-type: miniTests[${idx}].passageQuestionSet.questionGroups must include at least one MATCHING_HEADINGS or MATCHING_INFORMATION group.`,
-        );
-      }
     }
   }
 
@@ -122,6 +118,9 @@ export function GroupTestsBulkCreateCard(props: {
   const sample = useMemo(() => {
     if (levelOrder == null) return "";
     const isMulti = MULTI_TYPE_LEVELS.has(levelOrder);
+    if (isMulti) {
+      return JSON.stringify(buildMultiTypeGroupSamplePayload(levelOrder), null, 2);
+    }
     return JSON.stringify(
       {
         groupTest: {
@@ -134,72 +133,43 @@ export function GroupTestsBulkCreateCard(props: {
               },
               passageQuestionSet: {
                 difficulty: "MEDIUM",
-                expectedTotalQuestions: isMulti ? 14 : 7,
+                expectedTotalQuestions: 7,
                 recommendedTimeMinutes: 20,
-                questionGroups: isMulti
-                  ? [
-                      {
-                        order: 1,
-                        startQuestionNumber: 1,
-                        endQuestionNumber: 7,
-                        questionType: "MATCHING_HEADINGS",
-                        instruction: "",
-                        meta: { headings: ["Heading i", "Heading ii"], allowReuse: false },
-                        questions: Array.from({ length: 7 }, (_, i) => ({
-                          questionBody: { layout: "TEXT", content: `Statement ${i + 1}` },
-                          correctAnswer: "i",
-                          explanation: "Explanation for question.",
-                        })),
-                      },
-                      {
-                        order: 2,
-                        startQuestionNumber: 8,
-                        endQuestionNumber: 14,
-                        questionType: "YES_NO_NOT_GIVEN",
-                        instruction: "",
-                        meta: { labels: ["YES", "NO", "NOT GIVEN"] },
-                        questions: Array.from({ length: 7 }, (_, i) => ({
-                          questionBody: { layout: "TEXT", content: `Statement ${i + 1}` },
-                          correctAnswer: "NOT GIVEN",
-                          explanation: "Explanation for question.",
-                        })),
-                      },
-                    ]
-                  : [
-                      {
-                        order: 1,
-                        startQuestionNumber: 1,
-                        endQuestionNumber: 7,
-                        questionType: SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE",
-                        instruction: "",
-                        meta:
-                          levelOrder === 10
-                            ? { options: ["A", "B", "C", "D", "E"], selectCount: 2 }
-                            : levelOrder === 9
-                              ? { options: ["A", "B", "C", "D"], selectCount: 1 }
-                              : levelOrder === 11
-                                ? { endings: ["Ending A", "Ending B"] }
-                                : levelOrder === 12
-                                  ? { features: ["Feature A", "Feature B"] }
-                                  : levelOrder === 13
-                                    ? { paragraphCount: 4 }
-                                    : levelOrder === 14
-                                      ? { headings: ["Heading i", "Heading ii"], allowReuse: false }
-                                      : { options: ["A", "B", "C", "D"], selectCount: 1 },
-                        questions: Array.from({ length: 7 }, (_, i) => ({
-                          questionBody: { layout: "TEXT", content: `Question ${i + 1}` },
-                          ...(levelOrder === 10 || levelOrder === 9
-                            ? {
-                                options: ["A", "B", "C", "D"],
-                                correctAnswer: levelOrder === 10 ? ["A"] : "A",
-                              }
-                            : levelOrder === 14
-                              ? { correctAnswer: "i" }
-                              : { correctAnswer: "A" }),
-                          explanation: "Explanation for question.",
-                        })),
-                      },
-                    ],
+                questionGroups: [
+                  {
+                    order: 1,
+                    startQuestionNumber: 1,
+                    endQuestionNumber: 7,
+                    questionType: SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE",
+                    instruction: "",
+                    meta:
+                      levelOrder === 10
+                        ? { options: ["A", "B", "C", "D", "E"], selectCount: 2 }
+                        : levelOrder === 9
+                          ? { options: ["A", "B", "C", "D"], selectCount: 1 }
+                          : levelOrder === 11
+                            ? { endings: ["Ending A", "Ending B"] }
+                            : levelOrder === 12
+                              ? { features: ["Feature A", "Feature B"] }
+                              : levelOrder === 13
+                                ? { paragraphCount: 4 }
+                                : levelOrder === 14
+                                  ? { headings: ["Heading i", "Heading ii"], allowReuse: false }
+                                  : { options: ["A", "B", "C", "D"], selectCount: 1 },
+                    questions: Array.from({ length: 7 }, (_, i) => ({
+                      questionBody: { layout: "TEXT", content: `Question ${i + 1}` },
+                      ...(levelOrder === 10 || levelOrder === 9
+                        ? {
+                            options: ["A", "B", "C", "D"],
+                            correctAnswer: levelOrder === 10 ? ["A"] : "A",
+                          }
+                        : levelOrder === 14
+                          ? { correctAnswer: "i" }
+                          : { correctAnswer: "A" }),
+                      explanation: "Explanation for question.",
+                    })),
+                  },
+                ],
               },
             },
             {
@@ -210,7 +180,7 @@ export function GroupTestsBulkCreateCard(props: {
               },
               passageQuestionSet: {
                 difficulty: "MEDIUM",
-                expectedTotalQuestions: isMulti ? 14 : 7,
+                expectedTotalQuestions: 7,
                 recommendedTimeMinutes: 20,
                 questionGroups: [],
               },
@@ -223,7 +193,7 @@ export function GroupTestsBulkCreateCard(props: {
               },
               passageQuestionSet: {
                 difficulty: "MEDIUM",
-                expectedTotalQuestions: isMulti ? 14 : 7,
+                expectedTotalQuestions: 7,
                 recommendedTimeMinutes: 20,
                 questionGroups: [],
               },
@@ -254,9 +224,11 @@ export function GroupTestsBulkCreateCard(props: {
       return;
     }
 
+    const stripped = stripGroupBulkWrapper(parsed.value);
+
     let validated: BulkGroupTestCreatePayload;
     try {
-      validated = validateGroupBulkPayload({ payload: parsed.value, levelOrder });
+      validated = validateGroupBulkPayload({ payload: stripped, levelOrder });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid payload");
       return;
@@ -291,23 +263,25 @@ export function GroupTestsBulkCreateCard(props: {
       }
 
       const passageQuestionSets = await Promise.all(
-        createdPassagesResult.created.map((passage, idx) =>
-          createPassageQuestionSetFromBulkInput({
+        createdPassagesResult.created.map((passage, idx) => {
+          const mt = miniTests[idx];
+          if (!mt) throw new Error(`Missing miniTests[${idx}]`);
+          return createPassageQuestionSetFromBulkInput({
             passage,
             passageNumber: (idx + 1) as 1 | 2 | 3,
-            questionSetInput: miniTests[idx].passageQuestionSet,
-          }),
-        ),
+            questionSetInput: mt.passageQuestionSet,
+          });
+        }),
       );
 
       const nextOrderInPool =
         groupTests.length > 0 ? Math.max(...groupTests.map((g) => g.orderInPool)) + 1 : 1;
 
-      const pqsIds: [string, string, string] = [
-        passageQuestionSets[0]._id,
-        passageQuestionSets[1]._id,
-        passageQuestionSets[2]._id,
-      ];
+      const p0 = passageQuestionSets[0];
+      const p1 = passageQuestionSets[1];
+      const p2 = passageQuestionSets[2];
+      if (!p0 || !p1 || !p2) throw new Error("Expected three passage question sets");
+      const pqsIds: [string, string, string] = [p0._id, p1._id, p2._id];
 
       const createdGroup = await createGroupTest(versionId, {
         orderInPool: nextOrderInPool,
@@ -402,7 +376,9 @@ export function GroupTestsBulkCreateCard(props: {
           </div>
 
           <p className="text-xs text-stone-500">
-            Multi-type levels {Array.from(MULTI_TYPE_LEVELS).join(", ")} must use expectedTotalQuestions=13 or 14 for each mini test.
+            Multi-type levels {[...MULTI_TYPE_LEVELS].sort((a, b) => a - b).join(", ")}: each mini test needs ≥2 groups and
+            expectedTotalQuestions 13 or 14. Template adds <code className="text-[11px]">__instructions</code> +{" "}
+            <code className="text-[11px]">__questionTypeCatalog</code> (stripped before submit).
           </p>
         </CardContent>
       )}

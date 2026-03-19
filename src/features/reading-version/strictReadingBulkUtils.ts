@@ -15,6 +15,7 @@ import {
   createPassageQuestionSet,
   createQuestionSet,
 } from "@/src/lib/api/instructor";
+import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 
 export type BulkPassageInput = {
   title: string;
@@ -108,34 +109,129 @@ function validateGroupCoverage(input: BulkPassageQuestionSetInput): { min: numbe
   return { min: sorted[0] ?? 1, max: sorted[sorted.length - 1] ?? 1 };
 }
 
-/** Backend requires meta.options (array, min 2) and meta.selectCount (1 | 2) for MCQ. Normalize so POST /api/reading/questionSet does not ZodError. */
+/** Completion-style types: backend Zod requires either wordLimit or options. */
+const COMPLETION_META_REFINE_TYPES: ReadingQuestionType[] = [
+  "SENTENCE_COMPLETION",
+  "SUMMARY_COMPLETION",
+  "NOTE_COMPLETION",
+  "TABLE_COMPLETION",
+  "FLOW_CHART_COMPLETION",
+];
+
+/**
+ * Merge type defaults with bulk JSON meta and patch gaps so POST /api/reading/questionSet passes Zod
+ * (e.g. MATCHING_INFORMATION.paragraphCount, completion wordLimit/options, MATCHING_HEADINGS.headings).
+ */
 function normalizeMetaForQuestionSet(
   questionType: ReadingQuestionType,
   meta: QuestionSetMeta | undefined,
   questions: BulkQuestionGroupInput["questions"],
+  passageParagraphCount?: number,
 ): QuestionSetMeta {
-  if (questionType !== "MCQ_SINGLE" && questionType !== "MCQ_MULTIPLE") {
-    return meta ?? {};
+  const defaults = QUESTION_TYPE_CONFIG[questionType]?.defaultMeta ?? {};
+  const merged: QuestionSetMeta = { ...defaults, ...(meta ?? {}) };
+
+  if (questionType === "MCQ_SINGLE" || questionType === "MCQ_MULTIPLE") {
+    const options =
+      Array.isArray(merged.options) && merged.options.length >= 2
+        ? merged.options
+        : (() => {
+            const set = new Set<string>();
+            for (const q of questions) {
+              const opts = (q as { options?: string[] }).options;
+              if (Array.isArray(opts)) for (const o of opts) if (typeof o === "string" && o.trim()) set.add(o.trim());
+            }
+            const arr = [...set];
+            return arr.length >= 2 ? arr : arr.length === 1 ? [arr[0], "Other"] : ["A", "B"];
+          })();
+    const selectCount =
+      merged.selectCount === 1 || merged.selectCount === 2
+        ? merged.selectCount
+        : questionType === "MCQ_MULTIPLE"
+          ? 2
+          : 1;
+    return { ...merged, options, selectCount };
   }
-  const options =
-    Array.isArray(meta?.options) && meta.options.length >= 2
-      ? meta.options
-      : (() => {
-          const set = new Set<string>();
-          for (const q of questions) {
-            const opts = (q as { options?: string[] }).options;
-            if (Array.isArray(opts)) for (const o of opts) if (typeof o === "string" && o.trim()) set.add(o.trim());
-          }
-          const arr = [...set];
-          return arr.length >= 2 ? arr : arr.length === 1 ? [arr[0], "Other"] : ["A", "B"];
-        })();
-  const selectCount =
-    meta?.selectCount === 1 || meta?.selectCount === 2
-      ? meta.selectCount
-      : questionType === "MCQ_MULTIPLE"
-        ? 2
-        : 1;
-  return { ...meta, options, selectCount };
+
+  if (questionType === "MATCHING_INFORMATION") {
+    const pc = merged.paragraphCount;
+    const valid = typeof pc === "number" && Number.isFinite(pc) && pc >= 1;
+    if (valid) return merged;
+    const fromPassage =
+      typeof passageParagraphCount === "number" && passageParagraphCount >= 1
+        ? passageParagraphCount
+        : undefined;
+    return {
+      ...merged,
+      paragraphCount: fromPassage ?? defaults.paragraphCount ?? 4,
+    };
+  }
+
+  if (questionType === "MATCHING_HEADINGS") {
+    const headings =
+      Array.isArray(merged.headings) && merged.headings.length >= 2
+        ? merged.headings
+        : defaults.headings ?? ["Heading i", "Heading ii"];
+    const allowReuse = typeof merged.allowReuse === "boolean" ? merged.allowReuse : (defaults.allowReuse ?? false);
+    return { ...merged, headings, allowReuse };
+  }
+
+  if (questionType === "MATCHING_FEATURES") {
+    const features =
+      Array.isArray(merged.features) && merged.features.length >= 2
+        ? merged.features
+        : defaults.features ?? ["Feature A", "Feature B"];
+    return { ...merged, features };
+  }
+
+  if (questionType === "MATCHING_SENTENCE_ENDINGS") {
+    const endings =
+      Array.isArray(merged.endings) && merged.endings.length >= 2
+        ? merged.endings
+        : defaults.endings ?? ["Ending A", "Ending B"];
+    return { ...merged, endings };
+  }
+
+  if (questionType === "TRUE_FALSE_NOT_GIVEN" || questionType === "YES_NO_NOT_GIVEN") {
+    const labels =
+      Array.isArray(merged.labels) && merged.labels.length === 3
+        ? merged.labels
+        : defaults.labels ?? (questionType === "TRUE_FALSE_NOT_GIVEN"
+            ? ["TRUE", "FALSE", "NOT GIVEN"]
+            : ["YES", "NO", "NOT GIVEN"]);
+    return { ...merged, labels };
+  }
+
+  if (questionType === "DIAGRAM_LABEL_COMPLETION") {
+    const labels =
+      Array.isArray(merged.labels) && merged.labels.length >= 1
+        ? merged.labels
+        : defaults.labels ?? ["Label 1"];
+    return { ...merged, labels };
+  }
+
+  if (questionType === "SHORT_ANSWER") {
+    const wl = merged.wordLimit;
+    if (typeof wl === "number" && wl >= 1 && wl <= 5) return merged;
+    return { ...merged, wordLimit: defaults.wordLimit ?? 3 };
+  }
+
+  if (questionType === "SUMMARY_COMPLETION_WITH_CLUES") {
+    const options =
+      Array.isArray(merged.options) && merged.options.length >= 2
+        ? merged.options
+        : defaults.options ?? ["option A", "option B", "option C", "option D"];
+    return { ...merged, options };
+  }
+
+  if (COMPLETION_META_REFINE_TYPES.includes(questionType)) {
+    const hasWord = typeof merged.wordLimit === "number" && merged.wordLimit >= 1;
+    const hasOpts = Array.isArray(merged.options) && merged.options.length > 0;
+    if (hasWord || hasOpts) return merged;
+    return { ...merged, wordLimit: defaults.wordLimit ?? 1 };
+  }
+
+  return merged;
 }
 
 export async function createPassageQuestionSetFromBulkInput(params: {
@@ -149,6 +245,7 @@ export async function createPassageQuestionSetFromBulkInput(params: {
 
   const passageCodeId = formatPassageCodeId(passage);
   const hasParagraphIndexing = shouldShowParagraphLabels(questionSetInput.questionGroups);
+  const passageParagraphCount = Array.isArray(passage.content) ? passage.content.length : undefined;
 
   const questionGroupIds: string[] = [];
 
@@ -162,7 +259,12 @@ export async function createPassageQuestionSetFromBulkInput(params: {
       );
     }
 
-    const meta = normalizeMetaForQuestionSet(g.questionType, g.meta, g.questions);
+    const meta = normalizeMetaForQuestionSet(
+      g.questionType,
+      g.meta,
+      g.questions,
+      passageParagraphCount,
+    );
     const createdGroup = await createQuestionSet({
       passageId: passage._id,
       passageNumber,
