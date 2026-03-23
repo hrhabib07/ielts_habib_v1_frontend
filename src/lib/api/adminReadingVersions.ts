@@ -104,6 +104,8 @@ export interface VersionDetail {
   steps: ReadingLevelStep[];
   groupTests: GroupTest[];
   practiceTests: PracticeTest[];
+  /** Practice tests from all versions of this level (includes manually created from older versions) */
+  allLevelPracticeTests?: PracticeTest[];
 }
 
 export interface CreateStepPayload {
@@ -505,8 +507,16 @@ export async function getGroupTest(
   return unwrap(res);
 }
 
-export async function deleteGroupTest(groupTestId: string): Promise<void> {
-  await apiClient.delete(`${BASE}/group-tests/${groupTestId}`);
+export async function deleteGroupTest(
+  groupTestId: string,
+  mode: "detach" | "permanent" = "detach",
+): Promise<void> {
+  const params = new URLSearchParams();
+  if (mode === "permanent") params.set("mode", "permanent");
+  const query = params.toString();
+  await apiClient.delete(
+    `${BASE}/group-tests/${groupTestId}${query ? `?${query}` : ""}`,
+  );
 }
 
 /** Returns group tests for the version (sorted by orderInPool). Kept for compatibility. */
@@ -572,8 +582,16 @@ export async function updatePracticeTest(
   return unwrap(res);
 }
 
-export async function deletePracticeTest(practiceTestId: string): Promise<void> {
-  await apiClient.delete(`${BASE}/practice-tests/${practiceTestId}`);
+export async function deletePracticeTest(
+  practiceTestId: string,
+  mode: "detach" | "permanent" = "detach",
+): Promise<void> {
+  const params = new URLSearchParams();
+  if (mode === "permanent") params.set("mode", "permanent");
+  const query = params.toString();
+  await apiClient.delete(
+    `${BASE}/practice-tests/${practiceTestId}${query ? `?${query}` : ""}`,
+  );
 }
 
 export async function reorderPracticeTests(
@@ -622,6 +640,7 @@ export interface GroupTestQuestionForPreview {
 
 /** One question type block (e.g. "Questions 1–7: True/False/Not Given") */
 export interface GroupTestQuestionGroupForPreview {
+  _id?: string;
   questionType: string;
   startQuestionNumber: number;
   endQuestionNumber: number;
@@ -634,6 +653,10 @@ export interface GroupTestMiniTestForPreview {
   passageId: string;
   questionSetId: string;
   order: number;
+  /** For editing: PQS ID when practice test uses passage question set */
+  passageQuestionSetId?: string;
+  /** For editing: ordered question group IDs in PQS */
+  questionGroupIds?: string[];
   passage: {
     _id: string;
     title: string;

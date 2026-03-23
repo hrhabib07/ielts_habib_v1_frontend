@@ -29,6 +29,8 @@ export default function FinalEvaluationPage() {
     overallPass: boolean;
     miniTestResults: Array<{ bandScore: number; passed: boolean }>;
     newPassStatus: string;
+    promotionType?: "STREAK" | "AVERAGE";
+    finalAverageMockBandScore?: number;
   } | null>(null);
 
   const loadTest = useCallback(() => {
@@ -64,6 +66,8 @@ export default function FinalEvaluationPage() {
       overallPass: boolean;
       miniTestResults: Array<{ bandScore: number; passed: boolean }>;
       newPassStatus: string;
+      promotionType?: "STREAK" | "AVERAGE";
+      finalAverageMockBandScore?: number;
     }) => {
       setResult(res);
       setPhase("result");
@@ -147,30 +151,43 @@ export default function FinalEvaluationPage() {
   }
 
   if (phase === "result" && result) {
-    const passed = result.overallPass;
+    const unlocked = result.overallPass;
+    const isAveragePromotion = result.promotionType === "AVERAGE";
     return (
       <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
         <div
           className={`w-full max-w-md rounded-2xl border p-8 shadow-xl transition-opacity duration-300 ${
-            passed
+            unlocked
               ? "border-emerald-200/80 bg-white dark:border-emerald-800/50 dark:bg-slate-900"
               : "border-amber-200/80 bg-white dark:border-amber-800/50 dark:bg-slate-900"
           }`}
         >
           <div className="flex flex-col items-center text-center">
-            {passed ? (
+            {unlocked ? (
               <CheckCircle2 className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
             ) : (
               <AlertCircle className="h-12 w-12 text-amber-600 dark:text-amber-400" />
             )}
             <h2 className="mt-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
-              {passed ? "Test passed" : "Test not passed"}
+              {unlocked ? (isAveragePromotion ? "Promoted with average score" : "Test passed") : "Test not passed"}
             </h2>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              {passed
-                ? "You’ve met the requirement for this group test."
+              {unlocked
+                ? isAveragePromotion
+                  ? `You unlocked the next level using your average mock band score.`
+                  : "You’ve met the consecutive mock requirement."
                 : "Review the level and try again when ready."}
             </p>
+            {unlocked && isAveragePromotion && typeof result.finalAverageMockBandScore === "number" && (
+              <div className="mt-3 w-full rounded-xl border border-emerald-200/80 bg-emerald-50/50 px-4 py-3 text-left">
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                  Average mock band score
+                </span>
+                <div className="mt-1 text-2xl font-bold tabular-nums text-emerald-900 dark:text-emerald-200">
+                  {result.finalAverageMockBandScore.toFixed(2)}
+                </div>
+              </div>
+            )}
             <div className="mt-6 w-full space-y-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4">
               {result.miniTestResults.map((r, i) => (
                 <div

@@ -246,7 +246,7 @@ function PracticeTestContent() {
             </p>
 
             <div className="mt-6 flex w-full flex-col gap-3">
-              {result.attemptId && (
+              {result.attemptId && result.passed && (
                 <Link
                   href={`/profile/reading/practice-attempt/${result.attemptId}`}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"

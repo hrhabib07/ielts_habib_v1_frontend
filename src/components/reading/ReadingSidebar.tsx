@@ -427,7 +427,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
 
   if (loading) {
     return (
-      <aside className="flex h-full w-72 shrink-0 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
+      <aside className="flex h-full w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
         <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
           <Loader2 className="h-5 w-5 animate-spin" />
           <span className="text-sm font-medium">Loading your path…</span>
@@ -438,7 +438,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
 
   if (levels.length === 0) {
     return (
-      <aside className="flex h-full w-72 shrink-0 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
+      <aside className="flex h-full w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
         <p className="text-sm text-slate-500 dark:text-slate-400">No levels yet</p>
       </aside>
     );
@@ -479,8 +479,11 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
           </aside>
         </div>
       )}
-      {/* Desktop sidebar - fixed height, scrolls independently */}
-      <aside className="hidden h-full min-h-0 w-72 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm lg:flex">
+      {/* Desktop sidebar - fixed width prevents layout shift when nodes expand */}
+      <aside
+        className="hidden h-full min-h-0 w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm lg:flex"
+        style={{ contain: "layout" }}
+      >
         {sidebarContent}
       </aside>
     </>

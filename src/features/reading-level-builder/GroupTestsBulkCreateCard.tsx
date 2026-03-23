@@ -17,6 +17,14 @@ import {
   stripGroupBulkWrapper,
   buildMultiTypeGroupSamplePayload,
 } from "../reading-version/multiTypeBulkTemplate";
+import {
+  SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL,
+  getDefaultMetaForLevel,
+  getBulkQuestionTemplateForLevel,
+  EXPECTED_QUESTIONS_BY_LEVEL,
+  DEFAULT_SINGLE_TYPE_QUESTIONS,
+} from "../reading-version/levelQuestionTypeMapping";
+import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 
 type BulkMiniTestItemInput = {
   title?: string;
@@ -32,14 +40,6 @@ export type BulkGroupTestCreatePayload = {
 };
 
 const MULTI_TYPE_LEVELS = MULTI_TYPE_LEVEL_ORDERS;
-const SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL: Partial<Record<number, string>> = {
-  9: "MCQ_SINGLE",
-  10: "MCQ_MULTIPLE",
-  11: "MATCHING_SENTENCE_ENDINGS",
-  12: "MATCHING_FEATURES",
-  13: "MATCHING_INFORMATION",
-  14: "MATCHING_HEADINGS",
-};
 
 function safeJsonParse(raw: string): { ok: true; value: unknown } | { ok: false; error: string } {
   try {
@@ -62,7 +62,7 @@ function validateGroupBulkPayload(params: { payload: unknown; levelOrder: number
   const isMulti = MULTI_TYPE_LEVELS.has(levelOrder);
   if (!isMulti) {
     const expected = SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder];
-    if (!expected) return p as BulkGroupTestCreatePayload;
+    if (expected == null) return p as BulkGroupTestCreatePayload;
     for (const [idx, t] of miniTests.entries()) {
       const groups = t.passageQuestionSet?.questionGroups ?? [];
       if (!Array.isArray(groups) || groups.length !== 1) {
@@ -121,6 +121,17 @@ export function GroupTestsBulkCreateCard(props: {
     if (isMulti) {
       return JSON.stringify(buildMultiTypeGroupSamplePayload(levelOrder), null, 2);
     }
+    const questionCount = EXPECTED_QUESTIONS_BY_LEVEL[levelOrder] ?? DEFAULT_SINGLE_TYPE_QUESTIONS;
+    const questionType = SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE";
+    const defaultInstruction =
+      questionType === "SENTENCE_COMPLETION"
+        ? (QUESTION_TYPE_CONFIG.SENTENCE_COMPLETION?.defaultInstruction ??
+          "Complete the sentences below. Choose ONE WORD ONLY from the passage for each answer.")
+        : "";
+    const firstMiniQuestions = Array.from({ length: questionCount }, (_, i) => {
+      const template = getBulkQuestionTemplateForLevel(levelOrder, i);
+      return { ...template, explanation: "Explanation for question." };
+    });
     return JSON.stringify(
       {
         groupTest: {
@@ -133,41 +144,17 @@ export function GroupTestsBulkCreateCard(props: {
               },
               passageQuestionSet: {
                 difficulty: "MEDIUM",
-                expectedTotalQuestions: 7,
+                expectedTotalQuestions: questionCount,
                 recommendedTimeMinutes: 20,
                 questionGroups: [
                   {
                     order: 1,
                     startQuestionNumber: 1,
-                    endQuestionNumber: 7,
-                    questionType: SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE",
-                    instruction: "",
-                    meta:
-                      levelOrder === 10
-                        ? { options: ["A", "B", "C", "D", "E"], selectCount: 2 }
-                        : levelOrder === 9
-                          ? { options: ["A", "B", "C", "D"], selectCount: 1 }
-                          : levelOrder === 11
-                            ? { endings: ["Ending A", "Ending B"] }
-                            : levelOrder === 12
-                              ? { features: ["Feature A", "Feature B"] }
-                              : levelOrder === 13
-                                ? { paragraphCount: 4 }
-                                : levelOrder === 14
-                                  ? { headings: ["Heading i", "Heading ii"], allowReuse: false }
-                                  : { options: ["A", "B", "C", "D"], selectCount: 1 },
-                    questions: Array.from({ length: 7 }, (_, i) => ({
-                      questionBody: { layout: "TEXT", content: `Question ${i + 1}` },
-                      ...(levelOrder === 10 || levelOrder === 9
-                        ? {
-                            options: ["A", "B", "C", "D"],
-                            correctAnswer: levelOrder === 10 ? ["A"] : "A",
-                          }
-                        : levelOrder === 14
-                          ? { correctAnswer: "i" }
-                          : { correctAnswer: "A" }),
-                      explanation: "Explanation for question.",
-                    })),
+                    endQuestionNumber: questionCount,
+                    questionType,
+                    instruction: defaultInstruction,
+                    meta: getDefaultMetaForLevel(levelOrder),
+                    questions: firstMiniQuestions,
                   },
                 ],
               },
@@ -180,7 +167,7 @@ export function GroupTestsBulkCreateCard(props: {
               },
               passageQuestionSet: {
                 difficulty: "MEDIUM",
-                expectedTotalQuestions: 7,
+                expectedTotalQuestions: questionCount,
                 recommendedTimeMinutes: 20,
                 questionGroups: [],
               },
@@ -193,7 +180,7 @@ export function GroupTestsBulkCreateCard(props: {
               },
               passageQuestionSet: {
                 difficulty: "MEDIUM",
-                expectedTotalQuestions: 7,
+                expectedTotalQuestions: questionCount,
                 recommendedTimeMinutes: 20,
                 questionGroups: [],
               },

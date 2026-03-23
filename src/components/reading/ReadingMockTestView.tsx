@@ -15,6 +15,8 @@ import {
   buildDisplayNumberStartByQuestionId,
   hasGapPlaceholders,
   isStructuredNoteQuestion,
+  isStructuredTableQuestion,
+  questionStartsWithNumber,
   DraggableWordBank,
 } from "./GapFillingQuestionInput";
 import {
@@ -129,6 +131,7 @@ function QuestionBlock({
   const qBody = question.questionBody;
   const rawText = extractQuestionText(qBody);
   const text = (rawText as string).trim() || `Question ${displayNumber}`;
+  const showNumber = !questionStartsWithNumber(text);
 
   const highlights = questionHighlights ?? [];
   const notes = questionNotes ?? [];
@@ -151,7 +154,13 @@ function QuestionBlock({
       <span className={QUESTION_TEXT_CLASS}>{text}</span>
     );
 
-  if (question.blanks?.length && (isStructuredNoteQuestion(question) || hasGapPlaceholders(rawText) || question.blanks.length > 1)) {
+  if (
+    question.blanks?.length &&
+    (isStructuredNoteQuestion(question) ||
+      isStructuredTableQuestion(question) ||
+      hasGapPlaceholders(rawText) ||
+      question.blanks.length > 1)
+  ) {
     return (
       <GapFillingQuestionInput
         question={question}
@@ -177,7 +186,7 @@ function QuestionBlock({
     return (
       <div className="mb-6">
         <p className="mb-2.5">
-          {displayNumber}. {renderQuestionText()}
+          {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
         </p>
         <div className="mt-2 flex flex-wrap gap-3">
           {options.map((opt) => (
@@ -207,7 +216,7 @@ function QuestionBlock({
     return (
       <div className="mb-6">
         <p className="mb-2.5">
-          {displayNumber}. {renderQuestionText()}
+          {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
         </p>
         <div className="space-y-2 pl-0.5">
           {question.options.map((opt, i) => (
@@ -237,7 +246,7 @@ function QuestionBlock({
     return (
       <div className="mb-6">
         <p className="mb-2.5">
-          {displayNumber}. {renderQuestionText()}
+          {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <input
@@ -261,7 +270,7 @@ function QuestionBlock({
   return (
     <div className="mb-6">
       <p className="mb-2.5">
-        {displayNumber}. {renderQuestionText()}
+        {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
       </p>
       <input
         type="text"
@@ -282,6 +291,8 @@ export interface ReadingMockTestViewProps {
     overallPass: boolean;
     miniTestResults: Array<{ bandScore: number; passed: boolean }>;
     newPassStatus: string;
+    promotionType?: "STREAK" | "AVERAGE";
+    finalAverageMockBandScore?: number;
   }) => void;
   onProgressUpdate?: () => void;
 }
@@ -534,6 +545,8 @@ export function ReadingMockTestView({
         overallPass: res.overallPass,
         miniTestResults: res.miniTestResults,
         newPassStatus: res.newPassStatus,
+        promotionType: res.promotionType,
+        finalAverageMockBandScore: res.finalAverageMockBandScore,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submit failed");
@@ -553,6 +566,14 @@ export function ReadingMockTestView({
           <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
             GAMLISH Reading
           </span>
+          {content.groupTestsTotal != null && content.groupTestsTotal > 1 && (
+            <span className="rounded-full bg-indigo-100 dark:bg-indigo-900/50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-300">
+              Attempt {(content.attemptNumber ?? 1)} of {content.groupTestsTotal}
+              {content.groupTestsRemaining != null && content.groupTestsRemaining > 0 && (
+                <> · {content.groupTestsRemaining} remaining</>
+              )}
+            </span>
+          )}
           <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
             Passage {passageIndex + 1} of {content.miniTests.length}
           </span>

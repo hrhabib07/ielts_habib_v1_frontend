@@ -16,7 +16,9 @@ export default function ProfileLayout({
 }) {
   const pathname = usePathname() ?? "";
   const isExamPage = pathname.includes("/final-evaluation") || pathname.includes("/practice-test");
-  const isReadingDashboard = pathname.includes("/profile/reading/strict-levels");
+  const isReadingDashboard =
+    pathname.includes("/profile/reading/strict-levels") ||
+    pathname.includes("/profile/reading/practice-attempt");
 
   if (isExamPage) {
     return <>{children}</>;

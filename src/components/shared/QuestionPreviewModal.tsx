@@ -340,6 +340,13 @@ function QuestionBody({ question, questionSet }: { question: Question; questionS
     const structuredNote = isStructuredNote
       ? (rawContent as { heading?: string; sections: Array<{ subheading?: string; lines: string[] }> })
       : null;
+    const isStructuredTable =
+      type === "TABLE_COMPLETION" &&
+      qBody?.layout === "TABLE" &&
+      Array.isArray(rawContent) &&
+      rawContent.length > 0 &&
+      rawContent.every((r: unknown) => Array.isArray(r) && (r as unknown[]).every((c) => typeof c === "string"));
+    const structuredTable = isStructuredTable ? (rawContent as string[][]) : null;
 
     return (
       <div className="space-y-2">
@@ -352,7 +359,40 @@ function QuestionBody({ question, questionSet }: { question: Question; questionS
             {wordLimit > 1 ? "s" : ""} from the passage for each answer.
           </p>
         )}
-        {structuredNote ? (
+        {structuredTable ? (
+          (() => {
+            const displayStart = getDisplayNumber(question, questionSet);
+            const blankCount = question.blanks?.length ?? 0;
+            const usePerGapNumbers = blankCount > 1;
+            const gapIndexRef = { current: 0 };
+            return (
+              <div className="overflow-x-auto rounded-lg border border-stone-200 bg-stone-50/80" style={{ fontFamily: "Georgia, serif" }}>
+                <table className="w-full min-w-[280px] border-collapse text-[14px] text-stone-800">
+                  <tbody>
+                    {structuredTable.map((row, rowIdx) => (
+                      <tr key={rowIdx}>
+                        {row.map((cell, cellIdx) => (
+                          <td
+                            key={cellIdx}
+                            className={`border border-stone-300 px-3 py-2 align-middle ${
+                              rowIdx === 0 ? "font-semibold bg-stone-100" : ""
+                            }`}
+                          >
+                            {hasGaps(cell)
+                              ? renderWithGaps(cell, usePerGapNumbers
+                                  ? { displayNumberStart: displayStart, gapIndexRef }
+                                  : undefined)
+                              : cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()
+        ) : structuredNote ? (
           (() => {
             const displayStart = getDisplayNumber(question, questionSet);
             const blankCount = question.blanks?.length ?? 0;
@@ -406,7 +446,7 @@ function QuestionBody({ question, questionSet }: { question: Question; questionS
           </p>
         ) : null}
         {/* Fallback blank lines for legacy questions that use blanks[] without {{gapN}} tokens */}
-        {!structuredNote && !content && question.blanks && question.blanks.length > 0 && (
+        {!structuredNote && !structuredTable && !content && question.blanks && question.blanks.length > 0 && (
           <div className="mt-3 space-y-1.5">
             {question.blanks.map((blank) => (
               <div key={blank.id} className="flex items-center gap-2">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Eye, FileText, Video, Lightbulb, BarChart2 } from "lucide-react";
 import type { LearningContentPreview, LearningContentType } from "@/src/lib/api/learningContents";
+import { EmbeddedLearningBody } from "@/src/components/shared/EmbeddedLearningBody";
 
 const TYPE_ICONS: Record<LearningContentType, React.ReactNode> = {
   INTRO: <FileText className="h-4 w-4" />,
@@ -150,9 +151,10 @@ export function ContentPreviewView({
 
       {content.body && (
         <Card className="p-6">
-          <div
+          <EmbeddedLearningBody
+            html={content.body}
+            title={content.title}
             className="content-preview text-foreground [&_h1]:text-xl [&_h1]:font-bold [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-semibold [&_p]:mb-3 [&_p]:leading-relaxed [&_a]:text-primary [&_a]:underline [&_ul]:list-inside [&_ul]:list-disc [&_ol]:list-inside [&_ol]:list-decimal [&_li]:mb-1"
-            dangerouslySetInnerHTML={{ __html: content.body }}
           />
         </Card>
       )}

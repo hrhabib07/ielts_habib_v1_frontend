@@ -15,7 +15,9 @@ export default function ReadingLayout({
 }) {
   const pathname = usePathname() ?? "";
   const isExamPage = pathname.includes("/final-evaluation") || pathname.includes("/practice-test");
-  const isDashboard = pathname.includes("/profile/reading/strict-levels");
+  const isDashboard =
+    pathname.includes("/profile/reading/strict-levels") ||
+    pathname.includes("/profile/reading/practice-attempt");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -37,9 +39,9 @@ export default function ReadingLayout({
       {isExamPage ? (
         <div className="min-h-screen w-full">{children}</div>
       ) : isDashboard ? (
-        <div className="flex h-full min-h-0 w-full flex-1 overflow-hidden">
+        <div className="flex h-full min-h-0 w-full flex-1 flex-nowrap overflow-x-hidden">
           {sidebarOpen && <ReadingSidebar onCollapse={toggleSidebar} />}
-          <main className="relative min-h-0 min-w-0 flex-1 overflow-hidden">
+          <main className="relative min-h-0 min-w-0 flex-1 basis-0 overflow-hidden">
             {!sidebarOpen && (
               <button
                 type="button"
@@ -51,7 +53,9 @@ export default function ReadingLayout({
                 <span className="text-sm font-medium">Show Levels</span>
               </button>
             )}
-            <div className="h-full w-full">{children}</div>
+            <div className="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
+              {children}
+            </div>
           </main>
         </div>
       ) : (

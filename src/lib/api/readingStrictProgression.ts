@@ -32,6 +32,10 @@ export interface LevelDetailForStudent {
     completedStepIds: string[];
     passStatus: string;
     evaluationMode: string;
+    /** Total group tests for final evaluation (skill levels) */
+    groupTestsTotal?: number;
+    /** Remaining group tests to attempt */
+    groupTestsRemaining?: number;
     [key: string]: unknown;
   };
   steps: LevelDetailStep[];
@@ -314,6 +318,12 @@ export interface GroupTestMiniTestContent {
 export interface GroupTestContentForStudent {
   groupTestId: string;
   miniTests: [GroupTestMiniTestContent, GroupTestMiniTestContent, GroupTestMiniTestContent];
+  /** 1-based attempt number (e.g. 2 = second group test) */
+  attemptNumber?: number;
+  /** Total group tests for this level */
+  groupTestsTotal?: number;
+  /** How many group tests remain after this one */
+  groupTestsRemaining?: number;
 }
 
 export interface SubmitGroupTestPayload {
@@ -329,6 +339,10 @@ export interface SubmitGroupTestResponse {
   miniTestResults: Array<{ bandScore: number; passed: boolean }>;
   newPassStatus: string;
   newEvaluationMode: string;
+  promotionType?: "STREAK" | "AVERAGE";
+  finalAverageMockBandScore?: number;
+  currentMockAverageBandScore?: number;
+  consecutivePassedMockCount?: number;
 }
 
 export async function getNextGroupTestContent(
@@ -381,12 +395,14 @@ export interface PracticeTestAttemptReview {
     correctAnswer: string | string[];
     yourAnswer: string | string[];
     isCorrect: boolean;
+    explanation?: string;
   }>;
 }
 
 export interface PracticeTestStepStatus {
   bestBandScore: number;
   lastAttemptId: string | null;
+  lastAttemptPassed: boolean;
   attemptCount: number;
   passed: boolean;
 }

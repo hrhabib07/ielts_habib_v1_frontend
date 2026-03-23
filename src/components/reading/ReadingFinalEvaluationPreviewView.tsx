@@ -9,7 +9,9 @@ import type {
 import {
   GAP_BASED_COMPLETION_TYPES,
   buildDisplayNumberStartByQuestionId,
+  questionStartsWithNumber,
   DraggableWordBank,
+  getStructuredTableContent,
 } from "./GapFillingQuestionInput";
 import { InstructionBlock } from "./InstructionBlock";
 
@@ -156,12 +158,14 @@ function QuestionPreviewBlock({
   const displayNumberEnd = startNum + blankCount - 1;
   const displayLabel = usePerGapNumbers ? `${startNum}–${displayNumberEnd}` : String(displayNumber);
   const hideBodyLabel = displayNumberStart != null && blankCount > 1;
+  const hideNumberInText = questionStartsWithNumber(rawText);
+  const showBodyLabel = !hideBodyLabel && !hideNumberInText;
   const gapIndexRef = { current: 0 };
 
   if (structuredNote) {
     return (
       <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-4">
-        {!hideBodyLabel && (
+        {showBodyLabel && (
           <p className="mb-3 text-[16px] font-medium text-slate-900 dark:text-slate-100">
             {displayLabel}.
           </p>
@@ -199,6 +203,52 @@ function QuestionPreviewBlock({
     );
   }
 
+  const structuredTable = getStructuredTableContent(qBody);
+  if (structuredTable) {
+    return (
+      <div className="mb-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 p-4">
+        {showBodyLabel && (
+          <p className="mb-3 text-[16px] font-medium text-slate-900 dark:text-slate-100">
+            {displayLabel}.
+          </p>
+        )}
+        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-900/50">
+          <table className="w-full min-w-[280px] border-collapse text-[15px] text-slate-800 dark:text-slate-200">
+            <tbody>
+              {structuredTable.map((row, rowIdx) => (
+                <tr key={rowIdx}>
+                  {row.map((cell, cellIdx) => (
+                    <td
+                      key={cellIdx}
+                      className={`border border-slate-200 dark:border-slate-600 px-3 py-2 align-middle ${
+                        rowIdx === 0 ? "font-semibold bg-slate-100 dark:bg-slate-800/60" : ""
+                      }`}
+                    >
+                      {hasGaps(cell)
+                        ? renderLineWithGapBoxes(
+                            cell,
+                            usePerGapNumbers ? { displayNumberStart: startNum, gapIndexRef } : undefined
+                          )
+                        : cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 dark:border-emerald-800 dark:bg-emerald-950/40">
+          <span className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">
+            Correct answer{blanksWithAnswer.length > 1 ? "s" : ""}:
+          </span>
+          <span className="text-[15px] font-medium text-emerald-800 dark:text-emerald-200">
+            {correct}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   const textWithGaps = hasGaps(rawText) ? (
     renderLineWithGapBoxes(rawText, usePerGapNumbers ? { displayNumberStart: startNum, gapIndexRef } : undefined)
   ) : (
@@ -213,7 +263,7 @@ function QuestionPreviewBlock({
         </p>
       ) : (
         <p className="mb-2 text-[16px] font-medium text-slate-900 dark:text-slate-100">
-          {displayNumber}. {rawText}
+          {showBodyLabel ? `${displayNumber}. ` : ""}{rawText}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-3 py-2">

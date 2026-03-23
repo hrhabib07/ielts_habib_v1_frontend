@@ -88,7 +88,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
     );
   }
 
-  const { version, steps, groupTests, practiceTests } = data;
+  const { version, steps, groupTests, practiceTests, allLevelPracticeTests } = data;
   const disabled = version.status === "PUBLISHED";
   const isPublished = version.status === "PUBLISHED";
   const finalEvalType = version.evaluationConfig?.finalEvaluationType ?? "";

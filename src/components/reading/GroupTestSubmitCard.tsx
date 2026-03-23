@@ -19,6 +19,8 @@ import {
   buildDisplayNumberStartByQuestionId,
   hasGapPlaceholders,
   isStructuredNoteQuestion,
+  isStructuredTableQuestion,
+  questionStartsWithNumber,
   DraggableWordBank,
 } from "./GapFillingQuestionInput";
 import { Loader2, CheckCircle2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
@@ -213,8 +215,16 @@ function QuestionInput({
 }) {
   const qBody = question.questionBody;
   const rawText = extractQuestionText(qBody);
+  const text = rawText.trim() || `Question ${displayNumber}`;
+  const showNumber = !questionStartsWithNumber(text);
 
-  if (question.blanks?.length && (isStructuredNoteQuestion(question) || hasGapPlaceholders(rawText) || question.blanks.length > 1)) {
+  if (
+    question.blanks?.length &&
+    (isStructuredNoteQuestion(question) ||
+      isStructuredTableQuestion(question) ||
+      hasGapPlaceholders(rawText) ||
+      question.blanks.length > 1)
+  ) {
     return (
       <GapFillingQuestionInput
         question={question}
@@ -237,10 +247,9 @@ function QuestionInput({
           ? ["TRUE", "FALSE", "NOT GIVEN"]
           : ["YES", "NO", "NOT GIVEN"];
     const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
-    const text = rawText.trim() || `Question ${displayNumber}`;
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
+        <Label className="text-sm font-medium">{showNumber ? `Q${displayNumber}. ` : ""}{text}</Label>
         <div className="mt-2 flex flex-wrap gap-3">
           {options.map((opt) => (
             <label
@@ -265,10 +274,9 @@ function QuestionInput({
   }
 
   if (question.blanks?.length) {
-    const text = rawText.trim() || `Question ${displayNumber}`;
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
+        <Label className="text-sm font-medium">{showNumber ? `Q${displayNumber}. ` : ""}{text}</Label>
         <div className="flex items-center gap-2">
           <Input
             type="text"
@@ -283,13 +291,11 @@ function QuestionInput({
     );
   }
 
-  const text = rawText.trim() || `Question ${displayNumber}`;
-
   if (question.options?.length) {
     const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
     return (
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Q{displayNumber}. {text}</Label>
+        <Label className="text-sm font-medium">{showNumber ? `Q${displayNumber}. ` : ""}{text}</Label>
         <div className="space-y-1.5 pl-2">
           {question.options.map((opt, i) => (
             <label key={i} className="flex items-center gap-2 cursor-pointer">
@@ -313,7 +319,7 @@ function QuestionInput({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={question._id} className="text-sm font-medium">
-        Q{displayNumber}. {text}
+        {showNumber ? `Q${displayNumber}. ` : ""}{text}
       </Label>
       <Input
         id={question._id}

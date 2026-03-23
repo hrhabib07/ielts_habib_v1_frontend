@@ -17,6 +17,7 @@ import {
   type UpdatePracticeTestPayload,
   type PracticeTestContentForPreview,
 } from "@/src/lib/api/adminReadingVersions";
+import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
 import { Trash2, Plus, Loader2, X, Check, Pencil, Eye, ChevronUp, ChevronDown } from "lucide-react";
 
@@ -45,6 +46,7 @@ export function PracticeTestBuilder({
   const [error, setError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<PracticeTestContentForPreview | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ id: string; title: string } | null>(null);
 
   const handleCreate = async (payload: CreatePracticeTestPayload) => {
     setError(null);
@@ -80,12 +82,15 @@ export function PracticeTestBuilder({
     }
   };
 
-  const handleDelete = async (practiceTestId: string) => {
+  const handleDeleteConfirm = async (mode: "detach" | "permanent") => {
+    if (!deleteDialog) return;
+    const { id: practiceTestId } = deleteDialog;
     setError(null);
     setBusyId(practiceTestId);
     try {
-      await deletePracticeTest(practiceTestId);
+      await deletePracticeTest(practiceTestId, mode);
       onPracticeTestsChange(practiceTests.filter((p) => p._id !== practiceTestId));
+      setDeleteDialog(null);
       if (previewId === practiceTestId) setPreviewId(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to delete practice test");
@@ -225,7 +230,7 @@ export function PracticeTestBuilder({
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => handleDelete(pt._id)}
+                          onClick={() => setDeleteDialog({ id: pt._id, title: pt.title })}
                           disabled={busyId === pt._id}
                         >
                           {busyId === pt._id ? (
@@ -241,6 +246,16 @@ export function PracticeTestBuilder({
               </li>
           ))}
         </ul>
+        {deleteDialog && (
+          <DeleteConfirmDialog
+            open={!!deleteDialog}
+            onClose={() => setDeleteDialog(null)}
+            onConfirm={handleDeleteConfirm}
+            itemName={deleteDialog.title}
+            itemType="practice test"
+            busy={!!busyId}
+          />
+        )}
         {previewId && (
           <PracticeTestPreview
             content={previewContent}

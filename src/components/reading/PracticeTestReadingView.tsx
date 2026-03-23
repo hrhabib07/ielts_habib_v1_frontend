@@ -31,6 +31,8 @@ import {
   buildDisplayNumberStartByQuestionId,
   hasGapPlaceholders,
   isStructuredNoteQuestion,
+  isStructuredTableQuestion,
+  questionStartsWithNumber,
   DraggableWordBank,
 } from "./GapFillingQuestionInput";
 import {
@@ -155,6 +157,7 @@ function QuestionBlock({
   const qBody = question.questionBody;
   const rawText = extractQuestionText(qBody);
   const text = (rawText as string).trim() || `Question ${displayNumber}`;
+  const showNumber = !questionStartsWithNumber(text);
 
   const highlights = questionHighlights ?? [];
   const notes = questionNotes ?? [];
@@ -177,7 +180,13 @@ function QuestionBlock({
       <span className={QUESTION_TEXT_CLASS}>{text}</span>
     );
 
-  if (question.blanks?.length && (isStructuredNoteQuestion(question) || hasGapPlaceholders(rawText) || question.blanks.length > 1)) {
+  if (
+    question.blanks?.length &&
+    (isStructuredNoteQuestion(question) ||
+      isStructuredTableQuestion(question) ||
+      hasGapPlaceholders(rawText) ||
+      question.blanks.length > 1)
+  ) {
     return (
       <GapFillingQuestionInput
         question={question}
@@ -203,7 +212,7 @@ function QuestionBlock({
     return (
       <div className="mb-6">
         <p className="mb-2.5">
-          {displayNumber}. {renderQuestionText()}
+          {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
         </p>
         <div className="mt-2 flex flex-wrap gap-3">
           {options.map((opt) => (
@@ -233,7 +242,7 @@ function QuestionBlock({
     return (
       <div className="mb-6">
         <p className="mb-2.5">
-          {displayNumber}. {renderQuestionText()}
+          {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
         </p>
         <div className="space-y-2 pl-0.5">
           {question.options.map((opt, i) => (
@@ -263,7 +272,7 @@ function QuestionBlock({
     return (
       <div className="mb-6">
         <p className="mb-2.5">
-          {displayNumber}. {renderQuestionText()}
+          {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
         </p>
         <input
           type="text"
@@ -285,7 +294,7 @@ function QuestionBlock({
   return (
     <div className="mb-6">
       <p className="mb-2.5">
-        {displayNumber}. {renderQuestionText()}
+        {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
       </p>
       <input
         type="text"

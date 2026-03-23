@@ -226,6 +226,7 @@ export default function PracticeTestsPage() {
                 levelTitle={selectedLevel.title}
                 levelOrder={selectedLevel.order - 1}
                 practiceTests={detail.practiceTests ?? []}
+                allLevelPracticeTests={detail.allLevelPracticeTests}
                 disabled={detail.version.status === "PUBLISHED"}
                 onPracticeTestsChange={handlePracticeTestsChange}
               />

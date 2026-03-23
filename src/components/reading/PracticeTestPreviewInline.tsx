@@ -1,12 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import type {
   GroupTestQuestionForPreview,
   GroupTestQuestionGroupForPreview,
   GroupTestMiniTestForPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import type { ReactNode } from "react";
-import { DraggableWordBank } from "./GapFillingQuestionInput";
+import {
+  DraggableWordBank,
+  questionStartsWithNumber,
+  getStructuredTableContent,
+} from "./GapFillingQuestionInput";
+import { Button } from "@/components/ui/button";
+import { Eye, EyeOff } from "lucide-react";
 
 function hasGaps(text: string): boolean {
   return /\{\{gap\d+\}\}/.test(text);
@@ -17,6 +24,7 @@ const GAP_BASED_COMPLETION_TYPES = [
   "SUMMARY_COMPLETION_WITH_CLUES",
   "NOTE_COMPLETION",
   "SENTENCE_COMPLETION",
+  "TABLE_COMPLETION",
 ] as const;
 
 function buildDisplayNumberStartByQuestionId(
@@ -146,10 +154,12 @@ function QuestionPreviewBlock({
   question,
   displayNumber,
   displayNumberStart,
+  showCorrectAnswers,
 }: {
   question: GroupTestQuestionForPreview;
   displayNumber: number;
   displayNumberStart?: number;
+  showCorrectAnswers: boolean;
 }) {
   const qBody = question.questionBody;
   const structuredNote = getStructuredNoteContent(qBody);
@@ -170,11 +180,13 @@ function QuestionPreviewBlock({
   const displayNumberEnd = startNum + blankCount - 1;
   const displayLabel = usePerGapNumbers ? `${startNum}–${displayNumberEnd}` : String(displayNumber);
   const hideBodyLabel = displayNumberStart != null && blankCount > 1;
+  const hideNumberInText = questionStartsWithNumber(rawText);
+  const showBodyLabel = !hideBodyLabel && !hideNumberInText;
   const gapIndexRef = { current: 0 };
 
   return (
     <div className="mb-4 rounded-xl border border-stone-200 bg-stone-50/50 p-4 dark:border-stone-700 dark:bg-stone-800/40">
-      {!hideBodyLabel && (
+      {showBodyLabel && (
         <p className="mb-2 text-[15px] font-medium text-stone-900 dark:text-stone-100">
           {displayLabel}.
         </p>
@@ -208,28 +220,87 @@ function QuestionPreviewBlock({
             </div>
           ))}
         </div>
-      ) : (
-        <p className="mb-3 text-[15px] text-stone-800 dark:text-stone-200">
-          {textHasGaps && usePerGapNumbers
-            ? renderLineWithGapBoxes(rawText, { displayNumberStart: startNum, gapIndexRef })
-            : renderLineWithGapBoxes(rawText)}
-        </p>
-      )}
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-800 dark:bg-emerald-950/40">
-        <span className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">
-          Correct answer{blanksWithAnswer.length > 1 ? "s" : ""}:
-        </span>
-        <span className="text-[14px] font-medium text-emerald-800 dark:text-emerald-200">
-          {correct}
-        </span>
-      </div>
-      {question.explanation && (
-        <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50/80 px-3 py-2 dark:border-blue-800 dark:bg-blue-950/40">
-          <span className="text-xs font-semibold uppercase text-blue-700 dark:text-blue-400">
-            Explanation:
-          </span>
-          <p className="mt-1 text-[14px] text-blue-900 dark:text-blue-200">{question.explanation}</p>
+      ) : (() => {
+        const structuredTable = getStructuredTableContent(qBody);
+        return structuredTable ? (
+          <div className="mb-3 overflow-x-auto rounded-lg border border-stone-200 bg-white/60 dark:border-stone-700 dark:bg-stone-900/40">
+            <table className="w-full min-w-[280px] border-collapse text-[15px] text-stone-800 dark:text-stone-200">
+              <tbody>
+                {structuredTable.map((row, rowIdx) => (
+                  <tr key={rowIdx}>
+                    {row.map((cell, cellIdx) => (
+                      <td
+                        key={cellIdx}
+                        className={`border border-stone-200 dark:border-stone-600 px-3 py-2 align-middle ${
+                          rowIdx === 0 ? "font-semibold bg-stone-100 dark:bg-stone-800/60" : ""
+                        }`}
+                      >
+                        {hasGaps(cell)
+                          ? renderLineWithGapBoxes(
+                              cell,
+                              usePerGapNumbers
+                                ? { displayNumberStart: startNum, gapIndexRef }
+                                : undefined,
+                            )
+                          : cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="mb-3 text-[15px] text-stone-800 dark:text-stone-200">
+            {textHasGaps && usePerGapNumbers
+              ? renderLineWithGapBoxes(rawText, { displayNumberStart: startNum, gapIndexRef })
+              : renderLineWithGapBoxes(rawText)}
+          </p>
+        );
+      })()}
+      {question.options && question.options.length > 0 && (
+        <div className="mb-3 space-y-1.5 rounded-lg border border-stone-200 bg-stone-50/50 p-3 dark:border-stone-700 dark:bg-stone-800/30">
+          <p className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+            Options
+          </p>
+          <ul className="list-none space-y-1 text-[15px]">
+            {question.options.map((opt, i) => {
+              const label = String.fromCharCode(65 + i);
+              const optStr = typeof opt === "string" ? opt : String(opt);
+              const hasLabel = /^[A-Z]\)\s/.test(optStr.trim());
+              return (
+                <li key={i} className="flex items-baseline gap-2 text-stone-800 dark:text-stone-200">
+                  {!hasLabel && (
+                    <span className="shrink-0 font-mono text-sm font-medium text-stone-600 dark:text-stone-400">
+                      {label})
+                    </span>
+                  )}
+                  <span>{optStr}</span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
+      )}
+      {showCorrectAnswers && (
+        <>
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-800 dark:bg-emerald-950/40">
+            <span className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">
+              Correct answer{blanksWithAnswer.length > 1 ? "s" : ""}:
+            </span>
+            <span className="text-[14px] font-medium text-emerald-800 dark:text-emerald-200">
+              {correct}
+            </span>
+          </div>
+          {question.explanation && (
+            <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50/80 px-3 py-2 dark:border-blue-800 dark:bg-blue-950/40">
+              <span className="text-xs font-semibold uppercase text-blue-700 dark:text-blue-400">
+                Explanation:
+              </span>
+              <p className="mt-1 text-[14px] text-blue-900 dark:text-blue-200">{question.explanation}</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -250,20 +321,42 @@ export function PracticeTestPreviewInline({
   passValue,
   miniTest,
 }: PracticeTestPreviewInlineProps) {
+  const [showCorrectAnswers, setShowCorrectAnswers] = useState(true);
   const passage = miniTest.passage;
   const questionGroups = miniTest.questionGroups;
   const flatQuestions = miniTest.questions ?? [];
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-teal-200 bg-teal-50/50 px-4 py-3 dark:border-teal-800 dark:bg-teal-950/30">
-        <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">
-          Instructor preview — correct answers and explanations visible (not submittable)
-        </p>
-        <p className="mt-1 text-sm text-teal-700 dark:text-teal-300">
-          {title} · {timeLimitMinutes} min · Pass:{" "}
-          {passType === "PERCENTAGE" ? `${passValue}%` : `band ${passValue}`}
-        </p>
+      <div className="flex flex-col gap-3 rounded-xl border border-teal-200 bg-teal-50/50 px-4 py-3 dark:border-teal-800 dark:bg-teal-950/30 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">
+            Instructor preview — same layout as students see (not submittable)
+          </p>
+          <p className="mt-1 text-sm text-teal-700 dark:text-teal-300">
+            {title} · {timeLimitMinutes} min · Pass:{" "}
+            {passType === "PERCENTAGE" ? `${passValue}%` : `band ${passValue}`}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setShowCorrectAnswers((v) => !v)}
+          className="shrink-0 gap-2 border-teal-300 bg-white dark:border-teal-700 dark:bg-teal-950/50"
+        >
+          {showCorrectAnswers ? (
+            <>
+              <EyeOff className="h-4 w-4" />
+              Hide correct answers
+            </>
+          ) : (
+            <>
+              <Eye className="h-4 w-4" />
+              Show correct answers
+            </>
+          )}
+        </Button>
       </div>
       <section>
         <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
@@ -327,6 +420,7 @@ export function PracticeTestPreviewInline({
                         question={q}
                         displayNumber={q.questionNumber}
                         displayNumberStart={displayNumberStartMap[q._id]}
+                        showCorrectAnswers={showCorrectAnswers}
                       />
                     );
                   })}
@@ -341,6 +435,7 @@ export function PracticeTestPreviewInline({
                 key={q._id}
                 question={q as GroupTestQuestionForPreview}
                 displayNumber={idx + 1}
+                showCorrectAnswers={showCorrectAnswers}
               />
             ))}
           </div>

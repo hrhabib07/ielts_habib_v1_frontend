@@ -15,6 +15,7 @@ import {
   type CreateGroupTestPayload,
   type UpdateGroupTestPayload,
 } from "@/src/lib/api/adminReadingVersions";
+import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
 import { Trash2, Plus, Loader2, X, Check, Pencil, Eye, MoreVertical } from "lucide-react";
 
@@ -42,6 +43,7 @@ export function GroupTestBuilder({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ id: string; label: string } | null>(null);
 
   const handleCreate = async (payload: CreateGroupTestPayload) => {
     setError(null);
@@ -77,12 +79,16 @@ export function GroupTestBuilder({
     }
   };
 
-  const handleDelete = async (groupTestId: string) => {
+  const handleDeleteConfirm = async (mode: "detach" | "permanent") => {
+    if (!deleteDialog) return;
+    const { id: groupTestId } = deleteDialog;
     setError(null);
     setBusyId(groupTestId);
     try {
-      await deleteGroupTest(groupTestId);
+      await deleteGroupTest(groupTestId, mode);
       onGroupTestsChange(groupTests.filter((g) => g._id !== groupTestId));
+      setDeleteDialog(null);
+      setMenuOpenId(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to delete group test");
     } finally {
@@ -120,6 +126,17 @@ export function GroupTestBuilder({
         )}
       </CardHeader>
       <CardContent className="space-y-4">
+        {deleteDialog && (
+          <DeleteConfirmDialog
+            open={!!deleteDialog}
+            onClose={() => setDeleteDialog(null)}
+            onConfirm={handleDeleteConfirm}
+            itemName={deleteDialog.label}
+            itemType="group test"
+            confirmPhrase="delete permanently"
+            busy={!!busyId}
+          />
+        )}
         {error && <p className="text-sm text-destructive">{error}</p>}
         {adding && (
           <GroupTestForm
@@ -209,7 +226,10 @@ export function GroupTestBuilder({
                                   type="button"
                                   onClick={() => {
                                     setMenuOpenId(null);
-                                    handleDelete(gt._id);
+                                    setDeleteDialog({
+                                      id: gt._id,
+                                      label: `Group Test ${idx + 1}`,
+                                    });
                                   }}
                                   disabled={busyId === gt._id}
                                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"

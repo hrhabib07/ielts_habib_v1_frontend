@@ -28,6 +28,7 @@ import type {
 import type { GroupTestMiniTestForPreview } from "@/src/lib/api/adminReadingVersions";
 import { getStepContent } from "@/src/lib/api/readingStrictProgression";
 import { getStepContentForPreview } from "@/src/lib/api/adminReadingVersions";
+import { EmbeddedLearningBody } from "@/src/components/shared/EmbeddedLearningBody";
 
 const StepQuizSubmitCard = dynamic(
   () =>
@@ -77,7 +78,22 @@ const PracticeTestStepCard = dynamic(
   },
 );
 
-function FinalEvaluationStartCard({ levelId }: { levelId: string }) {
+function FinalEvaluationStartCard({
+  levelId,
+  groupTestsTotal,
+  groupTestsRemaining,
+  isLocked,
+}: {
+  levelId: string;
+  groupTestsTotal?: number;
+  groupTestsRemaining?: number;
+  isLocked?: boolean;
+}) {
+  const total = groupTestsTotal ?? 1;
+  const remaining = groupTestsRemaining ?? total;
+  const attempted = total - remaining;
+  const canStart = !isLocked && remaining > 0;
+
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -87,13 +103,45 @@ function FinalEvaluationStartCard({ levelId }: { levelId: string }) {
         This is a full Reading mock test in exam conditions: three passages with
         questions. You will complete it in a dedicated test environment.
       </p>
-      <Link
-        href={`/profile/reading/strict-levels/${levelId}/final-evaluation`}
-        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
-      >
-        Start Final Evaluation
-        <ChevronRight className="h-4 w-4" />
-      </Link>
+      {isLocked && (
+        <p className="mt-3 text-sm font-medium text-amber-600 dark:text-amber-400">
+          Complete all three practice tests to unlock the final evaluation.
+        </p>
+      )}
+      {total > 0 && !isLocked && (
+        <p className="mt-3 text-sm font-medium text-[#1e3a8a] dark:text-[#60a5fa]">
+          {remaining > 0
+            ? attempted === 0
+              ? `${remaining} attempt${remaining !== 1 ? "s" : ""} available`
+              : `${remaining} attempt${remaining !== 1 ? "s" : ""} remaining`
+            : "All attempts completed — view your average score on the level."}
+        </p>
+      )}
+      {canStart ? (
+        <Link
+          href={`/profile/reading/strict-levels/${levelId}/final-evaluation`}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
+        >
+          {`Start${attempted > 0 ? ` Attempt ${attempted + 1} of ${total}` : ""} Final Evaluation`}
+          <ChevronRight className="h-4 w-4" />
+        </Link>
+      ) : !isLocked && remaining === 0 ? (
+        <Link
+          href={`/profile/reading/strict-levels/${levelId}/final-evaluation`}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
+        >
+          View Results
+          <ChevronRight className="h-4 w-4" />
+        </Link>
+      ) : (
+        <div
+          className="mt-5 inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-slate-300 dark:bg-slate-600 px-5 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400"
+          aria-disabled
+        >
+          Start Final Evaluation
+          <ChevronRight className="h-4 w-4" />
+        </div>
+      )}
     </div>
   );
 }
@@ -268,6 +316,10 @@ export interface LevelContentProps {
   /** Required when isPreview: used to fetch step content without student progress */
   versionId?: string;
   previewGroupTestsCount?: number;
+  /** Total group tests for final evaluation (from progress) */
+  groupTestsTotal?: number;
+  /** Remaining group tests to attempt (from progress) */
+  groupTestsRemaining?: number;
   /** When level is passed, show inline "Continue to next level" (student view) */
   isLevelPassed?: boolean;
   nextLevelInfo?: { levelId: string; title: string; firstStepId: string } | null;
@@ -295,6 +347,8 @@ export function LevelContent({
   isPreview = false,
   versionId,
   previewGroupTestsCount,
+  groupTestsTotal,
+  groupTestsRemaining,
   isLevelPassed,
   nextLevelInfo,
   onNavigateToNextLevel,
@@ -422,16 +476,28 @@ export function LevelContent({
 
       {/* Locked state */}
       {isLocked && (
-        <div className="flex items-center gap-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-6">
-          <Lock className="h-5 w-5 shrink-0 text-gray-300 dark:text-gray-600" />
-          <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Step locked
-            </p>
-            <p className="mt-0.5 text-sm text-gray-400 dark:text-gray-500">
-              Complete the previous step to unlock this one.
-            </p>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-6">
+            <Lock className="h-5 w-5 shrink-0 text-gray-300 dark:text-gray-600" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Step locked
+              </p>
+              <p className="mt-0.5 text-sm text-gray-400 dark:text-gray-500">
+                Complete the previous step to unlock this one.
+              </p>
+            </div>
           </div>
+          {prevStep && onNavigate && (
+            <button
+              type="button"
+              onClick={() => onNavigate(prevStep._id)}
+              className="flex items-center gap-2 rounded-xl border border-[#1e3a8a]/30 dark:border-[#3b82f6]/40 bg-[#1e3a8a]/10 dark:bg-[#1e3a8a]/20 px-5 py-2.5 text-sm font-semibold text-[#1e3a8a] dark:text-[#60a5fa] shadow-sm transition-all hover:bg-[#1e3a8a]/20 dark:hover:bg-[#1e3a8a]/30 active:scale-[0.98]"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Go to previous step
+            </button>
+          )}
         </div>
       )}
 
@@ -439,7 +505,7 @@ export function LevelContent({
       {!isLocked && (
         <div className="space-y-6">
           {/* Content area — actual content from API */}
-          <div className="min-h-50 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
+          <div className="min-h-50 w-full rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm sm:p-6">
             {contentLoading && (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
@@ -450,11 +516,23 @@ export function LevelContent({
             )}
 
             {contentError && (
-              <div className="flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
-                <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  {contentError}
-                </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
+                  <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    {contentError}
+                  </p>
+                </div>
+                {prevStep && onNavigate && (
+                  <button
+                    type="button"
+                    onClick={() => onNavigate(prevStep._id)}
+                    className="flex items-center gap-2 rounded-xl border border-[#1e3a8a]/30 dark:border-[#3b82f6]/40 bg-[#1e3a8a]/10 dark:bg-[#1e3a8a]/20 px-5 py-2.5 text-sm font-semibold text-[#1e3a8a] dark:text-[#60a5fa] shadow-sm transition-all hover:bg-[#1e3a8a]/20 dark:hover:bg-[#1e3a8a]/30 active:scale-[0.98]"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Go to previous step
+                  </button>
+                )}
               </div>
             )}
 
@@ -499,14 +577,15 @@ export function LevelContent({
 
                   {/* HTML body content */}
                   {content.content.body && (
-                    <div
-                      className="prose prose-sm sm:prose-base dark:prose-invert max-w-none
+                    <EmbeddedLearningBody
+                      html={content.content.body}
+                      title={content.content.title || step.title}
+                      className="prose prose-sm sm:prose-base dark:prose-invert max-w-none overflow-x-auto break-words
                         prose-headings:text-gray-900 dark:prose-headings:text-gray-100
                         prose-p:text-gray-700 dark:prose-p:text-gray-300
                         prose-a:text-indigo-600 dark:prose-a:text-indigo-400
                         prose-strong:text-gray-900 dark:prose-strong:text-gray-100
-                        prose-img:rounded-xl prose-img:shadow-md"
-                      dangerouslySetInnerHTML={{ __html: content.content.body }}
+                        prose-img:rounded-xl prose-img:shadow-md prose-img:max-w-full"
                     />
                   )}
 
@@ -590,7 +669,12 @@ export function LevelContent({
                   </p>
                 </div>
               ) : (
-                <FinalEvaluationStartCard levelId={levelId} />
+                <FinalEvaluationStartCard
+                  levelId={levelId}
+                  groupTestsTotal={groupTestsTotal}
+                  groupTestsRemaining={groupTestsRemaining}
+                  isLocked={isLocked}
+                />
               ))}
 
             {/* PASSAGE_QUESTION_SET: passage + questions */}

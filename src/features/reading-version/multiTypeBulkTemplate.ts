@@ -2,8 +2,8 @@ import type { ReadingQuestionType, QuestionSetMeta } from "@/src/lib/api/instruc
 import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 import type { BulkPassageQuestionSetInput } from "./strictReadingBulkUtils";
 
-/** UI order index: L15 = Passage 2 practice, L16 = P3, L17 = full test, L18 = master, L19+ = same multi-type rules */
-export const MULTI_TYPE_LEVEL_ORDERS = new Set([15, 16, 17, 18, 19]);
+/** L4 = Passage 1 (2–3 types); L15–L19 = Passage 2/3/Full/Master. L2 = single-type (Sentence Completion only, 8 questions). */
+export const MULTI_TYPE_LEVEL_ORDERS = new Set([4, 15, 16, 17, 18, 19]);
 
 const ALL_QUESTION_TYPES: ReadingQuestionType[] = [
   "MCQ_SINGLE",
@@ -24,7 +24,13 @@ const ALL_QUESTION_TYPES: ReadingQuestionType[] = [
   "DIAGRAM_LABEL_COMPLETION",
 ];
 
-const INSTRUCTIONS_PRACTICE = `MULTI-TYPE LEVELS (L15–L19): Passage 2 / Passage 3 / full test / master-style practice.
+const INSTRUCTIONS_L2 = `L2 FILL IN THE BLANKS: Use exactly 3 question types in order: SENTENCE_COMPLETION, NOTE_COMPLETION, TABLE_COMPLETION.
+expectedTotalQuestions: 13 or 14. Three questionGroups — one per completion type.`;
+
+const INSTRUCTIONS_L4 = `L4 PASSAGE 1: Use 2–3 question types from: TRUE_FALSE_NOT_GIVEN, SENTENCE_COMPLETION, SHORT_ANSWER.
+expectedTotalQuestions: 13 or 14. At least 2 questionGroups.`;
+
+const INSTRUCTIONS_PRACTICE = `MULTI-TYPE LEVELS: L4 = Passage 1 (TFNG + Sentence Completion + Short Answer); L15–L19 = Passage 2 / Passage 3 / full test / master.
 
 HOW TO BUILD A VALID passageQuestionSet
 1) Choose ANY number of questionGroups >= 2 (e.g. 2, 3, 4, 5…). There is no fixed mix.
@@ -341,6 +347,118 @@ function passageQuestionSet14(): BulkPassageQuestionSetInput {
   };
 }
 
+/** L2 Fill in the Blanks: Sentence Completion + Note Completion + Table Completion (3 types) */
+function l2FillBlanksQuestionSet(): BulkPassageQuestionSetInput {
+  return {
+    difficulty: "MEDIUM",
+    expectedTotalQuestions: 13,
+    recommendedTimeMinutes: 20,
+    questionGroups: [
+      {
+        order: 1,
+        startQuestionNumber: 1,
+        endQuestionNumber: 4,
+        questionType: "SENTENCE_COMPLETION",
+        instruction: "Complete the sentences below. NO MORE THAN TWO WORDS from the passage.",
+        meta: { wordLimit: 2 },
+        questions: repeatQuestions(4, 1, (n) => ({
+          questionBody: { layout: "TEXT", content: `The main finding was {{gap1}} for question ${n}.` },
+          blanks: [{ id: 1, correctAnswer: "unexpected", wordLimit: 2 }],
+          explanation: `Explanation for Q${n}.`,
+        })) as BulkPassageQuestionSetInput["questionGroups"][0]["questions"],
+      },
+      {
+        order: 2,
+        startQuestionNumber: 5,
+        endQuestionNumber: 8,
+        questionType: "NOTE_COMPLETION",
+        instruction: "Complete the notes below. NO MORE THAN TWO WORDS from the passage.",
+        meta: { wordLimit: 2 },
+        questions: repeatQuestions(4, 5, (n) => ({
+          questionBody: {
+            layout: "NOTE",
+            content: {
+              heading: "Findings",
+              sections: [{ subheading: "Section", lines: [`• Key point ${n}: {{gap1}}`] }],
+            },
+          },
+          blanks: [{ id: 1, correctAnswer: "example", wordLimit: 2 }],
+          explanation: `Explanation for Q${n}.`,
+        })) as BulkPassageQuestionSetInput["questionGroups"][0]["questions"],
+      },
+      {
+        order: 3,
+        startQuestionNumber: 9,
+        endQuestionNumber: 13,
+        questionType: "TABLE_COMPLETION",
+        instruction: "Complete the table below. NO MORE THAN TWO WORDS from the passage.",
+        meta: { wordLimit: 2 },
+        questions: repeatQuestions(5, 9, (n) => ({
+          questionBody: {
+            layout: "TABLE",
+            content: [
+              ["Factor", "Detail"],
+              [`Item ${n}`, "{{gap1}}"],
+            ],
+          },
+          blanks: [{ id: 1, correctAnswer: "value", wordLimit: 2 }],
+          explanation: `Explanation for Q${n}.`,
+        })) as BulkPassageQuestionSetInput["questionGroups"][0]["questions"],
+      },
+    ],
+  };
+}
+
+/** L4 Passage 1: TFNG + Sentence Completion + Short Answer (2–3 types) */
+function passage1QuestionSet(): BulkPassageQuestionSetInput {
+  return {
+    difficulty: "MEDIUM",
+    expectedTotalQuestions: 13,
+    recommendedTimeMinutes: 20,
+    questionGroups: [
+      {
+        order: 1,
+        startQuestionNumber: 1,
+        endQuestionNumber: 4,
+        questionType: "TRUE_FALSE_NOT_GIVEN",
+        instruction: "Do the following statements agree with the information in the passage?",
+        meta: { labels: ["TRUE", "FALSE", "NOT GIVEN"] },
+        questions: repeatQuestions(4, 1, (n) => ({
+          questionBody: { layout: "TEXT", content: `Statement ${n}.` },
+          correctAnswer: "TRUE",
+          explanation: `Explanation for Q${n}.`,
+        })) as BulkPassageQuestionSetInput["questionGroups"][0]["questions"],
+      },
+      {
+        order: 2,
+        startQuestionNumber: 5,
+        endQuestionNumber: 9,
+        questionType: "SENTENCE_COMPLETION",
+        instruction: "Complete the sentences. NO MORE THAN TWO WORDS from the passage.",
+        meta: { wordLimit: 2 },
+        questions: repeatQuestions(5, 5, (n) => ({
+          questionBody: { layout: "TEXT", content: `The passage suggests {{gap1}} for question ${n}.` },
+          blanks: [{ id: 1, correctAnswer: "example", wordLimit: 2 }],
+          explanation: `Explanation for Q${n}.`,
+        })) as BulkPassageQuestionSetInput["questionGroups"][0]["questions"],
+      },
+      {
+        order: 3,
+        startQuestionNumber: 10,
+        endQuestionNumber: 13,
+        questionType: "SHORT_ANSWER",
+        instruction: "Answer the questions below. NO MORE THAN THREE WORDS from the passage.",
+        meta: { wordLimit: 3 },
+        questions: repeatQuestions(4, 10, (n) => ({
+          questionBody: { layout: "TEXT", content: `What does the passage say about topic ${n}?` },
+          correctAnswer: "Answer from passage",
+          explanation: `Explanation for Q${n}.`,
+        })) as BulkPassageQuestionSetInput["questionGroups"][0]["questions"],
+      },
+    ],
+  };
+}
+
 function placeholderPassage(titleSuffix: string): {
   title: string;
   subTitle: string;
@@ -359,26 +477,42 @@ function placeholderPassage(titleSuffix: string): {
 }
 
 export function buildMultiTypePracticeSamplePayload(levelOrder: number): Record<string, unknown> {
+  const isL2 = levelOrder === 2;
+  const isL4 = levelOrder === 4;
+  const instructions = isL2
+    ? `${INSTRUCTIONS_L2}\n\n${INSTRUCTIONS_PRACTICE}`
+    : isL4
+      ? `${INSTRUCTIONS_L4}\n\n${INSTRUCTIONS_PRACTICE}`
+      : INSTRUCTIONS_PRACTICE;
+  const passage1Set = isL2 ? l2FillBlanksQuestionSet() : isL4 ? passage1QuestionSet() : passageQuestionSet13();
+  const passage2Set = isL2 ? l2FillBlanksQuestionSet() : isL4 ? passage1QuestionSet() : passageQuestionSet14();
+
+  const titleSuffix = isL2
+    ? "Fill in the Blanks: Sentence + Note + Table Completion"
+    : isL4
+      ? "Passage 1: TFNG + Sentence Completion + Short Answer"
+      : "13 questions";
+
   return {
-    __instructions: `${INSTRUCTIONS_PRACTICE}\n\nCurrent template level order: L${levelOrder}.`,
+    __instructions: `${instructions}\n\nCurrent template level order: L${levelOrder}.`,
     __questionTypeCatalog: buildQuestionTypeCatalog(),
     practiceTests: [
       {
-        title: `Practice Test 1 · (L${levelOrder}) — 13 questions (typical Passage 2 style)`,
+        title: `Practice Test 1 · (L${levelOrder}) — ${titleSuffix}`,
         passage: placeholderPassage("PT1"),
-        passageQuestionSet: passageQuestionSet13(),
+        passageQuestionSet: passage1Set,
         timeLimitMinutes: 20,
       },
       {
-        title: `Practice Test 2 · (L${levelOrder}) — 14 questions (typical Passage 3 style)`,
+        title: `Practice Test 2 · (L${levelOrder}) — ${isL2 || isL4 ? (isL2 ? "Fill in the Blanks style" : "Passage 1 style") : "14 questions"}`,
         passage: placeholderPassage("PT2"),
-        passageQuestionSet: passageQuestionSet14(),
+        passageQuestionSet: passage2Set,
         timeLimitMinutes: 20,
       },
       {
         title: `Practice Test 3 · (L${levelOrder}) — 13 questions`,
         passage: placeholderPassage("PT3"),
-        passageQuestionSet: passageQuestionSet13(),
+        passageQuestionSet: passage1Set,
         timeLimitMinutes: 20,
       },
     ],
@@ -386,24 +520,34 @@ export function buildMultiTypePracticeSamplePayload(levelOrder: number): Record<
 }
 
 export function buildMultiTypeGroupSamplePayload(levelOrder: number): Record<string, unknown> {
+  const isL2 = levelOrder === 2;
+  const isL4 = levelOrder === 4;
+  const instructions = isL2
+    ? `${INSTRUCTIONS_L2}\n\n${INSTRUCTIONS_GROUP}`
+    : isL4
+      ? `${INSTRUCTIONS_L4}\n\n${INSTRUCTIONS_GROUP}`
+      : INSTRUCTIONS_GROUP;
+  const passage1Set = isL2 ? l2FillBlanksQuestionSet() : isL4 ? passage1QuestionSet() : passageQuestionSet13();
+  const passage2Set = isL2 ? l2FillBlanksQuestionSet() : isL4 ? passage1QuestionSet() : passageQuestionSet14();
+
   return {
-    __instructions: `${INSTRUCTIONS_GROUP}\n\nCurrent template level order: L${levelOrder}. Mini 1 = 13 Q, Mini 2 = 14 Q, Mini 3 = 13 Q (adjust to 13/14 as needed).`,
+    __instructions: `${instructions}\n\nCurrent template level order: L${levelOrder}.`,
     __questionTypeCatalog: buildQuestionTypeCatalog(),
     groupTest: {
       miniTests: [
         {
           passage: placeholderPassage("mini P1"),
-          passageQuestionSet: passageQuestionSet13(),
+          passageQuestionSet: passage1Set,
           recommendedTimeMinutes: 20,
         },
         {
           passage: placeholderPassage("mini P2"),
-          passageQuestionSet: passageQuestionSet14(),
+          passageQuestionSet: passage2Set,
           recommendedTimeMinutes: 20,
         },
         {
           passage: placeholderPassage("mini P3"),
-          passageQuestionSet: passageQuestionSet13(),
+          passageQuestionSet: passage1Set,
           recommendedTimeMinutes: 20,
         },
       ],

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   submitLevelFeedback,
   type QualityOfQuestions,
@@ -10,7 +9,8 @@ import {
   type QualityOfVideo,
   type SubmitLevelFeedbackPayload,
 } from "@/src/lib/api/readingStrictProgression";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageSquare, ThumbsUp, Video } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const QUALITY_OPTIONS: { value: QualityOfQuestions; label: string }[] = [
   { value: "BELOW_STANDARD", label: "Below standard" },
@@ -36,8 +36,50 @@ const VIDEO_OPTIONS: { value: QualityOfVideo; label: string }[] = [
 interface LevelFeedbackFormProps {
   levelId: string;
   onSuccess: () => void;
-  /** Optional: hide video question (e.g. level has no video) */
   showVideoQuestion?: boolean;
+}
+
+interface OptionCardProps {
+  value: string;
+  label: string;
+  selected: boolean;
+  onChange: () => void;
+}
+
+function OptionCard({ value, label, selected, onChange }: OptionCardProps) {
+  return (
+    <label
+      className={cn(
+        "flex cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition-all duration-200",
+        "hover:border-primary/40 dark:hover:border-primary/50",
+        selected
+          ? "border-primary bg-primary/5 dark:border-primary dark:bg-primary/10 shadow-sm"
+          : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800/50",
+      )}
+    >
+      <input
+        type="radio"
+        value={value}
+        checked={selected}
+        onChange={onChange}
+        className="sr-only"
+        aria-hidden
+      />
+      <span
+        className={cn(
+          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+          selected ? "border-primary bg-primary" : "border-slate-300 dark:border-slate-600",
+        )}
+      >
+        {selected && (
+          <span className="h-2 w-2 rounded-full bg-white" aria-hidden />
+        )}
+      </span>
+      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+        {label}
+      </span>
+    </label>
+  );
 }
 
 export function LevelFeedbackForm({
@@ -87,80 +129,94 @@ export function LevelFeedbackForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-        Help us improve: rate this level (optional but appreciated).
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <p className="text-sm text-slate-600 dark:text-slate-400">
+        Your feedback helps us improve. Rate this level—it takes less than 30 seconds.
       </p>
 
-      <div>
-        <Label className="text-sm font-medium">Quality of questions</Label>
-        <div className="mt-2 flex flex-wrap gap-3">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Quality of questions
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {QUALITY_OPTIONS.map((opt) => (
-            <label key={opt.value} className="flex cursor-pointer items-center gap-2">
-              <input
-                type="radio"
-                name="qualityOfQuestions"
-                value={opt.value}
-                checked={qualityOfQuestions === opt.value}
-                onChange={() => setQualityOfQuestions(opt.value as QualityOfQuestions)}
-                className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">{opt.label}</span>
-            </label>
+            <OptionCard
+              key={opt.value}
+              value={opt.value}
+              label={opt.label}
+              selected={qualityOfQuestions === opt.value}
+              onChange={() => setQualityOfQuestions(opt.value as QualityOfQuestions)}
+            />
           ))}
         </div>
       </div>
 
-      <div>
-        <Label className="text-sm font-medium">Would you recommend this to others?</Label>
-        <div className="mt-2 flex flex-wrap gap-3">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <ThumbsUp className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Would you recommend this to others?
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
           {RECOMMEND_OPTIONS.map((opt) => (
-            <label key={opt.value} className="flex cursor-pointer items-center gap-2">
-              <input
-                type="radio"
-                name="recommendToOthers"
-                value={opt.value}
-                checked={recommendToOthers === opt.value}
-                onChange={() => setRecommendToOthers(opt.value as RecommendToOthers)}
-                className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">{opt.label}</span>
-            </label>
+            <OptionCard
+              key={opt.value}
+              value={opt.value}
+              label={opt.label}
+              selected={recommendToOthers === opt.value}
+              onChange={() => setRecommendToOthers(opt.value as RecommendToOthers)}
+            />
           ))}
         </div>
       </div>
 
       {showVideoQuestion && (
-        <div>
-          <Label className="text-sm font-medium">Quality of video / content</Label>
-          <div className="mt-2 flex flex-wrap gap-3">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Video className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Quality of video / content
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
             {VIDEO_OPTIONS.map((opt) => (
-              <label key={opt.value} className="flex cursor-pointer items-center gap-2">
-                <input
-                  type="radio"
-                  name="qualityOfVideo"
-                  value={opt.value}
-                  checked={qualityOfVideo === opt.value}
-                  onChange={() => setQualityOfVideo(opt.value as QualityOfVideo)}
-                  className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">{opt.label}</span>
-              </label>
+              <OptionCard
+                key={opt.value}
+                value={opt.value}
+                label={opt.label}
+                selected={qualityOfVideo === opt.value}
+                onChange={() => setQualityOfVideo(opt.value as QualityOfVideo)}
+              />
             ))}
           </div>
         </div>
       )}
 
       {error && (
-        <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p
+          className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/50 dark:text-red-400"
+          role="alert"
+        >
           {error}
         </p>
       )}
 
-      <div className="flex gap-2">
-        <Button type="submit" disabled={!canSubmit || submitting}>
+      <div className="pt-2">
+        <Button
+          type="submit"
+          disabled={!canSubmit || submitting}
+          size="lg"
+          className="min-w-[200px] shadow-sm"
+        >
           {submitting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Submitting…
+            </>
           ) : (
             "Submit feedback & continue"
           )}

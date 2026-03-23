@@ -170,7 +170,7 @@ export function LevelLayout({
           {isLevelPassed && (
             <div
               data-level-completed-banner
-              className="mb-8 flex flex-col gap-4 rounded-xl border border-[#1e3a8a]/30 dark:border-[#3b82f6]/40 bg-[#1e3a8a]/5 dark:bg-[#1e3a8a]/20 px-6 py-5"
+              className="mb-8 flex flex-col gap-6 rounded-2xl border border-[#1e3a8a]/20 dark:border-[#3b82f6]/30 bg-gradient-to-br from-[#1e3a8a]/5 to-[#1e3a8a]/10 dark:from-[#1e3a8a]/15 dark:to-[#1e3a8a]/25 px-6 py-6 shadow-sm"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
@@ -230,7 +230,7 @@ export function LevelLayout({
                 </div>
               </div>
               {isLevelPassed && showFeedbackForm && onFeedbackSuccess && (
-                <div className="rounded-xl border border-[#1e3a8a]/20 dark:border-[#3b82f6]/30 bg-white dark:bg-slate-900 p-4">
+                <div className="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-900/95 p-6 shadow-sm backdrop-blur-sm">
                   <LevelFeedbackForm
                     levelId={detail.level._id}
                     onSuccess={onFeedbackSuccess}
@@ -241,7 +241,7 @@ export function LevelLayout({
             </div>
           )}
 
-          <div className="rounded-lg bg-slate-50/60 dark:bg-slate-800/30 p-6 lg:p-8">
+          <div className="rounded-lg bg-slate-50/60 dark:bg-slate-800/30 p-4 lg:p-6">
               {loading ? (
                 <LevelContentSkeleton />
               ) : (
@@ -262,6 +262,8 @@ export function LevelLayout({
                   isPreview={isPreview}
                   versionId={isPreview ? detail.progress.versionId : undefined}
                   previewGroupTestsCount={previewGroupTestsCount}
+                  groupTestsTotal={detail.progress.groupTestsTotal}
+                  groupTestsRemaining={detail.progress.groupTestsRemaining}
                   isLevelPassed={isLevelPassed}
                   nextLevelInfo={nextLevelInfo}
                   onNavigateToNextLevel={

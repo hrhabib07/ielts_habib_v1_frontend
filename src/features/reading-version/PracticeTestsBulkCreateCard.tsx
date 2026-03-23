@@ -17,6 +17,14 @@ import {
   stripPracticeBulkWrapper,
   buildMultiTypePracticeSamplePayload,
 } from "./multiTypeBulkTemplate";
+import {
+  SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL,
+  getDefaultMetaForLevel,
+  getBulkQuestionTemplateForLevel,
+  EXPECTED_QUESTIONS_BY_LEVEL,
+  DEFAULT_SINGLE_TYPE_QUESTIONS,
+} from "./levelQuestionTypeMapping";
+import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 
 type BulkPracticeTestItemInput = {
   title?: string;
@@ -32,14 +40,6 @@ export type BulkPracticeTestsCreatePayload = {
 
 /** L15–L19: Passage 2 / 3 / full test / master (and extended pool) — multi-type passage question sets */
 const MULTI_TYPE_LEVELS = MULTI_TYPE_LEVEL_ORDERS;
-const SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL: Partial<Record<number, string>> = {
-  9: "MCQ_SINGLE",
-  10: "MCQ_MULTIPLE",
-  11: "MATCHING_SENTENCE_ENDINGS",
-  12: "MATCHING_FEATURES",
-  13: "MATCHING_INFORMATION",
-  14: "MATCHING_HEADINGS",
-};
 
 function safeJsonParse(raw: string): { ok: true; value: unknown } | { ok: false; error: string } {
   try {
@@ -62,6 +62,7 @@ function validatePracticeBulkPayload(params: {
   }
 
   const isMulti = MULTI_TYPE_LEVELS.has(levelOrder);
+
   if (!isMulti) {
     const expected = SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder];
     if (!expected) return { payload: p as BulkPracticeTestsCreatePayload };
@@ -107,11 +108,25 @@ export function PracticeTestsBulkCreateCard(props: {
     if (isMulti) {
       return JSON.stringify(buildMultiTypePracticeSamplePayload(levelOrder), null, 2);
     }
+    const questionCount = EXPECTED_QUESTIONS_BY_LEVEL[levelOrder] ?? DEFAULT_SINGLE_TYPE_QUESTIONS;
+    const questionType = SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE";
+    const defaultInstruction =
+      questionType === "SENTENCE_COMPLETION"
+        ? (QUESTION_TYPE_CONFIG.SENTENCE_COMPLETION?.defaultInstruction ??
+          "Complete the sentences below. Choose ONE WORD ONLY from the passage for each answer.")
+        : "";
+    const firstTestQuestions = Array.from({ length: questionCount }, (_, i) => {
+      const template = getBulkQuestionTemplateForLevel(levelOrder, i);
+      return {
+        ...template,
+        explanation: "Explanation for this question (min 5 characters).",
+      };
+    });
     return JSON.stringify(
       {
         practiceTests: [
           {
-            title: `Practice Test 1 · (L${levelOrder})`,
+            title: `Practice Test 1 · (L${levelOrder})${levelOrder === 2 ? " — Sentence Completion only" : ""}`,
             passage: {
               title: "PT1 passage title",
               subTitle: "",
@@ -121,40 +136,17 @@ export function PracticeTestsBulkCreateCard(props: {
             },
             passageQuestionSet: {
               difficulty: "MEDIUM",
-              expectedTotalQuestions: 7,
+              expectedTotalQuestions: questionCount,
               recommendedTimeMinutes: 20,
               questionGroups: [
                 {
                   order: 1,
                   startQuestionNumber: 1,
-                  endQuestionNumber: 7,
-                  questionType: SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE",
-                  instruction: "",
-                  meta:
-                    levelOrder === 10
-                      ? { options: ["A", "B", "C", "D", "E"], selectCount: 2 }
-                      : levelOrder === 9
-                        ? { options: ["A", "B", "C", "D"], selectCount: 1 }
-                        : levelOrder === 11
-                          ? { endings: ["Ending A", "Ending B"] }
-                          : levelOrder === 12
-                            ? { features: ["Feature A", "Feature B"] }
-                            : levelOrder === 13
-                              ? { paragraphCount: 4 }
-                              : levelOrder === 14
-                                ? { headings: ["Heading i", "Heading ii"], allowReuse: false }
-                                : { options: ["A", "B", "C", "D"], selectCount: 1 },
-                  questions: Array.from({ length: 7 }, (_, i) => ({
-                    questionBody: { layout: "TEXT", content: `Question ${i + 1} stem text here.` },
-                    ...(levelOrder === 10 || levelOrder === 9
-                      ? { options: ["A", "B", "C", "D"], correctAnswer: levelOrder === 10 ? ["A"] : "A" }
-                      : levelOrder === 14
-                        ? { correctAnswer: "i" }
-                        : levelOrder === 11
-                          ? { correctAnswer: "A" }
-                          : { correctAnswer: "A" }),
-                    explanation: "Explanation for this question (min 5 characters).",
-                  })),
+                  endQuestionNumber: questionCount,
+                  questionType,
+                  instruction: defaultInstruction,
+                  meta: getDefaultMetaForLevel(levelOrder),
+                  questions: firstTestQuestions,
                 },
               ],
             },
@@ -170,7 +162,7 @@ export function PracticeTestsBulkCreateCard(props: {
             },
             passageQuestionSet: {
               difficulty: "MEDIUM",
-              expectedTotalQuestions: 7,
+              expectedTotalQuestions: questionCount,
               recommendedTimeMinutes: 20,
               questionGroups: [],
             },
@@ -186,7 +178,7 @@ export function PracticeTestsBulkCreateCard(props: {
             },
             passageQuestionSet: {
               difficulty: "MEDIUM",
-              expectedTotalQuestions: 7,
+              expectedTotalQuestions: questionCount,
               recommendedTimeMinutes: 20,
               questionGroups: [],
             },
@@ -350,9 +342,9 @@ export function PracticeTestsBulkCreateCard(props: {
             </Button>
           </div>
           <p className="text-xs text-stone-500">
-            Multi-type levels {[...MULTI_TYPE_LEVELS].sort((a, b) => a - b).join(", ")}: use ≥2 question groups per
-            passage set; totals must be 13 or 14. Load template includes <code className="text-[11px]">__instructions</code>{" "}
-            and <code className="text-[11px]">__questionTypeCatalog</code> (reference only — stripped before API calls).
+            {levelOrder === 2
+              ? "Level 2: Sentence Completion only, 8 questions per passage. Use {{gap1}} in content and blanks[] for each question."
+              : `Multi-type levels ${[...MULTI_TYPE_LEVELS].sort((a, b) => a - b).join(", ")}: use ≥2 question groups per passage set; totals must be 13 or 14. Load template includes __instructions and __questionTypeCatalog (reference only — stripped before API calls).`}
           </p>
         </CardContent>
       )}

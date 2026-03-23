@@ -101,6 +101,7 @@ export const GAP_BASED_COMPLETION_TYPES = [
   "SUMMARY_COMPLETION_WITH_CLUES",
   "NOTE_COMPLETION",
   "SENTENCE_COMPLETION",
+  "TABLE_COMPLETION",
 ] as const;
 
 /** Count gaps in a question (blanks array length). */
@@ -160,14 +161,38 @@ function getStructuredNoteContent(qBody: unknown): NoteStructuredContent | null 
   };
 }
 
+/** Returns structured TABLE content (string[][]) if layout is TABLE, else null. */
+export function getStructuredTableContent(qBody: unknown): string[][] | null {
+  if (!qBody || typeof qBody !== "object") return null;
+  const layout = (qBody as { layout?: string }).layout;
+  const c = (qBody as { content?: unknown }).content;
+  if (layout !== "TABLE" || !Array.isArray(c) || c.length === 0) return null;
+  const rows = c as unknown[];
+  if (!rows.every((r) => Array.isArray(r) && r.every((cell) => typeof cell === "string"))) return null;
+  return rows as string[][];
+}
+
 /** Returns true when content contains {{gapN}} placeholders. */
 export function hasGapPlaceholders(content: string): boolean {
   return /\{\{gap\d+\}\}/.test(content);
 }
 
+/**
+ * Returns true if the question text starts with a number (e.g. "1.", "1)", "2. ", "1 ").
+ * When true, the UI should not prepend a question number since it's already in the text.
+ */
+export function questionStartsWithNumber(text: string): boolean {
+  return /^\s*\d+\s*[.)\s]/.test((text ?? "").trim());
+}
+
 /** Returns true if question uses structured NOTE layout (heading, subheadings, lines). */
 export function isStructuredNoteQuestion(question: GroupTestQuestionForStudent): boolean {
   return getStructuredNoteContent(question.questionBody) != null;
+}
+
+/** Returns true if question uses structured TABLE layout (rows of cells). */
+export function isStructuredTableQuestion(question: GroupTestQuestionForStudent): boolean {
+  return getStructuredTableContent(question.questionBody) != null;
 }
 
 /**
@@ -318,12 +343,40 @@ export function GapFillingQuestionInput({
     );
   }
 
+  const structuredTable = getStructuredTableContent(qBody);
+  if (structuredTable) {
+    return (
+      <div className="mb-4 overflow-x-auto">
+        <table className="w-full min-w-[280px] border-collapse border border-stone-300 dark:border-stone-600 text-[15px] text-stone-800 dark:text-stone-200">
+          <tbody>
+            {structuredTable.map((row, rowIdx) => (
+              <tr key={rowIdx}>
+                {row.map((cell, cellIdx) => (
+                  <td
+                    key={cellIdx}
+                    className={`border border-stone-300 dark:border-stone-600 px-3 py-2 align-middle ${
+                      rowIdx === 0 ? "font-semibold bg-stone-100 dark:bg-stone-800/60" : ""
+                    }`}
+                  >
+                    {hasGapPlaceholders(cell) ? renderLineWithGaps(cell) : cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  const hideNumber = questionStartsWithNumber(text);
+
   if (!hasGapPlaceholders(content)) {
     return (
       <div className="space-y-2">
         {sortedBlanks.length <= 1 && (
           <p className="text-sm font-medium text-stone-900 dark:text-stone-100">
-            {useGlobalNumbering ? text : `${displayNumber}. ${text}`}
+            {useGlobalNumbering ? text : hideNumber ? text : `${displayNumber}. ${text}`}
           </p>
         )}
         <div className="flex flex-wrap items-center gap-3">
@@ -382,7 +435,7 @@ export function GapFillingQuestionInput({
 
   return (
     <div className="mb-4">
-      {!useGlobalNumbering && sortedBlanks.length <= 1 && (
+      {!useGlobalNumbering && sortedBlanks.length <= 1 && !hideNumber && (
         <p className="text-sm font-medium text-stone-900 dark:text-stone-100 mb-2">
           {displayNumber}.
         </p>

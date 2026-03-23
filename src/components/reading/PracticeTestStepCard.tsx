@@ -73,7 +73,7 @@ export function PracticeTestStepCard({
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {status!.attemptCount} attempt{status!.attemptCount !== 1 ? "s" : ""}
             </span>
-            {status!.lastAttemptId && (
+            {status!.lastAttemptId && status!.lastAttemptPassed && (
               <Link
                 href={`/profile/reading/practice-attempt/${status!.lastAttemptId}`}
                 className="flex items-center gap-1.5 rounded-lg border border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/50 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"

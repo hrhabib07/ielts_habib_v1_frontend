@@ -23,9 +23,12 @@ import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api
 import {
   GAP_BASED_COMPLETION_TYPES,
   buildDisplayNumberStartByQuestionId,
+  questionStartsWithNumber,
   DraggableWordBank,
 } from "@/src/components/reading/GapFillingQuestionInput";
 import { PracticeTestsBulkCreateCard } from "./PracticeTestsBulkCreateCard";
+import { PracticeTestContentEditor } from "./PracticeTestContentEditor";
+import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
 import {
   Trash2,
   Plus,
@@ -39,6 +42,7 @@ import {
   ChevronUp,
   ChevronDown,
   RefreshCw,
+  FileEdit,
 } from "lucide-react";
 
 const MAX_ATTEMPTS_OPTIONS = [
@@ -52,6 +56,8 @@ interface PracticeTestManagerProps {
   levelTitle: string;
   levelOrder: number;
   practiceTests: PracticeTest[];
+  /** Practice tests from all versions of this level (for full list; includes manually created from older versions) */
+  allLevelPracticeTests?: PracticeTest[];
   disabled: boolean;
   onPracticeTestsChange: (practiceTests: PracticeTest[]) => void;
 }
@@ -75,6 +81,7 @@ export function PracticeTestManager({
   levelTitle,
   levelOrder,
   practiceTests,
+  allLevelPracticeTests,
   disabled,
   onPracticeTestsChange,
 }: PracticeTestManagerProps) {
@@ -85,6 +92,11 @@ export function PracticeTestManager({
   const [error, setError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<PracticeTestContentForPreview | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ id: string; title: string } | null>(null);
+  const [contentEditorId, setContentEditorId] = useState<string | null>(null);
+  const [deleteAllStep, setDeleteAllStep] = useState<0 | 1 | 2>(0);
+  const [deleteAllConfirmText, setDeleteAllConfirmText] = useState("");
+  const [deleteAllBusy, setDeleteAllBusy] = useState(false);
 
   const handleCreate = async (payload: CreatePracticeTestPayload) => {
     setError(null);
@@ -120,18 +132,15 @@ export function PracticeTestManager({
     }
   };
 
-  const handleDelete = async (practiceTestId: string, title: string) => {
-    if (
-      !window.confirm(
-        `Delete practice test "${title}"? This cannot be undone.`,
-      )
-    )
-      return;
+  const handleDeleteConfirm = async (mode: "detach" | "permanent") => {
+    if (!deleteDialog) return;
+    const { id: practiceTestId, title } = deleteDialog;
     setError(null);
     setBusyId(practiceTestId);
     try {
-      await deletePracticeTest(practiceTestId);
+      await deletePracticeTest(practiceTestId, mode);
       onPracticeTestsChange(practiceTests.filter((p) => p._id !== practiceTestId));
+      setDeleteDialog(null);
       if (previewId === practiceTestId) {
         setPreviewId(null);
         setPreviewContent(null);
@@ -162,6 +171,29 @@ export function PracticeTestManager({
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (deleteAllStep !== 2 || deleteAllConfirmText.trim() !== "DELETE ALL") return;
+    setError(null);
+    setDeleteAllBusy(true);
+    try {
+      for (const pt of sorted) {
+        await deletePracticeTest(pt._id, "permanent");
+      }
+      onPracticeTestsChange([]);
+      setDeleteAllStep(0);
+      setDeleteAllConfirmText("");
+      if (previewId && sorted.some((p) => p._id === previewId)) {
+        setPreviewId(null);
+        setPreviewContent(null);
+        setPreviewError(null);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete some practice tests");
+    } finally {
+      setDeleteAllBusy(false);
+    }
+  };
+
   const handleReorder = async (direction: "up" | "down", index: number) => {
     const sorted = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
     if (direction === "up" && index <= 0) return;
@@ -182,6 +214,15 @@ export function PracticeTestManager({
     }
   };
 
+  const displayList = (() => {
+    const all = allLevelPracticeTests ?? practiceTests ?? [];
+    const byId = new Map<string, PracticeTest>();
+    for (const p of all) byId.set(p._id, p);
+    for (const p of practiceTests ?? []) {
+      if (!byId.has(p._id)) byId.set(p._id, p);
+    }
+    return Array.from(byId.values()).sort((a, b) => a.order - b.order);
+  })();
   const sorted = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
 
   return (
@@ -206,18 +247,35 @@ export function PracticeTestManager({
           </p>
         </div>
         {!disabled && (
-          <Button
-            type="button"
-            size="sm"
-            className="gap-2 bg-stone-700 text-white hover:bg-stone-800 dark:bg-stone-600 dark:hover:bg-stone-700"
-            onClick={() => {
-              setAdding(true);
-              setError(null);
-            }}
-          >
-            <Plus className="h-4 w-4" />
-            Add practice test
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {sorted.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2 border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={() => {
+                  setDeleteAllStep(1);
+                  setDeleteAllConfirmText("");
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete all
+              </Button>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              className="gap-2 bg-stone-700 text-white hover:bg-stone-800 dark:bg-stone-600 dark:hover:bg-stone-700"
+              onClick={() => {
+                setAdding(true);
+                setError(null);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Add practice test
+            </Button>
+          </div>
         )}
       </div>
 
@@ -229,6 +287,7 @@ export function PracticeTestManager({
 
       {adding && (
         <CreatePracticeTestForm
+          levelOrder={levelOrder}
           nextOrder={
             sorted.length > 0 ? Math.max(...sorted.map((p) => p.order)) + 1 : 1
           }
@@ -239,7 +298,7 @@ export function PracticeTestManager({
         />
       )}
 
-      {sorted.length === 0 && !adding && (
+      {displayList.length === 0 && !adding && (
         <Card className="overflow-hidden rounded-2xl border-stone-200 dark:border-stone-800">
           <div className="flex flex-col items-center gap-4 py-16 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-stone-100 dark:bg-stone-800">
@@ -267,11 +326,13 @@ export function PracticeTestManager({
         </Card>
       )}
 
-      {sorted.length > 0 && (
+      {displayList.length > 0 && (
         <>
           {/* Card layout for small screens */}
           <div className="flex flex-col gap-3 md:hidden">
-            {sorted.map((pt, index) => (
+            {displayList.map((pt, index) => {
+              const isCurrentVersion = pt.levelVersionId === versionId;
+              return (
               <Card
                 key={pt._id}
                 className="overflow-hidden rounded-xl border-stone-200 dark:border-stone-800"
@@ -281,6 +342,11 @@ export function PracticeTestManager({
                     <div className="min-w-0">
                       <p className="font-medium text-stone-900 dark:text-stone-100 truncate">
                         {pt.title}
+                        {!isCurrentVersion && (
+                          <span className="ml-1.5 text-[10px] font-normal text-amber-600 dark:text-amber-400">
+                            (other version)
+                          </span>
+                        )}
                       </p>
                       <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                         {pt.contentCode ?? "—"} · {pt.timeLimitMinutes} min ·{" "}
@@ -307,6 +373,16 @@ export function PracticeTestManager({
                     {!disabled && (
                       <>
                         <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5"
+                          onClick={() => setContentEditorId(pt._id)}
+                          title="Edit passage & questions"
+                        >
+                          <FileEdit className="h-3.5 w-3.5" />
+                          Edit content
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="sm"
                           className="gap-1.5"
@@ -320,7 +396,7 @@ export function PracticeTestManager({
                           size="sm"
                           className="gap-1.5 text-destructive hover:bg-destructive/10"
                           disabled={busyId === pt._id}
-                          onClick={() => handleDelete(pt._id, pt.title)}
+                          onClick={() => setDeleteDialog({ id: pt._id, title: pt.title })}
                         >
                           {busyId === pt._id ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -344,7 +420,8 @@ export function PracticeTestManager({
                   )}
                 </div>
               </Card>
-            ))}
+            );
+            })}
           </div>
 
           {/* Table layout for medium and up */}
@@ -364,7 +441,10 @@ export function PracticeTestManager({
                 </tr>
               </thead>
               <tbody>
-                {sorted.map((pt, index) => (
+                {displayList.map((pt) => {
+                  const isCurrentVersion = pt.levelVersionId === versionId;
+                  const sortedIndex = sorted.findIndex((p) => p._id === pt._id);
+                  return (
                   <tr
                     key={pt._id}
                     className="border-b border-stone-100 last:border-0 transition-colors hover:bg-stone-50 dark:border-stone-800 dark:hover:bg-stone-900/50"
@@ -385,15 +465,15 @@ export function PracticeTestManager({
                             <span className="font-mono text-xs text-stone-600 dark:text-stone-400 w-5">
                               {pt.order}
                             </span>
-                            {!disabled && sorted.length > 1 && (
+                            {!disabled && isCurrentVersion && sorted.length > 1 && (
                               <div className="flex flex-col">
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="icon"
                                   className="h-6 w-6"
-                                  disabled={reorderBusy || index === 0}
-                                  onClick={() => handleReorder("up", index)}
+                                  disabled={reorderBusy || sortedIndex <= 0}
+                                  onClick={() => handleReorder("up", sortedIndex)}
                                   title="Move up"
                                 >
                                   <ChevronUp className="h-3.5 w-3.5" />
@@ -403,8 +483,8 @@ export function PracticeTestManager({
                                   variant="ghost"
                                   size="icon"
                                   className="h-6 w-6"
-                                  disabled={reorderBusy || index === sorted.length - 1}
-                                  onClick={() => handleReorder("down", index)}
+                                  disabled={reorderBusy || sortedIndex < 0 || sortedIndex >= sorted.length - 1}
+                                  onClick={() => handleReorder("down", sortedIndex)}
                                   title="Move down"
                                 >
                                   <ChevronDown className="h-3.5 w-3.5" />
@@ -418,6 +498,11 @@ export function PracticeTestManager({
                         </td>
                         <td className="p-4 font-medium text-stone-900 dark:text-stone-100">
                           {pt.title}
+                          {!isCurrentVersion && (
+                            <span className="ml-1 text-[10px] font-normal text-amber-600 dark:text-amber-400">
+                              (other version)
+                            </span>
+                          )}
                         </td>
                         <td className="p-4 text-stone-600 dark:text-stone-400">
                           {pt.timeLimitMinutes} min
@@ -450,6 +535,16 @@ export function PracticeTestManager({
                             {!disabled && (
                               <>
                                 <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 gap-1.5"
+                                  onClick={() => setContentEditorId(pt._id)}
+                                  title="Edit passage & questions"
+                                >
+                                  <FileEdit className="h-3.5 w-3.5" />
+                                  Edit content
+                                </Button>
+                                <Button
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 gap-1.5"
@@ -464,7 +559,7 @@ export function PracticeTestManager({
                                   size="sm"
                                   className="h-8 gap-1.5 text-destructive hover:bg-destructive/10"
                                   disabled={busyId === pt._id}
-                                  onClick={() => handleDelete(pt._id, pt.title)}
+                                  onClick={() => setDeleteDialog({ id: pt._id, title: pt.title })}
                                   title="Delete"
                                 >
                                   {busyId === pt._id ? (
@@ -481,7 +576,8 @@ export function PracticeTestManager({
                       </>
                     )}
                   </tr>
-                ))}
+                );
+                })}
               </tbody>
             </table>
           </div>
@@ -501,6 +597,115 @@ export function PracticeTestManager({
         <span>→ add step type &quot;Practice Test&quot; and select one from this list.</span>
       </div>
 
+      {deleteDialog && (
+        <DeleteConfirmDialog
+          open={!!deleteDialog}
+          onClose={() => setDeleteDialog(null)}
+          onConfirm={handleDeleteConfirm}
+          itemName={deleteDialog.title}
+          itemType="practice test"
+          busy={!!busyId}
+        />
+      )}
+      {deleteAllStep > 0 && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-all-dialog-title"
+        >
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setDeleteAllStep((s) => (s === 2 ? 1 : 0))}
+            onKeyDown={(e) => e.key === "Escape" && setDeleteAllStep((s) => (s === 2 ? 1 : 0))}
+            tabIndex={-1}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl dark:border-stone-800 dark:bg-stone-900">
+            <h2
+              id="delete-all-dialog-title"
+              className="text-lg font-semibold text-stone-900 dark:text-stone-100"
+            >
+              Delete all practice tests
+            </h2>
+            {deleteAllStep === 1 ? (
+              <>
+                <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
+                  You are about to permanently delete all <strong>{sorted.length}</strong> practice test{sorted.length !== 1 ? "s" : ""} in this level. Passages and questions will be removed. This cannot be undone.
+                </p>
+                <p className="mt-2 text-sm font-medium text-destructive">
+                  This action requires a second confirmation.
+                </p>
+                <div className="mt-6 flex justify-end gap-2">
+                  <Button variant="ghost" onClick={() => setDeleteAllStep(0)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setDeleteAllStep(2)}
+                  >
+                    Continue to confirm
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
+                  Type <code className="rounded bg-stone-200 px-1.5 py-0.5 text-xs font-mono dark:bg-stone-700">DELETE ALL</code> to confirm. This will permanently delete all {sorted.length} practice test{sorted.length !== 1 ? "s" : ""}.
+                </p>
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="delete-all-confirm">Confirm</Label>
+                  <Input
+                    id="delete-all-confirm"
+                    type="text"
+                    value={deleteAllConfirmText}
+                    onChange={(e) => setDeleteAllConfirmText(e.target.value)}
+                    placeholder="Type DELETE ALL"
+                    className="font-mono"
+                    disabled={deleteAllBusy}
+                  />
+                </div>
+                <div className="mt-6 flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setDeleteAllStep(1);
+                      setDeleteAllConfirmText("");
+                    }}
+                    disabled={deleteAllBusy}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDeleteAll}
+                    disabled={deleteAllConfirmText.trim() !== "DELETE ALL" || deleteAllBusy}
+                  >
+                    {deleteAllBusy ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Deleting…
+                      </>
+                    ) : (
+                      "Delete all permanently"
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+      {contentEditorId && (() => {
+        const pt = displayList.find((p) => p._id === contentEditorId);
+        return pt ? (
+          <PracticeTestContentEditor
+            versionId={versionId}
+            practiceTestId={contentEditorId}
+            practiceTestTitle={pt.title}
+            onClose={() => setContentEditorId(null)}
+          />
+        ) : null;
+      })()}
       {previewId && (
         <PracticeTestPreviewModal
           content={previewContent}
@@ -519,12 +724,14 @@ export function PracticeTestManager({
 }
 
 function CreatePracticeTestForm({
+  levelOrder,
   nextOrder,
   existingCount,
   onSave,
   onCancel,
   disabled,
 }: {
+  levelOrder: number;
   nextOrder: number;
   existingCount: number;
   onSave: (p: CreatePracticeTestPayload) => Promise<void>;
@@ -622,6 +829,11 @@ function CreatePracticeTestForm({
           <Label className="text-stone-700 dark:text-stone-300">
             Passage Question Set (one mini test) <span className="text-destructive">*</span>
           </Label>
+          {levelOrder === 2 && (
+            <p className="text-xs text-amber-700 dark:text-amber-400">
+              Level 2: Use only Sentence Completion (fill in the blanks) passage question sets.
+            </p>
+          )}
           {loadingPqs ? (
             <p className="text-sm text-stone-500 dark:text-stone-400">
               Loading passage question sets…
@@ -989,6 +1201,16 @@ function getStructuredNoteContent(qBody: unknown): { heading?: string; sections:
   return { heading: note.heading as string | undefined, sections: note.sections as Array<{ subheading?: string; lines: string[] }> };
 }
 
+function getStructuredTableContent(qBody: unknown): string[][] | null {
+  if (!qBody || typeof qBody !== "object") return null;
+  const layout = (qBody as { layout?: string }).layout;
+  const c = (qBody as { content?: unknown }).content;
+  if (layout !== "TABLE" || !Array.isArray(c) || c.length === 0) return null;
+  const rows = c as unknown[];
+  if (!rows.every((r) => Array.isArray(r) && (r as unknown[]).every((cell) => typeof cell === "string"))) return null;
+  return rows as string[][];
+}
+
 function renderLineWithGapBoxes(
   text: string,
   options?: { displayNumberStart?: number; gapIndexRef?: { current: number } }
@@ -1047,6 +1269,7 @@ function PracticeTestQuestionBlock({
 }) {
   const qBody = question.questionBody;
   const structuredNote = getStructuredNoteContent(qBody);
+  const structuredTable = getStructuredTableContent(qBody);
   const rawText = (extractQuestionText(qBody) as string).trim() || `Question ${displayNumber}`;
 
   const blanks = (question as { blanks?: Array<{ id: number; correctAnswer?: string | string[] }> }).blanks ?? [];
@@ -1058,15 +1281,17 @@ function PracticeTestQuestionBlock({
   const blankCount = blanks.length;
   const startNum = displayNumberStart ?? displayNumber;
   const hasGaps = /\{\{gap\d+\}\}/.test(rawText);
-  const usePerGapNumbers = blankCount > 1 && (structuredNote != null || hasGaps);
+  const usePerGapNumbers = blankCount > 1 && (structuredNote != null || structuredTable != null || hasGaps);
   const displayNumberEnd = startNum + blankCount - 1;
   const displayLabel = usePerGapNumbers ? `${startNum}–${displayNumberEnd}` : String(displayNumber);
   const hideBodyLabel = displayNumberStart != null && blankCount > 1;
+  const hideNumberInText = questionStartsWithNumber(rawText);
+  const showBodyLabel = !hideBodyLabel && !hideNumberInText;
   const gapIndexRef = { current: 0 };
 
   return (
     <div className="rounded-xl border border-stone-200 bg-stone-50/50 p-4 dark:border-stone-700 dark:bg-stone-800/40">
-      {!hideBodyLabel && (
+      {showBodyLabel && (
         <p className="mb-2 text-[15px] font-medium text-stone-900 dark:text-stone-100">
           {displayLabel}.
         </p>
@@ -1093,12 +1318,59 @@ function PracticeTestQuestionBlock({
             </div>
           ))}
         </div>
+      ) : structuredTable ? (
+        <div className="mb-3 overflow-x-auto rounded-lg border border-stone-200 bg-white/60 dark:border-stone-700 dark:bg-stone-900/40">
+          <table className="w-full min-w-[280px] border-collapse text-[15px] text-stone-800 dark:text-stone-200">
+            <tbody>
+              {structuredTable.map((row, rowIdx) => (
+                <tr key={rowIdx}>
+                  {row.map((cell, cellIdx) => (
+                    <td
+                      key={cellIdx}
+                      className={`border border-stone-200 dark:border-stone-600 px-3 py-2 align-middle ${
+                        rowIdx === 0 ? "font-semibold bg-stone-100 dark:bg-stone-800/60" : ""
+                      }`}
+                    >
+                      {/\{\{gap\d+\}\}/.test(cell)
+                        ? renderLineWithGapBoxes(cell, usePerGapNumbers ? { displayNumberStart: startNum, gapIndexRef } : undefined)
+                        : cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p className="mb-3 text-[15px] text-stone-800 dark:text-stone-200">
           {hasGaps && usePerGapNumbers
             ? renderLineWithGapBoxes(rawText, { displayNumberStart: startNum, gapIndexRef })
             : renderQuestionTextWithGaps(rawText)}
         </p>
+      )}
+      {question.options && question.options.length > 0 && (
+        <div className="mb-3 space-y-1.5 rounded-lg border border-stone-200 bg-stone-50/50 p-3 dark:border-stone-700 dark:bg-stone-800/30">
+          <p className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+            Options
+          </p>
+          <ul className="list-none space-y-1 text-[15px]">
+            {question.options.map((opt, i) => {
+              const label = String.fromCharCode(65 + i);
+              const optStr = typeof opt === "string" ? opt : String(opt);
+              const hasLabel = /^[A-Z]\)\s/.test(optStr.trim());
+              return (
+                <li key={i} className="flex items-baseline gap-2 text-stone-800 dark:text-stone-200">
+                  {!hasLabel && (
+                    <span className="shrink-0 font-mono text-sm font-medium text-stone-600 dark:text-stone-400">
+                      {label})
+                    </span>
+                  )}
+                  <span>{optStr}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-2 dark:border-emerald-800 dark:bg-emerald-950/40">
         <span className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-400">

@@ -18,6 +18,7 @@ function AnswerRow({ item }: { item: PracticeTestAttemptReview["review"][0] }) {
   const isCorrect = item.isCorrect;
   const correctStr = formatAnswer(item.correctAnswer);
   const yourStr = formatAnswer(item.yourAnswer);
+  const hasExplanation = Boolean(item.explanation?.trim());
 
   return (
     <Card
@@ -55,6 +56,16 @@ function AnswerRow({ item }: { item: PracticeTestAttemptReview["review"][0] }) {
           <p className="font-medium text-foreground">{correctStr}</p>
         </div>
       </div>
+      {hasExplanation && (
+        <div className="border-t bg-muted/20 px-4 py-3">
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Explanation
+          </span>
+          <p className="mt-1.5 text-sm leading-relaxed text-foreground">
+            {item.explanation}
+          </p>
+        </div>
+      )}
     </Card>
   );
 }
@@ -74,7 +85,12 @@ export default function PracticeAttemptReviewPage() {
     }
     getPracticeTestAttemptReview(attemptId)
       .then(setData)
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load"))
+      .catch((err: unknown) => {
+        const ax = err as { response?: { data?: { message?: string } } };
+        const msg =
+          ax?.response?.data?.message ?? (err instanceof Error ? err.message : "Failed to load");
+        setError(String(msg ?? "Failed to load"));
+      })
       .finally(() => setLoading(false));
   }, [attemptId]);
 
@@ -110,7 +126,7 @@ export default function PracticeAttemptReviewPage() {
   const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-4xl min-w-0 px-4 py-6 sm:px-6">
       <Link
         href={`/profile/reading/strict-levels/${data.levelId}`}
         className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
