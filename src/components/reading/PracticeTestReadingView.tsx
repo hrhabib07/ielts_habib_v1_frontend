@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import Link from "next/link";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import {
   Clock,
-  ZoomIn,
-  ZoomOut,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
@@ -17,13 +23,18 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
+  Moon,
+  Sun,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   submitPracticeTest,
   type PracticeTestStepContent,
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
 } from "@/src/lib/api/readingStrictProgression";
+import { PRACTICE_TEST_MINUTES } from "@/src/constants/readingAssessmentTiming";
+import { useTheme } from "@/src/components/shared/ThemeProvider";
 import { InstructionBlock } from "./InstructionBlock";
 import {
   GapFillingQuestionInput,
@@ -66,19 +77,19 @@ const QUESTION_TYPE_LABEL: Record<string, string> = {
   SHORT_ANSWER: "Short answer",
 };
 
-const STORAGE_KEY_TIME = "ielts-reading-practice-remaining-seconds";
+/** v3: each new test session starts at full duration (no leftover time from v2). */
+const STORAGE_KEY_TIME = "ielts-reading-practice-remaining-seconds-v3";
 
-function usePracticeTimer(stepId: string, timeLimitMinutes: number) {
-  const totalSeconds = timeLimitMinutes * 60;
-  const [remainingSeconds, setRemainingSeconds] = useState(() => {
-    if (typeof window === "undefined") return totalSeconds;
-    const stored = sessionStorage.getItem(`${STORAGE_KEY_TIME}-${stepId}`);
-    if (stored) {
-      const n = parseInt(stored, 10);
-      if (!Number.isNaN(n) && n > 0) return n;
-    }
-    return totalSeconds;
-  });
+function usePracticeTimer(stepId: string) {
+  const totalSeconds = PRACTICE_TEST_MINUTES * 60;
+  const [remainingSeconds, setRemainingSeconds] = useState(totalSeconds);
+
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    const key = `${STORAGE_KEY_TIME}-${stepId}`;
+    sessionStorage.removeItem(key);
+    setRemainingSeconds(totalSeconds);
+  }, [stepId, totalSeconds]);
 
   useEffect(() => {
     const key = `${STORAGE_KEY_TIME}-${stepId}`;
@@ -97,15 +108,17 @@ function usePracticeTimer(stepId: string, timeLimitMinutes: number) {
   return { remainingSeconds, display };
 }
 
-const ZOOM_LEVELS = [80, 90, 100, 110, 120, 130, 140];
-const DEFAULT_ZOOM_INDEX = 2;
 const MIN_PASSAGE_WIDTH_PCT = 25;
 const MAX_PASSAGE_WIDTH_PCT = 75;
 const DEFAULT_PASSAGE_WIDTH_PCT = 48;
+
+const MIN_PASSAGE_HEIGHT_PCT_MOBILE = 22;
+const MAX_PASSAGE_HEIGHT_PCT_MOBILE = 78;
+const DEFAULT_PASSAGE_HEIGHT_PCT_MOBILE = 48;
 const QUESTION_BASE_PX = 16;
 const QUESTION_TEXT_CLASS = "font-medium text-slate-900 dark:text-slate-100";
 const QUESTION_INPUT_BASE =
-  "rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-slate-900 dark:text-slate-100 transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
+  "rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-slate-900 dark:text-slate-100 transition-colors focus:border-[#1e3a8a] focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/25";
 
 function extractQuestionText(qBody: unknown): string {
   if (!qBody || typeof qBody !== "object") return "";
@@ -187,16 +200,41 @@ function QuestionBlock({
       hasGapPlaceholders(rawText) ||
       question.blanks.length > 1)
   ) {
+    const stemPlain = (rawText as string).trim() || `Question ${displayNumber}`;
+    const stemForHighlight =
+      hasGapPlaceholders(rawText) || /\{\{gap\d+\}\}/.test(stemPlain)
+        ? stemPlain.replace(/\{\{gap\d+\}\}/g, " [⋯] ")
+        : stemPlain;
+
     return (
-      <GapFillingQuestionInput
-        question={question}
-        displayNumber={displayNumber}
-        displayNumberStart={displayNumberStart}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        inputClassName={`min-w-[140px] max-w-[220px] ${QUESTION_INPUT_BASE}`}
-      />
+      <div className="mb-6 space-y-4">
+        {hasTools && !isStructuredNoteQuestion(question) && !isStructuredTableQuestion(question) ? (
+          <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-600 dark:bg-slate-900/90">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Question wording — highlight or note
+            </p>
+            <SelectableTextWithTools
+              blockId={question._id}
+              text={stemForHighlight}
+              highlights={highlights}
+              notes={notes}
+              onAddHighlight={onAddQuestionHighlight!}
+              onAddNote={onAddQuestionNote!}
+              onRemoveHighlight={onRemoveQuestionHighlight!}
+              className={QUESTION_TEXT_CLASS}
+            />
+          </div>
+        ) : null}
+        <GapFillingQuestionInput
+          question={question}
+          displayNumber={displayNumber}
+          displayNumberStart={displayNumberStart}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          inputClassName={`min-w-[140px] max-w-[220px] ${QUESTION_INPUT_BASE}`}
+        />
+      </div>
     );
   }
 
@@ -211,14 +249,14 @@ function QuestionBlock({
     const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
     return (
       <div className="mb-6">
-        <p className="mb-2.5">
+        <div className="mb-2.5">
           {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
-        </p>
+        </div>
         <div className="mt-2 flex flex-wrap gap-3">
           {options.map((opt) => (
             <label
               key={opt}
-              className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800/50 px-4 py-2.5 transition-colors hover:border-indigo-300 dark:hover:border-indigo-600 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50/60 dark:has-[:checked]:bg-indigo-950/40"
+              className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800/50 px-4 py-2.5 transition-colors hover:border-[#1e3a8a]/45 dark:hover:border-blue-700 has-[:checked]:border-[#1e3a8a] has-[:checked]:bg-[#1e3a8a]/10 dark:has-[:checked]:bg-[#0c1929]/60"
             >
               <input
                 type="radio"
@@ -227,7 +265,7 @@ function QuestionBlock({
                 checked={singleVal === opt}
                 onChange={() => onChange(opt)}
                 disabled={disabled}
-                className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 border-gray-300 text-[#1e3a8a] focus:ring-[#1e3a8a]"
               />
               <span className="font-medium text-slate-800 dark:text-slate-200">{opt}</span>
             </label>
@@ -241,14 +279,14 @@ function QuestionBlock({
     const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
     return (
       <div className="mb-6">
-        <p className="mb-2.5">
+        <div className="mb-2.5">
           {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
-        </p>
+        </div>
         <div className="space-y-2 pl-0.5">
           {question.options.map((opt, i) => (
             <label
               key={i}
-              className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800/50 px-3.5 py-2.5 transition-colors hover:border-indigo-300 dark:hover:border-indigo-600 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50/60 dark:has-[:checked]:bg-indigo-950/40"
+              className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800/50 px-3.5 py-2.5 transition-colors hover:border-[#1e3a8a]/45 dark:hover:border-blue-700 has-[:checked]:border-[#1e3a8a] has-[:checked]:bg-[#1e3a8a]/10 dark:has-[:checked]:bg-[#0c1929]/60"
             >
               <input
                 type="radio"
@@ -257,7 +295,7 @@ function QuestionBlock({
                 checked={singleVal === opt}
                 onChange={() => onChange(opt)}
                 disabled={disabled}
-                className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 border-gray-300 text-[#1e3a8a] focus:ring-[#1e3a8a]"
               />
               <span className="text-slate-800 dark:text-slate-200">{opt}</span>
             </label>
@@ -271,9 +309,9 @@ function QuestionBlock({
     const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
     return (
       <div className="mb-6">
-        <p className="mb-2.5">
+        <div className="mb-2.5">
           {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
-        </p>
+        </div>
         <input
           type="text"
           value={singleVal}
@@ -293,9 +331,9 @@ function QuestionBlock({
   const singleVal = Array.isArray(value) ? value[0] ?? "" : value;
   return (
     <div className="mb-6">
-      <p className="mb-2.5">
+      <div className="mb-2.5">
         {showNumber ? `${displayNumber}. ` : ""}{renderQuestionText()}
-      </p>
+      </div>
       <input
         type="text"
         value={singleVal}
@@ -322,21 +360,38 @@ export interface PracticeTestReadingViewProps {
     isNewBest?: boolean;
   }) => void;
   onProgressUpdate?: () => void;
+  /** When set, the in-test “Back” control calls this instead of navigating away (parent shows exit dialog). */
+  onRequestExit?: () => void;
 }
 
-export function PracticeTestReadingView({
-  levelId,
-  stepId,
-  content,
-  onSubmitted,
-  onProgressUpdate,
-}: PracticeTestReadingViewProps) {
+export type PracticeTestReadingViewHandle = {
+  submitIncompleteForExit: () => Promise<{ ok: boolean; error?: string }>;
+};
+
+export const PracticeTestReadingView = forwardRef<
+  PracticeTestReadingViewHandle,
+  PracticeTestReadingViewProps
+>(function PracticeTestReadingView(
+  {
+    levelId,
+    stepId,
+    content,
+    onSubmitted,
+    onProgressUpdate,
+    onRequestExit,
+  },
+  ref,
+) {
+  const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [passageWidthPct, setPassageWidthPct] = useState(DEFAULT_PASSAGE_WIDTH_PCT);
-  const [zoomIndex, setZoomIndex] = useState(DEFAULT_ZOOM_INDEX);
+  const [passageHeightPctMobile, setPassageHeightPctMobile] = useState(
+    DEFAULT_PASSAGE_HEIGHT_PCT_MOBILE,
+  );
   const [dragging, setDragging] = useState(false);
+  const [draggingVerticalMobile, setDraggingVerticalMobile] = useState(false);
   const [focusedQuestionIndex, setFocusedQuestionIndex] = useState(0);
   const [highlights, setHighlights] = useState<HighlightRange[]>([]);
   const [notes, setNotes] = useState<PassageNote[]>([]);
@@ -349,12 +404,11 @@ export function PracticeTestReadingView({
   const [noteMenuOpenId, setNoteMenuOpenId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const columnSplitRef = useRef<HTMLDivElement>(null);
 
   const miniTest = content.miniTest as GroupTestMiniTestContent;
-  const zoomFactor = ZOOM_LEVELS[zoomIndex] / 100;
-  const canZoomIn = zoomIndex < ZOOM_LEVELS.length - 1;
-  const canZoomOut = zoomIndex > 0;
-  const { display: timeDisplay } = usePracticeTimer(stepId, content.timeLimitMinutes);
+  const zoomFactor = 1;
+  const { display: timeDisplay } = usePracticeTimer(stepId);
   const totalQuestions = miniTest.questions?.length ?? 0;
   const canPrevQuestion = focusedQuestionIndex > 0;
   const canNextQuestion = focusedQuestionIndex < totalQuestions - 1 && totalQuestions > 0;
@@ -417,6 +471,13 @@ export function PracticeTestReadingView({
   const handleSplitterMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setDragging(true);
+  }, []);
+
+  const handleMobileHeightSplitterPointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+    setDraggingVerticalMobile(true);
   }, []);
 
   const addHighlight = useCallback((r: HighlightRange) => {
@@ -538,63 +599,120 @@ export function PracticeTestReadingView({
     };
   }, [dragging]);
 
-  const handleSubmit = async () => {
-    setError(null);
-    setSubmitting(true);
-    try {
-      const answerList = (miniTest.questions ?? []).map((q) => {
-        const val = answers[q._id];
-        if (Array.isArray(val)) {
-          return { questionId: q._id, studentAnswers: val.map((s) => String(s).trim()) };
-        }
-        return { questionId: q._id, studentAnswer: String(val ?? "").trim() };
-      });
-      if (answerList.length === 0) {
-        setError("Please answer at least one question before submitting.");
-        setSubmitting(false);
-        return;
-      }
+  useEffect(() => {
+    if (!draggingVerticalMobile) return;
+    const el = columnSplitRef.current;
+    if (!el) return;
+    const onMove = (e: PointerEvent) => {
+      const rect = el.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const pct = Math.round((y / rect.height) * 100);
+      const clamped = Math.min(
+        MAX_PASSAGE_HEIGHT_PCT_MOBILE,
+        Math.max(MIN_PASSAGE_HEIGHT_PCT_MOBILE, pct),
+      );
+      setPassageHeightPctMobile(clamped);
+    };
+    const onUp = () => setDraggingVerticalMobile(false);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, [draggingVerticalMobile]);
 
-      const res = await submitPracticeTest(levelId, stepId, { answers: answerList });
-      onProgressUpdate?.();
-      onSubmitted({
-        passed: res.passed,
-        scorePercent: res.scorePercent,
-        bandScore: res.bandScore,
-        attemptId: res.attemptId,
-        attemptNumber: res.attemptNumber,
-        bestBandScore: res.bestBandScore,
-        isNewBest: res.isNewBest,
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Submit failed");
-    } finally {
-      setSubmitting(false);
-    }
+  const { theme: uiTheme, toggleTheme } = useTheme();
+
+  const runSubmit = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
+      setError(null);
+      setSubmitting(true);
+      try {
+        const answerList = (miniTest.questions ?? []).map((q) => {
+          const val = answers[q._id];
+          if (Array.isArray(val)) {
+            return { questionId: q._id, studentAnswers: val.map((s) => String(s).trim()) };
+          }
+          return { questionId: q._id, studentAnswer: String(val ?? "").trim() };
+        });
+        if (answerList.length === 0) {
+          const msg = "No questions to submit.";
+          setError(msg);
+          return { ok: false, error: msg };
+        }
+
+        const res = await submitPracticeTest(levelId, stepId, { answers: answerList });
+        onProgressUpdate?.();
+        onSubmitted({
+          passed: res.passed,
+          scorePercent: res.scorePercent,
+          bandScore: res.bandScore,
+          attemptId: res.attemptId,
+          attemptNumber: res.attemptNumber,
+          bestBandScore: res.bestBandScore,
+          isNewBest: res.isNewBest,
+        });
+        return { ok: true };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Submit failed";
+        setError(msg);
+        return { ok: false, error: msg };
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [miniTest.questions, answers, levelId, stepId, onProgressUpdate, onSubmitted],
+  );
+
+  const handleSubmit = () => {
+    void runSubmit();
   };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      submitIncompleteForExit: () => runSubmit(),
+    }),
+    [runSubmit],
+  );
 
   return (
     <div
       ref={containerRef}
-      className={`relative flex h-full min-h-0 flex-col bg-slate-50 dark:bg-slate-950 ${dragging ? "select-none" : ""}`}
+      className={`relative flex h-full min-h-0 flex-col bg-slate-50 dark:bg-slate-950 ${dragging || draggingVerticalMobile ? "select-none" : ""}`}
     >
-      <header className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5">
-        <div className="flex items-center gap-4">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2.5 sm:px-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-4">
           <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
             IELTS Reading Practice Test
           </span>
           <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
-            {content.timeLimitMinutes} minutes
+            {PRACTICE_TEST_MINUTES} minutes
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-3">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={uiTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title="Theme"
+            className="flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400 dark:hover:bg-slate-800"
+          >
+            {uiTheme === "dark" ? (
+              <Sun className="h-4 w-4" aria-hidden />
+            ) : (
+              <Moon className="h-4 w-4" aria-hidden />
+            )}
+          </button>
           <button
             type="button"
             onClick={() => setNotepadOpen((o) => !o)}
             aria-label="Notepad"
             className={`flex items-center justify-center rounded-lg border p-2 transition-colors ${
               notepadOpen
-                ? "border-indigo-400 dark:border-indigo-500 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400"
+                ? "border-[#1e3a8a] dark:border-blue-500 bg-[#1e3a8a]/10 dark:bg-[#0c1929]/60 text-[#1e3a8a] dark:text-blue-300"
                 : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             }`}
           >
@@ -622,39 +740,27 @@ export function PracticeTestReadingView({
             </span>
             <span className="text-xs text-slate-500 dark:text-slate-400">remaining</span>
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-1.5 py-1">
-            <button
-              type="button"
-              onClick={() => setZoomIndex((i) => Math.max(0, i - 1))}
-              disabled={!canZoomOut}
-              aria-label="Zoom out"
-              className="rounded-md p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:pointer-events-none"
-            >
-              <ZoomOut className="h-4 w-4" />
-            </button>
-            <span className="min-w-[3rem] text-center text-xs font-medium tabular-nums text-slate-700 dark:text-slate-300">
-              {ZOOM_LEVELS[zoomIndex]}%
-            </span>
-            <button
-              type="button"
-              onClick={() => setZoomIndex((i) => Math.min(ZOOM_LEVELS.length - 1, i + 1))}
-              disabled={!canZoomIn}
-              aria-label="Zoom in"
-              className="rounded-md p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:pointer-events-none"
-            >
-              <ZoomIn className="h-4 w-4" />
-            </button>
-          </div>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-row">
+      <div
+        ref={columnSplitRef}
+        className="reading-exam-split-root flex min-h-0 flex-1 flex-col lg:flex-row"
+        style={
+          {
+            ["--reading-passage-pct" as string]: `${passageWidthPct}%`,
+            ["--mobile-passage-height-pct" as string]: `${passageHeightPctMobile}%`,
+          } as React.CSSProperties
+        }
+      >
         <aside
-          className="flex shrink-0 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
-          style={{ width: `${passageWidthPct}%`, minWidth: 280 }}
+          className="reading-exam-passage flex min-h-0 w-full shrink-0 flex-col border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 lg:max-h-none lg:w-[var(--reading-passage-pct)] lg:min-w-[280px] lg:flex-shrink-0 lg:border-b-0 lg:border-r"
         >
-          <div className="border-b border-emerald-200/50 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/40 px-4 py-3.5">
-            <h2 className="text-xl font-bold text-emerald-800 dark:text-emerald-200">
+          <div className="border-b border-sky-200/70 dark:border-sky-900/50 bg-sky-50/95 dark:bg-sky-950/35 px-4 py-3.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-sky-700/90 dark:text-sky-300/90">
+              Reading passage
+            </p>
+            <h2 className="mt-0.5 text-xl font-bold text-sky-950 dark:text-sky-100">
               {passageTitle}
             </h2>
             {miniTest.passage?.subTitle != null && String(miniTest.passage.subTitle).trim() !== "" && (
@@ -662,13 +768,22 @@ export function PracticeTestReadingView({
                 {String(miniTest.passage.subTitle)}
               </p>
             )}
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              Select text in passage or questions for <span className="font-medium">Note</span>,{" "}
-              <span className="font-medium">Highlight</span> or <span className="font-medium">Eraser</span> · Open notepad from header
+            <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+              <span className="max-lg:hidden">
+                Select text in the passage or in questions for{" "}
+              </span>
+              <span className="lg:hidden">
+                Long-press and drag to select text, then use{" "}
+              </span>
+              <span className="font-medium text-sky-800 dark:text-sky-200">Note</span>,{" "}
+              <span className="font-medium text-sky-800 dark:text-sky-200">Highlight</span> or{" "}
+              <span className="font-medium text-sky-800 dark:text-sky-200">Eraser</span>
+              <span className="max-lg:hidden"> · Notepad in the bar above</span>
+              <span className="lg:hidden"> · Drag the bar below to resize passage vs questions</span>
             </p>
           </div>
           <div className="flex flex-1 flex-col min-h-0">
-            <div className="flex-1 overflow-y-auto px-4 py-5">
+            <div className="flex-1 touch-pan-y overflow-y-auto px-4 py-5">
               {miniTest.passage?.content && Array.isArray(miniTest.passage.content) ? (
                 <PassageWithHighlightNotes
                   content={miniTest.passage.content as PassageParagraph[]}
@@ -686,10 +801,27 @@ export function PracticeTestReadingView({
 
         <div
           role="separator"
+          aria-label="Resize passage and question panels vertically"
+          aria-orientation="horizontal"
+          onPointerDown={handleMobileHeightSplitterPointerDown}
+          className={`flex h-4 shrink-0 touch-none cursor-row-resize items-center justify-center border-y border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800/80 lg:hidden ${
+            draggingVerticalMobile
+              ? "bg-[#1e3a8a]/20 dark:bg-blue-950/50"
+              : "active:bg-slate-200 dark:active:bg-slate-700"
+          }`}
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="h-0.5 w-8 rounded-full bg-slate-400 dark:bg-slate-500" />
+            <span className="h-0.5 w-8 rounded-full bg-slate-400 dark:bg-slate-500" />
+          </div>
+        </div>
+
+        <div
+          role="separator"
           aria-label="Resize passage and questions"
           onMouseDown={handleSplitterMouseDown}
-          className={`flex w-2 shrink-0 cursor-col-resize flex-col items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors ${
-            dragging ? "bg-indigo-200 dark:bg-indigo-800/50" : ""
+          className={`hidden w-2 shrink-0 cursor-col-resize flex-col items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-[#1e3a8a]/15 dark:hover:bg-blue-950/40 transition-colors lg:flex ${
+            dragging ? "bg-[#1e3a8a]/25 dark:bg-blue-900/50" : ""
           }`}
         >
           <div className="flex gap-0.5">
@@ -698,20 +830,25 @@ export function PracticeTestReadingView({
           </div>
         </div>
 
-        <main className="flex min-h-0 flex-1 flex-col bg-white dark:bg-slate-900" style={{ minWidth: 280 }}>
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 px-4 py-2">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col border-transparent bg-[#1e3a8a]/[0.06] dark:bg-[#0c1929]/40 lg:min-w-[280px] lg:border-l lg:border-transparent">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[#1e3a8a]/18 dark:border-blue-900/45 bg-[#1e3a8a]/[0.08] dark:bg-[#0c1929]/55 px-4 py-2">
             <div className="flex items-center gap-2">
-              <Link
-                href={`/profile/reading/strict-levels/${levelId}`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+              <button
+                type="button"
+                onClick={() =>
+                  onRequestExit
+                    ? onRequestExit()
+                    : router.push(`/profile/reading/strict-levels/${levelId}`)
+                }
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e3a8a]/32 dark:border-blue-800 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-[#0f172a] dark:text-slate-100 hover:bg-[#1e3a8a]/10 dark:hover:bg-[#0c1929]/60"
               >
-                <ArrowLeft className="h-3.5 w-3.5" /> Back to level
-              </Link>
+                <ArrowLeft className="h-3.5 w-3.5" /> Back
+              </button>
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                className="rounded-lg bg-[#1e3a8a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#172554] disabled:opacity-60"
               >
                 Submit test
               </button>
@@ -723,7 +860,7 @@ export function PracticeTestReadingView({
                   onClick={() => scrollToQuestion(focusedQuestionIndex - 1)}
                   disabled={!canPrevQuestion}
                   aria-label="Previous question"
-                  className="flex h-7 w-7 items-center justify-center rounded-full border border-emerald-400 dark:border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 disabled:opacity-40 disabled:pointer-events-none"
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-[#1e3a8a]/50 dark:border-blue-500 text-[#1e3a8a] dark:text-blue-200 hover:bg-[#1e3a8a]/10 dark:hover:bg-[#0c1929]/50 disabled:opacity-40 disabled:pointer-events-none"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -732,7 +869,7 @@ export function PracticeTestReadingView({
                   onClick={() => scrollToQuestion(focusedQuestionIndex + 1)}
                   disabled={!canNextQuestion}
                   aria-label="Next question"
-                  className="flex h-7 w-7 items-center justify-center rounded-full border border-emerald-400 dark:border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 disabled:opacity-40 disabled:pointer-events-none"
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-[#1e3a8a]/50 dark:border-blue-500 text-[#1e3a8a] dark:text-blue-200 hover:bg-[#1e3a8a]/10 dark:hover:bg-[#0c1929]/50 disabled:opacity-40 disabled:pointer-events-none"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -757,7 +894,7 @@ export function PracticeTestReadingView({
                     QUESTION_TYPE_LABEL[group.questionType] ?? group.questionType.replace(/_/g, " ");
                   return (
                     <section key={gIdx} className="mb-8">
-                      <h3 className="mb-3 text-lg font-bold text-emerald-800 dark:text-emerald-200">
+                      <h3 className="mb-3 border-l-4 border-[#1e3a8a] pl-3 text-lg font-bold text-[#0f172a] dark:text-slate-100">
                         Questions {group.startQuestionNumber}–{group.endQuestionNumber}: {typeLabel}
                       </h3>
                       {group.instruction && (
@@ -765,8 +902,8 @@ export function PracticeTestReadingView({
                           className={
                             group.questionType === "TRUE_FALSE_NOT_GIVEN" ||
                             group.questionType === "YES_NO_NOT_GIVEN"
-                              ? "mb-4 px-1 py-2"
-                              : "mb-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/50 px-4 py-3"
+                              ? "mb-4 rounded-md border border-amber-200/80 bg-amber-50/70 px-3 py-2 dark:border-amber-900/50 dark:bg-amber-950/30"
+                              : "mb-4 rounded-lg border border-[#1e3a8a]/22 dark:border-blue-800/60 bg-[#1e3a8a]/[0.07] dark:bg-[#0c1929]/45 px-4 py-3"
                           }
                         >
                           <InstructionBlock
@@ -809,7 +946,7 @@ export function PracticeTestReadingView({
               </div>
             ) : (
               <>
-                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <h3 className="mb-3 border-l-4 border-[#1e3a8a] pl-3 text-sm font-bold uppercase tracking-wide text-[#0f172a] dark:text-slate-100">
                   Questions {totalQuestions > 0 && `(1–${totalQuestions})`}
                 </h3>
                 {(miniTest.questions ?? []).map((q, idx) => (
@@ -913,7 +1050,7 @@ export function PracticeTestReadingView({
                                 type="text"
                                 value={editNoteText}
                                 onChange={(e) => setEditNoteText(e.target.value)}
-                                className="flex-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-sm focus:border-indigo-500 focus:outline-none"
+                                className="flex-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-sm focus:border-[#1e3a8a] focus:outline-none"
                                 autoFocus
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") updateNote(n.id, editNoteText);
@@ -923,7 +1060,7 @@ export function PracticeTestReadingView({
                               <button
                                 type="button"
                                 onClick={() => updateNote(n.id, editNoteText)}
-                                className="rounded bg-indigo-600 px-2 py-1 text-xs text-white"
+                                className="rounded bg-[#1e3a8a] px-2 py-1 text-xs text-white"
                               >
                                 Save
                               </button>
@@ -1015,7 +1152,7 @@ export function PracticeTestReadingView({
                                   type="text"
                                   value={editNoteText}
                                   onChange={(e) => setEditNoteText(e.target.value)}
-                                  className="flex-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-sm focus:border-indigo-500 focus:outline-none"
+                                  className="flex-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2 py-1 text-sm focus:border-[#1e3a8a] focus:outline-none"
                                   autoFocus
                                   onKeyDown={(e) => {
                                     if (e.key === "Enter") updateNote(n.id, editNoteText);
@@ -1025,7 +1162,7 @@ export function PracticeTestReadingView({
                                 <button
                                   type="button"
                                   onClick={() => updateNote(n.id, editNoteText)}
-                                  className="rounded bg-indigo-600 px-2 py-1 text-xs text-white"
+                                  className="rounded bg-[#1e3a8a] px-2 py-1 text-xs text-white"
                                 >
                                   Save
                                 </button>
@@ -1089,7 +1226,7 @@ export function PracticeTestReadingView({
       )}
 
       {totalQuestions > 0 && (
-        <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5">
+        <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-[#1e3a8a]/20 dark:border-blue-900/40 bg-[#1e3a8a]/[0.05] dark:bg-[#0c1929]/35 px-4 py-2.5">
           {(miniTest.questions ?? []).map((q) => {
             const v = answers[q._id];
             const answered = Array.isArray(v)
@@ -1103,7 +1240,7 @@ export function PracticeTestReadingView({
                 onClick={() => scrollToQuestion(miniTest.questions!.indexOf(q))}
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-all ${
                   answered
-                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                    ? "bg-[#1e3a8a] text-white hover:bg-[#172554]"
                     : "border border-slate-400 dark:border-slate-500 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:border-slate-500"
                 }`}
               >
@@ -1115,4 +1252,4 @@ export function PracticeTestReadingView({
       )}
     </div>
   );
-}
+});

@@ -81,7 +81,7 @@ function catalogHowToCustomize(qt: ReadingQuestionType): string {
       `${common} Either TEXT stem + correctAnswer, OR TEXT with {{gap1}} + blanks[]. meta.wordLimit or options per backend Completion rules.`,
     SUMMARY_COMPLETION: `${common} Same pattern as sentence completion; often TEXT + correctAnswer for bulk JSON.`,
     SUMMARY_COMPLETION_WITH_CLUES:
-      `${common} meta.options is the word bank (>=2). Often use {{gap1}} in content + blanks[{ id:1, correctAnswer: \"exact bank phrase\" }].`,
+      `${common} See SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC (frontend): meta.options = full word bank; expectedTotalQuestions = sum of all blanks across questions[]; each questions[] item is a multi-sentence block (use \\n\\n between sentences); {{gapN}} in reading order with global N across the group; each blank.correctAnswer must exactly match one meta.options entry.`,
     NOTE_COMPLETION: `${common} Prefer layout NOTE with sections/lines containing {{gapN}} + matching blanks[].`,
     TABLE_COMPLETION: `${common} layout TABLE, string[][] cells; put {{gapN}} inside cell strings + blanks[].`,
     FLOW_CHART_COMPLETION:
@@ -162,8 +162,16 @@ function sampleQuestionForType(qt: ReadingQuestionType): Record<string, unknown>
     case "SUMMARY_COMPLETION_WITH_CLUES":
       return {
         ...base,
-        questionBody: { layout: "TEXT", content: "Results were {{gap1}} compared to the control." },
-        blanks: [{ id: 1, correctAnswer: "stronger", wordLimit: 2 }],
+        questionBody: {
+          layout: "TEXT",
+          content:
+            "Intro sentence paraphrasing the passage (no gap).\n\nThe study found that {{gap1}} increased sharply, while {{gap2}} remained stable before {{gap3}} drove the final outcome.",
+        },
+        blanks: [
+          { id: 1, correctAnswer: "technology", wordLimit: 1 },
+          { id: 2, correctAnswer: "trade", wordLimit: 1 },
+          { id: 3, correctAnswer: "policy", wordLimit: 1 },
+        ],
       };
     case "NOTE_COMPLETION":
       return {

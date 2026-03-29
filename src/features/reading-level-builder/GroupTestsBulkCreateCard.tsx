@@ -23,7 +23,12 @@ import {
   getBulkQuestionTemplateForLevel,
   EXPECTED_QUESTIONS_BY_LEVEL,
   DEFAULT_SINGLE_TYPE_QUESTIONS,
+  resolveLevelTemplateIndex,
 } from "../reading-version/levelQuestionTypeMapping";
+import {
+  buildSummaryWithCluesBulkQuestionItems,
+  SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC,
+} from "../reading-version/summaryWithCluesBulk";
 import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 
 type BulkMiniTestItemInput = {
@@ -109,7 +114,7 @@ export function GroupTestsBulkCreateCard(props: {
     getReadingLevels()
       .then((levels: ReadingLevel[]) => {
         const lv = levels.find((l) => l._id === levelId);
-        if (lv) setLevelOrder(lv.order - 1);
+        if (lv) setLevelOrder(resolveLevelTemplateIndex(lv));
       })
       .catch(() => {})
       .finally(() => setLoadingLevel(false));
@@ -127,13 +132,27 @@ export function GroupTestsBulkCreateCard(props: {
       questionType === "SENTENCE_COMPLETION"
         ? (QUESTION_TYPE_CONFIG.SENTENCE_COMPLETION?.defaultInstruction ??
           "Complete the sentences below. Choose ONE WORD ONLY from the passage for each answer.")
-        : "";
-    const firstMiniQuestions = Array.from({ length: questionCount }, (_, i) => {
-      const template = getBulkQuestionTemplateForLevel(levelOrder, i);
-      return { ...template, explanation: "Explanation for question." };
-    });
+        : questionType === "SUMMARY_COMPLETION_WITH_CLUES"
+          ? (QUESTION_TYPE_CONFIG.SUMMARY_COMPLETION_WITH_CLUES?.defaultInstruction ??
+            "Complete the summary below. Choose the correct words from the box below.")
+          : "";
+    const meta = getDefaultMetaForLevel(levelOrder);
+    const firstMiniQuestions =
+      questionType === "SUMMARY_COMPLETION_WITH_CLUES"
+        ? buildSummaryWithCluesBulkQuestionItems(
+            questionCount,
+            typeof meta.wordLimit === "number" ? meta.wordLimit : 1,
+            Array.isArray(meta.options) ? meta.options : [],
+          )
+        : Array.from({ length: questionCount }, (_, i) => {
+            const template = getBulkQuestionTemplateForLevel(levelOrder, i);
+            return { ...template, explanation: "Explanation for question." };
+          });
     return JSON.stringify(
       {
+        ...(questionType === "SUMMARY_COMPLETION_WITH_CLUES"
+          ? { __instructions: SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC }
+          : {}),
         groupTest: {
           miniTests: [
             {
@@ -153,7 +172,7 @@ export function GroupTestsBulkCreateCard(props: {
                     endQuestionNumber: questionCount,
                     questionType,
                     instruction: defaultInstruction,
-                    meta: getDefaultMetaForLevel(levelOrder),
+                    meta,
                     questions: firstMiniQuestions,
                   },
                 ],

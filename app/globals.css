@@ -96,6 +96,8 @@
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #1e3a8a;
   --band-fill: #1e3a8a;
+  /* Hero liquid: stronger in light mode for contrast on pale surfaces */
+  --hero-water-fill-opacity: 0.94;
 }
 
 .dark {
@@ -139,6 +141,7 @@
   --sidebar-border: #475569;
   --sidebar-ring: #38bdf8;
   --band-fill: #38bdf8;
+  --hero-water-fill-opacity: 0.82;
 }
 
 @layer base {
@@ -259,8 +262,8 @@
   background-image: linear-gradient(
     to top,
     var(--band-fill) 0%,
-    var(--band-fill) calc(var(--fill-pct, 12%) + var(--wave-offset)),
-    transparent calc(var(--fill-pct, 12%) + var(--wave-offset))
+    var(--band-fill) calc(var(--fill-pct, 0%) + var(--wave-offset)),
+    transparent calc(var(--fill-pct, 0%) + var(--wave-offset))
   );
 }
 
@@ -276,4 +279,25 @@
 /* Dashboard: independent scroll areas, no scroll chaining */
 [data-reading-dashboard] {
   isolation: isolate;
+}
+
+@keyframes readingCount {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Reading exam: mobile column split height (driven by --mobile-passage-height-pct on .reading-exam-split-root) */
+@media (max-width: 1023px) {
+  .reading-exam-split-root > aside.reading-exam-passage {
+    flex: 0 0 var(--mobile-passage-height-pct, 48%);
+    min-height: 5.5rem;
+    max-height: 88%;
+    overflow: hidden;
+  }
 }

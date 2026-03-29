@@ -7,10 +7,13 @@ export interface SubscriptionPlan {
   name: string;
   slug: string;
   description: string;
+  features?: string[];
   modulesIncluded: ModuleType[];
+  module: ModuleType;
   durationInDays: number;
   price: number;
   discountPrice?: number;
+  manualPaymentInstructions?: string | null;
   isActive: boolean;
   isPublic: boolean;
   isWholePackage: boolean;
@@ -35,11 +38,35 @@ export interface ActiveSubscription {
 
 export interface SubmitRequestPayload {
   planId: string;
-  paymentMethod: "BKASH" | "BANK";
+  paymentMethod: "BKASH";
   transactionId: string;
   senderNumber?: string;
   paidAmount: number;
+  couponCode?: string;
   screenshotUrl?: string;
+}
+
+export interface First100PromoOffer {
+  enabled: boolean;
+  module: ModuleType;
+  code?: string;
+  discountType?: "PERCENT" | "FIXED";
+  discountValue?: number;
+  durationOverrideDays?: number;
+  maxTotalUses?: number | null;
+  usedCount?: number;
+  remainingUses?: number | null;
+}
+
+/** Student: get first-100 promo offer */
+export async function getFirst100PromoOffer(
+  module: ModuleType,
+): Promise<First100PromoOffer> {
+  const res = await apiClient.get<{ success: boolean; data: First100PromoOffer }>(
+    "/subscription-plans/first100-promo",
+    { params: { module } },
+  );
+  return res.data?.data ?? { enabled: false, module };
 }
 
 /** Public: fetch active + public plans */

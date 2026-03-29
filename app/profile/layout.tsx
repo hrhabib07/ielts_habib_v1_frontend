@@ -15,7 +15,10 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname() ?? "";
-  const isExamPage = pathname.includes("/final-evaluation") || pathname.includes("/practice-test");
+  const isExamPage =
+    pathname.includes("/final-evaluation") ||
+    pathname.includes("/practice-test") ||
+    pathname.includes("/step-quiz");
   const isReadingDashboard =
     pathname.includes("/profile/reading/strict-levels") ||
     pathname.includes("/profile/reading/practice-attempt");

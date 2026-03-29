@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Highlighter, StickyNote, Eraser } from "lucide-react";
+import { getSelectionStringOffsetsInRoot } from "@/src/utils/domTextOffsets";
 
 export type HighlightRange = { paragraphIndex: number; start: number; end: number };
 export type PassageNote = {
@@ -86,25 +88,24 @@ function applyHighlightsAndNotes(
   );
 }
 
-function getSelectionOffsets(
+function getPassageBodyOffsets(
   paragraphEl: HTMLElement,
+  paragraph: PassageParagraph,
   range: Range,
-  bodyTextStartOffset: number
+  labelLen: number,
 ): { start: number; end: number } | null {
-  try {
-    if (!paragraphEl.contains(range.startContainer)) return null;
-    const preRange = document.createRange();
-    preRange.selectNodeContents(paragraphEl);
-    preRange.setEnd(range.startContainer, range.startOffset);
-    const startInFull = preRange.toString().length;
-    const selLength = range.toString().length;
-    const start = startInFull - bodyTextStartOffset;
-    const end = start + selLength;
-    if (start < 0 || end <= start) return null;
-    return { start, end };
-  } catch {
+  if (!paragraphEl.contains(range.startContainer) || !paragraphEl.contains(range.endContainer)) {
     return null;
   }
+  const pair = getSelectionStringOffsetsInRoot(paragraphEl, range);
+  if (!pair) return null;
+  let { start: fs, end: fe } = pair;
+  if (fe < fs) [fs, fe] = [fe, fs];
+  if (fe <= labelLen) return null;
+  const start = Math.max(0, fs - labelLen);
+  const end = Math.min(paragraph.text.length, fe - labelLen);
+  if (end <= start) return null;
+  return { start, end };
 }
 
 function rangesOverlap(a: { start: number; end: number }, b: { start: number; end: number }): boolean {
@@ -143,6 +144,7 @@ export function PassageWithHighlightNotes({
   } | null>(null);
   const noteTextRef = useRef<HTMLTextAreaElement>(null);
   const passageRef = useRef<HTMLDivElement>(null);
+  const passageMenuOpenedAtRef = useRef(0);
 
   const getLabelLength = useCallback((p: PassageParagraph) => {
     const s = p.paragraphLabel != null && String(p.paragraphLabel).trim() !== "" ? String(p.paragraphLabel).trim() : "";
@@ -165,8 +167,9 @@ export function PassageWithHighlightNotes({
         for (let i = 0; i < paras.length; i++) {
           const el = paras[i] as HTMLElement;
           const p = content[i];
-          const labelLen = p ? getLabelLength(p) : 0;
-          const offsets = getSelectionOffsets(el, range, labelLen);
+          if (!p) continue;
+          const labelLen = getLabelLength(p);
+          const offsets = getPassageBodyOffsets(el, p, range, labelLen);
           if (offsets) {
             const pIndex = parseInt(el.getAttribute("data-p-id") ?? String(i), 10);
             let x: number;
@@ -183,6 +186,7 @@ export function PassageWithHighlightNotes({
               typeof window !== "undefined"
                 ? Math.min(Math.max(x, 8), window.innerWidth - 180)
                 : x;
+            passageMenuOpenedAtRef.current = Date.now();
             setContextMenu({
               x: safeX,
               y,
@@ -196,7 +200,7 @@ export function PassageWithHighlightNotes({
         // ignore
       }
     },
-    [content, getLabelLength]
+    [content, getLabelLength],
   );
 
   const handleContextMenu = useCallback(
@@ -212,15 +216,49 @@ export function PassageWithHighlightNotes({
   );
 
   useEffect(() => {
-    const onMouseUp = (e: MouseEvent) => {
-      if (e.button !== 0) return;
+    const scheduleToolbar = () => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => tryShowSelectionMenu());
       });
     };
-    document.addEventListener("mouseup", onMouseUp, true);
-    return () => document.removeEventListener("mouseup", onMouseUp, true);
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      scheduleToolbar();
+    };
+    document.addEventListener("pointerup", onPointerUp, true);
+    return () => document.removeEventListener("pointerup", onPointerUp, true);
   }, [tryShowSelectionMenu]);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const onSelectionChange = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const sel = document.getSelection();
+        if (!sel || sel.isCollapsed) return;
+        const passageEl = passageRef.current;
+        const anchor = sel.anchorNode;
+        if (!passageEl || !anchor || !passageEl.contains(anchor)) return;
+        tryShowSelectionMenu();
+      }, 160);
+    };
+    document.addEventListener("selectionchange", onSelectionChange);
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener("selectionchange", onSelectionChange);
+    };
+  }, [tryShowSelectionMenu]);
+
+  const onPassageTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.changedTouches.length === 0) return;
+      const t = e.changedTouches[0];
+      window.setTimeout(() => {
+        tryShowSelectionMenu(t.clientX, Math.min(t.clientY + 24, window.innerHeight - 56));
+      }, 100);
+    },
+    [tryShowSelectionMenu],
+  );
 
   const handleHighlight = useCallback(() => {
     if (!contextMenu) return;
@@ -277,13 +315,18 @@ export function PassageWithHighlightNotes({
   }, [noteInput, onAddNote, content]);
 
   useEffect(() => {
-    const close = (e: MouseEvent) => {
+    const close = (e: Event) => {
+      if (Date.now() - passageMenuOpenedAtRef.current < 180) return;
       const menu = document.querySelector("[data-passage-context-menu]");
       if (menu && menu.contains(e.target as Node)) return;
       setContextMenu(null);
     };
     document.addEventListener("click", close, true);
-    return () => document.removeEventListener("click", close, true);
+    document.addEventListener("touchstart", close, { capture: true });
+    return () => {
+      document.removeEventListener("click", close, true);
+      document.removeEventListener("touchstart", close, { capture: true });
+    };
   }, []);
 
   useEffect(() => {
@@ -294,14 +337,22 @@ export function PassageWithHighlightNotes({
 
   const baseSize = 17;
   const sizePx = baseSize * zoomFactor;
+  const canPortal = typeof document !== "undefined";
 
   return (
     <>
       <div
         ref={passageRef}
         onContextMenu={handleContextMenu}
-        className="space-y-5 text-slate-800 dark:text-slate-200 select-text"
-        style={{ fontSize: `${sizePx}px`, lineHeight: 1.8 }}
+        onTouchEnd={onPassageTouchEnd}
+        className="touch-pan-y space-y-5 text-slate-800 dark:text-slate-200 select-text [-webkit-user-select:text] [user-select:text] [-webkit-touch-callout:default]"
+        style={{
+          fontSize: `${sizePx}px`,
+          lineHeight: 1.8,
+          WebkitUserSelect: "text",
+          userSelect: "text",
+          touchAction: "pan-y",
+        }}
       >
         {content.map((p) => {
           const paraHighlights = highlights
@@ -320,7 +371,7 @@ export function PassageWithHighlightNotes({
               key={p.paragraphIndex}
               id={`passage-p-${p.paragraphIndex}`}
               data-p-id={p.paragraphIndex}
-              className="leading-relaxed scroll-mt-24"
+              className="leading-relaxed scroll-mt-24 [-webkit-user-select:text] [user-select:text]"
             >
               {p.paragraphLabel != null && String(p.paragraphLabel).trim() !== "" && (
                 <span className="mr-1.5 font-semibold text-slate-600 dark:text-slate-400">
@@ -334,90 +385,92 @@ export function PassageWithHighlightNotes({
         })}
       </div>
 
-      {contextMenu && (
-        <div
-          data-passage-context-menu
-          className="fixed z-[100] flex rounded-md bg-slate-800 dark:bg-slate-900 shadow-2xl border border-slate-700 overflow-hidden"
-          style={{
-            left: typeof window !== "undefined"
-              ? Math.min(Math.max(contextMenu.x, 8), window.innerWidth - 180)
-              : contextMenu.x,
-            top: contextMenu.y,
-          }}
-        >
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-slate-800 dark:border-t-slate-900" />
-          <button
-            type="button"
-            onClick={handleAddNote}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-700/80 transition-colors min-w-[90px] justify-center"
+      {contextMenu &&
+        canPortal &&
+        createPortal(
+          <div
+            data-passage-context-menu
+            className="fixed z-[220] flex rounded-md bg-slate-800 dark:bg-slate-900 shadow-2xl border border-slate-700 overflow-hidden"
+            style={{
+              left: Math.min(Math.max(contextMenu.x, 8), window.innerWidth - 180),
+              top: contextMenu.y,
+            }}
           >
-            <StickyNote className="h-4 w-4 text-slate-400" />
-            Note
-          </button>
-          <button
-            type="button"
-            onClick={handleHighlight}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-700/80 transition-colors min-w-[90px] justify-center border-l border-slate-600"
-          >
-            <Highlighter className="h-4 w-4 text-amber-400" />
-            Highlight
-          </button>
-          {overlappingHighlight && onRemoveHighlight && (
+            <div className="pointer-events-none absolute -bottom-2 left-1/2 w-0 -translate-x-1/2 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-slate-800 dark:border-t-slate-900" />
             <button
               type="button"
-              onClick={handleRemoveHighlight}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-700/80 transition-colors min-w-[90px] justify-center border-l border-slate-600"
+              onClick={handleAddNote}
+              className="flex min-w-[90px] items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700/80 sm:py-2.5"
             >
-              <Eraser className="h-4 w-4 text-slate-400" />
-              Eraser
+              <StickyNote className="h-4 w-4 text-slate-400" />
+              Note
             </button>
-          )}
-        </div>
-      )}
+            <button
+              type="button"
+              onClick={handleHighlight}
+              className="flex min-w-[90px] items-center justify-center gap-2 border-l border-slate-600 px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700/80 sm:py-2.5"
+            >
+              <Highlighter className="h-4 w-4 text-amber-400" />
+              Highlight
+            </button>
+            {overlappingHighlight && onRemoveHighlight && (
+              <button
+                type="button"
+                onClick={handleRemoveHighlight}
+                className="flex min-w-[90px] items-center justify-center gap-2 border-l border-slate-600 px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700/80 sm:py-2.5"
+              >
+                <Eraser className="h-4 w-4 text-slate-400" />
+                Eraser
+              </button>
+            )}
+          </div>,
+          document.body,
+        )}
 
-      {noteInput && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30"
-          onClick={() => setNoteInput(null)}
-        >
+      {noteInput &&
+        canPortal &&
+        createPortal(
           <div
-            className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl p-4 w-full max-w-md mx-4"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[220] flex items-center justify-center bg-black/30 px-4"
+            onClick={() => setNoteInput(null)}
           >
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
-              Add note
-            </p>
-            <textarea
-              ref={noteTextRef}
-              rows={3}
-              placeholder="Your note..."
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  submitNote();
-                }
-              }}
-            />
-            <div className="flex justify-end gap-2 mt-3">
-              <button
-                type="button"
-                onClick={() => setNoteInput(null)}
-                className="rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={submitNote}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
-              >
-                Add note
-              </button>
+            <div
+              className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">Add note</p>
+              <textarea
+                ref={noteTextRef}
+                rows={3}
+                placeholder="Your note..."
+                className="w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    submitNote();
+                  }
+                }}
+              />
+              <div className="mt-3 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNoteInput(null)}
+                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={submitNote}
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                >
+                  Add note
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

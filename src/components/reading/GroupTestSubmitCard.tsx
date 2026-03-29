@@ -383,19 +383,6 @@ export function GroupTestSubmitCard({
       }),
     }));
 
-    const allAnswered = miniTestAnswers.every((ma) =>
-      ma.answers.every((a) => {
-        if ("studentAnswers" in a && Array.isArray(a.studentAnswers)) {
-          return a.studentAnswers.every((s) => s !== "");
-        }
-        return (a.studentAnswer ?? "") !== "";
-      }),
-    );
-    if (!allAnswered) {
-      setError("Please answer all questions before submitting.");
-      return;
-    }
-
     setError(null);
     setSubmitting(true);
     try {

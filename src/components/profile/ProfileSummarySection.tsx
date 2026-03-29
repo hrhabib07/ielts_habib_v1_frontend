@@ -82,6 +82,9 @@ export function ProfileSummarySection() {
     weaknesses,
     recentAttempts,
     recentPracticeAttempts = [],
+    overallProgressPct = 0,
+    journeyEarnedPoints,
+    journeyMaxPoints,
   } = data;
 
   return (
@@ -126,6 +129,21 @@ export function ProfileSummarySection() {
           </p>
         </Card>
       </div>
+
+      <Card className="p-6">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <BarChart2 className="h-4 w-4" />
+          <span className="text-sm">Reading course journey</span>
+        </div>
+        <p className="mt-2 text-2xl font-semibold text-foreground tabular-nums">
+          {overallProgressPct}%
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {journeyEarnedPoints != null && journeyMaxPoints != null
+            ? `${journeyEarnedPoints} / ${journeyMaxPoints} points · first-try passes earn more`
+            : "Points update as you pass quizzes, practice tests, and level finals."}
+        </p>
+      </Card>
 
       {/* Continue from current level */}
       <Card className="p-6">

@@ -10,6 +10,7 @@ import {
   createPracticeTest,
   updatePracticeTest,
   deletePracticeTest,
+  deleteAllPracticeTestsByLevel,
   reorderPracticeTests,
   getPracticeTestPreviewContent,
   type PracticeTest,
@@ -176,9 +177,7 @@ export function PracticeTestManager({
     setError(null);
     setDeleteAllBusy(true);
     try {
-      for (const pt of sorted) {
-        await deletePracticeTest(pt._id, "permanent");
-      }
+      await deleteAllPracticeTestsByLevel(levelId, "permanent");
       onPracticeTestsChange([]);
       setDeleteAllStep(0);
       setDeleteAllConfirmText("");
@@ -188,7 +187,11 @@ export function PracticeTestManager({
         setPreviewError(null);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to delete some practice tests");
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Failed to delete all practice tests",
+      );
     } finally {
       setDeleteAllBusy(false);
     }
@@ -248,7 +251,7 @@ export function PracticeTestManager({
         </div>
         {!disabled && (
           <div className="flex flex-wrap items-center gap-2">
-            {sorted.length > 0 && (
+            {displayList.length > 0 && (
               <Button
                 type="button"
                 variant="outline"
@@ -630,7 +633,7 @@ export function PracticeTestManager({
             {deleteAllStep === 1 ? (
               <>
                 <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-                  You are about to permanently delete all <strong>{sorted.length}</strong> practice test{sorted.length !== 1 ? "s" : ""} in this level. Passages and questions will be removed. This cannot be undone.
+                  You are about to permanently delete all <strong>{displayList.length}</strong> practice test{displayList.length !== 1 ? "s" : ""} in this level (across versions). Passages and questions will be removed. This cannot be undone.
                 </p>
                 <p className="mt-2 text-sm font-medium text-destructive">
                   This action requires a second confirmation.
@@ -650,7 +653,7 @@ export function PracticeTestManager({
             ) : (
               <>
                 <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-                  Type <code className="rounded bg-stone-200 px-1.5 py-0.5 text-xs font-mono dark:bg-stone-700">DELETE ALL</code> to confirm. This will permanently delete all {sorted.length} practice test{sorted.length !== 1 ? "s" : ""}.
+                  Type <code className="rounded bg-stone-200 px-1.5 py-0.5 text-xs font-mono dark:bg-stone-700">DELETE ALL</code> to confirm. This will permanently delete all {displayList.length} practice test{displayList.length !== 1 ? "s" : ""} in this level.
                 </p>
                 <div className="mt-4 space-y-2">
                   <Label htmlFor="delete-all-confirm">Confirm</Label>

@@ -24,6 +24,10 @@ import {
   EXPECTED_QUESTIONS_BY_LEVEL,
   DEFAULT_SINGLE_TYPE_QUESTIONS,
 } from "./levelQuestionTypeMapping";
+import {
+  buildSummaryWithCluesBulkQuestionItems,
+  SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC,
+} from "./summaryWithCluesBulk";
 import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 
 type BulkPracticeTestItemInput = {
@@ -114,16 +118,30 @@ export function PracticeTestsBulkCreateCard(props: {
       questionType === "SENTENCE_COMPLETION"
         ? (QUESTION_TYPE_CONFIG.SENTENCE_COMPLETION?.defaultInstruction ??
           "Complete the sentences below. Choose ONE WORD ONLY from the passage for each answer.")
-        : "";
-    const firstTestQuestions = Array.from({ length: questionCount }, (_, i) => {
-      const template = getBulkQuestionTemplateForLevel(levelOrder, i);
-      return {
-        ...template,
-        explanation: "Explanation for this question (min 5 characters).",
-      };
-    });
+        : questionType === "SUMMARY_COMPLETION_WITH_CLUES"
+          ? (QUESTION_TYPE_CONFIG.SUMMARY_COMPLETION_WITH_CLUES?.defaultInstruction ??
+            "Complete the summary below. Choose the correct words from the box below.")
+          : "";
+    const meta = getDefaultMetaForLevel(levelOrder);
+    const firstTestQuestions =
+      questionType === "SUMMARY_COMPLETION_WITH_CLUES"
+        ? buildSummaryWithCluesBulkQuestionItems(
+            questionCount,
+            typeof meta.wordLimit === "number" ? meta.wordLimit : 1,
+            Array.isArray(meta.options) ? meta.options : [],
+          )
+        : Array.from({ length: questionCount }, (_, i) => {
+            const template = getBulkQuestionTemplateForLevel(levelOrder, i);
+            return {
+              ...template,
+              explanation: "Explanation for this question (min 5 characters).",
+            };
+          });
     return JSON.stringify(
       {
+        ...(questionType === "SUMMARY_COMPLETION_WITH_CLUES"
+          ? { __instructions: SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC }
+          : {}),
         practiceTests: [
           {
             title: `Practice Test 1 · (L${levelOrder})${levelOrder === 2 ? " — Sentence Completion only" : ""}`,
@@ -145,7 +163,7 @@ export function PracticeTestsBulkCreateCard(props: {
                   endQuestionNumber: questionCount,
                   questionType,
                   instruction: defaultInstruction,
-                  meta: getDefaultMetaForLevel(levelOrder),
+                  meta,
                   questions: firstTestQuestions,
                 },
               ],

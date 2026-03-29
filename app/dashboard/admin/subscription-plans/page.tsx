@@ -9,6 +9,10 @@ import {
   adminCreatePlan,
   adminUpdatePlan,
   adminTogglePlan,
+  adminListCoupons,
+  adminCreateCoupon,
+  adminUpdateCoupon,
+  type AdminCoupon,
   type CreatePlanPayload,
   type UpdatePlanPayload,
 } from "@/src/lib/api/admin";
@@ -27,9 +31,17 @@ import {
 const ALL_MODULES = ["READING", "LISTENING", "WRITING", "SPEAKING"] as const;
 
 function formatDuration(days: number): string {
-  if (days % 365 === 0) return `${days / 365}y`;
-  if (days % 30 === 0) return `${days / 30}mo`;
-  return `${days}d`;
+  const totalMonths = Math.max(1, Math.round(days / 30));
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+
+  if (years > 0 && months > 0) {
+    return `${years}y ${months}mo`;
+  }
+  if (years > 0) {
+    return `${years}y`;
+  }
+  return `${months}mo`;
 }
 
 interface PlanFormProps {
@@ -42,7 +54,10 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
   const [name, setName] = useState(initial?.name ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
-  const [modules, setModules] = useState<string[]>(
+  const [featuresText, setFeaturesText] = useState(
+    (initial?.features ?? []).join("\n"),
+  );
+  const [modules, setModules] = useState<(typeof ALL_MODULES)[number][]>(
     initial?.modulesIncluded ?? ["READING"],
   );
   const [durationInDays, setDurationInDays] = useState(
@@ -51,6 +66,9 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
   const [price, setPrice] = useState(String(initial?.price ?? ""));
   const [discountPrice, setDiscountPrice] = useState(
     initial?.discountPrice != null ? String(initial.discountPrice) : "",
+  );
+  const [manualPaymentInstructions, setManualPaymentInstructions] = useState(
+    initial?.manualPaymentInstructions ?? "",
   );
   const [isPublic, setIsPublic] = useState(initial?.isPublic ?? true);
   const [isWholePackage, setIsWholePackage] = useState(
@@ -70,7 +88,7 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
     if (!initial) setSlug(autoSlug(v));
   };
 
-  const toggleModule = (mod: string) => {
+  const toggleModule = (mod: (typeof ALL_MODULES)[number]) => {
     setModules((prev) =>
       prev.includes(mod) ? prev.filter((m) => m !== mod) : [...prev, mod],
     );
@@ -85,14 +103,23 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
     setSubmitting(true);
     setError(null);
     try {
+      const features = featuresText
+        .split("\n")
+        .map((feature) => feature.trim())
+        .filter(Boolean);
+
       await onSave({
         name: name.trim(),
         slug: slug.trim(),
         description: description.trim(),
+        features,
+        module: "READING",
         modulesIncluded: modules,
         durationInDays: Number(durationInDays),
         price: Number(price),
         ...(discountPrice ? { discountPrice: Number(discountPrice) } : {}),
+        manualPaymentInstructions:
+          manualPaymentInstructions.trim() || undefined,
         isPublic,
         isWholePackage,
       });
@@ -146,6 +173,32 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
           rows={2}
           className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
           required
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-foreground">
+          Plan features (one per line)
+        </label>
+        <textarea
+          value={featuresText}
+          onChange={(e) => setFeaturesText(e.target.value)}
+          placeholder={"Reading module access\nLevel-based progression\nBand tracking and analytics"}
+          rows={4}
+          className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm font-medium text-foreground">
+          Payment instructions (admin-managed)
+        </label>
+        <textarea
+          value={manualPaymentInstructions}
+          onChange={(e) => setManualPaymentInstructions(e.target.value)}
+          placeholder="Example: bKash: 01XXXXXXXXXX. Students will see this text during checkout."
+          rows={3}
+          className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
       </div>
 
@@ -268,12 +321,29 @@ export default function SubscriptionPlansAdminPage() {
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [first100Coupon, setFirst100Coupon] = useState<AdminCoupon | null>(null);
+  const [first100PromoCode, setFirst100PromoCode] = useState<string>("FIRST100");
+  const [first100DurationDays, setFirst100DurationDays] = useState<number>(720);
+  const [savingCoupon, setSavingCoupon] = useState<boolean>(false);
 
   const fetchPlans = async () => {
     setLoading(true);
     try {
       const data = await adminListAllPlans();
       setPlans(data);
+      const coupons = await adminListCoupons();
+      const promo = coupons.find(
+        (c) => c.module === "READING" && c.isFirst100Promo === true,
+      );
+      setFirst100Coupon(promo ?? null);
+
+      const readingPlan = data.find((p) => p.module === "READING");
+      const defaultPromoDuration = (readingPlan?.durationInDays ?? 180) * 4;
+
+      setFirst100PromoCode(promo?.code ?? "FIRST100");
+      setFirst100DurationDays(
+        promo?.durationOverrideDays ?? defaultPromoDuration,
+      );
     } catch {
       setError("Failed to load plans.");
     } finally {
@@ -350,6 +420,122 @@ export default function SubscriptionPlansAdminPage() {
         </div>
       )}
 
+      {/* First 100 promo management */}
+      <Card className="p-6 space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">
+              First 100 Promo (READING)
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Visible to students only when seats are available. Applies 60% off.
+            </p>
+          </div>
+          {first100Coupon ? (
+            <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+              Remaining:{" "}
+              {Math.max(
+                0,
+                (first100Coupon.maxTotalUses ?? 100) - (first100Coupon.usedCount ?? 0),
+              )}
+            </span>
+          ) : (
+            <span className="shrink-0 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+              Not configured
+            </span>
+          )}
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label className="text-sm font-medium text-foreground">
+              Promo code
+            </label>
+            <input
+              type="text"
+              value={first100PromoCode}
+              onChange={(e) => setFirst100PromoCode(e.target.value)}
+              placeholder="e.g. FIRST100"
+              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-foreground">
+              Extended duration (days)
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={first100DurationDays}
+              onChange={(e) => setFirst100DurationDays(Number(e.target.value))}
+              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+
+          <div className="rounded-xl border border-emerald-200/70 bg-emerald-50/50 p-4">
+            <p className="text-sm font-semibold text-emerald-800">Auto-applied</p>
+            <p className="mt-1 text-xs text-emerald-800">
+              Students only see this promo during the first 100 seats window.
+            </p>
+            <p className="mt-2 text-xs text-emerald-800">
+              Discount: 60% off
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            className="gap-2"
+            disabled={savingCoupon || first100PromoCode.trim() === ""}
+            onClick={async () => {
+              setSavingCoupon(true);
+              setError(null);
+              try {
+                const payload = {
+                  code: first100PromoCode.trim().toUpperCase(),
+                  module: "READING" as const,
+                  discountType: "PERCENT" as const,
+                  discountValue: 60,
+                  durationOverrideDays: first100DurationDays,
+                  maxTotalUses: 100,
+                  maxUsesPerUser: 1,
+                  isActive: true,
+                  isFirst100Promo: true,
+                };
+
+                if (first100Coupon) {
+                  await adminUpdateCoupon(first100Coupon._id, payload);
+                } else {
+                  await adminCreateCoupon(payload);
+                }
+
+                const coupons = await adminListCoupons();
+                const promo = coupons.find(
+                  (c) => c.module === "READING" && c.isFirst100Promo === true,
+                );
+                setFirst100Coupon(promo ?? null);
+              } catch (e) {
+                const msg = e instanceof Error ? e.message : "Failed to save promo";
+                setError(msg);
+              } finally {
+                setSavingCoupon(false);
+              }
+            }}
+          >
+            {savingCoupon ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving…
+              </>
+            ) : (
+              "Create/Update promo"
+            )}
+          </Button>
+        </div>
+      </Card>
+
       {/* Create form */}
       {showCreate && (
         <Card className="p-6">
@@ -425,7 +611,7 @@ export default function SubscriptionPlansAdminPage() {
                   <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                     <span>{formatDuration(plan.durationInDays)} access</span>
                     <span>·</span>
-                    <span>{plan.modulesIncluded.join(", ")}</span>
+                    <span>{(plan.modulesIncluded ?? ["READING"]).join(", ")}</span>
                     <span>·</span>
                     <span>
                       {plan.discountPrice != null ? (

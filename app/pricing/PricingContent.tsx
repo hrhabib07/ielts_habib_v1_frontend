@@ -4,34 +4,113 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, Loader2, Zap, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, Loader2, Zap, ChevronDown, ChevronUp, Shield } from "lucide-react";
 import {
   getPublicPlans,
+  getFirst100PromoOffer,
   submitSubscriptionRequest,
   type SubscriptionPlan,
+  type First100PromoOffer,
 } from "@/src/lib/api/subscription";
 import type { CurrentUser } from "@/src/lib/auth-server";
 
 function formatDuration(days: number): string {
-  if (days % 365 === 0) return `${days / 365} year${days / 365 > 1 ? "s" : ""}`;
-  if (days % 30 === 0) return `${days / 30} month${days / 30 > 1 ? "s" : ""}`;
-  return `${days} days`;
+  const totalMonths = Math.max(1, Math.floor(days / 30));
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+
+  if (years > 0) {
+    return `${years} year${years > 1 ? "s" : ""}`;
+  }
+
+  return `${months} month${months > 1 ? "s" : ""}`;
+}
+
+function getPlanFeatures(plan: SubscriptionPlan): string[] {
+  if (Array.isArray(plan.features) && plan.features.length > 0) {
+    return plan.features;
+  }
+  return [
+    ...(plan.modulesIncluded ?? ["READING"]).map(
+      (mod) => `${mod.charAt(0) + mod.slice(1).toLowerCase()} module access`,
+    ),
+    "Level-based progression",
+    "Band tracking and analytics",
+    "Structured test attempts",
+  ];
+}
+
+function extractBkashNumber(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const normalized = text.replace(/[\s-]+/g, "");
+  const match = normalized.match(/\b(?:\+?88)?01\d{9}\b/);
+  if (!match) return null;
+  return match[0];
 }
 
 interface PurchaseFormProps {
   plan: SubscriptionPlan;
+  first100PromoOffer: First100PromoOffer | null;
   onClose: () => void;
 }
 
-function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
-  const [method, setMethod] = useState<"BKASH" | "BANK">("BKASH");
+function computeDiscountAmount(
+  basePrice: number,
+  discountType: "PERCENT" | "FIXED" | undefined,
+  discountValue: number | undefined,
+): number {
+  if (!discountType || discountValue == null) return 0;
+  if (discountType === "PERCENT") return Math.round((basePrice * discountValue) / 100);
+  return Math.min(basePrice, discountValue);
+}
+
+function PurchaseForm({ plan, first100PromoOffer, onClose }: PurchaseFormProps) {
   const [txId, setTxId] = useState("");
   const [senderNumber, setSenderNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copiedNumber, setCopiedNumber] = useState(false);
 
-  const effectivePrice = plan.discountPrice ?? plan.price;
+  const basePrice = plan.discountPrice ?? plan.price;
+  const first100Active =
+    plan.module === "READING" &&
+    first100PromoOffer?.enabled === true &&
+    (first100PromoOffer.remainingUses ?? 0) > 0 &&
+    typeof first100PromoOffer.code === "string" &&
+    first100PromoOffer.code.trim() !== "";
+
+  const discountAmount = first100Active
+    ? computeDiscountAmount(
+        basePrice,
+        first100PromoOffer?.discountType,
+        first100PromoOffer?.discountValue,
+      )
+    : 0;
+
+  const payableAmount = Math.max(0, basePrice - discountAmount);
+  const displayDurationDays =
+    first100Active && first100PromoOffer?.durationOverrideDays
+      ? first100PromoOffer.durationOverrideDays
+      : plan.durationInDays;
+
+  const [paidAmount, setPaidAmount] = useState<number>(payableAmount);
+  const bkashNumber = extractBkashNumber(plan.manualPaymentInstructions);
+
+  useEffect(() => {
+    setPaidAmount(payableAmount);
+  }, [payableAmount]);
+
+  const handleCopyBkashNumber = async () => {
+    if (!bkashNumber) return;
+    try {
+      await navigator.clipboard.writeText(bkashNumber);
+      setCopiedNumber(true);
+      window.setTimeout(() => setCopiedNumber(false), 1600);
+    } catch {
+      setCopiedNumber(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,10 +123,11 @@ function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
     try {
       await submitSubscriptionRequest({
         planId: plan._id,
-        paymentMethod: method,
+        paymentMethod: "BKASH",
         transactionId: txId.trim(),
         senderNumber: senderNumber.trim() || undefined,
-        paidAmount: effectivePrice,
+        paidAmount,
+        couponCode: first100Active ? first100PromoOffer?.code : undefined,
       });
       setSuccess(true);
     } catch {
@@ -90,31 +170,53 @@ function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
       <div className="rounded-lg bg-muted/50 p-4 text-sm space-y-1">
         <p className="font-medium text-foreground">{plan.name}</p>
         <p className="text-muted-foreground">
-          {formatDuration(plan.durationInDays)} · {plan.modulesIncluded.join(", ")}
+          {formatDuration(displayDurationDays)} · {(plan.modulesIncluded ?? ["READING"]).join(", ")}
         </p>
-        <p className="text-lg font-bold text-foreground mt-2">
-          {effectivePrice.toLocaleString()} BDT
-          {plan.discountPrice != null && (
-            <span className="ml-2 text-sm font-normal line-through text-muted-foreground">
-              {plan.price.toLocaleString()} BDT
-            </span>
-          )}
-        </p>
+        <div className="mt-2 space-y-1">
+          <p className="text-xs text-muted-foreground">Normal price: {plan.price.toLocaleString()} BDT</p>
+          <p className="text-lg font-bold text-foreground">
+            {paidAmount.toLocaleString()} BDT
+            {first100Active && discountAmount > 0 && (
+              <span className="ml-2 text-sm font-normal text-emerald-600">
+                (Coupon user price)
+              </span>
+            )}
+          </p>
+        </div>
       </div>
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-foreground">Payment instructions</p>
         <div className="rounded-lg border p-4 text-sm text-muted-foreground space-y-1">
-          <p>
-            <strong className="text-foreground">bKash:</strong> Send{" "}
-            <strong className="text-foreground">{effectivePrice.toLocaleString()} BDT</strong> to{" "}
-            <span className="font-mono">01XXXXXXXXXX</span> (merchant)
-          </p>
-          <p>
-            <strong className="text-foreground">Bank:</strong> Contact us for bank details.
-          </p>
+          {bkashNumber && (
+            <div className="mb-3 rounded-lg border border-emerald-200/70 bg-emerald-50/60 p-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+                bKash number
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <span className="text-2xl font-bold tracking-wide text-emerald-700">
+                  {bkashNumber}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyBkashNumber}
+                  className="rounded-md border border-emerald-300 bg-white px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                >
+                  {copiedNumber ? "Copied" : "Copy number"}
+                </button>
+              </div>
+            </div>
+          )}
+          {plan.manualPaymentInstructions ? (
+            <p className="whitespace-pre-line">{plan.manualPaymentInstructions}</p>
+          ) : (
+            <p className="whitespace-pre-line">
+              Send {paidAmount.toLocaleString()} BDT and submit your transaction ID after payment.
+            </p>
+          )}
           <p className="pt-1 text-xs">
-            After sending, fill in the form below with your transaction ID.
+            Selected method: <span className="font-medium text-foreground">bKash</span>. Amount to pay:{" "}
+            <span className="font-medium text-foreground">{paidAmount.toLocaleString()} BDT</span>.
           </p>
         </div>
       </div>
@@ -122,21 +224,42 @@ function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="text-sm font-medium text-foreground">Payment method</label>
-          <div className="mt-1 flex gap-2">
-            {(["BKASH", "BANK"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMethod(m)}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                  method === m
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:border-primary/50"
-                }`}
-              >
-                {m === "BKASH" ? "bKash" : "Bank Transfer"}
-              </button>
-            ))}
+          <p className="mt-1 rounded-lg border px-4 py-2 text-sm font-medium text-foreground">
+            bKash
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          {first100Active && first100PromoOffer?.code && (
+            <div className="rounded-lg border border-emerald-200/70 bg-emerald-50/50 p-4 text-sm text-emerald-800">
+              <p className="font-semibold">First 100 promo applied</p>
+              <p className="mt-1 text-xs">
+                Code: <span className="font-mono">{first100PromoOffer.code}</span>
+              </p>
+              <p className="mt-1 text-xs">
+                Extended access: <span className="font-medium">{formatDuration(displayDurationDays)}</span>
+              </p>
+            </div>
+          )}
+
+          <div>
+            <label
+              htmlFor="paidAmount"
+              className="text-sm font-medium text-foreground"
+            >
+              Amount paid (BDT) <span className="text-destructive">*</span>
+            </label>
+            <input
+              id="paidAmount"
+              type="number"
+              min={0}
+              step={1}
+              value={paidAmount}
+              onChange={(e) => setPaidAmount(Number(e.target.value))}
+              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+              required
+              readOnly={first100Active}
+            />
           </div>
         </div>
 
@@ -155,21 +278,19 @@ function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
           />
         </div>
 
-        {method === "BKASH" && (
-          <div>
-            <label htmlFor="senderNumber" className="text-sm font-medium text-foreground">
-              Sender number (optional)
-            </label>
-            <input
-              id="senderNumber"
-              type="text"
-              value={senderNumber}
-              onChange={(e) => setSenderNumber(e.target.value)}
-              placeholder="e.g. 01XXXXXXXXXX"
-              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
-        )}
+        <div>
+          <label htmlFor="senderNumber" className="text-sm font-medium text-foreground">
+            Sender number (optional)
+          </label>
+          <input
+            id="senderNumber"
+            type="text"
+            value={senderNumber}
+            onChange={(e) => setSenderNumber(e.target.value)}
+            placeholder="e.g. 01XXXXXXXXXX"
+            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+        </div>
 
         {error && (
           <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -196,16 +317,46 @@ function PlanCard({
   plan,
   onPurchase,
   isLoggedIn,
+  first100PromoOffer,
 }: {
   plan: SubscriptionPlan;
   onPurchase: (plan: SubscriptionPlan) => void;
   isLoggedIn: boolean;
+  first100PromoOffer: First100PromoOffer | null;
 }) {
-  const effectivePrice = plan.discountPrice ?? plan.price;
-  const hasDiscount = plan.discountPrice != null && plan.discountPrice < plan.price;
+  const basePrice = plan.discountPrice ?? plan.price;
+  const first100Active =
+    plan.module === "READING" &&
+    first100PromoOffer?.enabled === true &&
+    (first100PromoOffer.remainingUses ?? 0) > 0 &&
+    typeof first100PromoOffer.code === "string" &&
+    first100PromoOffer.code.trim() !== "";
+
+  const discountAmount = first100Active
+    ? computeDiscountAmount(
+        basePrice,
+        first100PromoOffer?.discountType,
+        first100PromoOffer?.discountValue,
+      )
+    : 0;
+
+  const effectivePrice = Math.max(0, basePrice - discountAmount);
+  const displayDurationDays =
+    first100Active && first100PromoOffer?.durationOverrideDays
+      ? first100PromoOffer.durationOverrideDays
+      : plan.durationInDays;
+  const normalDuration = formatDuration(plan.durationInDays);
+  const couponDuration =
+    first100Active && first100PromoOffer?.durationOverrideDays
+      ? formatDuration(first100PromoOffer.durationOverrideDays)
+      : null;
+  const hasDiscount = effectivePrice < plan.price;
+  const remainingPromoSeats = first100PromoOffer?.remainingUses ?? 0;
+  const showUrgency = first100Active && remainingPromoSeats <= 15;
+  const savedAmount = Math.max(0, plan.price - effectivePrice);
 
   return (
-    <div className="rounded-xl border bg-card p-8 flex flex-col max-w-md mx-auto w-full">
+    <div className="rounded-2xl border bg-card p-8 flex flex-col max-w-md mx-auto w-full shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="text-xl font-semibold text-foreground">{plan.name}</h2>
@@ -220,39 +371,43 @@ function PlanCard({
 
       <div className="mt-4">
         <p className="text-3xl font-bold text-foreground">
-          {effectivePrice.toLocaleString()}{" "}
+          {plan.price.toLocaleString()}{" "}
           <span className="text-lg font-normal text-muted-foreground">BDT</span>
         </p>
         {hasDiscount && (
-          <p className="text-sm text-muted-foreground line-through">
-            {plan.price.toLocaleString()} BDT
-          </p>
+          <div className="mt-2 rounded-lg border border-emerald-200/70 bg-emerald-50/60 p-3">
+            <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+              Coupon price unlocked
+            </p>
+            <p className="mt-1 text-sm font-semibold text-emerald-700">
+              Your price: {effectivePrice.toLocaleString()} BDT (Save {savedAmount.toLocaleString()} BDT)
+            </p>
+          </div>
         )}
         <p className="mt-1 text-sm text-muted-foreground">
-          {formatDuration(plan.durationInDays)} access ·{" "}
-          {plan.isWholePackage ? "All modules" : plan.modulesIncluded.join(", ")}
+          {formatDuration(displayDurationDays)} access ·{" "}
+          {plan.isWholePackage ? "All modules" : (plan.modulesIncluded ?? ["READING"]).join(", ")}
         </p>
+        {couponDuration && (
+          <p className="mt-2 text-sm text-emerald-700">
+            Normal access: <span className="line-through decoration-2">{normalDuration}</span> ·
+            Coupon access: <span className="font-semibold"> {couponDuration}</span>
+          </p>
+        )}
+        {showUrgency && (
+          <p className="mt-2 text-xs font-semibold text-rose-600">
+            Hurry: only {remainingPromoSeats} promo seat{remainingPromoSeats > 1 ? "s" : ""} left.
+          </p>
+        )}
       </div>
 
       <ul className="mt-6 space-y-2 flex-1">
-        {plan.modulesIncluded.map((mod) => (
-          <li key={mod} className="flex items-center gap-2 text-sm text-foreground">
+        {getPlanFeatures(plan).map((feature) => (
+          <li key={feature} className="flex items-center gap-2 text-sm text-foreground">
             <Check className="h-4 w-4 text-green-500 shrink-0" />
-            {mod.charAt(0) + mod.slice(1).toLowerCase()} module access
+            {feature}
           </li>
         ))}
-        <li className="flex items-center gap-2 text-sm text-foreground">
-          <Check className="h-4 w-4 text-green-500 shrink-0" />
-          Level-based progression
-        </li>
-        <li className="flex items-center gap-2 text-sm text-foreground">
-          <Check className="h-4 w-4 text-green-500 shrink-0" />
-          Band tracking & analytics
-        </li>
-        <li className="flex items-center gap-2 text-sm text-foreground">
-          <Check className="h-4 w-4 text-green-500 shrink-0" />
-          Structured test attempts
-        </li>
       </ul>
 
       <div className="mt-8 flex flex-col gap-2">
@@ -287,14 +442,18 @@ interface PricingContentProps {
 
 export function PricingContent({ initialUser }: PricingContentProps) {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [first100PromoOffer, setFirst100PromoOffer] = useState<First100PromoOffer | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const isLoggedIn = !!initialUser;
 
   useEffect(() => {
-    getPublicPlans()
-      .then(setPlans)
+    Promise.all([getPublicPlans(), getFirst100PromoOffer("READING")])
+      .then(([p, promo]) => {
+        setPlans(p);
+        setFirst100PromoOffer(promo);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -305,11 +464,13 @@ export function PricingContent({ initialUser }: PricingContentProps) {
     },
     {
       q: "Which payment methods are accepted?",
-      a: "We currently accept bKash and bank transfer.",
+      a: "We currently accept bKash.",
     },
     {
       q: "Can I get a refund?",
-      a: "Please contact support within 7 days of purchase if you have any issues.",
+      a: isLoggedIn
+        ? "Purchase-related issues: contact support within 7 days. Separately, the Gamlish Score Guarantee™ may cover a 100% refund if you meet every eligibility rule—see your member guarantee page for the full checklist."
+        : "Purchase-related issues: contact support within 7 days. After you register, the Score Guarantee™ page in your profile explains when a full refund may apply for eligible learners.",
     },
     {
       q: "What happens when my subscription expires?",
@@ -326,8 +487,73 @@ export function PricingContent({ initialUser }: PricingContentProps) {
         </p>
       </div>
 
+      <Card className="overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.05] via-card to-card p-6 shadow-sm md:p-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
+              <Shield className="h-6 w-6" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+                Gamlish Score Guarantee™
+              </p>
+              <p className="mt-1 font-semibold tracking-tight text-foreground text-lg">
+                {isLoggedIn
+                  ? "Your target band can be contractually backed"
+                  : "We measure readiness—not guesswork"}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {isLoggedIn
+                  ? "Members who clear the Readiness Zone and every rule below may qualify for a 100% refund if the official exam does not match the band you trained for."
+                  : "Create an account to access the full member guarantee policy and continue your path after checkout."}
+              </p>
+            </div>
+          </div>
+          <Button asChild variant={isLoggedIn ? "default" : "outline"} className="w-full shrink-0 sm:w-auto">
+            <Link href={isLoggedIn ? "/profile/score-guarantee" : "/register"}>
+              {isLoggedIn ? "Open member guarantee" : "Get started to view guarantee"}
+            </Link>
+          </Button>
+        </div>
+      </Card>
+
+      {!selectedPlan && !loading && first100PromoOffer?.enabled && (first100PromoOffer.remainingUses ?? 0) > 0 && (
+        <Card className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-[#1e3a8a]/10 via-white to-emerald-50 p-6 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-[#1e3a8a]">
+                {first100PromoOffer.usedCount === 0
+                  ? "Be the first student of Gamblish"
+                  : "Top 100 Students Deal"}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {first100PromoOffer.usedCount === 0
+                  ? "Lock 60% off + extended access for early subscribers."
+                  : (first100PromoOffer.remainingUses ?? 0) <= 15
+                    ? `Hurry: only ${first100PromoOffer.remainingUses} seat(s) left for the 60% discount.`
+                    : `Only ${first100PromoOffer.remainingUses} seat(s) left for the 60% discount.`}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 mt-2 md:mt-0">
+              <span className="shrink-0 rounded-full bg-[#1e3a8a]/10 px-3 py-1 text-xs font-semibold text-[#1e3a8a]">
+                Promo: <span className="font-mono">{first100PromoOffer.code}</span>
+              </span>
+              <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                {first100PromoOffer.discountType === "PERCENT"
+                  ? `${first100PromoOffer.discountValue}% OFF`
+                  : `Save ${first100PromoOffer.discountValue} BDT`}
+              </span>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {selectedPlan ? (
-        <PurchaseForm plan={selectedPlan} onClose={() => setSelectedPlan(null)} />
+        <PurchaseForm
+          plan={selectedPlan}
+          first100PromoOffer={first100PromoOffer}
+          onClose={() => setSelectedPlan(null)}
+        />
       ) : loading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -339,7 +565,13 @@ export function PricingContent({ initialUser }: PricingContentProps) {
       ) : (
         <div className={`grid gap-6 ${plans.length > 1 ? "md:grid-cols-2" : ""} justify-items-center`}>
           {plans.map((plan) => (
-            <PlanCard key={plan._id} plan={plan} onPurchase={setSelectedPlan} isLoggedIn={isLoggedIn} />
+            <PlanCard
+              key={plan._id}
+              plan={plan}
+              onPurchase={setSelectedPlan}
+              isLoggedIn={isLoggedIn}
+              first100PromoOffer={first100PromoOffer}
+            />
           ))}
         </div>
       )}

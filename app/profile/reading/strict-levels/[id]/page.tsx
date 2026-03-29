@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Loader2, ArrowLeft, AlertTriangle } from "lucide-react";
+import {
+  isReadingPremiumLockMessage,
+  isReadingPremiumLockResponse,
+} from "@/src/lib/readingPremiumLock";
+import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
 import {
   getLevelDetail,
   getLevelFeedback,
@@ -12,7 +17,7 @@ import {
   type SubmitStepQuizResponse,
   type LevelCompletionScore,
 } from "@/src/lib/api/readingStrictProgression";
-import { getLevelsByModule } from "@/src/lib/api/levels";
+import { getCurrentLevel, getLevelsByModule } from "@/src/lib/api/levels";
 import { completeStep } from "@/src/lib/api/levels";
 import { LevelLayout } from "@/src/components/student-level/LevelLayout";
 import { SetTargetBandForm } from "@/src/components/student-level/SetTargetBandForm";
@@ -37,21 +42,48 @@ export default function ReadingStrictLevelPage() {
   const [readingTargetBand, setReadingTargetBandState] = useState<
     number | null | undefined
   >(undefined);
+  const [contentUpdateBannerMessage, setContentUpdateBannerMessage] = useState<string | null>(null);
+  const [premiumLock, setPremiumLock] = useState(false);
 
   const stepIdFromUrl = searchParams.get("step");
+  const contentUpdatedParam = searchParams.get("contentUpdated");
+
+  const lastHandledRestartToVersionIdRef = useRef<string | null>(null);
 
   const loadDetail = useCallback(() => {
     if (!id) return;
     setLoading(true);
     setError(null);
     setTargetBandRequired(false);
+    setPremiumLock(false);
     getLevelDetail(id)
       .then((d) => {
         setDetail(d);
         setContextDetail(d);
       })
       .catch((e) => {
-        const msg = e instanceof Error ? e.message : "Failed to load";
+        const ax = e as {
+          response?: { status?: number; data?: { message?: string } };
+        };
+        const status = ax?.response?.status;
+        const backendMsg = ax?.response?.data?.message;
+        const msg =
+          typeof backendMsg === "string"
+            ? backendMsg
+            : e instanceof Error
+              ? e.message
+              : "Failed to load";
+
+        if (
+          isReadingPremiumLockResponse(status, msg) ||
+          isReadingPremiumLockMessage(msg)
+        ) {
+          setPremiumLock(true);
+          setContextDetail(null);
+          setLoading(false);
+          return;
+        }
+
         const isTargetBandRequired =
           typeof msg === "string" &&
           msg.toLowerCase().includes("target band must be selected");
@@ -64,16 +96,82 @@ export default function ReadingStrictLevelPage() {
             (msg.toLowerCase().includes("current level") ||
               msg.toLowerCase().includes("access denied") ||
               msg.toLowerCase().includes("403"));
-          setError(
-            isAccessDenied
-              ? "This isn't your current level. Complete the previous level first."
-              : msg,
-          );
+          if (isAccessDenied) {
+            getCurrentLevel("READING")
+              .then((current) => {
+                const currentLevelId =
+                  current?.levelId && typeof current.levelId === "object"
+                    ? current.levelId._id
+                    : typeof current?.levelId === "string"
+                      ? current.levelId
+                      : null;
+                if (currentLevelId && currentLevelId !== id) {
+                  setTimeout(() => {
+                    router.replace(`/profile/reading/strict-levels/${currentLevelId}`);
+                  }, 300);
+                } else {
+                  setError(
+                    "This isn't your current level. Complete the previous level first.",
+                  );
+                }
+              })
+              .catch(() => {
+                setError(
+                  "This isn't your current level. Complete the previous level first.",
+                );
+              });
+          } else {
+            setError(msg);
+          }
         }
         setContextDetail(null);
       })
       .finally(() => setLoading(false));
-  }, [id, setContextDetail]);
+  }, [id, router, setContextDetail]);
+
+  const clearStepQueryParam = useCallback(() => {
+    if (!id) return;
+    router.replace(`/profile/reading/strict-levels/${id}`, { scroll: false });
+  }, [router, id]);
+
+  const handleContentUpdateRequired = useCallback(() => {
+    // Used for the "mid-step" error path where `detail` may not include `contentUpdateNotice`.
+    setContentUpdateBannerMessage(
+      "Admin updated this level. Restarting from the beginning to continue with the fresh content.",
+    );
+    clearStepQueryParam();
+    loadDetail();
+  }, [clearStepQueryParam, loadDetail]);
+
+  useEffect(() => {
+    const notice = detail?.contentUpdateNotice;
+    if (!notice?.restartRequired) return;
+    const toVersionId = notice.toVersionId;
+    if (!toVersionId) return;
+    if (lastHandledRestartToVersionIdRef.current === toVersionId) return;
+    lastHandledRestartToVersionIdRef.current = toVersionId;
+    clearStepQueryParam();
+  }, [
+    detail?.contentUpdateNotice?.restartRequired,
+    detail?.contentUpdateNotice?.toVersionId,
+    clearStepQueryParam,
+  ]);
+
+  useEffect(() => {
+    if (!contentUpdateBannerMessage) return;
+    const t = window.setTimeout(() => setContentUpdateBannerMessage(null), 8000);
+    return () => window.clearTimeout(t);
+  }, [contentUpdateBannerMessage]);
+
+  useEffect(() => {
+    if (contentUpdatedParam !== "1") return;
+    setContentUpdateBannerMessage(
+      "Admin updated this level. Restarting from the beginning to continue with the fresh content.",
+    );
+    if (id) {
+      router.replace(`/profile/reading/strict-levels/${id}`, { scroll: false });
+    }
+  }, [contentUpdatedParam, id, router]);
 
   useEffect(() => {
     loadDetail();
@@ -172,7 +270,9 @@ export default function ReadingStrictLevelPage() {
   }, [detail?.level.order, detail?.progress.passStatus, nextLevelInfo]);
 
   const handleLevelPassed = useCallback(() => {
-    loadDetail();
+    setTimeout(() => {
+      loadDetail();
+    }, 500);
   }, [loadDetail]);
 
   const handleCompleteStep = useCallback(
@@ -220,22 +320,66 @@ export default function ReadingStrictLevelPage() {
     [router, id],
   );
 
+  if (premiumLock && id) {
+    return (
+      <PremiumReadingLockPanel
+        variant="fullscreen"
+        levelId={id}
+        context="level"
+        backHref="/profile/reading"
+        backLabel="Back to Reading"
+      />
+    );
+  }
+
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
-          <p className="text-sm text-gray-400 dark:text-gray-500">
-            Loading level...
-          </p>
+      <div className="min-h-[calc(100vh-4rem)] w-full animate-pulse px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid min-h-[calc(100vh-5rem)] w-full gap-4 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
+          <aside className="space-y-3 rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-gray-700 dark:bg-gray-900/60">
+            <div className="h-5 w-36 rounded bg-gray-200 dark:bg-gray-700" />
+            <div className="h-3 w-24 rounded bg-gray-200/80 dark:bg-gray-700/80" />
+            <div className="h-12 rounded-xl bg-gray-100 dark:bg-gray-800" />
+            <div className="h-12 rounded-xl bg-gray-100 dark:bg-gray-800" />
+            <div className="h-12 rounded-xl bg-gray-100 dark:bg-gray-800" />
+            <div className="h-12 rounded-xl bg-gray-100 dark:bg-gray-800" />
+          </aside>
+
+          <section className="space-y-4 rounded-2xl border border-gray-200 bg-white/80 p-6 dark:border-gray-700 dark:bg-gray-900/60">
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800" />
+              <div className="space-y-2">
+                <div className="h-4 w-28 rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="h-6 w-72 max-w-full rounded bg-gray-200 dark:bg-gray-700" />
+              </div>
+            </div>
+            <div className="rounded-2xl border border-gray-100 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+              <div className="space-y-3">
+                <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="h-4 w-11/12 rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="h-4 w-4/5 rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
+                <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700" />
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     );
   }
 
   if (error || !detail) {
-    const isNotCurrentLevel =
-      typeof error === "string" && error.includes("isn't your current level");
+    if (typeof error === "string" && isReadingPremiumLockMessage(error) && id) {
+      return (
+        <PremiumReadingLockPanel
+          variant="fullscreen"
+          levelId={id}
+          context="level"
+          backHref="/profile/reading"
+          backLabel="Back to Reading"
+        />
+      );
+    }
 
     if (targetBandRequired && id) {
       return (
@@ -274,34 +418,84 @@ export default function ReadingStrictLevelPage() {
       );
     }
 
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center px-4">
-        <div className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center shadow-sm">
-          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
-            <AlertTriangle className="h-6 w-6 text-amber-500" />
+    const isAccessDenied =
+      typeof error === "string" &&
+      (error.toLowerCase().includes("current level") ||
+        error.toLowerCase().includes("access denied") ||
+        error.toLowerCase().includes("403"));
+    const isNotCurrentLevel =
+      typeof error === "string" && error.includes("isn't your current level");
+
+    if (isAccessDenied) {
+      return (
+        <div className="flex min-h-[60vh] items-center justify-center px-4">
+          <div className="w-full max-w-md rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 text-center shadow-sm">
+            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
+              <AlertTriangle className="h-6 w-6 text-amber-500" />
+            </div>
+            <h2 className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-100">
+              {isNotCurrentLevel ? "Level not available" : "Something went wrong"}
+            </h2>
+            <p className="mb-6 text-sm leading-6 text-gray-500 dark:text-gray-400">
+              {error ?? "Level not found."}
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  getCurrentLevel("READING")
+                    .then((current) => {
+                      const currentLevelId =
+                        current?.levelId && typeof current.levelId === "object"
+                          ? current.levelId._id
+                          : typeof current?.levelId === "string"
+                            ? current.levelId
+                            : null;
+                      if (currentLevelId) {
+                        router.replace(`/profile/reading/strict-levels/${currentLevelId}`);
+                      } else {
+                        router.replace("/profile/reading");
+                      }
+                    })
+                    .catch(() => {
+                      setLoading(false);
+                      setError("Unable to load your current level. Please try again.");
+                    });
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
+              >
+                Refresh and go to current level
+              </button>
+              <Link
+                href="/profile/reading"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Reading
+              </Link>
+            </div>
           </div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900 dark:text-gray-100">
-            {isNotCurrentLevel ? "Level not available" : "Something went wrong"}
-          </h2>
-          <p className="mb-6 text-sm leading-6 text-gray-500 dark:text-gray-400">
-            {error ?? "Level not found."}
-          </p>
-          <Link
-            href="/profile/reading"
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Reading
-          </Link>
         </div>
+      );
+    }
+  }
+
+  if (!detail) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] w-full animate-pulse space-y-4 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="h-6 w-48 rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-4 w-80 max-w-full rounded bg-gray-200/80 dark:bg-gray-700/80" />
+        <div className="h-[min(24rem,calc(100vh-12rem))] w-full rounded-2xl border border-gray-200 bg-white/70 dark:border-gray-700 dark:bg-gray-900/60" />
       </div>
     );
   }
 
   const activeStepId =
     stepIdFromUrl ??
-    detail.steps[detail.progress.currentStepIndex ?? 0]?._id ??
-    detail.steps[0]?._id ??
+    detail.steps?.[detail.progress.currentStepIndex ?? 0]?._id ??
+    detail.steps?.[0]?._id ??
     "";
 
   const isLevel0PassedWithNextLevel =
@@ -341,6 +535,8 @@ export default function ReadingStrictLevelPage() {
       completionScore={completionScore}
       hasFeedbackSubmitted={hasFeedbackSubmitted}
       onFeedbackSuccess={() => setHasFeedbackSubmitted(true)}
+      onContentUpdateRequired={handleContentUpdateRequired}
+      contentUpdateBannerMessage={contentUpdateBannerMessage}
     />
     </>
   );

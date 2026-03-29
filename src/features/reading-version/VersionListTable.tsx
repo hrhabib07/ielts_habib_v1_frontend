@@ -30,17 +30,26 @@ export function VersionListTable({
   busyVersionId,
 }: VersionListTableProps) {
   const isBusy = (id: string) => busyVersionId === id || isCreatingDraft;
+  const draftExists = versions.some((v) => v.status === "DRAFT");
+  const publishedExists = versions.some((v) => v.status === "PUBLISHED");
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>Versions</CardTitle>
+        <CardTitle>Published & draft</CardTitle>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => onCreateDraft()}
-          disabled={isCreatingDraft}
+          disabled={isCreatingDraft || draftExists || publishedExists}
+          title={
+            draftExists
+              ? "You already have a draft. Edit it or publish it before starting another."
+              : publishedExists
+                ? "Use Edit from published on the published row to copy live content into your draft."
+                : "Create the first draft for this level (empty until you add content)"
+          }
         >
           <Plus className="h-4 w-4 mr-1" />
           New draft
@@ -101,11 +110,15 @@ export function VersionListTable({
                             size="sm"
                             className="gap-1"
                             onClick={() => onClone(v._id)}
-                            disabled={isBusy(v._id)}
-                            title="Clone into new draft to make changes"
+                            disabled={isBusy(v._id) || draftExists}
+                            title={
+                              draftExists
+                                ? "Discard or publish the current draft before copying the published version into a new draft"
+                                : "Copy published content into a new draft to edit"
+                            }
                           >
                             <Copy className="h-4 w-4" />
-                            Clone
+                            Edit from published
                           </Button>
                         )}
                         {v.status === "DRAFT" && (

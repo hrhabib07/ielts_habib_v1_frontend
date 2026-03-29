@@ -135,7 +135,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
           {isPublished && (
             <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
               <Eye className="h-3.5 w-3.5" />
-              View only — clone to edit
+              View only — use Edit from published on Versions
             </span>
           )}
         </div>
@@ -144,11 +144,12 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
       {isPublished && (
         <Card className="rounded-xl border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30">
           <CardContent className="py-3 text-sm text-amber-800 dark:text-amber-200">
-            This version is published and cannot be edited. To make changes, go to{" "}
+            This is the published version (read-only). To edit, open{" "}
             <Link href={`/dashboard/instructor/reading-levels/${levelId}/versions`} className="underline font-medium">
               Versions
             </Link>
-            {" "}and use <strong>Clone</strong> on this version to create a new draft.
+            {" "}
+            and use <strong>Edit from published</strong> when you do not already have a draft — it copies this content into a single draft you can change and publish.
           </CardContent>
         </Card>
       )}
@@ -213,6 +214,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
         </CardHeader>
         <CardContent className="p-0 pt-0">
           <GroupTestBuilder
+            levelId={levelId}
             versionId={versionId}
             groupTests={groupTests ?? []}
             disabled={disabled}

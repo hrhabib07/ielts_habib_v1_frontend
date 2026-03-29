@@ -594,6 +594,32 @@ export async function deletePracticeTest(
   );
 }
 
+export async function deleteAllPracticeTestsByVersion(
+  versionId: string,
+  mode: "detach" | "permanent" = "permanent",
+): Promise<{ deletedCount: number }> {
+  const params = new URLSearchParams();
+  if (mode === "detach") params.set("mode", "detach");
+  const query = params.toString();
+  const res = await apiClient.delete<{ success: boolean; data: { deletedCount: number } }>(
+    `${BASE}/versions/${versionId}/practice-tests${query ? `?${query}` : ""}`,
+  );
+  return unwrap(res);
+}
+
+export async function deleteAllPracticeTestsByLevel(
+  levelId: string,
+  mode: "detach" | "permanent" = "permanent",
+): Promise<{ deletedCount: number }> {
+  const params = new URLSearchParams();
+  if (mode === "detach") params.set("mode", "detach");
+  const query = params.toString();
+  const res = await apiClient.delete<{ success: boolean; data: { deletedCount: number } }>(
+    `${LEVELS_BASE}/${levelId}/practice-tests${query ? `?${query}` : ""}`,
+  );
+  return unwrap(res);
+}
+
 export async function reorderPracticeTests(
   versionId: string,
   practiceTestIds: string[],

@@ -4,27 +4,50 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Menu, User, LogOut, ChevronDown, Sparkles, Layers, FileQuestion, Tag, BarChart2 } from "lucide-react";
+import { Moon, Sun, Menu, User, LogOut, ChevronDown, Sparkles, Layers, FileQuestion, Tag, BarChart2, Shield } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { getDecodedTokenClient, logout } from "@/src/lib/auth";
 import type { UserRole } from "@/src/lib/constants";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { GamlishLogo } from "./GamlishLogo";
+import { isReadingExamFocusPath } from "@/src/lib/examFocusPaths";
 
 interface HeaderProps {
   initialUser?: CurrentUser | null;
 }
 
+function ThemeToggleGlyph({
+  mounted,
+  resolvedLight,
+}: {
+  mounted: boolean;
+  resolvedLight: boolean;
+}) {
+  if (!mounted) {
+    return <span className="block h-5 w-5 shrink-0" aria-hidden />;
+  }
+  return resolvedLight ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />;
+}
+
 export function Header({ initialUser = null }: HeaderProps) {
   const pathname = usePathname();
+
+  if (isReadingExamFocusPath(pathname)) {
+    return null;
+  }
   const { theme, toggleTheme } = useTheme();
+  const [themeToggleMounted, setThemeToggleMounted] = useState(false);
   const [clientUser, setClientUser] = useState<{ role: UserRole; userId: string } | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   const user = initialUser ?? clientUser;
+
+  useEffect(() => {
+    setThemeToggleMounted(true);
+  }, []);
 
   useEffect(() => {
     const updateUser = () => {
@@ -56,6 +79,13 @@ export function Header({ initialUser = null }: HeaderProps) {
 
   const isActive = (path: string) => pathname === path;
 
+  const isStudentNavActive = (href: string) => {
+    if (href === "/profile") {
+      return pathname === "/profile" || pathname === "/profile/";
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   const publicNav = [
     { href: "/about", label: "About" },
     { href: "/pricing", label: "Plans & Pricing" },
@@ -63,7 +93,7 @@ export function Header({ initialUser = null }: HeaderProps) {
 
   const studentNav = [
     { href: "/profile/reading", label: "Reading" },
-    { href: "/profile/reading", label: "Analytics" },
+    { href: "/profile", label: "My profile" },
   ];
 
   return (
@@ -83,7 +113,9 @@ export function Header({ initialUser = null }: HeaderProps) {
                     key={link.href + link.label}
                     href={link.href}
                     className={`text-sm font-medium transition-colors hover:text-primary ${
-                      isActive(link.href) ? "text-foreground" : "text-muted-foreground"
+                      isStudentNavActive(link.href)
+                        ? "text-foreground"
+                        : "text-muted-foreground"
                     }`}
                   >
                     {link.label}
@@ -120,7 +152,7 @@ export function Header({ initialUser = null }: HeaderProps) {
             onClick={toggleTheme}
             aria-label="Toggle theme"
           >
-            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            <ThemeToggleGlyph mounted={themeToggleMounted} resolvedLight={theme === "light"} />
           </Button>
           {user ? (
             <div className="relative" ref={profileRef}>
@@ -194,13 +226,23 @@ export function Header({ initialUser = null }: HeaderProps) {
                   ) : (
                     <>
                       {user.role === "STUDENT" && (
-                        <Link
-                          href="/profile/reading"
-                          className="block px-4 py-2 text-sm hover:bg-muted"
-                          onClick={() => setProfileOpen(false)}
-                        >
-                          Profile
-                        </Link>
+                        <>
+                          <Link
+                            href="/profile"
+                            className="block px-4 py-2 text-sm hover:bg-muted"
+                            onClick={() => setProfileOpen(false)}
+                          >
+                            My profile
+                          </Link>
+                          <Link
+                            href="/profile/score-guarantee"
+                            className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted"
+                            onClick={() => setProfileOpen(false)}
+                          >
+                            <Shield className="h-4 w-4 text-primary" />
+                            Score Guarantee™
+                          </Link>
+                        </>
                       )}
                       <Link
                         href="/pricing"
@@ -241,7 +283,7 @@ export function Header({ initialUser = null }: HeaderProps) {
         {/* Mobile */}
         <div className="flex md:hidden items-center gap-2">
           <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            <ThemeToggleGlyph mounted={themeToggleMounted} resolvedLight={theme === "light"} />
           </Button>
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
@@ -257,8 +299,8 @@ export function Header({ initialUser = null }: HeaderProps) {
                       <Link href="/profile/reading" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium">
                         Reading
                       </Link>
-                      <Link href="/profile/reading" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium">
-                        Analytics
+                      <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium">
+                        My profile
                       </Link>
                     </>
                   ) : (
@@ -313,9 +355,19 @@ export function Header({ initialUser = null }: HeaderProps) {
                       ) : (
                         <>
                           {user.role === "STUDENT" && (
-                            <Link href="/profile/reading" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm">
-                              Profile
-                            </Link>
+                            <>
+                              <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm">
+                                My profile
+                              </Link>
+                              <Link
+                                href="/profile/score-guarantee"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center gap-2 py-2 text-sm font-medium text-primary"
+                              >
+                                <Shield className="h-4 w-4" />
+                                Score Guarantee™
+                              </Link>
+                            </>
                           )}
                           <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-2 text-sm">
                             <Sparkles className="h-4 w-4" /> Subscription plans

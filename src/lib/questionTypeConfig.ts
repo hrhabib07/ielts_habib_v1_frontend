@@ -143,8 +143,20 @@ NOT GIVEN	if it is impossible to say what the writer thinks about this`,
     SUMMARY_COMPLETION_WITH_CLUES: {
       label: "Summary Completion (with clues)",
       defaultInstruction:
-        "Complete the summary below. Choose NO MORE THAN TWO WORDS from the box for each answer.",
-      defaultMeta: { options: ["option A", "option B", "option C", "option D", "option E"], wordLimit: 2 },
+        "Complete the summary below. Choose ONE WORD ONLY from the box for each answer.",
+      defaultMeta: {
+        options: [
+          "technology",
+          "trade",
+          "policy",
+          "labour",
+          "climate",
+          "innovation",
+          "barrier",
+          "support",
+        ],
+        wordLimit: 1,
+      },
     },
     NOTE_COMPLETION: {
       label: "Note Completion",

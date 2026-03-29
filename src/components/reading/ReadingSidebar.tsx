@@ -42,6 +42,33 @@ function isLevelUnlocked(
   return isFirstLevel || levelOrder <= currentOrder;
 }
 
+/** Unlock when the pointer has advanced, or the previous level in the path is PASSED (handles stale `currentLevelId`). */
+function isLevelUnlockedStrict(
+  levelIndex: number,
+  levelOrder: number,
+  currentOrder: number,
+  levels: Level[],
+  detailCache: LevelDetailCache,
+  contextDetail: LevelDetailForStudent | null,
+  levelIdFromPath: string | null,
+): boolean {
+  const isFirstLevel = levelIndex === 0;
+  if (isFirstLevel) return true;
+  if (levelOrder <= currentOrder) return true;
+
+  const prev = levels[levelIndex - 1];
+  if (!prev) return true;
+
+  const prevDetail =
+    prev._id === levelIdFromPath && contextDetail
+      ? contextDetail
+      : detailCache[prev._id];
+  if (prevDetail?.progress.passStatus === "PASSED") {
+    return true;
+  }
+  return isLevelUnlocked(levelOrder, currentOrder, false);
+}
+
 interface StepStatus {
   completed: boolean;
   current: boolean;
@@ -149,21 +176,26 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
       levels.length > 0
     ) {
       let cancelled = false;
-      getCurrentLevel("READING")
-        .then((progress) => {
-          if (cancelled) return;
-          const levelId =
-            progress?.levelId && typeof progress.levelId === "object"
-              ? (progress.levelId as Level)._id
-              : typeof progress?.levelId === "string"
-                ? progress.levelId
-                : null;
-          setCurrentLevelId(levelId ?? null);
-          setCurrentStepId(progress?.currentStepId ?? null);
-        })
-        .catch(() => {});
+      const refreshCurrentLevel = () => {
+        getCurrentLevel("READING")
+          .then((progress) => {
+            if (cancelled) return;
+            const levelId =
+              progress?.levelId && typeof progress.levelId === "object"
+                ? (progress.levelId as Level)._id
+                : typeof progress?.levelId === "string"
+                  ? progress.levelId
+                  : null;
+            setCurrentLevelId(levelId ?? null);
+            setCurrentStepId(progress?.currentStepId ?? null);
+          })
+          .catch(() => {});
+      };
+      refreshCurrentLevel();
+      const retryTimer = setTimeout(refreshCurrentLevel, 1000);
       return () => {
         cancelled = true;
+        clearTimeout(retryTimer);
       };
     }
   }, [
@@ -191,6 +223,14 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
         });
       });
   }, [detailCache]);
+
+  useEffect(() => {
+    if (!levelIdFromPath || levels.length === 0) return;
+    const idx = levels.findIndex((l) => l._id === levelIdFromPath);
+    if (idx <= 0) return;
+    const prevId = levels[idx - 1]?._id;
+    if (prevId) loadLevelDetail(prevId);
+  }, [levelIdFromPath, levels, loadLevelDetail]);
 
   const toggleLevel = useCallback((levelId: string) => {
     setExpandedLevelIds((prev) => {
@@ -267,10 +307,17 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
 
       <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 overscroll-contain">
         <div className="space-y-1 px-3">
-          {levels.map((level) => {
+          {levels.map((level, levelIndex) => {
             const isExpanded = expandedLevelIds.has(level._id);
-            const isFirstLevel = levels[0] ? level.order === levels[0].order : level.order === 0;
-            const unlocked = isLevelUnlocked(level.order, currentOrder, isFirstLevel);
+            const unlocked = isLevelUnlockedStrict(
+              levelIndex,
+              level.order,
+              currentOrder,
+              levels,
+              detailCache,
+              contextDetail,
+              levelIdFromPath,
+            );
             const isCurrentLevel = level._id === currentLevelId;
             const detail =
               level._id === levelIdFromPath && contextDetail

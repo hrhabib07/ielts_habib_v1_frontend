@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Highlighter, StickyNote, Eraser } from "lucide-react";
+import { getSelectionStringOffsetsInRoot } from "@/src/utils/domTextOffsets";
 
 export type TextHighlightRange = { start: number; end: number };
 export type TextNote = {
@@ -93,6 +95,7 @@ export function SelectableTextWithTools({
   const [noteInput, setNoteInput] = useState<{ start: number; end: number } | null>(null);
   const noteTextRef = useRef<HTMLTextAreaElement>(null);
   const blockRef = useRef<HTMLSpanElement>(null);
+  const selectableMenuOpenedAtRef = useRef(0);
 
   const tryShowMenu = useCallback(
     (clientX?: number, clientY?: number) => {
@@ -102,12 +105,11 @@ export function SelectableTextWithTools({
       if (!el || !el.contains(sel.anchorNode) || !el.contains(sel.focusNode)) return;
       try {
         const range = sel.getRangeAt(0);
-        const preRange = document.createRange();
-        preRange.selectNodeContents(el);
-        preRange.setEnd(range.startContainer, range.startOffset);
-        const start = preRange.toString().length;
-        const end = start + range.toString().length;
-        if (start < 0 || end <= start) return;
+        const pair = getSelectionStringOffsetsInRoot(el, range);
+        if (!pair) return;
+        let { start, end } = pair;
+        if (end < start) [start, end] = [end, start];
+        if (start < 0 || end <= start || end > text.length) return;
         let x: number;
         let y: number;
         if (clientX != null && clientY != null) {
@@ -118,24 +120,59 @@ export function SelectableTextWithTools({
           x = rect.left + rect.width / 2 - 90;
           y = Math.max(8, rect.top - 44);
         }
+        selectableMenuOpenedAtRef.current = Date.now();
         setContextMenu({ x, y, offsets: { start, end } });
       } catch {
         // ignore
       }
     },
-    []
+    [text],
   );
 
   useEffect(() => {
-    const onMouseUp = (e: MouseEvent) => {
-      if (e.button !== 0) return;
+    const scheduleToolbar = () => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => tryShowMenu());
       });
     };
-    document.addEventListener("mouseup", onMouseUp, true);
-    return () => document.removeEventListener("mouseup", onMouseUp, true);
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      scheduleToolbar();
+    };
+    document.addEventListener("pointerup", onPointerUp, true);
+    return () => document.removeEventListener("pointerup", onPointerUp, true);
   }, [tryShowMenu]);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const onSelectionChange = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const sel = document.getSelection();
+        if (!sel || sel.isCollapsed) return;
+        const el = blockRef.current;
+        const anchor = sel.anchorNode;
+        if (!el || !anchor || !el.contains(anchor)) return;
+        tryShowMenu();
+      }, 160);
+    };
+    document.addEventListener("selectionchange", onSelectionChange);
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener("selectionchange", onSelectionChange);
+    };
+  }, [tryShowMenu]);
+
+  const onBlockTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.changedTouches.length === 0) return;
+      const t = e.changedTouches[0];
+      window.setTimeout(() => {
+        tryShowMenu(t.clientX, Math.min(t.clientY + 24, window.innerHeight - 56));
+      }, 100);
+    },
+    [tryShowMenu],
+  );
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -193,13 +230,18 @@ export function SelectableTextWithTools({
     : false;
 
   useEffect(() => {
-    const close = (e: MouseEvent) => {
+    const close = (e: Event) => {
+      if (Date.now() - selectableMenuOpenedAtRef.current < 180) return;
       const menu = document.querySelector("[data-selectable-context-menu]");
       if (menu?.contains(e.target as Node)) return;
       setContextMenu(null);
     };
     document.addEventListener("click", close, true);
-    return () => document.removeEventListener("click", close, true);
+    document.addEventListener("touchstart", close, { capture: true });
+    return () => {
+      document.removeEventListener("click", close, true);
+      document.removeEventListener("touchstart", close, { capture: true });
+    };
   }, []);
 
   useEffect(() => {
@@ -211,6 +253,7 @@ export function SelectableTextWithTools({
     end: n.end,
     noteText: n.text,
   }));
+  const canPortal = typeof document !== "undefined";
 
   return (
     <>
@@ -218,94 +261,102 @@ export function SelectableTextWithTools({
         ref={blockRef}
         data-block-id={blockId}
         onContextMenu={handleContextMenu}
-        className={`select-text ${className}`}
+        onTouchEnd={onBlockTouchEnd}
+        className={`touch-pan-y select-text [-webkit-user-select:text] [user-select:text] [-webkit-touch-callout:default] ${className}`}
+        style={{ WebkitUserSelect: "text", userSelect: "text", touchAction: "pan-y" }}
       >
         {highlights.length > 0 || notes.length > 0
           ? applyTextMarks(text, highlights, paraNotes)
           : text}
       </span>
 
-      {contextMenu && (
-        <div
-          data-selectable-context-menu
-          className="fixed z-[100] flex rounded-md bg-slate-800 dark:bg-slate-900 shadow-2xl border border-slate-700 overflow-hidden"
-          style={{
-            left:
-              typeof window !== "undefined"
-                ? Math.min(Math.max(contextMenu.x, 8), window.innerWidth - 220)
-                : contextMenu.x,
-            top: contextMenu.y,
-          }}
-        >
-          <button
-            type="button"
-            onClick={handleAddNote}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700/80 min-w-[70px] justify-center"
+      {contextMenu &&
+        canPortal &&
+        createPortal(
+          <div
+            data-selectable-context-menu
+            className="fixed z-[220] flex rounded-md bg-slate-800 dark:bg-slate-900 shadow-2xl border border-slate-700 overflow-hidden"
+            style={{
+              left:
+                typeof window !== "undefined"
+                  ? Math.min(Math.max(contextMenu.x, 8), window.innerWidth - 220)
+                  : contextMenu.x,
+              top: contextMenu.y,
+            }}
           >
-            <StickyNote className="h-3.5 w-3.5" /> Note
-          </button>
-          <button
-            type="button"
-            onClick={handleHighlight}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700/80 border-l border-slate-600 min-w-[70px] justify-center"
-          >
-            <Highlighter className="h-3.5 w-3.5 text-amber-400" /> Highlight
-          </button>
-          {hasOverlappingHighlight && (
             <button
               type="button"
-              onClick={handleRemoveHighlight}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700/80 border-l border-slate-600 min-w-[70px] justify-center"
+              onClick={handleAddNote}
+              className="flex min-w-[72px] items-center justify-center gap-2 px-3 py-3 text-sm font-medium text-slate-200 hover:bg-slate-700/80 sm:py-2"
             >
-              <Eraser className="h-3.5 w-3.5" /> Eraser
+              <StickyNote className="h-3.5 w-3.5" /> Note
             </button>
-          )}
-        </div>
-      )}
+            <button
+              type="button"
+              onClick={handleHighlight}
+              className="flex min-w-[72px] items-center justify-center gap-2 border-l border-slate-600 px-3 py-3 text-sm font-medium text-slate-200 hover:bg-slate-700/80 sm:py-2"
+            >
+              <Highlighter className="h-3.5 w-3.5 text-amber-400" /> Highlight
+            </button>
+            {hasOverlappingHighlight && (
+              <button
+                type="button"
+                onClick={handleRemoveHighlight}
+                className="flex min-w-[72px] items-center justify-center gap-2 border-l border-slate-600 px-3 py-3 text-sm font-medium text-slate-200 hover:bg-slate-700/80 sm:py-2"
+              >
+                <Eraser className="h-3.5 w-3.5" /> Eraser
+              </button>
+            )}
+          </div>,
+          document.body,
+        )}
 
-      {noteInput && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30"
-          onClick={() => setNoteInput(null)}
-        >
+      {noteInput &&
+        canPortal &&
+        createPortal(
           <div
-            className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl p-4 w-full max-w-md mx-4"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[220] flex items-center justify-center bg-black/30 px-4"
+            onClick={() => setNoteInput(null)}
           >
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
-              Add note
-            </p>
-            <textarea
-              ref={noteTextRef}
-              rows={3}
-              placeholder="Your note..."
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm resize-none focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  submitNote();
-                }
-              }}
-            />
-            <div className="flex justify-end gap-2 mt-3">
-              <button
-                type="button"
-                onClick={() => setNoteInput(null)}
-                className="rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={submitNote}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
-              >
+            <div
+              className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl p-4 w-full max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
                 Add note
-              </button>
+              </p>
+              <textarea
+                ref={noteTextRef}
+                rows={3}
+                placeholder="Your note..."
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm resize-none focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    submitNote();
+                  }
+                }}
+              />
+              <div className="flex justify-end gap-2 mt-3">
+                <button
+                  type="button"
+                  onClick={() => setNoteInput(null)}
+                  className="rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-1.5 text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={submitNote}
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                >
+                  Add note
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

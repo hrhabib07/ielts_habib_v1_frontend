@@ -9,6 +9,7 @@ import type {
   PracticeTestStepStatus,
 } from "@/src/lib/api/readingStrictProgression";
 import { getPracticeTestStepStatus } from "@/src/lib/api/readingStrictProgression";
+import { PRACTICE_TEST_MINUTES } from "@/src/constants/readingAssessmentTiming";
 
 export interface PracticeTestStepCardProps {
   levelId: string;
@@ -38,7 +39,7 @@ export function PracticeTestStepCard({
 
   const handleStartTest = () => {
     router.push(
-      `/profile/reading/strict-levels/${levelId}/practice-test?step=${encodeURIComponent(stepId)}`
+      `/profile/reading/strict-levels/${levelId}/practice-test?step=${encodeURIComponent(stepId)}`,
     );
   };
 
@@ -57,7 +58,7 @@ export function PracticeTestStepCard({
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{content.title}</p>
         )}
         <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          {content.timeLimitMinutes} minutes. One passage with questions. Your reading target band
+          {PRACTICE_TEST_MINUTES} minutes. One passage with questions. Your reading target band
           will be used to determine pass/fail. Unlimited attempts until you pass.
         </p>
 

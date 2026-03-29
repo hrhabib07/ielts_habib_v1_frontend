@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { GamlishLogo } from "./GamlishLogo";
+import { isReadingExamFocusPath } from "@/src/lib/examFocusPaths";
 
 interface FooterProps {
   initialUser?: CurrentUser | null;
@@ -11,6 +12,10 @@ interface FooterProps {
 
 export function Footer({ initialUser = null }: FooterProps) {
   const pathname = usePathname();
+
+  if (isReadingExamFocusPath(pathname)) {
+    return null;
+  }
 
   // Reading dashboard: no footer (full professional dashboard experience)
   if (pathname?.includes("/profile/reading/strict-levels")) {

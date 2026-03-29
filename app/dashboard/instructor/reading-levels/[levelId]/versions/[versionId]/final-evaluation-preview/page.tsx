@@ -2,52 +2,55 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getVersionDetail, getGroupTestPreviewContent } from "@/src/lib/api/adminReadingVersions";
-import type { GroupTest, GroupTestContentForPreview } from "@/src/lib/api/adminReadingVersions";
+import { useParams, useSearchParams } from "next/navigation";
+import {
+  getVersionDetail,
+  getGroupTestPreviewContent,
+} from "@/src/lib/api/adminReadingVersions";
+import type {
+  GroupTest,
+  GroupTestContentForPreview,
+} from "@/src/lib/api/adminReadingVersions";
 import { ReadingFinalEvaluationPreviewView } from "@/src/components/reading/ReadingFinalEvaluationPreviewView";
 import { Loader2, ArrowLeft, FileText } from "lucide-react";
 
-export default function FinalEvaluationPreviewPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ levelId: string; versionId: string }>;
-  searchParams: Promise<{ groupTestId?: string }>;
-}) {
-  const [levelId, setLevelId] = useState<string>("");
-  const [versionId, setVersionId] = useState<string>("");
+export default function FinalEvaluationPreviewPage() {
+  const params = useParams<{ levelId: string; versionId: string }>();
+  const searchParams = useSearchParams();
+  const levelId = params.levelId ?? "";
+  const versionId = params.versionId ?? "";
+  const groupTestIdFromQuery = searchParams.get("groupTestId");
+
   const [groupTests, setGroupTests] = useState<GroupTest[]>([]);
-  const [selectedGroupTestId, setSelectedGroupTestId] = useState<string | null>(null);
-  const [previewContent, setPreviewContent] = useState<GroupTestContentForPreview | null>(null);
+  const [selectedGroupTestId, setSelectedGroupTestId] = useState<string | null>(
+    null,
+  );
+  const [previewContent, setPreviewContent] =
+    useState<GroupTestContentForPreview | null>(null);
   const [loadingVersion, setLoadingVersion] = useState(true);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    params.then((p) => {
-      setLevelId(p.levelId);
-      setVersionId(p.versionId);
-    });
-  }, [params]);
-
-  useEffect(() => {
     if (!versionId) return;
     setLoadingVersion(true);
     setError(null);
-    Promise.all([getVersionDetail(versionId), searchParams])
-      .then(([detail, sp]) => {
+    getVersionDetail(versionId)
+      .then((detail) => {
         const tests = detail.groupTests ?? [];
         setGroupTests(tests);
-        const queryId = sp.groupTestId;
+        const queryId = groupTestIdFromQuery ?? undefined;
         if (queryId && tests.some((t) => t._id === queryId)) {
           setSelectedGroupTestId(queryId);
         } else if (tests.length) {
           setSelectedGroupTestId(tests[0]._id);
         }
       })
-      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load version"))
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : "Failed to load version"),
+      )
       .finally(() => setLoadingVersion(false));
-  }, [versionId, searchParams]);
+  }, [versionId, groupTestIdFromQuery]);
 
   useEffect(() => {
     if (!versionId || !selectedGroupTestId) {
@@ -56,14 +59,21 @@ export default function FinalEvaluationPreviewPage({
     }
     setLoadingPreview(true);
     setPreviewContent(null);
+    setError(null);
     getGroupTestPreviewContent(versionId, selectedGroupTestId)
       .then(setPreviewContent)
-      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load preview"))
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : "Failed to load preview"),
+      )
       .finally(() => setLoadingPreview(false));
   }, [versionId, selectedGroupTestId]);
 
   if (!levelId || !versionId) {
-    return null;
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   if (loadingVersion) {
@@ -111,13 +121,16 @@ export default function FinalEvaluationPreviewPage({
             No group tests in this version
           </p>
           <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
-            Add group tests in the version editor to preview the final evaluation here.
+            Add group tests in the version editor to preview the final evaluation
+            here.
           </p>
         </div>
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">Group test:</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              Group test:
+            </span>
             {groupTests.map((gt, idx) => (
               <button
                 key={gt._id}
@@ -144,7 +157,7 @@ export default function FinalEvaluationPreviewPage({
             <div className="min-h-[600px]">
               <ReadingFinalEvaluationPreviewView
                 content={previewContent}
-                groupLabel={`Group ${(groupTests.findIndex((g) => g._id === selectedGroupTestId)) + 1}`}
+                groupLabel={`Group ${groupTests.findIndex((g) => g._id === selectedGroupTestId) + 1}`}
               />
             </div>
           )}

@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getProfileSummary, getMyProfile } from "@/src/lib/api/profile";
 import { ArrowRight, BookOpen } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
-import { GamlishLogo } from "@/src/components/shared/GamlishLogo";
-import { BRAND } from "@/src/lib/constants";
+import { HeroAnimation } from "@/src/components/home/HeroAnimation";
 
 type HeroMode = "minimal" | "band" | "loading";
 
@@ -24,18 +23,25 @@ export function HomeHero({
   roleCtaHref = null,
   roleCtaLabel = null,
 }: HomeHeroProps) {
-  const [mode, setMode] = useState<HeroMode>("loading");
+  const needsStudentSummary = initialUser?.role === "STUDENT";
+  const [mode, setMode] = useState<HeroMode>(() =>
+    needsStudentSummary ? "loading" : "minimal",
+  );
   const [targetBand, setTargetBand] = useState<number | null>(null);
   const [overallProgressPct, setOverallProgressPct] = useState<number>(0);
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!needsStudentSummary) {
+      setMode("minimal");
+      return;
+    }
+
     let cancelled = false;
-    const isStudent = initialUser?.role === "STUDENT";
     getProfileSummary()
       .then((res) => {
         if (cancelled) return;
-        if (isStudent && res?.targetBand != null) {
+        if (res?.targetBand != null) {
           setMode("band");
           setTargetBand(res.targetBand);
           setOverallProgressPct(res.overallProgressPct ?? 0);
@@ -52,7 +58,7 @@ export function HomeHero({
     return () => {
       cancelled = true;
     };
-  }, [initialUser?.role]);
+  }, [needsStudentSummary]);
 
   if (mode === "loading") {
     return (
@@ -91,66 +97,76 @@ interface MinimalHeroProps {
   isAuthenticated: boolean;
 }
 
+const HERO_TITLE = "Turn Your Target Band Into Reality with Gamlish";
+const HERO_SUBTITLE = "Follow the system. Track your progress. Hit your band.";
+
 function MinimalHero({
   roleCtaHref,
   roleCtaLabel,
   isAuthenticated,
 }: MinimalHeroProps) {
-  const showAuthCtas = !isAuthenticated || !roleCtaHref || !roleCtaLabel;
+  const showGuestCtas = !isAuthenticated;
+  const showRoleCta = isAuthenticated && roleCtaHref && roleCtaLabel;
 
   return (
-    <section className="relative flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center overflow-hidden px-6 py-20 text-center">
-      {/* Premium gradient backdrop */}
+    <section className="relative flex min-h-[calc(100vh-8rem)] flex-col items-center justify-start overflow-visible px-4 pb-12 pt-20 text-center sm:px-6 sm:pb-16 sm:pt-24 md:pt-28">
       <div
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-primary/5 dark:from-primary/10 dark:to-primary/10"
         aria-hidden
       />
-      <div className="relative z-10 mx-auto max-w-3xl space-y-10">
-        <div className="flex justify-center">
-          <GamlishLogo showWordmark={false} variant="hero" />
-        </div>
-        <div className="space-y-6">
-          <h1 className="animate-hero-fade-in-up text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-            {BRAND.tagline}
-          </h1>
-          <p className="animate-slogan-reveal mx-auto max-w-xl text-base font-medium tracking-wide text-muted-foreground md:text-lg">
-            {BRAND.subheadline}
-          </p>
-        </div>
-        <p className="mx-auto max-w-md text-sm text-muted-foreground">
-          {BRAND.heroSubtext}
-        </p>
-        <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:justify-center">
-          {showAuthCtas ? (
-            <>
-              <Link href="/register">
-                <Button size="lg" className="gap-2 shadow-lg">
-                  {BRAND.cta}
+      <div className="relative z-10 flex w-full max-w-full flex-col items-center">
+        {showGuestCtas ? (
+          <>
+            <div className="mx-auto w-full max-w-2xl space-y-3 px-1 sm:space-y-4 sm:px-0">
+              <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                {HERO_TITLE}
+              </h1>
+              <p className="text-balance text-base font-medium leading-snug text-muted-foreground sm:text-lg">
+                {HERO_SUBTITLE}
+              </p>
+            </div>
+            <div className="mt-4 flex w-full min-w-0 justify-center px-2 sm:mt-5 sm:px-4">
+              <HeroAnimation />
+            </div>
+            <div className="mt-5 flex w-full max-w-2xl flex-col items-stretch gap-3 px-1 sm:mt-6 sm:flex-row sm:justify-center sm:gap-4 sm:px-0">
+              <Button size="lg" className="w-full gap-2 shadow-lg sm:w-auto" asChild>
+                <Link href="/register">
+                  Get started
                   <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button size="lg" variant="outline">
-                  Login
-                </Button>
-              </Link>
-            </>
-          ) : (
-            <Link href={roleCtaHref ?? "#"}>
-              <Button size="lg" className="gap-2 shadow-lg">
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
+                <Link href="/how-it-works">How it works</Link>
+              </Button>
+            </div>
+          </>
+        ) : showRoleCta ? (
+          <div className="flex flex-col items-center gap-6 py-8">
+            <Button size="lg" className="gap-2 shadow-lg" asChild>
+              <Link href={roleCtaHref ?? "#"}>
                 {roleCtaLabel}
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          )}
-        </div>
+              </Link>
+            </Button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
 }
 
-const FILL_MIN_PCT = 15;
-const FILL_MAX_PCT = 95;
+/**
+ * Large band digits make very low % (e.g. 3%) only a few pixels tall — looks empty.
+ * When journey is above 0, use at least this fill height so a sliver of water is visible.
+ * True % stays in copy and aria-label. 0% stays empty (no floor).
+ */
+const VISUAL_WATER_MIN_PCT = 8;
+
+function journeyToVisualWaterPercent(journeyPct: number): number {
+  const p = Math.min(100, Math.max(0, Math.round(journeyPct)));
+  if (p <= 0) return 0;
+  return Math.min(100, Math.max(VISUAL_WATER_MIN_PCT, p));
+}
 
 function BandHero({
   band,
@@ -164,29 +180,32 @@ function BandHero({
   const bandLabel = Number.isInteger(band) ? String(band) : band.toFixed(1);
   const topLine = userName ? `${userName} can achieve` : "You can achieve";
 
-  const targetFillPct = Math.round(
-    Math.min(FILL_MAX_PCT, Math.max(FILL_MIN_PCT, overallProgressPct))
-  );
+  const targetFillPct = journeyToVisualWaterPercent(overallProgressPct);
 
-  const [fillPct, setFillPct] = useState(FILL_MIN_PCT);
+  const [fillPct, setFillPct] = useState(0);
+  const fillRef = useRef(0);
 
   useEffect(() => {
-    if (targetFillPct <= FILL_MIN_PCT) return;
+    const target = targetFillPct;
+    const from = fillRef.current;
+    if (from === target) return;
+
+    let raf = 0;
     const duration = 2200;
     const start = performance.now();
-    const startPct = FILL_MIN_PCT;
 
     const tick = (now: number) => {
       const elapsed = now - start;
       const t = Math.min(1, elapsed / duration);
       const eased = 1 - (1 - t) * (1 - t);
-      const pct = Math.round(startPct + eased * (targetFillPct - startPct));
+      const pct = Math.round(from + eased * (target - from));
+      fillRef.current = pct;
       setFillPct(pct);
-      if (t < 1) requestAnimationFrame(tick);
+      if (t < 1) raf = requestAnimationFrame(tick);
     };
 
-    const id = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(id);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [targetFillPct]);
 
   return (
@@ -206,7 +225,7 @@ function BandHero({
           </span>
           <span
             className="band-score-outline font-bold tabular-nums select-none text-8xl tracking-tight md:text-9xl"
-            aria-label={`Target band score ${bandLabel}, progress ${fillPct}%`}
+            aria-label={`Target band score ${bandLabel}, course journey ${overallProgressPct}%`}
           >
             {bandLabel}
           </span>
@@ -214,7 +233,8 @@ function BandHero({
 
         <p className="text-muted-foreground">in Reading module</p>
         <p className="mt-2 text-sm text-muted-foreground">
-          {overallProgressPct}% through your journey — complete levels to fill the bar.
+          {overallProgressPct}% course journey — pass quizzes, practice tests, and finals with fewer
+          attempts to raise the bar faster.
         </p>
 
         <div className="pt-8">

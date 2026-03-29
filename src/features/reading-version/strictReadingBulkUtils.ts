@@ -45,6 +45,34 @@ export type BulkPassageQuestionSetInput = {
   questionGroups: BulkQuestionGroupInput[];
 };
 
+/**
+ * Completion groups may encode multiple answer slots in one question body via blanks[].
+ * SUMMARY_COMPLETION_WITH_CLUES: see summaryWithCluesBulk.ts (IELTS multi-sentence blocks + word bank).
+ */
+const GAP_COUNT_BY_BLANKS_TYPES: ReadonlySet<ReadingQuestionType> = new Set([
+  "SENTENCE_COMPLETION",
+  "SUMMARY_COMPLETION",
+  "SUMMARY_COMPLETION_WITH_CLUES",
+  "NOTE_COMPLETION",
+  "TABLE_COMPLETION",
+  "FLOW_CHART_COMPLETION",
+  "DIAGRAM_LABEL_COMPLETION",
+]);
+
+function countQuestionsRepresentedByGroup(
+  questionType: ReadingQuestionType,
+  questions: BulkQuestionGroupInput["questions"],
+): number {
+  if (!GAP_COUNT_BY_BLANKS_TYPES.has(questionType)) {
+    return questions.length;
+  }
+
+  return questions.reduce((sum, q) => {
+    const blankCount = Array.isArray(q.blanks) ? q.blanks.length : 0;
+    return sum + (blankCount > 0 ? blankCount : 1);
+  }, 0);
+}
+
 function formatPassageCodeId(p: Passage): string {
   if (typeof p.passageCode === "string") return p.passageCode;
   return (p.passageCode as { _id: string })._id;
@@ -252,10 +280,14 @@ export async function createPassageQuestionSetFromBulkInput(params: {
   for (let idx = 0; idx < questionSetInput.questionGroups.length; idx++) {
     const g = questionSetInput.questionGroups[idx];
     const expectedGroupCount = g.endQuestionNumber - g.startQuestionNumber + 1;
+    const representedCount = countQuestionsRepresentedByGroup(
+      g.questionType,
+      g.questions,
+    );
 
-    if (!Array.isArray(g.questions) || g.questions.length !== expectedGroupCount) {
+    if (!Array.isArray(g.questions) || representedCount !== expectedGroupCount) {
       throw new Error(
-        `Question group ${idx + 1} length mismatch: expected ${expectedGroupCount} questions, got ${g.questions?.length ?? 0}`,
+        `Question group ${idx + 1} count mismatch: expected ${expectedGroupCount} question numbers, got ${representedCount} from ${g.questions?.length ?? 0} question bodies.`,
       );
     }
 

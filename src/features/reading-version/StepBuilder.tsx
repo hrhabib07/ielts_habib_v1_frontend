@@ -49,6 +49,7 @@ interface StepBuilderProps {
   versionId: string;
   steps: ReadingLevelStep[];
   practiceTests?: PracticeTest[];
+  allLevelPracticeTests?: PracticeTest[];
   disabled: boolean;
   onStepsChange: (steps: ReadingLevelStep[]) => void;
 }
@@ -58,6 +59,7 @@ export function StepBuilder({
   versionId,
   steps,
   practiceTests = [],
+  allLevelPracticeTests = [],
   disabled,
   onStepsChange,
 }: StepBuilderProps) {
@@ -218,6 +220,7 @@ export function StepBuilder({
             contents={contents}
             quizContents={quizContents}
             practiceTests={practiceTests}
+            allLevelPracticeTests={allLevelPracticeTests}
             onSave={handleCreate}
             onCancel={() => {
               setAdding(false);
@@ -238,6 +241,7 @@ export function StepBuilder({
                     contents={contents}
                     quizContents={quizContents}
                     practiceTests={practiceTests}
+                    allLevelPracticeTests={allLevelPracticeTests}
                     onSave={(p) => handleUpdate(step._id, p)}
                     onCancel={() => setEditingId(null)}
                     onLoadContents={loadContents}
@@ -355,6 +359,7 @@ interface StepFormProps {
   contents: LearningContent[];
   quizContents: ReadingQuizContent[];
   practiceTests: PracticeTest[];
+  allLevelPracticeTests: PracticeTest[];
   onSave: (p: CreateStepPayload, opts?: { insertAtPosition?: number }) => Promise<void>;
   onCancel: () => void;
   onRetryQuizzes?: () => Promise<void>;
@@ -372,11 +377,19 @@ function StepForm({
   contents,
   quizContents,
   practiceTests,
+  allLevelPracticeTests,
   onSave,
   onCancel,
   onRetryQuizzes,
   disabled,
 }: StepFormProps) {
+  const practiceTestsToSelect = (() => {
+    const map = new Map<string, PracticeTest>();
+    for (const pt of practiceTests ?? []) map.set(pt._id, pt);
+    for (const pt of allLevelPracticeTests ?? []) map.set(pt._id, pt);
+    return Array.from(map.values()).sort((a, b) => a.order - b.order);
+  })();
+
   const sortedSteps = [...steps].sort((a, b) => a.order - b.order);
   const positionOptions: { label: string; value: number }[] = [
     { label: "At end", value: POS_AT_END },
@@ -547,13 +560,13 @@ function StepForm({
             required
           >
             <option value="">— Select practice test —</option>
-            {practiceTests.map((pt) => (
+            {practiceTestsToSelect.map((pt) => (
               <option key={pt._id} value={pt._id}>
                 {pt.contentCode ? `[${pt.contentCode}] ` : ""}{pt.title} ({pt.timeLimitMinutes} min · pass {pt.passType === "PERCENTAGE" ? `${pt.passValue}%` : `band ${pt.passValue}`})
               </option>
             ))}
           </select>
-          {practiceTests.length === 0 && (
+          {practiceTestsToSelect.length === 0 && (
             <p className="text-xs text-muted-foreground">
               No practice tests on this draft version yet. Create them under Dashboard → Practice Test Manager (same level),
               then in Level Builder use <strong>Sync from server</strong> / <strong>Refresh</strong> above so this list updates.
@@ -780,6 +793,7 @@ interface StepEditFormProps {
   contents: LearningContent[];
   quizContents: ReadingQuizContent[];
   practiceTests: PracticeTest[];
+  allLevelPracticeTests: PracticeTest[];
   onSave: (p: UpdateStepPayload) => Promise<void>;
   onCancel: () => void;
   onLoadContents: () => void;
@@ -791,11 +805,18 @@ function StepEditForm({
   contents,
   quizContents,
   practiceTests,
+  allLevelPracticeTests,
   onSave,
   onCancel,
   onLoadContents,
   busy,
 }: StepEditFormProps) {
+  const practiceTestsToSelect = (() => {
+    const map = new Map<string, PracticeTest>();
+    for (const pt of practiceTests ?? []) map.set(pt._id, pt);
+    for (const pt of allLevelPracticeTests ?? []) map.set(pt._id, pt);
+    return Array.from(map.values()).sort((a, b) => a.order - b.order);
+  })();
   const [typeSelectValue, setTypeSelectValue] = useState<StepTypeOption>(
     step.stepType === "QUIZ" && step.isFinalQuiz === true ? FINAL_QUIZ_PRESET : step.stepType,
   );
@@ -920,7 +941,7 @@ function StepEditForm({
             disabled={busy}
           >
             <option value="">— Practice test —</option>
-            {practiceTests.map((pt) => (
+            {practiceTestsToSelect.map((pt) => (
               <option key={pt._id} value={pt._id}>
                 {pt.contentCode ? `[${pt.contentCode}] ` : ""}{pt.title}
               </option>

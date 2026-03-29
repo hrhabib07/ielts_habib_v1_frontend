@@ -53,6 +53,9 @@ export interface ProfileSummary {
   currentLevel: ProfileSummaryLevel | null;
   totalLevels?: number;
   overallProgressPct?: number;
+  /** Reading journey points (max 5 per level); used for course “water level”. */
+  journeyEarnedPoints?: number;
+  journeyMaxPoints?: number;
   streakInfo: ProfileSummaryStreak | null;
   weaknesses: ProfileSummaryWeakness[];
   recentAttempts: ProfileSummaryRecentAttempt[];

@@ -10,6 +10,7 @@ import {
   createPracticeTest,
   updatePracticeTest,
   deletePracticeTest,
+  deleteAllPracticeTestsByVersion,
   reorderPracticeTests,
   getPracticeTestPreviewContent,
   type PracticeTest,
@@ -47,6 +48,7 @@ export function PracticeTestBuilder({
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<PracticeTestContentForPreview | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ id: string; title: string } | null>(null);
+  const [deleteAllBusy, setDeleteAllBusy] = useState(false);
 
   const handleCreate = async (payload: CreatePracticeTestPayload) => {
     setError(null);
@@ -111,6 +113,28 @@ export function PracticeTestBuilder({
   };
 
   const sortedList = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
+  const handleDeleteAll = async () => {
+    if (sortedList.length === 0) return;
+    const confirmed = window.prompt(
+      `Type DELETE ALL to permanently delete ${sortedList.length} practice test(s) in this level.`,
+      "",
+    );
+    if ((confirmed ?? "").trim() !== "DELETE ALL") return;
+    setDeleteAllBusy(true);
+    setError(null);
+    try {
+      await deleteAllPracticeTestsByVersion(versionId, "permanent");
+      onPracticeTestsChange([]);
+      setPreviewId(null);
+      setPreviewContent(null);
+      setEditingId(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete all practice tests");
+    } finally {
+      setDeleteAllBusy(false);
+    }
+  };
+
   const handleReorder = async (direction: "up" | "down", index: number) => {
     if (direction === "up" && index <= 0) return;
     if (direction === "down" && index >= sortedList.length - 1) return;
@@ -134,15 +158,30 @@ export function PracticeTestBuilder({
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle>Practice tests</CardTitle>
         {!disabled && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setAdding(true)}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Add practice test
-          </Button>
+          <div className="flex items-center gap-2">
+            {sortedList.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-destructive border-destructive/40 hover:bg-destructive/10"
+                onClick={handleDeleteAll}
+                disabled={deleteAllBusy}
+              >
+                {deleteAllBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Trash2 className="h-4 w-4 mr-1" />}
+                Delete all
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setAdding(true)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add practice test
+            </Button>
+          </div>
         )}
       </CardHeader>
       <CardContent className="space-y-4">

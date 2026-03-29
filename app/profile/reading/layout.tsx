@@ -14,7 +14,10 @@ export default function ReadingLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname() ?? "";
-  const isExamPage = pathname.includes("/final-evaluation") || pathname.includes("/practice-test");
+  const isExamPage =
+    pathname.includes("/final-evaluation") ||
+    pathname.includes("/practice-test") ||
+    pathname.includes("/step-quiz");
   const isDashboard =
     pathname.includes("/profile/reading/strict-levels") ||
     pathname.includes("/profile/reading/practice-attempt");
@@ -39,7 +42,14 @@ export default function ReadingLayout({
       {isExamPage ? (
         <div className="min-h-screen w-full">{children}</div>
       ) : isDashboard ? (
-        <div className="flex h-full min-h-0 w-full flex-1 flex-nowrap overflow-x-hidden">
+        <div
+          className="flex h-full min-h-0 w-full flex-1 flex-nowrap overflow-x-hidden"
+          style={
+            {
+              "--reading-sidebar-width": sidebarOpen ? "288px" : "0px",
+            } as Record<string, string>
+          }
+        >
           {sidebarOpen && <ReadingSidebar onCollapse={toggleSidebar} />}
           <main className="relative min-h-0 min-w-0 flex-1 basis-0 overflow-hidden">
             {!sidebarOpen && (

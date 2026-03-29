@@ -62,7 +62,7 @@ export function VersionListClient({ levelId }: VersionListClientProps) {
     setError(null);
     try {
       const created = await createDraftVersion(levelId);
-      setVersions((prev) => [created, ...prev]);
+      await loadVersions();
       router.push(
         `/dashboard/instructor/reading-levels/${levelId}/versions/${created._id}/edit`,
       );
@@ -78,12 +78,12 @@ export function VersionListClient({ levelId }: VersionListClientProps) {
     setError(null);
     try {
       const created = await cloneVersion(levelId, fromVersionId);
-      setVersions((prev) => [created, ...prev]);
+      await loadVersions();
       router.push(
         `/dashboard/instructor/reading-levels/${levelId}/versions/${created._id}/edit`,
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to clone");
+      setError(e instanceof Error ? e.message : "Failed to copy published version");
     } finally {
       setBusyVersionId(null);
     }
@@ -126,7 +126,7 @@ export function VersionListClient({ levelId }: VersionListClientProps) {
         </Link>
       </div>
       <p className="text-sm text-muted-foreground">
-        View published versions (read-only) or edit drafts. Clone a published version to create a new draft and make changes.
+        Each level has at most one <strong>published</strong> version (what students see) and one <strong>draft</strong> (your work in progress). Use <strong>Edit from published</strong> when you have no draft yet to copy the live content into a new draft. Publishing replaces the published version; older snapshots are kept for students already on them.
       </p>
       {error && <p className="text-sm text-destructive">{error}</p>}
       <VersionListTable

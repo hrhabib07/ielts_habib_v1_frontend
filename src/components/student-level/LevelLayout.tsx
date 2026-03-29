@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, ChevronRight, Menu } from "lucide-react";
+import { CheckCircle2, ChevronRight, Menu, AlertTriangle } from "lucide-react";
 import { LevelSidebar } from "./LevelSidebar";
 import { LevelContent, LevelContentSkeleton } from "./LevelContent";
 import { LevelFeedbackForm } from "./LevelFeedbackForm";
@@ -45,6 +45,10 @@ interface LevelLayoutProps {
   hasFeedbackSubmitted?: boolean | null;
   /** Called after feedback is submitted so parent can show Continue button */
   onFeedbackSuccess?: () => void;
+  /** Called when backend signals this level was updated and progress must restart. */
+  onContentUpdateRequired?: () => void;
+  /** Used when restart is triggered via a step/group-test API error (detail may not include the notice). */
+  contentUpdateBannerMessage?: string | null;
 }
 
 export function LevelLayout({
@@ -63,11 +67,23 @@ export function LevelLayout({
   previewGroupTestsCount,
   hasFeedbackSubmitted,
   onFeedbackSuccess,
+  onContentUpdateRequired,
+  contentUpdateBannerMessage,
 }: LevelLayoutProps) {
   const showContinue = hasFeedbackSubmitted === true;
   const showFeedbackForm = hasFeedbackSubmitted === false;
   const router = useRouter();
   const { progress, steps } = detail;
+  const contentUpdateNotice = detail.contentUpdateNotice;
+  const contentUpdateMessage = contentUpdateNotice?.message?.replace(
+    /^LEVEL_CONTENT_UPDATED:\s*/i,
+    "",
+  );
+  const showContentUpdateBanner = Boolean(
+    contentUpdateNotice?.restartRequired || contentUpdateBannerMessage,
+  );
+  const contentUpdateDisplayMessage =
+    contentUpdateMessage ?? contentUpdateBannerMessage ?? "";
   const currentIndex = progress.currentStepIndex ?? 0;
   const completedSet = new Set((progress.completedStepIds ?? []).map(String));
   const isLevelPassed = progress.passStatus === "PASSED";
@@ -167,6 +183,35 @@ export function LevelLayout({
             className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain"
           >
             <div className="w-full flex-1 p-0">
+          {showContentUpdateBanner && (
+            <div
+              role="alert"
+              className="mb-6 rounded-2xl border border-amber-200/70 dark:border-amber-800/70 bg-amber-50/40 dark:bg-amber-950/30 p-5 shadow-sm"
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                    Level content updated
+                  </p>
+                  <p className="mt-1 text-sm text-amber-800/90 dark:text-amber-200">
+                    {contentUpdateDisplayMessage ||
+                      "Admin updated this level. Restart from the beginning."}
+                  </p>
+                  {onContentUpdateRequired && (
+                    <button
+                      type="button"
+                      onClick={onContentUpdateRequired}
+                      className="mt-3 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
+                    >
+                      Go to first step
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           {isLevelPassed && (
             <div
               data-level-completed-banner
@@ -266,6 +311,7 @@ export function LevelLayout({
                   groupTestsRemaining={detail.progress.groupTestsRemaining}
                   isLevelPassed={isLevelPassed}
                   nextLevelInfo={nextLevelInfo}
+                  onContentUpdateRequired={onContentUpdateRequired}
                   onNavigateToNextLevel={
                     nextLevelInfo
                       ? () => {

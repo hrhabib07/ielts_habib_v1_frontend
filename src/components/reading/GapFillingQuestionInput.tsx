@@ -69,9 +69,9 @@ export function DraggableWordBank({ options }: { options: string[] }) {
       </p>
       {list.length > 0 ? (
         <div className="flex flex-wrap gap-2">
-        {list.map((w) => (
+        {list.map((w, wi) => (
           <span
-            key={w}
+            key={`${wi}-${w}`}
             draggable
             onDragStart={(e) => {
               e.dataTransfer.setData("text/plain", w);
@@ -416,22 +416,73 @@ export function GapFillingQuestionInput({
     );
   }
 
-  const parts: Array<{ type: "text"; value: string } | { type: "gap"; id: number }> = [];
-  let lastIndex = 0;
-  let m: RegExpExecArray | null;
-  GAP_RE.lastIndex = 0;
-  while ((m = GAP_RE.exec(content)) !== null) {
-    if (m.index > lastIndex) {
-      parts.push({ type: "text", value: content.slice(lastIndex, m.index) });
-    }
-    parts.push({ type: "gap", id: parseInt(m[1], 10) });
-    lastIndex = m.index + m[0].length;
-  }
-  if (lastIndex < content.length) {
-    parts.push({ type: "text", value: content.slice(lastIndex) });
-  }
-
   const gapIndexById = new Map(sortedBlanks.map((b, i) => [b.id, i]));
+
+  const renderGapPartsInFragment = (fragment: string, keyBase: string): ReactNode[] => {
+    const parts: Array<{ type: "text"; value: string } | { type: "gap"; id: number }> = [];
+    let lastIndex = 0;
+    let m: RegExpExecArray | null;
+    const re = /\{\{gap(\d+)\}\}/g;
+    while ((m = re.exec(fragment)) !== null) {
+      if (m.index > lastIndex) {
+        parts.push({ type: "text", value: fragment.slice(lastIndex, m.index) });
+      }
+      parts.push({ type: "gap", id: parseInt(m[1], 10) });
+      lastIndex = m.index + m[0].length;
+    }
+    if (lastIndex < fragment.length) {
+      parts.push({ type: "text", value: fragment.slice(lastIndex) });
+    }
+    return parts.map((part, i) => {
+      if (part.type === "text") {
+        return <span key={`${keyBase}-t-${i}`}>{part.value}</span>;
+      }
+      const idx = gapIndexById.get(part.id) ?? part.id - 1;
+      const blank = sortedBlanks[idx];
+      const placeholder = blank?.options?.length
+        ? `Choose: ${blank.options.slice(0, 2).join(", ")}${blank.options.length > 2 ? "…" : ""}`
+        : `Max ${blank?.wordLimit ?? 2} words`;
+      const gapNum = getGapDisplayNumber(idx);
+      const inner = (
+        <>
+          <span
+            className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-stone-500 bg-stone-100 px-0.5 text-[10px] font-semibold text-stone-700 dark:border-stone-500 dark:bg-stone-800 dark:text-stone-300"
+            aria-label={`Question ${gapNum}`}
+          >
+            {gapNum}
+          </span>
+          <input
+            type="text"
+            value={values[idx] ?? ""}
+            onChange={(e) => setGapValue(idx, e.target.value)}
+            disabled={disabled}
+            placeholder={placeholder}
+            className={inputClassName}
+            aria-label={`Question ${gapNum}`}
+          />
+        </>
+      );
+      return (
+        <GapDropTarget
+          key={`${keyBase}-g-${i}`}
+          gapIndex={idx}
+          gapDisplayNumber={gapNum}
+          value={values[idx] ?? ""}
+          onValueChange={(v) => setGapValue(idx, v)}
+          disabled={disabled}
+          inputClassName={inputClassName}
+          hasWordBank={hasWordBank}
+        >
+          {inner}
+        </GapDropTarget>
+      );
+    });
+  };
+
+  const paragraphBlocks = content
+    .split(/\n\s*\n/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 
   return (
     <div className="mb-4">
@@ -440,52 +491,22 @@ export function GapFillingQuestionInput({
           {displayNumber}.
         </p>
       )}
-      <p className="text-[15px] leading-relaxed text-stone-800 dark:text-stone-200 inline">
-        {parts.map((part, i) => {
-          if (part.type === "text") {
-            return <span key={i}>{part.value}</span>;
-          }
-          const idx = gapIndexById.get(part.id) ?? part.id - 1;
-          const blank = sortedBlanks[idx];
-          const placeholder = blank?.options?.length
-            ? `Choose: ${blank.options.slice(0, 2).join(", ")}${blank.options.length > 2 ? "…" : ""}`
-            : `Max ${blank?.wordLimit ?? 2} words`;
-          const gapNum = getGapDisplayNumber(idx);
-          const inner = (
-            <>
-              <span
-                className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-stone-500 bg-stone-100 px-0.5 text-[10px] font-semibold text-stone-700 dark:border-stone-500 dark:bg-stone-800 dark:text-stone-300"
-                aria-label={`Question ${gapNum}`}
-              >
-                {gapNum}
-              </span>
-              <input
-                type="text"
-                value={values[idx] ?? ""}
-                onChange={(e) => setGapValue(idx, e.target.value)}
-                disabled={disabled}
-                placeholder={placeholder}
-                className={inputClassName}
-                aria-label={`Question ${gapNum}`}
-              />
-            </>
-          );
-          return (
-            <GapDropTarget
-              key={i}
-              gapIndex={idx}
-              gapDisplayNumber={gapNum}
-              value={values[idx] ?? ""}
-              onValueChange={(v) => setGapValue(idx, v)}
-              disabled={disabled}
-              inputClassName={inputClassName}
-              hasWordBank={hasWordBank}
+      {paragraphBlocks.length <= 1 ? (
+        <p className="text-[15px] leading-relaxed text-stone-800 dark:text-stone-200 inline whitespace-pre-line">
+          {renderGapPartsInFragment(content.trim(), "single")}
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {paragraphBlocks.map((block, bi) => (
+            <p
+              key={bi}
+              className="text-[15px] leading-relaxed text-stone-800 dark:text-stone-200"
             >
-              {inner}
-            </GapDropTarget>
-          );
-        })}
-      </p>
+              {renderGapPartsInFragment(block, `p${bi}`)}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

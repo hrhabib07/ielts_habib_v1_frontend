@@ -2,16 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   getReadingLevels,
   ensureEditVersion,
+  getVersionDetail,
   type ReadingLevel,
   type VersionDetail,
   type PracticeTest,
 } from "@/src/lib/api/adminReadingVersions";
 import { PracticeTestManager } from "@/src/features/reading-version/PracticeTestManager";
+import { resolveLevelTemplateIndex } from "@/src/features/reading-version/levelQuestionTypeMapping";
 import {
   ArrowLeft,
   Loader2,
@@ -36,6 +39,9 @@ export default function PracticeTestsPage() {
   const [loading, setLoading] = useState(true);
   const [loadingVersion, setLoadingVersion] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const queryLevelId = searchParams.get("levelId");
+  const queryVersionId = searchParams.get("versionId");
 
   const loadLevels = useCallback(async () => {
     setLoading(true);
@@ -43,7 +49,7 @@ export default function PracticeTestsPage() {
     try {
       const data = await getReadingLevels();
       setLevels(data);
-      if (data.length > 0 && !selectedLevelId) {
+      if (data.length > 0 && !selectedLevelId && !queryLevelId && !queryVersionId) {
         const first = data.find((l) => l.levelType === "SKILL") ?? data[0];
         setSelectedLevelId(first._id);
       }
@@ -52,13 +58,35 @@ export default function PracticeTestsPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedLevelId]);
+  }, [selectedLevelId, queryLevelId, queryVersionId]);
 
   useEffect(() => {
     loadLevels();
   }, [loadLevels]);
 
   useEffect(() => {
+    if (!queryLevelId) return;
+    if (levels.some((l) => l._id === queryLevelId) && selectedLevelId !== queryLevelId) {
+      setSelectedLevelId(queryLevelId);
+    }
+  }, [levels, queryLevelId, selectedLevelId]);
+
+  useEffect(() => {
+    if (!queryVersionId) return;
+    setLoadingVersion(true);
+    setDetail(null);
+    setError(null);
+    getVersionDetail(queryVersionId)
+      .then((d) => {
+        setDetail(d);
+        if (d.version?.levelId) setSelectedLevelId(d.version.levelId);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load version"))
+      .finally(() => setLoadingVersion(false));
+  }, [queryVersionId]);
+
+  useEffect(() => {
+    if (queryVersionId) return;
     if (!selectedLevelId) {
       setDetail(null);
       return;
@@ -69,7 +97,7 @@ export default function PracticeTestsPage() {
       .then((d) => setDetail(d))
       .catch((e) => setError(e instanceof Error ? e.message : "Failed to load version"))
       .finally(() => setLoadingVersion(false));
-  }, [selectedLevelId]);
+  }, [selectedLevelId, queryVersionId]);
 
   const handlePracticeTestsChange = useCallback((practiceTests: PracticeTest[]) => {
     setDetail((prev) => (prev ? { ...prev, practiceTests } : null));
@@ -224,7 +252,7 @@ export default function PracticeTestsPage() {
                 versionId={detail.version._id}
                 levelId={selectedLevelId}
                 levelTitle={selectedLevel.title}
-                levelOrder={selectedLevel.order - 1}
+                levelOrder={resolveLevelTemplateIndex(selectedLevel)}
                 practiceTests={detail.practiceTests ?? []}
                 allLevelPracticeTests={detail.allLevelPracticeTests}
                 disabled={detail.version.status === "PUBLISHED"}

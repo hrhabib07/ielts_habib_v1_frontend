@@ -27,8 +27,11 @@ import type {
 } from "@/src/lib/api/readingStrictProgression";
 import type { GroupTestMiniTestForPreview } from "@/src/lib/api/adminReadingVersions";
 import { getStepContent } from "@/src/lib/api/readingStrictProgression";
+import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
+import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
 import { getStepContentForPreview } from "@/src/lib/api/adminReadingVersions";
 import { EmbeddedLearningBody } from "@/src/components/shared/EmbeddedLearningBody";
+import { QuizFocusedSessionLauncher } from "@/src/components/reading/QuizFocusedSessionLauncher";
 
 const StepQuizSubmitCard = dynamic(
   () =>
@@ -93,6 +96,7 @@ function FinalEvaluationStartCard({
   const remaining = groupTestsRemaining ?? total;
   const attempted = total - remaining;
   const canStart = !isLocked && remaining > 0;
+  const finalHref = `/profile/reading/strict-levels/${levelId}/final-evaluation`;
 
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
@@ -119,7 +123,7 @@ function FinalEvaluationStartCard({
       )}
       {canStart ? (
         <Link
-          href={`/profile/reading/strict-levels/${levelId}/final-evaluation`}
+          href={finalHref}
           className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
         >
           {`Start${attempted > 0 ? ` Attempt ${attempted + 1} of ${total}` : ""} Final Evaluation`}
@@ -127,7 +131,7 @@ function FinalEvaluationStartCard({
         </Link>
       ) : !isLocked && remaining === 0 ? (
         <Link
-          href={`/profile/reading/strict-levels/${levelId}/final-evaluation`}
+          href={finalHref}
           className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
         >
           View Results
@@ -311,6 +315,8 @@ export interface LevelContentProps {
   ) => void;
   onNavigate?: (stepId: string) => void;
   allSteps?: LevelDetailStep[];
+  /** Called when backend signals this level was updated and progress must restart. */
+  onContentUpdateRequired?: () => void;
   /** Instructor preview: use admin step preview API and show final evaluation link */
   isPreview?: boolean;
   /** Required when isPreview: used to fetch step content without student progress */
@@ -344,6 +350,7 @@ export function LevelContent({
   onProgressUpdate,
   onNavigate,
   allSteps,
+  onContentUpdateRequired,
   isPreview = false,
   versionId,
   previewGroupTestsCount,
@@ -357,6 +364,7 @@ export function LevelContent({
   const [content, setContent] = useState<StepContent | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
   const [contentError, setContentError] = useState<string | null>(null);
+  const [showSubscriptionPrompt, setShowSubscriptionPrompt] = useState(false);
 
   // Transition animation
   useEffect(() => {
@@ -371,6 +379,7 @@ export function LevelContent({
     async (stepId: string) => {
       setContentLoading(true);
       setContentError(null);
+      setShowSubscriptionPrompt(false);
       setContent(null);
       try {
         const data =
@@ -384,7 +393,22 @@ export function LevelContent({
         };
         const status = ax?.response?.status;
         const backendMessage = ax?.response?.data?.message;
-        if (status === 403) {
+        if (backendMessage && backendMessage.includes("LEVEL_CONTENT_UPDATED:")) {
+          onContentUpdateRequired?.();
+          const normalized = backendMessage.replace(/^LEVEL_CONTENT_UPDATED:\s*/i, "");
+          setContentError(
+            normalized || "Admin updated this level. Restarting from the beginning.",
+          );
+        } else if (status === 403) {
+          const isPaidLock =
+            !isPreview && isReadingPremiumLockResponse(status, backendMessage);
+
+          if (isPaidLock) {
+            setContentError(null);
+            setShowSubscriptionPrompt(true);
+            return;
+          }
+
           setContentError("Complete previous step to unlock this content.");
         } else if (backendMessage && backendMessage.trim()) {
           setContentError(backendMessage);
@@ -397,13 +421,14 @@ export function LevelContent({
         setContentLoading(false);
       }
     },
-    [levelId, isPreview, versionId],
+    [levelId, isPreview, versionId, onContentUpdateRequired],
   );
 
   useEffect(() => {
     if (!step || isLocked) {
       setContent(null);
       setContentError(null);
+      setShowSubscriptionPrompt(false);
       return;
     }
     if (step.stepType === "FINAL_EVALUATION") {
@@ -439,8 +464,8 @@ export function LevelContent({
   return (
     <div
       className={[
-        "transition-all duration-300 ease-out",
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2",
+        "transition-opacity duration-300 ease-out",
+        visible ? "opacity-100" : "opacity-0",
       ].join(" ")}
     >
       {/* Step header */}
@@ -503,19 +528,33 @@ export function LevelContent({
 
       {/* Active content */}
       {!isLocked && (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-40">
           {/* Content area — actual content from API */}
           <div className="min-h-50 w-full rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm sm:p-6">
             {contentLoading && (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
                 <span className="ml-2 text-sm text-gray-400 dark:text-gray-500">
-                  Loading content…
+                  {step.stepType === "PRACTICE_TEST"
+                    ? "Checking access…"
+                    : "Loading content…"}
                 </span>
               </div>
             )}
 
-            {contentError && (
+            {showSubscriptionPrompt && !contentLoading && (
+              <PremiumReadingLockPanel
+                variant="inline"
+                levelId={levelId}
+                context={
+                  step.stepType === "PRACTICE_TEST"
+                    ? "practice_test"
+                    : "step_content"
+                }
+              />
+            )}
+
+            {contentError && !contentLoading && !showSubscriptionPrompt && (
               <div className="space-y-3">
                 <div className="flex items-center gap-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
                   <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
@@ -549,10 +588,7 @@ export function LevelContent({
                       if (!embed) return null;
                       return (
                         <div className="mb-6">
-                          <div
-                            className="relative w-full overflow-hidden rounded-xl bg-black"
-                            style={{ paddingTop: "56.25%" }}
-                          >
+                          <div className="relative mx-auto w-full max-w-3xl aspect-video overflow-hidden rounded-xl bg-black">
                             {embed.type === "iframe" ? (
                               <iframe
                                 src={embed.src}
@@ -598,12 +634,13 @@ export function LevelContent({
                 </>
               )}
 
-            {/* QUIZ / VOCABULARY_TEST: inline quiz renderer driven by pre-fetched /content data */}
+            {/* QUIZ / VOCABULARY_TEST: focused full-page session (student); inline only in preview */}
             {!contentLoading &&
               !contentError &&
               content !== null &&
               (content.type === "QUIZ" ||
-                content.type === "VOCABULARY_TEST") && (
+                content.type === "VOCABULARY_TEST") &&
+              (isPreview ? (
                 <StepQuizSubmitCard
                   levelId={levelId}
                   step={step}
@@ -611,7 +648,14 @@ export function LevelContent({
                   onLevelPassed={onLevelPassed}
                   onProgressUpdate={onProgressUpdate}
                 />
-              )}
+              ) : (
+                <QuizFocusedSessionLauncher
+                  levelId={levelId}
+                  stepId={step._id}
+                  stepTitle={step.title}
+                  quizContent={content.content}
+                />
+              ))}
 
             {/* PRACTICE_TEST: one mini test, unlimited attempts until pass */}
             {!contentLoading &&
@@ -762,42 +806,94 @@ export function LevelContent({
             </div>
           )}
 
-          {/* Prev / Next navigation — Previous = muted (go back); Next = primary (move forward) */}
+          {/* Bottom navigation: single row — progress + bar centered, prev/next on the sides */}
           {onNavigate && allSteps && (
-            <div className="flex items-center justify-between gap-4 pt-2">
-              {prevStep ? (
-                <button
-                  type="button"
-                  onClick={() => onNavigate(prevStep._id)}
-                  className="flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 shadow-sm transition-all hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-800 dark:hover:text-gray-300 active:scale-[0.98]"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </button>
-              ) : (
-                <div />
-              )}
-              {nextStep ? (
-                <button
-                  type="button"
-                  onClick={() => onNavigate(nextStep._id)}
-                  className="flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0f172a] hover:shadow-md active:scale-[0.98] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              ) : nextLevelInfo && onNavigateToNextLevel ? (
-                <button
-                  type="button"
-                  onClick={onNavigateToNextLevel}
-                  className="flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0f172a] hover:shadow-md active:scale-[0.98] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
-                >
-                  Next: {nextLevelInfo.title}
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              ) : (
-                <div />
-              )}
+            <div className="fixed bottom-0 left-0 right-0 z-40 lg:[left:var(--reading-sidebar-width,0px)]">
+              <div className="border-t border-slate-200/80 bg-white/95 px-2 py-2 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-700/80 dark:bg-slate-900/95 dark:shadow-[0_-8px_30px_rgba(0,0,0,0.45)] sm:px-3">
+                <div className="mx-auto flex w-full max-w-6xl flex-nowrap items-center gap-2 sm:gap-3">
+                  <div className="shrink-0">
+                    {prevStep ? (
+                      <button
+                        type="button"
+                        onClick={() => onNavigate(prevStep._id)}
+                        className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-100 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800 sm:gap-2 sm:rounded-xl sm:px-3 sm:text-sm"
+                      >
+                        <ChevronLeft className="h-4 w-4 shrink-0" />
+                        <span className="hidden min-[400px]:inline">Previous</span>
+                      </button>
+                    ) : (
+                      <span className="inline-block w-10 sm:w-[72px]" aria-hidden />
+                    )}
+                  </div>
+
+                  <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+                    <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-500 dark:text-slate-400 sm:hidden">
+                      {stepIndex}/{totalSteps}
+                    </span>
+                    <div className="hidden min-w-0 shrink-0 flex-col text-[10px] leading-tight text-slate-500 dark:text-slate-400 sm:flex sm:text-xs">
+                      <span className="font-semibold whitespace-nowrap">
+                        Step {stepIndex} of {totalSteps}
+                      </span>
+                      <span className="tabular-nums">
+                        {Math.round((stepIndex / Math.max(totalSteps, 1)) * 100)}% complete
+                      </span>
+                    </div>
+                    <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700/80">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6] transition-all duration-300"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            Math.max(0, (stepIndex / Math.max(totalSteps, 1)) * 100),
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                    {!isQuizStep &&
+                      step.stepType !== "PRACTICE_TEST" &&
+                      step.stepType !== "FINAL_EVALUATION" &&
+                      isCurrent &&
+                      !isCompleted && (
+                        <button
+                          type="button"
+                          disabled={isCompleting}
+                          onClick={() => onComplete(step._id)}
+                          className="hidden items-center gap-1 rounded-lg border border-[#1e3a8a]/30 bg-[#1e3a8a]/10 px-2 py-2 text-xs font-semibold text-[#1e3a8a] shadow-sm transition-all hover:bg-[#1e3a8a]/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#3b82f6]/50 dark:bg-[#1e3a8a]/25 dark:text-[#93c5fd] dark:hover:bg-[#1e3a8a]/35 sm:flex sm:gap-1.5 sm:rounded-xl sm:px-2.5 sm:text-sm"
+                          title="Mark step complete"
+                        >
+                          {isCompleting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="h-4 w-4 shrink-0" />
+                          )}
+                          <span className="max-w-[7rem] truncate sm:max-w-none">Complete</span>
+                        </button>
+                      )}
+                    {nextStep ? (
+                      <button
+                        type="button"
+                        onClick={() => onNavigate(nextStep._id)}
+                        className="flex items-center gap-1 rounded-lg bg-[#1e3a8a] px-2.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#0f172a] active:scale-[0.98] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb] sm:gap-2 sm:rounded-xl sm:px-3 sm:text-sm"
+                      >
+                        <span className="hidden min-[400px]:inline">Next</span>
+                        <ChevronRight className="h-4 w-4 shrink-0" />
+                      </button>
+                    ) : nextLevelInfo && onNavigateToNextLevel ? (
+                      <button
+                        type="button"
+                        onClick={onNavigateToNextLevel}
+                        className="flex max-w-[40vw] items-center gap-1 truncate rounded-lg bg-[#1e3a8a] px-2 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#0f172a] sm:max-w-xs sm:rounded-xl sm:px-3 sm:text-sm"
+                      >
+                        <span className="truncate">Next level</span>
+                        <ChevronRight className="h-4 w-4 shrink-0" />
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

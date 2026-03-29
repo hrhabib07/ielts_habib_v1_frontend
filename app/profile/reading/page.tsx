@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { getLevelsByModule, getCurrentLevel } from "@/src/lib/api/levels";
 import { getLevelDetail } from "@/src/lib/api/readingStrictProgression";
 import type { Level } from "@/src/lib/api/levels";
@@ -101,9 +100,24 @@ export default function ProfileReadingPage() {
   }
 
   return (
-    <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      <p className="text-sm text-muted-foreground">Loading Reading…</p>
+    <div className="min-h-[calc(100vh-5rem)] w-full animate-pulse space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="space-y-3">
+        <div className="h-7 w-64 rounded-md bg-muted" />
+        <div className="h-4 w-96 max-w-full rounded-md bg-muted/80" />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="h-28 rounded-xl border bg-card" />
+        <div className="h-28 rounded-xl border bg-card" />
+        <div className="h-28 rounded-xl border bg-card" />
+      </div>
+
+      <div className="rounded-2xl border bg-card p-5 space-y-4">
+        <div className="h-5 w-48 rounded bg-muted" />
+        <div className="h-4 w-full rounded bg-muted/80" />
+        <div className="h-4 w-5/6 rounded bg-muted/80" />
+        <div className="h-4 w-2/3 rounded bg-muted/80" />
+      </div>
     </div>
   );
 }

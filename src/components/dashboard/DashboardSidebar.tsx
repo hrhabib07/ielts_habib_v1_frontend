@@ -74,6 +74,11 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({ role, isMobileOpen, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
   const groups = role ? ALL_GROUPS.filter((g) => !g.roles || g.roles.includes(role)) : [];
+  const versionEditCtx = pathname.match(
+    /^\/dashboard\/instructor\/reading-levels\/([^/]+)\/versions\/([^/]+)\/edit$/,
+  );
+  const ctxLevelId = versionEditCtx?.[1];
+  const ctxVersionId = versionEditCtx?.[2];
 
   return (
     <>
@@ -119,10 +124,14 @@ export function DashboardSidebar({ role, isMobileOpen, onClose }: DashboardSideb
                 {group.items.map((item) => {
                   const active = isNavItemActive(pathname, item.href);
                   const Icon = item.icon;
+                  const resolvedHref =
+                    item.href === "/dashboard/instructor/practice-tests" && ctxLevelId && ctxVersionId
+                      ? `${item.href}?levelId=${encodeURIComponent(ctxLevelId)}&versionId=${encodeURIComponent(ctxVersionId)}`
+                      : item.href;
                   return (
                     <li key={item.href}>
                       <Link
-                        href={item.href}
+                        href={resolvedHref}
                         onClick={onClose}
                         className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                           active

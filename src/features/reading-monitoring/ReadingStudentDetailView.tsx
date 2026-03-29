@@ -191,7 +191,12 @@ export function ReadingStudentDetailView({
                 : "No active level progress yet."}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Overall progress: {detail.dashboard?.overallProgressPct ?? 0}% ·
+              Course journey: {detail.dashboard?.overallProgressPct ?? 0}%
+              {detail.dashboard?.journeyEarnedPoints != null &&
+              detail.dashboard?.journeyMaxPoints != null
+                ? ` (${detail.dashboard.journeyEarnedPoints} / ${detail.dashboard.journeyMaxPoints} pts)`
+                : ""}{" "}
+              ·{" "}
               {detail.currentLevelProgress
                 ? ` resets on current level: ${detail.currentLevelProgress.resetCount}`
                 : " no level resets yet"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -13,9 +13,16 @@ import {
   getNextGroupTestContent,
   type GroupTestContentForStudent,
 } from "@/src/lib/api/readingStrictProgression";
-import { ReadingMockTestView } from "@/src/components/reading/ReadingMockTestView";
+import {
+  ReadingMockTestView,
+  type ReadingMockTestViewHandle,
+} from "@/src/components/reading/ReadingMockTestView";
+import { ReadingTestExitDialog } from "@/src/components/reading/ReadingTestExitDialog";
+import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
+import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
+import { TestStartCountdownOverlay } from "@/src/components/reading/TestStartCountdownOverlay";
 
-type Phase = "intro" | "loading" | "no_test" | "test" | "result";
+type Phase = "loading" | "no_test" | "test" | "result" | "premium_locked";
 
 export default function FinalEvaluationPage() {
   const params = useParams<{ id: string }>();
@@ -32,6 +39,31 @@ export default function FinalEvaluationPage() {
     promotionType?: "STREAK" | "AVERAGE";
     finalAverageMockBandScore?: number;
   } | null>(null);
+  const testRef = useRef<ReadingMockTestViewHandle>(null);
+  const [exitOpen, setExitOpen] = useState(false);
+  const [exitLoading, setExitLoading] = useState(false);
+  const [entryCountdownOpen, setEntryCountdownOpen] = useState(true);
+
+  useEffect(() => {
+    if (phase !== "test" || !levelId) return;
+    window.history.pushState({ readingGroupTestLock: true }, "");
+    const onPopState = () => {
+      window.history.pushState({ readingGroupTestLock: true }, "");
+      setExitOpen(true);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [phase, levelId]);
+
+  const handleConfirmExit = useCallback(async () => {
+    setExitLoading(true);
+    const res = await testRef.current?.submitIncompleteForExit();
+    setExitLoading(false);
+    setExitOpen(false);
+    if (!res?.ok) return;
+  }, []);
 
   const loadTest = useCallback(() => {
     if (!levelId) return;
@@ -48,18 +80,29 @@ export default function FinalEvaluationPage() {
         }
       })
       .catch((err) => {
+        const ax = err as {
+          response?: { status?: number; data?: { message?: string } };
+        };
+        const status = ax?.response?.status;
+        const backendMessage = ax?.response?.data?.message;
         const msg =
-          err?.response?.data?.message ??
-          err?.message ??
-          "Unable to load the test. Please try again.";
+          typeof backendMessage === "string"
+            ? backendMessage
+            : err instanceof Error
+              ? err.message
+              : "Unable to load the test. Please try again.";
+        if (typeof msg === "string" && msg.includes("LEVEL_CONTENT_UPDATED:")) {
+          router.push(`/profile/reading/strict-levels/${levelId}?contentUpdated=1`);
+          return;
+        }
+        if (isReadingPremiumLockResponse(status, msg)) {
+          setPhase("premium_locked");
+          return;
+        }
         setErrorMessage(typeof msg === "string" ? msg : "Unable to load the test.");
         setPhase("no_test");
       });
-  }, [levelId]);
-
-  useEffect(() => {
-    if (levelId) loadTest();
-  }, [levelId, loadTest]);
+  }, [levelId, router]);
 
   const handleSubmitted = useCallback(
     (res: {
@@ -87,6 +130,20 @@ export default function FinalEvaluationPage() {
     );
   }
 
+  if (entryCountdownOpen) {
+    return (
+      <TestStartCountdownOverlay
+        open
+        variant="navy"
+        subtitle="Final evaluation"
+        onComplete={() => {
+          setEntryCountdownOpen(false);
+          loadTest();
+        }}
+      />
+    );
+  }
+
   if (phase === "loading") {
     return (
       <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
@@ -96,10 +153,20 @@ export default function FinalEvaluationPage() {
             <Loader2 className="absolute inset-0 m-auto h-11 w-11 animate-spin text-indigo-600 dark:text-indigo-400" />
           </div>
           <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-            Loading your test…
+            Checking access…
           </p>
         </div>
       </div>
+    );
+  }
+
+  if (phase === "premium_locked") {
+    return (
+      <PremiumReadingLockPanel
+        variant="fullscreen"
+        levelId={levelId}
+        context="final_evaluation"
+      />
     );
   }
 
@@ -120,7 +187,7 @@ export default function FinalEvaluationPage() {
           <div className="mt-6 flex flex-col gap-3">
             <button
               type="button"
-              onClick={loadTest}
+              onClick={() => setEntryCountdownOpen(true)}
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-[0.99]"
             >
               Try again
@@ -140,13 +207,26 @@ export default function FinalEvaluationPage() {
 
   if (phase === "test" && content) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-950">
-        <ReadingMockTestView
-          levelId={levelId}
-          content={content}
-          onSubmitted={handleSubmitted}
+      <>
+        <ReadingTestExitDialog
+          open={exitOpen}
+          title="Submit and leave?"
+          description="Going back will submit this group test with your current answers. Unanswered items count as wrong. The attempt will be scored and counts toward your level progress. Choose Continue test to keep working."
+          confirmLabel="Submit and leave"
+          cancelLabel="Continue test"
+          confirmLoading={exitLoading}
+          onConfirm={handleConfirmExit}
+          onCancel={() => setExitOpen(false)}
         />
-      </div>
+        <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-950">
+          <ReadingMockTestView
+            ref={testRef}
+            levelId={levelId}
+            content={content}
+            onSubmitted={handleSubmitted}
+          />
+        </div>
+      </>
     );
   }
 

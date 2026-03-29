@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, Suspense, useRef } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import {
@@ -14,10 +14,24 @@ import {
   Eye,
 } from "lucide-react";
 import { getStepContent } from "@/src/lib/api/readingStrictProgression";
+import {
+  PracticeTestReadingView,
+  type PracticeTestReadingViewHandle,
+} from "@/src/components/reading/PracticeTestReadingView";
+import { ReadingTestExitDialog } from "@/src/components/reading/ReadingTestExitDialog";
 import type { PracticeTestStepContent } from "@/src/lib/api/readingStrictProgression";
-import { PracticeTestReadingView } from "@/src/components/reading/PracticeTestReadingView";
+import { PRACTICE_TEST_MINUTES } from "@/src/constants/readingAssessmentTiming";
+import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
+import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
+import { TestStartCountdownOverlay } from "@/src/components/reading/TestStartCountdownOverlay";
 
-type Phase = "intro" | "loading" | "test" | "result" | "error";
+type Phase =
+  | "intro"
+  | "loading"
+  | "test"
+  | "result"
+  | "error"
+  | "premium_locked";
 
 function PracticeTestContent() {
   const params = useParams<{ id: string }>();
@@ -28,6 +42,8 @@ function PracticeTestContent() {
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [content, setContent] = useState<PracticeTestStepContent | null>(null);
+  const contentRef = useRef<PracticeTestStepContent | null>(null);
+  contentRef.current = content;
   const [result, setResult] = useState<{
     passed: boolean;
     scorePercent: number;
@@ -38,6 +54,37 @@ function PracticeTestContent() {
     isNewBest?: boolean;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const testRef = useRef<PracticeTestReadingViewHandle>(null);
+  const prefetchedRef = useRef<PracticeTestStepContent | null>(null);
+  const prefetchKeyRef = useRef<string | null>(null);
+  const [exitOpen, setExitOpen] = useState(false);
+  const [exitLoading, setExitLoading] = useState(false);
+  const [launchCountdownOpen, setLaunchCountdownOpen] = useState(false);
+
+  const openExitDialog = useCallback(() => {
+    setExitOpen(true);
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "test" || !stepId) return;
+    window.history.pushState({ readingPracticeLock: true }, "");
+    const onPopState = () => {
+      window.history.pushState({ readingPracticeLock: true }, "");
+      setExitOpen(true);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [phase, stepId]);
+
+  const handleConfirmExit = useCallback(async () => {
+    setExitLoading(true);
+    const res = await testRef.current?.submitIncompleteForExit();
+    setExitLoading(false);
+    setExitOpen(false);
+    if (!res?.ok) return;
+  }, []);
 
   const loadTest = useCallback(() => {
     if (!levelId || !stepId) {
@@ -59,10 +106,72 @@ function PracticeTestContent() {
         setPhase("test");
       })
       .catch((err) => {
+        const ax = err as {
+          response?: { status?: number; data?: { message?: string } };
+          message?: string;
+        };
+        const status = ax?.response?.status;
+        const backendMessage = ax?.response?.data?.message;
+        const msg =
+          typeof backendMessage === "string"
+            ? backendMessage
+            : err instanceof Error
+              ? err.message
+              : ax?.message;
+        if (typeof msg === "string" && msg.includes("LEVEL_CONTENT_UPDATED:")) {
+          router.push(`/profile/reading/strict-levels/${levelId}?contentUpdated=1`);
+          return;
+        }
+        if (isReadingPremiumLockResponse(status, msg)) {
+          setPhase("premium_locked");
+          return;
+        }
         setPhase("error");
-        setErrorMsg(err instanceof Error ? err.message : "Failed to load test.");
+        setErrorMsg(
+          typeof msg === "string" ? msg : "Failed to load test.",
+        );
       });
-  }, [levelId, stepId]);
+  }, [levelId, stepId, router]);
+
+  const beginTestAfterCountdown = useCallback(() => {
+    if (!levelId || !stepId) {
+      setPhase("error");
+      setErrorMsg("Missing level or step.");
+      return;
+    }
+    setErrorMsg(null);
+    const fromPrefetch = prefetchedRef.current;
+    if (fromPrefetch) {
+      setContent(fromPrefetch);
+      setPhase("test");
+      return;
+    }
+    if (contentRef.current) {
+      setPhase("test");
+      return;
+    }
+    loadTest();
+  }, [levelId, stepId, loadTest]);
+
+  useEffect(() => {
+    if (phase !== "intro" || !levelId || !stepId) return;
+    const key = `${levelId}:${stepId}`;
+    prefetchKeyRef.current = key;
+    prefetchedRef.current = null;
+    getStepContent(levelId, stepId)
+      .then((data) => {
+        if (prefetchKeyRef.current !== key) return;
+        if (data.type !== "PRACTICE_TEST" || !data.content) {
+          prefetchedRef.current = null;
+          return;
+        }
+        prefetchedRef.current = data.content as PracticeTestStepContent;
+      })
+      .catch(() => {
+        if (prefetchKeyRef.current !== key) return;
+        prefetchedRef.current = null;
+      });
+  }, [phase, levelId, stepId]);
 
   const handleSubmitted = useCallback(
     (res: {
@@ -92,6 +201,19 @@ function PracticeTestContent() {
     );
   }
 
+  if (launchCountdownOpen) {
+    return (
+      <TestStartCountdownOverlay
+        open
+        subtitle="Practice test"
+        onComplete={() => {
+          setLaunchCountdownOpen(false);
+          beginTestAfterCountdown();
+        }}
+      />
+    );
+  }
+
   if (phase === "intro") {
     return (
       <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
@@ -106,12 +228,14 @@ function PracticeTestContent() {
               Reading Practice Test
             </h1>
             <p className="mt-3 text-center text-[15px] leading-relaxed text-slate-600 dark:text-slate-400">
-              One passage with questions. Answer all questions and submit before the timer runs out. Your reading target band will be used to determine pass/fail.
+              One passage with questions. You have {PRACTICE_TEST_MINUTES} minutes. Answer all questions
+              and submit before the timer runs out. Your reading target band will be used to determine
+              pass/fail.
             </p>
             <div className="mt-8 flex flex-col gap-3">
               <button
                 type="button"
-                onClick={loadTest}
+                onClick={() => setLaunchCountdownOpen(true)}
                 disabled={!stepId}
                 className="w-full rounded-xl bg-indigo-600 py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all duration-200 hover:bg-indigo-700 hover:shadow-md active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -137,10 +261,20 @@ function PracticeTestContent() {
         <div className="flex flex-col items-center gap-5 opacity-100 transition-opacity duration-200">
           <Loader2 className="h-11 w-11 animate-spin text-indigo-600 dark:text-indigo-400" />
           <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-            Loading test…
+            Checking access…
           </p>
         </div>
       </div>
+    );
+  }
+
+  if (phase === "premium_locked" && levelId) {
+    return (
+      <PremiumReadingLockPanel
+        variant="fullscreen"
+        levelId={levelId}
+        context="practice_test"
+      />
     );
   }
 
@@ -171,14 +305,28 @@ function PracticeTestContent() {
 
   if (phase === "test" && content) {
     return (
-      <div className="fixed inset-0 z-50 flex h-screen flex-col bg-slate-50 dark:bg-slate-950">
-        <PracticeTestReadingView
-          levelId={levelId}
-          stepId={stepId!}
-          content={content}
-          onSubmitted={handleSubmitted}
+      <>
+        <ReadingTestExitDialog
+          open={exitOpen}
+          title="Submit and leave?"
+          description="Leaving now will submit this attempt with your current answers. Blanks count as incorrect. Your band and score will be recorded as an official attempt. Use Continue test to stay and finish."
+          confirmLabel="Submit and leave"
+          cancelLabel="Continue test"
+          confirmLoading={exitLoading}
+          onConfirm={handleConfirmExit}
+          onCancel={() => setExitOpen(false)}
         />
-      </div>
+        <div className="fixed inset-0 z-50 flex h-screen flex-col bg-slate-50 dark:bg-slate-950">
+          <PracticeTestReadingView
+            ref={testRef}
+            levelId={levelId}
+            stepId={stepId!}
+            content={content}
+            onSubmitted={handleSubmitted}
+            onRequestExit={openExitDialog}
+          />
+        </div>
+      </>
     );
   }
 
@@ -257,7 +405,7 @@ function PracticeTestContent() {
               )}
               <button
                 type="button"
-                onClick={loadTest}
+                onClick={() => setLaunchCountdownOpen(true)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 py-3.5 text-[15px] font-semibold text-slate-700 dark:text-slate-300 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 <RotateCcw className="h-4 w-4" />

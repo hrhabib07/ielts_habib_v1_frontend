@@ -104,6 +104,7 @@ export function StepsBuilderSection({
             versionId={versionId}
             steps={steps}
             practiceTests={currentDetail.practiceTests ?? []}
+            allLevelPracticeTests={currentDetail.allLevelPracticeTests ?? []}
             disabled={disabled}
             onStepsChange={handleStepsChange}
           />
@@ -141,6 +142,7 @@ export function StepsBuilderSection({
             />
           </div>
           <GroupTestBuilder
+            levelId={levelId}
             versionId={versionId}
             groupTests={groupTests}
             disabled={disabled}

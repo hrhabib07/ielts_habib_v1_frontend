@@ -57,7 +57,19 @@ export function getDefaultMetaForLevel(levelOrder: number): Record<string, unkno
     case "FLOW_CHART_COMPLETION":
       return { wordLimit: 3 };
     case "SUMMARY_COMPLETION_WITH_CLUES":
-      return { options: ["option A", "option B", "option C"], wordLimit: 1 };
+      return {
+        options: [
+          "technology",
+          "trade",
+          "policy",
+          "labour",
+          "climate",
+          "innovation",
+          "barrier",
+          "support",
+        ],
+        wordLimit: 1,
+      };
     case "SHORT_ANSWER":
       return { wordLimit: 3 };
     case "DIAGRAM_LABEL_COMPLETION":
@@ -88,6 +100,20 @@ export function getBulkQuestionTemplateForLevel(
     return {
       questionBody: { layout: "TEXT", content: `Complete the sentence: The passage states that {{gap1}}.` },
       blanks: [{ id: 1, correctAnswer: "example", wordLimit: 2 }],
+    };
+  }
+  if (qt === "SUMMARY_COMPLETION_WITH_CLUES") {
+    return {
+      questionBody: {
+        layout: "TEXT",
+        content:
+          "Opening sentence of your summary (no gap).\n\nThe writer shows that {{gap1}} shaped early debate, while {{gap2}} grew in importance later.\n\nIn conclusion, {{gap3}} best matches the passage.",
+      },
+      blanks: [
+        { id: 1, correctAnswer: "technology", wordLimit: 1 },
+        { id: 2, correctAnswer: "trade", wordLimit: 1 },
+        { id: 3, correctAnswer: "policy", wordLimit: 1 },
+      ],
     };
   }
   return {
@@ -131,4 +157,34 @@ export function getQuestionItemShapeForLevel(
     default:
       return { options: ["A", "B", "C", "D"], correctAnswer: "A" };
   }
+}
+
+export function resolveLevelTemplateIndex(params: {
+  order: number;
+  title: string;
+  slug?: string | null;
+}): number {
+  const { order, title, slug } = params;
+  const clamp = (n: number): number => Math.max(0, Math.min(18, n));
+
+  // Prefer parsing from title (what instructors see as "L8"/"Level 8").
+  // Covers common formats:
+  // - "L8: Yes/No/Not Given"
+  // - "Level 8 – Yes/No/Not Given"
+  const titleL = title.match(/\bL\s*(\d+)\b/i)?.[1];
+  if (titleL != null) return clamp(Number(titleL));
+
+  const titleLevel = title.match(/\bLevel\s*(\d+)\b/i)?.[1];
+  if (titleLevel != null) return clamp(Number(titleLevel));
+
+  // Fallback: slug sometimes includes order as "level-{order}-...".
+  const slugOrder = slug?.match(/^level-(\d+)(?:-|$)/i)?.[1];
+  if (slugOrder != null) {
+    // In existing data: order is 1-based relative to L# (title uses order-1).
+    const idx = Number(slugOrder) - 1;
+    if (Number.isFinite(idx)) return clamp(idx);
+  }
+
+  // Last resort: original behavior (order is typically 1-based).
+  return clamp(order - 1);
 }

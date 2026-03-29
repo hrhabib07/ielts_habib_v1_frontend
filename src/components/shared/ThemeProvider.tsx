@@ -33,7 +33,13 @@ export function useTheme(): {
   toggleTheme: () => void;
 } {
   const { theme, setTheme, resolvedTheme } = useNextTheme();
-  const effective: Theme = (resolvedTheme as Theme) ?? (theme as Theme) ?? "light";
+  /** Avoid "system" leaking into UI before resolvedTheme exists — prevents SSR/client icon mismatch. */
+  const effective: Theme =
+    resolvedTheme === "light" || resolvedTheme === "dark"
+      ? resolvedTheme
+      : theme === "light" || theme === "dark"
+        ? theme
+        : "light";
   const toggleTheme = () => {
     setTheme(effective === "dark" ? "light" : "dark");
   };

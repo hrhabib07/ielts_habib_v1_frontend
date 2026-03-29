@@ -39,6 +39,12 @@ export interface LevelDetailForStudent {
     [key: string]: unknown;
   };
   steps: LevelDetailStep[];
+  contentUpdateNotice?: {
+    restartRequired: boolean;
+    message: string;
+    fromVersionId?: string;
+    toVersionId: string;
+  };
 }
 
 export interface QuizAttemptReviewItem {

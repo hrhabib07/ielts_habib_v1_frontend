@@ -146,6 +146,8 @@ export interface ReadingStudentDetail {
     } | null;
     totalLevels?: number;
     overallProgressPct?: number;
+    journeyEarnedPoints?: number;
+    journeyMaxPoints?: number;
     streakInfo: {
       consecutivePassCount: number;
       requiredStreak: number;
