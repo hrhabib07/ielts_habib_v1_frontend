@@ -7,7 +7,6 @@ import {
   ChevronRight,
   CheckCircle2,
   Lock,
-  Loader2,
   Menu,
   X,
   Trophy,
@@ -21,6 +20,7 @@ import type {
   LevelDetailStep,
 } from "@/src/lib/api/readingStrictProgression";
 import { useReadingLevelDetail } from "@/src/contexts/ReadingLevelDetailContext";
+import { ReadingSidebarSkeleton } from "@/src/components/reading/ReadingPathSkeleton";
 import { cn } from "@/lib/utils";
 
 const READING_STRICT_PREFIX = "/profile/reading/strict-levels/";
@@ -400,9 +400,16 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                 {isExpanded && (
                   <div className="border-t border-slate-100 dark:border-slate-800/80 pt-2 pb-3 pl-3 pr-2">
                     {!detail ? (
-                      <div className="flex items-center gap-2 py-4 text-slate-500 dark:text-slate-400">
-                        <Loader2 className="h-4 w-4 animate-spin shrink-0" />
-                        <span className="text-xs">Loading steps…</span>
+                      <div className="space-y-2 py-2" aria-hidden>
+                        {Array.from({ length: 5 }).map((_, j) => (
+                          <div
+                            key={j}
+                            className="flex items-center gap-3 rounded-lg px-3 py-2.5"
+                          >
+                            <div className="h-6 w-6 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
+                            <div className="h-3.5 flex-1 max-w-[85%] rounded-md bg-slate-200 dark:bg-slate-700" />
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <div className="space-y-0.5">
@@ -473,14 +480,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
   );
 
   if (loading) {
-    return (
-      <aside className="flex h-full w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
-        <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="text-sm font-medium">Loading your path…</span>
-        </div>
-      </aside>
-    );
+    return <ReadingSidebarSkeleton />;
   }
 
   if (levels.length === 0) {

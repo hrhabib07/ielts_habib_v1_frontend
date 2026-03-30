@@ -1,6 +1,6 @@
 "use client";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
@@ -20,6 +20,7 @@ export function MobileSidebar({ role }: MobileSidebarProps) {
       </SheetTrigger>
 
       <SheetContent side="left" className="p-0">
+        <SheetTitle className="sr-only">Dashboard navigation</SheetTitle>
         <Sidebar role={role} />
       </SheetContent>
     </Sheet>

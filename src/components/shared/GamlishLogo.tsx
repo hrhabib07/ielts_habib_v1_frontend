@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import { BRAND } from "@/src/lib/constants";
+import { GamlishWordmarkAnimation } from "./GamlishWordmarkAnimation";
 
 type GamlishLogoProps = {
   showWordmark?: boolean;
+  /** Header-only: Game + English → merge into Gamlish */
+  animateWordmark?: boolean;
   className?: string;
   /** "default" for header/footer (compact), "hero" for large hero placement */
   variant?: "default" | "hero";
@@ -12,6 +15,7 @@ type GamlishLogoProps = {
 
 export function GamlishLogo({
   showWordmark = true,
+  animateWordmark = false,
   className = "",
   variant = "default",
 }: GamlishLogoProps) {
@@ -31,7 +35,7 @@ export function GamlishLogo({
         height={size.h}
         className={
           isHero
-            ? "h-16 w-auto md:h-20"
+            ? "h-11 w-auto sm:h-12 md:h-14"
             : "h-7 w-auto max-h-7 shrink-0 object-contain object-center align-middle"
         }
         priority={isHero}
@@ -39,9 +43,13 @@ export function GamlishLogo({
         suppressHydrationWarning
       />
       {showWordmark && !isHero && (
-        <span className="text-lg font-semibold tracking-tight text-foreground leading-none">
-          Gamlish
-        </span>
+        animateWordmark ? (
+          <GamlishWordmarkAnimation />
+        ) : (
+          <span className="text-lg font-semibold tracking-tight text-foreground leading-none">
+            Gamlish
+          </span>
+        )
       )}
     </span>
   );

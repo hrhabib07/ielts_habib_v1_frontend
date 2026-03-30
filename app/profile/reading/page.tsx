@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getLevelsByModule, getCurrentLevel } from "@/src/lib/api/levels";
-import { getLevelDetail } from "@/src/lib/api/readingStrictProgression";
 import type { Level } from "@/src/lib/api/levels";
+import { ReadingMainAreaSkeleton } from "@/src/components/reading/ReadingPathSkeleton";
 
 /**
  * Reading hub: auto-redirect to the correct strict-level URL.
@@ -43,33 +43,19 @@ export default function ProfileReadingPage() {
               : null;
 
         let levelId: string;
-        let stepId: string;
+        let stepParam: string | null = null;
 
         if (currentLevelId && progress) {
           levelId = currentLevelId;
           if (progress.currentStepId) {
-            stepId = progress.currentStepId;
-          } else {
-            const detail = await getLevelDetail(levelId);
-            if (cancelled) return;
-            const idx = detail.progress.currentStepIndex ?? 0;
-            const step = detail.steps[idx] ?? detail.steps[detail.steps.length - 1];
-            stepId = step?._id ?? detail.steps[0]?._id ?? "";
+            stepParam = `?step=${encodeURIComponent(progress.currentStepId)}`;
           }
         } else {
           levelId = firstLevel._id;
-          const detail = await getLevelDetail(levelId);
-          if (cancelled) return;
-          const firstStep = detail.steps[0];
-          stepId = firstStep?._id ?? "";
         }
 
-        if (!stepId) {
-          router.replace(`/profile/reading/strict-levels/${levelId}`);
-          return;
-        }
         router.replace(
-          `/profile/reading/strict-levels/${levelId}?step=${encodeURIComponent(stepId)}`,
+          `/profile/reading/strict-levels/${levelId}${stepParam ?? ""}`,
         );
       } catch {
         if (!cancelled) setStatus("error");
@@ -99,25 +85,5 @@ export default function ProfileReadingPage() {
     );
   }
 
-  return (
-    <div className="min-h-[calc(100vh-5rem)] w-full animate-pulse space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="space-y-3">
-        <div className="h-7 w-64 rounded-md bg-muted" />
-        <div className="h-4 w-96 max-w-full rounded-md bg-muted/80" />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="h-28 rounded-xl border bg-card" />
-        <div className="h-28 rounded-xl border bg-card" />
-        <div className="h-28 rounded-xl border bg-card" />
-      </div>
-
-      <div className="rounded-2xl border bg-card p-5 space-y-4">
-        <div className="h-5 w-48 rounded bg-muted" />
-        <div className="h-4 w-full rounded bg-muted/80" />
-        <div className="h-4 w-5/6 rounded bg-muted/80" />
-        <div className="h-4 w-2/3 rounded bg-muted/80" />
-      </div>
-    </div>
-  );
+  return <ReadingMainAreaSkeleton className="min-h-[calc(100vh-4rem)]" />;
 }

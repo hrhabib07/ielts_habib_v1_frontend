@@ -29,7 +29,7 @@ export function useLogin() {
       } else if (role === "INSTRUCTOR") {
         window.location.href = "/dashboard/instructor";
       } else {
-        window.location.href = "/dashboard/student";
+        window.location.href = "/";
       }
     } catch (err) {
       setError("Invalid email or password");

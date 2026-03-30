@@ -2,13 +2,13 @@ export const SCORE_GUARANTEE_TAGLINE =
   "We don't guess your score—we measure it.";
 
 export const SCORE_GUARANTEE_INTRO =
-  "Most platforms give you materials; we give you a measurable outcome. We are so confident in our 18-Level Mastery System that if you reach our Readiness Zone and do not achieve your declared target band on the official IELTS, we will issue a 100% full refund—subject to the eligibility criteria below.";
+  "Most platforms give you materials; we give you a measurable outcome. We are so confident in our 20-Level Mastery System that if you reach our Readiness Zone and do not achieve your declared target band on the official IELTS exam, we will issue a 100% full refund of your course fees—subject to the eligibility criteria below.";
 
 export const SCORE_GUARANTEE_CRITERIA = [
   {
-    title: "100% curriculum mastery",
+    title: "100% Curriculum Mastery",
     description:
-      "Complete all 18 levels and every mandatory lesson in your personalized path.",
+      "Complete all 20 levels and every mandatory lesson in your personalized path.",
     shortLabel: "Full path",
   },
   {
@@ -18,21 +18,21 @@ export const SCORE_GUARANTEE_CRITERIA = [
     shortLabel: "90% readiness",
   },
   {
-    title: "Academic integrity",
+    title: "Academic Integrity",
     description:
-      "All quizzes and full-length mock exams must be completed honestly, following standard IELTS timing and rules.",
+      "All quizzes and full-length mock exams must be completed honestly, strictly following standard IELTS timing and rules.",
     shortLabel: "Honest attempts",
   },
   {
-    title: "The 14-day performance window",
+    title: "The 14-Day Performance Window",
     description:
-      "You must sit the official IELTS (IDP or British Council) within 14 days of first reaching 90% Readiness on Gamlish.",
+      "You must sit for the official IELTS exam (IDP or British Council) within 14 days of first hitting 90% Readiness on Gamlish.",
     shortLabel: "Exam timing",
   },
   {
-    title: "Rapid claim",
+    title: "Rapid Claim",
     description:
-      "If you do not hit your target, submit your official Test Report Form within 14 days of results publication.",
+      "If you do not hit your target, submit your official Test Report Form (TRF) within 14 days of your results publication.",
     shortLabel: "Claim window",
   },
 ] as const;

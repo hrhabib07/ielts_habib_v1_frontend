@@ -17,7 +17,7 @@ const DevQuickLogin =
       )
     : () => null;
 
-export function LoginForm() {
+export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) {
   const { handleLogin, loading, error } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,6 +33,14 @@ export function LoginForm() {
         </div>
 
         <div className="rounded-lg border bg-card p-8 shadow-sm">
+          {resetSuccess ? (
+            <div
+              className="mb-6 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-800 dark:text-emerald-200"
+              role="status"
+            >
+              Your password was reset. Sign in with your new password.
+            </div>
+          ) : null}
           <DevQuickLogin setEmail={setEmail} setPassword={setPassword} />
           <form
             className="space-y-6"
@@ -72,6 +80,14 @@ export function LoginForm() {
                   placeholder="Enter your password"
                   className="pl-10"
                 />
+              </div>
+              <div className="text-right">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
               </div>
             </div>
 

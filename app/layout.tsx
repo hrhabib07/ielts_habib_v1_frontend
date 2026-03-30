@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/src/components/shared/ThemeProvider";
 import { Header } from "@/src/components/shared/Header";
@@ -15,6 +15,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const hindSiliguri = Hind_Siliguri({
+  variable: "--font-hind-siliguri",
+  subsets: ["latin", "bengali"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -33,13 +40,13 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${hindSiliguri.variable} antialiased`}
       >
         <ThemeProvider>
           <SyncAuthCookie initialUser={initialUser} />
           <div className="flex min-h-screen flex-col">
             <Header initialUser={initialUser} />
-            <main className="min-h-0 flex-1">{children}</main>
+            <main className="flex min-h-0 flex-1 flex-col">{children}</main>
             <Footer initialUser={initialUser} />
           </div>
         </ThemeProvider>

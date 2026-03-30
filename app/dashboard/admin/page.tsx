@@ -19,10 +19,10 @@ export default function AdminDashboardPage() {
             Manage subscription requests, instructor applications, and content
           </p>
         </div>
-        <Link href="/profile/reading">
+        <Link href="/">
           <Button variant="outline" size="sm" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to app
+            Back to home
           </Button>
         </Link>
       </div>

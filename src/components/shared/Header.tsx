@@ -9,7 +9,7 @@ import { useTheme } from "./ThemeProvider";
 import { getDecodedTokenClient, logout } from "@/src/lib/auth";
 import type { UserRole } from "@/src/lib/constants";
 import type { CurrentUser } from "@/src/lib/auth-server";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { GamlishLogo } from "./GamlishLogo";
 import { isReadingExamFocusPath } from "@/src/lib/examFocusPaths";
 
@@ -77,8 +77,6 @@ export function Header({ initialUser = null }: HeaderProps) {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const isActive = (path: string) => pathname === path;
-
   const isStudentNavActive = (href: string) => {
     if (href === "/profile") {
       return pathname === "/profile" || pathname === "/profile/";
@@ -86,62 +84,64 @@ export function Header({ initialUser = null }: HeaderProps) {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const publicNav = [
-    { href: "/about", label: "About" },
-    { href: "/pricing", label: "Plans & Pricing" },
-  ];
-
   const studentNav = [
     { href: "/profile/reading", label: "Reading" },
     { href: "/profile", label: "My profile" },
   ];
 
+  const publicNavLinks = [
+    { href: "/how-it-works", label: "How it works" },
+    { href: "/pricing", label: "Plans & pricing" },
+  ] as const;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex h-full min-h-[2.5rem] items-center shrink-0 py-1">
-          <GamlishLogo className="flex items-center" />
+          <GamlishLogo animateWordmark className="flex items-center" />
         </Link>
 
         {/* Desktop */}
         <nav className="hidden md:flex items-center gap-6">
-          {user ? (
-            user.role === "STUDENT" ? (
-              <>
-                {studentNav.map((link) => (
-                  <Link
-                    key={link.href + link.label}
-                    href={link.href}
-                    className={`text-sm font-medium transition-colors hover:text-primary ${
-                      isStudentNavActive(link.href)
-                        ? "text-foreground"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </>
-            ) : (
-              <Link
-                href={user.role === "ADMIN" ? "/dashboard/admin" : "/dashboard/instructor"}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                Dashboard
-              </Link>
-            )
+          {!user ? (
+            <>
+              {publicNavLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    pathname === link.href || pathname.startsWith(`${link.href}/`)
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </>
+          ) : user.role === "STUDENT" ? (
+            <>
+              {studentNav.map((link) => (
+                <Link
+                  key={link.href + link.label}
+                  href={link.href}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    isStudentNavActive(link.href)
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </>
           ) : (
-            publicNav.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(link.href) ? "text-foreground" : "text-muted-foreground"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))
+            <Link
+              href={user.role === "ADMIN" ? "/dashboard/admin" : "/dashboard/instructor"}
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              Dashboard
+            </Link>
           )}
         </nav>
 
@@ -292,37 +292,38 @@ export function Header({ initialUser = null }: HeaderProps) {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px]">
-              <nav className="flex flex-col gap-4 mt-8">
-                {user ? (
-                  user.role === "STUDENT" ? (
-                    <>
-                      <Link href="/profile/reading" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium">
-                        Reading
+              <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+              <nav className="flex flex-col gap-4 mt-8" aria-label="Main navigation">
+                {!user ? (
+                  <>
+                    {publicNavLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="text-base font-medium text-foreground"
+                      >
+                        {link.label}
                       </Link>
-                      <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium">
-                        My profile
-                      </Link>
-                    </>
-                  ) : (
-                    <Link
-                      href={user.role === "ADMIN" ? "/dashboard/admin" : "/dashboard/instructor"}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-base font-medium"
-                    >
-                      Dashboard
+                    ))}
+                  </>
+                ) : user.role === "STUDENT" ? (
+                  <>
+                    <Link href="/profile/reading" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium">
+                      Reading
                     </Link>
-                  )
+                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="text-base font-medium">
+                      My profile
+                    </Link>
+                  </>
                 ) : (
-                  publicNav.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-base font-medium text-muted-foreground hover:text-foreground"
-                    >
-                      {link.label}
-                    </Link>
-                  ))
+                  <Link
+                    href={user.role === "ADMIN" ? "/dashboard/admin" : "/dashboard/instructor"}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-base font-medium"
+                  >
+                    Dashboard
+                  </Link>
                 )}
                 <div className="border-t pt-4 space-y-2">
                   {user ? (

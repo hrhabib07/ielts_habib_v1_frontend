@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, Loader2, Zap, ChevronDown, ChevronUp, Shield } from "lucide-react";
+import { Check, Loader2, Zap, Shield } from "lucide-react";
 import {
   getPublicPlans,
   getFirst100PromoOffer,
@@ -13,6 +13,7 @@ import {
   type First100PromoOffer,
 } from "@/src/lib/api/subscription";
 import type { CurrentUser } from "@/src/lib/auth-server";
+import { PricingFaqSection } from "@/src/components/pricing/PricingFaqSection";
 
 function formatDuration(days: number): string {
   const totalMonths = Math.max(1, Math.floor(days / 30));
@@ -356,7 +357,7 @@ function PlanCard({
   const savedAmount = Math.max(0, plan.price - effectivePrice);
 
   return (
-    <div className="rounded-2xl border bg-card p-8 flex flex-col max-w-md mx-auto w-full shadow-sm">
+    <div className="mx-auto flex w-full max-w-md flex-col rounded-2xl border border-border/80 bg-card/95 p-8 shadow-lg shadow-black/[0.04] backdrop-blur-sm dark:shadow-black/20">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="text-xl font-semibold text-foreground">{plan.name}</h2>
@@ -375,11 +376,11 @@ function PlanCard({
           <span className="text-lg font-normal text-muted-foreground">BDT</span>
         </p>
         {hasDiscount && (
-          <div className="mt-2 rounded-lg border border-emerald-200/70 bg-emerald-50/60 p-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+          <div className="mt-2 rounded-lg border border-emerald-500/25 bg-emerald-500/[0.08] p-3 dark:border-emerald-400/25 dark:bg-emerald-400/10">
+            <p className="text-xs font-medium uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
               Coupon price unlocked
             </p>
-            <p className="mt-1 text-sm font-semibold text-emerald-700">
+            <p className="mt-1 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
               Your price: {effectivePrice.toLocaleString()} BDT (Save {savedAmount.toLocaleString()} BDT)
             </p>
           </div>
@@ -389,13 +390,13 @@ function PlanCard({
           {plan.isWholePackage ? "All modules" : (plan.modulesIncluded ?? ["READING"]).join(", ")}
         </p>
         {couponDuration && (
-          <p className="mt-2 text-sm text-emerald-700">
+          <p className="mt-2 text-sm text-emerald-800 dark:text-emerald-300">
             Normal access: <span className="line-through decoration-2">{normalDuration}</span> ·
             Coupon access: <span className="font-semibold"> {couponDuration}</span>
           </p>
         )}
         {showUrgency && (
-          <p className="mt-2 text-xs font-semibold text-rose-600">
+          <p className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
             Hurry: only {remainingPromoSeats} promo seat{remainingPromoSeats > 1 ? "s" : ""} left.
           </p>
         )}
@@ -445,7 +446,6 @@ export function PricingContent({ initialUser }: PricingContentProps) {
   const [first100PromoOffer, setFirst100PromoOffer] = useState<First100PromoOffer | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const isLoggedIn = !!initialUser;
 
   useEffect(() => {
@@ -457,37 +457,26 @@ export function PricingContent({ initialUser }: PricingContentProps) {
       .finally(() => setLoading(false));
   }, []);
 
-  const faqs = [
-    {
-      q: "How do I get access after payment?",
-      a: "After submitting your transaction ID, our team verifies it manually. You will receive access within 24–48 hours.",
-    },
-    {
-      q: "Which payment methods are accepted?",
-      a: "We currently accept bKash.",
-    },
-    {
-      q: "Can I get a refund?",
-      a: isLoggedIn
-        ? "Purchase-related issues: contact support within 7 days. Separately, the Gamlish Score Guarantee™ may cover a 100% refund if you meet every eligibility rule—see your member guarantee page for the full checklist."
-        : "Purchase-related issues: contact support within 7 days. After you register, the Score Guarantee™ page in your profile explains when a full refund may apply for eligible learners.",
-    },
-    {
-      q: "What happens when my subscription expires?",
-      a: "Your account remains but module access is restricted until you renew.",
-    },
-  ];
-
   return (
-    <main className="mx-auto max-w-[900px] px-4 py-16 space-y-16">
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-foreground">Subscription Plans</h1>
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Structured, affordable access to IELTS preparation. Simple pricing, no hidden fees.
+    <main className="relative mx-auto max-w-4xl px-4 py-12 sm:px-6 md:py-20 space-y-12 md:space-y-16">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[min(40vh,20rem)] bg-[radial-gradient(ellipse_75%_60%_at_50%_-10%,var(--primary)_0%,transparent_58%)] opacity-[0.08] dark:opacity-[0.14]"
+        aria-hidden
+      />
+      <div className="relative text-center space-y-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
+          Plans &amp; access
+        </p>
+        <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-[2.5rem] md:leading-[1.15]">
+          Unlock Reading mastery
+        </h1>
+        <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
+          One focused module, clear pricing, and a guarantee tied to real readiness — no hidden fees,
+          no clutter.
         </p>
       </div>
 
-      <Card className="overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.05] via-card to-card p-6 shadow-sm md:p-7">
+      <Card className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-card to-card p-6 shadow-md shadow-primary/5 md:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary">
@@ -509,21 +498,28 @@ export function PricingContent({ initialUser }: PricingContentProps) {
               </p>
             </div>
           </div>
-          <Button asChild variant={isLoggedIn ? "default" : "outline"} className="w-full shrink-0 sm:w-auto">
-            <Link href={isLoggedIn ? "/profile/score-guarantee" : "/register"}>
-              {isLoggedIn ? "Open member guarantee" : "Get started to view guarantee"}
-            </Link>
-          </Button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+            {!isLoggedIn ? (
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link href="/score-guarantee">Read full policy</Link>
+              </Button>
+            ) : null}
+            <Button asChild className="w-full sm:w-auto">
+              <Link href={isLoggedIn ? "/profile/score-guarantee" : "/register"}>
+                {isLoggedIn ? "Open member guarantee" : "Get started"}
+              </Link>
+            </Button>
+          </div>
         </div>
       </Card>
 
       {!selectedPlan && !loading && first100PromoOffer?.enabled && (first100PromoOffer.remainingUses ?? 0) > 0 && (
-        <Card className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-[#1e3a8a]/10 via-white to-emerald-50 p-6 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <Card className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/[0.1] via-card to-emerald-500/[0.06] p-6 shadow-sm dark:from-primary/[0.16] dark:via-card dark:to-emerald-400/[0.08]">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-semibold text-[#1e3a8a]">
+              <p className="text-sm font-semibold text-foreground">
                 {first100PromoOffer.usedCount === 0
-                  ? "Be the first student of Gamblish"
+                  ? "Be the first student of Gamlish"
                   : "Top 100 Students Deal"}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -534,11 +530,11 @@ export function PricingContent({ initialUser }: PricingContentProps) {
                     : `Only ${first100PromoOffer.remainingUses} seat(s) left for the 60% discount.`}
               </p>
             </div>
-            <div className="flex items-center gap-3 mt-2 md:mt-0">
-              <span className="shrink-0 rounded-full bg-[#1e3a8a]/10 px-3 py-1 text-xs font-semibold text-[#1e3a8a]">
+            <div className="mt-2 flex flex-wrap items-center gap-3 md:mt-0">
+              <span className="shrink-0 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 Promo: <span className="font-mono">{first100PromoOffer.code}</span>
               </span>
-              <span className="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <span className="shrink-0 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-400/15 dark:text-emerald-300">
                 {first100PromoOffer.discountType === "PERCENT"
                   ? `${first100PromoOffer.discountValue}% OFF`
                   : `Save ${first100PromoOffer.discountValue} BDT`}
@@ -576,30 +572,7 @@ export function PricingContent({ initialUser }: PricingContentProps) {
         </div>
       )}
 
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold text-foreground">Frequently asked questions</h2>
-        <div className="divide-y rounded-xl border">
-          {faqs.map((faq, i) => (
-            <div key={i} className="px-5 py-4">
-              <button
-                type="button"
-                className="flex w-full items-center justify-between gap-4 text-left text-sm font-medium text-foreground"
-                onClick={() => setFaqOpen(faqOpen === i ? null : i)}
-              >
-                {faq.q}
-                {faqOpen === i ? (
-                  <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-                )}
-              </button>
-              {faqOpen === i && (
-                <p className="mt-2 text-sm text-muted-foreground">{faq.a}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+      <PricingFaqSection />
     </main>
   );
 }

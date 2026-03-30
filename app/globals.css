@@ -15,6 +15,7 @@
   --color-success: var(--success);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-family-bengali: var(--font-hind-siliguri), ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-sidebar-ring: var(--sidebar-ring);

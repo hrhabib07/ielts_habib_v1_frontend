@@ -5,6 +5,11 @@ import { usePathname } from "next/navigation";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { GamlishLogo } from "./GamlishLogo";
 import { isReadingExamFocusPath } from "@/src/lib/examFocusPaths";
+import {
+  SUPPORT_WHATSAPP_DISPLAY,
+  SUPPORT_WHATSAPP_HREF,
+} from "@/src/lib/contact";
+import { MessageCircle } from "lucide-react";
 
 interface FooterProps {
   initialUser?: CurrentUser | null;
@@ -17,100 +22,145 @@ export function Footer({ initialUser = null }: FooterProps) {
     return null;
   }
 
-  // Reading dashboard: no footer (full professional dashboard experience)
   if (pathname?.includes("/profile/reading/strict-levels")) {
     return null;
   }
 
-  // Home page: only copyright line (minimal, clean)
   if (pathname === "/") {
-    return (
-      <footer className="py-6 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Gamlish. All rights reserved.</p>
-      </footer>
-    );
+    return null;
   }
 
   return (
-    <footer className="border-t bg-muted/40">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-          {/* Brand */}
-          <div className="space-y-4">
+    <footer className="border-t border-border/80 bg-muted/30 dark:bg-muted/20">
+      <div className="container mx-auto max-w-6xl px-4 py-14 md:py-16">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-10">
+          <div className="md:col-span-4 space-y-4">
             <GamlishLogo className="text-lg" />
-            <p className="text-sm text-muted-foreground">
-              The world's first performance-driven English mastery engine.
-              Data-backed mastery. Levels to clear.
+            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+              Performance-driven IELTS Reading preparation — structured levels, readiness you can
+              measure, and a guarantee backed by clear rules.
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="mb-4 text-sm font-semibold">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
+          <div className="md:col-span-3">
+            <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-foreground">
+              Product
+            </h4>
+            <ul className="space-y-3 text-sm">
               <li>
                 <Link
                   href="/"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Home
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/about"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  href="/how-it-works"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  About
+                  How it works
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/courses"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  href="/pricing"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Courses
+                  Plans &amp; pricing
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/score-guarantee"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Score Guarantee™ (conditions)
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Terms &amp; policies
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Resources - hide auth links when authenticated */}
-          {!initialUser && (
-            <div>
-              <h4 className="mb-4 text-sm font-semibold">Resources</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="/login"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Login
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/register"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Register
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          )}
+          <div className="md:col-span-2">
+            <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-foreground">
+              Account
+            </h4>
+            <ul className="space-y-3 text-sm">
+              {initialUser ? (
+                <>
+                  <li>
+                    <Link
+                      href="/profile"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      My profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/profile/reading"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Reading
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link
+                      href="/login"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Log in
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/register"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Get started
+                    </Link>
+                  </li>
+                </>
+              )}
+            </ul>
+          </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="mb-4 text-sm font-semibold">Contact</h4>
-            <p className="text-sm text-muted-foreground">
-              For support and inquiries, please contact us through your
-              dashboard.
+          <div className="md:col-span-3">
+            <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-foreground">
+              Support
+            </h4>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Need help with access, billing, or how Gamlish works? Message us on{" "}
+              <strong className="font-medium text-foreground">WhatsApp only</strong> — we reply to
+              chats on this number.{" "}
+              <span className="text-foreground">Please do not call;</span> we do not provide phone
+              support on this line.
             </p>
+            <a
+              href={SUPPORT_WHATSAPP_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-500/15 dark:text-emerald-300"
+            >
+              <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
+              WhatsApp {SUPPORT_WHATSAPP_DISPLAY}
+            </a>
           </div>
         </div>
 
-        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-12 border-t border-border/60 pt-8 text-center text-xs text-muted-foreground md:text-sm">
           <p>&copy; {new Date().getFullYear()} Gamlish. All rights reserved.</p>
         </div>
       </div>

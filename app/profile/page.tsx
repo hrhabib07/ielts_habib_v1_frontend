@@ -9,17 +9,27 @@ import { Label } from "@/components/ui/label";
 import { getMyProfile, updateProfile } from "@/src/lib/api/profile";
 import { getMySubscription, type ActiveSubscription } from "@/src/lib/api/subscription";
 import type { StudentProfile } from "@/src/lib/api/types";
+import { JourneyCountryCombobox } from "@/src/components/profile/JourneyCountryCombobox";
+import { ProfileChangePassword } from "@/src/components/profile/ProfileChangePassword";
 import { ProfileSummarySection } from "@/src/components/profile/ProfileSummarySection";
 import { ProfilePageSkeleton } from "@/src/components/profile/ProfilePageSkeleton";
+import { normalizeJourneyCountryLabel } from "@/src/lib/journeyCountries";
 import {
   BookOpen,
   CreditCard,
   MapPin,
+  MessageCircle,
+  Pencil,
   Phone,
   Shield,
   Sparkles,
   User,
+  X,
 } from "lucide-react";
+import {
+  SUPPORT_WHATSAPP_DISPLAY,
+  SUPPORT_WHATSAPP_HREF,
+} from "@/src/lib/contact";
 
 function formatSubscriptionDate(iso: string): string {
   try {
@@ -60,6 +70,22 @@ export default function ProfilePage() {
   const [dreamCity, setDreamCity] = useState("");
   const [dreamCountry, setDreamCountry] = useState("");
   const [phone, setPhone] = useState("");
+  const [editingPersonalDetails, setEditingPersonalDetails] = useState(false);
+
+  const resetPersonalFormFromRecord = (record: StudentProfile) => {
+    setName(record.name ?? "");
+    setCurrentCity(record.profile?.currentCity ?? record.profile?.city ?? "");
+    setCurrentCountry(
+      normalizeJourneyCountryLabel(
+        record.profile?.currentCountry ?? record.profile?.country,
+      ) ?? "",
+    );
+    setDreamCity(record.profile?.dreamCity ?? "");
+    setDreamCountry(
+      normalizeJourneyCountryLabel(record.profile?.dreamCountry) ?? "",
+    );
+    setPhone(record.profile?.phone ?? "");
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -78,10 +104,14 @@ export default function ProfilePage() {
         setName(profile.name ?? "");
         setCurrentCity(profile.profile?.currentCity ?? profile.profile?.city ?? "");
         setCurrentCountry(
-          profile.profile?.currentCountry ?? profile.profile?.country ?? "",
+          normalizeJourneyCountryLabel(
+            profile.profile?.currentCountry ?? profile.profile?.country,
+          ) ?? "",
         );
         setDreamCity(profile.profile?.dreamCity ?? "");
-        setDreamCountry(profile.profile?.dreamCountry ?? "");
+        setDreamCountry(
+          normalizeJourneyCountryLabel(profile.profile?.dreamCountry) ?? "",
+        );
         setPhone(profile.profile?.phone ?? "");
       })
       .catch(() => {
@@ -98,27 +128,48 @@ export default function ProfilePage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim() || !currentCity.trim() || !dreamCity.trim() || phone.trim().length < 5) {
+      setError("Full name, both cities, both countries, and phone (min. 5 characters) are required.");
+      return;
+    }
+    const canonicalCurrent = normalizeJourneyCountryLabel(currentCountry);
+    const canonicalDream = normalizeJourneyCountryLabel(dreamCountry);
+    if (!canonicalCurrent || !canonicalDream) {
+      setError("Type each country and choose a value from the suggestions list.");
+      return;
+    }
     setSaving(true);
     setError(null);
     setSuccess(null);
     try {
       const updated = await updateProfile({
-        name: name.trim() || undefined,
+        name: name.trim(),
         profile: {
-          currentCity: currentCity.trim() || undefined,
-          currentCountry: currentCountry.trim() || undefined,
-          dreamCity: dreamCity.trim() || undefined,
-          dreamCountry: dreamCountry.trim() || undefined,
-          phone: phone.trim() || undefined,
+          currentCity: currentCity.trim(),
+          currentCountry: canonicalCurrent,
+          dreamCity: dreamCity.trim(),
+          dreamCountry: canonicalDream,
+          phone: phone.trim(),
         },
       });
-      if (updated) setProfileRecord(updated);
+      if (updated) {
+        setProfileRecord(updated);
+        resetPersonalFormFromRecord(updated);
+      }
       setSuccess("Profile updated successfully.");
+      setEditingPersonalDetails(false);
     } catch {
       setError("Failed to update profile.");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCancelPersonalEdit = () => {
+    if (profileRecord) resetPersonalFormFromRecord(profileRecord);
+    setEditingPersonalDetails(false);
+    setError(null);
+    setSuccess(null);
   };
 
   const readingTarget = profileRecord?.targetBands?.reading;
@@ -143,31 +194,46 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            My profile
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your account, subscription, and reading progress in one place.
-          </p>
+    <div className="relative min-h-[calc(100dvh-4rem)]">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[min(42vh,22rem)] bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,var(--primary)_0%,transparent_55%)] opacity-[0.07] dark:opacity-[0.12]"
+        aria-hidden
+      />
+      <div className="relative mx-auto w-full max-w-5xl space-y-10 px-4 py-10 md:space-y-12 md:px-6 md:py-12">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+              Your workspace
+            </p>
+            <h1 className="mt-2 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+              My profile
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">
+              Subscription, guarantee, and Reading progress — keep details current so we can support
+              you without friction.
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button asChild variant="outline" size="lg" className="gap-2 border-border/90">
+              <Link href="/profile/reading">
+                <BookOpen className="h-4 w-4" />
+                Open Reading
+              </Link>
+            </Button>
+            <Button asChild size="lg" className="gap-2 shadow-md shadow-primary/10">
+              <Link href="/profile/score-guarantee">
+                <Shield className="h-4 w-4" />
+                Score Guarantee™
+              </Link>
+            </Button>
+            <Button asChild variant="secondary" size="lg" className="gap-2">
+              <Link href="/pricing">
+                <CreditCard className="h-4 w-4" />
+                Plans
+              </Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
-          <Button asChild variant="outline" className="gap-2">
-            <Link href="/profile/reading">
-              <BookOpen className="h-4 w-4" />
-              Go to Reading
-            </Link>
-          </Button>
-          <Button asChild variant="default" className="gap-2 shadow-sm">
-            <Link href="/profile/score-guarantee">
-              <Shield className="h-4 w-4" />
-              Score Guarantee™
-            </Link>
-          </Button>
-        </div>
-      </div>
 
       <Link
         href="/profile/score-guarantee"
@@ -188,7 +254,7 @@ export default function ProfilePage() {
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 Hit the Readiness Zone, sit IELTS on schedule, and if you miss
                 your declared target despite meeting every rule—we refund you in
-                full. Open the full policy and checklist.
+                full. View eligibility and checklist.
               </p>
             </div>
           </div>
@@ -198,7 +264,38 @@ export default function ProfilePage() {
         </div>
       </Link>
 
-      <Card className="overflow-hidden border-border/80">
+      <Card className="overflow-hidden border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.06] via-card to-card shadow-sm">
+        <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between md:p-7">
+          <div className="flex gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
+              <MessageCircle className="h-6 w-6" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-800 dark:text-emerald-400">
+                Support
+              </p>
+              <p className="mt-1 font-semibold text-foreground">WhatsApp only — we reply to messages</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                For billing, access, or product questions, message us on WhatsApp.{" "}
+                <span className="font-medium text-foreground">Do not call this number</span> — we do
+                not offer phone support on this line.
+              </p>
+            </div>
+          </div>
+          <Button
+            asChild
+            size="lg"
+            className="w-full shrink-0 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 sm:w-auto"
+          >
+            <a href={SUPPORT_WHATSAPP_HREF} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp {SUPPORT_WHATSAPP_DISPLAY}
+            </a>
+          </Button>
+        </div>
+      </Card>
+
+      <Card className="overflow-hidden border-border/80 shadow-sm">
         <div className="border-b border-border/60 bg-muted/30 px-6 py-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div
@@ -218,7 +315,7 @@ export default function ProfilePage() {
                 </p>
               ) : (
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Add a phone number below so we can reach you if needed.
+                  Add a phone number in Personal details (Edit) so we can reach you if needed.
                 </p>
               )}
             </div>
@@ -258,15 +355,24 @@ export default function ProfilePage() {
         </div>
       </Card>
 
-      <Card className="border-border/80 p-6">
-        <div className="mb-4 flex items-start gap-3">
-          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+      <Card className="border-border/80 p-6 shadow-sm md:p-8">
+        <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground md:text-xl">
+          Account security
+        </h2>
+        <ProfileChangePassword />
+      </Card>
+
+      <Card className="border-border/80 p-6 shadow-sm md:p-8">
+        <div className="mb-6 flex items-start gap-3">
+          <div className="rounded-xl bg-primary/10 p-2.5 text-primary ring-1 ring-primary/10">
             <CreditCard className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-semibold text-foreground">Subscription</h2>
-            <p className="text-sm text-muted-foreground">
-              Your plan and access period. Manage billing from pricing.
+            <h2 className="text-lg font-semibold tracking-tight text-foreground md:text-xl">
+              Subscription
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              Active plan and renewal window. Purchase or renew from pricing anytime.
             </p>
           </div>
         </div>
@@ -324,76 +430,143 @@ export default function ProfilePage() {
         <ProfileSummarySection />
       </section>
 
-      <Card className="border-border/80 p-6">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground">
-            Edit personal details
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Update your name, phone, and location. These fields are saved to your
-            account.
-          </p>
-        </div>
-        <form onSubmit={handleSave} className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoComplete="name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                autoComplete="tel"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="currentCity">Current city</Label>
-              <Input
-                id="currentCity"
-                value={currentCity}
-                onChange={(e) => setCurrentCity(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="currentCountry">Current country</Label>
-              <Input
-                id="currentCountry"
-                value={currentCountry}
-                onChange={(e) => setCurrentCountry(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="dreamCity">Dream city</Label>
-              <Input
-                id="dreamCity"
-                value={dreamCity}
-                onChange={(e) => setDreamCity(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="dreamCountry">Dream country</Label>
-              <Input
-                id="dreamCountry"
-                value={dreamCountry}
-                onChange={(e) => setDreamCountry(e.target.value)}
-              />
-            </div>
+      <Card className="border-border/80 p-6 shadow-sm md:p-8">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground md:text-xl">
+              Personal details
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              Name, phone, and locations — used for your account and support context only. Tap Edit
+              to make changes.
+            </p>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          {success && <p className="text-sm text-emerald-600">{success}</p>}
-          <Button type="submit" disabled={saving}>
-            {saving ? "Saving…" : "Save changes"}
-          </Button>
-        </form>
+          {!editingPersonalDetails ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-2"
+              onClick={() => {
+                setEditingPersonalDetails(true);
+                setError(null);
+                setSuccess(null);
+              }}
+            >
+              <Pencil className="h-4 w-4" aria-hidden />
+              Edit
+            </Button>
+          ) : null}
+        </div>
+
+        {!editingPersonalDetails && success ? (
+          <p className="mb-4 text-sm font-medium text-emerald-600 dark:text-emerald-400">{success}</p>
+        ) : null}
+
+        {!editingPersonalDetails ? (
+          <div className="grid gap-6 md:grid-cols-2">
+            {(
+              [
+                { label: "Full name", value: name.trim() || "—" },
+                { label: "Phone", value: phone.trim() || "—" },
+                { label: "Current city", value: currentCity.trim() || "—" },
+                { label: "Current country", value: currentCountry.trim() || "—" },
+                { label: "Dream city", value: dreamCity.trim() || "—" },
+                { label: "Study destination country", value: dreamCountry.trim() || "—" },
+              ] as const
+            ).map((row) => (
+              <div key={row.label} className="space-y-1.5">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {row.label}
+                </p>
+                <p className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5 text-sm text-foreground">
+                  {row.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <form onSubmit={handleSave} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currentCity">Current city</Label>
+                <Input
+                  id="currentCity"
+                  value={currentCity}
+                  onChange={(e) => setCurrentCity(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currentCountry">Current country</Label>
+                <p className="text-xs text-muted-foreground">
+                  Journey map pins — only supported countries.
+                </p>
+                <JourneyCountryCombobox
+                  id="currentCountry"
+                  value={currentCountry}
+                  onValueChange={setCurrentCountry}
+                  placeholder="Type country, choose from list"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dreamCity">Dream city</Label>
+                <Input
+                  id="dreamCity"
+                  value={dreamCity}
+                  onChange={(e) => setDreamCity(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dreamCountry">Study destination country</Label>
+                <p className="text-xs text-muted-foreground">
+                  Study destination must be from this list so your route matches the map.
+                </p>
+                <JourneyCountryCombobox
+                  id="dreamCountry"
+                  value={dreamCountry}
+                  onValueChange={setDreamCountry}
+                  placeholder="Type country, choose from list"
+                />
+              </div>
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" disabled={saving}>
+                {saving ? "Saving…" : "Save changes"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={saving}
+                className="gap-2"
+                onClick={handleCancelPersonalEdit}
+              >
+                <X className="h-4 w-4" aria-hidden />
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )}
       </Card>
+      </div>
     </div>
   );
 }

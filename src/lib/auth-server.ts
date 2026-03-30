@@ -20,24 +20,18 @@ interface JwtPayload {
  * Use in Server Components, Route Handlers, and server actions.
  * Returns null ONLY if no cookie, invalid signature, or expired.
  */
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+export async function getBearerTokenFromCookie(): Promise<string | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get(TOKEN_COOKIE)?.value;
+  return cookieStore.get(TOKEN_COOKIE)?.value ?? null;
+}
 
-  // Temporary audit logging — remove after persistence is confirmed
-  if (process.env.NODE_ENV === "development") {
-    // eslint-disable-next-line no-console
-    console.log("[getCurrentUser] Token exists:", !!token);
-  }
+export async function getCurrentUser(): Promise<CurrentUser | null> {
+  const token = await getBearerTokenFromCookie();
 
   if (!token) return null;
 
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console
-      console.log("[getCurrentUser] JWT_SECRET missing in env");
-    }
     return null;
   }
 

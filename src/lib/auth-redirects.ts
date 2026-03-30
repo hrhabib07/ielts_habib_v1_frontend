@@ -2,7 +2,7 @@ import type { UserRole } from "@/src/lib/constants";
 
 /** Redirect paths for authenticated users by role. Single source of truth. */
 export const ROLE_REDIRECT_PATH: Record<UserRole, string> = {
-  STUDENT: "/profile/reading",
+  STUDENT: "/",
   INSTRUCTOR: "/dashboard/instructor",
   ADMIN: "/dashboard/admin",
 };

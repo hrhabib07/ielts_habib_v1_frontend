@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Loader2, ArrowLeft, AlertTriangle } from "lucide-react";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 import {
   isReadingPremiumLockMessage,
   isReadingPremiumLockResponse,
@@ -23,6 +23,7 @@ import { LevelLayout } from "@/src/components/student-level/LevelLayout";
 import { SetTargetBandForm } from "@/src/components/student-level/SetTargetBandForm";
 import type { NextLevelInfo } from "@/src/components/student-level/LevelLayout";
 import { useReadingLevelDetail } from "@/src/contexts/ReadingLevelDetailContext";
+import { ReadingMainAreaSkeleton } from "@/src/components/reading/ReadingPathSkeleton";
 
 export default function ReadingStrictLevelPage() {
   const params = useParams<{ id: string }>();
@@ -332,40 +333,11 @@ export default function ReadingStrictLevelPage() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] w-full animate-pulse px-4 py-6 sm:px-6 lg:px-8">
-        <div className="grid min-h-[calc(100vh-5rem)] w-full gap-4 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
-          <aside className="space-y-3 rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-gray-700 dark:bg-gray-900/60">
-            <div className="h-5 w-36 rounded bg-gray-200 dark:bg-gray-700" />
-            <div className="h-3 w-24 rounded bg-gray-200/80 dark:bg-gray-700/80" />
-            <div className="h-12 rounded-xl bg-gray-100 dark:bg-gray-800" />
-            <div className="h-12 rounded-xl bg-gray-100 dark:bg-gray-800" />
-            <div className="h-12 rounded-xl bg-gray-100 dark:bg-gray-800" />
-            <div className="h-12 rounded-xl bg-gray-100 dark:bg-gray-800" />
-          </aside>
+  const detailMatchesRoute =
+    Boolean(id && detail?.level._id === id);
 
-          <section className="space-y-4 rounded-2xl border border-gray-200 bg-white/80 p-6 dark:border-gray-700 dark:bg-gray-900/60">
-            <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800" />
-              <div className="space-y-2">
-                <div className="h-4 w-28 rounded bg-gray-200 dark:bg-gray-700" />
-                <div className="h-6 w-72 max-w-full rounded bg-gray-200 dark:bg-gray-700" />
-              </div>
-            </div>
-            <div className="rounded-2xl border border-gray-100 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
-              <div className="space-y-3">
-                <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
-                <div className="h-4 w-11/12 rounded bg-gray-200 dark:bg-gray-700" />
-                <div className="h-4 w-4/5 rounded bg-gray-200 dark:bg-gray-700" />
-                <div className="h-4 w-full rounded bg-gray-200 dark:bg-gray-700" />
-                <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-700" />
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    );
+  if (loading && (!detail || !detailMatchesRoute)) {
+    return <ReadingMainAreaSkeleton className="min-h-[calc(100vh-4rem)]" />;
   }
 
   if (error || !detail) {
@@ -483,13 +455,7 @@ export default function ReadingStrictLevelPage() {
   }
 
   if (!detail) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] w-full animate-pulse space-y-4 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="h-6 w-48 rounded bg-gray-200 dark:bg-gray-700" />
-        <div className="h-4 w-80 max-w-full rounded bg-gray-200/80 dark:bg-gray-700/80" />
-        <div className="h-[min(24rem,calc(100vh-12rem))] w-full rounded-2xl border border-gray-200 bg-white/70 dark:border-gray-700 dark:bg-gray-900/60" />
-      </div>
-    );
+    return <ReadingMainAreaSkeleton className="min-h-[calc(100vh-4rem)]" />;
   }
 
   const activeStepId =
