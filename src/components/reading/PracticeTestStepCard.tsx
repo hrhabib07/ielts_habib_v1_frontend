@@ -15,8 +15,6 @@ export interface PracticeTestStepCardProps {
   levelId: string;
   stepId: string;
   content: PracticeTestStepContent;
-  onComplete: (stepId: string) => void;
-  onProgressUpdate: (progress: unknown) => void;
 }
 
 /**

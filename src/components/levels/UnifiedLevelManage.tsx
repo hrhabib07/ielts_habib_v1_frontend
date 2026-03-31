@@ -17,6 +17,7 @@ import {
   type CreateLevelStepPayload,
   type UpdateLevelStepPayload,
   type UpdateLevelSettingsPayload,
+  type LevelPreviewResponse,
 } from "@/src/lib/api/levels";
 import { StepBuilder } from "./StepBuilder";
 import { FullTestBuilder } from "./FullTestBuilder";
@@ -67,11 +68,7 @@ export function UnifiedLevelManage({
   const [data, setData] = useState<ManageLevelResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [previewData, setPreviewData] = useState<{
-    level: ManageLevelResponse["level"];
-    learningSteps: ManageLevelResponse["learningSteps"];
-    assessmentSteps: ManageLevelResponse["assessmentSteps"];
-  } | null>(null);
+  const [previewData, setPreviewData] = useState<LevelPreviewResponse | null>(null);
 
   const [learningSteps, setLearningSteps] = useState<
     (LevelStep & { resolvedContent?: Record<string, unknown> | null })[]
@@ -134,11 +131,7 @@ export function UnifiedLevelManage({
   const loadPreview = useCallback(async () => {
     try {
       const payload = await instructorGetLevelPreview(levelId);
-      setPreviewData({
-        level: payload.level,
-        learningSteps: payload.learningSteps,
-        assessmentSteps: payload.assessmentSteps,
-      });
+      setPreviewData(payload);
     } catch {
       setPreviewData(null);
     }

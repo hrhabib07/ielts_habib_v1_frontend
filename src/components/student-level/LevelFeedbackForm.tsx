@@ -118,7 +118,8 @@ export function LevelFeedbackForm({
     } catch (err) {
       setError(
         err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          ? ((err as { response?: { data?: { message?: string } } }).response?.data
+              ?.message ?? "Failed to submit feedback")
           : err instanceof Error
             ? err.message
             : "Failed to submit feedback",

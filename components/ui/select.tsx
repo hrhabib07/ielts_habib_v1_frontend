@@ -49,18 +49,28 @@ function Select({
 function SelectTrigger({
   children,
   className,
+  disabled,
+  id,
 }: {
   children?: React.ReactNode;
   className?: string;
+  disabled?: boolean;
+  id?: string;
 }) {
   const ctx = React.useContext(SelectContext);
   if (!ctx) return null;
   return (
     <button
+      id={id}
       type="button"
-      onClick={() => ctx.setOpen(!ctx.open)}
+      disabled={disabled}
+      onClick={() => {
+        if (disabled) return;
+        ctx.setOpen(!ctx.open);
+      }}
       className={cn(
         "flex items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm",
+        disabled && "pointer-events-none opacity-50",
         className,
       )}
     >

@@ -11,6 +11,7 @@ import {
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
   type GroupTestQuestionGroup,
+  type SubmitGroupTestPayload,
 } from "@/src/lib/api/readingStrictProgression";
 import { InstructionBlock } from "./InstructionBlock";
 import {
@@ -365,7 +366,7 @@ export function GroupTestSubmitCard({
     return () => { cancelled = true; };
   }, [levelId]);
 
-  const setAnswer = (questionId: string, value: string) => {
+  const setAnswer = (questionId: string, value: string | string[]) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
@@ -387,7 +388,8 @@ export function GroupTestSubmitCard({
     setSubmitting(true);
     try {
       const res = await submitGroupTest(levelId, content.groupTestId, {
-        miniTestAnswers,
+        miniTestAnswers:
+          miniTestAnswers as SubmitGroupTestPayload["miniTestAnswers"],
       });
       setResult({
         overallPass: res.overallPass,

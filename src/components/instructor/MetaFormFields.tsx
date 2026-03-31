@@ -227,7 +227,7 @@ function MCQFields({
   meta,
   onChange,
 }: {
-  meta: { options: string[]; selectCount: number };
+  meta: { options: string[]; selectCount?: 1 | 2 };
   onChange: (m: QuestionSetMeta) => void;
 }) {
   return (
@@ -257,7 +257,9 @@ function MCQFields({
         label="Answer options"
         items={meta.options}
         minItems={2}
-        onChange={(options) => onChange({ ...meta, options })}
+        onChange={(options) =>
+          onChange({ options, selectCount: meta.selectCount ?? 1 })
+        }
         placeholder="Option label (A, B, C…)"
       />
     </div>
@@ -293,10 +295,11 @@ export default function MetaFormFields({ questionType, meta, onChange }: Props) 
   switch (questionType) {
     case "MCQ_SINGLE":
     case "MCQ_MULTIPLE": {
-      const m = meta as { options: string[]; selectCount: number };
+      const m = meta as { options: string[]; selectCount?: number };
+      const selectCount: 1 | 2 = m.selectCount === 2 ? 2 : 1;
       return (
         <MCQFields
-          meta={{ options: m.options ?? ["A", "B", "C", "D"], selectCount: m.selectCount ?? 1 }}
+          meta={{ options: m.options ?? ["A", "B", "C", "D"], selectCount }}
           onChange={onChange}
         />
       );

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { QuizBuilderForm } from "@/src/features/quiz-content/QuizBuilderForm";
-import { createQuizContent } from "@/src/lib/api/quizContent";
+import { createQuizContent, type QuizGroup } from "@/src/lib/api/quizContent";
 import { ArrowLeft } from "lucide-react";
 
 export default function CreateQuizContentPage() {
@@ -18,7 +18,7 @@ export default function CreateQuizContentPage() {
     title: string;
     description?: string;
     timeLimit?: number;
-    groups: { title: string; order: number; questions: unknown[] }[];
+    groups: QuizGroup[];
   }) => {
     setError(null);
     setIsSubmitting(true);

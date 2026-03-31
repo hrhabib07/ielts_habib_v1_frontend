@@ -206,7 +206,11 @@ export function PracticeTestManager({
     try {
       const reordered = [...sorted];
       const swap = direction === "up" ? index - 1 : index + 1;
-      [reordered[index], reordered[swap]] = [reordered[swap], reordered[index]];
+      const a = reordered[index];
+      const b = reordered[swap];
+      if (!a || !b) return;
+      reordered[index] = b;
+      reordered[swap] = a;
       const ids = reordered.map((p) => p._id);
       const updated = await reorderPracticeTests(versionId, ids);
       onPracticeTestsChange(updated);

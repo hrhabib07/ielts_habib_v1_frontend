@@ -280,7 +280,9 @@ export function PracticeTestContentEditor({
                 try {
                   const start = startQuestionNumber ?? 1;
                   for (let i = 0; i < questionIds.length; i++) {
-                    await updateQuestion(questionIds[i], { questionNumber: start + i });
+                    const qid = questionIds[i];
+                    if (!qid) continue;
+                    await updateQuestion(qid, { questionNumber: start + i });
                   }
                   onSaved?.();
                   await loadContent();
@@ -470,18 +472,30 @@ function QuestionsTab({
                 onMoveUp={
                   idx > 0 && grp._id
                     ? () => {
+                        const gid = grp._id;
+                        if (!gid) return;
                         const ids = grp.questions.map((x) => x._id);
-                        [ids[idx - 1], ids[idx]] = [ids[idx], ids[idx - 1]];
-                        onReorderQuestions(grp._id, ids, grp.startQuestionNumber);
+                        const a = ids[idx - 1];
+                        const b = ids[idx];
+                        if (!a || !b) return;
+                        ids[idx - 1] = b;
+                        ids[idx] = a;
+                        onReorderQuestions(gid, ids, grp.startQuestionNumber);
                       }
                     : undefined
                 }
                 onMoveDown={
                   idx < grp.questions.length - 1 && grp._id
                     ? () => {
+                        const gid = grp._id;
+                        if (!gid) return;
                         const ids = grp.questions.map((x) => x._id);
-                        [ids[idx], ids[idx + 1]] = [ids[idx + 1], ids[idx]];
-                        onReorderQuestions(grp._id, ids, grp.startQuestionNumber);
+                        const a = ids[idx];
+                        const b = ids[idx + 1];
+                        if (!a || !b) return;
+                        ids[idx] = b;
+                        ids[idx + 1] = a;
+                        onReorderQuestions(gid, ids, grp.startQuestionNumber);
                       }
                     : undefined
                 }

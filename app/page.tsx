@@ -15,8 +15,11 @@ export default async function HomePage() {
   if (initialUser?.role === "STUDENT") {
     const token = await getBearerTokenFromCookie();
     if (token) {
-      const profile = await fetchStudentProfileServer(token);
-      if (!isStudentLearningReady(profile)) {
+      const result = await fetchStudentProfileServer(token);
+      if (
+        result.status === "ok" &&
+        !isStudentLearningReady(result.profile)
+      ) {
         redirect("/onboarding");
       }
     }

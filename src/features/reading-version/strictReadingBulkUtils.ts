@@ -84,15 +84,10 @@ function shouldShowParagraphLabels(questionGroups: BulkQuestionGroupInput[]): bo
 }
 
 /** Ensure every question has questionBody so POST /api/reading/question/bulk does not fail. MCQ/other often use "content" or "text" at top level. */
-function normalizeQuestionBody(
-  q: BulkQuestionGroupInput["questions"][number],
-): { layout: "TEXT" | "PASSAGE" | "TABLE" | "FLOWCHART" | "DIAGRAM" | "NOTE"; content: string | string[][] | unknown } {
+function normalizeQuestionBody(q: BulkQuestionGroupInput["questions"][number]): QuestionBody {
   const body = (q as { questionBody?: QuestionBody }).questionBody;
   if (body && typeof body === "object" && body.layout && body.content !== undefined) {
-    return {
-      layout: body.layout as "TEXT" | "PASSAGE" | "TABLE" | "FLOWCHART" | "DIAGRAM" | "NOTE",
-      content: body.content,
-    };
+    return body;
   }
   const raw = q as { content?: string; text?: string; question?: string };
   const text =
@@ -129,7 +124,10 @@ function validateGroupCoverage(input: BulkPassageQuestionSetInput): { min: numbe
   }
   const sorted = [...uniq].sort((a, b) => a - b);
   for (let i = 0; i < sorted.length - 1; i++) {
-    if (sorted[i + 1] !== sorted[i] + 1) {
+    const cur = sorted[i];
+    const nxt = sorted[i + 1];
+    if (cur === undefined || nxt === undefined) continue;
+    if (nxt !== cur + 1) {
       throw new Error("Question numbers must be continuous without gaps in questionGroups");
     }
   }
@@ -170,7 +168,11 @@ function normalizeMetaForQuestionSet(
               if (Array.isArray(opts)) for (const o of opts) if (typeof o === "string" && o.trim()) set.add(o.trim());
             }
             const arr = [...set];
-            return arr.length >= 2 ? arr : arr.length === 1 ? [arr[0], "Other"] : ["A", "B"];
+            return arr.length >= 2
+              ? arr
+              : arr.length === 1
+                ? [arr[0] ?? "A", "Other"]
+                : ["A", "B"];
           })();
     const selectCount =
       merged.selectCount === 1 || merged.selectCount === 2
@@ -279,6 +281,7 @@ export async function createPassageQuestionSetFromBulkInput(params: {
 
   for (let idx = 0; idx < questionSetInput.questionGroups.length; idx++) {
     const g = questionSetInput.questionGroups[idx];
+    if (!g) continue;
     const expectedGroupCount = g.endQuestionNumber - g.startQuestionNumber + 1;
     const representedCount = countQuestionsRepresentedByGroup(
       g.questionType,

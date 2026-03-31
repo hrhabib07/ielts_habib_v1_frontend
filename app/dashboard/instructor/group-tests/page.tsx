@@ -31,7 +31,7 @@ export default function GroupTestsPage() {
       setLevels(data);
       if (data.length > 0 && !selectedLevelId) {
         const first = data.find((l) => l.levelType === "SKILL") ?? data[0];
-        setSelectedLevelId(first._id);
+        if (first) setSelectedLevelId(first._id);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load levels");
@@ -139,7 +139,9 @@ export default function GroupTestsPage() {
                   groupTests={detail.groupTests ?? []}
                   disabled={detail.version.status === "PUBLISHED"}
                   onGroupTestsChange={handleGroupTestsChange}
-                  levelTitle={levels.find((l) => l._id === selectedLevelId)?.title}
+                  levelTitle={
+                    levels.find((l) => l._id === selectedLevelId)?.title ?? ""
+                  }
                   levelId={selectedLevelId}
                 />
               </div>

@@ -667,8 +667,6 @@ export function LevelContent({
                   levelId={levelId}
                   stepId={step._id}
                   content={content.content}
-                  onComplete={onComplete}
-                  onProgressUpdate={onProgressUpdate}
                 />
               )}
             {!contentLoading &&

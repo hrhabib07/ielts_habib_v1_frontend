@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Control, UseFormRegister } from "react-hook-form";
+import type { Control, FieldValues, UseFormRegister } from "react-hook-form";
 import OptionInput from "./OptionInput";
 
 type Label = "A" | "B" | "C" | "D" | "E";
@@ -12,17 +12,17 @@ type OptionField = {
   text?: string;
 };
 
-type OptionListProps = {
-  control: Control<any>;
-  register: UseFormRegister<any>;
+type OptionListProps<TFieldValues extends FieldValues> = {
+  control: Control<TFieldValues>;
+  register: UseFormRegister<TFieldValues>;
   fields: OptionField[];
 };
 
-export const OptionList: React.FC<OptionListProps> = ({
+export function OptionList<TFieldValues extends FieldValues>({
   control,
   register,
   fields,
-}) => {
+}: OptionListProps<TFieldValues>) {
   return (
     <div className="space-y-3">
       {fields.map((f, idx) => (
@@ -36,6 +36,6 @@ export const OptionList: React.FC<OptionListProps> = ({
       ))}
     </div>
   );
-};
+}
 
 export default OptionList;

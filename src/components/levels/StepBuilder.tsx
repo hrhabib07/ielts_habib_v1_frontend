@@ -562,12 +562,17 @@ export function StepBuilder({
           getMyQuestionSets()
             .then((sets) =>
               setQuestionSets(
-                sets.map((s) => ({
-                  _id: s._id,
-                  instruction: s.instruction,
-                  startQuestionNumber: s.startQuestionNumber,
-                  endQuestionNumber: s.endQuestionNumber,
-                })),
+                sets.map(
+                  (s): AdminQuestionSet => ({
+                    _id: s._id,
+                    passageId: s.passageId,
+                    instruction: s.instruction,
+                    startQuestionNumber: s.startQuestionNumber,
+                    endQuestionNumber: s.endQuestionNumber,
+                    questionType: s.questionType,
+                    isPublished: s.isPublished,
+                  }),
+                ),
               ),
             )
             .catch(() => setQuestionSets([]));
@@ -612,20 +617,23 @@ export function StepBuilder({
     if (direction === "up" && idx === 0) return;
     if (direction === "down" && idx === sorted.length - 1) return;
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    const newOrder = sorted[swapIdx].order;
-    const swapOrder = sorted[idx].order;
+    const swapStep = sorted[swapIdx];
+    const currentStep = sorted[idx];
+    if (!swapStep || !currentStep) return;
+    const newOrder = swapStep.order;
+    const swapOrder = currentStep.order;
     const prev = [...steps];
     onStepsChange(
       steps.map((s) => {
         if (s._id === stepId) return { ...s, order: newOrder };
-        if (s._id === sorted[swapIdx]._id) return { ...s, order: swapOrder };
+        if (s._id === swapStep._id) return { ...s, order: swapOrder };
         return s;
       }),
     );
     setReordering(true);
     try {
       await updateStep(levelId, stepId, { order: newOrder });
-      await updateStep(levelId, sorted[swapIdx]._id, {
+      await updateStep(levelId, swapStep._id, {
         order: swapOrder,
       });
     } catch {

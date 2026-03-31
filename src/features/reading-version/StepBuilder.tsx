@@ -146,7 +146,11 @@ export function StepBuilder({
     setBusyId(stepId);
     try {
       const reordered = [...sortedStepIds];
-      [reordered[idx - 1], reordered[idx]] = [reordered[idx], reordered[idx - 1]];
+      const a = reordered[idx - 1];
+      const b = reordered[idx];
+      if (!a || !b) return;
+      reordered[idx - 1] = b;
+      reordered[idx] = a;
       const updated = await reorderSteps(versionId, reordered);
       onStepsChange(updated);
     } catch (e) {
@@ -163,7 +167,11 @@ export function StepBuilder({
     setBusyId(stepId);
     try {
       const reordered = [...sortedStepIds];
-      [reordered[idx], reordered[idx + 1]] = [reordered[idx + 1], reordered[idx]];
+      const a = reordered[idx];
+      const b = reordered[idx + 1];
+      if (!a || !b) return;
+      reordered[idx] = b;
+      reordered[idx + 1] = a;
       const updated = await reorderSteps(versionId, reordered);
       onStepsChange(updated);
     } catch (e) {
@@ -473,7 +481,11 @@ function StepForm({
     if (next < 0 || next >= contentIds.length) return;
     setContentIds((prev) => {
       const arr = [...prev];
-      [arr[index], arr[next]] = [arr[next], arr[index]];
+      const a = arr[index];
+      const b = arr[next];
+      if (a === undefined || b === undefined) return arr;
+      arr[index] = b;
+      arr[next] = a;
       return arr;
     });
   };
@@ -888,7 +900,11 @@ function StepEditForm({
     if (next < 0 || next >= contentIds.length) return;
     setContentIds((prev) => {
       const arr = [...prev];
-      [arr[index], arr[next]] = [arr[next], arr[index]];
+      const a = arr[index];
+      const b = arr[next];
+      if (a === undefined || b === undefined) return arr;
+      arr[index] = b;
+      arr[next] = a;
       return arr;
     });
   };

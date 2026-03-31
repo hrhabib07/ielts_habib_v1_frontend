@@ -43,7 +43,8 @@ export default function FinalEvaluationPreviewPage() {
         if (queryId && tests.some((t) => t._id === queryId)) {
           setSelectedGroupTestId(queryId);
         } else if (tests.length) {
-          setSelectedGroupTestId(tests[0]._id);
+          const first = tests[0];
+          if (first) setSelectedGroupTestId(first._id);
         }
       })
       .catch((e) =>

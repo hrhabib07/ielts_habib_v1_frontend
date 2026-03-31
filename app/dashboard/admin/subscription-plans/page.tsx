@@ -108,6 +108,7 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
         .map((feature) => feature.trim())
         .filter(Boolean);
 
+      const paymentNote = manualPaymentInstructions.trim();
       await onSave({
         name: name.trim(),
         slug: slug.trim(),
@@ -118,8 +119,7 @@ function PlanForm({ initial, onSave, onCancel }: PlanFormProps) {
         durationInDays: Number(durationInDays),
         price: Number(price),
         ...(discountPrice ? { discountPrice: Number(discountPrice) } : {}),
-        manualPaymentInstructions:
-          manualPaymentInstructions.trim() || undefined,
+        ...(paymentNote ? { manualPaymentInstructions: paymentNote } : {}),
         isPublic,
         isWholePackage,
       });

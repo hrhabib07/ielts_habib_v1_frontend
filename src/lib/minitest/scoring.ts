@@ -22,7 +22,13 @@ export function calculateScore(
   let correct = 0;
   for (const id of Object.keys(correctMap)) {
     const user = answers[id];
-    if (user !== undefined && user !== "" && isCorrect(user, correctMap[id])) {
+    const expected = correctMap[id];
+    if (
+      user !== undefined &&
+      user !== "" &&
+      expected !== undefined &&
+      isCorrect(user, expected)
+    ) {
       correct += 1;
     }
   }
@@ -37,7 +43,13 @@ export function predictBand(score: number, total: number): TestResult {
     { min: 5, max: total, band: "8.0–9.0", range: "8.0–9.0" },
   ];
   const clamped = Math.min(score, total);
-  const entry = bandMap.find((e) => clamped >= e.min && clamped <= e.max) ?? bandMap[0];
+  const entry =
+    bandMap.find((e) => clamped >= e.min && clamped <= e.max) ?? bandMap[0] ?? {
+      min: 0,
+      max: total,
+      band: "4.0–5.0",
+      range: "4.0–5.0",
+    };
   return {
     score,
     total,

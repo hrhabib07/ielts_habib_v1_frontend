@@ -132,7 +132,8 @@ export function ReadingMonitoringClient({
       const list = await getReadingLevels();
       setLevels(list);
       if (list.length > 0 && !selectedLevelId) {
-        setSelectedLevelId(list[0]._id);
+        const first = list[0];
+        if (first) setSelectedLevelId(first._id);
       }
     } catch {
       setLevels([]);

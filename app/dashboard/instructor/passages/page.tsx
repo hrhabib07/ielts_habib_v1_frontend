@@ -279,7 +279,7 @@ export default function PassagesPage() {
       ),
     );
     setParagraphsError(null);
-    const hasExistingGlossary = p.glossary && p.glossary.length > 0;
+    const hasExistingGlossary = Boolean(p.glossary?.length);
     setHasGlossary(hasExistingGlossary);
     setGlossaryJson(
       hasExistingGlossary

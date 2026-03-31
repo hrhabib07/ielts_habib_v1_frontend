@@ -122,7 +122,7 @@ export default function LevelFeedbackPage() {
     setListLoading(true);
     try {
       const res = await listLevelFeedback({
-        levelId: levelFilter && levelFilter !== "all" ? levelFilter : undefined,
+        ...(levelFilter && levelFilter !== "all" ? { levelId: levelFilter } : {}),
         page: 1,
         limit: 50,
       });
@@ -224,13 +224,22 @@ export default function LevelFeedbackPage() {
                 const levelTitle = typeof f.levelId === "object" && f.levelId && "title" in f.levelId
                   ? (f.levelId as { title?: string }).title
                   : null;
+                const levelDisplay =
+                  levelTitle ??
+                  (typeof f.levelId === "string"
+                    ? f.levelId
+                    : f.levelId &&
+                        typeof f.levelId === "object" &&
+                        "_id" in f.levelId
+                      ? String((f.levelId as { _id: string })._id)
+                      : "—");
                 return (
                   <li
                     key={f._id}
                     className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm"
                   >
                     <span className="text-muted-foreground">
-                      {levelTitle ?? f.levelId} · {userId.slice(-6)}
+                      {levelDisplay} · {userId.slice(-6)}
                     </span>
                     <span className="flex gap-2">
                       <span>{QUALITY_LABELS[f.qualityOfQuestions] ?? f.qualityOfQuestions}</span>

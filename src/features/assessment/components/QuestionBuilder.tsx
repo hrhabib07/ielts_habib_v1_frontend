@@ -64,6 +64,7 @@ export function QuestionBuilder({
     const idx = questions.findIndex((x) => x._id === q._id);
     if (idx <= 0) return;
     const prev = questions[idx - 1];
+    if (!prev) return;
     setMoveLoading(q._id);
     try {
       await onUpdate(q._id, { order: prev.order });
@@ -78,6 +79,7 @@ export function QuestionBuilder({
     const idx = questions.findIndex((x) => x._id === q._id);
     if (idx < 0 || idx >= questions.length - 1) return;
     const next = questions[idx + 1];
+    if (!next) return;
     setMoveLoading(q._id);
     try {
       await onUpdate(q._id, { order: next.order });

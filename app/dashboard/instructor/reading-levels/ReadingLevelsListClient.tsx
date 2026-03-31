@@ -51,6 +51,7 @@ import {
   listQuizContent,
   createQuizContent,
   updateQuizContent,
+  type QuizGroup,
   type ReadingQuizContent,
 } from "@/src/lib/api/quizContent";
 
@@ -541,14 +542,14 @@ export function ReadingLevelsListClient() {
         questions: BulkCreateSkillLevelContentQuestion[];
       }): Promise<string> => {
         const existing = quizContents.find((q) => q.contentCode === args.contentCode);
-        const groups = [
+        const groups: QuizGroup[] = [
           {
             title: "Practice quiz",
             order: 0,
-            questions: args.questions.map((qq, idx) => {
+            questions: args.questions.map((qq) => {
               const options = qq.options;
               return {
-                type: "MCQ",
+                type: "MCQ" as const,
                 questionText: qq.questionText,
                 options,
                 correctAnswer: qq.correctAnswer,
@@ -649,6 +650,7 @@ export function ReadingLevelsListClient() {
         // Create steps: 0=VIDEO, 1=INSTRUCTION(Notes), 2=QUIZ (practice quiz).
         const stepsPayload: Omit<ReadingLevelStep, "_id">[] = [
           {
+            levelVersionId: versionId,
             stepType: "VIDEO",
             title: videoTitle,
             order: 0,
@@ -658,6 +660,7 @@ export function ReadingLevelsListClient() {
             isFinalQuiz: false,
           },
           {
+            levelVersionId: versionId,
             stepType: "INSTRUCTION",
             title: notesTitle,
             order: 1,
@@ -667,6 +670,7 @@ export function ReadingLevelsListClient() {
             isFinalQuiz: false,
           },
           {
+            levelVersionId: versionId,
             stepType: "QUIZ",
             title: quizTitle,
             order: 2,
@@ -680,11 +684,16 @@ export function ReadingLevelsListClient() {
           },
         ];
 
+        const [videoStep, notesStep, quizStep] = stepsPayload;
+        if (!videoStep || !notesStep || !quizStep) {
+          throw new Error("Bulk skill create: internal step payload mismatch");
+        }
+
         await createStep(versionId, {
-          stepType: stepsPayload[0].stepType as ReadingStepType,
-          title: stepsPayload[0].title,
-          order: stepsPayload[0].order,
-          contentId: stepsPayload[0].contentId ?? null,
+          stepType: videoStep.stepType as ReadingStepType,
+          title: videoStep.title,
+          order: videoStep.order,
+          contentId: videoStep.contentId ?? null,
           attemptPolicy: undefined,
           passType: undefined,
           passValue: undefined,
@@ -692,18 +701,18 @@ export function ReadingLevelsListClient() {
         });
 
         await createStep(versionId, {
-          stepType: stepsPayload[1].stepType as ReadingStepType,
-          title: stepsPayload[1].title,
-          order: stepsPayload[1].order,
-          contentId: stepsPayload[1].contentId ?? null,
+          stepType: notesStep.stepType as ReadingStepType,
+          title: notesStep.title,
+          order: notesStep.order,
+          contentId: notesStep.contentId ?? null,
           isFinalQuiz: false,
         });
 
         await createStep(versionId, {
-          stepType: stepsPayload[2].stepType as ReadingStepType,
-          title: stepsPayload[2].title,
-          order: stepsPayload[2].order,
-          contentId: stepsPayload[2].contentId ?? null,
+          stepType: quizStep.stepType as ReadingStepType,
+          title: quizStep.title,
+          order: quizStep.order,
+          contentId: quizStep.contentId ?? null,
           isFinalQuiz: false,
           passType: "PERCENTAGE",
           passValue: 100,
@@ -1140,14 +1149,23 @@ export function ReadingLevelsListClient() {
   );
 }
 
-interface LevelFormModalProps {
-  title: string;
-  initial: CreateLevelPayload & { description?: string };
-  onSave: (p: CreateLevelPayload | UpdateLevelPayload) => Promise<void>;
-  onCancel: () => void;
-  busy: boolean;
-  isCreate: boolean;
-}
+type LevelFormModalProps =
+  | {
+      title: string;
+      initial: CreateLevelPayload & { description?: string };
+      onSave: (p: CreateLevelPayload) => Promise<void>;
+      onCancel: () => void;
+      busy: boolean;
+      isCreate: true;
+    }
+  | {
+      title: string;
+      initial: CreateLevelPayload & { description?: string };
+      onSave: (p: UpdateLevelPayload) => Promise<void>;
+      onCancel: () => void;
+      busy: boolean;
+      isCreate: false;
+    };
 
 const DIFFICULTY_OPTIONS: { value: ReadingLevelDifficulty; label: string }[] = [
   { value: "basic", label: "Basic" },

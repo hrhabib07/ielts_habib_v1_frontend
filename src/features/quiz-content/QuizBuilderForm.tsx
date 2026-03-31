@@ -276,7 +276,11 @@ export function QuizBuilderForm({
     const next = index + dir;
     if (next < 0 || next >= form.groups.length) return;
     const arr = [...form.groups];
-    [arr[index], arr[next]] = [arr[next], arr[index]];
+    const a = arr[index];
+    const b = arr[next];
+    if (!a || !b) return;
+    arr[index] = b;
+    arr[next] = a;
     setForm((prev) => ({ ...prev, groups: arr.map((g, i) => ({ ...g, order: i })) }));
     setExpandedGroup(next);
   };
@@ -289,9 +293,11 @@ export function QuizBuilderForm({
   };
 
   const addQuestion = (groupIndex: number) => {
+    const newQuestionIndex = form.groups[groupIndex]?.questions.length ?? 0;
     setForm((prev) => {
       const groups = [...prev.groups];
       const g = groups[groupIndex];
+      if (!g) return prev;
       const newQ = newQuestion(g.questions.length);
       groups[groupIndex] = {
         ...g,
@@ -299,14 +305,14 @@ export function QuizBuilderForm({
       };
       return { ...prev, groups };
     });
-    setExpandedQuestion(`g${groupIndex}-q${form.groups[groupIndex].questions.length}`);
+    setExpandedQuestion(`g${groupIndex}-q${newQuestionIndex}`);
   };
 
   const removeQuestion = (groupIndex: number, qIndex: number) => {
     setForm((prev) => {
       const groups = [...prev.groups];
       const g = groups[groupIndex];
-      if (g.questions.length <= 1) return prev;
+      if (!g || g.questions.length <= 1) return prev;
       groups[groupIndex] = {
         ...g,
         questions: g.questions.filter((_, i) => i !== qIndex),

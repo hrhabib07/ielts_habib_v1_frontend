@@ -29,8 +29,10 @@ function decodeJwtPayload(token: string): { role: string } | null {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
+    const payloadPart = parts[1];
+    if (!payloadPart) return null;
 
-    let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    let base64 = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
     const pad = base64.length % 4;
     if (pad) base64 += "====".slice(0, 4 - pad);
 

@@ -49,6 +49,7 @@ export function useTestEngine() {
         };
       }
       const config = STAGE_CONFIGS[next];
+      if (!config) return prev;
       totalDurationRef.current = config.duration;
       return {
         ...prev,
@@ -83,6 +84,7 @@ export function useTestEngine() {
 
   const handleCountdownComplete = useCallback(() => {
     const config = STAGE_CONFIGS[0];
+    if (!config) return;
     totalDurationRef.current = config.duration;
     setState({
       stageIndex: 0,

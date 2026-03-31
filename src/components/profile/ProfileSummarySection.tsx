@@ -297,6 +297,7 @@ export function ProfileSummarySection() {
                   <strong>Focus area:</strong>{" "}
                   {(() => {
                     const top = weaknessAnalytics[0];
+                    if (!top) return null;
                     const CATEGORY_LABELS: Record<string, string> = {
                       VOCABULARY: "Vocabulary",
                       LOGIC_TRAP: "Logic Trap",

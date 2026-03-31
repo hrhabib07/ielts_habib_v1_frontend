@@ -43,7 +43,7 @@ export default function CreateQuizPage() {
   const correctAnswer = watch("correctAnswer");
 
   const hasFifth = useMemo(
-    () => fields.length >= 5 && fields[4].label === "E",
+    () => fields.length >= 5 && fields[4]?.label === "E",
     [fields],
   );
 
@@ -99,11 +99,7 @@ export default function CreateQuizPage() {
               </button>
             </div>
 
-            <OptionList
-              control={control}
-              register={register}
-              fields={fields as any}
-            />
+            <OptionList control={control} register={register} fields={fields} />
           </div>
 
           <div className="flex items-center justify-between">

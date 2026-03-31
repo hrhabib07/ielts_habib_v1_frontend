@@ -44,6 +44,7 @@ function mergeRanges(
   for (let i = 0; i < sorted.length - 1; i++) {
     const start = sorted[i];
     const end = sorted[i + 1];
+    if (start === undefined || end === undefined) continue;
     const mid = (start + end) / 2;
     const noteRange = noteRanges.find((r) => mid >= r.start && mid < r.end);
     const inHighlight = highlightRanges.some((r) => mid >= r.start && mid < r.end);
@@ -253,6 +254,7 @@ export function PassageWithHighlightNotes({
     (e: React.TouchEvent) => {
       if (e.changedTouches.length === 0) return;
       const t = e.changedTouches[0];
+      if (!t) return;
       window.setTimeout(() => {
         tryShowSelectionMenu(t.clientX, Math.min(t.clientY + 24, window.innerHeight - 56));
       }, 100);

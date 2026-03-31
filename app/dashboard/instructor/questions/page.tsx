@@ -915,7 +915,9 @@ export default function QuestionsPage() {
               value={
                 Array.isArray(form.options)
                   ? form.options.join(", ")
-                  : (form.options as string) ?? ""
+                  : typeof form.options === "string"
+                    ? form.options
+                    : ""
               }
               onChange={(e) =>
                 setForm((f) => ({

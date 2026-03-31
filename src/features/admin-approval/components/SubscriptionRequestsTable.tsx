@@ -61,10 +61,13 @@ export function SubscriptionRequestsTable() {
     }
   };
 
-  const email = (r: SubscriptionRequestItem) =>
-    typeof r.userId === "object" && r.userId && "email" in r.userId
-      ? (r.userId as { email?: string }).email
-      : r.userId;
+  const userDisplay = (r: SubscriptionRequestItem): string => {
+    if (typeof r.userId === "object" && r.userId && "_id" in r.userId) {
+      const u = r.userId as { email?: string; _id: string };
+      return u.email ?? String(u._id);
+    }
+    return String(r.userId);
+  };
   const planName = (r: SubscriptionRequestItem) =>
     typeof r.planId === "object" && r.planId && "name" in r.planId
       ? (r.planId as { name?: string }).name
@@ -132,7 +135,7 @@ export function SubscriptionRequestsTable() {
                 <tr key={r._id} className="border-b hover:bg-muted/20">
                   <td className="p-4">
                     <span className="font-medium text-foreground">
-                      {email(r) ?? r.userId}
+                      {userDisplay(r)}
                     </span>
                   </td>
                   <td className="p-4 text-muted-foreground">{planName(r)}</td>

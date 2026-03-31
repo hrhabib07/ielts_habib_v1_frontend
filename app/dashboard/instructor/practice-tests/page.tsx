@@ -51,7 +51,7 @@ export default function PracticeTestsPage() {
       setLevels(data);
       if (data.length > 0 && !selectedLevelId && !queryLevelId && !queryVersionId) {
         const first = data.find((l) => l.levelType === "SKILL") ?? data[0];
-        setSelectedLevelId(first._id);
+        if (first) setSelectedLevelId(first._id);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load levels");
@@ -153,7 +153,7 @@ export default function PracticeTestsPage() {
           </div>
           <div className="w-full sm:w-72">
             <Select
-              value={selectedLevelId || undefined}
+              value={selectedLevelId}
               onValueChange={(v) => setSelectedLevelId(v)}
             >
               <SelectTrigger

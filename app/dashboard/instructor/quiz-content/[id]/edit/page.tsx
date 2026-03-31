@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { QuizBuilderForm } from "@/src/features/quiz-content/QuizBuilderForm";
-import { getQuizContentById, updateQuizContent } from "@/src/lib/api/quizContent";
+import {
+  getQuizContentById,
+  updateQuizContent,
+  type QuizGroup,
+} from "@/src/lib/api/quizContent";
 import { ArrowLeft, Loader2, Eye } from "lucide-react";
 
 export default function EditQuizContentPage() {
@@ -19,7 +23,7 @@ export default function EditQuizContentPage() {
     timeLimit: string;
     quizUseType?: "" | "PRACTICE" | "FINAL";
     evaluationType?: "" | "PERCENTAGE";
-    groups: { title: string; order: number; questions: unknown[] }[];
+    groups: QuizGroup[];
   } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +53,7 @@ export default function EditQuizContentPage() {
     timeLimit?: number;
     quizUseType?: "PRACTICE" | "FINAL";
     evaluationType?: "PERCENTAGE";
-    groups: { title: string; order: number; questions: unknown[] }[];
+    groups: QuizGroup[];
   }) => {
     if (!id) return;
     setSubmitError(null);

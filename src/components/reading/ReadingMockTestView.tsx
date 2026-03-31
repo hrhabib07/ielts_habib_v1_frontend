@@ -28,6 +28,7 @@ import {
   type GroupTestContentForStudent,
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
+  type SubmitGroupTestPayload,
 } from "@/src/lib/api/readingStrictProgression";
 import {
   GROUP_TEST_PASSAGE_MINUTES,
@@ -639,7 +640,8 @@ export const ReadingMockTestView = forwardRef<
         }));
 
         const res = await submitGroupTest(levelId, content.groupTestId, {
-          miniTestAnswers,
+          miniTestAnswers:
+            miniTestAnswers as SubmitGroupTestPayload["miniTestAnswers"],
         });
         onProgressUpdate?.();
         onSubmitted({

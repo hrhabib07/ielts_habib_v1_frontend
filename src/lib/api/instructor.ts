@@ -15,13 +15,15 @@ const QUESTION_SET_BASE = "/reading/questionSet";
 const PASSAGE_QSET_BASE = "/reading/passageQSet";
 const PASSAGE_CODE_BASE = "/passage-codes";
 
+export type PassageSource = "CAMBRIDGE" | "IELTS_HABIB";
+
 /* ----- Passage Codes (Passage Info) ----- */
 export interface PassageCode {
   _id: string;
   book: string;
   test: string;
   passage: string;
-  source: string;
+  source: PassageSource;
   createdAt?: string;
 }
 
@@ -89,7 +91,6 @@ export interface PassageGlossary {
   order: number;
 }
 
-export type PassageSource = "CAMBRIDGE" | "IELTS_HABIB";
 export type PassageDifficulty = "EASY" | "MEDIUM" | "HARD";
 export type PassageModuleType = "ACADEMIC" | "GENERAL_TRAINING";
 

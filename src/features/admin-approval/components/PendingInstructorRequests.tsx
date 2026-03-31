@@ -56,8 +56,9 @@ export function PendingInstructorRequests() {
               </div>
               <div className="flex-1">
                 <p className="font-medium">
-                  {typeof req.userId === "object" && req.userId && "email" in req.userId
-                    ? (req.userId as { email?: string }).email ?? req.userId
+                  {typeof req.userId === "object" && req.userId && "_id" in req.userId
+                    ? (req.userId as { email?: string; _id: string }).email ??
+                      String((req.userId as { _id: string })._id)
                     : String(req.userId)}
                 </p>
                 <div className="flex items-center gap-2 mt-1">

@@ -43,7 +43,9 @@ export function InstructionBlock({
     const parsedDefinitions = rawDefinitionLines
       .map((line) => {
         const m = line.match(/^(TRUE|FALSE|NOT GIVEN|YES|NO)\.?\s*(.*)$/i);
-        if (m) return { label: m[1].toUpperCase(), desc: (m[2] || line).trim() };
+        if (m?.[1]) {
+          return { label: m[1].toUpperCase(), desc: (m[2] || line).trim() };
+        }
         return null;
       })
       .filter(Boolean) as { label: string; desc: string }[];

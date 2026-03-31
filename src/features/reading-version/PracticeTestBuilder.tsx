@@ -143,7 +143,11 @@ export function PracticeTestBuilder({
     try {
       const reordered = [...sortedList];
       const swap = direction === "up" ? index - 1 : index + 1;
-      [reordered[index], reordered[swap]] = [reordered[swap], reordered[index]];
+      const a = reordered[index];
+      const b = reordered[swap];
+      if (!a || !b) return;
+      reordered[index] = b;
+      reordered[swap] = a;
       const updated = await reorderPracticeTests(versionId, reordered.map((p) => p._id));
       onPracticeTestsChange(updated);
     } catch (e) {

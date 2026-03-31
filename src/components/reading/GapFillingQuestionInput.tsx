@@ -254,7 +254,7 @@ export function GapFillingQuestionInput({
         ? displayNumber + blankIdx
         : displayNumber;
 
-  const hasWordBank = sortedBlanks[0]?.options?.length > 0;
+  const hasWordBank = (sortedBlanks[0]?.options?.length ?? 0) > 0;
 
   const renderLineWithGaps = (line: string) => {
     const parts: Array<{ type: "text"; value: string } | { type: "gap"; id: number }> = [];
@@ -263,7 +263,10 @@ export function GapFillingQuestionInput({
     GAP_RE.lastIndex = 0;
     while ((m = GAP_RE.exec(line)) !== null) {
       if (m.index > lastIndex) parts.push({ type: "text", value: line.slice(lastIndex, m.index) });
-      parts.push({ type: "gap", id: parseInt(m[1], 10) });
+      const gapNum = m[1];
+      if (gapNum !== undefined) {
+        parts.push({ type: "gap", id: parseInt(gapNum, 10) });
+      }
       lastIndex = m.index + m[0].length;
     }
     if (lastIndex < line.length) parts.push({ type: "text", value: line.slice(lastIndex) });
@@ -427,7 +430,10 @@ export function GapFillingQuestionInput({
       if (m.index > lastIndex) {
         parts.push({ type: "text", value: fragment.slice(lastIndex, m.index) });
       }
-      parts.push({ type: "gap", id: parseInt(m[1], 10) });
+      const gapNum = m[1];
+      if (gapNum !== undefined) {
+        parts.push({ type: "gap", id: parseInt(gapNum, 10) });
+      }
       lastIndex = m.index + m[0].length;
     }
     if (lastIndex < fragment.length) {
