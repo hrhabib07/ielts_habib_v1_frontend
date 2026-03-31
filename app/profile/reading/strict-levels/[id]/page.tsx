@@ -323,13 +323,7 @@ export default function ReadingStrictLevelPage() {
 
   if (premiumLock && id) {
     return (
-      <PremiumReadingLockPanel
-        variant="fullscreen"
-        levelId={id}
-        context="level"
-        backHref="/profile/reading"
-        backLabel="Back to Reading"
-      />
+      <PremiumReadingLockPanel variant="fullscreen" levelId={id} context="level" />
     );
   }
 
@@ -343,13 +337,7 @@ export default function ReadingStrictLevelPage() {
   if (error || !detail) {
     if (typeof error === "string" && isReadingPremiumLockMessage(error) && id) {
       return (
-        <PremiumReadingLockPanel
-          variant="fullscreen"
-          levelId={id}
-          context="level"
-          backHref="/profile/reading"
-          backLabel="Back to Reading"
-        />
+        <PremiumReadingLockPanel variant="fullscreen" levelId={id} context="level" />
       );
     }
 
