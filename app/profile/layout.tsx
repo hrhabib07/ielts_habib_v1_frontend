@@ -20,8 +20,10 @@ export default function ProfileLayout({
     pathname.includes("/practice-test") ||
     pathname.includes("/step-quiz");
   const isReadingDashboard =
+    pathname === "/profile/reading" ||
     pathname.includes("/profile/reading/strict-levels") ||
-    pathname.includes("/profile/reading/practice-attempt");
+    pathname.includes("/profile/reading/practice-attempt") ||
+    pathname === "/profile/reading/trial-feedback";
 
   if (isExamPage) {
     return <>{children}</>;

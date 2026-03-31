@@ -263,7 +263,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
   const overallProgress = totalSteps > 0 ? Math.round((totalCompleted / totalSteps) * 100) : 0;
 
   const sidebarContent = (
-    <>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       {/* Gamified header */}
       <div className="shrink-0 border-b border-slate-200/80 dark:border-slate-700/80 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900/80 dark:to-slate-900 px-5 py-5">
         <div className="flex items-center justify-between gap-2">
@@ -305,8 +305,11 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
         </div>
       </div>
 
-      <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 overscroll-contain">
-        <div className="space-y-1 px-3">
+      <nav
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 overscroll-contain [scrollbar-gutter:stable]"
+        aria-label="Reading levels"
+      >
+        <div className="space-y-1 px-3 pb-4">
           {levels.map((level, levelIndex) => {
             const isExpanded = expandedLevelIds.has(level._id);
             const unlocked = isLevelUnlockedStrict(
@@ -341,7 +344,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                   type="button"
                   onClick={() => unlocked && toggleLevel(level._id)}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-all",
+                    "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-all",
                     !unlocked && "cursor-not-allowed opacity-60",
                     isCurrentLevel && "bg-primary/10 dark:bg-primary/15",
                     unlocked && !isCurrentLevel && "hover:bg-slate-100 dark:hover:bg-slate-800/60",
@@ -350,7 +353,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                   {/* Level badge - gamified */}
                   <div
                     className={cn(
-                      "relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm transition-all",
+                      "relative mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold shadow-sm transition-all",
                       isLevelPassed
                         ? "bg-[#1e3a8a] text-white dark:bg-[#2563eb]"
                         : isCurrentLevel
@@ -366,10 +369,10 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                       level.order
                     )}
                   </div>
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 pr-1">
                     <p
                       className={cn(
-                        "truncate text-sm font-semibold",
+                        "break-words text-sm font-semibold leading-snug",
                         isCurrentLevel ? "text-primary" : "text-slate-900 dark:text-slate-100",
                       )}
                     >
@@ -384,10 +387,10 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                     </p>
                   </div>
                   {!unlocked && (
-                    <Lock className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
+                    <Lock className="mt-1 h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
                   )}
                   {unlocked && (
-                    <span className="shrink-0 text-slate-400 dark:text-slate-500">
+                    <span className="mt-1 shrink-0 text-slate-400 dark:text-slate-500">
                       {isExpanded ? (
                         <ChevronDown className="h-4 w-4" />
                       ) : (
@@ -436,7 +439,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                                 !stepStatus.locked && handleStepClick(level._id, step._id)
                               }
                               className={cn(
-                                "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
+                                "flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
                                 stepStatus.locked && "cursor-not-allowed opacity-60",
                                 isActive &&
                                   "bg-primary/15 text-primary font-medium dark:bg-primary/20",
@@ -446,15 +449,15 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                               )}
                             >
                               {stepStatus.completed ? (
-                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1e3a8a]/20 dark:bg-[#2563eb]/20">
+                                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1e3a8a]/20 dark:bg-[#2563eb]/20">
                                   <CheckCircle2 className="h-3.5 w-3.5 text-[#1e3a8a] dark:text-[#3b82f6]" />
                                 </div>
                               ) : stepStatus.locked ? (
-                                <Lock className="h-4 w-4 shrink-0 text-slate-400" />
+                                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
                               ) : (
                                 <span
                                   className={cn(
-                                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+                                    "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
                                     stepStatus.current
                                       ? "bg-primary text-primary-foreground"
                                       : "border-2 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400",
@@ -463,7 +466,9 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                                   {step.order}
                                 </span>
                               )}
-                              <span className="min-w-0 flex-1 truncate">{step.title}</span>
+                              <span className="min-w-0 flex-1 break-words text-left text-sm leading-snug">
+                                {step.title}
+                              </span>
                             </button>
                           );
                         })}
@@ -476,7 +481,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
           })}
         </div>
       </nav>
-    </>
+    </div>
   );
 
   if (loading) {
@@ -522,14 +527,16 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">{sidebarContent}</div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+              {sidebarContent}
+            </div>
           </aside>
         </div>
       )}
       {/* Desktop sidebar - fixed width prevents layout shift when nodes expand */}
       <aside
         className="hidden h-full min-h-0 w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm lg:flex"
-        style={{ contain: "layout" }}
+        style={{ contain: "strict" }}
       >
         {sidebarContent}
       </aside>

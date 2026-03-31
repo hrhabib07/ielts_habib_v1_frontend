@@ -21,7 +21,8 @@ export default function ReadingLayoutClient({
   const isDashboard =
     pathname === "/profile/reading" ||
     pathname.startsWith("/profile/reading/strict-levels") ||
-    pathname.includes("/profile/reading/practice-attempt");
+    pathname.includes("/profile/reading/practice-attempt") ||
+    pathname === "/profile/reading/trial-feedback";
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
