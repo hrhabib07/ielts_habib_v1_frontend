@@ -22,8 +22,7 @@ export default function ProfileLayout({
   const isReadingDashboard =
     pathname === "/profile/reading" ||
     pathname.includes("/profile/reading/strict-levels") ||
-    pathname.includes("/profile/reading/practice-attempt") ||
-    pathname === "/profile/reading/trial-feedback";
+    pathname.includes("/profile/reading/practice-attempt");
 
   if (isExamPage) {
     return <>{children}</>;
@@ -36,7 +35,8 @@ export default function ProfileLayout({
           className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-1 flex-col overflow-hidden"
           data-reading-dashboard
         >
-          {children}
+          {/* flex-1 min-h-0 so ReadingLayoutClient fills height and inner scroll regions work */}
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">{children}</div>
         </div>
       </ReadingDashboardContainer>
     );

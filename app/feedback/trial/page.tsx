@@ -1,10 +1,13 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { getCurrentUser } from "@/src/lib/auth-server";
 import { TrialFeedbackPageClient } from "@/src/components/reading/TrialFeedbackPageClient";
 
 export const metadata: Metadata = {
-  title: "Trial feedback | Reading",
-  description: "Share feedback after your free trial on GAMLISH Reading.",
+  title: "Trial feedback | GAMLISH",
+  description: "Share feedback after your free trial.",
+  robots: { index: false, follow: false },
 };
 
 function TrialFeedbackFallback() {
@@ -16,10 +19,17 @@ function TrialFeedbackFallback() {
   );
 }
 
-export default function TrialFeedbackPage() {
+export default async function TrialFeedbackPage() {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
-    <Suspense fallback={<TrialFeedbackFallback />}>
-      <TrialFeedbackPageClient />
-    </Suspense>
+    <div className="w-full">
+      <Suspense fallback={<TrialFeedbackFallback />}>
+        <TrialFeedbackPageClient />
+      </Suspense>
+    </div>
   );
 }

@@ -107,7 +107,7 @@ export function TrialFeedbackPageClient() {
 
   if (sent) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-10 sm:py-14">
+      <div className="mx-auto max-w-lg px-4 py-10 pb-20 sm:py-14 sm:pb-24">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-8">
           <p className="text-base font-medium text-slate-900 dark:text-slate-100">
             Thank you. Your feedback helps us improve GAMLISH for everyone.
@@ -129,7 +129,7 @@ export function TrialFeedbackPageClient() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
+    <div className="mx-auto w-full max-w-2xl px-4 py-8 pb-20 sm:py-10 sm:pb-24">
       <Link
         href={backHref}
         className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"

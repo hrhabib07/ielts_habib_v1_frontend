@@ -21,8 +21,7 @@ export default function ReadingLayoutClient({
   const isDashboard =
     pathname === "/profile/reading" ||
     pathname.startsWith("/profile/reading/strict-levels") ||
-    pathname.includes("/profile/reading/practice-attempt") ||
-    pathname === "/profile/reading/trial-feedback";
+    pathname.includes("/profile/reading/practice-attempt");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -49,7 +48,7 @@ export default function ReadingLayoutClient({
         <div className="min-h-screen w-full">{children}</div>
       ) : isDashboard ? (
         <div
-          className="flex h-full min-h-0 w-full flex-1 flex-nowrap overflow-x-hidden"
+          className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-nowrap overflow-hidden"
           style={
             {
               "--reading-sidebar-width": sidebarOpen ? "288px" : "0px",
@@ -57,7 +56,7 @@ export default function ReadingLayoutClient({
           }
         >
           {sidebarOpen && <ReadingSidebar onCollapse={toggleSidebar} />}
-          <main className="relative min-h-0 min-w-0 flex-1 basis-0 overflow-hidden">
+          <main className="relative flex min-h-0 min-w-0 flex-1 basis-0 flex-col overflow-hidden">
             {!sidebarOpen && (
               <button
                 type="button"
@@ -69,7 +68,7 @@ export default function ReadingLayoutClient({
                 <span className="text-sm font-medium">Show Levels</span>
               </button>
             )}
-            <div className="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]">
               {children}
             </div>
           </main>

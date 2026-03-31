@@ -533,11 +533,8 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
           </aside>
         </div>
       )}
-      {/* Desktop sidebar - fixed width prevents layout shift when nodes expand */}
-      <aside
-        className="hidden h-full min-h-0 w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm lg:flex"
-        style={{ contain: "strict" }}
-      >
+      {/* Desktop sidebar: flex-col + min-h-0 so the nav region scrolls through all levels */}
+      <aside className="hidden h-full min-h-0 w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm lg:flex">
         {sidebarContent}
       </aside>
     </>
