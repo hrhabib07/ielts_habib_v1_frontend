@@ -63,9 +63,16 @@ export function useRegister() {
       if (msg) {
         setError(msg);
       } else if (ax?.response) {
-        setError(ax.response.status === 409
-          ? "An account with this email already exists. Please sign in."
-          : "Something went wrong. Please try again.");
+        const st = ax.response.status;
+        if (st === 409) {
+          setError("An account with this email already exists. Please sign in.");
+        } else if (st === 404) {
+          setError(
+            "API not found. Set NEXT_PUBLIC_API_BASE_URL on Vercel to your Railway URL ending in /api.",
+          );
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
       } else {
         setError(
           "Could not reach the server. Check your connection and that the app is running.",

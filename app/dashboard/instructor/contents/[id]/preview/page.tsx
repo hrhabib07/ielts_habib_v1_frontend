@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { ContentPreviewView } from "@/src/components/contents/ContentPreviewView";
 import type { LearningContentPreview } from "@/src/lib/api/learningContents";
+import { getApiBaseUrl } from "@/src/lib/api-base-url";
 
 const TOKEN_COOKIE = "ielts_habib_token";
 
@@ -9,8 +10,7 @@ async function fetchContentPreview(
   id: string,
   token: string,
 ): Promise<LearningContentPreview | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl) return null;
+  const baseUrl = getApiBaseUrl();
 
   const res = await fetch(`${baseUrl}/admin/contents/${id}/preview`, {
     headers: {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
+import { getAppOrigin } from "@/src/lib/api-base-url";
 import { ThemeProvider } from "@/src/components/shared/ThemeProvider";
 import { Header } from "@/src/components/shared/Header";
 import { Footer } from "@/src/components/shared/Footer";
@@ -25,8 +26,17 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getAppOrigin()),
   title: "GAMLISH — The Game of English",
   description: "Master English through focused practice. GAMLISH offers structured Reading and Writing modules with clarity, strategy, and confidence.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const dynamic = "force-dynamic";

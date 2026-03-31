@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { LevelPreviewView } from "@/src/components/levels/LevelPreviewView";
 import type { LevelPreviewResponse } from "@/src/lib/api/levels";
+import { getApiBaseUrl } from "@/src/lib/api-base-url";
 
 const TOKEN_COOKIE = "ielts_habib_token";
 
@@ -9,8 +10,7 @@ async function fetchLevelPreview(
   levelId: string,
   token: string,
 ): Promise<LevelPreviewResponse | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!baseUrl) return null;
+  const baseUrl = getApiBaseUrl();
 
   const res = await fetch(
     `${baseUrl}/admin/levels/${levelId}/preview`,

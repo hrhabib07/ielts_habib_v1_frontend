@@ -1,4 +1,5 @@
 import apiClient from "../lib/api-client";
+import { getApiBaseUrl } from "../lib/api-base-url";
 import type {
   LoginRequest,
   LoginResponse,
@@ -56,7 +57,7 @@ export async function resetPasswordWithToken(
   resetToken: string,
   newPassword: string,
 ): Promise<void> {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";
+  const base = getApiBaseUrl();
   const res = await fetch(`${base}/auth/reset-password`, {
     method: "POST",
     headers: {

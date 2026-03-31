@@ -1,4 +1,5 @@
 import type { StudentProfile } from "@/src/lib/api/types";
+import { getApiBaseUrl } from "@/src/lib/api-base-url";
 
 export type FetchStudentProfileServerResult =
   | { status: "ok"; profile: StudentProfile | null }
@@ -11,11 +12,10 @@ export type FetchStudentProfileServerResult =
 export async function fetchStudentProfileServer(
   accessToken: string,
 ): Promise<FetchStudentProfileServerResult> {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!base) return { status: "unavailable" };
+  const base = getApiBaseUrl();
 
   try {
-    const res = await fetch(`${base.replace(/\/$/, "")}/students/me`, {
+    const res = await fetch(`${base}/students/me`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
