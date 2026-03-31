@@ -69,3 +69,24 @@ export function getDecodedToken(): JwtPayload | null {
     return null;
   }
 }
+
+function isJwtPayloadUsable(p: JwtPayload | null): p is JwtPayload {
+  if (!p || typeof p.exp !== "number") return false;
+  return p.exp * 1000 >= Date.now();
+}
+
+/** Client-only: non-expired JWT in localStorage (API Bearer). Independent of server cookie verification. */
+export function hasUsableClientToken(): boolean {
+  if (typeof window === "undefined") return false;
+  return isJwtPayloadUsable(getDecodedTokenClient());
+}
+
+/**
+ * Client-only: session is an active STUDENT (for UI that cannot rely on RSC getCurrentUser(), e.g. missing JWT_SECRET on the host).
+ */
+export function isActiveStudentSessionClient(): boolean {
+  if (typeof window === "undefined") return false;
+  const p = getDecodedTokenClient();
+  if (!isJwtPayloadUsable(p)) return false;
+  return String(p.role).toUpperCase() === "STUDENT";
+}

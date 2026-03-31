@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { getProfileSummary, getMyProfile } from "@/src/lib/api/profile";
 import { BookOpen } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
+import {
+  hasUsableClientToken,
+  isActiveStudentSessionClient,
+} from "@/src/lib/auth";
 import { HeroAnimation } from "@/src/components/home/HeroAnimation";
 import { StudentBandJourneyFlightVisual } from "@/src/components/home/StudentBandJourneyFlightVisual";
 import {
@@ -14,7 +18,16 @@ import {
   resolveJourneyMapPoint,
 } from "@/src/components/home/studentJourneyHeroConfig";
 
-type HeroMode = "minimal" | "band" | "loading";
+type HeroMode = "minimal" | "student" | "loading";
+
+interface StudentHeroData {
+  band: number | null;
+  overallProgressPct: number;
+  userName: string | null;
+  currentCountry: string;
+  dreamCountry: string;
+  dreamCity: string | null;
+}
 
 interface HomeHeroProps {
   children?: React.ReactNode;
@@ -23,59 +36,86 @@ interface HomeHeroProps {
   roleCtaLabel?: string | null;
 }
 
+function buildStudentHeroData(
+  summary: Awaited<ReturnType<typeof getProfileSummary>>,
+  profile: Awaited<ReturnType<typeof getMyProfile>>,
+): StudentHeroData {
+  const band =
+    summary?.targetBand ?? profile?.targetBands?.reading ?? null;
+  const overallProgressPct = summary?.overallProgressPct ?? 0;
+  const userName = profile?.name?.trim() || null;
+  const cur =
+    profile?.profile?.currentCountry?.trim() ||
+    profile?.profile?.country?.trim() ||
+    null;
+  const dream = profile?.profile?.dreamCountry?.trim() || null;
+  const dreamCity = profile?.profile?.dreamCity?.trim() || null;
+
+  return {
+    band,
+    overallProgressPct,
+    userName,
+    currentCountry: cur || STUDENT_JOURNEY_HERO_MOCK.currentCountry,
+    dreamCountry: dream || STUDENT_JOURNEY_HERO_MOCK.dreamCountry,
+    dreamCity,
+  };
+}
+
 export function HomeHero({
   children,
   initialUser = null,
   roleCtaHref = null,
   roleCtaLabel = null,
 }: HomeHeroProps) {
-  const needsStudentSummary = initialUser?.role === "STUDENT";
+  const [authBootstrapped, setAuthBootstrapped] = useState(false);
+  useEffect(() => {
+    setAuthBootstrapped(true);
+  }, []);
+
+  const serverStudent = initialUser?.role === "STUDENT";
+  const clientStudentFallback =
+    authBootstrapped &&
+    initialUser == null &&
+    isActiveStudentSessionClient();
+  const isStudent = serverStudent || clientStudentFallback;
+
   const [mode, setMode] = useState<HeroMode>(() =>
-    needsStudentSummary ? "loading" : "minimal",
+    serverStudent ? "loading" : "minimal",
   );
-  const [targetBand, setTargetBand] = useState<number | null>(null);
-  const [overallProgressPct, setOverallProgressPct] = useState<number>(0);
-  const [userName, setUserName] = useState<string | null>(null);
-  const [profileCurrentCountry, setProfileCurrentCountry] = useState<
-    string | null
-  >(null);
-  const [profileDreamCountry, setProfileDreamCountry] = useState<string | null>(
-    null,
-  );
+  const [studentData, setStudentData] = useState<StudentHeroData | null>(null);
 
   useEffect(() => {
-    if (!needsStudentSummary) {
+    if (!isStudent) {
       setMode("minimal");
+      setStudentData(null);
       return;
     }
 
+    setMode("loading");
+
     let cancelled = false;
-    getProfileSummary()
-      .then((res) => {
-        if (cancelled) return;
-        if (res?.targetBand != null) {
-          setMode("band");
-          setTargetBand(res.targetBand);
-          setOverallProgressPct(res.overallProgressPct ?? 0);
-          getMyProfile().then((p) => {
-            if (cancelled || !p) return;
-            if (p.name) setUserName(p.name);
-            const cur = p.profile?.currentCountry ?? null;
-            const dream = p.profile?.dreamCountry ?? null;
-            setProfileCurrentCountry(cur);
-            setProfileDreamCountry(dream);
-          });
-        } else {
-          setMode("minimal");
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setMode("minimal");
-      });
+
+    (async () => {
+      const [summaryOutcome, profileOutcome] = await Promise.allSettled([
+        getProfileSummary(),
+        getMyProfile(),
+      ]);
+
+      if (cancelled) return;
+
+      const summary =
+        summaryOutcome.status === "fulfilled" ? summaryOutcome.value : null;
+      const profile =
+        profileOutcome.status === "fulfilled" ? profileOutcome.value : null;
+
+      setStudentData(buildStudentHeroData(summary, profile));
+      setMode("student");
+    })();
+
     return () => {
       cancelled = true;
     };
-  }, [needsStudentSummary]);
+  }, [isStudent]);
 
   if (mode === "loading") {
     return (
@@ -86,31 +126,31 @@ export function HomeHero({
     );
   }
 
-  if (mode === "band" && targetBand != null) {
+  if (mode === "student" && studentData) {
     return (
       <BandHero
-        band={targetBand}
-        overallProgressPct={overallProgressPct}
-        userName={userName}
-        currentCountry={
-          profileCurrentCountry?.trim() ||
-          STUDENT_JOURNEY_HERO_MOCK.currentCountry
-        }
-        dreamCountry={
-          profileDreamCountry?.trim() || STUDENT_JOURNEY_HERO_MOCK.dreamCountry
-        }
+        band={studentData.band}
+        overallProgressPct={studentData.overallProgressPct}
+        userName={studentData.userName}
+        currentCountry={studentData.currentCountry}
+        dreamCountry={studentData.dreamCountry}
+        dreamCity={studentData.dreamCity}
         moduleLabel={STUDENT_JOURNEY_HERO_MOCK.moduleLabel}
         improveSkillsHref={STUDENT_JOURNEY_HERO_MOCK.profileHref}
       />
     );
   }
 
+  const showAsAuthenticatedUi =
+    !!initialUser ||
+    (authBootstrapped && hasUsableClientToken());
+
   return (
     <>
       <MinimalHero
         roleCtaHref={roleCtaHref}
         roleCtaLabel={roleCtaLabel}
-        isAuthenticated={!!initialUser}
+        isAuthenticated={showAsAuthenticatedUi}
       />
       {children}
     </>
@@ -342,18 +382,25 @@ function BandHero({
   userName,
   currentCountry,
   dreamCountry,
+  dreamCity,
   moduleLabel,
   improveSkillsHref,
 }: {
-  band: number;
+  band: number | null;
   overallProgressPct: number;
   userName: string | null;
   currentCountry: string;
   dreamCountry: string;
+  dreamCity: string | null;
   moduleLabel: string;
   improveSkillsHref: string;
 }) {
-  const bandLabel = Number.isInteger(band) ? String(band) : band.toFixed(1);
+  const bandLabel =
+    band == null
+      ? null
+      : Number.isInteger(band)
+        ? String(band)
+        : band.toFixed(1);
   const headerLine = userName
     ? `${userName.toUpperCase()}, YOU ARE ON YOUR WAY`
     : "YOU ARE ON YOUR WAY";
@@ -361,7 +408,8 @@ function BandHero({
   const fromPoint = resolveJourneyMapPoint(currentCountry, "from");
   const toPoint = resolveJourneyMapPoint(dreamCountry, "to");
 
-  const targetFillPct = journeyToVisualWaterPercent(overallProgressPct);
+  const targetFillPct =
+    band == null ? 0 : journeyToVisualWaterPercent(overallProgressPct);
 
   const [fillPct, setFillPct] = useState(0);
   const fillRef = useRef(0);
@@ -391,6 +439,11 @@ function BandHero({
 
   const moduleLower = moduleLabel.toLowerCase();
 
+  const dreamLine =
+    dreamCity != null && dreamCity.length > 0
+      ? `Your journey toward ${dreamCity}, ${dreamCountry}, is underway.`
+      : `Your dream to study in ${dreamCountry} is within reach.`;
+
   return (
     <section className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center overflow-hidden bg-background px-6 pt-8 text-center">
       <StudentBandJourneyFlightVisual
@@ -407,47 +460,74 @@ function BandHero({
           {headerLine}
         </p>
 
-        <p className="mt-8 text-balance text-base font-medium text-foreground sm:text-lg">
-          Let&apos;s reach your goal of a
-        </p>
+        {bandLabel != null ? (
+          <>
+            <p className="mt-8 text-balance text-base font-medium text-foreground sm:text-lg">
+              Let&apos;s reach your goal of a
+            </p>
 
-        <div className="band-score-container my-6 flex min-h-[7rem] items-center justify-center sm:my-8">
-          <span
-            className="band-score-fill font-bold tabular-nums select-none text-8xl tracking-tight md:text-9xl"
-            style={{ "--fill-pct": `${fillPct}%` } as React.CSSProperties}
-            aria-hidden
-          >
-            {bandLabel}
-          </span>
-          <span
-            className="band-score-outline font-bold tabular-nums select-none text-8xl tracking-tight md:text-9xl"
-            aria-label={`Target band score ${bandLabel}, ${overallProgressPct}% complete`}
-          >
-            {bandLabel}
-          </span>
-        </div>
+            <div className="band-score-container my-6 flex min-h-[7rem] items-center justify-center sm:my-8">
+              <span
+                className="band-score-fill font-bold tabular-nums select-none text-8xl tracking-tight md:text-9xl"
+                style={{ "--fill-pct": `${fillPct}%` } as React.CSSProperties}
+                aria-hidden
+              >
+                {bandLabel}
+              </span>
+              <span
+                className="band-score-outline font-bold tabular-nums select-none text-8xl tracking-tight md:text-9xl"
+                aria-label={`Target band score ${bandLabel}, ${overallProgressPct}% complete`}
+              >
+                {bandLabel}
+              </span>
+            </div>
 
-        <p className="text-balance text-base font-medium text-foreground sm:text-lg">
-          in IELTS {moduleLabel}.
-        </p>
+            <p className="text-balance text-base font-medium text-foreground sm:text-lg">
+              in IELTS {moduleLabel}.
+            </p>
 
-        <p className="mt-5 max-w-md text-balance text-sm font-medium text-muted-foreground sm:text-base">
-          Your dream to study in {dreamCountry} is within reach.
-        </p>
+            <p className="mt-5 max-w-md text-balance text-sm font-medium text-muted-foreground sm:text-base">
+              {dreamLine}
+            </p>
 
-        <p className="mt-3 max-w-md text-balance text-xs text-muted-foreground/90 sm:text-sm">
-          {overallProgressPct}% complete. Keep going. Your Band {bandLabel} is closer than you
-          think.
-        </p>
+            <p className="mt-3 max-w-md text-balance text-xs text-muted-foreground/90 sm:text-sm">
+              {overallProgressPct}% complete. Keep going. Your Band {bandLabel}{" "}
+              is closer than you think.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="mt-8 text-balance text-base font-medium text-foreground sm:text-lg">
+              Your personalized flight path is ready.
+            </p>
+            <p className="mt-4 max-w-md text-balance text-sm text-muted-foreground sm:text-base">
+              {dreamLine} Set your reading target band to see your score goal
+              fill in here, or head straight into practice.
+            </p>
+            <div className="mt-10 flex w-full max-w-md flex-col items-stretch gap-3 pb-6 sm:flex-row sm:justify-center">
+              <Button size="lg" className="gap-2" asChild>
+                <Link href={improveSkillsHref}>
+                  <BookOpen className="h-4 w-4" />
+                  Improve your {moduleLower} skills
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/onboarding">Set target band</Link>
+              </Button>
+            </div>
+          </>
+        )}
 
-        <div className="flex w-full justify-center pt-10 pb-6">
-          <Link href={improveSkillsHref}>
-            <Button size="lg" className="gap-2">
-              <BookOpen className="h-4 w-4" />
-              Improve your {moduleLower} skills
-            </Button>
-          </Link>
-        </div>
+        {bandLabel != null ? (
+          <div className="flex w-full justify-center pt-10 pb-6">
+            <Link href={improveSkillsHref}>
+              <Button size="lg" className="gap-2">
+                <BookOpen className="h-4 w-4" />
+                Improve your {moduleLower} skills
+              </Button>
+            </Link>
+          </div>
+        ) : null}
       </div>
     </section>
   );
