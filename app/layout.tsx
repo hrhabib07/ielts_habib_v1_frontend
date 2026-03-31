@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import { getAppOrigin } from "@/src/lib/api-base-url";
 import { ThemeProvider } from "@/src/components/shared/ThemeProvider";
-import { Header } from "@/src/components/shared/Header";
-import { Footer } from "@/src/components/shared/Footer";
-import { SyncAuthCookie } from "@/src/components/auth/SyncAuthCookie";
-import { getCurrentUser } from "@/src/lib/auth-server";
+import { AppShellFallback } from "@/src/components/shared/AppShellFallback";
+import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,26 +38,20 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialUser = await getCurrentUser();
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${hindSiliguri.variable} antialiased`}
       >
         <ThemeProvider>
-          <SyncAuthCookie initialUser={initialUser} />
-          <div className="flex min-h-screen flex-col">
-            <Header initialUser={initialUser} />
-            <main className="flex min-h-0 flex-1 flex-col">{children}</main>
-            <Footer initialUser={initialUser} />
-          </div>
+          <Suspense fallback={<AppShellFallback>{children}</AppShellFallback>}>
+            <AppShellWithAuth>{children}</AppShellWithAuth>
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>
