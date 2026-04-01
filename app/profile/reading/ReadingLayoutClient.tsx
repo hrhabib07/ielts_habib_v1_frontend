@@ -48,7 +48,7 @@ export default function ReadingLayoutClient({
         <div className="min-h-screen w-full">{children}</div>
       ) : isDashboard ? (
         <div
-          className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-nowrap overflow-hidden"
+          className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-nowrap items-stretch overflow-hidden"
           style={
             {
               "--reading-sidebar-width": sidebarOpen ? "288px" : "0px",
@@ -56,7 +56,7 @@ export default function ReadingLayoutClient({
           }
         >
           {sidebarOpen && <ReadingSidebar onCollapse={toggleSidebar} />}
-          <main className="relative flex min-h-0 min-w-0 flex-1 basis-0 flex-col overflow-hidden">
+          <main className="relative flex min-h-0 min-w-0 w-full flex-1 basis-0 flex-col overflow-hidden transition-[margin] duration-200 ease-out lg:ml-[var(--reading-sidebar-width,0px)]">
             {!sidebarOpen && (
               <button
                 type="button"

@@ -25,6 +25,24 @@ import { cn } from "@/lib/utils";
 
 const READING_STRICT_PREFIX = "/profile/reading/strict-levels/";
 
+function isReadingDashboardPath(path: string): boolean {
+  return (
+    path === "/profile/reading" ||
+    path.startsWith("/profile/reading/strict-levels") ||
+    path.includes("/profile/reading/practice-attempt")
+  );
+}
+
+/**
+ * Fixed full-height column below the sticky header (4rem). Inner grid + nav overflow-y handle scrolling.
+ */
+const READING_DESKTOP_SIDEBAR_FIXED =
+  "pointer-events-auto hidden overflow-hidden border-r border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:fixed lg:left-0 lg:top-16 lg:z-30 lg:flex lg:h-[calc(100dvh-4rem)] lg:max-h-[calc(100dvh-4rem)] lg:min-h-0 lg:w-[288px] lg:min-w-[288px] lg:max-w-[288px] lg:flex-col";
+
+/** In-flow column for non-dashboard reading layouts (e.g. generic profile + reading). */
+const READING_DESKTOP_SIDEBAR_FLOW =
+  "pointer-events-auto hidden h-full min-h-0 w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:flex";
+
 function getCurrentLevelOrder(
   levels: Level[],
   currentLevelId: string | null,
@@ -51,7 +69,9 @@ function isLevelUnlockedStrict(
   detailCache: LevelDetailCache,
   contextDetail: LevelDetailForStudent | null,
   levelIdFromPath: string | null,
+  curriculumDemoAccount: boolean,
 ): boolean {
+  if (curriculumDemoAccount) return true;
   const isFirstLevel = levelIndex === 0;
   if (isFirstLevel) return true;
   if (levelOrder <= currentOrder) return true;
@@ -81,9 +101,13 @@ function getStepStatus(
   currentStepIndex: number,
   completedStepIds: Set<string>,
   isLevelPassed: boolean,
+  curriculumDemoAccount: boolean,
 ): StepStatus {
   const completed = completedStepIds.has(step._id);
   const current = !isLevelPassed && stepIndex === currentStepIndex;
+  if (curriculumDemoAccount) {
+    return { completed, current, locked: false };
+  }
   const locked =
     !isLevelPassed && !completed && stepIndex > currentStepIndex;
   return { completed, current, locked };
@@ -95,7 +119,8 @@ interface LevelDetailCache {
 
 export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
+  const useFixedDesktopSidebar = isReadingDashboardPath(pathname);
   const searchParams = useSearchParams();
   const { detail: contextDetail } = useReadingLevelDetail();
 
@@ -109,6 +134,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
   const [detailCache, setDetailCache] = useState<LevelDetailCache>({});
   const requestedRef = useRef<Set<string>>(new Set());
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [curriculumDemoAccount, setCurriculumDemoAccount] = useState(false);
 
   const levelIdFromPath =
     pathname.startsWith(READING_STRICT_PREFIX) &&
@@ -136,6 +162,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
               : null;
         setCurrentLevelId(levelId ?? null);
         setCurrentStepId(progress?.currentStepId ?? null);
+        setCurriculumDemoAccount(progress?.curriculumDemoAccount === true);
         if (levelId) {
           setExpandedLevelIds((prev) => new Set(prev).add(levelId));
         }
@@ -162,6 +189,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
               : null;
         setCurrentLevelId(levelId ?? null);
         setCurrentStepId(progress?.currentStepId ?? null);
+        setCurriculumDemoAccount(progress?.curriculumDemoAccount === true);
       })
       .catch(() => {});
     return () => {
@@ -188,6 +216,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                   : null;
             setCurrentLevelId(levelId ?? null);
             setCurrentStepId(progress?.currentStepId ?? null);
+            setCurriculumDemoAccount(progress?.curriculumDemoAccount === true);
           })
           .catch(() => {});
       };
@@ -263,8 +292,8 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
   const overallProgress = totalSteps > 0 ? Math.round((totalCompleted / totalSteps) * 100) : 0;
 
   const sidebarContent = (
-    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-      {/* Gamified header */}
+    <div className="grid h-full min-h-0 min-w-0 w-full grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+      {/* Fixed chrome: Reading Path + progress bar (does not scroll) */}
       <div className="shrink-0 border-b border-slate-200/80 dark:border-slate-700/80 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900/80 dark:to-slate-900 px-5 py-5">
         <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
@@ -306,7 +335,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
       </div>
 
       <nav
-        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 overscroll-contain [scrollbar-gutter:stable]"
+        className="min-h-0 overflow-y-scroll overflow-x-hidden overscroll-y-contain py-4 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] touch-pan-y"
         aria-label="Reading levels"
       >
         <div className="space-y-1 px-3 pb-4">
@@ -320,6 +349,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
               detailCache,
               contextDetail,
               levelIdFromPath,
+              curriculumDemoAccount,
             );
             const isCurrentLevel = level._id === currentLevelId;
             const detail =
@@ -426,6 +456,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                             detail.progress.currentStepIndex ?? 0,
                             completedSet,
                             detail.progress.passStatus === "PASSED",
+                            curriculumDemoAccount,
                           );
                           const isActive =
                             level._id === levelIdFromPath && step._id === stepIdFromUrl;
@@ -484,15 +515,27 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
     </div>
   );
 
+  const desktopShellClass = useFixedDesktopSidebar
+    ? READING_DESKTOP_SIDEBAR_FIXED
+    : READING_DESKTOP_SIDEBAR_FLOW;
+
   if (loading) {
-    return <ReadingSidebarSkeleton />;
+    return (
+      <div className={desktopShellClass}>
+        <div className="flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
+          <ReadingSidebarSkeleton />
+        </div>
+      </div>
+    );
   }
 
   if (levels.length === 0) {
     return (
-      <aside className="flex h-full w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
-        <p className="text-sm text-slate-500 dark:text-slate-400">No levels yet</p>
-      </aside>
+      <div className={desktopShellClass}>
+        <aside className="flex h-full min-h-0 w-full flex-col justify-center p-6">
+          <p className="text-sm text-slate-500 dark:text-slate-400">No levels yet</p>
+        </aside>
+      </div>
     );
   }
 
@@ -517,8 +560,8 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
             onClick={() => setMobileOpen(false)}
             aria-hidden
           />
-          <aside className="absolute inset-y-0 left-0 flex w-80 max-w-[90vw] flex-col border-r border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center justify-end border-b border-slate-200 px-5 py-3 dark:border-slate-800">
+          <aside className="absolute inset-y-0 left-0 grid w-80 max-w-[90vw] min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden border-r border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex shrink-0 items-center justify-end border-b border-slate-200 px-5 py-3 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
@@ -527,16 +570,15 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-              {sidebarContent}
-            </div>
+            <div className="min-h-0 min-w-0 overflow-hidden">{sidebarContent}</div>
           </aside>
         </div>
       )}
-      {/* Desktop sidebar: flex-col + min-h-0 so the nav region scrolls through all levels */}
-      <aside className="hidden h-full min-h-0 w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm lg:flex">
-        {sidebarContent}
-      </aside>
+      <div className={desktopShellClass}>
+        <aside className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden">
+          {sidebarContent}
+        </aside>
+      </div>
     </>
   );
 }

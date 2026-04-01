@@ -8,7 +8,7 @@ const bar = "rounded-md bg-slate-200/90 dark:bg-slate-700/90";
 export function ReadingSidebarSkeleton() {
   return (
     <aside
-      className="hidden h-full min-h-0 w-[288px] min-w-[288px] max-w-[288px] shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm lg:flex"
+      className="grid h-full min-h-0 w-full min-w-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden bg-white dark:bg-slate-900"
       style={{ contain: "layout" }}
       aria-hidden
     >
@@ -33,7 +33,7 @@ export function ReadingSidebarSkeleton() {
           </div>
         </div>
       </div>
-      <nav className="min-h-0 flex-1 space-y-2 overflow-hidden px-3 py-4">
+      <nav className="min-h-0 space-y-2 overflow-y-scroll overflow-x-hidden overscroll-y-contain px-3 py-4 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] touch-pan-y">
         {Array.from({ length: 7 }).map((_, i) => (
           <div
             key={i}

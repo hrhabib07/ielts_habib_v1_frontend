@@ -107,6 +107,8 @@ export interface StudentLevelProgress {
   isCompleted: boolean;
   unlockedAt?: string | null;
   completedAt?: string | null;
+  /** Backend: full curriculum unlock for the dedicated teaching-demo student. */
+  curriculumDemoAccount?: boolean;
 }
 
 export interface CreateLevelPayload {

@@ -36,7 +36,9 @@ export default function ProfileLayout({
           data-reading-dashboard
         >
           {/* flex-1 min-h-0 so ReadingLayoutClient fills height and inner scroll regions work */}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">{children}</div>
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            {children}
+          </div>
         </div>
       </ReadingDashboardContainer>
     );
