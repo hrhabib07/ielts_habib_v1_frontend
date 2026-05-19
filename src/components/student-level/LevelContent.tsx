@@ -693,7 +693,8 @@ export function LevelContent({
             {!contentLoading &&
               !contentError &&
               content !== null &&
-              content.type === "INTEGRATED_LESSON" && (
+              content.type === "INTEGRATED_LESSON" &&
+              !isPreview && (
                 <IntegratedLessonPlayer
                   levelId={levelId}
                   stepId={step._id}
@@ -705,6 +706,25 @@ export function LevelContent({
                     }
                   }}
                 />
+              )}
+            {!contentLoading &&
+              !contentError &&
+              content !== null &&
+              content.type === "INTEGRATED_LESSON" &&
+              isPreview && (
+                <div className="space-y-4">
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+                    Instructor preview — same layout and EN/বাংলা toggle as students. Micro-quizzes
+                    show correct answers and explanations after submit.
+                  </div>
+                  <IntegratedLessonPlayer
+                    levelId={levelId}
+                    stepId={step._id}
+                    content={content.content}
+                    previewMode
+                    instructorGradingBlocks={content.content.instructorGradingBlocks}
+                  />
+                </div>
               )}
 
             {!contentLoading &&

@@ -4,18 +4,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   createIntegratedLesson,
   updateIntegratedLesson,
   deleteIntegratedLesson,
   type IntegratedLesson,
   type IntegratedLessonBlock,
-  type IntegratedLessonMicroQuizQuestion,
-  type MicroQuizQuestionType,
 } from "@/src/lib/api/adminReadingVersions";
 import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
-import { ChevronDown, ChevronUp, Loader2, Plus, Trash2, BookOpen } from "lucide-react";
+import { validateIntegratedLessonBlocks } from "./integratedLessonValidation";
+import { LessonJsonImportPanel } from "./LessonJsonImportPanel";
+import { parseIntegratedLessonJson, serializeIntegratedLessonToJson } from "./integratedLessonJson";
+import { LEVEL_0_LESSON_JSON_EXAMPLE } from "./integratedLessonJsonExample";
+import { IntegratedLessonPreviewModal } from "@/src/components/reading/IntegratedLessonPreviewModal";
+import { buildIntegratedLessonPreviewPayload } from "./integratedLessonPreviewMapper";
+import { ChevronDown, Eye, Loader2, Plus, BookOpen } from "lucide-react";
 
 interface IntegratedLessonManagerProps {
   versionId: string;
@@ -23,27 +26,7 @@ interface IntegratedLessonManagerProps {
   disabled: boolean;
   onLessonsChange: (lessons: IntegratedLesson[]) => void;
   onStepsSync?: () => void;
-}
-
-function emptyNoteBlock(order: number): IntegratedLessonBlock {
-  return { type: "NOTE", order, body: "" };
-}
-
-function emptyMicroQuizBlock(order: number): IntegratedLessonBlock {
-  return {
-    type: "MICRO_QUIZ",
-    order,
-    quizTitle: "Quick check",
-    questions: [
-      {
-        type: "MCQ",
-        questionText: "",
-        options: ["", "", "", ""],
-        correctAnswer: "",
-        marks: 1,
-      },
-    ],
-  };
+  levelOrder?: number;
 }
 
 function normalizeBlocks(blocks: IntegratedLessonBlock[]): IntegratedLessonBlock[] {
@@ -61,7 +44,7 @@ function LessonEditor({
   onSaved: (updated: IntegratedLesson) => void;
   onDeleted: () => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [title, setTitle] = useState(lesson.title);
   const [blocks, setBlocks] = useState<IntegratedLessonBlock[]>(
     normalizeBlocks(lesson.blocks ?? []),
@@ -69,14 +52,42 @@ function LessonEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewRestartKey, setPreviewRestartKey] = useState(0);
+
+  const blockSummary = `${blocks.length} blocks · ${blocks.filter((b) => b.type === "NOTE").length} notes · ${blocks.filter((b) => b.type === "MICRO_QUIZ").length} quizzes`;
+
+  const previewPayload = buildIntegratedLessonPreviewPayload(
+    { _id: lesson._id, title: title.trim() || lesson.title, lessonCode: lesson.lessonCode, lessonNumber: lesson.lessonNumber },
+    normalizeBlocks(blocks),
+  );
+
+  const openPreview = () => {
+    const validationError = validateIntegratedLessonBlocks(
+      title.trim() || lesson.title,
+      normalizeBlocks(blocks),
+    );
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError(null);
+    setPreviewOpen(true);
+  };
 
   const save = async () => {
     setError(null);
+    const normalized = normalizeBlocks(blocks);
+    const validationError = validateIntegratedLessonBlocks(title, normalized);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     setSaving(true);
     try {
       const updated = await updateIntegratedLesson(lesson._id, {
         title: title.trim(),
-        blocks: normalizeBlocks(blocks),
+        blocks: normalized,
       });
       onSaved(updated);
     } catch (e) {
@@ -92,20 +103,6 @@ function LessonEditor({
     setDeleteOpen(false);
   };
 
-  const updateBlock = (index: number, patch: Partial<IntegratedLessonBlock>) => {
-    setBlocks((prev) =>
-      normalizeBlocks(prev.map((b, i) => (i === index ? { ...b, ...patch } : b))),
-    );
-  };
-
-  const moveBlock = (index: number, dir: -1 | 1) => {
-    const next = index + dir;
-    if (next < 0 || next >= blocks.length) return;
-    const copy = [...blocks];
-    [copy[index], copy[next]] = [copy[next], copy[index]];
-    setBlocks(normalizeBlocks(copy));
-  };
-
   return (
     <div className="rounded-xl border border-border bg-card">
       <button
@@ -115,7 +112,8 @@ function LessonEditor({
       >
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground">{lesson.lessonCode}</p>
-          <p className="truncate font-medium text-foreground">{lesson.title}</p>
+          <p className="truncate font-medium text-foreground">{title || lesson.title}</p>
+          <p className="text-xs text-muted-foreground">{blockSummary}</p>
         </div>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
@@ -125,6 +123,17 @@ function LessonEditor({
       {open && (
         <div className="space-y-4 border-t border-border px-4 py-4">
           {error && <p className="text-sm text-destructive">{error}</p>}
+
+          <LessonJsonImportPanel
+            disabled={disabled}
+            getJsonToExport={() => serializeIntegratedLessonToJson(title, blocks)}
+            onApply={({ title: importedTitle, blocks: importedBlocks }) => {
+              setTitle(importedTitle);
+              setBlocks(normalizeBlocks(importedBlocks));
+              setError(null);
+            }}
+          />
+
           <div>
             <Label>Lesson title</Label>
             <Input
@@ -135,140 +144,21 @@ function LessonEditor({
             />
           </div>
 
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-foreground">Blocks (notes + micro-quizzes)</p>
-            {blocks.map((block, index) => (
-              <div
-                key={`${block.type}-${index}`}
-                className="rounded-lg border border-border/80 bg-muted/30 p-3 space-y-3"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {block.type === "NOTE" ? "Note" : "Micro-quiz"} · #{index + 1}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={disabled || index === 0}
-                      onClick={() => moveBlock(index, -1)}
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      disabled={disabled || index === blocks.length - 1}
-                      onClick={() => moveBlock(index, 1)}
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                    {!disabled && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive"
-                        onClick={() =>
-                          setBlocks(normalizeBlocks(blocks.filter((_, i) => i !== index)))
-                        }
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                {block.type === "NOTE" ? (
-                  <Textarea
-                    value={block.body ?? ""}
-                    onChange={(e) => updateBlock(index, { body: e.target.value })}
-                    disabled={disabled}
-                    rows={6}
-                    placeholder="Lesson note (HTML supported)"
-                    className="font-mono text-sm"
-                  />
-                ) : (
-                  <>
-                    <Input
-                      value={block.quizTitle ?? ""}
-                      onChange={(e) => updateBlock(index, { quizTitle: e.target.value })}
-                      disabled={disabled}
-                      placeholder="Micro-quiz title"
-                    />
-                    {(block.questions ?? []).map((q, qi) => (
-                      <MicroQuizQuestionEditor
-                        key={qi}
-                        question={q}
-                        disabled={disabled}
-                        onChange={(updated) => {
-                          const qs = [...(block.questions ?? [])];
-                          qs[qi] = updated;
-                          updateBlock(index, { questions: qs });
-                        }}
-                        onRemove={() => {
-                          const qs = (block.questions ?? []).filter((_, i) => i !== qi);
-                          updateBlock(index, { questions: qs });
-                        }}
-                      />
-                    ))}
-                    {!disabled && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const qs = [...(block.questions ?? [])];
-                          qs.push({
-                            type: "MCQ",
-                            questionText: "",
-                            options: ["", "", "", ""],
-                            correctAnswer: "",
-                            marks: 1,
-                          });
-                          updateBlock(index, { questions: qs });
-                        }}
-                      >
-                        Add question
-                      </Button>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
+          <p className="text-xs text-muted-foreground">{blockSummary}</p>
 
           {!disabled && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 pt-1">
               <Button
                 type="button"
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                onClick={() => setBlocks(normalizeBlocks([...blocks, emptyNoteBlock(blocks.length)]))}
+                className="gap-1.5"
+                disabled={blocks.length === 0}
+                onClick={openPreview}
               >
-                <Plus className="mr-1 h-3.5 w-3.5" />
-                Add note
+                <Eye className="h-3.5 w-3.5" />
+                Preview as student
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setBlocks(normalizeBlocks([...blocks, emptyMicroQuizBlock(blocks.length)]))
-                }
-              >
-                <Plus className="mr-1 h-3.5 w-3.5" />
-                Add micro-quiz
-              </Button>
-            </div>
-          )}
-
-          {!disabled && (
-            <div className="flex flex-wrap gap-2 pt-2">
               <Button type="button" size="sm" disabled={saving} onClick={() => void save()}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save lesson"}
               </Button>
@@ -285,82 +175,23 @@ function LessonEditor({
         </div>
       )}
 
+      <IntegratedLessonPreviewModal
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        title={title.trim() || lesson.title}
+        lessonCode={lesson.lessonCode}
+        content={previewPayload.content}
+        instructorGradingBlocks={previewPayload.instructorGradingBlocks}
+        restartKey={previewRestartKey}
+        onRestart={() => setPreviewRestartKey((k) => k + 1)}
+      />
+
       <DeleteConfirmDialog
         open={deleteOpen}
-        title="Delete lesson?"
-        description="This removes the lesson and its step from this version."
+        itemName={lesson.title}
+        itemType="lesson"
         onConfirm={() => void confirmDelete()}
-        onCancel={() => setDeleteOpen(false)}
-      />
-    </div>
-  );
-}
-
-function MicroQuizQuestionEditor({
-  question,
-  disabled,
-  onChange,
-  onRemove,
-}: {
-  question: IntegratedLessonMicroQuizQuestion;
-  disabled: boolean;
-  onChange: (q: IntegratedLessonMicroQuizQuestion) => void;
-  onRemove: () => void;
-}) {
-  const types: MicroQuizQuestionType[] = ["MCQ", "TFNG", "FILL_BLANK", "MATCHING"];
-
-  return (
-    <div className="rounded-md border border-border bg-background p-3 space-y-2">
-      <div className="flex gap-2">
-        <select
-          className="h-9 rounded-md border border-input bg-transparent px-2 text-sm"
-          value={question.type}
-          disabled={disabled}
-          onChange={(e) =>
-            onChange({ ...question, type: e.target.value as MicroQuizQuestionType })
-          }
-        >
-          {types.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-        {!disabled && (
-          <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
-            Remove
-          </Button>
-        )}
-      </div>
-      <Input
-        value={question.questionText}
-        onChange={(e) => onChange({ ...question, questionText: e.target.value })}
-        disabled={disabled}
-        placeholder="Question text"
-      />
-      {(question.type === "MCQ" || question.type === "MATCHING") && (
-        <Textarea
-          value={(question.options ?? []).join("\n")}
-          onChange={(e) =>
-            onChange({
-              ...question,
-              options: e.target.value.split("\n").map((s) => s.trim()),
-            })
-          }
-          disabled={disabled}
-          rows={4}
-          placeholder="One option per line"
-        />
-      )}
-      <Input
-        value={
-          Array.isArray(question.correctAnswer)
-            ? question.correctAnswer.join(", ")
-            : question.correctAnswer
-        }
-        onChange={(e) => onChange({ ...question, correctAnswer: e.target.value.trim() })}
-        disabled={disabled}
-        placeholder="Correct answer"
+        onClose={() => setDeleteOpen(false)}
       />
     </div>
   );
@@ -372,26 +203,41 @@ export function IntegratedLessonManager({
   disabled,
   onLessonsChange,
   onStepsSync,
+  levelOrder = 0,
 }: IntegratedLessonManagerProps) {
   const [creating, setCreating] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
+  const [newTitle, setNewTitle] = useState(
+    levelOrder === 0 ? "Level 0 — The Mastery Foundation" : "",
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const sorted = [...lessons].sort((a, b) => a.lessonNumber - b.lessonNumber);
 
   const handleCreate = async () => {
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim()) {
+      setError("Lesson title is required.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
+      const parsed =
+        levelOrder === 0
+          ? parseIntegratedLessonJson(LEVEL_0_LESSON_JSON_EXAMPLE)
+          : null;
+      const initialBlocks =
+        parsed?.ok && parsed.blocks.length > 0
+          ? parsed.blocks
+          : [{ type: "NOTE" as const, order: 0, body: { en: "", bn: "" } }];
+
       const created = await createIntegratedLesson(versionId, {
         title: newTitle.trim(),
-        blocks: [emptyNoteBlock(0)],
+        blocks: initialBlocks,
       });
       onLessonsChange([...lessons, created].sort((a, b) => a.lessonNumber - b.lessonNumber));
       onStepsSync?.();
-      setNewTitle("");
+      setNewTitle(levelOrder === 0 ? "Level 0 — The Mastery Foundation" : "");
       setCreating(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create lesson");
@@ -403,14 +249,24 @@ export function IntegratedLessonManager({
   return (
     <div className="space-y-4">
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <p className="text-sm text-muted-foreground">
-        Each lesson is one step for students: read notes, then pass micro-quizzes (unlimited retries).
-      </p>
+
+      <div className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground space-y-1">
+        <p className="font-medium text-foreground">Fast workflow</p>
+        <ol className="list-decimal pl-4 space-y-0.5">
+          <li>Copy the AI prompt (or open the example JSON file in the repo).</li>
+          <li>Paste your raw note → AI returns JSON in the Gamlish format.</li>
+          <li>Paste JSON here → Apply to lesson → Preview as student → Save lesson.</li>
+        </ol>
+        <p>
+          Example file:{" "}
+          <code className="text-[11px]">content/examples/level-00-lesson.example.json</code>
+        </p>
+      </div>
 
       {sorted.length === 0 && !creating && (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border py-10 text-center">
           <BookOpen className="h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">No lessons yet.</p>
+          <p className="text-sm text-muted-foreground">No lessons yet. Create one to paste JSON.</p>
         </div>
       )}
 
@@ -444,7 +300,6 @@ export function IntegratedLessonManager({
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   className="mt-1"
-                  placeholder="e.g. Skimming strategies"
                 />
               </div>
               <Button type="button" size="sm" disabled={busy} onClick={() => void handleCreate()}>

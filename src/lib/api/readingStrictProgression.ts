@@ -1,4 +1,5 @@
 import apiClient from "../api-client";
+import type { IntegratedLessonBlock } from "./adminReadingVersions";
 
 const BASE = "/reading/strict-progression";
 
@@ -277,17 +278,23 @@ export interface PracticeTestStepContent {
  * Normalised step-content envelope returned by GET /levels/:levelId/steps/:stepId/content.
  * Discriminated union — narrow on `type` to get the correct `content` shape.
  */
+export interface LocalizedTextDto {
+  en: string;
+  bn: string;
+}
+
 export interface IntegratedLessonBlockForStudent {
   type: "NOTE" | "MICRO_QUIZ";
   order: number;
-  body?: string;
-  quizTitle?: string;
+  body?: LocalizedTextDto | string;
+  quizTitle?: LocalizedTextDto | string;
   questions?: Array<{
     _id?: string;
     type: string;
-    questionText: string;
-    options?: string[];
+    questionText: LocalizedTextDto | string;
+    options?: Array<LocalizedTextDto | string>;
     marks: number;
+    explanation?: LocalizedTextDto | string;
   }>;
 }
 
@@ -297,6 +304,8 @@ export interface IntegratedLessonStepContent {
   lessonNumber: number;
   lessonCode: string;
   blocks: IntegratedLessonBlockForStudent[];
+  /** Instructor preview only — full blocks with correctAnswer for local grading */
+  instructorGradingBlocks?: IntegratedLessonBlock[];
 }
 
 export type StepContent =

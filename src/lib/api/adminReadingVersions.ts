@@ -19,12 +19,18 @@ export type FinalEvaluationType = "GROUP_TEST" | "FINAL_QUIZ" | "SEQUENTIAL_FINA
 export type IntegratedLessonBlockType = "NOTE" | "MICRO_QUIZ";
 export type MicroQuizQuestionType = "MCQ" | "TFNG" | "FILL_BLANK" | "MATCHING";
 
+export interface LocalizedTextDto {
+  en: string;
+  bn: string;
+}
+
 export interface IntegratedLessonMicroQuizQuestion {
   _id?: string;
   type: MicroQuizQuestionType;
-  questionText: string;
-  options?: string[];
+  questionText: LocalizedTextDto | string;
+  options?: Array<LocalizedTextDto | string>;
   correctAnswer: string | string[];
+  explanation?: LocalizedTextDto | string;
   marks: number;
 }
 
@@ -32,9 +38,10 @@ export interface IntegratedLessonBlock {
   _id?: string;
   type: IntegratedLessonBlockType;
   order: number;
-  body?: string;
-  quizTitle?: string;
+  body?: LocalizedTextDto | string;
+  quizTitle?: LocalizedTextDto | string;
   questions?: IntegratedLessonMicroQuizQuestion[];
+  sectionKind?: string;
 }
 
 export interface IntegratedLesson {
@@ -114,6 +121,34 @@ export interface GroupTest {
   updatedAt?: string;
 }
 
+/** One final test per level version (replaces group test pool). */
+export interface FinalTest {
+  _id: string;
+  levelVersionId: string;
+  miniTestIds: [string, string, string];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export function finalTestAsGroupTestList(
+  finalTest: FinalTest | null | undefined,
+  legacyGroupTests?: GroupTest[],
+): GroupTest[] {
+  if (finalTest) {
+    return [
+      {
+        _id: finalTest._id,
+        levelVersionId: finalTest.levelVersionId,
+        orderInPool: 1,
+        miniTestIds: finalTest.miniTestIds,
+        createdAt: finalTest.createdAt,
+        updatedAt: finalTest.updatedAt,
+      },
+    ];
+  }
+  return legacyGroupTests ?? [];
+}
+
 export interface PracticeTest {
   _id: string;
   levelVersionId: string;
@@ -136,6 +171,7 @@ export interface VersionDetail {
   groupTests: GroupTest[];
   practiceTests: PracticeTest[];
   integratedLessons?: IntegratedLesson[];
+  finalTest?: FinalTest | null;
   /** Practice tests from all versions of this level ( includes manually created from older versions) */
   allLevelPracticeTests?: PracticeTest[];
 }
@@ -507,15 +543,39 @@ export async function reorderSteps(
   return Array.isArray(data) ? data : [];
 }
 
+export async function upsertFinalTest(
+  versionId: string,
+  payload: {
+    miniTestIds?: [string, string, string];
+    passageQuestionSetIds?: [string, string, string];
+  },
+): Promise<FinalTest> {
+  const res = await apiClient.put<{
+    success: boolean;
+    data: FinalTest;
+  }>(`${BASE}/versions/${versionId}/final-test`, payload);
+  const data = unwrap(res);
+  return data;
+}
+
+export async function getFinalTestByVersion(
+  versionId: string,
+): Promise<FinalTest | null> {
+  const res = await apiClient.get<{ success: boolean; data: FinalTest | null }>(
+    `${BASE}/versions/${versionId}/final-test`,
+  );
+  return unwrap(res) ?? null;
+}
+
 export async function createGroupTest(
   versionId: string,
   payload: CreateGroupTestPayload,
 ): Promise<GroupTest> {
-  const res = await apiClient.post<{
-    success: boolean;
-    data: GroupTest;
-  }>(`${BASE}/versions/${versionId}/group-tests`, payload);
-  return unwrap(res);
+  const ft = await upsertFinalTest(versionId, {
+    miniTestIds: payload.miniTestIds,
+    passageQuestionSetIds: payload.passageQuestionSetIds,
+  });
+  return finalTestAsGroupTestList(ft)[0];
 }
 
 export async function updateGroupTest(
@@ -525,7 +585,7 @@ export async function updateGroupTest(
   const res = await apiClient.patch<{
     success: boolean;
     data: GroupTest;
-  }>(`${BASE}/group-tests/${groupTestId}`, payload);
+  }>(`${BASE}/final-tests/${groupTestId}`, payload);
   return unwrap(res);
 }
 
@@ -535,7 +595,7 @@ export async function getGroupTest(
   const res = await apiClient.get<{
     success: boolean;
     data: GroupTestWithPqsIds;
-  }>(`${BASE}/group-tests/${groupTestId}`);
+  }>(`${BASE}/final-tests/${groupTestId}`);
   return unwrap(res);
 }
 
@@ -547,7 +607,7 @@ export async function deleteGroupTest(
   if (mode === "permanent") params.set("mode", "permanent");
   const query = params.toString();
   await apiClient.delete(
-    `${BASE}/group-tests/${groupTestId}${query ? `?${query}` : ""}`,
+    `${BASE}/final-tests/${groupTestId}${query ? `?${query}` : ""}`,
   );
 }
 
@@ -739,12 +799,12 @@ export interface GroupTestContentForPreview {
 
 export async function getGroupTestPreviewContent(
   versionId: string,
-  groupTestId: string,
+  _groupTestId?: string,
 ): Promise<GroupTestContentForPreview> {
   const res = await apiClient.get<{
     success: boolean;
     data: GroupTestContentForPreview;
-  }>(`${BASE}/versions/${versionId}/group-tests/${groupTestId}/preview-content`);
+  }>(`${BASE}/versions/${versionId}/final-test/preview-content`);
   return unwrap(res);
 }
 

@@ -7,7 +7,6 @@ import {
   Activity,
   FileText,
   Layers,
-  ClipboardList,
   ArrowRight,
   Loader2,
   AlertCircle,
@@ -16,6 +15,7 @@ import {
   ClipboardCheck,
   ListChecks,
   MessageSquare,
+  BookMarked,
 } from "lucide-react";
 import { getReadingLevels } from "@/src/lib/api/adminReadingVersions";
 import {
@@ -111,16 +111,16 @@ export default function InstructorDashboardPage() {
       icon: BookOpen,
     },
     {
+      title: "Lessons (Notes & Micro-quizzes)",
+      description: "Create integrated lessons with notes and embedded micro-quizzes. Each lesson becomes a level step.",
+      href: "/dashboard/instructor/lessons",
+      icon: BookMarked,
+    },
+    {
       title: "Practice Test Manager",
       description: "Create and manage mini practice tests (one passage + questions). Unlimited attempts until pass.",
       href: "/dashboard/instructor/practice-tests",
       icon: ClipboardCheck,
-    },
-    {
-      title: "Group Tests",
-      description: "Configure level final evaluations (3 passage question sets per group test)",
-      href: "/dashboard/instructor/group-tests",
-      icon: ListChecks,
     },
     {
       title: "Reading Monitoring",
@@ -135,22 +135,10 @@ export default function InstructorDashboardPage() {
       icon: MessageSquare,
     },
     {
-      title: "Quiz Content",
-      description: "Create quiz content for QUIZ and VOCABULARY_TEST steps",
-      href: "/dashboard/instructor/quiz-content",
-      icon: ClipboardList,
-    },
-    {
       title: "Passages & Questions",
       description: "Manage passages, question sets, and questions for group tests",
       href: "/dashboard/instructor/passages",
       icon: FileText,
-    },
-    {
-      title: "Content Management",
-      description: "Create instruction and video content for levels",
-      href: "/dashboard/instructor/contents",
-      icon: Layers,
     },
   ];
 
@@ -243,12 +231,10 @@ export default function InstructorDashboardPage() {
           Workflow tips
         </h3>
         <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-          <li>1. Create Passages and Question Sets, then add Questions to sets.</li>
-          <li>2. Create Quiz Content for QUIZ / VOCABULARY_TEST steps.</li>
-          <li>3. Create Practice Tests (Practice Test Manager) from one passage question set each; add a &quot;Practice Test&quot; step in Level Builder and attach one.</li>
-          <li>4. Create Learning Content for INSTRUCTION / VIDEO steps.</li>
-          <li>5. Create a Reading Level → Add Versions → Add Steps (link content) → Add Group Tests (link passages + question sets).</li>
-          <li>6. Publish the version to make it live for students.</li>
+          <li>1. Create Passages and Passage Question Sets for tests and finals.</li>
+          <li>2. Create Practice Tests (Practice Test Manager); attach them in Level Builder.</li>
+          <li>3. Open a Reading Level → edit version → add Integrated Lessons (notes + micro-quizzes), practice tests, and final test (3 passages).</li>
+          <li>4. Publish the version to make it live for students.</li>
         </ul>
       </section>
     </div>

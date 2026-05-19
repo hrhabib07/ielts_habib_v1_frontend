@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, X, BarChart3, BookOpen, Activity, FolderKanban, Hash, FileText, Layers, FileQuestion, Tag, LayoutDashboard, Settings, Users, ClipboardList, ListChecks, ClipboardCheck } from "lucide-react";
+import { GraduationCap, X, BarChart3, BookOpen, Activity, Hash, FileText, Layers, FileQuestion, Tag, LayoutDashboard, Settings, Users, ListChecks, ClipboardCheck, BookMarked, FolderKanban } from "lucide-react";
 import type { UserRole } from "@/src/lib/constants";
 
 function isNavItemActive(pathname: string, href: string): boolean {
@@ -37,9 +37,8 @@ const INSTRUCTOR_CONTENT: DashboardNavGroup = {
   title: "CONTENT",
   roles: ["INSTRUCTOR", "ADMIN"],
   items: [
+    { label: "Lessons (Notes & Quizzes)", href: "/dashboard/instructor/lessons", icon: BookMarked },
     { label: "Practice Test Manager", href: "/dashboard/instructor/practice-tests", icon: ClipboardCheck },
-    { label: "Content Management", href: "/dashboard/instructor/contents", icon: FolderKanban },
-    { label: "Quiz Content", href: "/dashboard/instructor/quiz-content", icon: ClipboardList },
     { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
     { label: "Passage Codes", href: "/dashboard/instructor/passage-codes", icon: Hash },
     { label: "Passages", href: "/dashboard/instructor/passages", icon: FileText },

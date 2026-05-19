@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ensureEditVersion,
+  finalTestAsGroupTestList,
   type GroupTest,
   type IntegratedLesson,
   type PracticeTest,
@@ -19,7 +20,8 @@ import {
   FinalQuizSettingsCard,
 } from "@/src/features/reading-version";
 import { GroupTestsBulkCreateCard } from "./GroupTestsBulkCreateCard";
-import { RefreshCw, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { RefreshCw, Loader2, ExternalLink } from "lucide-react";
 
 interface StepsBuilderSectionProps {
   levelId: string;
@@ -38,12 +40,16 @@ export function StepsBuilderSection({
   versionId,
   versionStatus,
   levelType,
-  groupTests,
+  groupTests: groupTestsProp,
   practiceTests,
   integratedLessons,
   onDetailChange,
   currentDetail,
 }: StepsBuilderSectionProps) {
+  const groupTests = finalTestAsGroupTestList(
+    currentDetail.finalTest ?? null,
+    groupTestsProp,
+  );
   const [error, setError] = useState<string | null>(null);
   const [syncBusy, setSyncBusy] = useState(false);
   const disabled = versionStatus === "PUBLISHED";
@@ -64,7 +70,20 @@ export function StepsBuilderSection({
 
   const handleGroupTestsChange = useCallback(
     (newGroupTests: GroupTest[]) => {
-      onDetailChange({ ...currentDetail, groupTests: newGroupTests });
+      const primary = newGroupTests[0];
+      onDetailChange({
+        ...currentDetail,
+        groupTests: newGroupTests,
+        finalTest: primary
+          ? {
+              _id: primary._id,
+              levelVersionId: primary.levelVersionId,
+              miniTestIds: primary.miniTestIds,
+              createdAt: primary.createdAt,
+              updatedAt: primary.updatedAt,
+            }
+          : null,
+      });
     },
     [onDetailChange, currentDetail],
   );
@@ -105,10 +124,22 @@ export function StepsBuilderSection({
 
       <Card className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <CardHeader className="p-0 pb-2">
-          <CardTitle className="text-lg font-semibold">1. Lessons (notes + micro-quizzes)</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">
-            Each lesson becomes one step. Students read notes, then pass embedded micro-quizzes (unlimited retries).
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <CardTitle className="text-lg font-semibold">1. Lessons (notes + micro-quizzes)</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Each lesson becomes one step. Students read notes, then pass embedded micro-quizzes
+                (unlimited retries).
+              </p>
+            </div>
+            <Link
+              href={`/dashboard/instructor/lessons?levelId=${levelId}`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:opacity-90"
+            >
+              Open full lesson manager
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </CardHeader>
         <CardContent className="p-0 pt-6">
           <IntegratedLessonManager

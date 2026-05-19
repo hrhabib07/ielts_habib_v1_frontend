@@ -49,12 +49,10 @@ export function GroupTestBuilder({
     setError(null);
     try {
       const created = await createGroupTest(versionId, payload);
-      onGroupTestsChange(
-        [...groupTests, created].sort((a, b) => a.orderInPool - b.orderInPool),
-      );
+      onGroupTestsChange([created]);
       setAdding(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to create group test");
+      setError(e instanceof Error ? e.message : "Failed to save final test");
     }
   };
 
@@ -66,14 +64,10 @@ export function GroupTestBuilder({
     setBusyId(groupTestId);
     try {
       const updated = await updateGroupTest(groupTestId, payload);
-      onGroupTestsChange(
-        groupTests
-          .map((g) => (g._id === groupTestId ? updated : g))
-          .sort((a, b) => a.orderInPool - b.orderInPool),
-      );
+      onGroupTestsChange([updated]);
       setEditingId(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to update group test");
+      setError(e instanceof Error ? e.message : "Failed to update final test");
     } finally {
       setBusyId(null);
     }
@@ -106,14 +100,14 @@ export function GroupTestBuilder({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <div>
-          <CardTitle>Group tests</CardTitle>
+          <CardTitle>Final test (3 passages)</CardTitle>
           {levelTitle && (
             <p className="mt-1 text-sm font-normal text-muted-foreground">
               Level: {levelTitle}
             </p>
           )}
         </div>
-        {!disabled && (
+        {!disabled && sortedTests.length === 0 && (
           <Button
             type="button"
             variant="outline"
@@ -121,7 +115,7 @@ export function GroupTestBuilder({
             onClick={() => setAdding(true)}
           >
             <Plus className="h-4 w-4 mr-1" />
-            Add group test
+            Add final test
           </Button>
         )}
       </CardHeader>
@@ -132,7 +126,7 @@ export function GroupTestBuilder({
             onClose={() => setDeleteDialog(null)}
             onConfirm={handleDeleteConfirm}
             itemName={deleteDialog.label}
-            itemType="group test"
+            itemType="final test"
             confirmPhrase="delete permanently"
             busy={!!busyId}
           />
@@ -159,7 +153,7 @@ export function GroupTestBuilder({
               {editingId === gt._id ? (
                 <GroupTestEditForm
                   groupTestId={gt._id}
-                  displayLabel={`Group Test ${idx + 1}`}
+                  displayLabel="Final test (3 passages)"
                   initialOrderInPool={gt.orderInPool}
                   onSave={(p) => handleUpdate(gt._id, p)}
                   onCancel={() => setEditingId(null)}
@@ -168,10 +162,7 @@ export function GroupTestBuilder({
               ) : (
                 <>
                   <span className="shrink-0 font-medium text-foreground">
-                    Group Test {idx + 1}
-                  </span>
-                  <span className="text-muted-foreground text-sm">
-                    (order {gt.orderInPool})
+                    Final test (3 passages)
                   </span>
                   <span className="text-muted-foreground text-xs">
                     · 3 mini tests
@@ -185,7 +176,7 @@ export function GroupTestBuilder({
                         className="text-muted-foreground hover:text-foreground"
                       >
                         <Link
-                          href={`${previewBaseUrl}?groupTestId=${encodeURIComponent(gt._id)}`}
+                          href={previewBaseUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

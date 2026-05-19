@@ -104,7 +104,10 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
   const disabled = version.status === "PUBLISHED";
   const isPublished = version.status === "PUBLISHED";
   const isFoundation = level.levelType === "FOUNDATION";
-  const hasFinalTests = (groupTests?.length ?? 0) > 0;
+  const finalTestForUi =
+    data.finalTest ??
+    (groupTests?.length ? groupTests[0] : null);
+  const hasFinalTests = finalTestForUi != null || (groupTests?.length ?? 0) > 0;
 
   return (
     <div className="space-y-6">
@@ -199,6 +202,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
             versionId={versionId}
             lessons={integratedLessons ?? []}
             disabled={disabled}
+            levelOrder={level?.order ?? 0}
             onLessonsChange={handleLessonsChange}
             onStepsSync={() => void syncFromServer()}
           />

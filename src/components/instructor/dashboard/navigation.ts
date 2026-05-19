@@ -3,15 +3,14 @@ import {
   BookOpen,
   Activity,
   Users,
-  FolderKanban,
   Hash,
   FileText,
   Layers,
   FileQuestion,
   Tag,
-  ClipboardList,
   ListChecks,
   ClipboardCheck,
+  BookMarked,
   type LucideIcon,
 } from "lucide-react";
 
@@ -39,9 +38,8 @@ export const instructorNavGroups: InstructorNavGroup[] = [
   {
     title: "CONTENT",
     items: [
+      { label: "Lessons (Notes & Quizzes)", href: "/dashboard/instructor/lessons", icon: BookMarked },
       { label: "Practice Test Manager", href: "/dashboard/instructor/practice-tests", icon: ClipboardCheck },
-      { label: "Content Management", href: "/dashboard/instructor/contents", icon: FolderKanban },
-      { label: "Quiz Content", href: "/dashboard/instructor/quiz-content", icon: ClipboardList },
       { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
       { label: "Passage Codes", href: "/dashboard/instructor/passage-codes", icon: Hash },
       { label: "Passages", href: "/dashboard/instructor/passages", icon: FileText },
@@ -58,8 +56,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/instructor/reading-levels": "Reading Levels",
   "/dashboard/instructor/reading-monitoring": "Reading Monitoring",
   "/dashboard/instructor/students": "Student Detail",
-  "/dashboard/instructor/contents": "Content Management",
-  "/dashboard/instructor/quiz-content": "Quiz Content",
+  "/dashboard/instructor/lessons": "Lessons (Notes & Micro-quizzes)",
   "/dashboard/instructor/practice-tests": "Practice Test Manager",
   "/dashboard/instructor/group-tests": "Group Tests",
   "/dashboard/instructor/passage-codes": "Passage Codes",
@@ -76,9 +73,6 @@ export function getInstructorPageTitle(pathname: string): string {
   if (pathname.match(/\/reading-levels\/[^/]+\/edit$/)) return "Level Builder";
   if (pathname.match(/\/reading-levels\/[^/]+\/versions\/[^/]+\/edit$/)) return "Edit Version";
   if (pathname.match(/\/reading-levels\/[^/]+\/versions$/)) return "Version History";
-  if (pathname.match(/\/quiz-content\/[^/]+\/preview$/)) return "Quiz Preview";
-  if (pathname.match(/\/quiz-content\/[^/]+\/edit$/)) return "Edit Quiz";
-  if (pathname.match(/\/quiz-content\/create$/)) return "Create Quiz";
   const matchedPath = Object.keys(PAGE_TITLES)
     .filter((path) => path !== "/dashboard/instructor" && pathname.startsWith(`${path}/`))
     .sort((a, b) => b.length - a.length)[0];
