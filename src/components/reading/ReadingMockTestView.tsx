@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import {
   submitGroupTest,
+  submitFinalTest,
   type GroupTestContentForStudent,
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
@@ -342,6 +343,8 @@ function QuestionBlock({
 export interface ReadingMockTestViewProps {
   levelId: string;
   content: GroupTestContentForStudent;
+  /** When set, submits a single sequential final (1–3) instead of a bundled group test. */
+  sequentialFinalIndex?: 1 | 2 | 3;
   onSubmitted: (result: {
     overallPass: boolean;
     miniTestResults: Array<{ bandScore: number; passed: boolean }>;
@@ -368,7 +371,7 @@ export const ReadingMockTestView = forwardRef<
   ReadingMockTestViewHandle,
   ReadingMockTestViewProps
 >(function ReadingMockTestView(
-  { levelId, content, onSubmitted, onProgressUpdate },
+  { levelId, content, sequentialFinalIndex, onSubmitted, onProgressUpdate },
   ref,
 ) {
   const [passageIndex, setPassageIndex] = useState(0);
@@ -629,14 +632,31 @@ export const ReadingMockTestView = forwardRef<
       setError(null);
       setSubmitting(true);
       try {
-        const miniTestAnswers = content.miniTests.map((mt) => ({
-          answers: mt.questions.map((q) => {
+        const buildAnswers = (mt: GroupTestMiniTestContent) =>
+          mt.questions.map((q) => {
             const val = answers[q._id];
             if (Array.isArray(val)) {
               return { questionId: q._id, studentAnswers: val.map((s) => String(s).trim()) };
             }
             return { questionId: q._id, studentAnswer: String(val ?? "").trim() };
-          }),
+          });
+
+        if (sequentialFinalIndex != null) {
+          const mt = content.miniTests[0];
+          const res = await submitFinalTest(levelId, sequentialFinalIndex, {
+            answers: buildAnswers(mt),
+          });
+          onProgressUpdate?.();
+          onSubmitted({
+            overallPass: res.isMastered,
+            miniTestResults: [{ bandScore: res.bandScore, passed: res.passed }],
+            newPassStatus: res.newPassStatus,
+          });
+          return { ok: true };
+        }
+
+        const miniTestAnswers = content.miniTests.map((mt) => ({
+          answers: buildAnswers(mt),
         }));
 
         const res = await submitGroupTest(levelId, content.groupTestId, {
@@ -660,7 +680,15 @@ export const ReadingMockTestView = forwardRef<
         setSubmitting(false);
       }
     },
-    [content.miniTests, content.groupTestId, answers, levelId, onProgressUpdate, onSubmitted],
+    [
+      content.miniTests,
+      content.groupTestId,
+      answers,
+      levelId,
+      sequentialFinalIndex,
+      onProgressUpdate,
+      onSubmitted,
+    ],
   );
 
   const handleSubmit = () => {

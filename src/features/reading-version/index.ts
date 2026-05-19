@@ -1,6 +1,8 @@
 export { VersionStatusBadge } from "./VersionStatusBadge";
 export { VersionListTable } from "./VersionListTable";
 export { StepBuilder } from "./StepBuilder";
+export { IntegratedLessonManager } from "./IntegratedLessonManager";
+export { PracticeTestBuilder } from "./PracticeTestBuilder";
 export { GroupTestBuilder } from "./GroupTestBuilder";
 export { EvaluationConfigForm } from "./EvaluationConfigForm";
 export { PublishPanel } from "./PublishPanel";

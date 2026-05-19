@@ -277,11 +277,59 @@ export interface PracticeTestStepContent {
  * Normalised step-content envelope returned by GET /levels/:levelId/steps/:stepId/content.
  * Discriminated union — narrow on `type` to get the correct `content` shape.
  */
+export interface IntegratedLessonBlockForStudent {
+  type: "NOTE" | "MICRO_QUIZ";
+  order: number;
+  body?: string;
+  quizTitle?: string;
+  questions?: Array<{
+    _id?: string;
+    type: string;
+    questionText: string;
+    options?: string[];
+    marks: number;
+  }>;
+}
+
+export interface IntegratedLessonStepContent {
+  lessonId: string;
+  title: string;
+  lessonNumber: number;
+  lessonCode: string;
+  blocks: IntegratedLessonBlockForStudent[];
+}
+
 export type StepContent =
   | { id: string; type: "INSTRUCTION" | "VIDEO"; content: LearningStepContent }
   | { id: string; type: "QUIZ" | "VOCABULARY_TEST"; content: QuizStepContent }
   | { id: string; type: "PASSAGE_QUESTION_SET"; content: PassageQuestionContent }
-  | { id: string; type: "PRACTICE_TEST"; content: PracticeTestStepContent };
+  | { id: string; type: "PRACTICE_TEST"; content: PracticeTestStepContent }
+  | { id: string; type: "INTEGRATED_LESSON"; content: IntegratedLessonStepContent };
+
+export interface SubmitIntegratedLessonPayload {
+  blockOrder?: number;
+  answers?: Array<{ questionIndex: number; value: string | string[] }>;
+  completeNotesOnly?: boolean;
+}
+
+export interface SubmitIntegratedLessonResponse {
+  passed: boolean;
+  lessonComplete: boolean;
+  incorrectCount?: number;
+  progress: { _id: string; currentStepIndex: number; completedStepIds: string[]; [key: string]: unknown };
+}
+
+export async function submitIntegratedLesson(
+  levelId: string,
+  stepId: string,
+  payload: SubmitIntegratedLessonPayload,
+): Promise<SubmitIntegratedLessonResponse> {
+  const res = await apiClient.post<{ success: boolean; data: SubmitIntegratedLessonResponse }>(
+    `${BASE}/levels/${levelId}/steps/${stepId}/submit-integrated-lesson`,
+    payload,
+  );
+  return unwrap(res);
+}
 
 /** Group test content for FINAL_EVALUATION step. */
 export interface GroupTestPassageContent {
@@ -370,6 +418,78 @@ export async function submitGroupTest(
     success: boolean;
     data: SubmitGroupTestResponse;
   }>(`${BASE}/levels/${levelId}/group-tests/${groupTestId}/submit`, payload);
+  return unwrap(res);
+}
+
+export interface FinalPhaseStatus {
+  isMastered: boolean;
+  strictFinalsComplete: boolean;
+  optionalFinalsUnlocked: boolean;
+  nextFinalTestIndex: 1 | 2 | 3 | null;
+  bestFinalBandScore: number | null;
+  passStatus: string;
+  evaluationMode: string;
+  strictAttempts: Array<{
+    finalTestIndex: 1 | 2 | 3;
+    bandScore: number;
+    passed: boolean;
+  }>;
+}
+
+export interface FinalTestContentResponse {
+  finalTestIndex: 1 | 2 | 3;
+  miniTest: GroupTestMiniTestContent;
+  isOptionalAttempt: boolean;
+}
+
+export interface SubmitFinalTestResponse {
+  finalTestIndex: 1 | 2 | 3;
+  bandScore: number;
+  passed: boolean;
+  isMastered: boolean;
+  strictFinalsComplete: boolean;
+  optionalFinalsUnlocked: boolean;
+  nextFinalTestIndex: 1 | 2 | 3 | null;
+  curriculumUnlocked: boolean;
+  newPassStatus: string;
+  newEvaluationMode: string;
+  bestFinalBandScore: number | null;
+}
+
+export async function getFinalPhaseStatus(
+  levelId: string,
+): Promise<FinalPhaseStatus | null> {
+  const res = await apiClient.get<{ success: boolean; data: FinalPhaseStatus | null }>(
+    `${BASE}/levels/${levelId}/finals/status`,
+  );
+  return res.data?.data ?? null;
+}
+
+export async function getFinalTestContent(
+  levelId: string,
+  finalIndex: 1 | 2 | 3,
+): Promise<FinalTestContentResponse> {
+  const res = await apiClient.get<{ success: boolean; data: FinalTestContentResponse }>(
+    `${BASE}/levels/${levelId}/finals/${finalIndex}/content`,
+  );
+  return unwrap(res);
+}
+
+export async function submitFinalTest(
+  levelId: string,
+  finalIndex: 1 | 2 | 3,
+  payload: {
+    answers: Array<{
+      questionId: string;
+      studentAnswer?: string;
+      studentAnswers?: string[];
+    }>;
+  },
+): Promise<SubmitFinalTestResponse> {
+  const res = await apiClient.post<{ success: boolean; data: SubmitFinalTestResponse }>(
+    `${BASE}/levels/${levelId}/finals/${finalIndex}/submit`,
+    payload,
+  );
   return unwrap(res);
 }
 

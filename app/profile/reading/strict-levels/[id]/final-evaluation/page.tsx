@@ -10,7 +10,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import {
-  getNextGroupTestContent,
+  getFinalPhaseStatus,
+  getFinalTestContent,
+  type FinalPhaseStatus,
   type GroupTestContentForStudent,
 } from "@/src/lib/api/readingStrictProgression";
 import {
@@ -30,14 +32,14 @@ export default function FinalEvaluationPage() {
   const levelId = params.id;
 
   const [phase, setPhase] = useState<Phase>("loading");
+  const [finalIndex, setFinalIndex] = useState<1 | 2 | 3 | null>(null);
+  const [phaseStatus, setPhaseStatus] = useState<FinalPhaseStatus | null>(null);
   const [content, setContent] = useState<GroupTestContentForStudent | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<{
-    overallPass: boolean;
-    miniTestResults: Array<{ bandScore: number; passed: boolean }>;
-    newPassStatus: string;
-    promotionType?: "STREAK" | "AVERAGE";
-    finalAverageMockBandScore?: number;
+    passed: boolean;
+    isMastered: boolean;
+    bandScore: number;
   } | null>(null);
   const testRef = useRef<ReadingMockTestViewHandle>(null);
   const [exitOpen, setExitOpen] = useState(false);
@@ -46,9 +48,9 @@ export default function FinalEvaluationPage() {
 
   useEffect(() => {
     if (phase !== "test" || !levelId) return;
-    window.history.pushState({ readingGroupTestLock: true }, "");
+    window.history.pushState({ readingFinalTestLock: true }, "");
     const onPopState = () => {
-      window.history.pushState({ readingGroupTestLock: true }, "");
+      window.history.pushState({ readingFinalTestLock: true }, "");
       setExitOpen(true);
     };
     window.addEventListener("popstate", onPopState);
@@ -65,54 +67,79 @@ export default function FinalEvaluationPage() {
     if (!res?.ok) return;
   }, []);
 
-  const loadTest = useCallback(() => {
+  const loadTest = useCallback(async () => {
     if (!levelId) return;
     setPhase("loading");
     setContent(null);
     setErrorMessage(null);
-    getNextGroupTestContent(levelId)
-      .then((data) => {
-        if (data) {
-          setContent(data);
-          setPhase("test");
-        } else {
-          setPhase("no_test");
-        }
-      })
-      .catch((err) => {
-        const ax = err as {
-          response?: { status?: number; data?: { message?: string } };
-        };
-        const status = ax?.response?.status;
-        const backendMessage = ax?.response?.data?.message;
-        const msg =
-          typeof backendMessage === "string"
-            ? backendMessage
-            : err instanceof Error
-              ? err.message
-              : "Unable to load the test. Please try again.";
-        if (typeof msg === "string" && msg.includes("LEVEL_CONTENT_UPDATED:")) {
-          router.push(`/profile/reading/strict-levels/${levelId}?contentUpdated=1`);
-          return;
-        }
-        if (isReadingPremiumLockResponse(status, msg)) {
-          setPhase("premium_locked");
-          return;
-        }
-        setErrorMessage(typeof msg === "string" ? msg : "Unable to load the test.");
+
+    try {
+      const status = await getFinalPhaseStatus(levelId);
+      if (!status) {
         setPhase("no_test");
+        setErrorMessage("This level does not use sequential final tests.");
+        return;
+      }
+      setPhaseStatus(status);
+
+      const index = status.nextFinalTestIndex;
+      if (index == null) {
+        setPhase("no_test");
+        setErrorMessage(
+          status.strictFinalsComplete && !status.isMastered
+            ? "All three finals are complete. You can continue to the next level."
+            : "No final test is available right now.",
+        );
+        return;
+      }
+
+      setFinalIndex(index);
+      const testContent = await getFinalTestContent(levelId, index);
+      setContent({
+        groupTestId: `sequential-final-${index}`,
+        miniTests: [
+          testContent.miniTest,
+          testContent.miniTest,
+          testContent.miniTest,
+        ],
       });
+      setPhase("test");
+    } catch (err) {
+      const ax = err as {
+        response?: { status?: number; data?: { message?: string } };
+      };
+      const status = ax?.response?.status;
+      const backendMessage = ax?.response?.data?.message;
+      const msg =
+        typeof backendMessage === "string"
+          ? backendMessage
+          : err instanceof Error
+            ? err.message
+            : "Unable to load the test. Please try again.";
+      if (typeof msg === "string" && msg.includes("LEVEL_CONTENT_UPDATED:")) {
+        router.push(`/profile/reading/strict-levels/${levelId}?contentUpdated=1`);
+        return;
+      }
+      if (isReadingPremiumLockResponse(status, msg)) {
+        setPhase("premium_locked");
+        return;
+      }
+      setErrorMessage(typeof msg === "string" ? msg : "Unable to load the test.");
+      setPhase("no_test");
+    }
   }, [levelId, router]);
 
   const handleSubmitted = useCallback(
     (res: {
       overallPass: boolean;
       miniTestResults: Array<{ bandScore: number; passed: boolean }>;
-      newPassStatus: string;
-      promotionType?: "STREAK" | "AVERAGE";
-      finalAverageMockBandScore?: number;
     }) => {
-      setResult(res);
+      const first = res.miniTestResults[0];
+      setResult({
+        passed: first?.passed ?? false,
+        isMastered: res.overallPass,
+        bandScore: first?.bandScore ?? 0,
+      });
       setPhase("result");
     },
     [],
@@ -135,10 +162,14 @@ export default function FinalEvaluationPage() {
       <TestStartCountdownOverlay
         open
         variant="navy"
-        subtitle="Final evaluation"
+        subtitle={
+          phaseStatus?.nextFinalTestIndex != null
+            ? `Final test ${phaseStatus.nextFinalTestIndex} of 3`
+            : "Final evaluation"
+        }
         onComplete={() => {
           setEntryCountdownOpen(false);
-          loadTest();
+          void loadTest();
         }}
       />
     );
@@ -147,15 +178,7 @@ export default function FinalEvaluationPage() {
   if (phase === "loading") {
     return (
       <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="flex flex-col items-center gap-5 opacity-100 transition-opacity duration-200">
-          <div className="relative">
-            <div className="h-11 w-11 rounded-full border-2 border-indigo-200 dark:border-indigo-800" />
-            <Loader2 className="absolute inset-0 m-auto h-11 w-11 animate-spin text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-            Checking access…
-          </p>
-        </div>
+        <LoaderBlock />
       </div>
     );
   }
@@ -172,29 +195,27 @@ export default function FinalEvaluationPage() {
 
   if (phase === "no_test") {
     return (
-      <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center shadow-xl transition-opacity duration-300">
-          <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-amber-500/10 dark:bg-amber-400/10">
-            <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-          </div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+      <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white p-8 text-center shadow-xl dark:border-slate-800 dark:bg-slate-900">
+          <AlertCircle className="mx-auto h-6 w-6 text-amber-600 dark:text-amber-400" />
+          <h2 className="mt-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
             No test available
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             {errorMessage ??
-              "No group tests are ready for this level, or you’ve already completed them. Check back later or continue with the level."}
+              "Complete all practice tests first, or you have already finished this final phase."}
           </p>
           <div className="mt-6 flex flex-col gap-3">
             <button
               type="button"
               onClick={() => setEntryCountdownOpen(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-[0.99]"
+              className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
             >
               Try again
             </button>
             <Link
               href={`/profile/reading/strict-levels/${levelId}`}
-              className="inline-flex items-center justify-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+              className="inline-flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to level
@@ -205,13 +226,13 @@ export default function FinalEvaluationPage() {
     );
   }
 
-  if (phase === "test" && content) {
+  if (phase === "test" && content && finalIndex != null) {
     return (
       <>
         <ReadingTestExitDialog
           open={exitOpen}
           title="Submit and leave?"
-          description="Going back will submit this group test with your current answers. Unanswered items count as wrong. The attempt will be scored and counts toward your level progress. Choose Continue test to keep working."
+          description="Going back will submit this final test with your current answers. In strict mode this counts as your only attempt for this final."
           confirmLabel="Submit and leave"
           cancelLabel="Continue test"
           confirmLoading={exitLoading}
@@ -223,6 +244,7 @@ export default function FinalEvaluationPage() {
             ref={testRef}
             levelId={levelId}
             content={content}
+            sequentialFinalIndex={finalIndex}
             onSubmitted={handleSubmitted}
           />
         </div>
@@ -231,76 +253,75 @@ export default function FinalEvaluationPage() {
   }
 
   if (phase === "result" && result) {
-    const unlocked = result.overallPass;
-    const isAveragePromotion = result.promotionType === "AVERAGE";
     return (
-      <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 px-4">
-        <div
-          className={`w-full max-w-md rounded-2xl border p-8 shadow-xl transition-opacity duration-300 ${
-            unlocked
-              ? "border-emerald-200/80 bg-white dark:border-emerald-800/50 dark:bg-slate-900"
-              : "border-amber-200/80 bg-white dark:border-amber-800/50 dark:bg-slate-900"
-          }`}
-        >
-          <div className="flex flex-col items-center text-center">
-            {unlocked ? (
-              <CheckCircle2 className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
-            ) : (
-              <AlertCircle className="h-12 w-12 text-amber-600 dark:text-amber-400" />
-            )}
-            <h2 className="mt-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
-              {unlocked ? (isAveragePromotion ? "Promoted with average score" : "Test passed") : "Test not passed"}
-            </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              {unlocked
-                ? isAveragePromotion
-                  ? `You unlocked the next level using your average mock band score.`
-                  : "You’ve met the consecutive mock requirement."
-                : "Review the level and try again when ready."}
-            </p>
-            {unlocked && isAveragePromotion && typeof result.finalAverageMockBandScore === "number" && (
-              <div className="mt-3 w-full rounded-xl border border-emerald-200/80 bg-emerald-50/50 px-4 py-3 text-left">
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                  Average mock band score
-                </span>
-                <div className="mt-1 text-2xl font-bold tabular-nums text-emerald-900 dark:text-emerald-200">
-                  {result.finalAverageMockBandScore.toFixed(2)}
-                </div>
-              </div>
-            )}
-            <div className="mt-6 w-full space-y-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4">
-              {result.miniTestResults.map((r, i) => (
-                <div
-                  key={i}
-                  className="flex justify-between text-sm font-medium"
-                >
-                  <span className="text-slate-600 dark:text-slate-400">
-                    Passage {i + 1}
-                  </span>
-                  <span
-                    className={
-                      r.passed
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-amber-600 dark:text-amber-400"
-                    }
-                  >
-                    Band {r.bandScore} {r.passed ? "✓" : "✗"}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={handleBackToLevel}
-              className="mt-6 w-full rounded-xl bg-indigo-600 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-[0.99]"
-            >
-              Back to level
-            </button>
-          </div>
-        </div>
+      <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
+        <ResultCard
+          mastered={result.isMastered}
+          bandScore={result.bandScore}
+          finalIndex={finalIndex}
+          onBack={handleBackToLevel}
+        />
       </div>
     );
   }
 
   return null;
+}
+
+function LoaderBlock() {
+  return (
+    <div className="flex flex-col items-center gap-5">
+      <Loader2 className="h-11 w-11 animate-spin text-indigo-600 dark:text-indigo-400" />
+      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+        Preparing final test…
+      </p>
+    </div>
+  );
+}
+
+function ResultCard({
+  mastered,
+  bandScore,
+  finalIndex,
+  onBack,
+}: {
+  mastered: boolean;
+  bandScore: number;
+  finalIndex: 1 | 2 | 3 | null;
+  onBack: () => void;
+}) {
+  return (
+    <div
+      className={`w-full max-w-md rounded-2xl border p-8 text-center shadow-xl ${
+        mastered
+          ? "border-emerald-200/80 bg-white dark:border-emerald-800/50 dark:bg-slate-900"
+          : "border-amber-200/80 bg-white dark:border-amber-800/50 dark:bg-slate-900"
+      }`}
+    >
+      {mastered ? (
+        <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600 dark:text-emerald-400" />
+      ) : (
+        <AlertCircle className="mx-auto h-12 w-12 text-amber-600 dark:text-amber-400" />
+      )}
+      <h2 className="mt-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
+        {mastered ? "Level mastered" : "Final attempt recorded"}
+      </h2>
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+        {mastered
+          ? "You reached your target band. This level counts toward your course progress."
+          : `Band ${bandScore.toFixed(1)}. ${
+              finalIndex != null && finalIndex < 3
+                ? `Return to the level to take Final Test ${finalIndex + 1}.`
+                : "You may advance to the next level; mastery needs your target band on a final."
+            }`}
+      </p>
+      <button
+        type="button"
+        onClick={onBack}
+        className="mt-6 w-full rounded-xl bg-indigo-600 py-3 text-[15px] font-semibold text-white hover:bg-indigo-700"
+      >
+        Back to level
+      </button>
+    </div>
+  );
 }

@@ -6,12 +6,16 @@ import {
   getVersionDetail,
   type VersionDetail,
   type ReadingLevelVersion,
-  type ReadingLevelStep,
   type GroupTest,
+  type IntegratedLesson,
+  type PracticeTest,
+  type ReadingLevel,
+  getLevelById,
 } from "@/src/lib/api/adminReadingVersions";
 import {
   VersionStatusBadge,
-  StepBuilder,
+  IntegratedLessonManager,
+  PracticeTestBuilder,
   GroupTestBuilder,
   EvaluationConfigForm,
   PublishPanel,
@@ -28,13 +32,18 @@ interface VersionEditClientProps {
 
 export function VersionEditClient({ levelId, versionId }: VersionEditClientProps) {
   const [data, setData] = useState<VersionDetail | null>(null);
+  const [level, setLevel] = useState<ReadingLevel | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [syncBusy, setSyncBusy] = useState(false);
 
   const load = async () => {
-    const detail = await getVersionDetail(versionId);
+    const [detail, levelData] = await Promise.all([
+      getVersionDetail(versionId),
+      getLevelById(levelId),
+    ]);
     setData(detail);
+    setLevel(levelData);
   };
 
   const syncFromServer = async () => {
@@ -47,22 +56,25 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
   };
 
   useEffect(() => {
-    getVersionDetail(versionId)
-      .then(setData)
+    load()
       .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"))
       .finally(() => setLoading(false));
-  }, [versionId]);
+  }, [versionId, levelId]);
 
   const handleVersionChange = (version: ReadingLevelVersion) => {
     setData((prev) => (prev ? { ...prev, version } : null));
   };
 
-  const handleStepsChange = (steps: ReadingLevelStep[]) => {
-    setData((prev) => (prev ? { ...prev, steps } : null));
-  };
-
   const handleGroupTestsChange = (groupTests: GroupTest[]) => {
     setData((prev) => (prev ? { ...prev, groupTests } : null));
+  };
+
+  const handlePracticeTestsChange = (practiceTests: PracticeTest[]) => {
+    setData((prev) => (prev ? { ...prev, practiceTests } : null));
+  };
+
+  const handleLessonsChange = (integratedLessons: IntegratedLesson[]) => {
+    setData((prev) => (prev ? { ...prev, integratedLessons } : null));
   };
 
   if (loading) {
@@ -73,7 +85,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
     );
   }
 
-  if (error || !data) {
+  if (error || !data || !level) {
     return (
       <div className="space-y-4">
         <Link
@@ -88,12 +100,11 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
     );
   }
 
-  const { version, steps, groupTests, practiceTests, allLevelPracticeTests } = data;
+  const { version, groupTests, practiceTests, integratedLessons, steps } = data;
   const disabled = version.status === "PUBLISHED";
   const isPublished = version.status === "PUBLISHED";
-  const finalEvalType = version.evaluationConfig?.finalEvaluationType ?? "";
-  const isGroupTestFinalEval = finalEvalType !== "FINAL_QUIZ";
-  const hasGroupTests = (groupTests?.length ?? 0) > 0;
+  const isFoundation = level.levelType === "FOUNDATION";
+  const hasFinalTests = (groupTests?.length ?? 0) > 0;
 
   return (
     <div className="space-y-6">
@@ -119,37 +130,27 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
             <Eye className="h-4 w-4" />
             Preview level
           </Link>
-          {hasGroupTests && (
+          {hasFinalTests && !isFoundation && (
             <Link
               href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/final-evaluation-preview`}
               className="inline-flex items-center gap-2 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2 text-sm font-medium text-emerald-800 dark:text-emerald-200 shadow-sm transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
             >
               <FileText className="h-4 w-4" />
-              Preview final evaluation
+              Preview final tests
             </Link>
           )}
         </div>
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-semibold">Version {version.version}</h2>
           <VersionStatusBadge status={version.status} />
-          {isPublished && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              <Eye className="h-3.5 w-3.5" />
-              View only — use Edit from published on Versions
-            </span>
-          )}
         </div>
       </div>
 
       {isPublished && (
         <Card className="rounded-xl border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30">
           <CardContent className="py-3 text-sm text-amber-800 dark:text-amber-200">
-            This is the published version (read-only). To edit, open{" "}
-            <Link href={`/dashboard/instructor/reading-levels/${levelId}/versions`} className="underline font-medium">
-              Versions
-            </Link>
-            {" "}
-            and use <strong>Edit from published</strong> when you do not already have a draft — it copies this content into a single draft you can change and publish.
+            Published version is read-only. Use <strong>Edit from published</strong> on the Versions
+            page to create a draft.
           </CardContent>
         </Card>
       )}
@@ -157,6 +158,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
       <div className="grid gap-6 md:grid-cols-2">
         <EvaluationConfigForm
           version={version}
+          levelType={level.levelType}
           disabled={disabled}
           onVersionChange={handleVersionChange}
         />
@@ -169,61 +171,75 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
         )}
       </div>
 
+      {!disabled && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={syncBusy}
+            onClick={() => void syncFromServer()}
+          >
+            {syncBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            Sync from server
+          </Button>
+        </div>
+      )}
+
       <Card>
-        <CardHeader className="pb-2 flex flex-row flex-wrap items-center justify-between gap-2">
-          <div>
-            <CardTitle className="text-base">Steps</CardTitle>
-            <p className="text-xs text-muted-foreground mt-1 max-w-xl">
-              After creating practice tests elsewhere, use refresh so the Practice Test dropdown updates.
-            </p>
-          </div>
-          {!disabled && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-2 shrink-0"
-              disabled={syncBusy}
-              onClick={() => void syncFromServer()}
-            >
-              {syncBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-              Refresh
-            </Button>
-          )}
+        <CardHeader>
+          <CardTitle className="text-base">1. Lessons (notes + micro-quizzes)</CardTitle>
+          <p className="text-xs text-muted-foreground">
+            One step per lesson. No separate video or standalone quiz steps.
+          </p>
         </CardHeader>
-        <CardContent className="p-0 pt-0">
-          <StepBuilder
-            levelId={levelId}
+        <CardContent>
+          <IntegratedLessonManager
             versionId={versionId}
-            steps={steps}
+            lessons={integratedLessons ?? []}
+            disabled={disabled}
+            onLessonsChange={handleLessonsChange}
+            onStepsSync={() => void syncFromServer()}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">2. Practice tests</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PracticeTestBuilder
+            versionId={versionId}
             practiceTests={practiceTests ?? []}
             disabled={disabled}
-            onStepsChange={handleStepsChange}
+            onPracticeTestsChange={handlePracticeTestsChange}
           />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Group tests (final evaluation)</CardTitle>
-          {!isGroupTestFinalEval && (
-            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              Final evaluation is set to Quiz. To use group tests and publish, set Final evaluation type to Group test in Evaluation config above.
+      {!isFoundation && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">3. Final tests</CardTitle>
+            <p className="text-xs text-muted-foreground">
+              One pool of three passages. Students take Final Test 1 → 2 → 3 sequentially.
             </p>
-          )}
-        </CardHeader>
-        <CardContent className="p-0 pt-0">
-          <GroupTestBuilder
-            levelId={levelId}
-            versionId={versionId}
-            groupTests={groupTests ?? []}
-            disabled={disabled}
-            onGroupTestsChange={handleGroupTestsChange}
-          />
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <GroupTestBuilder
+              levelId={levelId}
+              versionId={versionId}
+              groupTests={groupTests ?? []}
+              disabled={disabled}
+              onGroupTestsChange={handleGroupTestsChange}
+            />
+          </CardContent>
+        </Card>
+      )}
 
-      <FinalQuizSettingsCard steps={steps} />
+      {isFoundation && <FinalQuizSettingsCard steps={steps} />}
     </div>
   );
 }

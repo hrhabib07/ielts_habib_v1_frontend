@@ -48,6 +48,9 @@ export interface ProfileSummaryPracticeAttempt {
 }
 
 export interface ProfileSummary {
+  masteryProgressPct?: number;
+  masteredLevelCount?: number;
+  gapToTarget?: number | null;
   targetBand: number | null;
   currentEstimatedBand: number | null;
   currentLevel: ProfileSummaryLevel | null;

@@ -13,8 +13,39 @@ export type ReadingStepType =
   | "QUIZ"
   | "VOCABULARY_TEST"
   | "PASSAGE_QUESTION_SET"
-  | "FINAL_EVALUATION";
-export type FinalEvaluationType = "GROUP_TEST" | "FINAL_QUIZ";
+  | "FINAL_EVALUATION"
+  | "INTEGRATED_LESSON";
+export type FinalEvaluationType = "GROUP_TEST" | "FINAL_QUIZ" | "SEQUENTIAL_FINALS";
+export type IntegratedLessonBlockType = "NOTE" | "MICRO_QUIZ";
+export type MicroQuizQuestionType = "MCQ" | "TFNG" | "FILL_BLANK" | "MATCHING";
+
+export interface IntegratedLessonMicroQuizQuestion {
+  _id?: string;
+  type: MicroQuizQuestionType;
+  questionText: string;
+  options?: string[];
+  correctAnswer: string | string[];
+  marks: number;
+}
+
+export interface IntegratedLessonBlock {
+  _id?: string;
+  type: IntegratedLessonBlockType;
+  order: number;
+  body?: string;
+  quizTitle?: string;
+  questions?: IntegratedLessonMicroQuizQuestion[];
+}
+
+export interface IntegratedLesson {
+  _id: string;
+  levelVersionId: string;
+  lessonNumber: number;
+  lessonCode: string;
+  title: string;
+  blocks: IntegratedLessonBlock[];
+  isPublished: boolean;
+}
 export type StepQuizPassType = "PERCENTAGE" | "BAND";
 export type StepQuizAttemptPolicy = "SINGLE" | "UNLIMITED" | "LIMITED";
 
@@ -104,7 +135,8 @@ export interface VersionDetail {
   steps: ReadingLevelStep[];
   groupTests: GroupTest[];
   practiceTests: PracticeTest[];
-  /** Practice tests from all versions of this level (includes manually created from older versions) */
+  integratedLessons?: IntegratedLesson[];
+  /** Practice tests from all versions of this level ( includes manually created from older versions) */
   allLevelPracticeTests?: PracticeTest[];
 }
 
@@ -727,4 +759,43 @@ export async function getStepContentForPreview(
   }>(`${BASE}/versions/${versionId}/steps/${stepId}/preview-content`);
   const data = unwrap(res);
   return { ...data, id: (data as { id?: string }).id ?? stepId };
+}
+
+export async function listIntegratedLessons(
+  versionId: string,
+): Promise<IntegratedLesson[]> {
+  const res = await apiClient.get<{ success: boolean; data: IntegratedLesson[] }>(
+    `${BASE}/versions/${versionId}/integrated-lessons`,
+  );
+  return unwrap(res) ?? [];
+}
+
+export async function createIntegratedLesson(
+  versionId: string,
+  payload: { title: string; blocks?: IntegratedLessonBlock[] },
+): Promise<IntegratedLesson> {
+  const res = await apiClient.post<{ success: boolean; data: IntegratedLesson }>(
+    `${BASE}/versions/${versionId}/integrated-lessons`,
+    payload,
+  );
+  return unwrap(res);
+}
+
+export async function updateIntegratedLesson(
+  lessonId: string,
+  payload: {
+    title?: string;
+    blocks?: IntegratedLessonBlock[];
+    isPublished?: boolean;
+  },
+): Promise<IntegratedLesson> {
+  const res = await apiClient.patch<{ success: boolean; data: IntegratedLesson }>(
+    `${BASE}/integrated-lessons/${lessonId}`,
+    payload,
+  );
+  return unwrap(res);
+}
+
+export async function deleteIntegratedLesson(lessonId: string): Promise<void> {
+  await apiClient.delete(`${BASE}/integrated-lessons/${lessonId}`);
 }

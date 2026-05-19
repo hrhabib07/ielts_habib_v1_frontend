@@ -81,6 +81,21 @@ const PracticeTestStepCard = dynamic(
   },
 );
 
+const IntegratedLessonPlayer = dynamic(
+  () =>
+    import("@/src/components/reading/IntegratedLessonPlayer").then(
+      (m) => m.IntegratedLessonPlayer,
+    ),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
+      </div>
+    ),
+    ssr: false,
+  },
+);
+
 function FinalEvaluationStartCard({
   levelId,
   groupTestsTotal,
@@ -156,6 +171,12 @@ const STEP_TYPE_META: Record<
   string,
   { label: string; Icon: React.ElementType; bg: string; iconColor: string }
 > = {
+  INTEGRATED_LESSON: {
+    label: "Lesson",
+    Icon: BookOpen,
+    bg: "bg-indigo-50 dark:bg-indigo-950/40",
+    iconColor: "text-indigo-500",
+  },
   INSTRUCTION: {
     label: "Instruction",
     Icon: FileText,
@@ -672,6 +693,23 @@ export function LevelContent({
             {!contentLoading &&
               !contentError &&
               content !== null &&
+              content.type === "INTEGRATED_LESSON" && (
+                <IntegratedLessonPlayer
+                  levelId={levelId}
+                  stepId={step._id}
+                  content={content.content}
+                  onComplete={(res) => {
+                    onProgressUpdate(res.progress);
+                    if (res.lessonComplete) {
+                      onLevelPassed();
+                    }
+                  }}
+                />
+              )}
+
+            {!contentLoading &&
+              !contentError &&
+              content !== null &&
               content.type === "PRACTICE_TEST" &&
               isPreview && (
                 <PracticeTestPreviewInline
@@ -741,7 +779,12 @@ export function LevelContent({
           </div>
 
           {/* Mark complete button (not for quiz, practice test, or FINAL_EVALUATION — practice test uses submit + unlimited tries) */}
-          {!isQuizStep && step.stepType !== "PRACTICE_TEST" && step.stepType !== "FINAL_EVALUATION" && isCurrent && !isCompleted && (
+          {!isQuizStep &&
+            step.stepType !== "PRACTICE_TEST" &&
+            step.stepType !== "FINAL_EVALUATION" &&
+            step.stepType !== "INTEGRATED_LESSON" &&
+            isCurrent &&
+            !isCompleted && (
             <div className="flex items-center gap-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-gradient-to-r from-[#1e3a8a]/5 to-white dark:from-[#1e3a8a]/10 dark:to-slate-800/50 p-5">
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -775,7 +818,10 @@ export function LevelContent({
           )}
 
           {/* Completed state (not for practice test — completion comes from passing the test; they can keep trying) */}
-          {isCompleted && !isQuizStep && step.stepType !== "PRACTICE_TEST" && (
+          {isCompleted &&
+            !isQuizStep &&
+            step.stepType !== "PRACTICE_TEST" &&
+            step.stepType !== "INTEGRATED_LESSON" && (
             <div className="flex items-center gap-3 rounded-2xl border border-[#1e3a8a]/20 dark:border-[#3b82f6]/30 bg-[#1e3a8a]/5 dark:bg-[#1e3a8a]/15 px-5 py-4">
               <CheckCircle2 className="h-5 w-5 shrink-0 text-[#1e3a8a] dark:text-[#60a5fa]" />
               <p className="text-sm font-medium text-[#1e3a8a] dark:text-[#60a5fa]">

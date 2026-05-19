@@ -8,52 +8,56 @@ import { Label } from "@/components/ui/label";
 import {
   updateEvaluationConfig,
   type ReadingLevelVersion,
+  type ReadingLevelType,
   type UpdateEvaluationConfigPayload,
 } from "@/src/lib/api/adminReadingVersions";
 import { Loader2 } from "lucide-react";
 
 interface EvaluationConfigFormProps {
   version: ReadingLevelVersion;
+  levelType: ReadingLevelType;
   disabled: boolean;
   onVersionChange: (v: ReadingLevelVersion) => void;
 }
 
-const FINAL_EVAL_OPTIONS = [
-  { value: "GROUP_TEST", label: "Group test" },
-  { value: "FINAL_QUIZ", label: "Final quiz" },
-];
-
 export function EvaluationConfigForm({
   version,
+  levelType,
   disabled,
   onVersionChange,
 }: EvaluationConfigFormProps) {
   const config = version.evaluationConfig ?? {};
+  const isSkill = levelType === "SKILL";
   const [maxAttempts, setMaxAttempts] = useState<string>(
     config.maxAttempts != null ? String(config.maxAttempts) : "",
   );
   const [finalEvaluationType, setFinalEvaluationType] = useState<string>(
-    config.finalEvaluationType && config.finalEvaluationType !== ""
-      ? config.finalEvaluationType
-      : "GROUP_TEST",
+    isSkill
+      ? "SEQUENTIAL_FINALS"
+      : config.finalEvaluationType && config.finalEvaluationType !== ""
+        ? config.finalEvaluationType
+        : "FINAL_QUIZ",
   );
   const [passMarkPercent, setPassMarkPercent] = useState<string>(
     config.passMarkPercent != null ? String(config.passMarkPercent) : "",
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const isGroupTest = (finalEvaluationType || "GROUP_TEST") === "GROUP_TEST";
 
   useEffect(() => {
     const c = version.evaluationConfig ?? {};
     setMaxAttempts(c.maxAttempts != null ? String(c.maxAttempts) : "");
-    setFinalEvaluationType(
-      c.finalEvaluationType && c.finalEvaluationType !== ""
-        ? c.finalEvaluationType
-        : "GROUP_TEST",
-    );
+    if (isSkill) {
+      setFinalEvaluationType("SEQUENTIAL_FINALS");
+    } else {
+      setFinalEvaluationType(
+        c.finalEvaluationType && c.finalEvaluationType !== ""
+          ? c.finalEvaluationType
+          : "FINAL_QUIZ",
+      );
+    }
     setPassMarkPercent(c.passMarkPercent != null ? String(c.passMarkPercent) : "");
-  }, [version.evaluationConfig]);
+  }, [version.evaluationConfig, isSkill]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,13 +68,15 @@ export function EvaluationConfigForm({
       const n = Number(maxAttempts);
       if (Number.isFinite(n) && n >= 1) payload.maxAttempts = n;
     }
-    payload.finalEvaluationType = finalEvaluationType || "GROUP_TEST";
-    // Pass mark % only applies to Final quiz; group tests pass by student's target band.
-    if (!isGroupTest && passMarkPercent.trim() !== "") {
-      const n = Number(passMarkPercent);
-      if (Number.isFinite(n) && n >= 0 && n <= 100) payload.passMarkPercent = n;
+    if (isSkill) {
+      payload.finalEvaluationType = "SEQUENTIAL_FINALS";
+    } else {
+      payload.finalEvaluationType = finalEvaluationType || "FINAL_QUIZ";
+      if (passMarkPercent.trim() !== "") {
+        const n = Number(passMarkPercent);
+        if (Number.isFinite(n) && n >= 0 && n <= 100) payload.passMarkPercent = n;
+      }
     }
-    if (isGroupTest) payload.passMarkPercent = undefined;
     try {
       const updated = await updateEvaluationConfig(version._id, payload);
       onVersionChange(updated);
@@ -90,44 +96,25 @@ export function EvaluationConfigForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <p className="text-sm text-destructive">{error}</p>}
           <div>
-            <Label>Max attempts</Label>
+            <Label>Max attempts (legacy group pool)</Label>
             <Input
               type="number"
               min={1}
               value={maxAttempts}
               onChange={(e) => setMaxAttempts(e.target.value)}
-              placeholder="e.g. 3"
+              placeholder="Optional"
               disabled={disabled}
             />
           </div>
-          <div>
-            <Label>Final evaluation type</Label>
-            <select
-              className="mt-1 h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
-              value={finalEvaluationType || "GROUP_TEST"}
-              onChange={(e) => setFinalEvaluationType(e.target.value)}
-              disabled={disabled}
-            >
-              {FINAL_EVAL_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            {finalEvaluationType === "GROUP_TEST" && (
-              <p className="mt-1.5 text-xs text-muted-foreground">
-                Add at least one Group test below (each with 3 passage question sets). Steps above are optional.
-              </p>
-            )}
-            {finalEvaluationType === "GROUP_TEST" && (
-              <p className="mt-1.5 rounded-md bg-primary/5 px-2 py-1.5 text-xs text-primary">
-                Group tests are <strong>band-based</strong>: students pass when their score meets their target band (e.g. 5.5). No percentage pass mark.
-              </p>
-            )}
-          </div>
-          {!isGroupTest && (
+          {isSkill ? (
+            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+              <strong className="text-foreground">Final evaluation:</strong> three sequential final
+              tests (one passage each). Configure passages in <strong>Final tests</strong> below.
+              Students pass when they reach their target band on any final (mastery).
+            </div>
+          ) : (
             <div>
-              <Label>Pass mark % (0–100)</Label>
+              <Label>Pass mark % for final quiz (0–100)</Label>
               <Input
                 type="number"
                 min={0}
@@ -137,18 +124,11 @@ export function EvaluationConfigForm({
                 placeholder="e.g. 60"
                 disabled={disabled}
               />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Used for Final quiz steps (percentage to pass).
-              </p>
             </div>
           )}
           {!disabled && (
             <Button type="submit" size="sm" disabled={submitting}>
-              {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Save"
-              )}
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
             </Button>
           )}
         </form>
