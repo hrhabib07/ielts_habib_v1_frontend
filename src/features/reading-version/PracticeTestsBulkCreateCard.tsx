@@ -11,7 +11,11 @@ import { createBulkPassages } from "@/src/lib/api/instructor";
 import type { BulkCreatePassagesResult } from "@/src/lib/api/instructor";
 import type { BulkPassageInput, BulkPassageQuestionSetInput } from "./strictReadingBulkUtils";
 import { createPassageQuestionSetFromBulkInput } from "./strictReadingBulkUtils";
-import { createPracticeTest } from "@/src/lib/api/adminReadingVersions";
+import {
+  createPracticeTest,
+  createSentenceLocatorPracticeTest,
+  type SentenceLocatorContentAuthoringPreview,
+} from "@/src/lib/api/adminReadingVersions";
 import {
   MULTI_TYPE_LEVEL_ORDERS,
   stripPracticeBulkWrapper,
@@ -24,6 +28,7 @@ import {
   EXPECTED_QUESTIONS_BY_LEVEL,
   DEFAULT_SINGLE_TYPE_QUESTIONS,
 } from "./levelQuestionTypeMapping";
+import { readingLevelIndexFromOrder } from "@/src/lib/readingLevelOrder";
 import {
   buildSummaryWithCluesBulkQuestionItems,
   SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC,
@@ -42,8 +47,68 @@ export type BulkPracticeTestsCreatePayload = {
   practiceTests: BulkPracticeTestItemInput[];
 };
 
+type BulkL0SentenceLocatorItem = {
+  title?: string;
+  timeLimitMinutes?: number;
+  passType?: string;
+  passValue?: number;
+  maxAttempts?: number | null;
+  sentenceLocator: SentenceLocatorContentAuthoringPreview;
+};
+
 /** L15–L19: Passage 2 / 3 / full test / master (and extended pool) — multi-type passage question sets */
 const MULTI_TYPE_LEVELS = MULTI_TYPE_LEVEL_ORDERS;
+
+const L0_BULK_INSTRUCTIONS =
+  "Level 0 uses Sentence locator practice tests (embedded passage + statements, no passage question set). " +
+  "Each practiceTests[] entry must include sentenceLocator (see docs/SENTENCE_LOCATOR_PRACTICE_TEST_JSON.md). " +
+  "You can list 1–3 tests; each is created via POST practice-tests with contentFormat SENTENCE_LOCATOR.";
+
+function validateL0SentenceLocatorBulk(payload: unknown): { practiceTests: BulkL0SentenceLocatorItem[] } {
+  if (!payload || typeof payload !== "object") throw new Error("Payload must be an object.");
+  const p = payload as { practiceTests?: unknown };
+  if (!Array.isArray(p.practiceTests) || p.practiceTests.length < 1 || p.practiceTests.length > 3) {
+    throw new Error("practiceTests must be an array of 1 to 3 items for Level 0.");
+  }
+  const out: BulkL0SentenceLocatorItem[] = [];
+  for (let i = 0; i < p.practiceTests.length; i++) {
+    const item = p.practiceTests[i];
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      throw new Error(`practiceTests[${i}] must be an object.`);
+    }
+    const t = item as Record<string, unknown>;
+    const sl = t.sentenceLocator;
+    if (!sl || typeof sl !== "object" || Array.isArray(sl)) {
+      throw new Error(
+        `practiceTests[${i}] must include "sentenceLocator" (object with passageTitle, paragraphs[], statements[]).`,
+      );
+    }
+    const slObj = sl as Record<string, unknown>;
+    if (typeof slObj.passageTitle !== "string" || !slObj.passageTitle.trim()) {
+      throw new Error(`practiceTests[${i}].sentenceLocator.passageTitle is required.`);
+    }
+    if (!Array.isArray(slObj.paragraphs) || slObj.paragraphs.length === 0) {
+      throw new Error(`practiceTests[${i}].sentenceLocator.paragraphs must be a non-empty array.`);
+    }
+    if (!Array.isArray(slObj.statements) || slObj.statements.length === 0) {
+      throw new Error(`practiceTests[${i}].sentenceLocator.statements must be a non-empty array.`);
+    }
+    out.push({
+      title: typeof t.title === "string" ? t.title : undefined,
+      timeLimitMinutes: typeof t.timeLimitMinutes === "number" ? t.timeLimitMinutes : undefined,
+      passType: typeof t.passType === "string" ? t.passType : undefined,
+      passValue: typeof t.passValue === "number" ? t.passValue : undefined,
+      maxAttempts:
+        t.maxAttempts === null
+          ? null
+          : typeof t.maxAttempts === "number"
+            ? t.maxAttempts
+            : undefined,
+      sentenceLocator: sl as SentenceLocatorContentAuthoringPreview,
+    });
+  }
+  return { practiceTests: out };
+}
 
 function safeJsonParse(raw: string): { ok: true; value: unknown } | { ok: false; error: string } {
   try {
@@ -112,6 +177,60 @@ export function PracticeTestsBulkCreateCard(props: {
     if (isMulti) {
       return JSON.stringify(buildMultiTypePracticeSamplePayload(levelOrder), null, 2);
     }
+    if (levelOrder === 0) {
+      return JSON.stringify(
+        {
+          __instructions: L0_BULK_INSTRUCTIONS,
+          practiceTests: [
+            {
+              title: "L0 — Sample sentence locator",
+              timeLimitMinutes: 20,
+              passType: "PERCENTAGE",
+              passValue: 60,
+              maxAttempts: null,
+              sentenceLocator: {
+                passageTitle: "Urban green spaces",
+                passageSubTitle: "Sample passage",
+                instruction:
+                  "Click the sentence in the passage that best matches each statement.",
+                paragraphs: [
+                  {
+                    paragraphIndex: 0,
+                    sentences: [
+                      "Cities need trees along major roads.",
+                      "Parks help reduce summer heat.",
+                    ],
+                  },
+                  {
+                    paragraphIndex: 1,
+                    sentences: [
+                      "Residents near parks report lower stress.",
+                      "Funding for upkeep is often uneven.",
+                    ],
+                  },
+                ],
+                statements: [
+                  {
+                    id: "stmt_01",
+                    order: 1,
+                    statement: "People living close to green areas feel less stressed.",
+                    targetParagraphIndex: 1,
+                    targetSentenceIndex: 0,
+                    anchorKeywords: ["stress", "Residents", "parks"],
+                    gamlishHack: "Match stress / wellbeing language in the second paragraph.",
+                    difficulty: "MEDIUM",
+                  },
+                ],
+                reviewAfterEachAttempt: true,
+                showCoachHintsDuringAttempt: false,
+              },
+            },
+          ],
+        },
+        null,
+        2,
+      );
+    }
     const questionCount = EXPECTED_QUESTIONS_BY_LEVEL[levelOrder] ?? DEFAULT_SINGLE_TYPE_QUESTIONS;
     const questionType = SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL[levelOrder] ?? "MCQ_SINGLE";
     const defaultInstruction =
@@ -137,71 +256,40 @@ export function PracticeTestsBulkCreateCard(props: {
               explanation: "Explanation for this question (min 5 characters).",
             };
           });
-    return JSON.stringify(
-      {
-        ...(questionType === "SUMMARY_COMPLETION_WITH_CLUES"
-          ? { __instructions: SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC }
-          : {}),
-        practiceTests: [
+    const singlePracticeTest: BulkPracticeTestItemInput = {
+      title: `Practice Test 1 · (L${levelOrder})${levelOrder === 2 ? " — Sentence Completion only" : ""}`,
+      passage: {
+        title: "PT1 passage title",
+        subTitle: "",
+        contentParagraphs: [
+          { paragraphIndex: 0, text: "Paste the real passage paragraph text here..." },
+        ],
+      },
+      passageQuestionSet: {
+        difficulty: "MEDIUM",
+        expectedTotalQuestions: questionCount,
+        recommendedTimeMinutes: 20,
+        questionGroups: [
           {
-            title: `Practice Test 1 · (L${levelOrder})${levelOrder === 2 ? " — Sentence Completion only" : ""}`,
-            passage: {
-              title: "PT1 passage title",
-              subTitle: "",
-              contentParagraphs: [
-                { paragraphIndex: 1, text: "Paste the real passage paragraph text here..." },
-              ],
-            },
-            passageQuestionSet: {
-              difficulty: "MEDIUM",
-              expectedTotalQuestions: questionCount,
-              recommendedTimeMinutes: 20,
-              questionGroups: [
-                {
-                  order: 1,
-                  startQuestionNumber: 1,
-                  endQuestionNumber: questionCount,
-                  questionType,
-                  instruction: defaultInstruction,
-                  meta,
-                  questions: firstTestQuestions,
-                },
-              ],
-            },
-          },
-          {
-            title: `Practice Test 2 · (L${levelOrder})`,
-            passage: {
-              title: "PT2 passage title",
-              subTitle: "",
-              contentParagraphs: [
-                { paragraphIndex: 1, text: "Paste the real passage paragraph text here..." },
-              ],
-            },
-            passageQuestionSet: {
-              difficulty: "MEDIUM",
-              expectedTotalQuestions: questionCount,
-              recommendedTimeMinutes: 20,
-              questionGroups: [],
-            },
-          },
-          {
-            title: `Practice Test 3 · (L${levelOrder})`,
-            passage: {
-              title: "PT3 passage title",
-              subTitle: "",
-              contentParagraphs: [
-                { paragraphIndex: 1, text: "Paste the real passage paragraph text here..." },
-              ],
-            },
-            passageQuestionSet: {
-              difficulty: "MEDIUM",
-              expectedTotalQuestions: questionCount,
-              recommendedTimeMinutes: 20,
-              questionGroups: [],
-            },
+            order: 1,
+            startQuestionNumber: 1,
+            endQuestionNumber: questionCount,
+            questionType,
+            instruction: defaultInstruction,
+            meta,
+            questions: firstTestQuestions,
           },
         ],
+      },
+    };
+
+    return JSON.stringify(
+      {
+        __instructions:
+          questionType === "SUMMARY_COMPLETION_WITH_CLUES"
+            ? SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC
+            : "Single complete practice test (valid on Load template). Duplicate the object inside practiceTests and adjust titles/passages to add a 2nd or 3rd test in one run.",
+        practiceTests: [singlePracticeTest],
       },
       null,
       2,
@@ -223,6 +311,42 @@ export function PracticeTestsBulkCreateCard(props: {
     }
 
     const stripped = stripPracticeBulkWrapper(parsed.value);
+
+    if (levelOrder === 0) {
+      let l0: { practiceTests: BulkL0SentenceLocatorItem[] };
+      try {
+        l0 = validateL0SentenceLocatorBulk(stripped);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Invalid Level 0 payload");
+        return;
+      }
+      setBusy(true);
+      try {
+        const createdPracticeTests: PracticeTest[] = [];
+        for (let i = 0; i < l0.practiceTests.length; i++) {
+          const t = l0.practiceTests[i];
+          if (!t) continue;
+          const title = (t.title?.trim() || `Sentence locator ${i + 1}`).slice(0, 500);
+          const created = await createSentenceLocatorPracticeTest(versionId, {
+            title,
+            sentenceLocator: t.sentenceLocator,
+            timeLimitMinutes: t.timeLimitMinutes ?? 20,
+            passType: t.passType ?? "PERCENTAGE",
+            passValue: typeof t.passValue === "number" ? t.passValue : 60,
+            maxAttempts: t.maxAttempts === undefined ? null : t.maxAttempts,
+            order: i + 1,
+          });
+          createdPracticeTests.push(created);
+        }
+        onMergeCreatedPracticeTests(createdPracticeTests);
+        setOpen(false);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Bulk create failed");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
 
     let validated: BulkPracticeTestsCreatePayload;
     try {
@@ -307,7 +431,20 @@ export function PracticeTestsBulkCreateCard(props: {
             Bulk create practice tests (1 or 3)
           </CardTitle>
           <p className="mt-1 text-sm text-stone-500">
-            Paste JSON with 1 passage (single) or 3 passages. source is always <strong>IELTS_HABIB</strong>. API: <code className="text-xs">/api/reading/passage</code>, <code className="text-xs">/api/reading/questionSet</code>, <code className="text-xs">/api/reading/passageQSet</code>.
+            {levelOrder === 0 ? (
+              <>
+                Level 0: paste JSON with <code className="text-xs">sentenceLocator</code> per test (embedded passage
+                + statements). API: <code className="text-xs">POST …/practice-tests</code> with{" "}
+                <code className="text-xs">contentFormat: &quot;SENTENCE_LOCATOR&quot;</code>. See{" "}
+                <code className="text-xs">docs/SENTENCE_LOCATOR_PRACTICE_TEST_JSON.md</code>.
+              </>
+            ) : (
+              <>
+                Paste JSON with 1 passage (single) or 3 passages. source is always <strong>IELTS_HABIB</strong>. API:{" "}
+                <code className="text-xs">/api/reading/passage</code>, <code className="text-xs">/api/reading/questionSet</code>,{" "}
+                <code className="text-xs">/api/reading/passageQSet</code>.
+              </>
+            )}
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={() => setOpen((o) => !o)} disabled={disabled}>
@@ -360,9 +497,13 @@ export function PracticeTestsBulkCreateCard(props: {
             </Button>
           </div>
           <p className="text-xs text-stone-500">
-            {levelOrder === 2
-              ? "Level 2: Sentence Completion only, 8 questions per passage. Use {{gap1}} in content and blanks[] for each question."
-              : `Multi-type levels ${[...MULTI_TYPE_LEVELS].sort((a, b) => a - b).join(", ")}: use ≥2 question groups per passage set; totals must be 13 or 14. Load template includes __instructions and __questionTypeCatalog (reference only — stripped before API calls).`}
+            {levelOrder === 0
+              ? "Load template fills one valid sentence-locator test. Add more objects to practiceTests (max 3) to batch-create."
+              : levelOrder === 2
+                ? "Level 2: Sentence Completion only, 8 questions per passage. Use {{gap1}} in content and blanks[] for each question."
+                : MULTI_TYPE_LEVELS.has(levelOrder)
+                  ? `Multi-type levels ${[...MULTI_TYPE_LEVELS].sort((a, b) => a - b).join(", ")}: use ≥2 question groups per passage set; totals must be 13 or 14. Load template includes __instructions and __questionTypeCatalog (reference only — stripped before API calls).`
+                  : "Load template is one complete passage + passage question set. Duplicate the object inside practiceTests (and renumber) to create 2–3 tests in one run."}
           </p>
         </CardContent>
       )}

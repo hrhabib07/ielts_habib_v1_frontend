@@ -54,6 +54,7 @@ import {
   type QuizGroup,
   type ReadingQuizContent,
 } from "@/src/lib/api/quizContent";
+import { readingLevelIndexFromOrder } from "@/src/lib/readingLevelOrder";
 
 export interface LevelVersionSummary {
   publishedVersion?: number;
@@ -959,7 +960,7 @@ export function ReadingLevelsListClient() {
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground" title="Level index (0-based)">
-                          L{level.order - 1}
+                          L{readingLevelIndexFromOrder(level.order)}
                         </span>
                         <p className="font-medium text-foreground">
                           {level.title}

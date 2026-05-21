@@ -139,6 +139,8 @@ export function LevelBuilderClient({ levelId }: LevelBuilderClientProps) {
             versionId={version._id}
             versionStatus={version.status}
             levelType={level.levelType}
+            levelOrder={level.order}
+            levelTitle={level.title}
             groupTests={detail.groupTests}
             practiceTests={detail.practiceTests ?? []}
             integratedLessons={detail.integratedLessons ?? []}

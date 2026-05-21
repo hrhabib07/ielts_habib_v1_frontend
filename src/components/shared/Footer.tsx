@@ -22,7 +22,10 @@ export function Footer({ initialUser = null }: FooterProps) {
     return null;
   }
 
-  if (pathname?.includes("/profile/reading/strict-levels")) {
+  if (
+    pathname?.includes("/profile/reading/strict-levels") ||
+    pathname?.includes("/profile/reading/practice-attempt")
+  ) {
     return null;
   }
 

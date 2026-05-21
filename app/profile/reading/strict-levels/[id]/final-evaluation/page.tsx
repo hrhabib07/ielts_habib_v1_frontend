@@ -13,18 +13,25 @@ import {
   getFinalPhaseStatus,
   getFinalTestContent,
   type FinalPhaseStatus,
+  type FinalTestContentResponse,
   type GroupTestContentForStudent,
+  type PracticeTestStepContentSentenceLocator,
 } from "@/src/lib/api/readingStrictProgression";
 import {
   ReadingMockTestView,
   type ReadingMockTestViewHandle,
 } from "@/src/components/reading/ReadingMockTestView";
+import {
+  SentenceLocatorPracticeView,
+  type SentenceLocatorPracticeViewHandle,
+} from "@/src/components/reading/SentenceLocatorPracticeView";
 import { ReadingTestExitDialog } from "@/src/components/reading/ReadingTestExitDialog";
 import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
 import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
 import { TestStartCountdownOverlay } from "@/src/components/reading/TestStartCountdownOverlay";
 
 type Phase = "loading" | "no_test" | "test" | "result" | "premium_locked";
+type FinalTestUiMode = "standard" | "sentence_locator";
 
 export default function FinalEvaluationPage() {
   const params = useParams<{ id: string }>();
@@ -34,14 +41,18 @@ export default function FinalEvaluationPage() {
   const [phase, setPhase] = useState<Phase>("loading");
   const [finalIndex, setFinalIndex] = useState<1 | 2 | 3 | null>(null);
   const [phaseStatus, setPhaseStatus] = useState<FinalPhaseStatus | null>(null);
+  const [testMode, setTestMode] = useState<FinalTestUiMode>("standard");
   const [content, setContent] = useState<GroupTestContentForStudent | null>(null);
+  const [sentenceLocatorContent, setSentenceLocatorContent] =
+    useState<PracticeTestStepContentSentenceLocator | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<{
     passed: boolean;
     isMastered: boolean;
     bandScore: number;
   } | null>(null);
-  const testRef = useRef<ReadingMockTestViewHandle>(null);
+  const mockTestRef = useRef<ReadingMockTestViewHandle>(null);
+  const locatorRef = useRef<SentenceLocatorPracticeViewHandle>(null);
   const [exitOpen, setExitOpen] = useState(false);
   const [exitLoading, setExitLoading] = useState(false);
   const [entryCountdownOpen, setEntryCountdownOpen] = useState(true);
@@ -61,16 +72,20 @@ export default function FinalEvaluationPage() {
 
   const handleConfirmExit = useCallback(async () => {
     setExitLoading(true);
-    const res = await testRef.current?.submitIncompleteForExit();
+    const res =
+      testMode === "sentence_locator"
+        ? await locatorRef.current?.submitIncompleteForExit()
+        : await mockTestRef.current?.submitIncompleteForExit();
     setExitLoading(false);
     setExitOpen(false);
     if (!res?.ok) return;
-  }, []);
+  }, [testMode]);
 
   const loadTest = useCallback(async () => {
     if (!levelId) return;
     setPhase("loading");
     setContent(null);
+    setSentenceLocatorContent(null);
     setErrorMessage(null);
 
     try {
@@ -94,15 +109,33 @@ export default function FinalEvaluationPage() {
       }
 
       setFinalIndex(index);
-      const testContent = await getFinalTestContent(levelId, index);
-      setContent({
-        groupTestId: `sequential-final-${index}`,
-        miniTests: [
-          testContent.miniTest,
-          testContent.miniTest,
-          testContent.miniTest,
-        ],
-      });
+      const testContent: FinalTestContentResponse = await getFinalTestContent(levelId, index);
+
+      if (
+        testContent.contentFormat === "SENTENCE_LOCATOR" &&
+        testContent.sentenceLocator
+      ) {
+        setTestMode("sentence_locator");
+        setSentenceLocatorContent({
+          contentFormat: "SENTENCE_LOCATOR",
+          practiceTestId: `final-${index}`,
+          title: testContent.title ?? `Final test ${index}`,
+          timeLimitMinutes: testContent.timeLimitMinutes ?? 25,
+          passType: "BAND",
+          passValue: 0,
+          sentenceLocator: testContent.sentenceLocator,
+        });
+      } else if (testContent.miniTest) {
+        setTestMode("standard");
+        setContent({
+          groupTestId: `sequential-final-${index}`,
+          miniTests: [testContent.miniTest, testContent.miniTest, testContent.miniTest],
+        });
+      } else {
+        setPhase("no_test");
+        setErrorMessage("Final test content is not configured.");
+        return;
+      }
       setPhase("test");
     } catch (err) {
       const ax = err as {
@@ -129,7 +162,7 @@ export default function FinalEvaluationPage() {
     }
   }, [levelId, router]);
 
-  const handleSubmitted = useCallback(
+  const handleMockSubmitted = useCallback(
     (res: {
       overallPass: boolean;
       miniTestResults: Array<{ bandScore: number; passed: boolean }>;
@@ -139,6 +172,18 @@ export default function FinalEvaluationPage() {
         passed: first?.passed ?? false,
         isMastered: res.overallPass,
         bandScore: first?.bandScore ?? 0,
+      });
+      setPhase("result");
+    },
+    [],
+  );
+
+  const handleLocatorSubmitted = useCallback(
+    (res: { passed: boolean; bandScore: number; isMastered?: boolean }) => {
+      setResult({
+        passed: res.passed,
+        isMastered: res.isMastered ?? res.passed,
+        bandScore: res.bandScore,
       });
       setPhase("result");
     },
@@ -226,30 +271,49 @@ export default function FinalEvaluationPage() {
     );
   }
 
-  if (phase === "test" && content && finalIndex != null) {
-    return (
-      <>
-        <ReadingTestExitDialog
-          open={exitOpen}
-          title="Submit and leave?"
-          description="Going back will submit this final test with your current answers. In strict mode this counts as your only attempt for this final."
-          confirmLabel="Submit and leave"
-          cancelLabel="Continue test"
-          confirmLoading={exitLoading}
-          onConfirm={handleConfirmExit}
-          onCancel={() => setExitOpen(false)}
-        />
-        <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-950">
-          <ReadingMockTestView
-            ref={testRef}
-            levelId={levelId}
-            content={content}
-            sequentialFinalIndex={finalIndex}
-            onSubmitted={handleSubmitted}
+  if (phase === "test" && finalIndex != null) {
+    const showLocator =
+      testMode === "sentence_locator" && sentenceLocatorContent != null;
+    const showMock = testMode === "standard" && content != null;
+
+    if (showLocator || showMock) {
+      return (
+        <>
+          <ReadingTestExitDialog
+            open={exitOpen}
+            title="Submit and leave?"
+            description="Going back will submit this final test with your current answers. In strict mode this counts as your only attempt for this final."
+            confirmLabel="Submit and leave"
+            cancelLabel="Continue test"
+            confirmLoading={exitLoading}
+            onConfirm={handleConfirmExit}
+            onCancel={() => setExitOpen(false)}
           />
-        </div>
-      </>
-    );
+          <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-950">
+            {showLocator ? (
+              <SentenceLocatorPracticeView
+                ref={locatorRef}
+                levelId={levelId}
+                stepId={`final-${finalIndex}`}
+                sessionKey={`final-${levelId}-${finalIndex}`}
+                finalTestIndex={finalIndex}
+                content={sentenceLocatorContent}
+                onSubmitted={handleLocatorSubmitted}
+                onRequestExit={() => setExitOpen(true)}
+              />
+            ) : (
+              <ReadingMockTestView
+                ref={mockTestRef}
+                levelId={levelId}
+                content={content!}
+                sequentialFinalIndex={finalIndex}
+                onSubmitted={handleMockSubmitted}
+              />
+            )}
+          </div>
+        </>
+      );
+    }
   }
 
   if (phase === "result" && result) {

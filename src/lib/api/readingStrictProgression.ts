@@ -262,8 +262,9 @@ export interface PracticeTestMiniTestContent {
   questionGroups?: GroupTestQuestionGroup[];
 }
 
-/** Practice test step content: one mini test, time limit, pass criteria. */
-export interface PracticeTestStepContent {
+/** Practice test — standard passage + question bank. */
+export interface PracticeTestStepContentStandard {
+  contentFormat?: "STANDARD";
   practiceTestId: string;
   title: string;
   timeLimitMinutes: number;
@@ -272,6 +273,48 @@ export interface PracticeTestStepContent {
   passValue: number;
   maxAttempts?: number | null;
   miniTest: PracticeTestMiniTestContent;
+}
+
+/** Level 0 — target lock: passage sentences + statement list (no miniTest). */
+export interface SentenceLocatorParagraphDto {
+  paragraphIndex: number;
+  sentences: string[];
+}
+
+export interface SentenceLocatorStatementDto {
+  id: string;
+  order: number;
+  statement: string;
+  coachHint?: string;
+}
+
+export interface SentenceLocatorStudentPayloadDto {
+  passageTitle: string;
+  passageSubTitle?: string;
+  instruction: string;
+  paragraphs: SentenceLocatorParagraphDto[];
+  statements: SentenceLocatorStatementDto[];
+}
+
+export interface PracticeTestStepContentSentenceLocator {
+  contentFormat: "SENTENCE_LOCATOR";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts?: number | null;
+  sentenceLocator: SentenceLocatorStudentPayloadDto;
+}
+
+export type PracticeTestStepContent =
+  | PracticeTestStepContentStandard
+  | PracticeTestStepContentSentenceLocator;
+
+export function isSentenceLocatorPracticeContent(
+  c: PracticeTestStepContent,
+): c is PracticeTestStepContentSentenceLocator {
+  return c.contentFormat === "SENTENCE_LOCATOR" && "sentenceLocator" in c;
 }
 
 /**
@@ -325,7 +368,16 @@ export interface SubmitIntegratedLessonResponse {
   passed: boolean;
   lessonComplete: boolean;
   incorrectCount?: number;
-  progress: { _id: string; currentStepIndex: number; completedStepIds: string[]; [key: string]: unknown };
+  progress: {
+    _id: string;
+    levelId: string;
+    versionId: string;
+    currentStepIndex: number;
+    completedStepIds: string[];
+    passStatus: string;
+    evaluationMode: string;
+    [key: string]: unknown;
+  };
 }
 
 export async function submitIntegratedLesson(
@@ -447,7 +499,11 @@ export interface FinalPhaseStatus {
 
 export interface FinalTestContentResponse {
   finalTestIndex: 1 | 2 | 3;
-  miniTest: GroupTestMiniTestContent;
+  contentFormat: "STANDARD" | "SENTENCE_LOCATOR";
+  miniTest?: GroupTestMiniTestContent;
+  sentenceLocator?: SentenceLocatorStudentPayloadDto;
+  title?: string;
+  timeLimitMinutes?: number;
   isOptionalAttempt: boolean;
 }
 
@@ -523,6 +579,7 @@ export interface PracticeTestAttemptReview {
   correctCount: number;
   totalQuestions: number;
   createdAt: string;
+  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR";
   review: Array<{
     questionId: string;
     questionNumber: number;
@@ -532,6 +589,17 @@ export interface PracticeTestAttemptReview {
     isCorrect: boolean;
     explanation?: string;
   }>;
+  sentenceLocatorReview?: Array<{
+    statementId: string;
+    order: number;
+    statement: string;
+    isCorrect: boolean;
+    yourSentence: string | null;
+    correctSentence: string;
+    anchorHits: number;
+    anchorTotal: number;
+    gamlishHack?: string;
+  }>;
 }
 
 export interface PracticeTestStepStatus {
@@ -540,6 +608,7 @@ export interface PracticeTestStepStatus {
   lastAttemptPassed: boolean;
   attemptCount: number;
   passed: boolean;
+  canReviewLastAttempt?: boolean;
 }
 
 export async function getPracticeTestStepStatus(
@@ -559,6 +628,34 @@ export async function getPracticeTestAttemptReview(
     `${BASE}/attempts/${attemptId}/review`,
   );
   return unwrap(res);
+}
+
+export interface StatementFeedbackItem {
+  statementId: string;
+  reason: string;
+  comment?: string;
+  updatedAt: string;
+}
+
+export async function getAttemptStatementFeedback(
+  attemptId: string,
+): Promise<StatementFeedbackItem[]> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: { items: StatementFeedbackItem[] };
+  }>(`${BASE}/attempts/${attemptId}/statement-feedback`);
+  return unwrap(res).items;
+}
+
+export async function submitAttemptStatementFeedback(
+  attemptId: string,
+  payload: { statementId: string; reason: string; comment?: string },
+): Promise<StatementFeedbackItem> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: { statementId: string; reason: string; comment?: string };
+  }>(`${BASE}/attempts/${attemptId}/statement-feedback`, payload);
+  return { ...unwrap(res), updatedAt: new Date().toISOString() };
 }
 
 /** GET reading target band (4–9). Null if not set yet (required before Level 1). */

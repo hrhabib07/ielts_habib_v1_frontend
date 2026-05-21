@@ -11,6 +11,7 @@ import {
   type PracticeTestContentForPreview,
   type GroupTestQuestionGroupForPreview,
   type GroupTestQuestionForPreview,
+  isSentenceLocatorPreviewContent,
 } from "@/src/lib/api/adminReadingVersions";
 import {
   updatePassage,
@@ -37,6 +38,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { SentenceLocatorContentEditor } from "./SentenceLocatorContentEditor";
 
 const QUESTION_TYPE_LABEL: Record<string, string> = {
   TRUE_FALSE_NOT_GIVEN: "True / False / Not Given",
@@ -126,11 +128,6 @@ export function PracticeTestContentEditor({
     loadContent();
   }, [loadContent]);
 
-  const passage = content?.miniTest?.passage;
-  const questionGroups = content?.miniTest?.questionGroups ?? [];
-  const pqsId = content?.miniTest?.passageQuestionSetId;
-  const flatQuestions = content?.miniTest?.questions ?? [];
-
   if (loading && !content) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -160,6 +157,36 @@ export function PracticeTestContentEditor({
       </div>
     );
   }
+
+  if (content && isSentenceLocatorPreviewContent(content)) {
+    return (
+      <SentenceLocatorContentEditor
+        versionId={versionId}
+        practiceTestId={practiceTestId}
+        practiceTestTitle={practiceTestTitle}
+        onClose={onClose}
+        onSaved={onSaved}
+      />
+    );
+  }
+
+  if (!content) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="flex flex-col gap-4 rounded-xl bg-white p-6 dark:bg-slate-900">
+          <p className="text-sm text-stone-600 dark:text-stone-400">No content to display.</p>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const passage = content.miniTest.passage;
+  const questionGroups = content.miniTest.questionGroups ?? [];
+  const pqsId = content.miniTest.passageQuestionSetId;
+  const flatQuestions = content.miniTest.questions ?? [];
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: "passage", label: "Passage", icon: <FileText className="h-4 w-4" /> },
@@ -747,15 +774,17 @@ function JsonTab({
   content: PracticeTestContentForPreview;
   onReload: () => void;
 }) {
-  const jsonText = JSON.stringify(
-    {
-      passage: content.miniTest.passage,
-      questionGroups: content.miniTest.questionGroups,
-      questions: content.miniTest.questions,
-    },
-    null,
-    2,
-  );
+  const jsonText = isSentenceLocatorPreviewContent(content)
+    ? JSON.stringify({ sentenceLocator: content.sentenceLocator }, null, 2)
+    : JSON.stringify(
+        {
+          passage: content.miniTest.passage,
+          questionGroups: content.miniTest.questionGroups,
+          questions: content.miniTest.questions,
+        },
+        null,
+        2,
+      );
   const [copyFeedback, setCopyFeedback] = useState(false);
 
   const handleCopy = async () => {
@@ -767,7 +796,9 @@ function JsonTab({
   return (
     <div className="space-y-4">
       <p className="text-sm text-stone-500 dark:text-stone-400">
-        Export the full content as JSON. Use this to inspect structure or prepare bulk edits. To apply changes, edit the passage or questions in their tabs.
+        {isSentenceLocatorPreviewContent(content)
+          ? "Read-only export of sentence locator authoring data. To change content, use Practice tests → edit (JSON) on the level version."
+          : "Export the full content as JSON. Use this to inspect structure or prepare bulk edits. To apply changes, edit the passage or questions in their tabs."}
       </p>
       <div className="flex gap-2">
         <Button variant="outline" size="sm" onClick={handleCopy} className="gap-2">

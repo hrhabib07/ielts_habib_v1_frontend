@@ -13,13 +13,20 @@ import {
   RotateCcw,
   Eye,
 } from "lucide-react";
-import { getStepContent } from "@/src/lib/api/readingStrictProgression";
+import {
+  getStepContent,
+  type PracticeTestStepContent,
+  isSentenceLocatorPracticeContent,
+} from "@/src/lib/api/readingStrictProgression";
 import {
   PracticeTestReadingView,
   type PracticeTestReadingViewHandle,
 } from "@/src/components/reading/PracticeTestReadingView";
+import {
+  SentenceLocatorPracticeView,
+  type SentenceLocatorPracticeViewHandle,
+} from "@/src/components/reading/SentenceLocatorPracticeView";
 import { ReadingTestExitDialog } from "@/src/components/reading/ReadingTestExitDialog";
-import type { PracticeTestStepContent } from "@/src/lib/api/readingStrictProgression";
 import { PRACTICE_TEST_MINUTES } from "@/src/constants/readingAssessmentTiming";
 import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
 import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
@@ -54,7 +61,7 @@ function PracticeTestContent() {
     isNewBest?: boolean;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const testRef = useRef<PracticeTestReadingViewHandle>(null);
+  const testRef = useRef<PracticeTestReadingViewHandle | SentenceLocatorPracticeViewHandle | null>(null);
   const prefetchedRef = useRef<PracticeTestStepContent | null>(null);
   const prefetchKeyRef = useRef<string | null>(null);
   const [exitOpen, setExitOpen] = useState(false);
@@ -317,14 +324,25 @@ function PracticeTestContent() {
           onCancel={() => setExitOpen(false)}
         />
         <div className="fixed inset-0 z-50 flex h-screen flex-col bg-slate-50 dark:bg-slate-950">
-          <PracticeTestReadingView
-            ref={testRef}
-            levelId={levelId}
-            stepId={stepId!}
-            content={content}
-            onSubmitted={handleSubmitted}
-            onRequestExit={openExitDialog}
-          />
+          {isSentenceLocatorPracticeContent(content) ? (
+            <SentenceLocatorPracticeView
+              ref={testRef}
+              levelId={levelId}
+              stepId={stepId!}
+              content={content}
+              onSubmitted={handleSubmitted}
+              onRequestExit={openExitDialog}
+            />
+          ) : (
+            <PracticeTestReadingView
+              ref={testRef}
+              levelId={levelId}
+              stepId={stepId!}
+              content={content}
+              onSubmitted={handleSubmitted}
+              onRequestExit={openExitDialog}
+            />
+          )}
         </div>
       </>
     );
@@ -394,7 +412,9 @@ function PracticeTestContent() {
             </p>
 
             <div className="mt-6 flex w-full flex-col gap-3">
-              {result.attemptId && result.passed && (
+              {result.attemptId &&
+                ((content != null && isSentenceLocatorPracticeContent(content)) ||
+                  result.passed) && (
                 <Link
                   href={`/profile/reading/practice-attempt/${result.attemptId}`}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"

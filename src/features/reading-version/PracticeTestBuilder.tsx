@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   createPracticeTest,
@@ -17,6 +17,10 @@ import {
   type CreatePracticeTestPayload,
   type UpdatePracticeTestPayload,
   type PracticeTestContentForPreview,
+  createSentenceLocatorPracticeTest,
+  type CreateSentenceLocatorPracticeTestPayload,
+  isSentenceLocatorPreviewContent,
+  type SentenceLocatorContentAuthoringPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
@@ -32,6 +36,9 @@ interface PracticeTestBuilderProps {
   practiceTests: PracticeTest[];
   disabled: boolean;
   onPracticeTestsChange: (practiceTests: PracticeTest[]) => void;
+  /** Level 0: practice test IDs registered in the final-test pool (section 3). */
+  finalTestPracticeTestIds?: string[];
+  isL0Foundation?: boolean;
 }
 
 export function PracticeTestBuilder({
@@ -39,8 +46,15 @@ export function PracticeTestBuilder({
   practiceTests,
   disabled,
   onPracticeTestsChange,
+  finalTestPracticeTestIds = [],
+  isL0Foundation = false,
 }: PracticeTestBuilderProps) {
+  const finalSlotIdSet = new Set(finalTestPracticeTestIds);
+  const finalSlotIndex = new Map(
+    finalTestPracticeTestIds.map((id, i) => [id, i + 1] as const),
+  );
   const [adding, setAdding] = useState(false);
+  const [addingLocator, setAddingLocator] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [reorderBusy, setReorderBusy] = useState(false);
@@ -49,6 +63,47 @@ export function PracticeTestBuilder({
   const [previewContent, setPreviewContent] = useState<PracticeTestContentForPreview | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{ id: string; title: string } | null>(null);
   const [deleteAllBusy, setDeleteAllBusy] = useState(false);
+  const [editingLocatorJson, setEditingLocatorJson] =
+    useState<SentenceLocatorContentAuthoringPreview | null>(null);
+  const [editingLocatorLoading, setEditingLocatorLoading] = useState(false);
+
+  useEffect(() => {
+    if (!editingId) {
+      setEditingLocatorJson(null);
+      setEditingLocatorLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setEditingLocatorLoading(true);
+    getPracticeTestPreviewContent(versionId, editingId)
+      .then((c) => {
+        if (cancelled) return;
+        if (isSentenceLocatorPreviewContent(c)) setEditingLocatorJson(c.sentenceLocator);
+        else setEditingLocatorJson(null);
+      })
+      .catch(() => {
+        if (!cancelled) setEditingLocatorJson(null);
+      })
+      .finally(() => {
+        if (!cancelled) setEditingLocatorLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [editingId, versionId]);
+
+  const handleCreateLocator = async (payload: CreateSentenceLocatorPracticeTestPayload) => {
+    setError(null);
+    try {
+      const created = await createSentenceLocatorPracticeTest(versionId, payload);
+      onPracticeTestsChange(
+        [...practiceTests, created].sort((a, b) => a.order - b.order),
+      );
+      setAddingLocator(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to create sentence locator test");
+    }
+  };
 
   const handleCreate = async (payload: CreatePracticeTestPayload) => {
     setError(null);
@@ -113,6 +168,12 @@ export function PracticeTestBuilder({
   };
 
   const sortedList = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
+  const practiceOnlyList = isL0Foundation
+    ? sortedList.filter((p) => !finalSlotIdSet.has(p._id))
+    : sortedList;
+  const finalOnlyList = isL0Foundation
+    ? sortedList.filter((p) => finalSlotIdSet.has(p._id))
+    : [];
   const handleDeleteAll = async () => {
     if (sortedList.length === 0) return;
     const confirmed = window.prompt(
@@ -185,14 +246,65 @@ export function PracticeTestBuilder({
               <Plus className="h-4 w-4 mr-1" />
               Add practice test
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setAddingLocator(true)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Sentence locator
+            </Button>
           </div>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <p className="text-xs text-muted-foreground">
-          Each practice test = one passage question set (one mini test). Students get unlimited attempts until they reach the pass score. Add a step of type &quot;Practice Test&quot; in the Level Builder and attach a practice test.
-        </p>
+        <div className="rounded-lg border border-border/80 bg-muted/30 px-3 py-2.5 text-xs leading-relaxed text-muted-foreground">
+          <span className="font-medium text-foreground">Quick guide:</span> (1) Create tests with the buttons
+          above — a <span className="font-medium text-foreground">Practice Test</span> step is added automatically after
+          your lessons. (2) Open <span className="font-medium text-foreground">Preview level</span> to verify. (3) Use{" "}
+          <span className="font-medium text-foreground">Preview</span> (eye) to
+          verify. Standard tests use a passage question set; Sentence locator embeds JSON (Level 0) — see{" "}
+          <code className="rounded bg-background px-1 py-0.5 text-[11px]">docs/SENTENCE_LOCATOR_PRACTICE_TEST_JSON.md</code>.
+          {isL0Foundation ? (
+            <>
+              {" "}
+              <span className="font-medium text-indigo-800 dark:text-indigo-200">
+                Level 0 finals belong in section 3 — not here. Tests marked Final are managed there.
+              </span>
+            </>
+          ) : null}
+        </div>
+        {isL0Foundation && finalOnlyList.length > 0 && (
+          <div className="rounded-lg border border-indigo-200/80 bg-indigo-50/40 px-3 py-2.5 dark:border-indigo-900/50 dark:bg-indigo-950/25">
+            <p className="text-xs font-medium text-indigo-900 dark:text-indigo-100 mb-2">
+              Registered as Level 0 final tests (edit in section 3)
+            </p>
+            <ul className="space-y-1 text-sm text-indigo-900/90 dark:text-indigo-100/90">
+              {finalOnlyList.map((pt) => (
+                <li key={pt._id} className="flex items-center gap-2">
+                  <span className="rounded bg-indigo-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase dark:bg-indigo-800">
+                    Final {finalSlotIndex.get(pt._id) ?? "?"}
+                  </span>
+                  <span>{pt.title}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {addingLocator && (
+          <SentenceLocatorCreateForm
+            nextOrder={
+              practiceTests.length > 0
+                ? Math.max(...practiceTests.map((p) => p.order)) + 1
+                : 1
+            }
+            onSave={handleCreateLocator}
+            onCancel={() => setAddingLocator(false)}
+            disabled={disabled}
+          />
+        )}
         {adding && (
           <PracticeTestForm
             nextOrder={
@@ -206,11 +318,15 @@ export function PracticeTestBuilder({
           />
         )}
         <ul className="space-y-2">
-          {sortedList.map((pt, index) => (
+          {practiceOnlyList.map((pt) => {
+            const index = sortedList.findIndex((p) => p._id === pt._id);
+            return (
               <li key={pt._id} className="flex items-center gap-2 rounded-md border p-3">
                 {editingId === pt._id ? (
                   <PracticeTestEditForm
                     practiceTest={pt}
+                    initialSentenceLocator={editingLocatorJson}
+                    locatorLoading={editingLocatorLoading}
                     onSave={(p) => handleUpdate(pt._id, p)}
                     onCancel={() => setEditingId(null)}
                     busy={busyId === pt._id}
@@ -245,6 +361,11 @@ export function PracticeTestBuilder({
                     <span className="text-sm flex-1 font-medium">
                       {pt.contentCode ? `[${pt.contentCode}] ` : ""}
                       {pt.title}
+                      {pt.contentFormat === "SENTENCE_LOCATOR" ? (
+                        <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
+                          SL
+                        </span>
+                      ) : null}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {pt.timeLimitMinutes} min · pass {pt.passType === "PERCENTAGE" ? `${pt.passValue}%` : `band ${pt.passValue}`}
@@ -287,7 +408,8 @@ export function PracticeTestBuilder({
                   </>
                 )}
               </li>
-          ))}
+            );
+          })}
         </ul>
         {deleteDialog && (
           <DeleteConfirmDialog
@@ -310,6 +432,216 @@ export function PracticeTestBuilder({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+const SENTENCE_LOCATOR_JSON_PLACEHOLDER = `{
+  "passageTitle": "Urban green spaces",
+  "passageSubTitle": "Sample",
+  "instruction": "Click the sentence in the passage that matches each statement.",
+  "paragraphs": [
+    { "paragraphIndex": 0, "sentences": ["Cities need trees.", "Parks reduce heat."] },
+    { "paragraphIndex": 1, "sentences": ["Residents report better wellbeing.", "Funding remains uneven."] }
+  ],
+  "statements": [
+    {
+      "id": "s1",
+      "order": 1,
+      "statement": "People feel healthier when green space exists.",
+      "targetParagraphIndex": 1,
+      "targetSentenceIndex": 0,
+      "anchorKeywords": ["wellbeing", "Residents"],
+      "gamlishHack": "Match wellbeing / residents to the wellbeing sentence.",
+      "difficulty": "MEDIUM"
+    }
+  ],
+  "reviewAfterEachAttempt": true,
+  "showCoachHintsDuringAttempt": false
+}`;
+
+interface SentenceLocatorCreateFormProps {
+  nextOrder: number;
+  onSave: (p: CreateSentenceLocatorPracticeTestPayload) => Promise<void>;
+  onCancel: () => void;
+  disabled: boolean;
+}
+
+function SentenceLocatorCreateForm({
+  nextOrder,
+  onSave,
+  onCancel,
+  disabled,
+}: SentenceLocatorCreateFormProps) {
+  const [title, setTitle] = useState("");
+  const [contentCode, setContentCode] = useState("");
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(20);
+  const [passType, setPassType] = useState<"PERCENTAGE" | "BAND">("PERCENTAGE");
+  const [passValue, setPassValue] = useState(60);
+  const [maxAttemptsRaw, setMaxAttemptsRaw] = useState("unlimited");
+  const [order, setOrder] = useState(nextOrder);
+  const [jsonText, setJsonText] = useState(SENTENCE_LOCATOR_JSON_PLACEHOLDER);
+  const [submitting, setSubmitting] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+    if (!title.trim()) return;
+    let sentenceLocator: SentenceLocatorContentAuthoringPreview;
+    try {
+      const parsed = JSON.parse(jsonText) as unknown;
+      if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+        setLocalError("JSON must be an object (the sentenceLocator payload).");
+        return;
+      }
+      sentenceLocator = parsed as SentenceLocatorContentAuthoringPreview;
+    } catch {
+      setLocalError("Invalid JSON. Fix syntax and try again.");
+      return;
+    }
+    const maxAttempts =
+      maxAttemptsRaw === "unlimited"
+        ? null
+        : Math.max(1, Math.min(99, parseInt(maxAttemptsRaw, 10) || 1));
+    const effectivePassValue = passType === "BAND" ? 0 : Math.max(0, Math.min(100, passValue));
+    setSubmitting(true);
+    try {
+      await onSave({
+        title: title.trim(),
+        contentCode: contentCode.trim() || undefined,
+        sentenceLocator,
+        timeLimitMinutes,
+        passType,
+        passValue: effectivePassValue,
+        maxAttempts,
+        order,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-violet-200/60 bg-violet-50/20 dark:border-violet-900/40 dark:bg-violet-950/20 p-4">
+      <p className="text-sm font-medium text-foreground">New sentence locator practice test</p>
+      <p className="text-xs text-muted-foreground">
+        Paste the inner <code className="rounded bg-muted px-1">sentenceLocator</code> object as JSON
+        (see repo file <code className="rounded bg-muted px-1">docs/SENTENCE_LOCATOR_PRACTICE_TEST_JSON.md</code>).
+      </p>
+      {localError && <p className="text-sm text-destructive">{localError}</p>}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label>
+            Title <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Level 0 — locate evidence"
+            disabled={disabled}
+            className="mt-1"
+            required
+          />
+        </div>
+        <div>
+          <Label>Content code (optional)</Label>
+          <Input
+            value={contentCode}
+            onChange={(e) => setContentCode(e.target.value)}
+            placeholder="e.g. SL-1"
+            disabled={disabled}
+            className="mt-1"
+          />
+        </div>
+      </div>
+      <div>
+        <Label>
+          Sentence locator JSON <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          value={jsonText}
+          onChange={(e) => setJsonText(e.target.value)}
+          disabled={disabled}
+          className="mt-1 min-h-[220px] font-mono text-xs"
+          spellCheck={false}
+        />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <Label>Time limit (minutes)</Label>
+          <Input
+            type="number"
+            min={1}
+            max={60}
+            value={timeLimitMinutes}
+            onChange={(e) => setTimeLimitMinutes(Number(e.target.value) || 3)}
+            disabled={disabled}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>Max attempts</Label>
+          <select
+            value={maxAttemptsRaw}
+            onChange={(e) => setMaxAttemptsRaw(e.target.value)}
+            disabled={disabled}
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
+            {MAX_ATTEMPTS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <Label>Pass type</Label>
+          <select
+            value={passType}
+            onChange={(e) => setPassType(e.target.value as "PERCENTAGE" | "BAND")}
+            disabled={disabled}
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
+            <option value="PERCENTAGE">Percentage (min pass %)</option>
+            <option value="BAND">Band score (student chooses target)</option>
+          </select>
+        </div>
+        {passType === "PERCENTAGE" && (
+          <div>
+            <Label>Minimum pass %</Label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={passValue}
+              onChange={(e) => setPassValue(Number(e.target.value) ?? 0)}
+              disabled={disabled}
+              className="mt-1"
+            />
+          </div>
+        )}
+        <div>
+          <Label>Order</Label>
+          <Input
+            type="number"
+            min={1}
+            value={order}
+            onChange={(e) => setOrder(Number(e.target.value) || 1)}
+            disabled={disabled}
+            className="mt-1"
+          />
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Button type="submit" size="sm" disabled={submitting || disabled || !title.trim()}>
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+          Create sentence locator test
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
+          <X className="h-4 w-4" /> Cancel
+        </Button>
+      </div>
+    </form>
   );
 }
 
@@ -503,6 +835,8 @@ function PracticeTestForm({
 
 interface PracticeTestEditFormProps {
   practiceTest: PracticeTest;
+  initialSentenceLocator: SentenceLocatorContentAuthoringPreview | null;
+  locatorLoading: boolean;
   onSave: (p: UpdatePracticeTestPayload) => Promise<void>;
   onCancel: () => void;
   busy: boolean;
@@ -510,6 +844,8 @@ interface PracticeTestEditFormProps {
 
 function PracticeTestEditForm({
   practiceTest,
+  initialSentenceLocator,
+  locatorLoading,
   onSave,
   onCancel,
   busy,
@@ -525,10 +861,25 @@ function PracticeTestEditForm({
       : String(practiceTest.maxAttempts),
   );
   const [order, setOrder] = useState(practiceTest.order);
+  const [locatorJson, setLocatorJson] = useState("");
+  const [locatorError, setLocatorError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const isSentenceLocator = practiceTest.contentFormat === "SENTENCE_LOCATOR";
+
+  useEffect(() => {
+    if (!isSentenceLocator) return;
+    if (initialSentenceLocator) {
+      setLocatorJson(JSON.stringify(initialSentenceLocator, null, 2));
+      setLocatorError(null);
+    } else if (!locatorLoading) {
+      setLocatorJson("");
+    }
+  }, [isSentenceLocator, initialSentenceLocator, locatorLoading, practiceTest._id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLocatorError(null);
     setSubmitting(true);
     try {
       const maxAttempts =
@@ -536,7 +887,7 @@ function PracticeTestEditForm({
           ? null
           : Math.max(1, Math.min(99, parseInt(maxAttemptsRaw, 10) || 1));
       const effectivePassValue = passType === "BAND" ? 0 : Math.max(0, Math.min(100, passValue));
-      await onSave({
+      const base: UpdatePracticeTestPayload = {
         title,
         contentCode: contentCode.trim() || undefined,
         timeLimitMinutes,
@@ -544,104 +895,140 @@ function PracticeTestEditForm({
         passValue: effectivePassValue,
         maxAttempts,
         order,
-      });
+      };
+      if (isSentenceLocator) {
+        let sentenceLocatorContent: SentenceLocatorContentAuthoringPreview;
+        try {
+          const parsed = JSON.parse(locatorJson) as unknown;
+          if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+            setLocatorError("Locator JSON must be an object.");
+            return;
+          }
+          sentenceLocatorContent = parsed as SentenceLocatorContentAuthoringPreview;
+        } catch {
+          setLocatorError("Invalid JSON.");
+          return;
+        }
+        await onSave({ ...base, sentenceLocatorContent });
+      } else {
+        await onSave(base);
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 w-full">
-      <div className="min-w-[140px]">
-        <Label className="text-xs">Title</Label>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          disabled={busy}
-          className="mt-1"
-          required
-        />
-      </div>
-      <div className="w-20">
-        <Label className="text-xs">Code</Label>
-        <Input
-          value={contentCode}
-          onChange={(e) => setContentCode(e.target.value)}
-          placeholder="PT-1"
-          disabled={busy}
-          className="mt-1"
-        />
-      </div>
-      <div className="w-20">
-        <Label className="text-xs">Min</Label>
-        <Input
-          type="number"
-          min={1}
-          max={60}
-          value={timeLimitMinutes}
-          onChange={(e) => setTimeLimitMinutes(Number(e.target.value) || 3)}
-          disabled={busy}
-          className="mt-1"
-        />
-      </div>
-      <div className="w-24">
-        <Label className="text-xs">Attempts</Label>
-        <select
-          value={maxAttemptsRaw}
-          onChange={(e) => setMaxAttemptsRaw(e.target.value)}
-          disabled={busy}
-          className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
-        >
-          {MAX_ATTEMPTS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="w-24">
-        <Label className="text-xs">Pass</Label>
-        <select
-          value={passType}
-          onChange={(e) => setPassType(e.target.value as "PERCENTAGE" | "BAND")}
-          disabled={busy}
-          className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
-        >
-          <option value="PERCENTAGE">%</option>
-          <option value="BAND">Band</option>
-        </select>
-      </div>
-      {passType === "PERCENTAGE" && (
-        <div className="w-16">
-          <Label className="text-xs">Min %</Label>
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-3">
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="min-w-[140px]">
+          <Label className="text-xs">Title</Label>
           <Input
-            type="number"
-            min={0}
-            max={100}
-            value={passValue}
-            onChange={(e) => setPassValue(Number(e.target.value) ?? 0)}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            disabled={busy}
+            className="mt-1"
+            required
+          />
+        </div>
+        <div className="w-20">
+          <Label className="text-xs">Code</Label>
+          <Input
+            value={contentCode}
+            onChange={(e) => setContentCode(e.target.value)}
+            placeholder="PT-1"
             disabled={busy}
             className="mt-1"
           />
         </div>
-      )}
-      <div className="w-14">
-        <Label className="text-xs">Order</Label>
-        <Input
-          type="number"
-          min={1}
-          value={order}
-          onChange={(e) => setOrder(Number(e.target.value) || 1)}
-          disabled={busy}
-          className="mt-1"
-        />
+        <div className="w-20">
+          <Label className="text-xs">Min</Label>
+          <Input
+            type="number"
+            min={1}
+            max={60}
+            value={timeLimitMinutes}
+            onChange={(e) => setTimeLimitMinutes(Number(e.target.value) || 3)}
+            disabled={busy}
+            className="mt-1"
+          />
+        </div>
+        <div className="w-24">
+          <Label className="text-xs">Attempts</Label>
+          <select
+            value={maxAttemptsRaw}
+            onChange={(e) => setMaxAttemptsRaw(e.target.value)}
+            disabled={busy}
+            className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
+          >
+            {MAX_ATTEMPTS_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="w-24">
+          <Label className="text-xs">Pass</Label>
+          <select
+            value={passType}
+            onChange={(e) => setPassType(e.target.value as "PERCENTAGE" | "BAND")}
+            disabled={busy}
+            className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
+          >
+            <option value="PERCENTAGE">%</option>
+            <option value="BAND">Band</option>
+          </select>
+        </div>
+        {passType === "PERCENTAGE" && (
+          <div className="w-16">
+            <Label className="text-xs">Min %</Label>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              value={passValue}
+              onChange={(e) => setPassValue(Number(e.target.value) ?? 0)}
+              disabled={busy}
+              className="mt-1"
+            />
+          </div>
+        )}
+        <div className="w-14">
+          <Label className="text-xs">Order</Label>
+          <Input
+            type="number"
+            min={1}
+            value={order}
+            onChange={(e) => setOrder(Number(e.target.value) || 1)}
+            disabled={busy}
+            className="mt-1"
+          />
+        </div>
+        <Button type="submit" size="sm" disabled={submitting || busy}>
+          {submitting || busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+          <X className="h-4 w-4" />
+        </Button>
       </div>
-      <Button type="submit" size="sm" disabled={submitting || busy}>
-        {submitting || busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-      </Button>
-      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-        <X className="h-4 w-4" />
-      </Button>
+      {isSentenceLocator && (
+        <div className="w-full min-w-0 space-y-1 rounded-md border bg-muted/20 p-2">
+          <Label className="text-xs">Sentence locator JSON (full replace)</Label>
+          {locatorLoading ? (
+            <p className="text-xs text-muted-foreground py-2">Loading current content…</p>
+          ) : (
+            <Textarea
+              value={locatorJson}
+              onChange={(e) => setLocatorJson(e.target.value)}
+              disabled={busy}
+              className="min-h-[160px] font-mono text-xs"
+              spellCheck={false}
+            />
+          )}
+          {locatorError && <p className="text-xs text-destructive">{locatorError}</p>}
+        </div>
+      )}
     </form>
   );
 }
@@ -658,6 +1045,41 @@ function PracticeTestPreview({
       <div className="rounded-lg border bg-muted/30 p-4 flex items-center justify-between">
         <span className="text-sm text-muted-foreground">Loading preview…</span>
         <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
+      </div>
+    );
+  }
+  if (isSentenceLocatorPreviewContent(previewContent)) {
+    const sl = previewContent.sentenceLocator;
+    const paraCount = sl.paragraphs?.length ?? 0;
+    const stmtCount = sl.statements?.length ?? 0;
+    return (
+      <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h4 className="font-medium text-sm">
+            Preview: {previewContent.title} ({previewContent.timeLimitMinutes} min · pass{" "}
+            {previewContent.passType === "PERCENTAGE"
+              ? `${previewContent.passValue}%`
+              : `band ${previewContent.passValue}`}
+            ){" "}
+            <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
+              SL
+            </span>
+          </h4>
+          <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
+        </div>
+        <div className="text-sm space-y-2">
+          <p className="font-medium">{sl.passageTitle}</p>
+          {sl.passageSubTitle ? (
+            <p className="text-muted-foreground text-xs">{sl.passageSubTitle}</p>
+          ) : null}
+          {sl.instruction ? (
+            <p className="text-muted-foreground text-xs line-clamp-3">{sl.instruction}</p>
+          ) : null}
+          <p className="text-muted-foreground">
+            {paraCount} paragraph{paraCount !== 1 ? "s" : ""} · {stmtCount} statement
+            {stmtCount !== 1 ? "s" : ""}
+          </p>
+        </div>
       </div>
     );
   }

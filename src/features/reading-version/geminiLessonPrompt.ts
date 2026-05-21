@@ -20,6 +20,18 @@ OUTPUT RULES (strict):
    - RIGHT: "content": "This is an \\"open book\\" test."
    Use single quotes (') for quoted phrases inside sentences whenever possible.
 
+NOTE BLOCKS — HARD VALIDATION (Gamlish will reject the whole paste if any note breaks this):
+• This applies to every block with "type": "note" that uses separate "en" and "bn" objects (not the rare "body": { "en", "bn" } shortcut).
+• For each such note, AT LEAST ONE of the following must be true across en and bn combined:
+  (a) trimmed "content" is non-empty in English OR Bangla, OR
+  (b) "metaRows" is a non-empty array in English OR Bangla, OR
+  (c) "bullets" is a non-empty array in English OR Bangla.
+• These fields NEVER satisfy that rule by themselves: "levelLabel", "instructorNote", "heading" only.
+  Putting the entire INTRO welcome only inside "instructorNote" with "content": "" in BOTH languages WILL FAIL with:
+  "add content, metaRows, or bullets in at least one language."
+• Correct INTRO pattern: put the main student-facing welcome and teaching prose in "content" (both en and bn, with \\n\\n between paragraphs). Use "instructorNote" only as an optional extra line labeled in the UI — never as the sole carrier of the lesson text.
+• MODULE_META: "content" may be "" in both languages if "metaRows" has rows in at least one language (ideally both).
+
 SECTION tags for "note" blocks (use exactly one per note):
 INTRO | MODULE_META | CORE_OBJECTIVE | MECHANICS | PARAPHRASE | EXECUTION | MINEFIELD | ARSENAL | WRAP_UP
 
@@ -29,9 +41,9 @@ Note block shape:
   "section": "INTRO",
   "en": {
     "levelLabel": "only on INTRO — optional",
-    "instructorNote": "optional",
+    "instructorNote": "optional short aside; NOT a substitute for content",
     "heading": "optional",
-    "content": "paragraphs separated by \\n\\n",
+    "content": "REQUIRED unless metaRows or bullets carry the block — paragraphs separated by \\n\\n",
     "bullets": ["optional", "array"],
     "metaRows": [{ "label": "Target Level", "value": "Level 0" }]
   },
@@ -70,5 +82,6 @@ Generate the complete JSON now.`;
 export const JSON_PASTE_CHECKLIST = [
   "Copy Gemini prompt → add your EN + BN notes at the bottom → generate JSON only (no markdown)",
   "Paste JSON below → Validate → Apply to lesson → Save lesson",
-  "If Validate fails: replace inner \" with ' (e.g. 'Open Book Exam', 'Aha!') or use Load perfect Level 0 as reference",
+  'If Validate says "add content, metaRows, or bullets": every note needs non-empty content OR metaRows OR bullets (en or bn); instructorNote alone is not enough',
+  "If Validate fails on JSON: replace inner \" with ' (e.g. 'Open Book Exam', 'Aha!') or use Load perfect Level 0 as reference",
 ];

@@ -8,7 +8,10 @@ import type {
   PracticeTestStepContent,
   PracticeTestStepStatus,
 } from "@/src/lib/api/readingStrictProgression";
-import { getPracticeTestStepStatus } from "@/src/lib/api/readingStrictProgression";
+import {
+  getPracticeTestStepStatus,
+  isSentenceLocatorPracticeContent,
+} from "@/src/lib/api/readingStrictProgression";
 import { PRACTICE_TEST_MINUTES } from "@/src/constants/readingAssessmentTiming";
 
 export interface PracticeTestStepCardProps {
@@ -42,6 +45,10 @@ export function PracticeTestStepCard({
   };
 
   const hasAttempts = status && status.attemptCount > 0;
+  const isSl = isSentenceLocatorPracticeContent(content);
+  const showReviewLink =
+    Boolean(status?.lastAttemptId) &&
+    (isSl ? status?.canReviewLastAttempt !== false : Boolean(status?.lastAttemptPassed));
 
   return (
     <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-8 shadow-sm">
@@ -50,14 +57,15 @@ export function PracticeTestStepCard({
           <FileText className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
         </div>
         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-          Reading Practice Test
+          {isSl ? "Sentence locator practice" : "Reading practice test"}
         </h3>
         {content.title && (
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{content.title}</p>
         )}
         <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-          {PRACTICE_TEST_MINUTES} minutes. One passage with questions. Your reading target band
-          will be used to determine pass/fail. Unlimited attempts until you pass.
+          {isSl
+            ? `Up to ${content.timeLimitMinutes} minutes. Match each statement to the exact sentence in the passage. Pass when you meet the configured score. You can retry until you pass.`
+            : `${PRACTICE_TEST_MINUTES} minutes. One passage with questions. Your reading target band will be used to determine pass/fail. Unlimited attempts until you pass.`}
         </p>
 
         {hasAttempts && (
@@ -72,7 +80,7 @@ export function PracticeTestStepCard({
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {status!.attemptCount} attempt{status!.attemptCount !== 1 ? "s" : ""}
             </span>
-            {status!.lastAttemptId && status!.lastAttemptPassed && (
+            {showReviewLink && status!.lastAttemptId && (
               <Link
                 href={`/profile/reading/practice-attempt/${status!.lastAttemptId}`}
                 className="flex items-center gap-1.5 rounded-lg border border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/50 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"

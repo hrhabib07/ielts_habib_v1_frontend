@@ -29,7 +29,7 @@ import {
 import { useRouter } from "next/navigation";
 import {
   submitPracticeTest,
-  type PracticeTestStepContent,
+  type PracticeTestStepContentStandard,
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
 } from "@/src/lib/api/readingStrictProgression";
@@ -349,7 +349,7 @@ function QuestionBlock({
 export interface PracticeTestReadingViewProps {
   levelId: string;
   stepId: string;
-  content: PracticeTestStepContent;
+  content: PracticeTestStepContentStandard;
   onSubmitted: (result: {
     passed: boolean;
     scorePercent: number;

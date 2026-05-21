@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, ChevronRight, Menu, AlertTriangle } from "lucide-react";
 import { LevelSidebar } from "./LevelSidebar";
 import { LevelContent, LevelContentSkeleton } from "./LevelContent";
+import { LevelStepBottomNav } from "./LevelStepBottomNav";
 import { LevelFeedbackForm } from "./LevelFeedbackForm";
 import type {
   LevelDetailForStudent,
@@ -41,6 +42,8 @@ interface LevelLayoutProps {
   isPreview?: boolean;
   /** In preview, number of group tests (for final evaluation step message) */
   previewGroupTestsCount?: number;
+  /** Level 0 sentence locator sequential finals */
+  previewIsL0SentenceLocatorFinals?: boolean;
   /** When level passed: true = show Continue, false = show feedback form, null/undefined = loading (show neither) */
   hasFeedbackSubmitted?: boolean | null;
   /** Called after feedback is submitted so parent can show Continue button */
@@ -65,6 +68,7 @@ export function LevelLayout({
   completionScore = null,
   isPreview = false,
   previewGroupTestsCount,
+  previewIsL0SentenceLocatorFinals,
   hasFeedbackSubmitted,
   onFeedbackSuccess,
   onContentUpdateRequired,
@@ -135,6 +139,8 @@ export function LevelLayout({
     ? !isCompleted && activeStepIndex === currentIndex
     : false;
 
+  const dockBottomNav = hideSidebar && !isPreview && Boolean(onNavigate) && Boolean(activeStep);
+
   useEffect(() => {
     contentScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, [activeStepId]);
@@ -176,13 +182,23 @@ export function LevelLayout({
           />
         )}
 
-        {/* Content area: full-page canvas with inner scroll */}
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-slate-900">
+        {/* Content area: scrollable lesson body + docked step bar (reading dashboard) */}
+        <main
+          className={[
+            "min-h-0 min-w-0 flex-1 overflow-hidden bg-white dark:bg-slate-900",
+            dockBottomNav
+              ? "grid h-full grid-rows-[minmax(0,1fr)_auto]"
+              : "flex h-full flex-col",
+          ].join(" ")}
+        >
           <div
             ref={contentScrollRef}
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain"
+            className={[
+              "overflow-x-hidden overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]",
+              dockBottomNav ? "min-h-0" : "min-h-0 flex-1",
+            ].join(" ")}
           >
-            <div className="w-full flex-1 p-0">
+            <div className="w-full p-0">
           {showContentUpdateBanner && (
             <div
               role="alert"
@@ -305,8 +321,10 @@ export function LevelLayout({
                   onNavigate={handleNavigate}
                   allSteps={steps}
                   isPreview={isPreview}
+                  dockBottomNav={dockBottomNav}
                   versionId={isPreview ? detail.progress.versionId : undefined}
                   previewGroupTestsCount={previewGroupTestsCount}
+                  previewIsL0SentenceLocatorFinals={previewIsL0SentenceLocatorFinals}
                   groupTestsTotal={detail.progress.groupTestsTotal}
                   groupTestsRemaining={detail.progress.groupTestsRemaining}
                   isLevelPassed={isLevelPassed}
@@ -326,9 +344,35 @@ export function LevelLayout({
                   }
                 />
               )}
-          </div>
+            </div>
             </div>
           </div>
+          {dockBottomNav && activeStep && (
+            <LevelStepBottomNav
+              step={activeStep}
+              stepIndex={activeStepIndex + 1}
+              totalSteps={steps.length}
+              allSteps={steps}
+              isCurrent={isCurrent}
+              isCompleted={isCompleted}
+              completingStepId={completingStepId}
+              onNavigate={handleNavigate}
+              onComplete={onComplete}
+              nextLevelInfo={nextLevelInfo}
+              onNavigateToNextLevel={
+                nextLevelInfo
+                  ? () => {
+                      const stepParam = nextLevelInfo.firstStepId
+                        ? `?step=${encodeURIComponent(nextLevelInfo.firstStepId)}`
+                        : "";
+                      router.push(
+                        `/profile/reading/strict-levels/${nextLevelInfo.levelId}${stepParam}`,
+                      );
+                    }
+                  : undefined
+              }
+            />
+          )}
         </main>
       </div>
     </div>

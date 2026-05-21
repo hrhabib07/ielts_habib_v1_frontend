@@ -148,63 +148,43 @@ export function GroupTestsBulkCreateCard(props: {
             const template = getBulkQuestionTemplateForLevel(levelOrder, i);
             return { ...template, explanation: "Explanation for question." };
           });
+    const firstMini = {
+      passage: {
+        title: "GT mini 1 passage title",
+        subTitle: "",
+        contentParagraphs: [{ paragraphIndex: 1, text: "Paste passage text..." }],
+      },
+      passageQuestionSet: {
+        difficulty: "MEDIUM",
+        expectedTotalQuestions: questionCount,
+        recommendedTimeMinutes: 20,
+        questionGroups: [
+          {
+            order: 1,
+            startQuestionNumber: 1,
+            endQuestionNumber: questionCount,
+            questionType,
+            instruction: defaultInstruction,
+            meta,
+            questions: firstMiniQuestions,
+          },
+        ],
+      },
+    };
+
+    const miniTests = ([1, 2, 3] as const).map((n) => {
+      const cloned = structuredClone(firstMini);
+      cloned.passage.title = `GT mini ${n} passage title`;
+      return cloned;
+    });
+
     return JSON.stringify(
       {
         ...(questionType === "SUMMARY_COMPLETION_WITH_CLUES"
           ? { __instructions: SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC }
           : {}),
         groupTest: {
-          miniTests: [
-            {
-              passage: {
-                title: "GT mini 1 passage title",
-                subTitle: "",
-                contentParagraphs: [{ paragraphIndex: 1, text: "Paste passage text..." }],
-              },
-              passageQuestionSet: {
-                difficulty: "MEDIUM",
-                expectedTotalQuestions: questionCount,
-                recommendedTimeMinutes: 20,
-                questionGroups: [
-                  {
-                    order: 1,
-                    startQuestionNumber: 1,
-                    endQuestionNumber: questionCount,
-                    questionType,
-                    instruction: defaultInstruction,
-                    meta,
-                    questions: firstMiniQuestions,
-                  },
-                ],
-              },
-            },
-            {
-              passage: {
-                title: "GT mini 2 passage title",
-                subTitle: "",
-                contentParagraphs: [{ paragraphIndex: 1, text: "Paste passage text..." }],
-              },
-              passageQuestionSet: {
-                difficulty: "MEDIUM",
-                expectedTotalQuestions: questionCount,
-                recommendedTimeMinutes: 20,
-                questionGroups: [],
-              },
-            },
-            {
-              passage: {
-                title: "GT mini 3 passage title",
-                subTitle: "",
-                contentParagraphs: [{ paragraphIndex: 1, text: "Paste passage text..." }],
-              },
-              passageQuestionSet: {
-                difficulty: "MEDIUM",
-                expectedTotalQuestions: questionCount,
-                recommendedTimeMinutes: 20,
-                questionGroups: [],
-              },
-            },
-          ],
+          miniTests,
         },
       },
       null,

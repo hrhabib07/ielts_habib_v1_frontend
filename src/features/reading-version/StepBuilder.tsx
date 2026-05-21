@@ -34,6 +34,7 @@ const STEP_TYPE_LABELS: Record<ReadingStepType, string> = {
   QUIZ: "Quiz",
   VOCABULARY_TEST: "Vocabulary Test",
   PASSAGE_QUESTION_SET: "Passage Q Set",
+  INTEGRATED_LESSON: "Integrated Lesson",
   FINAL_EVALUATION: "Final Evaluation",
 };
 

@@ -16,6 +16,10 @@ import {
 } from "@/src/lib/api/adminReadingVersions";
 import { VersionStatusBadge } from "@/src/features/reading-version";
 import { Loader2 } from "lucide-react";
+import {
+  isReadingFoundationL0,
+  readingLevelIndexFromOrder,
+} from "@/src/lib/readingLevelOrder";
 
 const DIFFICULTY_OPTIONS: { value: ReadingLevelDifficulty; label: string }[] = [
   { value: "basic", label: "Basic" },
@@ -118,7 +122,8 @@ export function LevelMetadataCard({
         {error && <p className="text-sm text-destructive">{error}</p>}
         <form onSubmit={handleSaveLevel} className="space-y-4">
           <p className="text-xs text-muted-foreground">
-            Level index (0-based): <strong>{level.order - 1}</strong> — steps are numbered from 1.
+            Level index (0-based): <strong>{readingLevelIndexFromOrder(level.order)}</strong> — steps
+            are numbered from 1.
           </p>
           <div>
             <Label htmlFor="level-title">Title</Label>
@@ -160,30 +165,32 @@ export function LevelMetadataCard({
           )}
         </form>
 
-        <div className="border-t border-zinc-200 pt-6">
-          <Label className="text-sm font-medium">Max attempts (version)</Label>
-          <p className="mt-1 text-xs text-zinc-500">
-            {level.difficulty === "basic"
-              ? "Basic: unlimited attempts"
-              : "Set a number or leave empty."}
-          </p>
-          <form onSubmit={handleSaveConfig} className="mt-3 flex gap-2">
-            <Input
-              type="number"
-              min={1}
-              value={maxAttempts}
-              onChange={(e) => setMaxAttempts(e.target.value)}
-              placeholder={level.difficulty === "basic" ? "Unlimited" : "e.g. 3"}
-              className="max-w-[120px]"
-              disabled={isPublished || savingConfig || level.difficulty === "basic"}
-            />
-            {!isPublished && level.difficulty !== "basic" && (
-              <Button type="submit" size="sm" disabled={savingConfig}>
-                {savingConfig ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-              </Button>
-            )}
-          </form>
-        </div>
+        {!isReadingFoundationL0(level) && (
+          <div className="border-t border-zinc-200 pt-6">
+            <Label className="text-sm font-medium">Max attempts (version)</Label>
+            <p className="mt-1 text-xs text-zinc-500">
+              {level.difficulty === "basic"
+                ? "Basic: unlimited attempts"
+                : "Set a number or leave empty."}
+            </p>
+            <form onSubmit={handleSaveConfig} className="mt-3 flex gap-2">
+              <Input
+                type="number"
+                min={1}
+                value={maxAttempts}
+                onChange={(e) => setMaxAttempts(e.target.value)}
+                placeholder={level.difficulty === "basic" ? "Unlimited" : "e.g. 3"}
+                className="max-w-[120px]"
+                disabled={isPublished || savingConfig || level.difficulty === "basic"}
+              />
+              {!isPublished && level.difficulty !== "basic" && (
+                <Button type="submit" size="sm" disabled={savingConfig}>
+                  {savingConfig ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+                </Button>
+              )}
+            </form>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

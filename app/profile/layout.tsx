@@ -32,13 +32,10 @@ export default function ProfileLayout({
     return (
       <ReadingDashboardContainer>
         <div
-          className="flex h-[calc(100vh-4rem)] min-h-0 w-full flex-1 flex-col overflow-hidden"
+          className="flex h-full min-h-0 w-full flex-col overflow-hidden"
           data-reading-dashboard
         >
-          {/* flex-1 min-h-0 so ReadingLayoutClient fills height and inner scroll regions work */}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            {children}
-          </div>
+          {children}
         </div>
       </ReadingDashboardContainer>
     );
@@ -60,5 +57,12 @@ function ReadingDashboardContainer({ children }: { children: React.ReactNode }) 
       document.documentElement.style.overflow = "";
     };
   }, []);
-  return <>{children}</>;
+  return (
+    <div
+      className="fixed inset-x-0 bottom-0 top-16 z-[1] flex h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)] flex-col overflow-hidden"
+      data-reading-dashboard-shell
+    >
+      {children}
+    </div>
+  );
 }

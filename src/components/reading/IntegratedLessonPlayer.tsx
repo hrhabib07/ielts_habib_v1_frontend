@@ -51,6 +51,15 @@ type QuestionResult = {
   correctLabel: string;
 };
 
+function getSubmitErrorMessage(err: unknown, fallback: string): string {
+  const ax = err as { response?: { data?: { message?: string } } };
+  const backendMessage = ax.response?.data?.message;
+  if (typeof backendMessage === "string" && backendMessage.trim()) {
+    return backendMessage;
+  }
+  return err instanceof Error ? err.message : fallback;
+}
+
 export function IntegratedLessonPlayer({
   levelId,
   stepId,
@@ -114,7 +123,7 @@ export function IntegratedLessonPlayer({
       });
       onComplete?.(res);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not complete lesson");
+      setError(getSubmitErrorMessage(e, "Could not complete lesson"));
     } finally {
       setSubmitting(false);
     }
@@ -177,7 +186,7 @@ export function IntegratedLessonPlayer({
       setAnswers({});
       setBlockIndex((i) => i + 1);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not submit quiz");
+      setError(getSubmitErrorMessage(e, "Could not submit quiz"));
     } finally {
       setSubmitting(false);
     }

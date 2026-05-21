@@ -125,7 +125,9 @@ export interface GroupTest {
 export interface FinalTest {
   _id: string;
   levelVersionId: string;
-  miniTestIds: [string, string, string];
+  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR";
+  miniTestIds?: [string, string, string];
+  practiceTestIds?: [string, string, string];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -135,12 +137,15 @@ export function finalTestAsGroupTestList(
   legacyGroupTests?: GroupTest[],
 ): GroupTest[] {
   if (finalTest) {
+    const isSentenceLocator = finalTest.contentFormat === "SENTENCE_LOCATOR";
     return [
       {
         _id: finalTest._id,
         levelVersionId: finalTest.levelVersionId,
         orderInPool: 1,
-        miniTestIds: finalTest.miniTestIds,
+        miniTestIds: isSentenceLocator
+          ? (finalTest.practiceTestIds ?? ["", "", ""])
+          : (finalTest.miniTestIds ?? ["", "", ""]),
         createdAt: finalTest.createdAt,
         updatedAt: finalTest.updatedAt,
       },
@@ -154,7 +159,8 @@ export interface PracticeTest {
   levelVersionId: string;
   title: string;
   contentCode?: string;
-  miniTestId: string;
+  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR";
+  miniTestId?: string;
   timeLimitMinutes: number;
   passType: string;
   passValue: number;
@@ -548,6 +554,7 @@ export async function upsertFinalTest(
   payload: {
     miniTestIds?: [string, string, string];
     passageQuestionSetIds?: [string, string, string];
+    practiceTestIds?: [string, string, string];
   },
 ): Promise<FinalTest> {
   const res = await apiClient.put<{
@@ -575,7 +582,11 @@ export async function createGroupTest(
     miniTestIds: payload.miniTestIds,
     passageQuestionSetIds: payload.passageQuestionSetIds,
   });
-  return finalTestAsGroupTestList(ft)[0];
+  const created = finalTestAsGroupTestList(ft)[0];
+  if (!created) {
+    throw new Error("Failed to create group test from final test");
+  }
+  return created;
 }
 
 export async function updateGroupTest(
@@ -643,6 +654,8 @@ export interface UpdatePracticeTestPayload {
   passValue?: number;
   maxAttempts?: number | null;
   order?: number;
+  /** Replace full sentence locator payload (draft version only). */
+  sentenceLocatorContent?: SentenceLocatorContentAuthoringPreview;
 }
 
 export async function listPracticeTests(versionId: string): Promise<PracticeTest[]> {
@@ -659,6 +672,38 @@ export async function createPracticeTest(
   const res = await apiClient.post<{ success: boolean; data: PracticeTest }>(
     `${BASE}/versions/${versionId}/practice-tests`,
     payload,
+  );
+  return unwrap(res);
+}
+
+export interface CreateSentenceLocatorPracticeTestPayload {
+  title: string;
+  contentCode?: string;
+  sentenceLocator: SentenceLocatorContentAuthoringPreview;
+  timeLimitMinutes?: number;
+  passType?: string;
+  passValue?: number;
+  maxAttempts?: number | null;
+  order?: number;
+}
+
+export async function createSentenceLocatorPracticeTest(
+  versionId: string,
+  payload: CreateSentenceLocatorPracticeTestPayload,
+): Promise<PracticeTest> {
+  const res = await apiClient.post<{ success: boolean; data: PracticeTest }>(
+    `${BASE}/versions/${versionId}/practice-tests`,
+    {
+      title: payload.title,
+      contentCode: payload.contentCode,
+      contentFormat: "SENTENCE_LOCATOR",
+      sentenceLocator: payload.sentenceLocator,
+      timeLimitMinutes: payload.timeLimitMinutes,
+      passType: payload.passType,
+      passValue: payload.passValue ?? 60,
+      maxAttempts: payload.maxAttempts,
+      order: payload.order,
+    },
   );
   return unwrap(res);
 }
@@ -723,7 +768,8 @@ export async function reorderPracticeTests(
   return res.data?.data ?? [];
 }
 
-export interface PracticeTestContentForPreview {
+export interface PracticeTestContentForPreviewStandard {
+  contentFormat?: "STANDARD";
   practiceTestId: string;
   title: string;
   timeLimitMinutes: number;
@@ -731,6 +777,112 @@ export interface PracticeTestContentForPreview {
   passValue: number;
   maxAttempts: number | null;
   miniTest: GroupTestMiniTestForPreview;
+}
+
+export interface SentenceLocatorStatementAuthoringPreview {
+  id: string;
+  order: number;
+  statement: string;
+  targetParagraphIndex: number;
+  targetSentenceIndex: number;
+  anchorKeywords?: string[];
+  gamlishHack?: string;
+  difficulty?: "EASY" | "MEDIUM" | "HARD";
+}
+
+export interface SentenceLocatorContentAuthoringPreview {
+  passageTitle: string;
+  passageSubTitle?: string;
+  instruction?: string;
+  paragraphs: Array<{ paragraphIndex: number; sentences: string[] }>;
+  statements: SentenceLocatorStatementAuthoringPreview[];
+  reviewAfterEachAttempt?: boolean;
+  showCoachHintsDuringAttempt?: boolean;
+}
+
+export interface PracticeTestContentForPreviewSentenceLocator {
+  contentFormat: "SENTENCE_LOCATOR";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts: number | null;
+  sentenceLocator: SentenceLocatorContentAuthoringPreview;
+}
+
+export type PracticeTestContentForPreview =
+  | PracticeTestContentForPreviewStandard
+  | PracticeTestContentForPreviewSentenceLocator;
+
+export function isSentenceLocatorPreviewContent(
+  c: PracticeTestContentForPreview,
+): c is PracticeTestContentForPreviewSentenceLocator {
+  return c.contentFormat === "SENTENCE_LOCATOR" && "sentenceLocator" in c;
+}
+
+export interface InstructorStatementFeedbackRow {
+  _id: string;
+  statementId: string;
+  statementOrder: number;
+  reason: string;
+  comment?: string;
+  attemptId: string;
+  levelId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export async function listPracticeTestStatementFeedback(
+  practiceTestId: string,
+  limit = 100,
+): Promise<InstructorStatementFeedbackRow[]> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: { items: InstructorStatementFeedbackRow[] };
+  }>(`${BASE}/practice-tests/${practiceTestId}/statement-feedback`, {
+    params: { limit },
+  });
+  return unwrap(res).items;
+}
+
+export async function patchSentenceLocatorStatement(
+  practiceTestId: string,
+  statementId: string,
+  patch: {
+    statement?: string;
+    targetParagraphIndex?: number;
+    targetSentenceIndex?: number;
+    anchorKeywords?: string[];
+    gamlishHack?: string;
+    difficulty?: "EASY" | "MEDIUM" | "HARD";
+    order?: number;
+  },
+): Promise<SentenceLocatorContentAuthoringPreview> {
+  const res = await apiClient.patch<{
+    success: boolean;
+    data: { sentenceLocatorContent: SentenceLocatorContentAuthoringPreview };
+  }>(
+    `${BASE}/practice-tests/${practiceTestId}/sentence-locator/statements/${encodeURIComponent(statementId)}`,
+    patch,
+  );
+  return unwrap(res).sentenceLocatorContent;
+}
+
+export async function patchSentenceLocatorPassageSentence(
+  practiceTestId: string,
+  paragraphIndex: number,
+  sentenceIndex: number,
+  text: string,
+): Promise<SentenceLocatorContentAuthoringPreview> {
+  const res = await apiClient.patch<{
+    success: boolean;
+    data: { sentenceLocatorContent: SentenceLocatorContentAuthoringPreview };
+  }>(
+    `${BASE}/practice-tests/${practiceTestId}/sentence-locator/paragraphs/${paragraphIndex}/sentences/${sentenceIndex}`,
+    { text },
+  );
+  return unwrap(res).sentenceLocatorContent;
 }
 
 export async function getPracticeTestPreviewContent(
@@ -788,6 +940,7 @@ export interface GroupTestMiniTestForPreview {
 }
 
 export interface GroupTestContentForPreview {
+  contentFormat?: "STANDARD";
   groupTestId: string;
   orderInPool: number;
   miniTests: [
@@ -797,16 +950,45 @@ export interface GroupTestContentForPreview {
   ];
 }
 
+export interface L0FinalSlotPreview {
+  slotIndex: 1 | 2 | 3;
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  content: PracticeTestContentForPreview;
+}
+
+export interface L0SentenceLocatorFinalTestPreview {
+  contentFormat: "SENTENCE_LOCATOR";
+  finalTestId: string;
+  finals: [L0FinalSlotPreview, L0FinalSlotPreview, L0FinalSlotPreview];
+}
+
+export type FinalTestPreviewContent =
+  | GroupTestContentForPreview
+  | L0SentenceLocatorFinalTestPreview;
+
+export function isL0SentenceLocatorFinalPreview(
+  data: FinalTestPreviewContent,
+): data is L0SentenceLocatorFinalTestPreview {
+  return data.contentFormat === "SENTENCE_LOCATOR";
+}
+
 export async function getGroupTestPreviewContent(
   versionId: string,
   _groupTestId?: string,
-): Promise<GroupTestContentForPreview> {
+): Promise<FinalTestPreviewContent> {
   const res = await apiClient.get<{
     success: boolean;
-    data: GroupTestContentForPreview;
+    data: FinalTestPreviewContent;
   }>(`${BASE}/versions/${versionId}/final-test/preview-content`);
   return unwrap(res);
 }
+
+/** Loads final test preview (standard passages or Level 0 sentence locator finals). */
+export const getFinalTestPreviewContent = getGroupTestPreviewContent;
 
 /** Step content for instructor level preview (no student progress required). Same shape as student step content. */
 export async function getStepContentForPreview(

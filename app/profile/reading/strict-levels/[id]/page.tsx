@@ -24,6 +24,7 @@ import { SetTargetBandForm } from "@/src/components/student-level/SetTargetBandF
 import type { NextLevelInfo } from "@/src/components/student-level/LevelLayout";
 import { useReadingLevelDetail } from "@/src/contexts/ReadingLevelDetailContext";
 import { ReadingMainAreaSkeleton } from "@/src/components/reading/ReadingPathSkeleton";
+import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
 
 export default function ReadingStrictLevelPage() {
   const params = useParams<{ id: string }>();
@@ -453,17 +454,17 @@ export default function ReadingStrictLevelPage() {
     "";
 
   const isLevel0PassedWithNextLevel =
-    detail.level.order === 0 &&
+    isReadingFoundationL0(detail.level) &&
     detail.progress.passStatus === "PASSED" &&
     nextLevelInfo != null;
   const showSetTargetBandOnLevel0 =
     isLevel0PassedWithNextLevel && readingTargetBand === null;
 
   return (
-    <>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       {showSetTargetBandOnLevel0 && (
-        <div className="mx-auto max-w-300 px-4 pt-6 lg:px-6">
-          <div className="rounded-2xl border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 p-6 shadow-sm">
+        <div className="shrink-0 border-b border-indigo-200/80 bg-indigo-50/90 px-4 py-4 dark:border-indigo-800/80 dark:bg-indigo-950/50 lg:px-6">
+          <div className="mx-auto max-w-3xl rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-white/80 dark:bg-indigo-950/40 p-6 shadow-sm">
             <SetTargetBandForm
               heading="Set your desired band score before Level 1"
               description="Choose your target IELTS band (4–9). You can set or update this when moving from Level 0 to Level 1."
@@ -475,23 +476,25 @@ export default function ReadingStrictLevelPage() {
           </div>
         </div>
       )}
-      <LevelLayout
-      detail={detail}
-      loading={false}
-      completingStepId={completingStepId}
-      onComplete={handleCompleteStep}
-      onLevelPassed={handleLevelPassed}
-      onProgressUpdate={handleProgressUpdate}
-      activeStepId={activeStepId}
-      onNavigate={handleNavigate}
-      hideSidebar
-      nextLevelInfo={nextLevelInfo}
-      completionScore={completionScore}
-      hasFeedbackSubmitted={hasFeedbackSubmitted}
-      onFeedbackSuccess={() => setHasFeedbackSubmitted(true)}
-      onContentUpdateRequired={handleContentUpdateRequired}
-      contentUpdateBannerMessage={contentUpdateBannerMessage}
-    />
-    </>
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <LevelLayout
+          detail={detail}
+          loading={false}
+          completingStepId={completingStepId}
+          onComplete={handleCompleteStep}
+          onLevelPassed={handleLevelPassed}
+          onProgressUpdate={handleProgressUpdate}
+          activeStepId={activeStepId}
+          onNavigate={handleNavigate}
+          hideSidebar
+          nextLevelInfo={nextLevelInfo}
+          completionScore={completionScore}
+          hasFeedbackSubmitted={hasFeedbackSubmitted}
+          onFeedbackSuccess={() => setHasFeedbackSubmitted(true)}
+          onContentUpdateRequired={handleContentUpdateRequired}
+          contentUpdateBannerMessage={contentUpdateBannerMessage}
+        />
+      </div>
+    </div>
   );
 }

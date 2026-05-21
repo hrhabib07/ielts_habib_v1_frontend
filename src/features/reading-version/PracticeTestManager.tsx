@@ -19,6 +19,7 @@ import {
   type PracticeTestContentForPreview,
   type GroupTestQuestionForPreview,
   type GroupTestQuestionGroupForPreview,
+  isSentenceLocatorPreviewContent,
 } from "@/src/lib/api/adminReadingVersions";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
 import {
@@ -377,7 +378,7 @@ export function PracticeTestManager({
                       <Eye className="h-3.5 w-3.5" />
                       Preview
                     </Button>
-                    {!disabled && (
+                    {!disabled && isCurrentVersion && (
                       <>
                         <Button
                           variant="outline"
@@ -414,8 +415,13 @@ export function PracticeTestManager({
                         </Button>
                       </>
                     )}
+                    {!disabled && !isCurrentVersion && (
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
+                        From another version — edit the matching test in this draft list (same title/order).
+                      </p>
+                    )}
                   </div>
-                  {editingId === pt._id && (
+                  {editingId === pt._id && isCurrentVersion && (
                     <div className="pt-2 border-t border-stone-200 dark:border-stone-700">
                       <EditPracticeTestForm
                         practiceTest={pt}
@@ -539,7 +545,7 @@ export function PracticeTestManager({
                               <Eye className="h-3.5 w-3.5" />
                               Preview
                             </Button>
-                            {!disabled && (
+                            {!disabled && isCurrentVersion && (
                               <>
                                 <Button
                                   variant="outline"
@@ -1414,9 +1420,11 @@ function PracticeTestPreviewModal({
   onClose: () => void;
   onRetry: () => void;
 }) {
-  const passage = content?.miniTest?.passage;
-  const questionGroups = content?.miniTest?.questionGroups;
-  const flatQuestions = content?.miniTest?.questions ?? [];
+  const isSl = content != null && isSentenceLocatorPreviewContent(content);
+  const passage = !isSl && content ? content.miniTest.passage : undefined;
+  const questionGroups = !isSl && content ? content.miniTest.questionGroups : undefined;
+  const flatQuestions: GroupTestQuestionForPreview[] =
+    !isSl && content ? (content.miniTest.questions ?? []) : [];
 
   return (
     <div
@@ -1482,7 +1490,47 @@ function PracticeTestPreviewModal({
               </Button>
             </div>
           )}
-          {content && !loading && (
+          {content && !loading && isSl && (
+            <div className="space-y-6">
+              <section>
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                  Sentence locator
+                </h3>
+                <h4 className="font-medium text-stone-900 dark:text-stone-100">
+                  {content.sentenceLocator.passageTitle}
+                </h4>
+                {content.sentenceLocator.passageSubTitle ? (
+                  <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">
+                    {content.sentenceLocator.passageSubTitle}
+                  </p>
+                ) : null}
+                {content.sentenceLocator.instruction ? (
+                  <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
+                    {content.sentenceLocator.instruction}
+                  </p>
+                ) : null}
+                <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
+                  {content.sentenceLocator.paragraphs.length} paragraph
+                  {content.sentenceLocator.paragraphs.length !== 1 ? "s" : ""} ·{" "}
+                  {content.sentenceLocator.statements.length} statement
+                  {content.sentenceLocator.statements.length !== 1 ? "s" : ""}
+                </p>
+              </section>
+              <section>
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                  Statements (preview)
+                </h3>
+                <ol className="list-decimal space-y-2 pl-5 text-sm text-stone-700 dark:text-stone-200">
+                  {[...content.sentenceLocator.statements]
+                    .sort((a, b) => a.order - b.order)
+                    .map((s) => (
+                      <li key={s.id}>{s.statement}</li>
+                    ))}
+                </ol>
+              </section>
+            </div>
+          )}
+          {content && !loading && !isSl && (
             <div className="space-y-8">
               <section>
                 <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">

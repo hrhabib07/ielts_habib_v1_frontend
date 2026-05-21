@@ -19,6 +19,7 @@ import { LEVEL_0_LESSON_JSON_EXAMPLE } from "./integratedLessonJsonExample";
 import { IntegratedLessonPreviewModal } from "@/src/components/reading/IntegratedLessonPreviewModal";
 import { buildIntegratedLessonPreviewPayload } from "./integratedLessonPreviewMapper";
 import { ChevronDown, Eye, Loader2, Plus, BookOpen } from "lucide-react";
+import { readingLevelIndexFromOrder } from "@/src/lib/readingLevelOrder";
 
 interface IntegratedLessonManagerProps {
   versionId: string;
@@ -205,9 +206,10 @@ export function IntegratedLessonManager({
   onStepsSync,
   levelOrder = 0,
 }: IntegratedLessonManagerProps) {
+  const isL0 = readingLevelIndexFromOrder(levelOrder) === 0;
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState(
-    levelOrder === 0 ? "Level 0 — The Mastery Foundation" : "",
+    isL0 ? "Level 0 — The Mastery Foundation" : "",
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -222,8 +224,7 @@ export function IntegratedLessonManager({
     setBusy(true);
     setError(null);
     try {
-      const parsed =
-        levelOrder === 0
+      const parsed = isL0
           ? parseIntegratedLessonJson(LEVEL_0_LESSON_JSON_EXAMPLE)
           : null;
       const initialBlocks =
@@ -237,7 +238,7 @@ export function IntegratedLessonManager({
       });
       onLessonsChange([...lessons, created].sort((a, b) => a.lessonNumber - b.lessonNumber));
       onStepsSync?.();
-      setNewTitle(levelOrder === 0 ? "Level 0 — The Mastery Foundation" : "");
+      setNewTitle(isL0 ? "Level 0 — The Mastery Foundation" : "");
       setCreating(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create lesson");

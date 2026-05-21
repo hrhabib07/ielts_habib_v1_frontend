@@ -2,72 +2,44 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
-  getVersionDetail,
-  getGroupTestPreviewContent,
-} from "@/src/lib/api/adminReadingVersions";
-import type {
-  GroupTest,
-  GroupTestContentForPreview,
+  getFinalTestPreviewContent,
+  isL0SentenceLocatorFinalPreview,
+  isSentenceLocatorPreviewContent,
+  type FinalTestPreviewContent,
+  type L0FinalSlotPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import { ReadingFinalEvaluationPreviewView } from "@/src/components/reading/ReadingFinalEvaluationPreviewView";
+import { PracticeTestPreviewInline } from "@/src/components/reading/PracticeTestPreviewInline";
 import { Loader2, ArrowLeft, FileText } from "lucide-react";
 
 export default function FinalEvaluationPreviewPage() {
   const params = useParams<{ levelId: string; versionId: string }>();
-  const searchParams = useSearchParams();
   const levelId = params.levelId ?? "";
   const versionId = params.versionId ?? "";
-  const groupTestIdFromQuery = searchParams.get("groupTestId");
 
-  const [groupTests, setGroupTests] = useState<GroupTest[]>([]);
-  const [selectedGroupTestId, setSelectedGroupTestId] = useState<string | null>(
-    null,
-  );
-  const [previewContent, setPreviewContent] =
-    useState<GroupTestContentForPreview | null>(null);
-  const [loadingVersion, setLoadingVersion] = useState(true);
-  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [preview, setPreview] = useState<FinalTestPreviewContent | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<1 | 2 | 3>(1);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!versionId) return;
-    setLoadingVersion(true);
+    setLoading(true);
     setError(null);
-    getVersionDetail(versionId)
-      .then((detail) => {
-        const tests = detail.groupTests ?? [];
-        setGroupTests(tests);
-        const queryId = groupTestIdFromQuery ?? undefined;
-        if (queryId && tests.some((t) => t._id === queryId)) {
-          setSelectedGroupTestId(queryId);
-        } else if (tests.length) {
-          const first = tests[0];
-          if (first) setSelectedGroupTestId(first._id);
+    getFinalTestPreviewContent(versionId)
+      .then((data) => {
+        setPreview(data);
+        if (isL0SentenceLocatorFinalPreview(data)) {
+          setSelectedSlot(1);
         }
       })
       .catch((e) =>
-        setError(e instanceof Error ? e.message : "Failed to load version"),
+        setError(e instanceof Error ? e.message : "Failed to load final test preview"),
       )
-      .finally(() => setLoadingVersion(false));
-  }, [versionId, groupTestIdFromQuery]);
-
-  useEffect(() => {
-    if (!versionId || !selectedGroupTestId) {
-      setPreviewContent(null);
-      return;
-    }
-    setLoadingPreview(true);
-    setPreviewContent(null);
-    setError(null);
-    getGroupTestPreviewContent(versionId, selectedGroupTestId)
-      .then(setPreviewContent)
-      .catch((e) =>
-        setError(e instanceof Error ? e.message : "Failed to load preview"),
-      )
-      .finally(() => setLoadingPreview(false));
-  }, [versionId, selectedGroupTestId]);
+      .finally(() => setLoading(false));
+  }, [versionId]);
 
   if (!levelId || !versionId) {
     return (
@@ -77,7 +49,7 @@ export default function FinalEvaluationPreviewPage() {
     );
   }
 
-  if (loadingVersion) {
+  if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -85,89 +57,99 @@ export default function FinalEvaluationPreviewPage() {
     );
   }
 
-  if (error && !groupTests.length) {
+  if (error && !preview) {
     return (
       <div className="space-y-4">
         <Link
-          href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/edit`}
+          href={`/dashboard/instructor/reading-levels/${levelId}/edit`}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to version
+          Back to level
         </Link>
         <p className="text-destructive">{error}</p>
       </div>
     );
   }
 
+  const isL0 = preview != null && isL0SentenceLocatorFinalPreview(preview);
+  const l0Slot: L0FinalSlotPreview | null = isL0
+    ? preview.finals.find((f) => f.slotIndex === selectedSlot) ?? preview.finals[0] ?? null
+    : null;
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
-            href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/edit`}
+            href={`/dashboard/instructor/reading-levels/${levelId}/edit`}
             className="inline-flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to version
+            Back to level
           </Link>
-          <h1 className="text-xl font-semibold">Final evaluation preview</h1>
+          <h1 className="text-xl font-semibold">
+            {isL0 ? "Level 0 final tests preview" : "Final evaluation preview"}
+          </h1>
         </div>
       </div>
 
-      {groupTests.length === 0 ? (
+      {!preview ? (
         <div className="rounded-xl border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20 p-6 text-center">
           <FileText className="mx-auto h-10 w-10 text-amber-500" />
           <p className="mt-2 font-medium text-amber-800 dark:text-amber-200">
-            No group tests in this version
+            No final test configured
           </p>
           <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
-            Add group tests in the version editor to preview the final evaluation
-            here.
+            Add three final tests in section 3 of the level builder, then refresh this page.
           </p>
         </div>
-      ) : (
+      ) : isL0 && l0Slot ? (
         <>
+          <p className="text-sm text-muted-foreground">
+            Three sequential finals (hardest → easiest). Students match statements to passage
+            sentences.
+          </p>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">
-              Group test:
-            </span>
-            {groupTests.map((gt, idx) => (
+            {preview.finals.map((f) => (
               <button
-                key={gt._id}
+                key={f.slotIndex}
                 type="button"
-                onClick={() => setSelectedGroupTestId(gt._id)}
+                onClick={() => setSelectedSlot(f.slotIndex)}
                 className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
-                  selectedGroupTestId === gt._id
+                  selectedSlot === f.slotIndex
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-card hover:bg-muted"
                 }`}
               >
-                Group {idx + 1}
+                Final Test {f.slotIndex}
               </button>
             ))}
           </div>
-
-          {loadingPreview && (
-            <div className="flex min-h-[300px] items-center justify-center rounded-xl border border-border bg-muted/30">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          )}
-
-          {!loadingPreview && previewContent && (
-            <div className="min-h-[600px]">
-              <ReadingFinalEvaluationPreviewView
-                content={previewContent}
-                groupLabel={`Group ${groupTests.findIndex((g) => g._id === selectedGroupTestId) + 1}`}
+          <div className="min-h-[500px] rounded-xl border border-border bg-card p-4">
+            {isSentenceLocatorPreviewContent(l0Slot.content) ? (
+              <PracticeTestPreviewInline
+                title={l0Slot.title}
+                timeLimitMinutes={l0Slot.timeLimitMinutes}
+                passType={l0Slot.passType}
+                passValue={l0Slot.passValue}
+                sentenceLocator={l0Slot.content.sentenceLocator}
               />
-            </div>
-          )}
-
-          {!loadingPreview && selectedGroupTestId && !previewContent && error && (
-            <p className="text-destructive">{error}</p>
-          )}
+            ) : (
+              <p className="text-sm text-muted-foreground">Unable to render this final test.</p>
+            )}
+          </div>
         </>
-      )}
+      ) : !isL0 && "miniTests" in preview ? (
+        <div className="min-h-[600px]">
+          <ReadingFinalEvaluationPreviewView
+            content={preview}
+            groupLabel="Final tests (3 passages)"
+          />
+        </div>
+      ) : null}
+
+      {error && preview && <p className="text-destructive text-sm">{error}</p>}
     </div>
   );
 }

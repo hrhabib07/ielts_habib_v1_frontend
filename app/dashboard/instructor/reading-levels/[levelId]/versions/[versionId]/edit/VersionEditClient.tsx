@@ -11,6 +11,7 @@ import {
   type PracticeTest,
   type ReadingLevel,
   getLevelById,
+  finalTestAsGroupTestList,
 } from "@/src/lib/api/adminReadingVersions";
 import {
   VersionStatusBadge,
@@ -24,6 +25,9 @@ import {
 import { Loader2, ArrowLeft, Eye, FileText, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { GroupTestsBulkCreateCard } from "@/src/features/reading-level-builder/GroupTestsBulkCreateCard";
+import { L0FinalTestsBuilder } from "@/src/features/reading-level-builder/L0FinalTestsBuilder";
+import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
 
 interface VersionEditClientProps {
   levelId: string;
@@ -65,8 +69,25 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
     setData((prev) => (prev ? { ...prev, version } : null));
   };
 
-  const handleGroupTestsChange = (groupTests: GroupTest[]) => {
-    setData((prev) => (prev ? { ...prev, groupTests } : null));
+  const handleGroupTestsChange = (newGroupTests: GroupTest[]) => {
+    const primary = newGroupTests[0];
+    setData((prev) =>
+      prev
+        ? {
+            ...prev,
+            groupTests: newGroupTests,
+            finalTest: primary
+              ? {
+                  _id: primary._id,
+                  levelVersionId: primary.levelVersionId,
+                  miniTestIds: primary.miniTestIds,
+                  createdAt: primary.createdAt,
+                  updatedAt: primary.updatedAt,
+                }
+              : null,
+          }
+        : null,
+    );
   };
 
   const handlePracticeTestsChange = (practiceTests: PracticeTest[]) => {
@@ -104,10 +125,12 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
   const disabled = version.status === "PUBLISHED";
   const isPublished = version.status === "PUBLISHED";
   const isFoundation = level.levelType === "FOUNDATION";
-  const finalTestForUi =
-    data.finalTest ??
-    (groupTests?.length ? groupTests[0] : null);
-  const hasFinalTests = finalTestForUi != null || (groupTests?.length ?? 0) > 0;
+  const isReadingL0Foundation = isReadingFoundationL0(level);
+  const showStrictReadingFinalTests = !isFoundation || isReadingL0Foundation;
+  const mergedGroupTests = finalTestAsGroupTestList(data.finalTest ?? null, groupTests ?? []);
+  const finalTestForUi = data.finalTest ?? (mergedGroupTests.length ? mergedGroupTests[0] : null);
+  const hasFinalTests =
+    finalTestForUi != null || mergedGroupTests.length > 0 || data.finalTest != null;
 
   return (
     <div className="space-y-6">
@@ -133,7 +156,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
             <Eye className="h-4 w-4" />
             Preview level
           </Link>
-          {hasFinalTests && !isFoundation && (
+          {hasFinalTests && showStrictReadingFinalTests && (
             <Link
               href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/final-evaluation-preview`}
               className="inline-flex items-center gap-2 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2 text-sm font-medium text-emerald-800 dark:text-emerald-200 shadow-sm transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
@@ -159,12 +182,26 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
       )}
 
       <div className="grid gap-6 md:grid-cols-2">
-        <EvaluationConfigForm
-          version={version}
-          levelType={level.levelType}
-          disabled={disabled}
-          onVersionChange={handleVersionChange}
-        />
+        {isReadingL0Foundation ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Final test mode</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground leading-relaxed">
+              Level 0 uses <strong className="text-foreground">three sequential final tests</strong>{" "}
+              (passage + statement questions). Configure them in section 3 below — not a final quiz
+              step. Evaluation settings are applied automatically for this level.
+            </CardContent>
+          </Card>
+        ) : (
+          <EvaluationConfigForm
+            version={version}
+            levelType={level.levelType}
+            levelOrder={level.order}
+            disabled={disabled}
+            onVersionChange={handleVersionChange}
+          />
+        )}
         {!isPublished && (
           <PublishPanel
             levelId={levelId}
@@ -212,6 +249,10 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
       <Card>
         <CardHeader>
           <CardTitle className="text-base">2. Practice tests</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+            Standard (passage question set) and Sentence locator (embedded JSON) both count as practice tests. After
+            creating, link each test from a Practice Test step in the Steps editor for this version.
+          </p>
         </CardHeader>
         <CardContent>
           <PracticeTestBuilder
@@ -223,27 +264,70 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
         </CardContent>
       </Card>
 
-      {!isFoundation && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">3. Final tests</CardTitle>
-            <p className="text-xs text-muted-foreground">
-              One pool of three passages. Students take Final Test 1 → 2 → 3 sequentially.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <GroupTestBuilder
-              levelId={levelId}
-              versionId={versionId}
-              groupTests={groupTests ?? []}
-              disabled={disabled}
-              onGroupTestsChange={handleGroupTestsChange}
-            />
-          </CardContent>
-        </Card>
+      {showStrictReadingFinalTests && (
+        isReadingL0Foundation ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">3. Final tests (passage + questions)</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add three final tests — not a final quiz step. Each test: passage paragraphs +
+                statement questions.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <L0FinalTestsBuilder
+                levelId={levelId}
+                versionId={versionId}
+                version={version}
+                disabled={disabled}
+                finalTest={data.finalTest ?? null}
+                practiceTests={practiceTests ?? []}
+                onFinalTestChange={(ft) =>
+                  setData((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          finalTest: ft,
+                          groupTests: finalTestAsGroupTestList(ft, []),
+                        }
+                      : null,
+                  )
+                }
+                onVersionChange={handleVersionChange}
+                onPracticeTestsChange={handlePracticeTestsChange}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">3. Final tests (3 passages)</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                One pool, three passage question sets. Open Preview final tests when mini tests are saved.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <GroupTestsBulkCreateCard
+                versionId={versionId}
+                levelId={levelId}
+                disabled={disabled}
+                groupTests={mergedGroupTests}
+                onGroupTestsChange={handleGroupTestsChange}
+              />
+              <GroupTestBuilder
+                levelId={levelId}
+                versionId={versionId}
+                levelTitle={level.title}
+                groupTests={mergedGroupTests}
+                disabled={disabled}
+                onGroupTestsChange={handleGroupTestsChange}
+              />
+            </CardContent>
+          </Card>
+        )
       )}
 
-      {isFoundation && <FinalQuizSettingsCard steps={steps} />}
+      {isFoundation && !isReadingL0Foundation && <FinalQuizSettingsCard steps={steps} />}
     </div>
   );
 }

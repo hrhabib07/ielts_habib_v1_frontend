@@ -13,7 +13,7 @@
 import type { ReadingQuestionType } from "@/src/lib/api/instructor";
 
 export const SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL: Record<number, ReadingQuestionType> = {
-  0: "MCQ_SINGLE", // L0: IELTS Reading Basics (quiz, not sentence completion)
+  0: "MCQ_SINGLE", // L0 bulk templates: legacy MCQ; Level 0 reading practice may use Sentence locator (separate authoring path)
   1: "TRUE_FALSE_NOT_GIVEN", // L1: Mastering True/False/Not Given
   2: "SENTENCE_COMPLETION", // L2: Fill in the Blanks — only Sentence Completion, 8 questions per passage
   3: "SHORT_ANSWER", // L3: Short Answer Questions

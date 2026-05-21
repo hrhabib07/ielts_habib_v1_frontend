@@ -3,6 +3,7 @@
 import { LevelLayout } from "./LevelLayout";
 import type { LevelDetailForStudent } from "@/src/lib/api/readingStrictProgression";
 import type { ReadingLevel, VersionDetail } from "@/src/lib/api/adminReadingVersions";
+import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
 
 export interface LevelRendererPreviewProps {
   level: ReadingLevel;
@@ -22,6 +23,7 @@ function buildPreviewDetail(
     title: s.title,
     order: s.order,
     contentId: s.contentId ?? undefined,
+    practiceTestId: s.practiceTestId ?? undefined,
     isFinalQuiz: s.isFinalQuiz,
     passType: s.passType,
     passValue: s.passValue,
@@ -30,29 +32,30 @@ function buildPreviewDetail(
   }));
 
   const hasFinalEvalStep = steps.some((s) => s.stepType === "FINAL_EVALUATION");
+  const evalType = detail.version.evaluationConfig?.finalEvaluationType ?? "GROUP_TEST";
   const isSkillWithGroupTests =
     level.levelType === "SKILL" &&
     (detail.groupTests?.length ?? 0) >= 1 &&
-    (detail.version.evaluationConfig?.finalEvaluationType ?? "GROUP_TEST") === "GROUP_TEST";
+    (evalType === "GROUP_TEST" || evalType === "SEQUENTIAL_FINALS");
+  const isFoundationL0BandFinals =
+    isReadingFoundationL0(level) &&
+    (detail.finalTest?.contentFormat === "SENTENCE_LOCATOR" ||
+      (evalType === "GROUP_TEST" || evalType === "SEQUENTIAL_FINALS"));
 
   let finalSteps = steps;
   let currentStepIndex = steps.length;
   let completedStepIds = steps.map((s) => s._id);
 
-  if (initialStepIndex != null && initialStepIndex >= 0) {
-    const clamped = Math.min(initialStepIndex, steps.length);
-    currentStepIndex = clamped;
-    completedStepIds = steps.slice(0, clamped).map((s) => s._id);
-  }
-
-  if (!hasFinalEvalStep && isSkillWithGroupTests) {
+  if (!hasFinalEvalStep && (isSkillWithGroupTests || isFoundationL0BandFinals)) {
     const syntheticId = `preview-final-${detail.version._id}`;
     finalSteps = [
       ...steps,
       {
         _id: syntheticId,
         stepType: "FINAL_EVALUATION",
-        title: "Final evaluation (group tests)",
+        title: isFoundationL0BandFinals
+          ? "Final evaluation (three passage finals)"
+          : "Final evaluation (group tests)",
         order: steps.length + 1,
         contentId: undefined,
         isFinalQuiz: false,
@@ -63,9 +66,15 @@ function buildPreviewDetail(
       },
     ];
     if (initialStepIndex == null) {
-      currentStepIndex = steps.length;
-      completedStepIds = steps.map((s) => s._id);
+      currentStepIndex = finalSteps.length - 1;
+      completedStepIds = finalSteps.slice(0, -1).map((s) => s._id);
     }
+  }
+
+  if (initialStepIndex != null && initialStepIndex >= 0) {
+    const clamped = Math.min(initialStepIndex, Math.max(0, finalSteps.length - 1));
+    currentStepIndex = clamped;
+    completedStepIds = finalSteps.slice(0, clamped).map((s) => s._id);
   }
 
   return {
@@ -87,6 +96,7 @@ function buildPreviewDetail(
     },
     steps: finalSteps,
     previewGroupTestsCount: isSkillWithGroupTests ? (detail.groupTests?.length ?? 0) : undefined,
+    previewIsL0SentenceLocatorFinals: isFoundationL0BandFinals,
   };
 }
 
@@ -102,6 +112,9 @@ export function LevelRenderer({ level, detail, initialStepIndex }: LevelRenderer
       onProgressUpdate={() => {}}
       isPreview
       previewGroupTestsCount={(previewDetail as { previewGroupTestsCount?: number }).previewGroupTestsCount}
+      previewIsL0SentenceLocatorFinals={
+        (previewDetail as { previewIsL0SentenceLocatorFinals?: boolean }).previewIsL0SentenceLocatorFinals
+      }
     />
   );
 }

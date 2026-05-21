@@ -390,9 +390,9 @@ Output ONLY valid JSON (no markdown fences, no commentary) matching this schema:
       "section": "INTRO",
       "en": {
         "levelLabel": "optional — only for intro",
-        "instructorNote": "optional welcome text",
+        "instructorNote": "optional; UI label only — does NOT count toward required note body",
         "heading": "optional section heading",
-        "content": "Main paragraphs. Use \\n\\n between paragraphs.",
+        "content": "Main paragraphs. Use \\n\\n between paragraphs. Required unless this language uses metaRows or bullets.",
         "bullets": ["optional", "bullet", "lines"],
         "metaRows": [{ "label": "Target Level", "value": "Level 0" }]
       },
@@ -421,7 +421,8 @@ Rules:
 - section values: INTRO, MODULE_META, CORE_OBJECTIVE, MECHANICS, PARAPHRASE, EXECUTION, MINEFIELD, ARSENAL, WRAP_UP, CUSTOM.
 - correct must be exactly A, B, C, or D (letter only).
 - Every question needs A, B, C, D and both en and bn on question and each option.
-- MODULE_META notes often have empty content but filled metaRows.
+- Every "note" with en/bn objects must pass: non-empty trimmed content OR non-empty metaRows OR non-empty bullets in at least one language (en or bn). levelLabel, instructorNote, and heading alone never count. Put INTRO welcome and all teaching prose in "content" (both languages); use instructorNote only as an optional extra line, not the only text.
+- MODULE_META notes often have empty content but filled metaRows (that satisfies the rule).
 
 CRITICAL — valid JSON strings:
 - Never put unescaped " inside a JSON string value.

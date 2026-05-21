@@ -5,6 +5,7 @@ import type {
   GroupTestQuestionForPreview,
   GroupTestQuestionGroupForPreview,
   GroupTestMiniTestForPreview,
+  SentenceLocatorContentAuthoringPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import type { ReactNode } from "react";
 import {
@@ -311,7 +312,8 @@ export interface PracticeTestPreviewInlineProps {
   timeLimitMinutes: number;
   passType: string;
   passValue: number;
-  miniTest: GroupTestMiniTestForPreview;
+  miniTest?: GroupTestMiniTestForPreview;
+  sentenceLocator?: SentenceLocatorContentAuthoringPreview;
 }
 
 export function PracticeTestPreviewInline({
@@ -320,8 +322,118 @@ export function PracticeTestPreviewInline({
   passType,
   passValue,
   miniTest,
+  sentenceLocator,
 }: PracticeTestPreviewInlineProps) {
   const [showCorrectAnswers, setShowCorrectAnswers] = useState(true);
+
+  if (sentenceLocator) {
+    const sortedStatements = [...sentenceLocator.statements].sort((a, b) => a.order - b.order);
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col gap-3 rounded-xl border border-violet-200 bg-violet-50/50 px-4 py-3 dark:border-violet-900 dark:bg-violet-950/30 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">
+              Sentence locator (Level 0) — instructor preview
+            </p>
+            <p className="mt-1 text-sm text-violet-800 dark:text-violet-200">
+              {title} · {timeLimitMinutes} min · Pass:{" "}
+              {passType === "PERCENTAGE" ? `${passValue}%` : `band ≥ profile target`}
+            </p>
+          </div>
+        </div>
+        <section>
+          <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-stone-500">Passage</h3>
+          <h4 className="font-medium text-stone-900 dark:text-stone-100">{sentenceLocator.passageTitle}</h4>
+          {sentenceLocator.passageSubTitle ? (
+            <p className="mt-0.5 text-sm text-stone-500">{sentenceLocator.passageSubTitle}</p>
+          ) : null}
+          <p className="mt-2 text-xs text-stone-600 dark:text-stone-400">
+            {sentenceLocator.instruction ?? "Students match each statement to one sentence."}
+          </p>
+          <div className="mt-3 space-y-4 rounded-xl border border-stone-200 bg-stone-50/30 p-4 dark:border-stone-700">
+            {[...sentenceLocator.paragraphs]
+              .sort((a, b) => a.paragraphIndex - b.paragraphIndex)
+              .map((p) => (
+                <div key={p.paragraphIndex}>
+                  <p className="mb-1 text-[11px] font-bold uppercase text-stone-400">
+                    Paragraph {p.paragraphIndex + 1}
+                  </p>
+                  <ul className="list-none space-y-1">
+                    {p.sentences.map((s, i) => (
+                      <li key={i} className="text-sm leading-relaxed text-stone-800 dark:text-stone-200">
+                        <span className="mr-2 font-mono text-xs text-stone-400">{i + 1}.</span>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+          </div>
+        </section>
+        <section>
+          <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-stone-500">
+            Statements ({sortedStatements.length})
+          </h3>
+          <div className="space-y-3">
+            {sortedStatements.map((st) => {
+              const para = sentenceLocator.paragraphs.find((x) => x.paragraphIndex === st.targetParagraphIndex);
+              const targetText = para?.sentences[st.targetSentenceIndex] ?? "—";
+              return (
+                <div
+                  key={st.id}
+                  className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900/50"
+                >
+                  <p className="text-sm font-medium text-stone-900 dark:text-stone-100">
+                    {st.order}. {st.statement}
+                  </p>
+                  {showCorrectAnswers && (
+                    <p className="mt-2 text-xs text-emerald-800 dark:text-emerald-200">
+                      <span className="font-semibold">Target: </span>P{st.targetParagraphIndex + 1} · S
+                      {st.targetSentenceIndex + 1} — {targetText}
+                    </p>
+                  )}
+                  {st.anchorKeywords && st.anchorKeywords.length > 0 && showCorrectAnswers && (
+                    <p className="mt-1 text-xs text-stone-600">
+                      Anchors: {st.anchorKeywords.join(", ")}
+                    </p>
+                  )}
+                  {st.gamlishHack && showCorrectAnswers && (
+                    <p className="mt-1 text-xs text-amber-800 dark:text-amber-200">{st.gamlishHack}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCorrectAnswers((v) => !v)}
+            className="gap-2"
+          >
+            {showCorrectAnswers ? (
+              <>
+                <EyeOff className="h-4 w-4" />
+                Hide solutions
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4" />
+                Show solutions
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!miniTest) {
+    return <p className="text-sm text-muted-foreground">No preview content.</p>;
+  }
+
   const passage = miniTest.passage;
   const questionGroups = miniTest.questionGroups;
   const flatQuestions = miniTest.questions ?? [];

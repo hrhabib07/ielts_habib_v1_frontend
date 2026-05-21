@@ -26,7 +26,8 @@ import type {
   PassageQuestionContent,
 } from "@/src/lib/api/readingStrictProgression";
 import type { GroupTestMiniTestForPreview } from "@/src/lib/api/adminReadingVersions";
-import { getStepContent } from "@/src/lib/api/readingStrictProgression";
+import type { PracticeTestContentForPreviewSentenceLocator } from "@/src/lib/api/adminReadingVersions";
+import { getStepContent, isSentenceLocatorPracticeContent } from "@/src/lib/api/readingStrictProgression";
 import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
 import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
 import { getStepContentForPreview } from "@/src/lib/api/adminReadingVersions";
@@ -343,6 +344,7 @@ export interface LevelContentProps {
   /** Required when isPreview: used to fetch step content without student progress */
   versionId?: string;
   previewGroupTestsCount?: number;
+  previewIsL0SentenceLocatorFinals?: boolean;
   /** Total group tests for final evaluation (from progress) */
   groupTestsTotal?: number;
   /** Remaining group tests to attempt (from progress) */
@@ -351,6 +353,8 @@ export interface LevelContentProps {
   isLevelPassed?: boolean;
   nextLevelInfo?: { levelId: string; title: string; firstStepId: string } | null;
   onNavigateToNextLevel?: () => void;
+  /** When true, step nav is rendered by LevelLayout below the scroll area (reading dashboard). */
+  dockBottomNav?: boolean;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -375,25 +379,18 @@ export function LevelContent({
   isPreview = false,
   versionId,
   previewGroupTestsCount,
+  previewIsL0SentenceLocatorFinals,
   groupTestsTotal,
   groupTestsRemaining,
   isLevelPassed,
   nextLevelInfo,
   onNavigateToNextLevel,
+  dockBottomNav = false,
 }: LevelContentProps) {
-  const [visibleStepId, setVisibleStepId] = useState<string | null>(null);
   const [content, setContent] = useState<StepContent | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
   const [contentError, setContentError] = useState<string | null>(null);
   const [showSubscriptionPrompt, setShowSubscriptionPrompt] = useState(false);
-
-  // Transition animation
-  useEffect(() => {
-    if (!step) return;
-    const stepId = step._id;
-    const t = setTimeout(() => setVisibleStepId(stepId), 60);
-    return () => clearTimeout(t);
-  }, [step]);
 
   // Fetch step content when step changes and is not locked
   const fetchContent = useCallback(
@@ -466,8 +463,6 @@ export function LevelContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step?._id, step?.contentId, step?.stepType, isLocked, fetchContent]);
 
-  const visible = step !== null && visibleStepId === step._id;
-
   if (!step) {
     return <LevelContentEmpty />;
   }
@@ -483,12 +478,7 @@ export function LevelContent({
   const nextStep = hasNext && allSteps ? allSteps[stepIndex] : null;
 
   return (
-    <div
-      className={[
-        "transition-opacity duration-300 ease-out",
-        visible ? "opacity-100" : "opacity-0",
-      ].join(" ")}
-    >
+    <div>
       {/* Step header */}
       <div className="mb-6 flex items-start gap-4">
         <div className={`shrink-0 rounded-xl p-2.5 ${bg}`}>
@@ -549,7 +539,7 @@ export function LevelContent({
 
       {/* Active content */}
       {!isLocked && (
-        <div className="space-y-6 pb-40">
+        <div className={dockBottomNav ? "space-y-6 pb-6" : "space-y-6 pb-40"}>
           {/* Content area — actual content from API */}
           <div className="min-h-50 w-full rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm sm:p-6">
             {contentLoading && (
@@ -731,7 +721,19 @@ export function LevelContent({
               !contentError &&
               content !== null &&
               content.type === "PRACTICE_TEST" &&
-              isPreview && (
+              isPreview &&
+              (isSentenceLocatorPracticeContent(content.content) ? (
+                <PracticeTestPreviewInline
+                  title={content.content.title}
+                  timeLimitMinutes={content.content.timeLimitMinutes}
+                  passType={content.content.passType}
+                  passValue={content.content.passValue}
+                  sentenceLocator={
+                    (content.content as unknown as PracticeTestContentForPreviewSentenceLocator)
+                      .sentenceLocator
+                  }
+                />
+              ) : (
                 <PracticeTestPreviewInline
                   title={content.content.title}
                   timeLimitMinutes={content.content.timeLimitMinutes}
@@ -739,7 +741,7 @@ export function LevelContent({
                   passValue={content.content.passValue}
                   miniTest={content.content.miniTest as GroupTestMiniTestForPreview}
                 />
-              )}
+              ))}
 
             {/* FINAL_EVALUATION: Start button only — actual test runs in dedicated mock environment */}
             {!contentLoading &&
@@ -748,12 +750,16 @@ export function LevelContent({
               (isPreview ? (
                 <div className="rounded-2xl border border-dashed border-[#1e3a8a]/40 dark:border-[#3b82f6]/50 bg-[#1e3a8a]/5 dark:bg-[#1e3a8a]/20 p-6 text-center">
                   <p className="text-sm font-semibold text-[#0f172a] dark:text-slate-100">
-                    Final evaluation (group tests)
+                    {previewIsL0SentenceLocatorFinals
+                      ? "Final evaluation (three passage finals)"
+                      : "Final evaluation (group tests)"}
                   </p>
                   <p className="mt-2 text-sm text-[#1e3a8a]/80 dark:text-slate-400">
-                    {previewGroupTestsCount != null && previewGroupTestsCount > 0
-                      ? `This level has ${previewGroupTestsCount} group test(s). Each group test has 3 passage-based mini tests. Students will see and attempt them here after completing the steps above.`
-                      : "This level uses group tests for the final evaluation. Students will see the group test content here."}
+                    {previewIsL0SentenceLocatorFinals
+                      ? "Students take Final Test 1 → 2 → 3 (sentence locator: match statements to passage sentences). Preview each slot below."
+                      : previewGroupTestsCount != null && previewGroupTestsCount > 0
+                        ? `This level has ${previewGroupTestsCount} group test(s). Each group test has 3 passage-based mini tests. Students will see and attempt them here after completing the steps above.`
+                        : "This level uses group tests for the final evaluation. Students will see the group test content here."}
                   </p>
                   {versionId && (
                     <Link
@@ -870,8 +876,8 @@ export function LevelContent({
             </div>
           )}
 
-          {/* Bottom navigation: single row — progress + bar centered, prev/next on the sides */}
-          {onNavigate && allSteps && (
+          {/* Bottom navigation (fixed overlay when not docked in reading dashboard layout) */}
+          {!dockBottomNav && onNavigate && allSteps && (
             <div className="fixed bottom-0 left-0 right-0 z-40 lg:[left:var(--reading-sidebar-width,0px)]">
               <div className="border-t border-slate-200/80 bg-white/95 px-2 py-2 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-700/80 dark:bg-slate-900/95 dark:shadow-[0_-8px_30px_rgba(0,0,0,0.45)] sm:px-3">
                 <div className="mx-auto flex w-full max-w-6xl flex-nowrap items-center gap-2 sm:gap-3">
