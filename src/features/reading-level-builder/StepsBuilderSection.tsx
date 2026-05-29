@@ -7,36 +7,29 @@ import {
   ensureEditVersion,
   finalTestAsGroupTestList,
   type GroupTest,
-  type IntegratedLesson,
   type PracticeTest,
   type ReadingLevelType,
   type VersionDetail,
 } from "@/src/lib/api/adminReadingVersions";
 import {
   GroupTestBuilder,
-  IntegratedLessonManager,
   PracticeTestBuilder,
   EvaluationConfigForm,
-  FinalQuizSettingsCard,
 } from "@/src/features/reading-version";
 import { GroupTestsBulkCreateCard } from "./GroupTestsBulkCreateCard";
 import { L0FinalTestsBuilder } from "./L0FinalTestsBuilder";
 import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
-import Link from "next/link";
-import { RefreshCw, Loader2, ExternalLink } from "lucide-react";
+import { RefreshCw, Loader2 } from "lucide-react";
 
 interface StepsBuilderSectionProps {
   levelId: string;
   versionId: string;
   versionStatus: string;
   levelType: ReadingLevelType;
-  /** Reading curriculum order (0 = IELTS Reading Basics / L0). */
   levelOrder: number;
-  /** Display name for final-test tooling */
   levelTitle?: string;
   groupTests: GroupTest[];
   practiceTests: PracticeTest[];
-  integratedLessons: IntegratedLesson[];
   onDetailChange: (detail: VersionDetail) => void;
   currentDetail: VersionDetail;
 }
@@ -50,7 +43,6 @@ export function StepsBuilderSection({
   levelTitle,
   groupTests: groupTestsProp,
   practiceTests,
-  integratedLessons,
   onDetailChange,
   currentDetail,
 }: StepsBuilderSectionProps) {
@@ -61,12 +53,10 @@ export function StepsBuilderSection({
   const [error, setError] = useState<string | null>(null);
   const [syncBusy, setSyncBusy] = useState(false);
   const disabled = versionStatus === "PUBLISHED";
-  const isFoundation = levelType === "FOUNDATION";
   const isReadingL0Foundation = isReadingFoundationL0({
     levelType,
     order: levelOrder,
   });
-  const showStrictReadingFinalTests = !isFoundation || isReadingL0Foundation;
 
   const syncFromServer = useCallback(async () => {
     setError(null);
@@ -108,13 +98,6 @@ export function StepsBuilderSection({
     [onDetailChange, currentDetail],
   );
 
-  const handleLessonsChange = useCallback(
-    (lessons: IntegratedLesson[]) => {
-      onDetailChange({ ...currentDetail, integratedLessons: lessons });
-    },
-    [onDetailChange, currentDetail],
-  );
-
   return (
     <div className="space-y-8">
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -137,43 +120,9 @@ export function StepsBuilderSection({
 
       <Card className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
         <CardHeader className="p-0 pb-2">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <CardTitle className="text-lg font-semibold">1. Lessons (notes + micro-quizzes)</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Each lesson becomes one step. Students read notes, then pass embedded micro-quizzes
-                (unlimited retries).
-              </p>
-            </div>
-            <Link
-              href={`/dashboard/instructor/lessons?levelId=${levelId}`}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:opacity-90"
-            >
-              Open full lesson manager
-              <ExternalLink className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0 pt-6">
-          <IntegratedLessonManager
-            versionId={versionId}
-            lessons={integratedLessons}
-            disabled={disabled}
-            levelOrder={levelOrder}
-            onLessonsChange={handleLessonsChange}
-            onStepsSync={() => void syncFromServer()}
-          />
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-        <CardHeader className="p-0 pb-2">
-          <CardTitle className="text-lg font-semibold tracking-tight">2. Practice tests</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-            Add band-gated tests, then attach each one to a <span className="font-medium text-foreground">Practice Test</span>{" "}
-            step in the Steps section of this version. Use <span className="font-medium text-foreground">Standard</span> for a
-            passage question set, or <span className="font-medium text-foreground">Sentence locator</span> (Level 0) for embedded
-            passage + statements — both count as full practice tests.
+          <CardTitle className="text-lg font-semibold">1. Practice tests</CardTitle>
+          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+            Add at least three practice tests. Student steps sync automatically when you save.
           </p>
         </CardHeader>
         <CardContent className="p-0 pt-6">
@@ -194,101 +143,78 @@ export function StepsBuilderSection({
 
       {isReadingL0Foundation && (
         <p className="rounded-lg border border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-900 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-100">
-          <strong>Level 0 mode:</strong> use section 3 below to create{" "}
-          <strong>final tests</strong> (passage + questions). Do not use a final quiz step.
+          <strong>Level 0:</strong> configure three sequential final tests in section 2 (not a quiz step).
         </p>
       )}
 
-      {showStrictReadingFinalTests && (
-        <>
-          {!isReadingL0Foundation && (
-            <EvaluationConfigForm
-              version={currentDetail.version}
-              levelType={levelType}
-              levelOrder={levelOrder}
-              disabled={disabled}
-              onVersionChange={(v) => onDetailChange({ ...currentDetail, version: v })}
-            />
-          )}
-
-          {isReadingL0Foundation ? (
-            <Card className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-              <CardHeader className="p-0 pb-2">
-                <CardTitle className="text-lg font-semibold tracking-tight">
-                  3. Final tests (passage + questions)
-                </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-                  Not a quiz step — add three final tests here. Each uses an embedded passage and
-                  statement questions (sentence locator format).
-                </p>
-              </CardHeader>
-              <CardContent className="p-0 pt-6">
-                <L0FinalTestsBuilder
-                  levelId={levelId}
-                  versionId={versionId}
-                  version={currentDetail.version}
-                  disabled={disabled}
-                  finalTest={currentDetail.finalTest ?? null}
-                  practiceTests={practiceTests}
-                  onFinalTestChange={(ft) =>
-                    onDetailChange({
-                      ...currentDetail,
-                      finalTest: ft,
-                      groupTests: finalTestAsGroupTestList(ft, []),
-                    })
-                  }
-                  onVersionChange={(v) => onDetailChange({ ...currentDetail, version: v })}
-                  onPracticeTestsChange={handlePracticeTestsChange}
-                />
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-zinc-100">
-              <CardHeader className="p-0 pb-2">
-                <CardTitle className="text-lg font-semibold tracking-tight">3. Final tests (3 passages)</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-                  One pool linked to three passage question sets. Students take Final Test 1, then 2,
-                  then 3 (one strict attempt each). Use Bulk create or Add final test, then open
-                  Preview to verify.
-                </p>
-              </CardHeader>
-              <CardContent className="p-0 pt-6">
-                <div className="mb-6">
-                  <GroupTestsBulkCreateCard
-                    versionId={versionId}
-                    levelId={levelId}
-                    disabled={disabled}
-                    groupTests={groupTests}
-                    onGroupTestsChange={handleGroupTestsChange}
-                  />
-                </div>
-                <GroupTestBuilder
-                  levelId={levelId}
-                  versionId={versionId}
-                  levelTitle={levelTitle}
-                  groupTests={groupTests}
-                  disabled={disabled}
-                  onGroupTestsChange={handleGroupTestsChange}
-                />
-              </CardContent>
-            </Card>
-          )}
-        </>
+      {!isReadingL0Foundation && (
+        <EvaluationConfigForm
+          version={currentDetail.version}
+          levelType={levelType}
+          levelOrder={levelOrder}
+          disabled={disabled}
+          onVersionChange={(v) => onDetailChange({ ...currentDetail, version: v })}
+        />
       )}
 
-      {isFoundation && !isReadingL0Foundation && (
-        <>
-          {!showStrictReadingFinalTests && (
-            <EvaluationConfigForm
+      {isReadingL0Foundation ? (
+        <Card className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+          <CardHeader className="p-0 pb-2">
+            <CardTitle className="text-lg font-semibold tracking-tight">
+              2. Final tests (passage + questions)
+            </CardTitle>
+            <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+              Three final tests in sentence locator format — not a quiz step.
+            </p>
+          </CardHeader>
+          <CardContent className="p-0 pt-6">
+            <L0FinalTestsBuilder
+              levelId={levelId}
+              versionId={versionId}
               version={currentDetail.version}
-              levelType={levelType}
-              levelOrder={levelOrder}
               disabled={disabled}
+              finalTest={currentDetail.finalTest ?? null}
+              practiceTests={practiceTests}
+              onFinalTestChange={(ft) =>
+                onDetailChange({
+                  ...currentDetail,
+                  finalTest: ft,
+                  groupTests: finalTestAsGroupTestList(ft, []),
+                })
+              }
               onVersionChange={(v) => onDetailChange({ ...currentDetail, version: v })}
+              onPracticeTestsChange={handlePracticeTestsChange}
             />
-          )}
-          <FinalQuizSettingsCard steps={currentDetail.steps} />
-        </>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+          <CardHeader className="p-0 pb-2">
+            <CardTitle className="text-lg font-semibold tracking-tight">2. Final tests (3 passages)</CardTitle>
+            <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+              One pool, three passage question sets — same group-test flow as skill levels.
+            </p>
+          </CardHeader>
+          <CardContent className="p-0 pt-6">
+            <div className="mb-6">
+              <GroupTestsBulkCreateCard
+                versionId={versionId}
+                levelId={levelId}
+                disabled={disabled}
+                groupTests={groupTests}
+                onGroupTestsChange={handleGroupTestsChange}
+              />
+            </div>
+            <GroupTestBuilder
+              levelId={levelId}
+              versionId={versionId}
+              levelTitle={levelTitle}
+              groupTests={groupTests}
+              disabled={disabled}
+              onGroupTestsChange={handleGroupTestsChange}
+            />
+          </CardContent>
+        </Card>
       )}
     </div>
   );

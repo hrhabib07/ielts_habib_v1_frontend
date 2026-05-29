@@ -10,7 +10,6 @@ import {
   Tag,
   ListChecks,
   ClipboardCheck,
-  BookMarked,
   type LucideIcon,
 } from "lucide-react";
 
@@ -38,7 +37,6 @@ export const instructorNavGroups: InstructorNavGroup[] = [
   {
     title: "CONTENT",
     items: [
-      { label: "Lessons (Notes & Quizzes)", href: "/dashboard/instructor/lessons", icon: BookMarked },
       { label: "Practice Test Manager", href: "/dashboard/instructor/practice-tests", icon: ClipboardCheck },
       { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
       { label: "Passage Codes", href: "/dashboard/instructor/passage-codes", icon: Hash },
@@ -56,7 +54,6 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard/instructor/reading-levels": "Reading Levels",
   "/dashboard/instructor/reading-monitoring": "Reading Monitoring",
   "/dashboard/instructor/students": "Student Detail",
-  "/dashboard/instructor/lessons": "Lessons (Notes & Micro-quizzes)",
   "/dashboard/instructor/practice-tests": "Practice Test Manager",
   "/dashboard/instructor/group-tests": "Group Tests",
   "/dashboard/instructor/passage-codes": "Passage Codes",

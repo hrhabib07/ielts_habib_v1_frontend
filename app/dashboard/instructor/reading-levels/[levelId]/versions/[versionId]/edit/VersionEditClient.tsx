@@ -7,7 +7,6 @@ import {
   type VersionDetail,
   type ReadingLevelVersion,
   type GroupTest,
-  type IntegratedLesson,
   type PracticeTest,
   type ReadingLevel,
   getLevelById,
@@ -15,12 +14,10 @@ import {
 } from "@/src/lib/api/adminReadingVersions";
 import {
   VersionStatusBadge,
-  IntegratedLessonManager,
   PracticeTestBuilder,
   GroupTestBuilder,
   EvaluationConfigForm,
   PublishPanel,
-  FinalQuizSettingsCard,
 } from "@/src/features/reading-version";
 import { Loader2, ArrowLeft, Eye, FileText, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -94,10 +91,6 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
     setData((prev) => (prev ? { ...prev, practiceTests } : null));
   };
 
-  const handleLessonsChange = (integratedLessons: IntegratedLesson[]) => {
-    setData((prev) => (prev ? { ...prev, integratedLessons } : null));
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -121,12 +114,11 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
     );
   }
 
-  const { version, groupTests, practiceTests, integratedLessons, steps } = data;
+  const { version, groupTests, practiceTests } = data;
   const disabled = version.status === "PUBLISHED";
   const isPublished = version.status === "PUBLISHED";
   const isFoundation = level.levelType === "FOUNDATION";
   const isReadingL0Foundation = isReadingFoundationL0(level);
-  const showStrictReadingFinalTests = !isFoundation || isReadingL0Foundation;
   const mergedGroupTests = finalTestAsGroupTestList(data.finalTest ?? null, groupTests ?? []);
   const finalTestForUi = data.finalTest ?? (mergedGroupTests.length ? mergedGroupTests[0] : null);
   const hasFinalTests =
@@ -156,7 +148,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
             <Eye className="h-4 w-4" />
             Preview level
           </Link>
-          {hasFinalTests && showStrictReadingFinalTests && (
+          {hasFinalTests && (
             <Link
               href={`/dashboard/instructor/reading-levels/${levelId}/versions/${versionId}/final-evaluation-preview`}
               className="inline-flex items-center gap-2 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2 text-sm font-medium text-emerald-800 dark:text-emerald-200 shadow-sm transition-colors hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
@@ -189,8 +181,8 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground leading-relaxed">
               Level 0 uses <strong className="text-foreground">three sequential final tests</strong>{" "}
-              (passage + statement questions). Configure them in section 3 below — not a final quiz
-              step. Evaluation settings are applied automatically for this level.
+              (passage + statement questions). Configure them in section 2 below. Evaluation settings
+              are applied automatically for this level.
             </CardContent>
           </Card>
         ) : (
@@ -229,29 +221,10 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">1. Lessons (notes + micro-quizzes)</CardTitle>
-          <p className="text-xs text-muted-foreground">
-            One step per lesson. No separate video or standalone quiz steps.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <IntegratedLessonManager
-            versionId={versionId}
-            lessons={integratedLessons ?? []}
-            disabled={disabled}
-            levelOrder={level?.order ?? 0}
-            onLessonsChange={handleLessonsChange}
-            onStepsSync={() => void syncFromServer()}
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">2. Practice tests</CardTitle>
+          <CardTitle className="text-base">1. Practice tests</CardTitle>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            Standard (passage question set) and Sentence locator (embedded JSON) both count as practice tests. After
-            creating, link each test from a Practice Test step in the Steps editor for this version.
+            Add at least three practice tests. Steps sync automatically when you save (standard passage sets or
+            sentence locator JSON for Level 0).
           </p>
         </CardHeader>
         <CardContent>
@@ -264,11 +237,10 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
         </CardContent>
       </Card>
 
-      {showStrictReadingFinalTests && (
-        isReadingL0Foundation ? (
+      {isReadingL0Foundation ? (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">3. Final tests (passage + questions)</CardTitle>
+              <CardTitle className="text-base">2. Final tests (passage + questions)</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
                 Add three final tests — not a final quiz step. Each test: passage paragraphs +
                 statement questions.
@@ -301,7 +273,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">3. Final tests (3 passages)</CardTitle>
+              <CardTitle className="text-base">2. Final tests (3 passages)</CardTitle>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 One pool, three passage question sets. Open Preview final tests when mini tests are saved.
               </p>
@@ -324,10 +296,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
               />
             </CardContent>
           </Card>
-        )
-      )}
-
-      {isFoundation && !isReadingL0Foundation && <FinalQuizSettingsCard steps={steps} />}
+        )}
     </div>
   );
 }

@@ -49,9 +49,9 @@ export function EvaluationConfigForm({
         ? isFoundationBandFinalType(config.finalEvaluationType)
           ? "SEQUENTIAL_FINALS"
           : "FINAL_QUIZ"
-        : config.finalEvaluationType && config.finalEvaluationType !== ""
+        : isFoundationBandFinalType(config.finalEvaluationType)
           ? config.finalEvaluationType
-          : "FINAL_QUIZ",
+          : "GROUP_TEST",
   );
   const [passMarkPercent, setPassMarkPercent] = useState<string>(
     config.passMarkPercent != null ? String(config.passMarkPercent) : "",
@@ -70,9 +70,9 @@ export function EvaluationConfigForm({
       );
     } else {
       setFinalEvaluationType(
-        c.finalEvaluationType && c.finalEvaluationType !== ""
+        isFoundationBandFinalType(c.finalEvaluationType)
           ? c.finalEvaluationType
-          : "FINAL_QUIZ",
+          : "GROUP_TEST",
       );
     }
     setPassMarkPercent(c.passMarkPercent != null ? String(c.passMarkPercent) : "");
@@ -97,11 +97,9 @@ export function EvaluationConfigForm({
         if (Number.isFinite(n) && n >= 0 && n <= 100) payload.passMarkPercent = n;
       }
     } else {
-      payload.finalEvaluationType = finalEvaluationType || "FINAL_QUIZ";
-      if (passMarkPercent.trim() !== "") {
-        const n = Number(passMarkPercent);
-        if (Number.isFinite(n) && n >= 0 && n <= 100) payload.passMarkPercent = n;
-      }
+      payload.finalEvaluationType = isFoundationBandFinalType(finalEvaluationType)
+        ? finalEvaluationType
+        : "GROUP_TEST";
     }
     try {
       const updated = await updateEvaluationConfig(version._id, payload);
@@ -112,9 +110,6 @@ export function EvaluationConfigForm({
       setSubmitting(false);
     }
   };
-
-  const showPassMarkFoundation =
-    !isSkill && (!isFoundationL0 || finalEvaluationType === "FINAL_QUIZ");
 
   return (
     <Card>
@@ -148,17 +143,9 @@ export function EvaluationConfigForm({
               (three passage + statement tests). Final quiz mode is not used for this level.
             </div>
           ) : (
-            <div>
-              <Label>Pass mark % for final quiz (0–100)</Label>
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                value={passMarkPercent}
-                onChange={(e) => setPassMarkPercent(e.target.value)}
-                placeholder="e.g. 60"
-                disabled={disabled}
-              />
+            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+              <strong className="text-foreground">Final evaluation:</strong> group test with three
+              passages (section 2). Final quiz steps are no longer used.
             </div>
           )}
           {!disabled && (

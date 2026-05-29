@@ -37,7 +37,6 @@ const INSTRUCTOR_CONTENT: DashboardNavGroup = {
   title: "CONTENT",
   roles: ["INSTRUCTOR", "ADMIN"],
   items: [
-    { label: "Lessons (Notes & Quizzes)", href: "/dashboard/instructor/lessons", icon: BookMarked },
     { label: "Practice Test Manager", href: "/dashboard/instructor/practice-tests", icon: ClipboardCheck },
     { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
     { label: "Passage Codes", href: "/dashboard/instructor/passage-codes", icon: Hash },

@@ -143,7 +143,6 @@ export function LevelBuilderClient({ levelId }: LevelBuilderClientProps) {
             levelTitle={level.title}
             groupTests={detail.groupTests}
             practiceTests={detail.practiceTests ?? []}
-            integratedLessons={detail.integratedLessons ?? []}
             onDetailChange={handleDetailChange}
             currentDetail={detail}
           />

@@ -15,7 +15,6 @@ import {
   ClipboardCheck,
   ListChecks,
   MessageSquare,
-  BookMarked,
 } from "lucide-react";
 import { getReadingLevels } from "@/src/lib/api/adminReadingVersions";
 import {
@@ -109,12 +108,6 @@ export default function InstructorDashboardPage() {
       description: "Create levels, add steps, configure group tests and evaluation",
       href: "/dashboard/instructor/reading-levels",
       icon: BookOpen,
-    },
-    {
-      title: "Lessons (Notes & Micro-quizzes)",
-      description: "Create integrated lessons with notes and embedded micro-quizzes. Each lesson becomes a level step.",
-      href: "/dashboard/instructor/lessons",
-      icon: BookMarked,
     },
     {
       title: "Practice Test Manager",
