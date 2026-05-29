@@ -651,6 +651,12 @@ export const ReadingMockTestView = forwardRef<
             overallPass: res.isMastered,
             miniTestResults: [{ bandScore: res.bandScore, passed: res.passed }],
             newPassStatus: res.newPassStatus,
+            isMastered: res.isMastered,
+            levelComplete: res.newPassStatus === "PASSED",
+            finalTestIndex: res.finalTestIndex,
+            nextFinalTestIndex: res.nextFinalTestIndex,
+            bandScore: res.bandScore,
+            passed: res.passed,
           });
           return { ok: true };
         }

@@ -23,11 +23,14 @@ export function TestStartCountdownOverlay({
   onComplete,
   subtitle = "Get ready",
   variant = "indigo",
+  fast = false,
 }: {
   open: boolean;
   onComplete: () => void;
   subtitle?: string;
   variant?: TestStartCountdownVariant;
+  /** Shorter 3-2-1-GO when content is already prefetched. */
+  fast?: boolean;
 }) {
   const [display, setDisplay] = useState<number | "GO" | null>(null);
   const completeRef = useRef(onComplete);
@@ -40,13 +43,16 @@ export function TestStartCountdownOverlay({
     }
 
     setDisplay(3);
-    const t2 = window.setTimeout(() => setDisplay(2), 1000);
-    const t1 = window.setTimeout(() => setDisplay(1), 2000);
-    const tGo = window.setTimeout(() => setDisplay("GO"), 3000);
+    const stepMs = fast ? 650 : 1000;
+    const goMs = fast ? 1950 : 3000;
+    const doneMs = fast ? 2400 : 3600;
+    const t2 = window.setTimeout(() => setDisplay(2), stepMs);
+    const t1 = window.setTimeout(() => setDisplay(1), stepMs * 2);
+    const tGo = window.setTimeout(() => setDisplay("GO"), goMs);
     const tDone = window.setTimeout(() => {
       setDisplay(null);
       completeRef.current();
-    }, 3600);
+    }, doneMs);
 
     return () => {
       window.clearTimeout(t2);
@@ -54,7 +60,7 @@ export function TestStartCountdownOverlay({
       window.clearTimeout(tGo);
       window.clearTimeout(tDone);
     };
-  }, [open]);
+  }, [open, fast]);
 
   useEffect(() => {
     if (!open) return;

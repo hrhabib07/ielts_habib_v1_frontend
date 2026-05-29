@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FileText, Trophy, Eye, RotateCcw } from "lucide-react";
+import { FileText, Trophy, Eye, RotateCcw, ChevronRight } from "lucide-react";
 import type {
   PracticeTestStepContent,
   PracticeTestStepStatus,
@@ -13,6 +13,14 @@ import {
   isSentenceLocatorPracticeContent,
 } from "@/src/lib/api/readingStrictProgression";
 import { PRACTICE_TEST_MINUTES } from "@/src/constants/readingAssessmentTiming";
+import {
+  prefetchStepContent,
+  preloadPracticeTestViews,
+} from "@/src/lib/readingStepContentCache";
+import {
+  practiceTestHref,
+  prefetchPracticeTestRoute,
+} from "@/src/lib/prefetchReadingRoutes";
 
 export interface PracticeTestStepCardProps {
   levelId: string;
@@ -31,18 +39,19 @@ export function PracticeTestStepCard({
 }: PracticeTestStepCardProps) {
   const router = useRouter();
   const [status, setStatus] = useState<PracticeTestStepStatus | null>(null);
+  const testHref = practiceTestHref(levelId, stepId, true);
+
+  useEffect(() => {
+    prefetchStepContent(levelId, stepId);
+    preloadPracticeTestViews();
+    prefetchPracticeTestRoute(router, levelId, stepId, true);
+  }, [levelId, stepId, router]);
 
   useEffect(() => {
     getPracticeTestStepStatus(levelId, stepId)
       .then(setStatus)
       .catch(() => setStatus(null));
   }, [levelId, stepId]);
-
-  const handleStartTest = () => {
-    router.push(
-      `/profile/reading/strict-levels/${levelId}/practice-test?step=${encodeURIComponent(stepId)}`,
-    );
-  };
 
   const hasAttempts = status && status.attemptCount > 0;
   const isSl = isSentenceLocatorPracticeContent(content);
@@ -51,7 +60,7 @@ export function PracticeTestStepCard({
     (isSl ? status?.canReviewLastAttempt !== false : Boolean(status?.lastAttemptPassed));
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-8 shadow-sm">
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <div className="flex flex-col items-center text-center">
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-500/10 dark:bg-indigo-400/10">
           <FileText className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
@@ -69,7 +78,7 @@ export function PracticeTestStepCard({
         </p>
 
         {hasAttempts && (
-          <div className="mt-5 flex w-full max-w-sm flex-wrap items-center justify-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 py-3">
+          <div className="mt-5 flex w-full max-w-sm flex-wrap items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/50">
             <div className="flex items-center gap-2">
               <Trophy className="h-4 w-4 text-amber-500" />
               <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -83,7 +92,8 @@ export function PracticeTestStepCard({
             {showReviewLink && status!.lastAttemptId && (
               <Link
                 href={`/profile/reading/practice-attempt/${status!.lastAttemptId}`}
-                className="flex items-center gap-1.5 rounded-lg border border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/50 px-3 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50"
+                prefetch
+                className="flex items-center gap-1.5 rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 dark:border-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
               >
                 <Eye className="h-3.5 w-3.5" />
                 Review answers
@@ -93,10 +103,14 @@ export function PracticeTestStepCard({
         )}
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            onClick={handleStartTest}
-            className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md active:scale-[0.98]"
+          <Link
+            href={testHref}
+            prefetch
+            onMouseEnter={() => {
+              prefetchStepContent(levelId, stepId);
+              preloadPracticeTestViews();
+            }}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-md active:scale-[0.98]"
           >
             {hasAttempts ? (
               <>
@@ -104,9 +118,12 @@ export function PracticeTestStepCard({
                 Try again
               </>
             ) : (
-              "Start test"
+              <>
+                Start test
+                <ChevronRight className="h-4 w-4" />
+              </>
             )}
-          </button>
+          </Link>
         </div>
       </div>
     </div>

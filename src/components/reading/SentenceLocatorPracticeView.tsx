@@ -75,6 +75,10 @@ export interface SentenceLocatorPracticeViewProps {
     bestBandScore?: number;
     isNewBest?: boolean;
     isMastered?: boolean;
+    levelComplete?: boolean;
+    statementsCorrect?: { correct: number; total: number };
+    finalTestIndex?: 1 | 2 | 3;
+    nextFinalTestIndex?: 1 | 2 | 3 | null;
   }) => void;
   onProgressUpdate?: () => void;
   onRequestExit?: () => void;
@@ -174,14 +178,31 @@ export const SentenceLocatorPracticeView = forwardRef<
         questionId: s.id,
         studentAnswer: buildStudentAnswerJson(locks[s.id], keywords[s.id] ?? []),
       }));
+      const totalStatements = statements.length;
+      const statementsFromPercent = (pct: number) => ({
+        correct: totalStatements > 0 ? Math.round((pct / 100) * totalStatements) : 0,
+        total: totalStatements,
+      });
+
       if (finalTestIndex != null) {
         const res = await submitFinalTest(levelId, finalTestIndex, { answers: answerList });
+        const approxCorrect =
+          totalStatements > 0
+            ? Math.min(totalStatements, Math.round((res.bandScore / 9) * totalStatements))
+            : 0;
         onProgressUpdate?.();
         onSubmitted({
           passed: res.passed,
-          scorePercent: 0,
+          scorePercent:
+            totalStatements > 0
+              ? Math.round((approxCorrect / totalStatements) * 100)
+              : 0,
           bandScore: res.bandScore,
           isMastered: res.isMastered,
+          levelComplete: res.newPassStatus === "PASSED",
+          statementsCorrect: { correct: approxCorrect, total: totalStatements },
+          finalTestIndex: res.finalTestIndex,
+          nextFinalTestIndex: res.nextFinalTestIndex,
         });
         return { ok: true };
       }
@@ -191,10 +212,12 @@ export const SentenceLocatorPracticeView = forwardRef<
         passed: res.passed,
         scorePercent: res.scorePercent,
         bandScore: res.bandScore,
-        attemptId: res.attemptId,
+        attemptId: String(res.attemptId),
         attemptNumber: res.attemptNumber,
         bestBandScore: res.bestBandScore,
         isNewBest: res.isNewBest,
+        levelComplete: res.progress?.passStatus === "PASSED",
+        statementsCorrect: statementsFromPercent(res.scorePercent),
       });
       return { ok: true };
     } catch (err) {
@@ -215,7 +238,12 @@ export const SentenceLocatorPracticeView = forwardRef<
   );
 
   const canPrev = activeIdx > 0;
-  const canNext = activeIdx < statements.length - 1;
+  const isLastStatement = activeIdx === statements.length - 1;
+  const answeredCount = statements.filter((s) => locks[s.id] != null).length;
+  const allAnswered = answeredCount === statements.length;
+
+  const goPrev = () => setActiveIdx((i) => Math.max(0, i - 1));
+  const goNext = () => setActiveIdx((i) => Math.min(statements.length - 1, i + 1));
 
   return (
     <div
@@ -312,31 +340,50 @@ export const SentenceLocatorPracticeView = forwardRef<
         />
 
         <section className="flex min-h-0 min-w-0 flex-1 flex-col border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-200 px-3 py-2 dark:border-slate-800 sm:px-4">
-            <button
-              type="button"
-              disabled={!canPrev}
-              onClick={() => setActiveIdx((i) => Math.max(0, i - 1))}
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-2 text-sm disabled:opacity-40 dark:border-slate-700"
+          <div className="shrink-0 border-b border-slate-200 px-4 py-3 dark:border-slate-800 sm:px-5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Statement {activeIdx + 1}
+                <span className="font-normal text-slate-500 dark:text-slate-400">
+                  {" "}
+                  of {statements.length}
+                </span>
+              </p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                {answeredCount}/{statements.length} locked
+              </p>
+            </div>
+            <div
+              className="mt-3 flex items-center gap-1.5"
+              role="tablist"
+              aria-label="Statement progress"
             >
-              <ChevronLeft className="h-4 w-4" />
-              Prev
-            </button>
-            <span className="text-xs font-medium text-slate-500">
-              Statement {activeIdx + 1} / {statements.length}
-            </span>
-            <button
-              type="button"
-              disabled={!canNext}
-              onClick={() => setActiveIdx((i) => Math.min(statements.length - 1, i + 1))}
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-2 text-sm disabled:opacity-40 dark:border-slate-700"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </button>
+              {statements.map((st, idx) => {
+                const isActive = idx === activeIdx;
+                const isAnswered = locks[st.id] != null;
+                return (
+                  <button
+                    key={st.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-label={`Statement ${idx + 1}${isAnswered ? ", answered" : ", not answered"}`}
+                    onClick={() => setActiveIdx(idx)}
+                    className={cn(
+                      "h-2 min-w-0 flex-1 rounded-full transition-all",
+                      isActive
+                        ? "bg-indigo-600 dark:bg-indigo-500"
+                        : isAnswered
+                          ? "bg-emerald-400/90 dark:bg-emerald-500/80"
+                          : "bg-slate-200 dark:bg-slate-700",
+                    )}
+                  />
+                );
+              })}
+            </div>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
             {activeStatement ? (
               <div className="mx-auto max-w-xl space-y-4">
                 <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
@@ -374,24 +421,79 @@ export const SentenceLocatorPracticeView = forwardRef<
             ) : null}
           </div>
 
-          <div className="shrink-0 border-t border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-            {error ? <p className="mb-2 text-sm text-red-600 dark:text-red-400">{error}</p> : null}
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-900 sm:px-5">
+            {error ? (
+              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+                {error}
+              </p>
+            ) : null}
+            {!isLastStatement && answeredCount < statements.length ? (
+              <p className="mb-3 text-center text-xs text-slate-500 dark:text-slate-400">
+                Use <span className="font-medium text-slate-700 dark:text-slate-300">Next</span> to
+                move through each statement. You can submit on the last one.
+              </p>
+            ) : null}
+            {isLastStatement && !allAnswered ? (
+              <p className="mb-3 text-center text-xs text-amber-700 dark:text-amber-300">
+                Lock an answer for every statement before submitting.{" "}
+                {statements.length - answeredCount} still open.
+              </p>
+            ) : null}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
-                onClick={() => router.push(`/profile/reading/strict-levels/${levelId}`)}
-                className="text-sm text-slate-600 underline-offset-2 hover:underline dark:text-slate-400"
+                onClick={() =>
+                  onRequestExit
+                    ? onRequestExit()
+                    : router.push(`/profile/reading/strict-levels/${levelId}`)
+                }
+                className="order-2 text-center text-sm text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline dark:text-slate-400 dark:hover:text-slate-200 sm:order-1 sm:text-left"
               >
-                Save & exit later
+                Save &amp; exit later
               </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={() => void runSubmit()}
-                className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {submitting ? "Submitting…" : "Submit all"}
-              </button>
+              <div className="order-1 flex items-center gap-2 sm:order-2 sm:ml-auto">
+                <button
+                  type="button"
+                  disabled={!canPrev}
+                  onClick={goPrev}
+                  className={cn(
+                    "inline-flex h-11 min-w-[7.5rem] flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition-colors sm:flex-none",
+                    "hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700",
+                  )}
+                >
+                  <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
+                  Previous
+                </button>
+                {isLastStatement ? (
+                  <button
+                    type="button"
+                    disabled={submitting || !allAnswered}
+                    onClick={() => void runSubmit()}
+                    title={
+                      !allAnswered
+                        ? "Answer every statement before submitting"
+                        : undefined
+                    }
+                    className={cn(
+                      "inline-flex h-11 min-w-[7.5rem] flex-1 items-center justify-center gap-1.5 rounded-xl px-5 text-sm font-semibold text-white shadow-sm transition-colors sm:flex-none",
+                      allAnswered
+                        ? "bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                        : "cursor-not-allowed bg-slate-300 text-slate-500 dark:bg-slate-600 dark:text-slate-400",
+                    )}
+                  >
+                    {submitting ? "Submitting…" : "Submit all"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    className="inline-flex h-11 min-w-[7.5rem] flex-1 items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 sm:flex-none"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </section>

@@ -358,6 +358,7 @@ export interface PracticeTestReadingViewProps {
     attemptNumber?: number;
     bestBandScore?: number;
     isNewBest?: boolean;
+    levelComplete?: boolean;
   }) => void;
   onProgressUpdate?: () => void;
   /** When set, the in-test “Back” control calls this instead of navigating away (parent shows exit dialog). */
@@ -649,10 +650,11 @@ export const PracticeTestReadingView = forwardRef<
           passed: res.passed,
           scorePercent: res.scorePercent,
           bandScore: res.bandScore,
-          attemptId: res.attemptId,
+          attemptId: String(res.attemptId),
           attemptNumber: res.attemptNumber,
           bestBandScore: res.bestBandScore,
           isNewBest: res.isNewBest,
+          levelComplete: res.progress?.passStatus === "PASSED",
         });
         return { ok: true };
       } catch (err) {

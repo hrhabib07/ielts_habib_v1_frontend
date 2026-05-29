@@ -231,35 +231,37 @@ export function LevelLayout({
           {isLevelPassed && (
             <div
               data-level-completed-banner
-              className="mb-8 flex flex-col gap-6 rounded-2xl border border-[#1e3a8a]/20 dark:border-[#3b82f6]/30 bg-gradient-to-br from-[#1e3a8a]/5 to-[#1e3a8a]/10 dark:from-[#1e3a8a]/15 dark:to-[#1e3a8a]/25 px-6 py-6 shadow-sm"
+              className="mb-8 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-white to-indigo-50 shadow-md dark:border-emerald-800/40 dark:from-emerald-950/30 dark:via-slate-900 dark:to-indigo-950/20"
             >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-[#1e3a8a] dark:text-[#60a5fa]" />
+              <div className="flex flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/50">
+                    <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
                   <div>
-                    <p className="text-sm font-semibold text-[#0f172a] dark:text-slate-100">
+                    <p className="text-lg font-bold text-slate-900 dark:text-slate-100">
                       Level completed!
                     </p>
-                    <p className="text-xs text-[#1e3a8a]/80 dark:text-slate-400">
+                    <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                       {showFeedbackForm
-                        ? "Share quick feedback to continue to the next level."
+                        ? "Share quick feedback below, then continue to your next level."
                         : showContinue
                           ? nextLevelInfo
-                            ? "Next level is unlocked. Use the button below to continue."
-                            : "Great work. You've passed all steps in this level."
-                          : "Checking…"}
+                            ? "You passed every step. The next level is unlocked whenever you're ready."
+                            : "Congratulations — you've finished every level in this path."
+                          : "Checking your progress…"}
                     </p>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                   {completionScore != null && (
-                    <div className="rounded-xl bg-[#1e3a8a]/15 dark:bg-[#3b82f6]/20 px-4 py-2 text-right">
-                      <p className="text-[10px] font-medium uppercase tracking-wider text-[#1e3a8a] dark:text-[#60a5fa]">
-                        Score
+                    <div className="rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 text-right dark:border-slate-700 dark:bg-slate-900/80">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Overall score
                       </p>
-                      <p className="text-lg font-bold tabular-nums text-[#0f172a] dark:text-slate-100">
+                      <p className="text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
                         {completionScore.score}/{completionScore.total}
-                        <span className="ml-1.5 text-sm font-semibold">
+                        <span className="ml-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                           ({Math.round(completionScore.percentage)}%)
                         </span>
                       </p>
@@ -349,6 +351,7 @@ export function LevelLayout({
           </div>
           {dockBottomNav && activeStep && (
             <LevelStepBottomNav
+              levelId={detail.level._id}
               step={activeStep}
               stepIndex={activeStepIndex + 1}
               totalSteps={steps.length}

@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   ChevronRight,
@@ -28,11 +29,19 @@ import type {
 import type { GroupTestMiniTestForPreview } from "@/src/lib/api/adminReadingVersions";
 import type { PracticeTestContentForPreviewSentenceLocator } from "@/src/lib/api/adminReadingVersions";
 import { getStepContent, isSentenceLocatorPracticeContent } from "@/src/lib/api/readingStrictProgression";
+import {
+  getStepContentCached,
+  peekStepContentCached,
+  prefetchStepContent,
+  preloadPracticeTestViews,
+} from "@/src/lib/readingStepContentCache";
+import { prefetchReadingStep } from "@/src/lib/prefetchReadingStep";
 import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
 import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
 import { getStepContentForPreview } from "@/src/lib/api/adminReadingVersions";
 import { EmbeddedLearningBody } from "@/src/components/shared/EmbeddedLearningBody";
 import { QuizFocusedSessionLauncher } from "@/src/components/reading/QuizFocusedSessionLauncher";
+import { FinalEvaluationStartCard } from "@/src/components/reading/FinalEvaluationStartCard";
 
 const StepQuizSubmitCard = dynamic(
   () =>
@@ -81,90 +90,6 @@ const PracticeTestStepCard = dynamic(
     ssr: false,
   },
 );
-
-const IntegratedLessonPlayer = dynamic(
-  () =>
-    import("@/src/components/reading/IntegratedLessonPlayer").then(
-      (m) => m.IntegratedLessonPlayer,
-    ),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center py-8">
-        <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
-      </div>
-    ),
-    ssr: false,
-  },
-);
-
-function FinalEvaluationStartCard({
-  levelId,
-  groupTestsTotal,
-  groupTestsRemaining,
-  isLocked,
-}: {
-  levelId: string;
-  groupTestsTotal?: number;
-  groupTestsRemaining?: number;
-  isLocked?: boolean;
-}) {
-  const total = groupTestsTotal ?? 1;
-  const remaining = groupTestsRemaining ?? total;
-  const attempted = total - remaining;
-  const canStart = !isLocked && remaining > 0;
-  const finalHref = `/profile/reading/strict-levels/${levelId}/final-evaluation`;
-
-  return (
-    <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        Final Evaluation
-      </h3>
-      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        This is a full Reading mock test in exam conditions: three passages with
-        questions. You will complete it in a dedicated test environment.
-      </p>
-      {isLocked && (
-        <p className="mt-3 text-sm font-medium text-amber-600 dark:text-amber-400">
-          Complete all three practice tests to unlock the final evaluation.
-        </p>
-      )}
-      {total > 0 && !isLocked && (
-        <p className="mt-3 text-sm font-medium text-[#1e3a8a] dark:text-[#60a5fa]">
-          {remaining > 0
-            ? attempted === 0
-              ? `${remaining} attempt${remaining !== 1 ? "s" : ""} available`
-              : `${remaining} attempt${remaining !== 1 ? "s" : ""} remaining`
-            : "All attempts completed — view your average score on the level."}
-        </p>
-      )}
-      {canStart ? (
-        <Link
-          href={finalHref}
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
-        >
-          {`Start${attempted > 0 ? ` Attempt ${attempted + 1} of ${total}` : ""} Final Evaluation`}
-          <ChevronRight className="h-4 w-4" />
-        </Link>
-      ) : !isLocked && remaining === 0 ? (
-        <Link
-          href={finalHref}
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0f172a] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb]"
-        >
-          View Results
-          <ChevronRight className="h-4 w-4" />
-        </Link>
-      ) : (
-        <div
-          className="mt-5 inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-slate-300 dark:bg-slate-600 px-5 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400"
-          aria-disabled
-        >
-          Start Final Evaluation
-          <ChevronRight className="h-4 w-4" />
-        </div>
-      )}
-    </div>
-  );
-}
 
 const QUIZ_STEP_TYPES = ["QUIZ", "VOCABULARY_TEST"];
 
@@ -387,6 +312,7 @@ export function LevelContent({
   onNavigateToNextLevel,
   dockBottomNav = false,
 }: LevelContentProps) {
+  const router = useRouter();
   const [content, setContent] = useState<StepContent | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
   const [contentError, setContentError] = useState<string | null>(null);
@@ -395,16 +321,30 @@ export function LevelContent({
   // Fetch step content when step changes and is not locked
   const fetchContent = useCallback(
     async (stepId: string) => {
-      setContentLoading(true);
       setContentError(null);
       setShowSubscriptionPrompt(false);
-      setContent(null);
+
+      const cached =
+        !isPreview && levelId ? peekStepContentCached(levelId, stepId) : null;
+      if (cached) {
+        setContent(cached);
+        setContentLoading(false);
+      } else {
+        setContentLoading(true);
+        setContent(null);
+      }
+
       try {
         const data =
           isPreview && versionId
             ? await getStepContentForPreview(versionId, stepId)
-            : await getStepContent(levelId, stepId);
+            : await getStepContentCached(levelId, stepId, {
+                force: cached != null,
+              });
         setContent(data);
+        if (data.type === "PRACTICE_TEST") {
+          preloadPracticeTestViews();
+        }
       } catch (err) {
         const ax = err as {
           response?: { status?: number; data?: { message?: string } };
@@ -463,6 +403,17 @@ export function LevelContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step?._id, step?.contentId, step?.stepType, isLocked, fetchContent]);
 
+  useEffect(() => {
+    if (isPreview || isLocked || !levelId || !allSteps || !step) return;
+    const idx = stepIndex - 1;
+    const neighbors = [allSteps[idx - 1], allSteps[idx + 1]].filter(
+      (n): n is LevelDetailStep => n != null,
+    );
+    for (const neighbor of neighbors) {
+      prefetchReadingStep(router, levelId, neighbor);
+    }
+  }, [allSteps, step?._id, stepIndex, isLocked, isPreview, levelId, router]);
+
   if (!step) {
     return <LevelContentEmpty />;
   }
@@ -476,6 +427,14 @@ export function LevelContent({
   const hasNext = allSteps && stepIndex < totalSteps;
   const prevStep = hasPrev && allSteps ? allSteps[stepIndex - 2] : null;
   const nextStep = hasNext && allSteps ? allSteps[stepIndex] : null;
+
+  const warmStep = useCallback(
+    (target: LevelDetailStep | null | undefined) => {
+      if (!target || isPreview || !levelId) return;
+      prefetchReadingStep(router, levelId, target);
+    },
+    [isPreview, levelId, router],
+  );
 
   return (
     <div>
@@ -527,6 +486,8 @@ export function LevelContent({
           {prevStep && onNavigate && (
             <button
               type="button"
+              onMouseEnter={() => warmStep(prevStep)}
+              onFocus={() => warmStep(prevStep)}
               onClick={() => onNavigate(prevStep._id)}
               className="flex items-center gap-2 rounded-xl border border-[#1e3a8a]/30 dark:border-[#3b82f6]/40 bg-[#1e3a8a]/10 dark:bg-[#1e3a8a]/20 px-5 py-2.5 text-sm font-semibold text-[#1e3a8a] dark:text-[#60a5fa] shadow-sm transition-all hover:bg-[#1e3a8a]/20 dark:hover:bg-[#1e3a8a]/30 active:scale-[0.98]"
             >
@@ -576,6 +537,8 @@ export function LevelContent({
                 {prevStep && onNavigate && (
                   <button
                     type="button"
+                    onMouseEnter={() => warmStep(prevStep)}
+                    onFocus={() => warmStep(prevStep)}
                     onClick={() => onNavigate(prevStep._id)}
                     className="flex items-center gap-2 rounded-xl border border-[#1e3a8a]/30 dark:border-[#3b82f6]/40 bg-[#1e3a8a]/10 dark:bg-[#1e3a8a]/20 px-5 py-2.5 text-sm font-semibold text-[#1e3a8a] dark:text-[#60a5fa] shadow-sm transition-all hover:bg-[#1e3a8a]/20 dark:hover:bg-[#1e3a8a]/30 active:scale-[0.98]"
                   >
@@ -680,42 +643,12 @@ export function LevelContent({
                   content={content.content}
                 />
               )}
-            {!contentLoading &&
-              !contentError &&
-              content !== null &&
-              content.type === "INTEGRATED_LESSON" &&
-              !isPreview && (
-                <IntegratedLessonPlayer
-                  levelId={levelId}
-                  stepId={step._id}
-                  content={content.content}
-                  onComplete={(res) => {
-                    onProgressUpdate(res.progress);
-                    if (res.lessonComplete) {
-                      onLevelPassed();
-                    }
-                  }}
-                />
-              )}
-            {!contentLoading &&
-              !contentError &&
-              content !== null &&
-              content.type === "INTEGRATED_LESSON" &&
-              isPreview && (
-                <div className="space-y-4">
-                  <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-                    Instructor preview — same layout and EN/বাংলা toggle as students. Micro-quizzes
-                    show correct answers and explanations after submit.
-                  </div>
-                  <IntegratedLessonPlayer
-                    levelId={levelId}
-                    stepId={step._id}
-                    content={content.content}
-                    previewMode
-                    instructorGradingBlocks={content.content.instructorGradingBlocks}
-                  />
-                </div>
-              )}
+            {step.stepType === "INTEGRATED_LESSON" && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
+                This lesson type is no longer available. Continue with practice tests, or contact
+                support if your progress is stuck.
+              </div>
+            )}
 
             {!contentLoading &&
               !contentError &&
@@ -885,6 +818,8 @@ export function LevelContent({
                     {prevStep ? (
                       <button
                         type="button"
+                        onMouseEnter={() => warmStep(prevStep)}
+                        onFocus={() => warmStep(prevStep)}
                         onClick={() => onNavigate(prevStep._id)}
                         className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-100 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800 sm:gap-2 sm:rounded-xl sm:px-3 sm:text-sm"
                       >
@@ -945,6 +880,8 @@ export function LevelContent({
                     {nextStep ? (
                       <button
                         type="button"
+                        onMouseEnter={() => warmStep(nextStep)}
+                        onFocus={() => warmStep(nextStep)}
                         onClick={() => onNavigate(nextStep._id)}
                         className="flex items-center gap-1 rounded-lg bg-[#1e3a8a] px-2.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#0f172a] active:scale-[0.98] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb] sm:gap-2 sm:rounded-xl sm:px-3 sm:text-sm"
                       >

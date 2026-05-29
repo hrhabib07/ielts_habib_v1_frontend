@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { Suspense, useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Loader2,
   ArrowLeft,
-  CheckCircle2,
   AlertCircle,
 } from "lucide-react";
 import {
@@ -28,15 +27,25 @@ import {
 import { ReadingTestExitDialog } from "@/src/components/reading/ReadingTestExitDialog";
 import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
 import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
+import { ReadingAssessmentResultView } from "@/src/components/reading/ReadingAssessmentResultView";
+import { FinalEvaluationResultsSummary } from "@/src/components/reading/FinalEvaluationResultsSummary";
 import { TestStartCountdownOverlay } from "@/src/components/reading/TestStartCountdownOverlay";
 
-type Phase = "loading" | "no_test" | "test" | "result" | "premium_locked";
+type Phase =
+  | "loading"
+  | "no_test"
+  | "test"
+  | "result"
+  | "summary"
+  | "premium_locked";
 type FinalTestUiMode = "standard" | "sentence_locator";
 
-export default function FinalEvaluationPage() {
+function FinalEvaluationPageContent() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const levelId = params.id;
+  const viewResults = searchParams.get("view") === "results";
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [finalIndex, setFinalIndex] = useState<1 | 2 | 3 | null>(null);
@@ -50,12 +59,18 @@ export default function FinalEvaluationPage() {
     passed: boolean;
     isMastered: boolean;
     bandScore: number;
+    levelComplete?: boolean;
+    finalTestIndex?: 1 | 2 | 3;
+    nextFinalTestIndex?: 1 | 2 | 3 | null;
+    scorePercent?: number;
+    statementsCorrect?: { correct: number; total: number };
+    title?: string;
   } | null>(null);
   const mockTestRef = useRef<ReadingMockTestViewHandle>(null);
   const locatorRef = useRef<SentenceLocatorPracticeViewHandle>(null);
   const [exitOpen, setExitOpen] = useState(false);
   const [exitLoading, setExitLoading] = useState(false);
-  const [entryCountdownOpen, setEntryCountdownOpen] = useState(true);
+  const [entryCountdownOpen, setEntryCountdownOpen] = useState(!viewResults);
 
   useEffect(() => {
     if (phase !== "test" || !levelId) return;
@@ -81,6 +96,35 @@ export default function FinalEvaluationPage() {
     if (!res?.ok) return;
   }, [testMode]);
 
+  const loadResultsSummary = useCallback(async () => {
+    if (!levelId) return;
+    setPhase("loading");
+    setErrorMessage(null);
+    try {
+      const status = await getFinalPhaseStatus(levelId);
+      if (!status) {
+        setPhase("no_test");
+        setErrorMessage("This level does not use sequential final tests.");
+        return;
+      }
+      setPhaseStatus(status);
+      if (status.strictAttempts.length === 0) {
+        setPhase("no_test");
+        setErrorMessage(
+          status.nextFinalTestIndex != null
+            ? `Start Final Test ${status.nextFinalTestIndex} to see your first result here.`
+            : "No final test results yet.",
+        );
+        return;
+      }
+      setPhase("summary");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unable to load results.";
+      setErrorMessage(msg);
+      setPhase("no_test");
+    }
+  }, [levelId]);
+
   const loadTest = useCallback(async () => {
     if (!levelId) return;
     setPhase("loading");
@@ -99,6 +143,10 @@ export default function FinalEvaluationPage() {
 
       const index = status.nextFinalTestIndex;
       if (index == null) {
+        if (status.strictAttempts.length > 0) {
+          setPhase("summary");
+          return;
+        }
         setPhase("no_test");
         setErrorMessage(
           status.strictFinalsComplete && !status.isMastered
@@ -162,32 +210,64 @@ export default function FinalEvaluationPage() {
     }
   }, [levelId, router]);
 
+  useEffect(() => {
+    if (!levelId || !viewResults) return;
+    setEntryCountdownOpen(false);
+    void loadResultsSummary();
+  }, [levelId, viewResults, loadResultsSummary]);
+
   const handleMockSubmitted = useCallback(
     (res: {
       overallPass: boolean;
       miniTestResults: Array<{ bandScore: number; passed: boolean }>;
+      newPassStatus?: string;
+      isMastered?: boolean;
+      levelComplete?: boolean;
+      finalTestIndex?: 1 | 2 | 3;
+      nextFinalTestIndex?: 1 | 2 | 3 | null;
+      bandScore?: number;
+      passed?: boolean;
     }) => {
       const first = res.miniTestResults[0];
       setResult({
-        passed: first?.passed ?? false,
-        isMastered: res.overallPass,
-        bandScore: first?.bandScore ?? 0,
+        passed: res.passed ?? first?.passed ?? false,
+        isMastered: res.isMastered ?? res.overallPass,
+        bandScore: res.bandScore ?? first?.bandScore ?? 0,
+        levelComplete: res.levelComplete ?? res.newPassStatus === "PASSED",
+        finalTestIndex: res.finalTestIndex ?? finalIndex ?? undefined,
+        nextFinalTestIndex: res.nextFinalTestIndex,
+        title: finalIndex != null ? `Final test ${finalIndex}` : "Final evaluation",
       });
       setPhase("result");
     },
-    [],
+    [finalIndex],
   );
 
   const handleLocatorSubmitted = useCallback(
-    (res: { passed: boolean; bandScore: number; isMastered?: boolean }) => {
+    (res: {
+      passed: boolean;
+      bandScore: number;
+      isMastered?: boolean;
+      levelComplete?: boolean;
+      finalTestIndex?: 1 | 2 | 3;
+      nextFinalTestIndex?: 1 | 2 | 3 | null;
+      scorePercent?: number;
+      statementsCorrect?: { correct: number; total: number };
+    }) => {
       setResult({
         passed: res.passed,
         isMastered: res.isMastered ?? res.passed,
         bandScore: res.bandScore,
+        levelComplete: res.levelComplete,
+        finalTestIndex: res.finalTestIndex ?? finalIndex ?? undefined,
+        nextFinalTestIndex: res.nextFinalTestIndex,
+        scorePercent: res.scorePercent,
+        statementsCorrect: res.statementsCorrect,
+        title: sentenceLocatorContent?.title ?? (finalIndex != null ? `Final test ${finalIndex}` : undefined),
       });
       setPhase("result");
     },
-    [],
+    [finalIndex, sentenceLocatorContent?.title],
   );
 
   const handleBackToLevel = useCallback(() => {
@@ -202,7 +282,7 @@ export default function FinalEvaluationPage() {
     );
   }
 
-  if (entryCountdownOpen) {
+  if (entryCountdownOpen && !viewResults) {
     return (
       <TestStartCountdownOverlay
         open
@@ -223,7 +303,7 @@ export default function FinalEvaluationPage() {
   if (phase === "loading") {
     return (
       <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <LoaderBlock />
+        <LoaderBlock label={viewResults ? "Loading your results…" : "Preparing final test…"} />
       </div>
     );
   }
@@ -238,26 +318,42 @@ export default function FinalEvaluationPage() {
     );
   }
 
+  if (phase === "summary" && phaseStatus) {
+    return (
+      <FinalEvaluationResultsSummary
+        status={phaseStatus}
+        levelId={levelId}
+        onBackToLevel={handleBackToLevel}
+      />
+    );
+  }
+
   if (phase === "no_test") {
     return (
       <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
         <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-white p-8 text-center shadow-xl dark:border-slate-800 dark:bg-slate-900">
           <AlertCircle className="mx-auto h-6 w-6 text-amber-600 dark:text-amber-400" />
           <h2 className="mt-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
-            No test available
+            {viewResults ? "No results yet" : "No test available"}
           </h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
             {errorMessage ??
-              "Complete all practice tests first, or you have already finished this final phase."}
+              (viewResults
+                ? "Complete at least one final test to see results here."
+                : "Complete all practice tests first, or you have already finished this final phase.")}
           </p>
           <div className="mt-6 flex flex-col gap-3">
-            <button
-              type="button"
-              onClick={() => setEntryCountdownOpen(true)}
-              className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
-            >
-              Try again
-            </button>
+            {!viewResults && phaseStatus?.nextFinalTestIndex != null ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setEntryCountdownOpen(true);
+                }}
+                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+              >
+                Start Final Test {phaseStatus.nextFinalTestIndex}
+              </button>
+            ) : null}
             <Link
               href={`/profile/reading/strict-levels/${levelId}`}
               className="inline-flex items-center justify-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400"
@@ -318,74 +414,45 @@ export default function FinalEvaluationPage() {
 
   if (phase === "result" && result) {
     return (
-      <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
-        <ResultCard
-          mastered={result.isMastered}
-          bandScore={result.bandScore}
-          finalIndex={finalIndex}
-          onBack={handleBackToLevel}
-        />
-      </div>
+      <ReadingAssessmentResultView
+        variant="final"
+        passed={result.passed}
+        bandScore={result.bandScore}
+        scorePercent={result.statementsCorrect ? undefined : result.scorePercent}
+        statementsCorrect={result.statementsCorrect}
+        title={result.title}
+        isMastered={result.isMastered}
+        levelComplete={result.levelComplete}
+        finalTestIndex={result.finalTestIndex ?? finalIndex ?? undefined}
+        nextFinalTestIndex={result.nextFinalTestIndex}
+        levelId={levelId}
+        onBackToLevel={handleBackToLevel}
+      />
     );
   }
 
   return null;
 }
 
-function LoaderBlock() {
+export default function FinalEvaluationPage() {
   return (
-    <div className="flex flex-col items-center gap-5">
-      <Loader2 className="h-11 w-11 animate-spin text-indigo-600 dark:text-indigo-400" />
-      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-        Preparing final test…
-      </p>
-    </div>
+    <Suspense
+      fallback={
+        <div className="fixed inset-0 z-40 flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <LoaderBlock />
+        </div>
+      }
+    >
+      <FinalEvaluationPageContent />
+    </Suspense>
   );
 }
 
-function ResultCard({
-  mastered,
-  bandScore,
-  finalIndex,
-  onBack,
-}: {
-  mastered: boolean;
-  bandScore: number;
-  finalIndex: 1 | 2 | 3 | null;
-  onBack: () => void;
-}) {
+function LoaderBlock({ label = "Preparing final test…" }: { label?: string }) {
   return (
-    <div
-      className={`w-full max-w-md rounded-2xl border p-8 text-center shadow-xl ${
-        mastered
-          ? "border-emerald-200/80 bg-white dark:border-emerald-800/50 dark:bg-slate-900"
-          : "border-amber-200/80 bg-white dark:border-amber-800/50 dark:bg-slate-900"
-      }`}
-    >
-      {mastered ? (
-        <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600 dark:text-emerald-400" />
-      ) : (
-        <AlertCircle className="mx-auto h-12 w-12 text-amber-600 dark:text-amber-400" />
-      )}
-      <h2 className="mt-4 text-xl font-semibold text-slate-900 dark:text-slate-100">
-        {mastered ? "Level mastered" : "Final attempt recorded"}
-      </h2>
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        {mastered
-          ? "You reached your target band. This level counts toward your course progress."
-          : `Band ${bandScore.toFixed(1)}. ${
-              finalIndex != null && finalIndex < 3
-                ? `Return to the level to take Final Test ${finalIndex + 1}.`
-                : "You may advance to the next level; mastery needs your target band on a final."
-            }`}
-      </p>
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-6 w-full rounded-xl bg-indigo-600 py-3 text-[15px] font-semibold text-white hover:bg-indigo-700"
-      >
-        Back to level
-      </button>
+    <div className="flex flex-col items-center gap-5">
+      <Loader2 className="h-11 w-11 animate-spin text-indigo-600 dark:text-indigo-400" />
+      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{label}</p>
     </div>
   );
 }

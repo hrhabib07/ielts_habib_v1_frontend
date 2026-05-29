@@ -1,11 +1,15 @@
 "use client";
 
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import type { LevelDetailStep } from "@/src/lib/api/readingStrictProgression";
+import { prefetchReadingStep } from "@/src/lib/prefetchReadingStep";
 
 const QUIZ_STEP_TYPES = ["QUIZ", "VOCABULARY_TEST"] as const;
 
 export interface LevelStepBottomNavProps {
+  levelId: string;
   step: LevelDetailStep;
   stepIndex: number;
   totalSteps: number;
@@ -20,6 +24,7 @@ export interface LevelStepBottomNavProps {
 }
 
 export function LevelStepBottomNav({
+  levelId,
   step,
   stepIndex,
   totalSteps,
@@ -32,6 +37,7 @@ export function LevelStepBottomNav({
   nextLevelInfo,
   onNavigateToNextLevel,
 }: LevelStepBottomNavProps) {
+  const router = useRouter();
   const isQuizStep = QUIZ_STEP_TYPES.includes(
     step.stepType as (typeof QUIZ_STEP_TYPES)[number],
   );
@@ -41,6 +47,14 @@ export function LevelStepBottomNav({
   const hasNext = stepIndex < totalSteps;
   const prevStep = hasPrev ? allSteps[stepIndex - 2] : null;
   const nextStep = hasNext ? allSteps[stepIndex] : null;
+
+  const warmStep = useCallback(
+    (target: LevelDetailStep | null) => {
+      if (!target) return;
+      prefetchReadingStep(router, levelId, target);
+    },
+    [levelId, router],
+  );
 
   return (
     <div
@@ -54,6 +68,8 @@ export function LevelStepBottomNav({
             {prevStep ? (
               <button
                 type="button"
+                onMouseEnter={() => warmStep(prevStep)}
+                onFocus={() => warmStep(prevStep)}
                 onClick={() => onNavigate(prevStep._id)}
                 className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-100 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800 sm:gap-2 sm:rounded-xl sm:px-3 sm:text-sm"
               >
@@ -115,6 +131,8 @@ export function LevelStepBottomNav({
             {nextStep ? (
               <button
                 type="button"
+                onMouseEnter={() => warmStep(nextStep)}
+                onFocus={() => warmStep(nextStep)}
                 onClick={() => onNavigate(nextStep._id)}
                 className="flex items-center gap-1 rounded-lg bg-[#1e3a8a] px-2.5 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#0f172a] active:scale-[0.98] dark:bg-[#3b82f6] dark:hover:bg-[#2563eb] sm:gap-2 sm:rounded-xl sm:px-3 sm:text-sm"
               >

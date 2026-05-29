@@ -194,51 +194,99 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="relative min-h-[calc(100dvh-4rem)]">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[min(42vh,22rem)] bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,var(--primary)_0%,transparent_55%)] opacity-[0.07] dark:opacity-[0.12]"
-        aria-hidden
-      />
-      <div className="relative mx-auto w-full max-w-5xl space-y-10 px-4 py-10 md:space-y-12 md:px-6 md:py-12">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-              Your workspace
-            </p>
-            <h1 className="mt-2 text-balance text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              My profile
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground md:text-[0.9375rem]">
-              Subscription, guarantee, and Reading progress — keep details current so we can support
-              you without friction.
-            </p>
-          </div>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            <Button asChild variant="outline" size="lg" className="gap-2 border-border/90">
-              <Link href="/profile/reading">
-                <BookOpen className="h-4 w-4" />
-                Open Reading
-              </Link>
-            </Button>
-            <Button asChild size="lg" className="gap-2 shadow-md shadow-primary/10">
-              <Link href="/profile/score-guarantee">
-                <Shield className="h-4 w-4" />
-                Score Guarantee™
-              </Link>
-            </Button>
-            <Button asChild variant="secondary" size="lg" className="gap-2">
-              <Link href="/pricing">
-                <CreditCard className="h-4 w-4" />
-                Plans
-              </Link>
-            </Button>
+    <div className="relative min-h-[calc(100dvh-4rem)] overflow-hidden">
+      {/* Ambient background */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-primary/8 blur-3xl" />
+        <div className="absolute -right-24 top-32 h-80 w-80 rounded-full bg-violet-500/8 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-500/6 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:space-y-10 md:px-6 md:py-10">
+        {/* Hero identity strip */}
+        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-lg shadow-black/[0.03] dark:shadow-black/20">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-emerald-500/[0.05]" aria-hidden />
+          <div className="relative p-6 md:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 items-start gap-5">
+                <div className="relative shrink-0">
+                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/40 to-emerald-500/30 blur-sm" aria-hidden />
+                  <div
+                    className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-2xl font-bold text-primary-foreground shadow-lg"
+                    aria-hidden
+                  >
+                    {(name || "S").trim().charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+                    Student workspace
+                  </p>
+                  <h1 className="mt-1 truncate text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                    {name.trim() || "Student"}
+                  </h1>
+                  {phone?.trim() ? (
+                    <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                      <Phone className="h-4 w-4 shrink-0" />
+                      {phone.trim()}
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Add a phone number in Personal details so we can reach you.
+                    </p>
+                  )}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {[currentCity, currentCountry].filter(Boolean).length > 0 && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-foreground">
+                        <MapPin className="h-3 w-3 text-muted-foreground" />
+                        {[currentCity, currentCountry].filter(Boolean).join(", ")}
+                      </span>
+                    )}
+                    {[dreamCity, dreamCountry].filter(Boolean).length > 0 && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-foreground">
+                        <User className="h-3 w-3 text-primary" />
+                        Goal: {[dreamCity, dreamCountry].filter(Boolean).join(" → ")}
+                      </span>
+                    )}
+                    {readingTarget != null && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                        Reading target · Band {readingTarget}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 flex-wrap gap-2 lg:flex-col lg:items-stretch xl:flex-row">
+                <Button asChild size="lg" className="gap-2 shadow-md shadow-primary/15">
+                  <Link href="/profile/reading">
+                    <BookOpen className="h-4 w-4" />
+                    Open Reading
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="gap-2 bg-background/80">
+                  <Link href="/profile/score-guarantee">
+                    <Shield className="h-4 w-4" />
+                    Guarantee
+                  </Link>
+                </Button>
+                <Button asChild variant="secondary" size="lg" className="gap-2">
+                  <Link href="/pricing">
+                    <CreditCard className="h-4 w-4" />
+                    Plans
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
-      <Link
-        href="/profile/score-guarantee"
-        className="group block rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-card p-6 shadow-sm transition-all hover:border-primary/35 hover:shadow-md md:p-7"
-      >
+        {/* Quick links bento */}
+        <div className="grid gap-4 md:grid-cols-2">
+        <Link
+          href="/profile/score-guarantee"
+          className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-md md:p-7"
+        >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20">
@@ -262,9 +310,9 @@ export default function ProfilePage() {
             View guarantee →
           </span>
         </div>
-      </Link>
+        </Link>
 
-      <Card className="overflow-hidden border border-emerald-500/20 bg-gradient-to-br from-emerald-500/[0.06] via-card to-card shadow-sm">
+        <Card className="overflow-hidden border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.07] via-card to-card shadow-sm transition-shadow hover:shadow-md">
         <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between md:p-7">
           <div className="flex gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
@@ -293,69 +341,28 @@ export default function ProfilePage() {
             </a>
           </Button>
         </div>
-      </Card>
+        </Card>
+        </div>
 
-      <Card className="overflow-hidden border-border/80 shadow-sm">
-        <div className="border-b border-border/60 bg-muted/30 px-6 py-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary"
-              aria-hidden
+      <section aria-labelledby="reading-overview-heading" className="scroll-mt-8">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
+              Analytics
+            </p>
+            <h2
+              id="reading-overview-heading"
+              className="mt-1 text-xl font-bold tracking-tight text-foreground md:text-2xl"
             >
-              {(name || "S").trim().charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-lg font-semibold text-foreground">
-                {name.trim() || "Student"}
-              </p>
-              {phone?.trim() ? (
-                <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4 shrink-0" />
-                  {phone.trim()}
-                </p>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Add a phone number in Personal details (Edit) so we can reach you if needed.
-                </p>
-              )}
-            </div>
+              Reading progress
+            </h2>
           </div>
         </div>
-        <div className="grid gap-4 p-6 sm:grid-cols-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Reading target band
-            </p>
-            <p className="mt-1 text-base font-semibold text-foreground">
-              {readingTarget != null ? `Band ${readingTarget}` : "—"}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Current location
-            </p>
-            <p className="mt-1 flex items-start gap-2 text-sm text-foreground">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <span>
-                {[currentCity, currentCountry].filter(Boolean).join(", ") || "—"}
-              </span>
-            </p>
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Study goal
-            </p>
-            <p className="mt-1 flex items-start gap-2 text-sm text-foreground">
-              <User className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <span>
-                {[dreamCity, dreamCountry].filter(Boolean).join(" → ") || "—"}
-              </span>
-            </p>
-          </div>
-        </div>
-      </Card>
+        <ProfileSummarySection />
+      </section>
 
-      <Card className="border-border/80 p-6 shadow-sm md:p-8">
+      <div className="grid gap-6 lg:grid-cols-2">
+      <Card className="border-border/70 p-6 shadow-sm md:p-7">
         <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground md:text-xl">
           Account security
         </h2>
@@ -422,15 +429,9 @@ export default function ProfilePage() {
           </div>
         )}
       </Card>
+      </div>
 
-      <section aria-labelledby="reading-overview-heading">
-        <h2 id="reading-overview-heading" className="sr-only">
-          Reading overview
-        </h2>
-        <ProfileSummarySection />
-      </section>
-
-      <Card className="border-border/80 p-6 shadow-sm md:p-8">
+      <Card className="border-border/70 p-6 shadow-sm md:p-8">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-tight text-foreground md:text-xl">
@@ -476,10 +477,10 @@ export default function ProfilePage() {
               ] as const
             ).map((row) => (
               <div key={row.label} className="space-y-1.5">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                   {row.label}
                 </p>
-                <p className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5 text-sm text-foreground">
+                <p className="rounded-xl border border-border/50 bg-muted/25 px-3.5 py-2.5 text-sm text-foreground">
                   {row.value}
                 </p>
               </div>
