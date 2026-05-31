@@ -193,3 +193,27 @@ export async function adminUpdateCoupon(
   );
   return res.data.data;
 }
+
+export interface PlatformConfig {
+  configKey: string;
+  premiumBasePrice: number;
+  scholarshipOfferExpiryHours: number;
+}
+
+export async function adminGetPlatformConfig(): Promise<PlatformConfig> {
+  const res = await apiClient.get<{ success: boolean; data: PlatformConfig }>(
+    `${BASE}/platform-config`,
+  );
+  return res.data.data;
+}
+
+export async function adminUpdatePlatformConfig(payload: {
+  premiumBasePrice?: number;
+  scholarshipOfferExpiryHours?: number;
+}): Promise<PlatformConfig> {
+  const res = await apiClient.patch<{ success: boolean; data: PlatformConfig }>(
+    `${BASE}/platform-config`,
+    payload,
+  );
+  return res.data.data;
+}

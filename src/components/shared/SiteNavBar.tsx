@@ -1,0 +1,323 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import {
+  BarChart2,
+  ChevronDown,
+  FileQuestion,
+  Flame,
+  Layers,
+  LogOut,
+  Menu,
+  Sparkles,
+  Tag,
+  User,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { GamlishLogo } from "@/src/components/shared/GamlishLogo";
+import { SiteMobileNav } from "@/src/components/shared/SiteMobileNav";
+import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
+import { useStudentNavProgress } from "@/src/hooks/useStudentNavProgress";
+import { getDecodedTokenClient, logout } from "@/src/lib/auth";
+import type { CurrentUser } from "@/src/lib/auth-server";
+import type { UserRole } from "@/src/lib/constants";
+import { readingPathPremium } from "@/src/lib/readingPathPremium";
+import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
+import { cn } from "@/lib/utils";
+import { GuestLandingNavBar } from "@/src/components/home/guest/GuestLandingNavBar";
+
+const STUDENT_LINKS = [
+  { href: "/profile/reading", label: "Reading" },
+  { href: "/profile", label: "My profile" },
+] as const;
+
+const PUBLIC_LINKS = [{ href: "/pricing", label: "Plans & pricing" }] as const;
+
+export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?: string }) {
+  const { initialUser = null, className } = props;
+  const pathname = usePathname() ?? "";
+  const [clientUser, setClientUser] = useState<{ role: UserRole; userId: string } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const user = initialUser ?? clientUser;
+  const isStudent = user?.role === "STUDENT";
+  const isInstructor = user?.role === "INSTRUCTOR";
+  const isAdmin = user?.role === "ADMIN";
+
+  const { profileSummary, loading: progressLoading, overallProgressPct, levelsCompletedCount } =
+    useStudentNavProgress(isStudent);
+
+  const isJourney = pathname === "/profile/reading";
+  const isLevelPage = pathname.includes("/profile/reading/strict-levels/");
+  const isReadingArea = pathname.startsWith("/profile/reading");
+
+  useEffect(() => {
+    const updateUser = () => {
+      const decoded = getDecodedTokenClient();
+      setClientUser(decoded ? { role: decoded.role, userId: decoded.userId } : null);
+    };
+    updateUser();
+    window.addEventListener("auth-state-changed", updateUser);
+    window.addEventListener("storage", updateUser);
+    return () => {
+      window.removeEventListener("auth-state-changed", updateUser);
+      window.removeEventListener("storage", updateUser);
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
+  const isNavActive = (href: string) => {
+    if (href === "/profile") {
+      return pathname === "/profile" || pathname === "/profile/";
+    }
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  const logoHref = "/";
+  const streak = profileSummary?.streakInfo;
+  const journeyPoints = profileSummary?.journeyEarnedPoints;
+
+  const progressLabel = isLevelPage
+    ? "Level in progress"
+    : isJourney
+      ? "Your path"
+      : isReadingArea
+        ? "Reading journey"
+        : "Your path";
+
+  const navLinkClass = (active: boolean) =>
+    cn(
+      "rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200",
+      active
+        ? "bg-accent/12 text-accent shadow-sm ring-1 ring-accent/10"
+        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+    );
+
+  const isGuestLandingHome = pathname === "/" && !user;
+
+  if (isGuestLandingHome) {
+    return <GuestLandingNavBar className={className} />;
+  }
+
+  return (
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full shrink-0 border-b border-border/50 bg-background/92 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur-md dark:bg-background/88",
+        className,
+      )}
+    >
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4 lg:px-6">
+        <Link href={logoHref} className="flex shrink-0 items-center transition-opacity hover:opacity-90">
+          <GamlishLogo animateWordmark className="hidden min-[400px]:flex" />
+          <GamlishLogo showWordmark={false} className="min-[400px]:hidden" />
+        </Link>
+
+        <nav className="hidden items-center gap-0.5 lg:flex">
+          {!user &&
+            PUBLIC_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={navLinkClass(isNavActive(link.href))}
+              >
+                {link.label}
+              </Link>
+            ))}
+          {isStudent &&
+            STUDENT_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className={navLinkClass(isNavActive(link.href))}>
+                {link.label}
+              </Link>
+            ))}
+          {(isInstructor || isAdmin) && (
+            <Link
+              href={isAdmin ? "/dashboard/admin" : "/dashboard/instructor"}
+              className={navLinkClass(pathname.startsWith("/dashboard"))}
+            >
+              Dashboard
+            </Link>
+          )}
+        </nav>
+
+        {isStudent ? (
+          <div className="mx-auto hidden min-w-0 max-w-sm flex-1 px-2 lg:block lg:max-w-md">
+            {progressLoading ? (
+              <div className="h-[46px] animate-pulse rounded-xl bg-muted/40" />
+            ) : (
+              <div
+                className={cn(
+                  "rounded-xl border border-border/35 bg-muted/25 px-3 py-2 ring-1 ring-accent/[0.04]",
+                  "dark:bg-muted/15 dark:ring-accent/10",
+                )}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {progressLabel}
+                  </span>
+                  <span className="shrink-0 text-[10px] font-bold tabular-nums text-accent">
+                    {levelsCompletedCount}/{TOTAL_READING_PATH_LEVELS} · {overallProgressPct}%
+                  </span>
+                </div>
+                <div className={cn(readingPathPremium.progressTrack, "mt-1.5 h-1")}>
+                  <div
+                    className={cn(readingPathPremium.progressFill, "transition-all duration-700")}
+                    style={{ width: `${Math.min(100, Math.max(0, overallProgressPct))}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="hidden flex-1 lg:block" aria-hidden />
+        )}
+
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+          {isStudent && streak && (
+            <div
+              className="hidden items-center gap-1 rounded-full bg-accent/10 px-2 py-1 text-xs font-semibold text-accent ring-1 ring-accent/10 lg:flex"
+              title="Stability streak"
+            >
+              <Flame className="h-3.5 w-3.5" />
+              {streak.consecutivePassCount}/{streak.requiredStreak}
+            </div>
+          )}
+          {isStudent && journeyPoints != null && (
+            <div className="hidden rounded-full bg-muted/70 px-2 py-1 text-xs font-semibold tabular-nums text-foreground ring-1 ring-border/40 lg:block">
+              {journeyPoints} pts
+            </div>
+          )}
+
+          <ThemeToggleButton />
+
+          {user ? (
+            <div className="relative hidden lg:block" ref={menuRef}>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="flex h-9 items-center gap-1.5 rounded-full border border-border/50 bg-card px-2 py-1.5 text-sm font-medium text-muted-foreground shadow-sm transition-all hover:border-accent/25 hover:text-accent sm:px-3"
+                aria-label="Account menu"
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">Account</span>
+                <ChevronDown className="hidden h-3.5 w-3.5 sm:block" />
+              </button>
+              {menuOpen && (
+                <div className="animate-fade-up absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-xl border border-border/50 bg-card py-1 shadow-lg ring-1 ring-accent/[0.05]">
+                  {isStudent && (
+                    <>
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent/[0.05]"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        Profile settings
+                      </Link>
+                      <Link
+                        href="/pricing"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent/[0.05]"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Sparkles className="h-4 w-4 text-muted-foreground" />
+                        Subscription plans
+                      </Link>
+                    </>
+                  )}
+                  {isInstructor && (
+                    <>
+                      <Link href="/dashboard/instructor/profile" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent/[0.05]" onClick={() => setMenuOpen(false)}>
+                        <User className="h-4 w-4 text-muted-foreground" /> My Profile
+                      </Link>
+                      <Link href="/dashboard/instructor/levels" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent/[0.05]" onClick={() => setMenuOpen(false)}>
+                        <Layers className="h-4 w-4 text-muted-foreground" /> Manage Levels
+                      </Link>
+                      <Link href="/dashboard/instructor/questions" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent/[0.05]" onClick={() => setMenuOpen(false)}>
+                        <FileQuestion className="h-4 w-4 text-muted-foreground" /> Manage Questions
+                      </Link>
+                      <Link href="/dashboard/instructor/weakness-tags" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent/[0.05]" onClick={() => setMenuOpen(false)}>
+                        <Tag className="h-4 w-4 text-muted-foreground" /> Weakness Tags
+                      </Link>
+                      <Link href="/dashboard/instructor" className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent/[0.05]" onClick={() => setMenuOpen(false)}>
+                        <BarChart2 className="h-4 w-4 text-muted-foreground" /> Analytics
+                      </Link>
+                    </>
+                  )}
+                  {isAdmin && (
+                    <Link href="/dashboard/admin" className="flex px-3 py-2 text-sm hover:bg-accent/[0.05]" onClick={() => setMenuOpen(false)}>
+                      Admin dashboard
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent/[0.05]"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout();
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 text-muted-foreground" />
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link href="/login" className="hidden sm:block">
+                <Button variant="ghost" size="sm">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/register" className="hidden sm:block">
+                <Button size="sm">Get Started</Button>
+              </Link>
+            </>
+          )}
+
+          <SiteMobileNav
+            open={mobileOpen}
+            onOpenChange={setMobileOpen}
+            pathname={pathname}
+            user={user}
+            isStudent={isStudent}
+            isInstructor={isInstructor}
+            isAdmin={isAdmin}
+            isNavActive={isNavActive}
+            progressLoading={progressLoading}
+            progressLabel={progressLabel}
+            levelsCompletedCount={levelsCompletedCount}
+            overallProgressPct={overallProgressPct}
+            streak={streak}
+            journeyPoints={journeyPoints}
+            trigger={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0 lg:hidden"
+                aria-label="Open menu"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            }
+          />
+        </div>
+      </div>
+    </header>
+  );
+}

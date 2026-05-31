@@ -1,17 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   PRICING_FAQ_COPY,
   PRICING_FAQ_LOCALE_STORAGE_KEY,
-  type PricingFaqAnswer,
   type PricingFaqLocale,
 } from "@/src/lib/pricing-faq-copy";
-
-const GUARANTEE_POLICY_PATH = "/score-guarantee";
 
 function readStoredLocale(): PricingFaqLocale | null {
   if (typeof window === "undefined") return null;
@@ -21,28 +17,6 @@ function readStoredLocale(): PricingFaqLocale | null {
   } catch {
     return null;
   }
-}
-
-function FaqAnswerBody({
-  answer,
-}: {
-  answer: PricingFaqAnswer;
-}) {
-  if (answer.kind === "plain") {
-    return <>{answer.text}</>;
-  }
-  return (
-    <>
-      {answer.before}
-      <Link
-        href={GUARANTEE_POLICY_PATH}
-        className="font-medium text-primary underline decoration-primary/30 underline-offset-2 transition-colors hover:text-primary/90 hover:decoration-primary/60"
-      >
-        {answer.linkText}
-      </Link>
-      {answer.after}
-    </>
-  );
 }
 
 export function PricingFaqSection() {
@@ -128,9 +102,7 @@ export function PricingFaqSection() {
               )}
             </button>
             {openIndex === i && (
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                <FaqAnswerBody answer={faq.answer} />
-              </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{faq.answer.text}</p>
             )}
           </div>
         ))}

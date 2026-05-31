@@ -8,8 +8,6 @@ import {
 
 /**
  * Theme: class-based dark mode (Tailwind darkMode: "class").
- * Semantic tokens in globals.css: --bg-primary, --text-primary, etc.
- * Soft dark: #0f1115, #161a22, #2a2f3a, #e5e7eb, #9ca3af.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
@@ -27,21 +25,29 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 type Theme = "light" | "dark";
 
-/** useTheme: theme + toggleTheme for Header/ThemeToggle. resolvedTheme is "light" | "dark". */
+function readDomTheme(): Theme {
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
+/** useTheme: theme + toggleTheme for nav controls. */
 export function useTheme(): {
   theme: Theme;
   toggleTheme: () => void;
 } {
-  const { theme, setTheme, resolvedTheme } = useNextTheme();
-  /** Avoid "system" leaking into UI before resolvedTheme exists — prevents SSR/client icon mismatch. */
-  const effective: Theme =
-    resolvedTheme === "light" || resolvedTheme === "dark"
+  const { setTheme, resolvedTheme } = useNextTheme();
+
+  const theme: Theme =
+    resolvedTheme === "dark" || resolvedTheme === "light"
       ? resolvedTheme
-      : theme === "light" || theme === "dark"
-        ? theme
-        : "light";
+      : readDomTheme();
+
   const toggleTheme = () => {
-    setTheme(effective === "dark" ? "light" : "dark");
+    const currentlyDark =
+      resolvedTheme === "dark" ||
+      (resolvedTheme !== "light" && readDomTheme() === "dark");
+    setTheme(currentlyDark ? "light" : "dark");
   };
-  return { theme: effective, toggleTheme };
+
+  return { theme, toggleTheme };
 }

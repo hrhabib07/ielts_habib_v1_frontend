@@ -8,17 +8,15 @@ import { normalizeJourneyCountryLabel } from "@/src/lib/journeyCountries";
 export function isStudentLearningReady(profile: StudentProfile | null): boolean {
   if (!profile) return false;
   if (!profile.name?.trim()) return false;
+  const nickname = profile.nickname;
+  if (typeof nickname !== "string" || !nickname.trim()) return false;
   if (profile.targetBands?.reading == null) return false;
 
   const p = profile.profile;
-  if (!p?.phone?.trim() || p.phone.trim().length < 5) return false;
-  if (!p.currentCity?.trim()) return false;
-  if (!p.dreamCity?.trim()) return false;
-
   const currentCountry = normalizeJourneyCountryLabel(
-    p.currentCountry ?? p.country,
+    p?.currentCountry ?? p?.country,
   );
-  const dreamCountry = normalizeJourneyCountryLabel(p.dreamCountry);
+  const dreamCountry = normalizeJourneyCountryLabel(p?.dreamCountry);
   if (!currentCountry || !dreamCountry) return false;
 
   return true;

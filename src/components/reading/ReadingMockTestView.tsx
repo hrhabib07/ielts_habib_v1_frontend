@@ -26,6 +26,7 @@ import {
 import {
   submitGroupTest,
   submitFinalTest,
+  submitPracticeTest,
   type GroupTestContentForStudent,
   type GroupTestMiniTestContent,
   type GroupTestQuestionForStudent,
@@ -345,12 +346,23 @@ export interface ReadingMockTestViewProps {
   content: GroupTestContentForStudent;
   /** When set, submits a single sequential final (1–3) instead of a bundled group test. */
   sequentialFinalIndex?: 1 | 2 | 3;
+  /** When set, submits as a full-mock practice test step (3 passages). */
+  practiceStepId?: string;
   onSubmitted: (result: {
     overallPass: boolean;
     miniTestResults: Array<{ bandScore: number; passed: boolean }>;
-    newPassStatus: string;
+    newPassStatus?: string;
     promotionType?: "STREAK" | "AVERAGE";
     finalAverageMockBandScore?: number;
+    /** Practice full mock only */
+    bandScore?: number;
+    scorePercent?: number;
+    passed?: boolean;
+    attemptId?: string;
+    attemptNumber?: number;
+    bestBandScore?: number;
+    isNewBest?: boolean;
+    levelComplete?: boolean;
   }) => void;
   onProgressUpdate?: () => void;
 }
@@ -371,7 +383,7 @@ export const ReadingMockTestView = forwardRef<
   ReadingMockTestViewHandle,
   ReadingMockTestViewProps
 >(function ReadingMockTestView(
-  { levelId, content, sequentialFinalIndex, onSubmitted, onProgressUpdate },
+  { levelId, content, sequentialFinalIndex, practiceStepId, onSubmitted, onProgressUpdate },
   ref,
 ) {
   const [passageIndex, setPassageIndex] = useState(0);
@@ -650,13 +662,33 @@ export const ReadingMockTestView = forwardRef<
           onSubmitted({
             overallPass: res.isMastered,
             miniTestResults: [{ bandScore: res.bandScore, passed: res.passed }],
-            newPassStatus: res.newPassStatus,
-            isMastered: res.isMastered,
-            levelComplete: res.newPassStatus === "PASSED",
             finalTestIndex: res.finalTestIndex,
             nextFinalTestIndex: res.nextFinalTestIndex,
             bandScore: res.bandScore,
             passed: res.passed,
+          });
+          return { ok: true };
+        }
+
+        if (practiceStepId != null) {
+          const miniTestAnswers = content.miniTests.map((mt) => ({
+            answers: buildAnswers(mt),
+          }));
+          const res = await submitPracticeTest(levelId, practiceStepId, {
+            miniTestAnswers,
+          });
+          onProgressUpdate?.();
+          onSubmitted({
+            overallPass: res.passed,
+            passed: res.passed,
+            bandScore: res.bandScore,
+            scorePercent: res.scorePercent,
+            miniTestResults: [{ bandScore: res.bandScore, passed: res.passed }],
+            attemptId: res.attemptId,
+            attemptNumber: res.attemptNumber,
+            bestBandScore: res.bestBandScore,
+            isNewBest: res.isNewBest,
+            levelComplete: res.progress?.passStatus === "PASSED",
           });
           return { ok: true };
         }
@@ -692,6 +724,7 @@ export const ReadingMockTestView = forwardRef<
       answers,
       levelId,
       sequentialFinalIndex,
+      practiceStepId,
       onProgressUpdate,
       onSubmitted,
     ],

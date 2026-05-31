@@ -51,8 +51,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       />
       <div className="lg:pl-64 flex min-h-screen flex-col">
         <DashboardTopbar onOpenSidebar={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-auto">
-          <div className="mx-auto max-w-7xl px-6 py-6">
+        <main className="site-scroll-document min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
             {children}
           </div>
         </main>

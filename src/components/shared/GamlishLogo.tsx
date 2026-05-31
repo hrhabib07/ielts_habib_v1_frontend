@@ -24,7 +24,7 @@ export function GamlishLogo({
 
   return (
     <span
-      className={`inline-flex items-center gap-1 ${className}`}
+      className={`inline-flex items-center gap-1.5 ${className}`}
       aria-label="Gamlish"
       suppressHydrationWarning
     >

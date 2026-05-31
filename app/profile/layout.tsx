@@ -2,12 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { lockDocumentScroll } from "@/src/lib/documentScrollLock";
+import { isReadingExamSimulationPath } from "@/src/lib/siteScrollPolicy";
 
 /**
- * Profile: minimal internal layout (no full dashboard).
- * Root layout provides Header + Footer.
- * Mock test (final-evaluation) gets full bleed.
- * Reading dashboard (strict-levels) gets fixed viewport with independent scroll areas.
+ * Profile layout — reading journey uses document scroll; level runner uses fixed viewport panes.
  */
 export default function ProfileLayout({
   children,
@@ -15,20 +14,19 @@ export default function ProfileLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname() ?? "";
-  const isExamPage =
-    pathname.includes("/final-evaluation") ||
-    pathname.includes("/practice-test") ||
-    pathname.includes("/step-quiz");
-  const isReadingDashboard =
-    pathname === "/profile/reading" ||
-    pathname.includes("/profile/reading/strict-levels") ||
-    pathname.includes("/profile/reading/practice-attempt");
+  const isExamPage = isReadingExamSimulationPath(pathname);
+  const isReadingJourney = pathname === "/profile/reading";
+  const isStrictLevelRunner = pathname.includes("/profile/reading/strict-levels");
 
   if (isExamPage) {
     return <>{children}</>;
   }
 
-  if (isReadingDashboard) {
+  if (isReadingJourney) {
+    return <>{children}</>;
+  }
+
+  if (isStrictLevelRunner) {
     return (
       <ReadingDashboardContainer>
         <div
@@ -42,7 +40,7 @@ export default function ProfileLayout({
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4 py-8">
+    <div className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 sm:py-8">
       {children}
     </div>
   );
@@ -50,16 +48,12 @@ export default function ProfileLayout({
 
 function ReadingDashboardContainer({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
+    return lockDocumentScroll();
   }, []);
+
   return (
     <div
-      className="fixed inset-x-0 bottom-0 top-16 z-[1] flex h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)] flex-col overflow-hidden"
+      className="fixed inset-x-0 bottom-0 top-16 z-20 flex h-[calc(100dvh-4rem)] max-h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-background"
       data-reading-dashboard-shell
     >
       {children}

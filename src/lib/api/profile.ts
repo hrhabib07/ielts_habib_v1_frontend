@@ -16,6 +16,7 @@ export async function getMyProfile(): Promise<StudentProfile | null> {
  */
 export async function updateProfile(payload: {
   name?: string;
+  nickname?: string;
   profile?: {
     currentCity?: string;
     currentCountry?: string;

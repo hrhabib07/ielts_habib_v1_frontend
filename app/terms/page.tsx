@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 export const metadata: Metadata = {
   title: "Terms & policies | Gamlish",
   description:
-    "Gamlish terms of use, privacy summary, and links to the Score Guarantee™ policy.",
+    "Gamlish terms of use and privacy summary.",
 };
 
 export default function TermsPage() {
@@ -46,14 +46,6 @@ export default function TermsPage() {
               Content and features may change as we improve the product; we will make reasonable
               efforts to avoid disruption to active subscribers.
             </li>
-            <li>
-              The{" "}
-              <Link href="/score-guarantee" className="font-medium text-primary underline-offset-4 hover:underline">
-                Score Guarantee™
-              </Link>{" "}
-              is governed by its own eligibility rules and applies only when every listed condition is
-              met and verified.
-            </li>
           </ul>
         </Card>
 
@@ -61,8 +53,7 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-foreground">Privacy (summary)</h2>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             We collect account and usage data needed to run the service, improve learning outcomes,
-            and process subscriptions. We do not sell your personal data. Official exam results or
-            documents you submit for guarantee review are used only for verification. For data
+            and process subscriptions. We do not sell your personal data. For data
             requests or account issues, contact us via the WhatsApp number in the site footer.
           </p>
         </Card>

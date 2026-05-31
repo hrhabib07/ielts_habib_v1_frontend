@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { GamlishLogo } from "./GamlishLogo";
-import { isReadingExamFocusPath } from "@/src/lib/examFocusPaths";
+import { isReadingExamFocusPath, isReadingDashboardPath } from "@/src/lib/examFocusPaths";
 import {
   SUPPORT_WHATSAPP_DISPLAY,
   SUPPORT_WHATSAPP_HREF,
@@ -18,14 +18,7 @@ interface FooterProps {
 export function Footer({ initialUser = null }: FooterProps) {
   const pathname = usePathname();
 
-  if (isReadingExamFocusPath(pathname)) {
-    return null;
-  }
-
-  if (
-    pathname?.includes("/profile/reading/strict-levels") ||
-    pathname?.includes("/profile/reading/practice-attempt")
-  ) {
+  if (isReadingExamFocusPath(pathname) || isReadingDashboardPath(pathname)) {
     return null;
   }
 
@@ -40,8 +33,8 @@ export function Footer({ initialUser = null }: FooterProps) {
           <div className="md:col-span-4 space-y-4">
             <GamlishLogo className="text-lg" />
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Performance-driven IELTS Reading preparation — structured levels, readiness you can
-              measure, and a guarantee backed by clear rules.
+              Performance-driven IELTS Reading preparation — structured levels and readiness you
+              can measure.
             </p>
           </div>
 
@@ -60,10 +53,10 @@ export function Footer({ initialUser = null }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="/how-it-works"
+                  href="/#how-to-play"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  How it works
+                  How to play
                 </Link>
               </li>
               <li>
@@ -72,14 +65,6 @@ export function Footer({ initialUser = null }: FooterProps) {
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Plans &amp; pricing
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/score-guarantee"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Score Guarantee™ (conditions)
                 </Link>
               </li>
               <li>

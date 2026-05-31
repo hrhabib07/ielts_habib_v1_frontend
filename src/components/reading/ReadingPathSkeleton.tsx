@@ -105,7 +105,7 @@ export function ReadingMainAreaSkeleton({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-40 lg:[left:var(--reading-sidebar-width,0px)]">
+      <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-40">
         <div className="border-t border-slate-200/80 bg-white/95 px-2 py-2 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-700/80 dark:bg-slate-900/95 dark:shadow-[0_-8px_30px_rgba(0,0,0,0.45)] sm:px-3">
           <div className="mx-auto flex w-full max-w-6xl flex-nowrap items-center gap-2 sm:gap-3">
             <div className={cn("h-9 w-20 shrink-0 rounded-lg sm:w-[5.5rem]", bar)} />

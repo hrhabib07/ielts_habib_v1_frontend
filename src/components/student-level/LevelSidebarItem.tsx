@@ -19,7 +19,7 @@ const STEP_TYPE_CONFIG: Record<
 > = {
   INSTRUCTION: { label: "Instruction", Icon: FileText, color: "text-blue-500" },
   VIDEO: { label: "Video", Icon: Video, color: "text-purple-500" },
-  PRACTICE_TEST: { label: "Practice", Icon: BookOpen, color: "text-teal-500" },
+  PRACTICE_TEST: { label: "Practice", Icon: BookOpen, color: "text-accent" },
   QUIZ: { label: "Quiz", Icon: Play, color: "text-orange-500" },
   VOCABULARY_TEST: {
     label: "Vocabulary",

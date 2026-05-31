@@ -40,12 +40,10 @@ export default async function HomePage() {
           : null;
 
   return (
-    <div className="flex min-h-0 flex-col md:max-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-4rem)] md:flex-1 md:overflow-hidden">
-      <HomeHero
-        initialUser={initialUser}
-        roleCtaHref={roleCtaHref}
-        roleCtaLabel={roleCtaLabel}
-      />
-    </div>
+    <HomeHero
+      initialUser={initialUser}
+      roleCtaHref={roleCtaHref}
+      roleCtaLabel={roleCtaLabel}
+    />
   );
 }

@@ -12,6 +12,7 @@ import {
   type GroupTestQuestionGroupForPreview,
   type GroupTestQuestionForPreview,
   isSentenceLocatorPreviewContent,
+  isFullMockPreviewContent,
 } from "@/src/lib/api/adminReadingVersions";
 import {
   updatePassage,
@@ -167,6 +168,26 @@ export function PracticeTestContentEditor({
         onClose={onClose}
         onSaved={onSaved}
       />
+    );
+  }
+
+  if (content && isFullMockPreviewContent(content)) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="flex max-w-md flex-col gap-4 rounded-xl bg-white p-6 dark:bg-slate-900">
+          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+            Full mock practice test
+          </h2>
+          <p className="text-sm text-stone-600 dark:text-stone-400">
+            This test has three passages (~60 minutes). Use the preview button to review all
+            passages. To change content, edit the bulk JSON and re-import via the Full Mock portal,
+            or update passages and question sets in the Reading library.
+          </p>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
     );
   }
 

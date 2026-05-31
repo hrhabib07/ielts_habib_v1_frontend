@@ -21,7 +21,6 @@ import {
   MessageCircle,
   Pencil,
   Phone,
-  Shield,
   Sparkles,
   User,
   X,
@@ -194,7 +193,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="relative min-h-[calc(100dvh-4rem)] overflow-hidden">
+    <div className="relative min-h-[calc(100dvh-4rem)] overflow-x-hidden">
       {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-primary/8 blur-3xl" />
@@ -264,12 +263,6 @@ export default function ProfilePage() {
                     Open Reading
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="gap-2 bg-background/80">
-                  <Link href="/profile/score-guarantee">
-                    <Shield className="h-4 w-4" />
-                    Guarantee
-                  </Link>
-                </Button>
                 <Button asChild variant="secondary" size="lg" className="gap-2">
                   <Link href="/pricing">
                     <CreditCard className="h-4 w-4" />
@@ -281,37 +274,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Quick links bento */}
-        <div className="grid gap-4 md:grid-cols-2">
-        <Link
-          href="/profile/score-guarantee"
-          className="group relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-md md:p-7"
-        >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20">
-              <Shield className="h-6 w-6" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
-                Your assurance
-              </p>
-              <p className="mt-1 font-semibold tracking-tight text-foreground text-lg md:text-xl">
-                Your target band is backed by the Gamlish Score Guarantee™
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Hit the Readiness Zone, sit IELTS on schedule, and if you miss
-                your declared target despite meeting every rule—we refund you in
-                full. View eligibility and checklist.
-              </p>
-            </div>
-          </div>
-          <span className="text-sm font-semibold text-primary group-hover:underline sm:shrink-0">
-            View guarantee →
-          </span>
-        </div>
-        </Link>
-
+        {/* Quick links */}
         <Card className="overflow-hidden border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.07] via-card to-card shadow-sm transition-shadow hover:shadow-md">
         <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between md:p-7">
           <div className="flex gap-4">
@@ -342,7 +305,6 @@ export default function ProfilePage() {
           </Button>
         </div>
         </Card>
-        </div>
 
       <section aria-labelledby="reading-overview-heading" className="scroll-mt-8">
         <div className="mb-6 flex items-end justify-between gap-4">

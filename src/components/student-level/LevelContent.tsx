@@ -28,7 +28,7 @@ import type {
 } from "@/src/lib/api/readingStrictProgression";
 import type { GroupTestMiniTestForPreview } from "@/src/lib/api/adminReadingVersions";
 import type { PracticeTestContentForPreviewSentenceLocator } from "@/src/lib/api/adminReadingVersions";
-import { getStepContent, isSentenceLocatorPracticeContent } from "@/src/lib/api/readingStrictProgression";
+import { getStepContent, isSentenceLocatorPracticeContent, isFullMockPracticeContent } from "@/src/lib/api/readingStrictProgression";
 import {
   getStepContentCached,
   peekStepContentCached,
@@ -118,8 +118,8 @@ const STEP_TYPE_META: Record<
   PRACTICE_TEST: {
     label: "Practice Test",
     Icon: BookOpen,
-    bg: "bg-teal-50 dark:bg-teal-950/40",
-    iconColor: "text-teal-500",
+    bg: "bg-accent/10 dark:bg-accent/15",
+    iconColor: "text-accent",
   },
   QUIZ: {
     label: "Quiz",
@@ -436,16 +436,26 @@ export function LevelContent({
     [isPreview, levelId, router],
   );
 
+  const isPracticeTestStep = step.stepType === "PRACTICE_TEST";
+  const showPracticeTestCard =
+    isPracticeTestStep &&
+    !contentLoading &&
+    !contentError &&
+    content !== null &&
+    content.type === "PRACTICE_TEST" &&
+    !isPreview;
+
   return (
     <div>
-      {/* Step header */}
+      {/* Step header — hidden for practice test launcher (card owns context) */}
+      {!showPracticeTestCard && (
       <div className="mb-6 flex items-start gap-4">
         <div className={`shrink-0 rounded-xl p-2.5 ${bg}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+            <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               {label}
             </span>
             <span className="text-xs text-gray-400 dark:text-gray-500">
@@ -463,11 +473,12 @@ export function LevelContent({
               </span>
             )}
           </div>
-          <h2 className="text-xl font-semibold leading-snug text-gray-900 dark:text-gray-100">
+          <h2 className="text-xl font-semibold tracking-tight leading-snug text-foreground">
             {step.title}
           </h2>
         </div>
       </div>
+      )}
 
       {/* Locked state */}
       {isLocked && (
@@ -500,12 +511,25 @@ export function LevelContent({
 
       {/* Active content */}
       {!isLocked && (
-        <div className={dockBottomNav ? "space-y-6 pb-6" : "space-y-6 pb-40"}>
-          {/* Content area — actual content from API */}
-          <div className="min-h-50 w-full rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800/50 p-4 shadow-sm sm:p-6">
+        <div
+          className={
+            showPracticeTestCard
+              ? "flex min-h-[min(520px,calc(100dvh-13rem))] flex-col items-center justify-center py-4"
+              : dockBottomNav
+                ? "space-y-6 pb-6"
+                : "space-y-6 pb-40"
+          }
+        >
+          <div
+            className={
+              showPracticeTestCard
+                ? "w-full"
+                : "min-h-50 w-full rounded-2xl border border-border/40 bg-card p-4 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.05)] ring-1 ring-[color:var(--accent)]/[0.04] sm:p-6 dark:border-border/50"
+            }
+          >
             {contentLoading && (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-accent" />
                 <span className="ml-2 text-sm text-gray-400 dark:text-gray-500">
                   {step.stepType === "PRACTICE_TEST"
                     ? "Checking access…"
@@ -641,6 +665,8 @@ export function LevelContent({
                   levelId={levelId}
                   stepId={step._id}
                   content={content.content}
+                  stepIndex={stepIndex}
+                  totalSteps={totalSteps}
                 />
               )}
             {step.stepType === "INTEGRATED_LESSON" && (
@@ -666,13 +692,25 @@ export function LevelContent({
                       .sentenceLocator
                   }
                 />
+              ) : isFullMockPracticeContent(content.content) ? (
+                <PracticeTestPreviewInline
+                  title={`${content.content.title} (Passage 1 of 3)`}
+                  timeLimitMinutes={content.content.timeLimitMinutes}
+                  passType={content.content.passType}
+                  passValue={content.content.passValue}
+                  miniTest={content.content.miniTests[0] as GroupTestMiniTestForPreview}
+                />
               ) : (
                 <PracticeTestPreviewInline
                   title={content.content.title}
                   timeLimitMinutes={content.content.timeLimitMinutes}
                   passType={content.content.passType}
                   passValue={content.content.passValue}
-                  miniTest={content.content.miniTest as GroupTestMiniTestForPreview}
+                  miniTest={
+                    "miniTest" in content.content
+                      ? (content.content.miniTest as GroupTestMiniTestForPreview)
+                      : undefined
+                  }
                 />
               ))}
 
@@ -811,7 +849,7 @@ export function LevelContent({
 
           {/* Bottom navigation (fixed overlay when not docked in reading dashboard layout) */}
           {!dockBottomNav && onNavigate && allSteps && (
-            <div className="fixed bottom-0 left-0 right-0 z-40 lg:[left:var(--reading-sidebar-width,0px)]">
+            <div className="fixed bottom-0 left-0 right-0 z-40">
               <div className="border-t border-slate-200/80 bg-white/95 px-2 py-2 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-700/80 dark:bg-slate-900/95 dark:shadow-[0_-8px_30px_rgba(0,0,0,0.45)] sm:px-3">
                 <div className="mx-auto flex w-full max-w-6xl flex-nowrap items-center gap-2 sm:gap-3">
                   <div className="shrink-0">

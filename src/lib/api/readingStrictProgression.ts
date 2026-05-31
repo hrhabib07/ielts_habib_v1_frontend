@@ -185,11 +185,19 @@ export async function submitStepQuiz(
 }
 
 export interface SubmitPracticeTestPayload {
-  answers: Array<{
+  answers?: Array<{
     questionId: string;
     studentAnswer?: string;
     /** For multi-gap questions: one value per gap in order (gap1, gap2, ...). */
     studentAnswers?: string[];
+  }>;
+  /** Full mock practice (3 passages): one answers block per passage. */
+  miniTestAnswers?: Array<{
+    answers: Array<{
+      questionId: string;
+      studentAnswer?: string;
+      studentAnswers?: string[];
+    }>;
   }>;
   /** Required when practice test pass type is BAND: student's desired/target band (becomes their pass mark). */
   targetBandScore?: number;
@@ -307,9 +315,32 @@ export interface PracticeTestStepContentSentenceLocator {
   sentenceLocator: SentenceLocatorStudentPayloadDto;
 }
 
+/** Practice test — full IELTS mock (3 passages, ~60 min). */
+export interface PracticeTestStepContentFullMock {
+  contentFormat: "FULL_MOCK";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts?: number | null;
+  miniTests: [
+    PracticeTestMiniTestContent,
+    PracticeTestMiniTestContent,
+    PracticeTestMiniTestContent,
+  ];
+}
+
 export type PracticeTestStepContent =
   | PracticeTestStepContentStandard
-  | PracticeTestStepContentSentenceLocator;
+  | PracticeTestStepContentSentenceLocator
+  | PracticeTestStepContentFullMock;
+
+export function isFullMockPracticeContent(
+  c: PracticeTestStepContent,
+): c is PracticeTestStepContentFullMock {
+  return c.contentFormat === "FULL_MOCK" && "miniTests" in c;
+}
 
 export function isSentenceLocatorPracticeContent(
   c: PracticeTestStepContent,

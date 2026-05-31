@@ -24,13 +24,29 @@ import { SetTargetBandForm } from "@/src/components/student-level/SetTargetBandF
 import type { NextLevelInfo } from "@/src/components/student-level/LevelLayout";
 import { useReadingLevelDetail } from "@/src/contexts/ReadingLevelDetailContext";
 import { ReadingMainAreaSkeleton } from "@/src/components/reading/ReadingPathSkeleton";
-import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
+import { isReadingFoundationL0, isReadingFirstSkillL1, findFirstSkillOrder } from "@/src/lib/readingLevelOrder";
+import { estimateBandFromAccuracy } from "@/src/lib/scholarshipUtils";
+import { ScholarshipRealityCheckModal } from "@/src/components/scholarship/ScholarshipRealityCheckModal";
+import { useScholarship } from "@/src/contexts/ScholarshipContext";
+import { MockLevelLaunchView } from "@/src/components/reading/MockLevelLaunchView";
+import {
+  buildMockLevelPlaceholderDetail,
+  getMockLevelLaunchState,
+  isMockLevelOrder,
+  mergeReadingLevelsWithMockPlaceholders,
+  orderFromPlaceholderLevelId,
+  shouldUseMockLevelPlaceholder,
+  type MockLevelLaunchState,
+  type MockLevelOrder,
+} from "@/src/lib/readingMockLevelsLaunch";
+import type { Level } from "@/src/lib/api/levels";
 
 export default function ReadingStrictLevelPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setDetail: setContextDetail } = useReadingLevelDetail();
+  const { status: scholarshipStatus, refresh: refreshScholarship } = useScholarship();
   const id = params.id;
 
   const [detail, setDetail] = useState<LevelDetailForStudent | null>(null);
@@ -46,11 +62,74 @@ export default function ReadingStrictLevelPage() {
   >(undefined);
   const [contentUpdateBannerMessage, setContentUpdateBannerMessage] = useState<string | null>(null);
   const [premiumLock, setPremiumLock] = useState(false);
+  const [mockLevelOrder, setMockLevelOrder] = useState<MockLevelOrder | null>(null);
+  const [mockLaunchState, setMockLaunchState] = useState<MockLevelLaunchState | null>(null);
+  const [mockBackHref, setMockBackHref] = useState("/profile/reading");
+  const [firstSkillOrder, setFirstSkillOrder] = useState<number | null>(null);
+  const [realityCheckOpen, setRealityCheckOpen] = useState(false);
+  const l1RealityCheckShownRef = useRef(false);
 
   const stepIdFromUrl = searchParams.get("step");
   const contentUpdatedParam = searchParams.get("contentUpdated");
 
   const lastHandledRestartToVersionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getLevelsByModule("READING")
+      .then((levels) => {
+        if (!cancelled) setFirstSkillOrder(findFirstSkillOrder(levels));
+      })
+      .catch(() => {
+        if (!cancelled) setFirstSkillOrder(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const resolveMockLaunchContext = useCallback(
+    async (levelOrder: MockLevelOrder, routeLevelId: string) => {
+      const [levelsData, progress] = await Promise.all([
+        getLevelsByModule("READING"),
+        getCurrentLevel("READING").catch(() => null),
+      ]);
+      const levels = mergeReadingLevelsWithMockPlaceholders(levelsData);
+      const levelIndex = levels.findIndex(
+        (l) => l._id === routeLevelId || l.order === levelOrder,
+      );
+      const currentLevelId =
+        progress?.levelId && typeof progress.levelId === "object"
+          ? (progress.levelId as Level)._id
+          : typeof progress?.levelId === "string"
+            ? progress.levelId
+            : null;
+      const currentOrder = currentLevelId
+        ? (levels.find((l) => l._id === currentLevelId)?.order ?? 0)
+        : 0;
+      const launchState = getMockLevelLaunchState({
+        levelOrder,
+        levelIndex: levelIndex >= 0 ? levelIndex : 0,
+        levels,
+        currentOrder,
+        detailCache: {},
+        contextDetail: null,
+        levelIdFromPath: routeLevelId,
+        curriculumDemoAccount: progress?.curriculumDemoAccount === true,
+      });
+      const backHref = "/profile/reading";
+      return {
+        launchState,
+        placeholderDetail: buildMockLevelPlaceholderDetail(
+          levelOrder,
+          launchState,
+          routeLevelId,
+        ),
+        backHref,
+      };
+    },
+    [],
+  );
 
   const loadDetail = useCallback(() => {
     if (!id) return;
@@ -58,8 +137,41 @@ export default function ReadingStrictLevelPage() {
     setError(null);
     setTargetBandRequired(false);
     setPremiumLock(false);
+    setMockLevelOrder(null);
+    setMockLaunchState(null);
+
+    const placeholderOrder = orderFromPlaceholderLevelId(id);
+    if (placeholderOrder != null) {
+      resolveMockLaunchContext(placeholderOrder, id)
+        .then(({ launchState, placeholderDetail, backHref }) => {
+          setMockLevelOrder(placeholderOrder);
+          setMockLaunchState(launchState);
+          setMockBackHref(backHref);
+          setDetail(placeholderDetail);
+          setContextDetail(placeholderDetail);
+        })
+        .catch((e) => {
+          setError(e instanceof Error ? e.message : "Failed to load level");
+          setContextDetail(null);
+        })
+        .finally(() => setLoading(false));
+      return;
+    }
+
     getLevelDetail(id)
-      .then((d) => {
+      .then(async (d) => {
+        if (shouldUseMockLevelPlaceholder(d.level.order) && isMockLevelOrder(d.level.order)) {
+          const { launchState, placeholderDetail, backHref } = await resolveMockLaunchContext(
+            d.level.order,
+            id,
+          );
+          setMockLevelOrder(d.level.order);
+          setMockLaunchState(launchState);
+          setMockBackHref(backHref);
+          setDetail(placeholderDetail);
+          setContextDetail(placeholderDetail);
+          return;
+        }
         setDetail(d);
         setContextDetail(d);
       })
@@ -129,7 +241,7 @@ export default function ReadingStrictLevelPage() {
         setContextDetail(null);
       })
       .finally(() => setLoading(false));
-  }, [id, router, setContextDetail]);
+  }, [id, router, setContextDetail, resolveMockLaunchContext]);
 
   const clearStepQueryParam = useCallback(() => {
     if (!id) return;
@@ -181,7 +293,7 @@ export default function ReadingStrictLevelPage() {
   }, [loadDetail, setContextDetail]);
 
   useEffect(() => {
-    if (!detail || loading || stepIdFromUrl) return;
+    if (!detail || loading || stepIdFromUrl || mockLevelOrder != null) return;
     const steps = detail.steps;
     const currentIndex = detail.progress.currentStepIndex ?? 0;
     const firstIncompleteStep = steps[currentIndex] ?? steps[steps.length - 1];
@@ -193,7 +305,7 @@ export default function ReadingStrictLevelPage() {
         { scroll: false },
       );
     }
-  }, [detail, loading, stepIdFromUrl, id, router]);
+  }, [detail, loading, stepIdFromUrl, id, router, mockLevelOrder]);
 
   useEffect(() => {
     if (!detail || detail.progress.passStatus !== "PASSED") {
@@ -271,6 +383,21 @@ export default function ReadingStrictLevelPage() {
     };
   }, [detail?.level.order, detail?.progress.passStatus, nextLevelInfo]);
 
+  useEffect(() => {
+    if (
+      !detail ||
+      detail.progress.passStatus !== "PASSED" ||
+      firstSkillOrder == null ||
+      !isReadingFirstSkillL1(detail.level, firstSkillOrder) ||
+      l1RealityCheckShownRef.current
+    ) {
+      return;
+    }
+    l1RealityCheckShownRef.current = true;
+    void refreshScholarship();
+    setRealityCheckOpen(true);
+  }, [detail, firstSkillOrder, refreshScholarship]);
+
   const handleLevelPassed = useCallback(() => {
     setTimeout(() => {
       loadDetail();
@@ -325,6 +452,19 @@ export default function ReadingStrictLevelPage() {
   if (premiumLock && id) {
     return (
       <PremiumReadingLockPanel variant="fullscreen" levelId={id} context="level" />
+    );
+  }
+
+  if (mockLevelOrder != null && mockLaunchState != null && detail) {
+    return (
+      <div className="flex h-full min-h-0 flex-col overflow-auto px-4 py-6 lg:px-8">
+        <MockLevelLaunchView
+          levelOrder={mockLevelOrder}
+          launchState={mockLaunchState}
+          backHref={mockBackHref}
+          activeStepId={stepIdFromUrl}
+        />
+      </div>
     );
   }
 
@@ -460,8 +600,40 @@ export default function ReadingStrictLevelPage() {
   const showSetTargetBandOnLevel0 =
     isLevel0PassedWithNextLevel && readingTargetBand === null;
 
+  const targetBandForModal =
+    typeof readingTargetBand === "number" ? readingTargetBand : 6.5;
+  const baselineBandForModal = completionScore
+    ? estimateBandFromAccuracy(completionScore.percentage)
+    : Math.max(4, (readingTargetBand ?? 6) - 1);
+  const scholarshipPercentForModal =
+    scholarshipStatus?.unlockedDiscountPercent ??
+    scholarshipStatus?.currentTierPercent ??
+    60;
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <ScholarshipRealityCheckModal
+        open={realityCheckOpen}
+        targetBand={typeof readingTargetBand === "number" ? readingTargetBand : targetBandForModal}
+        baselineBand={baselineBandForModal}
+        scholarshipPercent={scholarshipPercentForModal}
+        onAccept={() => {
+          setRealityCheckOpen(false);
+          router.push("/pricing");
+        }}
+        onRestart={() => {
+          setRealityCheckOpen(false);
+          l1RealityCheckShownRef.current = false;
+          const firstStepId = detail?.steps?.[0]?._id;
+          if (firstStepId && id) {
+            router.replace(
+              `/profile/reading/strict-levels/${id}?step=${encodeURIComponent(firstStepId)}`,
+            );
+          }
+          void loadDetail();
+        }}
+        onClose={() => setRealityCheckOpen(false)}
+      />
       {showSetTargetBandOnLevel0 && (
         <div className="shrink-0 border-b border-indigo-200/80 bg-indigo-50/90 px-4 py-4 dark:border-indigo-800/80 dark:bg-indigo-950/50 lg:px-6">
           <div className="mx-auto max-w-3xl rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-white/80 dark:bg-indigo-950/40 p-6 shadow-sm">

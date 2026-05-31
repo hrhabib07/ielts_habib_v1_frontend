@@ -55,6 +55,7 @@ import {
   type ReadingQuizContent,
 } from "@/src/lib/api/quizContent";
 import { readingLevelIndexFromOrder } from "@/src/lib/readingLevelOrder";
+import { MockLevelsLaunchInstructorBanner } from "@/src/components/reading/MockLevelsLaunchInstructorBanner";
 
 export interface LevelVersionSummary {
   publishedVersion?: number;
@@ -777,6 +778,8 @@ export function ReadingLevelsListClient() {
 
   return (
     <>
+      <MockLevelsLaunchInstructorBanner levels={levels} />
+
       <Card className="rounded-2xl border border-border bg-muted/30 shadow-sm">
         <CardHeader
           className="flex flex-row items-center justify-between space-y-0 p-4 cursor-pointer"

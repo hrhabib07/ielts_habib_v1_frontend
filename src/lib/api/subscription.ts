@@ -46,29 +46,6 @@ export interface SubmitRequestPayload {
   screenshotUrl?: string;
 }
 
-export interface First100PromoOffer {
-  enabled: boolean;
-  module: ModuleType;
-  code?: string;
-  discountType?: "PERCENT" | "FIXED";
-  discountValue?: number;
-  durationOverrideDays?: number;
-  maxTotalUses?: number | null;
-  usedCount?: number;
-  remainingUses?: number | null;
-}
-
-/** Student: get first-100 promo offer */
-export async function getFirst100PromoOffer(
-  module: ModuleType,
-): Promise<First100PromoOffer> {
-  const res = await apiClient.get<{ success: boolean; data: First100PromoOffer }>(
-    "/subscription-plans/first100-promo",
-    { params: { module } },
-  );
-  return res.data?.data ?? { enabled: false, module };
-}
-
 /** Public: fetch active + public plans */
 export async function getPublicPlans(): Promise<SubscriptionPlan[]> {
   const res = await apiClient.get<{ success: boolean; data: SubscriptionPlan[] }>(

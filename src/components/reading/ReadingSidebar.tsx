@@ -21,6 +21,15 @@ import type {
 } from "@/src/lib/api/readingStrictProgression";
 import { useReadingLevelDetail } from "@/src/contexts/ReadingLevelDetailContext";
 import { ReadingSidebarSkeleton } from "@/src/components/reading/ReadingPathSkeleton";
+import {
+  buildMockLevelPlaceholderDetail,
+  getMockLevelLaunchState,
+  isMockLevelOrder,
+  isMockLevelUnlockedForStudent,
+  isPlaceholderLevelId,
+  mergeReadingLevelsWithMockPlaceholders,
+  shouldUseMockLevelPlaceholder,
+} from "@/src/lib/readingMockLevelsLaunch";
 import { cn } from "@/lib/utils";
 
 const READING_STRICT_PREFIX = "/profile/reading/strict-levels/";
@@ -152,8 +161,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
     ])
       .then(([levelsData, progress]) => {
         if (cancelled) return;
-        const sorted = levelsData.sort((a, b) => a.order - b.order);
-        setLevels(sorted);
+        setLevels(mergeReadingLevelsWithMockPlaceholders(levelsData));
         const levelId =
           progress?.levelId && typeof progress.levelId === "object"
             ? (progress.levelId as Level)._id
@@ -236,7 +244,42 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
 
   const currentOrder = getCurrentLevelOrder(levels, currentLevelId);
 
-  const loadLevelDetail = useCallback((levelId: string) => {
+  const loadLevelDetail = useCallback(
+    (levelId: string) => {
+    const level = levels.find((l) => l._id === levelId);
+    const mockOrder =
+      (level && shouldUseMockLevelPlaceholder(level.order) && isMockLevelOrder(level.order)
+        ? level.order
+        : null) ??
+      (isPlaceholderLevelId(levelId)
+        ? Number(levelId.replace("gamlish-placeholder-reading-l", ""))
+        : null);
+
+    if (
+      mockOrder != null &&
+      isMockLevelOrder(mockOrder) &&
+      shouldUseMockLevelPlaceholder(mockOrder)
+    ) {
+      const levelIndex = levels.findIndex(
+        (l) => l._id === levelId || l.order === mockOrder,
+      );
+      const launchState = getMockLevelLaunchState({
+        levelOrder: mockOrder,
+        levelIndex: levelIndex >= 0 ? levelIndex : 0,
+        levels,
+        currentOrder,
+        detailCache,
+        contextDetail,
+        levelIdFromPath,
+        curriculumDemoAccount,
+      });
+      setDetailCache((prev) => ({
+        ...prev,
+        [levelId]: buildMockLevelPlaceholderDetail(mockOrder, launchState, levelId),
+      }));
+      return;
+    }
+
     if (detailCache[levelId] || requestedRef.current.has(levelId)) return;
     requestedRef.current.add(levelId);
     getLevelDetail(levelId)
@@ -251,7 +294,16 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
           return next;
         });
       });
-  }, [detailCache]);
+  },
+    [
+      levels,
+      currentOrder,
+      detailCache,
+      contextDetail,
+      levelIdFromPath,
+      curriculumDemoAccount,
+    ],
+  );
 
   useEffect(() => {
     if (!levelIdFromPath || levels.length === 0) return;
@@ -341,16 +393,42 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
         <div className="space-y-1 px-3 pb-4">
           {levels.map((level, levelIndex) => {
             const isExpanded = expandedLevelIds.has(level._id);
-            const unlocked = isLevelUnlockedStrict(
-              levelIndex,
-              level.order,
-              currentOrder,
-              levels,
-              detailCache,
-              contextDetail,
-              levelIdFromPath,
-              curriculumDemoAccount,
-            );
+            const isMockPlaceholder = shouldUseMockLevelPlaceholder(level.order);
+            const unlocked = isMockPlaceholder
+              ? isMockLevelUnlockedForStudent(
+                  levelIndex,
+                  level.order,
+                  currentOrder,
+                  levels,
+                  detailCache,
+                  contextDetail,
+                  levelIdFromPath,
+                  curriculumDemoAccount,
+                )
+              : isLevelUnlockedStrict(
+                  levelIndex,
+                  level.order,
+                  currentOrder,
+                  levels,
+                  detailCache,
+                  contextDetail,
+                  levelIdFromPath,
+                  curriculumDemoAccount,
+                );
+            const canExpand = unlocked || isMockPlaceholder;
+            const mockLaunchState =
+              isMockPlaceholder && isMockLevelOrder(level.order)
+                ? getMockLevelLaunchState({
+                    levelOrder: level.order,
+                    levelIndex,
+                    levels,
+                    currentOrder,
+                    detailCache,
+                    contextDetail,
+                    levelIdFromPath,
+                    curriculumDemoAccount,
+                  })
+                : null;
             const isCurrentLevel = level._id === currentLevelId;
             const detail =
               level._id === levelIdFromPath && contextDetail
@@ -372,10 +450,10 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
               >
                 <button
                   type="button"
-                  onClick={() => unlocked && toggleLevel(level._id)}
+                  onClick={() => canExpand && toggleLevel(level._id)}
                   className={cn(
                     "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-all",
-                    !unlocked && "cursor-not-allowed opacity-60",
+                    !canExpand && "cursor-not-allowed opacity-60",
                     isCurrentLevel && "bg-primary/10 dark:bg-primary/15",
                     unlocked && !isCurrentLevel && "hover:bg-slate-100 dark:hover:bg-slate-800/60",
                   )}
@@ -419,7 +497,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                   {!unlocked && (
                     <Lock className="mt-1 h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
                   )}
-                  {unlocked && (
+                  {canExpand && (
                     <span className="mt-1 shrink-0 text-slate-400 dark:text-slate-500">
                       {isExpanded ? (
                         <ChevronDown className="h-4 w-4" />
@@ -458,6 +536,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                             detail.progress.passStatus === "PASSED",
                             curriculumDemoAccount,
                           );
+                          const mockStepLocked = mockLaunchState === "locked";
                           const isActive =
                             level._id === levelIdFromPath && step._id === stepIdFromUrl;
 
@@ -465,17 +544,30 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                             <button
                               key={step._id}
                               type="button"
-                              disabled={stepStatus.locked}
-                              onClick={() =>
-                                !stepStatus.locked && handleStepClick(level._id, step._id)
-                              }
+                              disabled={!isMockPlaceholder && stepStatus.locked}
+                              onClick={() => {
+                                if (isMockPlaceholder) {
+                                  handleStepClick(level._id, step._id);
+                                  return;
+                                }
+                                if (!stepStatus.locked) {
+                                  handleStepClick(level._id, step._id);
+                                }
+                              }}
                               className={cn(
                                 "flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
-                                stepStatus.locked && "cursor-not-allowed opacity-60",
+                                !isMockPlaceholder &&
+                                  stepStatus.locked &&
+                                  "cursor-not-allowed opacity-60",
+                                isMockPlaceholder &&
+                                  mockStepLocked &&
+                                  "opacity-80 hover:bg-slate-100 dark:hover:bg-slate-800/50",
                                 isActive &&
                                   "bg-primary/15 text-primary font-medium dark:bg-primary/20",
-                                !stepStatus.locked &&
-                                  !isActive &&
+                                ((!isMockPlaceholder &&
+                                  !stepStatus.locked &&
+                                  !isActive) ||
+                                  (isMockPlaceholder && !isActive)) &&
                                   "hover:bg-slate-100 dark:hover:bg-slate-800/50",
                               )}
                             >
@@ -483,7 +575,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                                 <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1e3a8a]/20 dark:bg-[#2563eb]/20">
                                   <CheckCircle2 className="h-3.5 w-3.5 text-[#1e3a8a] dark:text-[#3b82f6]" />
                                 </div>
-                              ) : stepStatus.locked ? (
+                              ) : mockStepLocked || stepStatus.locked ? (
                                 <Lock className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
                               ) : (
                                 <span

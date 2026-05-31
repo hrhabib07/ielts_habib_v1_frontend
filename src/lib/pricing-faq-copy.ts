@@ -1,13 +1,6 @@
 export type PricingFaqLocale = "en" | "bn";
 
-export type PricingFaqAnswer =
-  | { readonly kind: "plain"; readonly text: string }
-  | {
-      readonly kind: "guaranteeLink";
-      readonly before: string;
-      readonly linkText: string;
-      readonly after: string;
-    };
+export type PricingFaqAnswer = { readonly kind: "plain"; readonly text: string };
 
 export interface PricingFaqItem {
   readonly question: string;
@@ -37,16 +30,6 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
           kind: "plain",
           text:
             'No. Gamlish is a gamified, AI-driven adaptive platform. Instead of passively watching videos, you play through 20 Mastery Levels. As you pass strategy lessons and practice sets, your "Water Level" (Readiness Meter) rises. We don\'t just give you practice materials; we mathematically track exactly when you are ready for your target band.',
-        },
-      },
-      {
-        question: "How exactly does the 100% Money-Back Guarantee work?",
-        answer: {
-          kind: "guaranteeLink",
-          before:
-            "It is simple and transparent. If your Gamlish Water Level reaches 90% (meaning our system verifies you are exam-ready), and you sit for the official IELTS within 14 days but fail to achieve your target band, we refund your full course fee. You just need to follow our ",
-          linkText: "five eligibility conditions",
-          after: " (like not cheating on mock tests).",
         },
       },
       {
@@ -88,16 +71,6 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
           kind: "plain",
           text:
             "না। Gamlish একটি গ্যামিফাইড এবং অ্যাডাপ্টিভ প্ল্যাটফর্ম। এখানে শুধু বসে বসে ভিডিও দেখার সুযোগ নেই; আপনাকে ২০টি মাস্টারি লেভেল পার করতে হবে। আপনি যখন স্ট্র্যাটেজি শিখবেন এবং প্র্যাকটিস করবেন, তখন আপনার \"Water Level\" (প্রস্তুতির মাত্রা) বাড়তে থাকবে। আমরা শুধু ম্যাটেরিয়াল দিই না, আপনি টার্গেট স্কোরের জন্য কখন পুরোপুরি প্রস্তুত, তা ম্যাথমেটিক্যালি ট্র্যাক করি।",
-        },
-      },
-      {
-        question: "১০০% মানি-ব্যাক গ্যারান্টি আসলে কীভাবে কাজ করে?",
-        answer: {
-          kind: "guaranteeLink",
-          before:
-            "এটি একদম স্বচ্ছ। Gamlish-এ আপনার ওয়াটার লেভেল যদি ৯০% ছুঁয়ে যায় (অর্থাৎ সিস্টেম নিশ্চিত করে যে আপনি প্রস্তুত), এবং আপনি পরবর্তী ১৪ দিনের মধ্যে মেইন আইইএলটিএস পরীক্ষা দেওয়ার পরও টার্গেট স্কোর না পান, তবে আমরা আপনার সম্পূর্ণ কোর্স ফি ফেরত দেব। এর জন্য শুধু আমাদের ",
-          linkText: "৫টি সাধারণ শর্ত",
-          after: " (যেমন: মক টেস্টে সততা বজায় রাখা) পূরণ করতে হবে।",
         },
       },
       {

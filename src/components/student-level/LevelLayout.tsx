@@ -7,6 +7,8 @@ import { LevelSidebar } from "./LevelSidebar";
 import { LevelContent, LevelContentSkeleton } from "./LevelContent";
 import { LevelStepBottomNav } from "./LevelStepBottomNav";
 import { LevelFeedbackForm } from "./LevelFeedbackForm";
+import { readingPathPremium } from "@/src/lib/readingPathPremium";
+import { cn } from "@/lib/utils";
 import type {
   LevelDetailForStudent,
   SubmitStepQuizResponse,
@@ -141,12 +143,20 @@ export function LevelLayout({
 
   const dockBottomNav = hideSidebar && !isPreview && Boolean(onNavigate) && Boolean(activeStep);
 
+  const isPracticeTestLauncher =
+    activeStep?.stepType === "PRACTICE_TEST" && !isCompleted && !isPreview;
+
   useEffect(() => {
     contentScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, [activeStepId]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div
+      className={cn(
+        "flex h-full min-h-0 flex-col overflow-hidden",
+        isPracticeTestLauncher ? "bg-background" : "bg-slate-50 dark:bg-slate-950",
+      )}
+    >
       {!hideSidebar && (
         <div className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm lg:hidden">
           <button
@@ -184,12 +194,13 @@ export function LevelLayout({
 
         {/* Content area: scrollable lesson body + docked step bar (reading dashboard) */}
         <main
-          className={[
-            "min-h-0 min-w-0 flex-1 overflow-hidden bg-white dark:bg-slate-900",
+          className={cn(
+            "min-h-0 min-w-0 flex-1 overflow-hidden",
+            isPracticeTestLauncher ? "bg-background" : "bg-white dark:bg-slate-900",
             dockBottomNav
               ? "grid h-full grid-rows-[minmax(0,1fr)_auto]"
               : "flex h-full flex-col",
-          ].join(" ")}
+          )}
         >
           <div
             ref={contentScrollRef}
@@ -304,7 +315,13 @@ export function LevelLayout({
             </div>
           )}
 
-          <div className="rounded-lg bg-slate-50/60 dark:bg-slate-800/30 p-4 lg:p-6">
+          <div
+            className={cn(
+              isPracticeTestLauncher
+                ? "flex min-h-full flex-col bg-background px-4 lg:px-6"
+                : "rounded-lg bg-slate-50/60 p-4 dark:bg-slate-800/30 lg:p-6",
+            )}
+          >
               {loading ? (
                 <LevelContentSkeleton />
               ) : (

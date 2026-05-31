@@ -1,10 +1,25 @@
-/**
- * Full-screen reading assessments: hide global chrome (header/footer).
- */
+import {
+  isReadingExamSimulationPath,
+  isReadingFixedViewportShellPath,
+} from "@/src/lib/siteScrollPolicy";
+
+/** @deprecated Prefer `isReadingExamSimulationPath` */
 export function isReadingExamFocusPath(pathname: string | null): boolean {
+  return isReadingExamSimulationPath(pathname);
+}
+
+/** Reading path + level runner — fixed viewport; hide site footer. */
+export function isReadingDashboardPath(pathname: string | null): boolean {
   if (!pathname) return false;
-  if (pathname.includes("/profile/reading/step-quiz")) return true;
-  return /\/profile\/reading\/strict-levels\/[^/]+\/(practice-test|final-evaluation)(\/|$)/.test(
-    pathname,
+  return (
+    pathname === "/profile/reading" ||
+    pathname.startsWith("/profile/reading/strict-levels") ||
+    pathname.includes("/profile/reading/practice-attempt")
   );
 }
+
+export {
+  isReadingExamSimulationPath,
+  isReadingFixedViewportShellPath,
+  shouldUseDocumentScroll,
+} from "@/src/lib/siteScrollPolicy";

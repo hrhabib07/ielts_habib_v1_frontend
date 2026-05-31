@@ -13,9 +13,11 @@ import {
 import {
   type PracticeTestStepContent,
   isSentenceLocatorPracticeContent,
+  isFullMockPracticeContent,
 } from "@/src/lib/api/readingStrictProgression";
 import type { PracticeTestReadingViewHandle } from "@/src/components/reading/PracticeTestReadingView";
 import type { SentenceLocatorPracticeViewHandle } from "@/src/components/reading/SentenceLocatorPracticeView";
+import type { ReadingMockTestViewHandle } from "@/src/components/reading/ReadingMockTestView";
 import { ReadingAssessmentResultView } from "@/src/components/reading/ReadingAssessmentResultView";
 import { ReadingTestExitDialog } from "@/src/components/reading/ReadingTestExitDialog";
 import { PRACTICE_TEST_MINUTES } from "@/src/constants/readingAssessmentTiming";
@@ -27,6 +29,14 @@ import {
   peekPracticeTestContentCached,
   preloadPracticeTestViews,
 } from "@/src/lib/readingStepContentCache";
+
+const ReadingMockTestView = dynamic(
+  () =>
+    import("@/src/components/reading/ReadingMockTestView").then(
+      (m) => m.ReadingMockTestView,
+    ),
+  { ssr: false, loading: () => null },
+);
 
 const PracticeTestReadingView = dynamic(
   () =>
@@ -86,7 +96,10 @@ function PracticeTestContent() {
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const testRef = useRef<
-    PracticeTestReadingViewHandle | SentenceLocatorPracticeViewHandle | null
+    | PracticeTestReadingViewHandle
+    | SentenceLocatorPracticeViewHandle
+    | ReadingMockTestViewHandle
+    | null
   >(null);
   const prefetchedRef = useRef<PracticeTestStepContent | null>(null);
   const [exitOpen, setExitOpen] = useState(false);
@@ -122,6 +135,8 @@ function PracticeTestContent() {
     preloadPracticeTestViews();
     if (isSentenceLocatorPracticeContent(practiceContent)) {
       await import("@/src/components/reading/SentenceLocatorPracticeView");
+    } else if (isFullMockPracticeContent(practiceContent)) {
+      await import("@/src/components/reading/ReadingMockTestView");
     } else {
       await import("@/src/components/reading/PracticeTestReadingView");
     }
@@ -352,6 +367,28 @@ function PracticeTestContent() {
               content={content}
               onSubmitted={handleSubmitted}
               onRequestExit={openExitDialog}
+            />
+          ) : isFullMockPracticeContent(content) ? (
+            <ReadingMockTestView
+              ref={testRef}
+              levelId={levelId}
+              practiceStepId={stepId!}
+              content={{
+                groupTestId: content.practiceTestId,
+                miniTests: content.miniTests,
+              }}
+              onSubmitted={(res) => {
+                handleSubmitted({
+                  passed: res.passed ?? res.overallPass,
+                  scorePercent: res.scorePercent ?? 0,
+                  bandScore: res.bandScore ?? 0,
+                  attemptId: res.attemptId,
+                  attemptNumber: res.attemptNumber,
+                  bestBandScore: res.bestBandScore,
+                  isNewBest: res.isNewBest,
+                  levelComplete: res.levelComplete,
+                });
+              }}
             />
           ) : (
             <PracticeTestReadingView

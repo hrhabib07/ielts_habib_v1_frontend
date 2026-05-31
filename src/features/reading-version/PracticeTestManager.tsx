@@ -20,6 +20,8 @@ import {
   type GroupTestQuestionForPreview,
   type GroupTestQuestionGroupForPreview,
   isSentenceLocatorPreviewContent,
+  isFullMockPreviewContent,
+  type GroupTestMiniTestForPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
 import {
@@ -29,6 +31,8 @@ import {
   DraggableWordBank,
 } from "@/src/components/reading/GapFillingQuestionInput";
 import { PracticeTestsBulkCreateCard } from "./PracticeTestsBulkCreateCard";
+import { FullMockPracticeBulkPortal } from "./FullMockPracticeBulkPortal";
+import { FULL_MOCK_LEVEL_ORDERS } from "./multiTypeBulkTemplate";
 import { PracticeTestContentEditor } from "./PracticeTestContentEditor";
 import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
 import {
@@ -235,23 +239,38 @@ export function PracticeTestManager({
 
   return (
     <div className="space-y-4">
-      <PracticeTestsBulkCreateCard
-        versionId={versionId}
-        levelOrder={levelOrder}
-        disabled={disabled}
-        onMergeCreatedPracticeTests={(created) => {
-          onPracticeTestsChange(
-            [...practiceTests, ...created].sort((a, b) => a.order - b.order),
-          );
-        }}
-      />
+      {FULL_MOCK_LEVEL_ORDERS.has(levelOrder) ? (
+        <FullMockPracticeBulkPortal
+          versionId={versionId}
+          levelOrder={levelOrder}
+          disabled={disabled}
+          onMergeCreatedPracticeTests={(created) => {
+            onPracticeTestsChange(
+              [...practiceTests, ...created].sort((a, b) => a.order - b.order),
+            );
+          }}
+        />
+      ) : (
+        <PracticeTestsBulkCreateCard
+          versionId={versionId}
+          levelOrder={levelOrder}
+          disabled={disabled}
+          onMergeCreatedPracticeTests={(created) => {
+            onPracticeTestsChange(
+              [...practiceTests, ...created].sort((a, b) => a.order - b.order),
+            );
+          }}
+        />
+      )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="font-semibold text-stone-900 dark:text-stone-100">
             Practice tests for {levelTitle}
           </h3>
           <p className="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
-            Each test = one passage + question set. Add a step of type &quot;Practice Test&quot; in the Level Builder and select one of these.
+            {FULL_MOCK_LEVEL_ORDERS.has(levelOrder)
+              ? "Levels 17–20: each test is a full 60-minute mock (3 passages). Use the bulk portal above, then add Practice Test steps in the Level Builder."
+              : 'Each test = one passage + question set. Add a step of type "Practice Test" in the Level Builder and select one of these.'}
           </p>
         </div>
         {!disabled && (
@@ -1407,6 +1426,96 @@ function PracticeTestQuestionBlock({
   );
 }
 
+function PracticeTestMiniPreviewBody({ miniTest }: { miniTest: GroupTestMiniTestForPreview }) {
+  const passage = miniTest.passage;
+  const questionGroups = miniTest.questionGroups;
+  const flatQuestions = miniTest.questions ?? [];
+
+  return (
+    <div className="space-y-8">
+      <section>
+        <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+          Passage
+        </h3>
+        <h4 className="font-medium text-stone-900 dark:text-stone-100">
+          {passage?.title ?? "Passage"}
+        </h4>
+        {passage?.subTitle && (
+          <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">{passage.subTitle}</p>
+        )}
+        <div className="mt-3 rounded-xl border border-stone-200 bg-stone-50/30 p-4 dark:border-stone-700 dark:bg-stone-800/30">
+          {passage?.content != null ? (
+            renderPassageContent(passage.content)
+          ) : (
+            <p className="text-stone-500 dark:text-stone-400">No passage content.</p>
+          )}
+        </div>
+        {typeof passage?.wordCount === "number" && (
+          <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
+            {passage.wordCount} words
+          </p>
+        )}
+      </section>
+      <section>
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+          Questions ({flatQuestions.length})
+        </h3>
+        {questionGroups && questionGroups.length > 0 ? (
+          <div className="space-y-6">
+            {(questionGroups as GroupTestQuestionGroupForPreview[]).map((grp) => (
+              <div key={`${grp.startQuestionNumber}-${grp.endQuestionNumber}`}>
+                <p className="mb-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+                  Questions {grp.startQuestionNumber}–{grp.endQuestionNumber}:{" "}
+                  {QUESTION_TYPE_LABEL[grp.questionType] ?? grp.questionType}
+                </p>
+                {grp.instruction && (
+                  <p className="mb-3 text-xs italic text-stone-500 dark:text-stone-400">
+                    {grp.instruction}
+                  </p>
+                )}
+                {grp.questionType === "SUMMARY_COMPLETION_WITH_CLUES" && (
+                  <DraggableWordBank options={grp.questions[0]?.blanks?.[0]?.options ?? []} />
+                )}
+                <div className="space-y-3">
+                  {grp.questions.map((q) => {
+                    const displayNumberStartMap = GAP_BASED_COMPLETION_TYPES.includes(
+                      grp.questionType as (typeof GAP_BASED_COMPLETION_TYPES)[number],
+                    )
+                      ? buildDisplayNumberStartByQuestionId(
+                          grp.questionType,
+                          grp.questions,
+                          grp.startQuestionNumber,
+                        )
+                      : {};
+                    return (
+                      <PracticeTestQuestionBlock
+                        key={q._id}
+                        question={q}
+                        displayNumber={q.questionNumber}
+                        displayNumberStart={displayNumberStartMap[q._id]}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {flatQuestions.map((q, idx) => (
+              <PracticeTestQuestionBlock
+                key={q._id}
+                question={q}
+                displayNumber={idx + 1}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
 function PracticeTestPreviewModal({
   content,
   loading,
@@ -1420,11 +1529,20 @@ function PracticeTestPreviewModal({
   onClose: () => void;
   onRetry: () => void;
 }) {
+  const [passageIndex, setPassageIndex] = useState(0);
   const isSl = content != null && isSentenceLocatorPreviewContent(content);
-  const passage = !isSl && content ? content.miniTest.passage : undefined;
-  const questionGroups = !isSl && content ? content.miniTest.questionGroups : undefined;
-  const flatQuestions: GroupTestQuestionForPreview[] =
-    !isSl && content ? (content.miniTest.questions ?? []) : [];
+  const isFullMock = content != null && isFullMockPreviewContent(content);
+
+  useEffect(() => {
+    setPassageIndex(0);
+  }, [content?.practiceTestId]);
+
+  const activeMiniTest: GroupTestMiniTestForPreview | undefined = (() => {
+    if (!content || isSl) return undefined;
+    if (isFullMock) return content.miniTests[passageIndex];
+    if ("miniTest" in content) return content.miniTest;
+    return undefined;
+  })();
 
   return (
     <div
@@ -1448,6 +1566,11 @@ function PracticeTestPreviewModal({
             {content ? (
               <>
                 Preview: {content.title}
+                {isFullMock ? (
+                  <span className="ml-2 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
+                    Full mock
+                  </span>
+                ) : null}
                 <span className="ml-2 hidden text-sm font-normal text-stone-500 dark:text-stone-400 sm:inline">
                   {content.timeLimitMinutes} min · pass{" "}
                   {content.passType === "PERCENTAGE"
@@ -1530,92 +1653,25 @@ function PracticeTestPreviewModal({
               </section>
             </div>
           )}
-          {content && !loading && !isSl && (
-            <div className="space-y-8">
-              <section>
-                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  Passage
-                </h3>
-                <h4 className="font-medium text-stone-900 dark:text-stone-100">
-                  {passage?.title ?? "Passage"}
-                </h4>
-                {passage?.subTitle && (
-                  <p className="mt-0.5 text-sm text-stone-500 dark:text-stone-400">
-                    {passage.subTitle}
-                  </p>
-                )}
-                <div className="mt-3 rounded-xl border border-stone-200 bg-stone-50/30 p-4 dark:border-stone-700 dark:bg-stone-800/30">
-                  {passage?.content != null
-                    ? renderPassageContent(passage.content)
-                    : (
-                      <p className="text-stone-500 dark:text-stone-400">No passage content.</p>
-                    )}
-                </div>
-                {typeof passage?.wordCount === "number" && (
-                  <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
-                    {passage.wordCount} words
-                  </p>
-                )}
-              </section>
-              <section>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  Questions ({flatQuestions.length})
-                </h3>
-                {questionGroups && questionGroups.length > 0 ? (
-                  <div className="space-y-6">
-                    {(questionGroups as GroupTestQuestionGroupForPreview[]).map((grp) => (
-                      <div key={`${grp.startQuestionNumber}-${grp.endQuestionNumber}`}>
-                        <p className="mb-2 text-sm font-medium text-stone-700 dark:text-stone-300">
-                          Questions {grp.startQuestionNumber}–{grp.endQuestionNumber}:{" "}
-                          {QUESTION_TYPE_LABEL[grp.questionType] ?? grp.questionType}
-                        </p>
-                        {grp.instruction && (
-                          <p className="mb-3 text-xs italic text-stone-500 dark:text-stone-400">
-                            {grp.instruction}
-                          </p>
-                        )}
-                        {grp.questionType === "SUMMARY_COMPLETION_WITH_CLUES" && (
-                          <DraggableWordBank
-                            options={grp.questions[0]?.blanks?.[0]?.options ?? []}
-                          />
-                        )}
-                        <div className="space-y-3">
-                          {grp.questions.map((q) => {
-                            const displayNumberStartMap = GAP_BASED_COMPLETION_TYPES.includes(
-                              grp.questionType as (typeof GAP_BASED_COMPLETION_TYPES)[number]
-                            )
-                              ? buildDisplayNumberStartByQuestionId(
-                                  grp.questionType,
-                                  grp.questions,
-                                  grp.startQuestionNumber
-                                )
-                              : {};
-                            return (
-                              <PracticeTestQuestionBlock
-                                key={q._id}
-                                question={q}
-                                displayNumber={q.questionNumber}
-                                displayNumberStart={displayNumberStartMap[q._id]}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {flatQuestions.map((q, idx) => (
-                      <PracticeTestQuestionBlock
-                        key={q._id}
-                        question={q}
-                        displayNumber={idx + 1}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
+          {content && !loading && !isSl && isFullMock && (
+            <div className="mb-6 flex flex-wrap gap-2">
+              {content.miniTests.map((mt, idx) => (
+                <Button
+                  key={mt.miniTestId ?? idx}
+                  type="button"
+                  size="sm"
+                  variant={passageIndex === idx ? "default" : "outline"}
+                  className={passageIndex === idx ? "bg-indigo-700 hover:bg-indigo-800" : ""}
+                  onClick={() => setPassageIndex(idx)}
+                >
+                  Passage {idx + 1}
+                  {mt.passage?.title ? `: ${mt.passage.title.slice(0, 28)}${mt.passage.title.length > 28 ? "…" : ""}` : ""}
+                </Button>
+              ))}
             </div>
+          )}
+          {content && !loading && !isSl && activeMiniTest && (
+            <PracticeTestMiniPreviewBody miniTest={activeMiniTest} />
           )}
         </div>
       </div>

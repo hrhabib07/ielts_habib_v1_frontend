@@ -56,7 +56,6 @@ export function FinalEvaluationResultsSummary({
   onBackToLevel,
 }: FinalEvaluationResultsSummaryProps) {
   const [userName, setUserName] = useState("");
-  const [targetBand, setTargetBand] = useState<number | null>(null);
   const [levelTitle, setLevelTitle] = useState("");
   const [levelNumber, setLevelNumber] = useState<number | null>(null);
   const [canNativeShare, setCanNativeShare] = useState(false);
@@ -74,10 +73,9 @@ export function FinalEvaluationResultsSummary({
       getLevelDetail(levelId).catch(() => null),
     ]).then(([profile, level]) => {
       if (cancelled) return;
-      if (profile?.name) setUserName(profile.name);
-      if (profile?.targetBands?.reading != null) {
-        setTargetBand(profile.targetBands.reading);
-      }
+      const nick =
+        profile && typeof profile.nickname === "string" ? profile.nickname.trim() : "";
+      setUserName(nick || profile?.name?.trim() || "");
       if (level?.level) {
         setLevelTitle(level.level.title);
         setLevelNumber(level.level.order);

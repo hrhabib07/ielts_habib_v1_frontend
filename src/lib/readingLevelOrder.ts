@@ -18,3 +18,24 @@ export function isReadingFoundationL0(level: {
     readingLevelIndexFromOrder(level.order ?? -1) === 0
   );
 }
+
+/** First SKILL curriculum level (Level 1 / free trial cap). */
+export function isReadingFirstSkillL1(
+  level: { levelType?: ReadingLevelType | string | null; order?: number | null },
+  firstSkillOrder: number | null,
+): boolean {
+  return (
+    level.levelType === "SKILL" &&
+    firstSkillOrder != null &&
+    level.order === firstSkillOrder
+  );
+}
+
+export function findFirstSkillOrder(
+  levels: ReadonlyArray<{ levelType?: string; order?: number }>,
+): number | null {
+  const skill = levels
+    .filter((l) => l.levelType === "SKILL")
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))[0];
+  return skill?.order ?? null;
+}

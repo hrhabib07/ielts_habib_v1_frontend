@@ -365,6 +365,10 @@ export function PracticeTestBuilder({
                         <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
                           SL
                         </span>
+                      ) : pt.contentFormat === "FULL_MOCK" ? (
+                        <span className="ml-2 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
+                          Full mock
+                        </span>
                       ) : null}
                     </span>
                     <span className="text-xs text-muted-foreground">

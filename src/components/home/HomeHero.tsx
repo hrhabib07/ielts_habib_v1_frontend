@@ -2,16 +2,15 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { getProfileSummary, getMyProfile } from "@/src/lib/api/profile";
-import { BookOpen } from "lucide-react";
+import { BookOpen, MapPin, Sparkles, TrendingUp } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import {
   hasUsableClientToken,
   isActiveStudentSessionClient,
 } from "@/src/lib/auth";
-import { HeroAnimation } from "@/src/components/home/HeroAnimation";
+import { GuestLandingPage } from "@/src/components/home/guest/GuestLandingPage";
 import { StudentBandJourneyFlightVisual } from "@/src/components/home/StudentBandJourneyFlightVisual";
 import {
   STUDENT_JOURNEY_HERO_MOCK,
@@ -119,9 +118,10 @@ export function HomeHero({
 
   if (mode === "loading") {
     return (
-      <section className="flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center px-6 text-center font-bengali">
-        <div className="h-24 w-48 animate-pulse rounded-lg bg-muted" />
-        <p className="mt-4 text-sm text-muted-foreground">লোড হচ্ছে…</p>
+      <section className="flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center px-6 py-16 text-center">
+        <div className="h-32 w-full max-w-lg animate-pulse rounded-2xl bg-muted/50" />
+        <div className="mt-8 h-24 w-40 animate-pulse rounded-xl bg-muted/40" />
+        <p className="mt-6 text-sm text-muted-foreground">Loading your journey…</p>
       </section>
     );
   }
@@ -145,166 +145,38 @@ export function HomeHero({
     !!initialUser ||
     (authBootstrapped && hasUsableClientToken());
 
+  if (!showAsAuthenticatedUi) {
+    return (
+      <>
+        <GuestLandingPage />
+        {children}
+      </>
+    );
+  }
+
   return (
     <>
-      <MinimalHero
-        roleCtaHref={roleCtaHref}
-        roleCtaLabel={roleCtaLabel}
-        isAuthenticated={showAsAuthenticatedUi}
-      />
+      <AuthenticatedHomeCta roleCtaHref={roleCtaHref} roleCtaLabel={roleCtaLabel} />
       {children}
     </>
   );
 }
 
-interface MinimalHeroProps {
-  roleCtaHref?: string | null;
-  roleCtaLabel?: string | null;
-  isAuthenticated: boolean;
-}
-
-const HERO_EYEBROW =
-  "আসসালামু আলাইকুম আপনাকে, এবং আপনার IELTS Reading-এর ভয়কে!";
-/** Main headline — comma break for two visual lines (no em dash) */
-const HERO_TITLE_LINE1 = "আপনাকে সালাম Gamlish-এ স্বাগতম জানাতে,";
-const HERO_TITLE_LINE2 = "আর আপনার ভয়কে সালাম চিরতরে বিদায় দিতে।";
-const HERO_SUBTITLE =
-  "Gamlish-এর গ্যামিফাইড সলিউশন আপনার রিডিংয়ের এই ভীতিকে নিখুঁত আত্মবিশ্বাসে রূপান্তর করবে। ভয় কাটিয়ে আপনার কাঙ্ক্ষিত ব্যান্ড স্কোর (Desired Band Score) অর্জন এখন হবে একদম স্মুথ।";
-/** First CTA leads with confidence; second explains the product */
-const CTA_PRIMARY = "আত্মবিশ্বাসে শুরু করুন";
-const CTA_SECONDARY = "কীভাবে কাজ করে";
-
-const EASE_PREMIUM: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-function heroTextVariants(reduceMotion: boolean | null) {
-  const blur = reduceMotion ? 0 : 8;
-  return {
-    hidden: { opacity: 0, y: reduceMotion ? 6 : 16, filter: `blur(${blur}px)` },
-    show: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: {
-        duration: reduceMotion ? 0.2 : 0.58,
-        ease: EASE_PREMIUM,
-      },
-    },
-  };
-}
-
-function MinimalHero({
+/** Compact CTA for logged-in admin/instructor on home (students use BandHero). */
+function AuthenticatedHomeCta({
   roleCtaHref,
   roleCtaLabel,
-  isAuthenticated,
-}: MinimalHeroProps) {
-  const reduceMotion = useReducedMotion();
-  const showGuestCtas = !isAuthenticated;
-  const showRoleCta = isAuthenticated && roleCtaHref && roleCtaLabel;
-  const lineVariant = heroTextVariants(reduceMotion);
+}: {
+  roleCtaHref?: string | null;
+  roleCtaLabel?: string | null;
+}) {
+  if (!roleCtaHref || !roleCtaLabel) return null;
 
   return (
-    <section
-      lang="bn"
-      className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center overflow-x-clip overflow-y-auto px-4 pb-6 pt-8 text-center sm:px-6 sm:pb-5 sm:pt-10 md:min-h-0 md:flex-1 md:overflow-y-hidden md:pb-5 md:pt-12 lg:pt-14"
-    >
-      <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/[0.07] via-transparent to-muted/25 dark:from-primary/12 dark:via-transparent dark:to-muted/15"
-        aria-hidden
-      />
-      <div className="relative z-10 flex w-full max-w-5xl min-h-0 flex-1 flex-col items-center justify-center gap-4 font-bengali sm:gap-5 md:max-h-full md:justify-center md:gap-5 lg:gap-6">
-        {showGuestCtas ? (
-          <>
-            <div className="flex w-full min-h-0 min-w-0 shrink justify-center px-0 pt-1 sm:px-2 sm:pt-2 md:max-h-none md:items-center md:pt-2">
-              <HeroAnimation />
-            </div>
-            <motion.div
-              className="mx-auto mt-1 flex w-full max-w-3xl flex-col space-y-3 px-1 sm:space-y-3.5 sm:px-0 md:mt-2 md:min-h-0 md:shrink md:space-y-3"
-              initial="hidden"
-              animate="show"
-              variants={{
-                show: {
-                  transition: {
-                    staggerChildren: reduceMotion ? 0.06 : 0.14,
-                    delayChildren: reduceMotion ? 0 : 0.08,
-                  },
-                },
-              }}
-            >
-              <motion.p
-                variants={lineVariant}
-                className="text-balance text-xs font-semibold leading-relaxed sm:text-sm md:text-[0.8125rem]"
-              >
-                <span className="inline-block bg-gradient-to-r from-primary via-primary/95 to-primary/75 bg-clip-text text-transparent dark:from-sky-200/95 dark:via-primary/90 dark:to-sky-300/80">
-                  {HERO_EYEBROW}
-                </span>
-              </motion.p>
-              <motion.h1
-                variants={{
-                  hidden: {},
-                  show: {
-                    transition: {
-                      staggerChildren: reduceMotion ? 0.07 : 0.13,
-                      delayChildren: 0,
-                    },
-                  },
-                }}
-                className="m-0 flex w-full flex-col items-center text-[clamp(1.05rem,2.05vw,1.6rem)] font-bold leading-[1.38] tracking-tight sm:text-[clamp(1.1rem,2.15vw,1.75rem)] lg:text-[clamp(1.2rem,2.25vw,1.9rem)]"
-              >
-                <motion.span
-                  variants={lineVariant}
-                  className="block max-w-full whitespace-normal bg-gradient-to-br from-foreground via-foreground to-foreground/75 bg-clip-text text-transparent drop-shadow-[0_1px_24px_rgba(15,23,42,0.06)] dark:from-slate-50 dark:via-slate-100 dark:to-slate-300/90 dark:drop-shadow-[0_1px_28px_rgba(248,250,252,0.07)]"
-                >
-                  {HERO_TITLE_LINE1}
-                </motion.span>
-                <motion.span
-                  variants={lineVariant}
-                  className="mt-1.5 block max-w-full whitespace-normal bg-gradient-to-r from-primary via-primary/92 to-slate-700 bg-clip-text text-transparent dark:from-sky-200/95 dark:via-primary/88 dark:to-slate-300/85"
-                >
-                  {HERO_TITLE_LINE2}
-                </motion.span>
-              </motion.h1>
-              <motion.p
-                variants={lineVariant}
-                className="text-balance border-t border-border/60 pt-3 text-sm font-medium leading-relaxed text-muted-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] sm:text-[0.95rem] md:border-border/50 md:pt-3.5 md:text-[0.8125rem] md:leading-[1.65] lg:text-sm"
-              >
-                {HERO_SUBTITLE}
-              </motion.p>
-            </motion.div>
-            <motion.div
-              className="mt-3 flex w-full max-w-2xl flex-col items-stretch gap-2.5 px-1 sm:mt-4 sm:flex-row sm:justify-center sm:gap-3 sm:px-0 md:mt-4 md:shrink-0"
-              initial={{ opacity: 0, y: reduceMotion ? 4 : 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: reduceMotion ? 0.15 : 0.55,
-                duration: reduceMotion ? 0.2 : 0.45,
-                ease: EASE_PREMIUM,
-              }}
-            >
-              <Button
-                size="lg"
-                className="h-11 w-full text-base font-semibold shadow-md transition-shadow hover:shadow-lg sm:h-10 sm:w-auto sm:px-6 md:h-10 md:text-sm"
-                asChild
-              >
-                <Link href="/register">{CTA_PRIMARY}</Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-11 w-full border-border/80 bg-background/60 text-base font-semibold backdrop-blur-sm sm:h-10 sm:w-auto sm:px-6 md:h-10 md:text-sm"
-                asChild
-              >
-                <Link href="/how-it-works">{CTA_SECONDARY}</Link>
-              </Button>
-            </motion.div>
-          </>
-        ) : showRoleCta ? (
-          <div className="flex flex-col items-center gap-6 py-8">
-            <Button size="lg" className="shadow-lg" asChild>
-              <Link href={roleCtaHref ?? "#"}>{roleCtaLabel}</Link>
-            </Button>
-          </div>
-        ) : null}
-      </div>
+    <section className="flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center px-6 py-16 text-center">
+      <Button size="lg" className="shadow-lg" asChild>
+        <Link href={roleCtaHref}>{roleCtaLabel}</Link>
+      </Button>
     </section>
   );
 }
@@ -445,7 +317,7 @@ function BandHero({
       : `Your dream to study in ${dreamCountry} is within reach.`;
 
   return (
-    <section className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center overflow-hidden bg-background px-6 pt-8 text-center">
+    <section className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center overflow-x-clip bg-background px-4 py-12 text-center sm:px-6 sm:py-16">
       <StudentBandJourneyFlightVisual
         currentCountryLabel={currentCountry}
         dreamCountryLabel={dreamCountry}
@@ -455,45 +327,86 @@ function BandHero({
       />
       <BandHeroAtmosphere />
 
-      <div className="relative z-10 flex max-w-xl flex-col items-center">
-        <p className="mt-8 max-w-md text-xs font-semibold uppercase leading-relaxed tracking-widest text-muted-foreground sm:text-sm">
-          {headerLine}
-        </p>
+      {/* Ambient glow */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-[18%] h-64 w-64 -translate-x-1/2 rounded-full bg-accent/10 blur-3xl dark:bg-accent/15"
+        aria-hidden
+      />
+
+      <div className="relative z-10 flex w-full max-w-2xl flex-col items-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-accent/15 bg-card/80 px-3 py-1.5 shadow-sm ring-1 ring-accent/10 backdrop-blur-sm">
+          <Sparkles className="h-3.5 w-3.5 text-accent" />
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            {headerLine}
+          </span>
+        </div>
 
         {bandLabel != null ? (
           <>
-            <p className="mt-8 text-balance text-base font-medium text-foreground sm:text-lg">
+            <p className="mt-8 text-balance text-lg font-medium text-foreground sm:text-xl">
               Let&apos;s reach your goal of a
             </p>
 
-            <div className="band-score-container my-6 flex min-h-[7rem] items-center justify-center sm:my-8">
+            <div className="band-score-container relative my-6 flex min-h-[7.5rem] items-center justify-center sm:my-8">
+              <div
+                className="pointer-events-none absolute inset-0 rounded-full bg-accent/5 blur-2xl"
+                aria-hidden
+              />
               <span
-                className="band-score-fill font-bold tabular-nums select-none text-8xl tracking-tight md:text-9xl"
+                className="band-score-fill font-bold tabular-nums select-none text-[clamp(4.5rem,16vw,7.5rem)] leading-none tracking-tight"
                 style={{ "--fill-pct": `${fillPct}%` } as React.CSSProperties}
                 aria-hidden
               >
                 {bandLabel}
               </span>
               <span
-                className="band-score-outline font-bold tabular-nums select-none text-8xl tracking-tight md:text-9xl"
+                className="band-score-outline font-bold tabular-nums select-none text-[clamp(4.5rem,16vw,7.5rem)] leading-none tracking-tight"
                 aria-label={`Target band score ${bandLabel}, ${overallProgressPct}% complete`}
               >
                 {bandLabel}
               </span>
             </div>
 
-            <p className="text-balance text-base font-medium text-foreground sm:text-lg">
-              in IELTS {moduleLabel}.
+            <p className="text-balance text-lg font-semibold text-foreground sm:text-xl">
+              in IELTS {moduleLabel}
             </p>
 
-            <p className="mt-5 max-w-md text-balance text-sm font-medium text-muted-foreground sm:text-base">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
+                <MapPin className="h-3.5 w-3.5 text-accent" />
+                {currentCountry}
+              </span>
+              <span className="text-muted-foreground/50" aria-hidden>
+                →
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm dark:text-emerald-200">
+                <MapPin className="h-3.5 w-3.5" />
+                {dreamCity ? `${dreamCity}, ${dreamCountry}` : dreamCountry}
+              </span>
+            </div>
+
+            <p className="mt-6 max-w-lg text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
               {dreamLine}
             </p>
 
-            <p className="mt-3 max-w-md text-balance text-xs text-muted-foreground/90 sm:text-sm">
-              {overallProgressPct}% complete. Keep going. Your Band {bandLabel}{" "}
-              is closer than you think.
-            </p>
+            <div className="mt-5 w-full max-w-md rounded-2xl border border-border/40 bg-card/70 px-4 py-3 shadow-sm ring-1 ring-accent/[0.06] backdrop-blur-sm">
+              <div className="mb-2 flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3 text-accent" />
+                  Journey progress
+                </span>
+                <span className="tabular-nums text-accent">{overallProgressPct}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-muted/80">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-accent/80 transition-all duration-1000 ease-out"
+                  style={{ width: `${Math.min(100, Math.max(0, overallProgressPct))}%` }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground/90">
+                Keep going — your Band {bandLabel} is closer than you think.
+              </p>
+            </div>
           </>
         ) : (
           <>
@@ -519,10 +432,13 @@ function BandHero({
         )}
 
         {bandLabel != null ? (
-          <div className="flex w-full justify-center pt-10 pb-6">
-            <Link href={improveSkillsHref}>
-              <Button size="lg" className="gap-2">
-                <BookOpen className="h-4 w-4" />
+          <div className="flex w-full justify-center pt-8 pb-4 sm:pt-10">
+            <Link href={improveSkillsHref} className="w-full max-w-sm sm:w-auto">
+              <Button
+                size="lg"
+                className="group h-12 w-full gap-2.5 bg-accent text-base font-semibold shadow-[0_4px_20px_-4px_rgba(30,58,138,0.45)] transition-all hover:-translate-y-0.5 hover:bg-accent/90 hover:shadow-[0_8px_28px_-6px_rgba(30,58,138,0.5)] sm:px-8"
+              >
+                <BookOpen className="h-4 w-4 transition-transform group-hover:scale-110" />
                 Improve your {moduleLower} skills
               </Button>
             </Link>

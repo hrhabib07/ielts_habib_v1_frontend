@@ -159,8 +159,9 @@ export interface PracticeTest {
   levelVersionId: string;
   title: string;
   contentCode?: string;
-  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR";
+  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR" | "FULL_MOCK";
   miniTestId?: string;
+  miniTestIds?: [string, string, string];
   timeLimitMinutes: number;
   passType: string;
   passValue: number;
@@ -634,6 +635,31 @@ export async function assignGroupTestContentCodes(
   return out?.groupTests ?? [];
 }
 
+export interface CreateFullMockPracticeTestPayload {
+  title: string;
+  contentCode?: string;
+  passageQuestionSetIds: [string, string, string];
+  timeLimitMinutes?: number;
+  passType?: string;
+  passValue: number;
+  maxAttempts?: number | null;
+  order?: number;
+}
+
+export async function createFullMockPracticeTest(
+  versionId: string,
+  payload: CreateFullMockPracticeTestPayload,
+): Promise<PracticeTest> {
+  const res = await apiClient.post<{ success: boolean; data: PracticeTest }>(
+    `${BASE}/versions/${versionId}/practice-tests`,
+    {
+      ...payload,
+      contentFormat: "FULL_MOCK",
+    },
+  );
+  return unwrap(res);
+}
+
 export interface CreatePracticeTestPayload {
   title: string;
   contentCode?: string;
@@ -811,9 +837,31 @@ export interface PracticeTestContentForPreviewSentenceLocator {
   sentenceLocator: SentenceLocatorContentAuthoringPreview;
 }
 
+export interface PracticeTestContentForPreviewFullMock {
+  contentFormat: "FULL_MOCK";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts: number | null;
+  miniTests: [
+    GroupTestMiniTestForPreview,
+    GroupTestMiniTestForPreview,
+    GroupTestMiniTestForPreview,
+  ];
+}
+
 export type PracticeTestContentForPreview =
   | PracticeTestContentForPreviewStandard
-  | PracticeTestContentForPreviewSentenceLocator;
+  | PracticeTestContentForPreviewSentenceLocator
+  | PracticeTestContentForPreviewFullMock;
+
+export function isFullMockPreviewContent(
+  c: PracticeTestContentForPreview,
+): c is PracticeTestContentForPreviewFullMock {
+  return c.contentFormat === "FULL_MOCK" && "miniTests" in c;
+}
 
 export function isSentenceLocatorPreviewContent(
   c: PracticeTestContentForPreview,

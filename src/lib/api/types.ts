@@ -77,6 +77,8 @@ export interface StudentProfile {
   _id?: string;
   userId?: string;
   name?: string;
+  nickname?: string | null;
+  email?: string | null;
   targetBands?: {
     overall?: number | null;
     reading?: number | null;

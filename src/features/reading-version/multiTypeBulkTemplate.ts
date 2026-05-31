@@ -2,8 +2,11 @@ import type { ReadingQuestionType, QuestionSetMeta } from "@/src/lib/api/instruc
 import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 import type { BulkPassageQuestionSetInput } from "./strictReadingBulkUtils";
 
-/** L4 = Passage 1 (2–3 types); L15–L19 = Passage 2/3/Full/Master. L2 = single-type (Sentence Completion only, 8 questions). */
-export const MULTI_TYPE_LEVEL_ORDERS = new Set([4, 15, 16, 17, 18, 19]);
+/** L4 = Passage 1 (2–3 types); L15–L16 = multi-type single passage. L17–L20 = full mock (see FULL_MOCK_LEVEL_ORDERS). */
+export const MULTI_TYPE_LEVEL_ORDERS = new Set([4, 15, 16]);
+
+/** Levels that use 3-passage full IELTS Reading mock practice tests (~60 min each). */
+export const FULL_MOCK_LEVEL_ORDERS = new Set([17, 18, 19, 20]);
 
 const ALL_QUESTION_TYPES: ReadingQuestionType[] = [
   "MCQ_SINGLE",
