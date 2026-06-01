@@ -16,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GamlishLogo } from "@/src/components/shared/GamlishLogo";
+import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { SiteMobileNav } from "@/src/components/shared/SiteMobileNav";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useStudentNavProgress } from "@/src/hooks/useStudentNavProgress";
@@ -122,10 +122,14 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
         className,
       )}
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4 lg:px-6">
-        <Link href={logoHref} className="flex shrink-0 items-center transition-opacity hover:opacity-90">
-          <GamlishLogo animateWordmark className="hidden min-[400px]:flex" />
-          <GamlishLogo showWordmark={false} className="min-[400px]:hidden" />
+      <div className="mx-auto flex h-14 max-w-7xl flex-nowrap items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4 lg:px-6">
+        <Link
+          href={logoHref}
+          data-nav-brand="single"
+          className="flex h-9 shrink-0 flex-nowrap items-center transition-opacity hover:opacity-90"
+          aria-label="Gamlish home"
+        >
+          <GamlishNavBrand />
         </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex">

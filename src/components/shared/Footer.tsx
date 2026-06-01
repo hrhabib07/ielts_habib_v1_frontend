@@ -31,7 +31,7 @@ export function Footer({ initialUser = null }: FooterProps) {
       <div className="container mx-auto max-w-6xl px-4 py-14 md:py-16">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-10">
           <div className="md:col-span-4 space-y-4">
-            <GamlishLogo className="text-lg" />
+            <GamlishLogo iconMark className="text-lg" />
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               Performance-driven IELTS Reading preparation — structured levels and readiness you
               can measure.

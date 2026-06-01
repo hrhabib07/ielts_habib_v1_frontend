@@ -16,7 +16,7 @@ export function ThemeToggleButton({
 
   useEffect(() => setMounted(true), []);
 
-  const isDark = resolvedTheme === "dark";
+  const isDark = mounted && resolvedTheme === "dark";
 
   const toggleTheme = useCallback(() => {
     const currentlyDark =
@@ -37,7 +37,13 @@ export function ThemeToggleButton({
         className,
       )}
       onClick={toggleTheme}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={
+        mounted
+          ? isDark
+            ? "Switch to light mode"
+            : "Switch to dark mode"
+          : "Toggle color theme"
+      }
       aria-pressed={mounted ? isDark : undefined}
     >
       {mounted ? (

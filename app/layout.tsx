@@ -49,7 +49,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${hindSiliguri.variable} antialiased`}
       >
         <ThemeProvider>
-          <Suspense fallback={<AppShellFallback>{children}</AppShellFallback>}>
+          <Suspense fallback={<AppShellFallback />}>
             <AppShellWithAuth>{children}</AppShellWithAuth>
           </Suspense>
         </ThemeProvider>

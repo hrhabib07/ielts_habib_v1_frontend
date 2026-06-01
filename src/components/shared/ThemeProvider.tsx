@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import {
   ThemeProvider as NextThemesProvider,
   useTheme as useNextTheme,
@@ -34,11 +34,16 @@ function readDomTheme(): Theme {
 export function useTheme(): {
   theme: Theme;
   toggleTheme: () => void;
+  mounted: boolean;
 } {
   const { setTheme, resolvedTheme } = useNextTheme();
+  const [mounted, setMounted] = useState(false);
 
-  const theme: Theme =
-    resolvedTheme === "dark" || resolvedTheme === "light"
+  useEffect(() => setMounted(true), []);
+
+  const theme: Theme = !mounted
+    ? "light"
+    : resolvedTheme === "dark" || resolvedTheme === "light"
       ? resolvedTheme
       : readDomTheme();
 
@@ -49,5 +54,5 @@ export function useTheme(): {
     setTheme(currentlyDark ? "light" : "dark");
   };
 
-  return { theme, toggleTheme };
+  return { theme, toggleTheme, mounted };
 }

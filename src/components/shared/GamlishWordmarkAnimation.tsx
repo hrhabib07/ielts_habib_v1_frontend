@@ -24,8 +24,18 @@ const mutedWord =
   "font-normal text-[0.92em] text-muted-foreground/75 tracking-normal";
 const boldWord = "font-semibold text-foreground tracking-normal";
 
-export function GamlishWordmarkAnimation({ className }: { className?: string }) {
+const NAV_PHRASE_HOLD_MS = 2_400;
+
+export function GamlishWordmarkAnimation({
+  className,
+  variant = "full",
+}: {
+  className?: string;
+  /** Nav: animate tagline only; “Gamlish” stays on the logo image. */
+  variant?: "full" | "nav";
+}) {
   const reducedMotion = useReducedMotion();
+  const isNav = variant === "nav";
   const [phase, setPhase] = useState<Phase>("settle");
   const [cycleKey, setCycleKey] = useState(0);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -52,15 +62,21 @@ export function GamlishWordmarkAnimation({ className }: { className?: string }) 
 
       const tWhisper = SETTLE_MS;
       const tFinal = tWhisper + WHISPER_MS;
-      const tCross = tFinal + FINAL_MS;
-      const tHold = tCross + CROSSFADE_MS;
-      const tLoop = tHold + HOLD_MS;
 
       schedule(() => alive && setPhase("whisper"), tWhisper);
       schedule(() => alive && setPhase("finalTouch"), tFinal);
-      schedule(() => alive && setPhase("crossfade"), tCross);
-      schedule(() => alive && setPhase("hold"), tHold);
-      schedule(() => alive && runCycle(), tLoop);
+
+      if (isNav) {
+        const tLoop = tFinal + FINAL_MS + NAV_PHRASE_HOLD_MS;
+        schedule(() => alive && runCycle(), tLoop);
+      } else {
+        const tCross = tFinal + FINAL_MS;
+        const tHold = tCross + CROSSFADE_MS;
+        const tLoop = tHold + HOLD_MS;
+        schedule(() => alive && setPhase("crossfade"), tCross);
+        schedule(() => alive && setPhase("hold"), tHold);
+        schedule(() => alive && runCycle(), tLoop);
+      }
     };
 
     runCycle();
@@ -68,13 +84,25 @@ export function GamlishWordmarkAnimation({ className }: { className?: string }) 
       alive = false;
       clearTimers();
     };
-  }, [reducedMotion, clearTimers, schedule]);
+  }, [reducedMotion, clearTimers, schedule, isNav]);
 
   if (reducedMotion) {
+    if (isNav) {
+      return (
+        <span
+          className={cn(
+            "text-[11px] font-medium leading-none tracking-tight text-muted-foreground sm:text-xs",
+            className,
+          )}
+        >
+          The Game of English
+        </span>
+      );
+    }
     return (
       <span
         className={cn(
-          "text-lg font-semibold tracking-tight text-foreground leading-none",
+          "text-lg font-semibold leading-none tracking-tight text-foreground",
           className,
         )}
       >
@@ -85,7 +113,7 @@ export function GamlishWordmarkAnimation({ className }: { className?: string }) 
 
   const showPhrase =
     phase === "settle" || phase === "whisper" || phase === "finalTouch";
-  const showBrand = phase === "crossfade" || phase === "hold";
+  const showBrand = !isNav && (phase === "crossfade" || phase === "hold");
   const brandSettled = phase === "hold";
 
   const whisperTransition = {
@@ -127,16 +155,16 @@ export function GamlishWordmarkAnimation({ className }: { className?: string }) 
   return (
     <span
       className={cn(
-        "relative inline-flex h-7 min-w-[11.75rem] items-center sm:min-w-[12.75rem]",
+        "relative flex h-7 max-w-full shrink items-center overflow-hidden",
+        isNav ? "min-w-[6.5rem] sm:min-w-[12.75rem]" : "min-w-[7.5rem] sm:min-w-[12.75rem]",
         className,
       )}
-      aria-hidden
     >
-      <AnimatePresence mode="sync" initial={false}>
+      <AnimatePresence mode="wait" initial={false}>
         {showPhrase && (
           <motion.span
             key={`phrase-${cycleKey}`}
-            className="absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap"
+            className="whitespace-nowrap"
             initial={{ opacity: 0, filter: "blur(3px)" }}
             animate={{
               opacity: phase === "finalTouch" ? 0.96 : 1,
@@ -150,7 +178,7 @@ export function GamlishWordmarkAnimation({ className }: { className?: string }) 
             }}
             transition={{ duration: 0.5, ease: EASE_SMOOTH }}
           >
-            <span className="inline-flex items-baseline gap-x-[0.28em] text-[17px] leading-snug tracking-normal">
+            <span className="inline-flex items-baseline gap-x-[0.22em] text-[15px] leading-snug tracking-normal sm:gap-x-[0.28em] sm:text-[17px]">
               <motion.span
                 className="inline-flex items-baseline gap-x-[0.28em] will-change-transform"
                 animate={leftAnimate}
@@ -186,10 +214,7 @@ export function GamlishWordmarkAnimation({ className }: { className?: string }) 
         {showBrand && (
           <motion.span
             key={`brand-${cycleKey}`}
-            className={cn(
-              boldWord,
-              "absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap text-lg leading-none",
-            )}
+            className={cn(boldWord, "whitespace-nowrap text-lg leading-none")}
             initial={{ opacity: 0, filter: "blur(6px)", scale: 1.04, letterSpacing: "0.06em" }}
             animate={{
               opacity: 1,

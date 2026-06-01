@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { GamlishLogo } from "@/src/components/shared/GamlishLogo";
+import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
@@ -27,31 +27,22 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-3 sm:h-16 sm:gap-4 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-6xl flex-nowrap items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
         <Link
           href="/"
-          className="min-w-0 shrink transition-opacity hover:opacity-85"
+          data-nav-brand="single"
+          className="flex h-9 shrink-0 flex-nowrap items-center pr-2 transition-opacity hover:opacity-85"
           aria-label="Gamlish home"
         >
-          {/* Mobile / tablet: icon + short wordmark (no wide animation) */}
-          <span className="inline-flex items-center gap-2 lg:hidden">
-            <GamlishLogo showWordmark={false} className="shrink-0" />
-            <span className="truncate text-base font-semibold tracking-tight text-foreground">
-              Gamlish
-            </span>
-          </span>
-          {/* Desktop: animated wordmark */}
-          <GamlishLogo animateWordmark className="hidden lg:flex" />
+          <GamlishNavBrand />
         </Link>
 
-        {/* Desktop controls */}
-        <div className="hidden items-center gap-2 sm:gap-2.5 lg:flex">
+        <div className="hidden shrink-0 items-center gap-2 sm:gap-2.5 lg:flex">
           <GuestLandingLanguageToggle />
           <ThemeToggleButton />
         </div>
 
-        {/* Mobile / tablet: compact toolbar + menu */}
-        <div className="flex items-center gap-1.5 lg:hidden">
+        <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
           <GuestLandingLanguageToggle className="scale-[0.92] origin-right sm:scale-100" />
           <ThemeToggleButton />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
