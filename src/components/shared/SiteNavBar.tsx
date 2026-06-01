@@ -27,6 +27,7 @@ import { readingPathPremium } from "@/src/lib/readingPathPremium";
 import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { cn } from "@/lib/utils";
 import { GuestLandingNavBar } from "@/src/components/home/guest/GuestLandingNavBar";
+import { shouldUseGuestLandingNav } from "@/src/lib/guest-nav-paths";
 
 const STUDENT_LINKS = [
   { href: "/profile/reading", label: "Reading" },
@@ -109,11 +110,12 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
     );
 
-  const isGuestLandingHome = pathname === "/" && !user;
-
-  if (isGuestLandingHome) {
+  if (shouldUseGuestLandingNav(pathname, Boolean(user))) {
     return <GuestLandingNavBar className={className} />;
   }
+
+  const isStudentHome = pathname === "/" && isStudent;
+  const navBrandCompact = isStudentHome;
 
   return (
     <header
@@ -122,14 +124,19 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
         className,
       )}
     >
-      <div className="mx-auto flex h-14 max-w-7xl flex-nowrap items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4 lg:px-6">
+      <div
+        className={cn(
+          "mx-auto flex h-14 max-w-7xl flex-nowrap items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-4 lg:px-6",
+          navBrandCompact && "max-w-6xl",
+        )}
+      >
         <Link
           href={logoHref}
           data-nav-brand="single"
-          className="flex h-9 shrink-0 flex-nowrap items-center transition-opacity hover:opacity-90"
+          className="flex h-9 min-w-0 shrink flex-nowrap items-center transition-opacity hover:opacity-90"
           aria-label="Gamlish home"
         >
-          <GamlishNavBrand />
+          <GamlishNavBrand showTagline={!navBrandCompact} />
         </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex">
@@ -191,7 +198,12 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
           <div className="hidden flex-1 lg:block" aria-hidden />
         )}
 
-        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
+        <div
+          className={cn(
+            "ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5",
+            navBrandCompact && "gap-1.5",
+          )}
+        >
           {isStudent && streak && (
             <div
               className="hidden items-center gap-1 rounded-full bg-accent/10 px-2 py-1 text-xs font-semibold text-accent ring-1 ring-accent/10 lg:flex"
@@ -311,12 +323,16 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
             journeyPoints={journeyPoints}
             trigger={
               <Button
-                variant="ghost"
+                type="button"
+                variant={navBrandCompact ? "outline" : "ghost"}
                 size="icon"
-                className="h-9 w-9 shrink-0 lg:hidden"
+                className={cn(
+                  "h-9 w-9 shrink-0 lg:hidden",
+                  navBrandCompact && "rounded-full border-border/60",
+                )}
                 aria-label="Open menu"
               >
-                <Menu className="h-5 w-5" />
+                <Menu className="h-4 w-4" />
               </Button>
             }
           />

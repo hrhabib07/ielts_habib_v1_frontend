@@ -3,7 +3,6 @@ import { clearAuth, getAccessToken } from "./auth";
 import { getApiBaseUrl } from "./api-base-url";
 
 const apiClient = axios.create({
-  baseURL: getApiBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },
@@ -11,6 +10,7 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
+  config.baseURL = getApiBaseUrl();
   const token = getAccessToken();
 
   if (token) {

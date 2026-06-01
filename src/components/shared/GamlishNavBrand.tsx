@@ -6,9 +6,16 @@ import { BRAND } from "@/src/lib/constants";
 import { GamlishWordmarkAnimation } from "./GamlishWordmarkAnimation";
 
 /**
- * Nav identity: G mark (img) + “Gamlish” wordmark (+ tagline animation on sm+).
+ * Nav identity: G mark (img) + “Gamlish” wordmark (+ optional tagline animation on large screens).
  */
-export function GamlishNavBrand({ className }: { className?: string }) {
+export function GamlishNavBrand({
+  className,
+  showTagline = true,
+}: {
+  className?: string;
+  /** Hide animated tagline (e.g. student home / narrow mobile headers). */
+  showTagline?: boolean;
+}) {
   const [logoSrc, setLogoSrc] = useState<string>(BRAND.navLogoUrl);
 
   return (
@@ -46,9 +53,11 @@ export function GamlishNavBrand({ className }: { className?: string }) {
       <span className="whitespace-nowrap text-lg font-semibold leading-none tracking-tight text-foreground">
         Gamlish
       </span>
-      <span className="hidden shrink-0 items-center border-l border-border/40 pl-2.5 sm:inline-flex">
-        <GamlishWordmarkAnimation variant="nav" className="min-w-0" />
-      </span>
+      {showTagline ? (
+        <span className="hidden min-w-0 shrink items-center border-l border-border/40 pl-2.5 lg:inline-flex">
+          <GamlishWordmarkAnimation variant="nav" className="min-w-0 max-w-[9.5rem] xl:max-w-none" />
+        </span>
+      ) : null}
     </span>
   );
 }

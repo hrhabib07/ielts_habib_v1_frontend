@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,13 +13,18 @@ import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleSta
 import { cn } from "@/lib/utils";
 
 export function GuestLandingNavBar({ className }: { className?: string }) {
+  const pathname = usePathname() ?? "";
   const [menuOpen, setMenuOpen] = useState(false);
   const { copy } = useGuestLandingLocaleState();
+  const isHome = pathname === "/";
 
   const scrollToHowToPlay = () => {
     setMenuOpen(false);
     document.getElementById("how-to-play")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const howToPlayClassName =
+    "rounded-lg px-3 py-2.5 text-left text-base font-medium text-foreground hover:bg-muted/60";
 
   return (
     <header
@@ -34,7 +40,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
           className="flex h-9 shrink-0 flex-nowrap items-center pr-2 transition-opacity hover:opacity-85"
           aria-label="Gamlish home"
         >
-          <GamlishNavBrand />
+          <GamlishNavBrand showTagline={false} />
         </Link>
 
         <div className="hidden shrink-0 items-center gap-2 sm:gap-2.5 lg:flex">
@@ -68,13 +74,19 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                 </div>
 
                 <nav className="flex flex-col gap-1" aria-label="Guest menu">
-                  <button
-                    type="button"
-                    onClick={scrollToHowToPlay}
-                    className="rounded-lg px-3 py-2.5 text-left text-base font-medium text-foreground hover:bg-muted/60"
-                  >
-                    {copy.ctaSecondary}
-                  </button>
+                  {isHome ? (
+                    <button type="button" onClick={scrollToHowToPlay} className={howToPlayClassName}>
+                      {copy.ctaSecondary}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/#how-to-play"
+                      onClick={() => setMenuOpen(false)}
+                      className={howToPlayClassName}
+                    >
+                      {copy.ctaSecondary}
+                    </Link>
+                  )}
                   <Link
                     href="/pricing"
                     onClick={() => setMenuOpen(false)}

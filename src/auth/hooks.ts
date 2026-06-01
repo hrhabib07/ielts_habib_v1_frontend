@@ -31,8 +31,33 @@ export function useLogin() {
       } else {
         window.location.href = "/";
       }
-    } catch (err) {
-      setError("Invalid email or password");
+    } catch (err: unknown) {
+      const ax =
+        err && typeof err === "object" && "response" in err
+          ? (err as {
+              response?: {
+                data?: { message?: string; errorSources?: { message?: string }[] };
+                status?: number;
+              };
+            })
+          : null;
+      const msg =
+        ax?.response?.data?.message ??
+        ax?.response?.data?.errorSources?.[0]?.message ??
+        null;
+      if (msg) {
+        setError(msg);
+      } else if (ax?.response?.status === 404) {
+        setError(
+          "API not found. Set NEXT_PUBLIC_API_BASE_URL on Vercel to your Railway URL ending in /api.",
+        );
+      } else if (ax?.response) {
+        setError("Invalid email or password");
+      } else {
+        setError(
+          "Could not reach the server. Check your connection and try again.",
+        );
+      }
     } finally {
       setLoading(false);
     }

@@ -16,6 +16,7 @@ import {
   STUDENT_JOURNEY_HERO_MOCK,
   resolveJourneyMapPoint,
 } from "@/src/components/home/studentJourneyHeroConfig";
+import { getStudentDisplayName } from "@/src/lib/student-display-name";
 
 type HeroMode = "minimal" | "student" | "loading";
 
@@ -42,7 +43,7 @@ function buildStudentHeroData(
   const band =
     summary?.targetBand ?? profile?.targetBands?.reading ?? null;
   const overallProgressPct = summary?.overallProgressPct ?? 0;
-  const userName = profile?.name?.trim() || null;
+  const userName = getStudentDisplayName(profile);
   const cur =
     profile?.profile?.currentCountry?.trim() ||
     profile?.profile?.country?.trim() ||
@@ -334,9 +335,9 @@ function BandHero({
       />
 
       <div className="relative z-10 flex w-full max-w-2xl flex-col items-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-accent/15 bg-card/80 px-3 py-1.5 shadow-sm ring-1 ring-accent/10 backdrop-blur-sm">
-          <Sparkles className="h-3.5 w-3.5 text-accent" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <div className="inline-flex max-w-[min(100%,20rem)] items-center gap-2 rounded-full border border-accent/15 bg-card/80 px-3 py-1.5 shadow-sm ring-1 ring-accent/10 backdrop-blur-sm sm:max-w-none">
+          <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
+          <span className="truncate text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground sm:tracking-[0.2em]">
             {headerLine}
           </span>
         </div>
