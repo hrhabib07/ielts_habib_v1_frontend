@@ -50,7 +50,7 @@ export function EvaluationConfigForm({
           ? "SEQUENTIAL_FINALS"
           : "FINAL_QUIZ"
         : isFoundationBandFinalType(config.finalEvaluationType)
-          ? config.finalEvaluationType
+          ? (config.finalEvaluationType ?? "GROUP_TEST")
           : "GROUP_TEST",
   );
   const [passMarkPercent, setPassMarkPercent] = useState<string>(
@@ -71,7 +71,7 @@ export function EvaluationConfigForm({
     } else {
       setFinalEvaluationType(
         isFoundationBandFinalType(c.finalEvaluationType)
-          ? c.finalEvaluationType
+          ? (c.finalEvaluationType ?? "GROUP_TEST")
           : "GROUP_TEST",
       );
     }

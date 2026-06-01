@@ -20,6 +20,7 @@ import {
   createSentenceLocatorPracticeTest,
   type CreateSentenceLocatorPracticeTestPayload,
   isSentenceLocatorPreviewContent,
+  isFullMockPreviewContent,
   type SentenceLocatorContentAuthoringPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
@@ -1084,6 +1085,36 @@ function PracticeTestPreview({
             {stmtCount !== 1 ? "s" : ""}
           </p>
         </div>
+      </div>
+    );
+  }
+  if (isFullMockPreviewContent(previewContent)) {
+    const passageCount: number = previewContent.miniTests.length;
+    const questionCount = previewContent.miniTests.reduce(
+      (n, mt) => n + (mt.questions?.length ?? 0),
+      0,
+    );
+    return (
+      <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-sm">
+            Preview: {previewContent.title} ({previewContent.timeLimitMinutes} min · pass{" "}
+            {previewContent.passType === "PERCENTAGE"
+              ? `${previewContent.passValue}%`
+              : `band ${previewContent.passValue}`}
+            ){" "}
+            <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
+              Full mock
+            </span>
+          </h4>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {passageCount} passage{passageCount !== 1 ? "s" : ""} · {questionCount} question
+          {questionCount !== 1 ? "s" : ""}
+        </p>
       </div>
     );
   }

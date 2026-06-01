@@ -16,7 +16,10 @@ function buildPreviewDetail(
   level: ReadingLevel,
   detail: VersionDetail,
   initialStepIndex?: number,
-): LevelDetailForStudent & { previewGroupTestsCount?: number } {
+): LevelDetailForStudent & {
+  previewGroupTestsCount?: number;
+  previewIsL0SentenceLocatorFinals?: boolean;
+} {
   const steps = detail.steps.map((s) => ({
     _id: s._id,
     stepType: s.stepType,
@@ -58,6 +61,7 @@ function buildPreviewDetail(
           : "Final evaluation (group tests)",
         order: steps.length + 1,
         contentId: undefined,
+        practiceTestId: undefined,
         isFinalQuiz: false,
         passType: undefined,
         passValue: undefined,
@@ -111,10 +115,8 @@ export function LevelRenderer({ level, detail, initialStepIndex }: LevelRenderer
       onLevelPassed={() => {}}
       onProgressUpdate={() => {}}
       isPreview
-      previewGroupTestsCount={(previewDetail as { previewGroupTestsCount?: number }).previewGroupTestsCount}
-      previewIsL0SentenceLocatorFinals={
-        (previewDetail as { previewIsL0SentenceLocatorFinals?: boolean }).previewIsL0SentenceLocatorFinals
-      }
+      previewGroupTestsCount={previewDetail.previewGroupTestsCount}
+      previewIsL0SentenceLocatorFinals={previewDetail.previewIsL0SentenceLocatorFinals}
     />
   );
 }

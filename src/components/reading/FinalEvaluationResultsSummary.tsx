@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import type { FinalPhaseStatus } from "@/src/lib/api/readingStrictProgression";
 import { getLevelDetail } from "@/src/lib/api/readingStrictProgression";
-import { getMyProfile } from "@/src/lib/api/profile";
+import { getMyProfile, getProfileSummary } from "@/src/lib/api/profile";
 import { BRAND } from "@/src/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +56,7 @@ export function FinalEvaluationResultsSummary({
   onBackToLevel,
 }: FinalEvaluationResultsSummaryProps) {
   const [userName, setUserName] = useState("");
+  const [targetBand, setTargetBand] = useState<number | null>(null);
   const [levelTitle, setLevelTitle] = useState("");
   const [levelNumber, setLevelNumber] = useState<number | null>(null);
   const [canNativeShare, setCanNativeShare] = useState(false);
@@ -70,12 +71,18 @@ export function FinalEvaluationResultsSummary({
     let cancelled = false;
     Promise.all([
       getMyProfile().catch(() => null),
+      getProfileSummary().catch(() => null),
       getLevelDetail(levelId).catch(() => null),
-    ]).then(([profile, level]) => {
+    ]).then(([profile, summary, level]) => {
       if (cancelled) return;
       const nick =
         profile && typeof profile.nickname === "string" ? profile.nickname.trim() : "";
       setUserName(nick || profile?.name?.trim() || "");
+      const band =
+        summary?.targetBand ??
+        profile?.targetBands?.reading ??
+        null;
+      setTargetBand(typeof band === "number" ? band : null);
       if (level?.level) {
         setLevelTitle(level.level.title);
         setLevelNumber(level.level.order);
@@ -239,7 +246,7 @@ export function FinalEvaluationResultsSummary({
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     {targetBand != null && (
                       <span className="inline-flex items-center rounded-md bg-white/[0.05] px-2 py-0.5 text-[10px] font-semibold text-white/45 ring-1 ring-white/10 sm:text-[11px]">
-                        Target {targetBand}
+                        Target {formatBand(targetBand)}
                       </span>
                     )}
                     {passedCount > 0 && (

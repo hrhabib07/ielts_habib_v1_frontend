@@ -363,6 +363,10 @@ export interface ReadingMockTestViewProps {
     bestBandScore?: number;
     isNewBest?: boolean;
     levelComplete?: boolean;
+    /** Sequential final (1–3) only */
+    finalTestIndex?: 1 | 2 | 3;
+    nextFinalTestIndex?: 1 | 2 | 3 | null;
+    isMastered?: boolean;
   }) => void;
   onProgressUpdate?: () => void;
 }
@@ -661,6 +665,7 @@ export const ReadingMockTestView = forwardRef<
           onProgressUpdate?.();
           onSubmitted({
             overallPass: res.isMastered,
+            isMastered: res.isMastered,
             miniTestResults: [{ bandScore: res.bandScore, passed: res.passed }],
             finalTestIndex: res.finalTestIndex,
             nextFinalTestIndex: res.nextFinalTestIndex,

@@ -797,15 +797,17 @@ function JsonTab({
 }) {
   const jsonText = isSentenceLocatorPreviewContent(content)
     ? JSON.stringify({ sentenceLocator: content.sentenceLocator }, null, 2)
-    : JSON.stringify(
-        {
-          passage: content.miniTest.passage,
-          questionGroups: content.miniTest.questionGroups,
-          questions: content.miniTest.questions,
-        },
-        null,
-        2,
-      );
+    : isFullMockPreviewContent(content)
+      ? JSON.stringify({ miniTests: content.miniTests }, null, 2)
+      : JSON.stringify(
+          {
+            passage: content.miniTest.passage,
+            questionGroups: content.miniTest.questionGroups,
+            questions: content.miniTest.questions,
+          },
+          null,
+          2,
+        );
   const [copyFeedback, setCopyFeedback] = useState(false);
 
   const handleCopy = async () => {

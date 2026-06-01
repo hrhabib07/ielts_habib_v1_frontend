@@ -68,5 +68,5 @@ export function estimateBandFromAccuracy(accuracyPercent: number): number {
     bands.length - 1,
     Math.max(0, Math.floor(accuracyPercent / 10)),
   );
-  return bands[idx];
+  return bands[idx] ?? 4;
 }
