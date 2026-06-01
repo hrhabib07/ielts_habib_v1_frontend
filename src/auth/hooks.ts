@@ -53,6 +53,15 @@ export function useLogin() {
         );
       } else if (ax?.response) {
         setError("Invalid email or password");
+      } else if (
+        err &&
+        typeof err === "object" &&
+        "message" in err &&
+        String((err as { message?: string }).message).includes("Network Error")
+      ) {
+        setError(
+          "Cannot reach the API. On Railway set FRONTEND_ORIGIN to https://gamlish.com,https://www.gamlish.com and redeploy the API.",
+        );
       } else {
         setError(
           "Could not reach the server. Check your connection and try again.",
