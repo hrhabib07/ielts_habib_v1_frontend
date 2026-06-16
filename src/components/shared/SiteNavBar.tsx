@@ -39,8 +39,12 @@ const STUDENT_LINKS = [
 
 const PUBLIC_LINKS = [{ href: "/pricing", label: "Plans & pricing" }] as const;
 
-export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?: string }) {
-  const { initialUser = null, className } = props;
+export function SiteNavBar(props: {
+  initialUser?: CurrentUser | null;
+  className?: string;
+  embedded?: boolean;
+}) {
+  const { initialUser = null, className, embedded = false } = props;
   const pathname = usePathname() ?? "";
   const [clientUser, setClientUser] = useState<{ role: UserRole; userId: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -130,7 +134,7 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full shrink-0 overflow-visible border-b border-border/50 bg-background/92 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur-md dark:bg-background/88",
+        "w-full shrink-0 overflow-visible border-b border-border/50 bg-background/92 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur-md dark:bg-background/88",
         className,
       )}
     >

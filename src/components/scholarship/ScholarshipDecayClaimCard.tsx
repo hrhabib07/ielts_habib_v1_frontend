@@ -7,12 +7,11 @@ import { Card } from "@/components/ui/card";
 import { useScholarship } from "@/src/contexts/ScholarshipContext";
 import { useScholarshipDecayTimer } from "@/src/hooks/useScholarshipTimer";
 import { claimMyScholarship } from "@/src/lib/api/scholarship";
+import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
 
 export function ScholarshipDecayClaimCard() {
   const { status, refresh } = useScholarship();
-  const decayTimer = useScholarshipDecayTimer(
-    status?.scholarshipStartTime ?? status?.createdAt,
-  );
+  const decayTimer = useScholarshipDecayTimer(resolveScholarshipWindowStart(status));
   const [claiming, setClaiming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

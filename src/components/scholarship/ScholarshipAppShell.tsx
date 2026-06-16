@@ -5,7 +5,6 @@ import type { CurrentUser } from "@/src/lib/auth-server";
 import { ScholarshipProvider } from "@/src/contexts/ScholarshipContext";
 import { StudentSessionProvider } from "@/src/contexts/StudentSessionContext";
 import { PlatformVideosProvider } from "@/src/contexts/PlatformVideosContext";
-import { ScholarshipUrgencyBanner } from "@/src/components/scholarship/ScholarshipUrgencyBanner";
 
 export function ScholarshipAppShell({
   initialUser,
@@ -18,7 +17,6 @@ export function ScholarshipAppShell({
     <StudentSessionProvider initialUser={initialUser}>
       <PlatformVideosProvider>
         <ScholarshipProvider initialUser={initialUser}>
-          <ScholarshipUrgencyBanner />
           {children}
         </ScholarshipProvider>
       </PlatformVideosProvider>

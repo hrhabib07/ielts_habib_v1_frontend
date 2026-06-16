@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { setReadingTargetBand } from "@/src/lib/api/readingStrictProgression";
-import { claimMyScholarship } from "@/src/lib/api/scholarship";
 import { useScholarship } from "@/src/contexts/ScholarshipContext";
 
 export interface ScholarshipRealityCheckModalProps {
@@ -43,7 +42,6 @@ export function ScholarshipRealityCheckModal({
     setSubmitting(true);
     try {
       await setReadingTargetBand(baselineBand);
-      await claimMyScholarship();
       await refresh();
       onAccept();
     } finally {
@@ -89,7 +87,7 @@ export function ScholarshipRealityCheckModal({
             disabled={submitting}
             onClick={() => void handleAccept()}
           >
-            Adjust target to Band {baselineBand} and Claim {scholarshipPercent}% Scholarship
+            Adjust target to Band {baselineBand} and continue
           </Button>
           <Button
             type="button"

@@ -1,113 +1,79 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { ChevronRight, Sparkles, Timer } from "lucide-react";
 import { useScholarship } from "@/src/contexts/ScholarshipContext";
-import {
-  useClaimExpiryTimer,
-  useScholarshipDecayTimer,
-} from "@/src/hooks/useScholarshipTimer";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { useScholarshipDecayTimer } from "@/src/hooks/useScholarshipTimer";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
-import { claimMyScholarship } from "@/src/lib/api/scholarship";
 import { isReadingExamSimulationPath } from "@/src/lib/siteScrollPolicy";
+import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
+import {
+  FOUNDER_SCHOLARSHIP_PERCENT,
+  FOUNDER_SCHOLARSHIP_PRICE_BDT,
+  PREMIUM_BASE_PRICE_BDT,
+} from "@/src/lib/pricingOffer";
 
 export function ScholarshipUrgencyBanner() {
   const pathname = usePathname();
-  const { status, refresh } = useScholarship();
+  const { status } = useScholarship();
+  const { subscription, loading: sessionLoading } = useStudentSession();
   const { isPendingReview, hasActiveAccess, loading: paymentLoading } =
-    usePaymentApplicationStatus(Boolean(status?.inTrialPhase));
-  const decayTimer = useScholarshipDecayTimer(
-    status?.scholarshipStartTime ?? status?.createdAt,
-  );
-  const claimTimer = useClaimExpiryTimer(status?.claimRemainingMs ?? 0);
-  const [claiming, setClaiming] = useState(false);
+    usePaymentApplicationStatus(true);
+  const windowStart = resolveScholarshipWindowStart(status);
+  const decayTimer = useScholarshipDecayTimer(windowStart);
 
   if (isReadingExamSimulationPath(pathname)) {
     return null;
   }
 
-  if (!status?.inTrialPhase) {
+  const hasPaidAccess =
+    hasActiveAccess || subscription?.status === "ACTIVE";
+  if (!paymentLoading && !sessionLoading && (isPendingReview || hasPaidAccess)) {
     return null;
   }
 
-  if (!paymentLoading && (isPendingReview || hasActiveAccess)) {
+  const scholarshipLive =
+    (status?.activeDiscountPercent ?? 0) > 0 ||
+    (decayTimer.ready && decayTimer.currentTierPercent > 0);
+
+  if (!scholarshipLive) {
     return null;
   }
-
-  if (status.isClaimActive && status.claimedDiscountPercent != null) {
-    return (
-      <div
-        className="sticky top-0 z-[60] border-b border-orange-600/80 bg-gradient-to-r from-red-950 via-orange-950 to-red-950 px-4 py-3 text-center text-sm text-orange-50 shadow-lg shadow-red-950/50 backdrop-blur-md"
-        role="alert"
-        aria-live="assertive"
-      >
-        <p className="mx-auto max-w-4xl font-semibold leading-snug">
-          You have{" "}
-          <span className="font-mono text-base tabular-nums text-white">
-            {claimTimer.ready ? claimTimer.formatted : "24:00:00"}
-          </span>{" "}
-          to enroll with your{" "}
-          <span className="text-white">{status.claimedDiscountPercent}%</span> discount!
-          <Link
-            href="/pricing"
-            className="ml-2 inline-flex underline decoration-orange-300/80 underline-offset-2 hover:text-white"
-          >
-            Go to checkout
-          </Link>
-        </p>
-      </div>
-    );
-  }
-
-  if (status.isFullyExpired || status.currentTierPercent <= 0) {
-    return null;
-  }
-
-  const handleClaim = async () => {
-    setClaiming(true);
-    try {
-      await claimMyScholarship();
-      await refresh();
-    } catch {
-      /* toast optional */
-    } finally {
-      setClaiming(false);
-    }
-  };
 
   return (
-    <div
-      className="sticky top-0 z-[60] border-b border-indigo-500/40 bg-slate-950/95 px-4 py-2.5 text-center text-sm text-slate-100 shadow-lg shadow-slate-950/40 backdrop-blur-md"
+    <Link
+      href="/pricing?checkout=founder"
+      className="group relative block overflow-hidden border-b border-violet-400/40 bg-gradient-to-r from-violet-950 via-indigo-950 to-violet-950 px-4 py-3 shadow-lg shadow-violet-950/50 transition-all hover:from-violet-900 hover:via-indigo-900"
       role="status"
       aria-live="polite"
     >
-      <p className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-2 gap-y-2 font-medium leading-snug">
-        <span>
-          Founder&apos;s <span className="font-semibold text-white">60%</span> scholarship ends in{" "}
-          <span className="font-mono font-semibold tabular-nums text-indigo-300">
-            {decayTimer.ready ? decayTimer.formatted : "--:--:--"}
-          </span>
-          . Only available until 1 August 2026.
+      <div
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(251,191,36,0.08),transparent)] opacity-0 transition-opacity group-hover:opacity-100"
+        aria-hidden
+      />
+      <div className="relative mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center text-sm text-violet-50">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-200 ring-1 ring-amber-400/30">
+          <Sparkles className="h-3 w-3" />
+          Founder scholarship
         </span>
-        <Button
-          type="button"
-          size="sm"
-          disabled={claiming}
-          className="h-8 rounded-full bg-indigo-600 px-4 text-xs font-semibold hover:bg-indigo-500"
-          onClick={() => void handleClaim()}
-        >
-          {claiming ? "Claiming…" : "Claim scholarship"}
-        </Button>
-        <Link
-          href="/pricing"
-          className="text-xs text-indigo-300 underline underline-offset-2 hover:text-white"
-        >
-          View plans
-        </Link>
-      </p>
-    </div>
+        <span className="font-semibold leading-snug">
+          <span className="text-amber-300">{FOUNDER_SCHOLARSHIP_PERCENT}% off</span> — pay{" "}
+          <span className="text-white">{FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT</span>{" "}
+          <span className="text-violet-300/80 line-through">{PREMIUM_BASE_PRICE_BDT} BDT</span>{" "}
+          if you enroll within{" "}
+          <span className="inline-flex items-center gap-1 font-mono text-base tabular-nums text-amber-200">
+            <Timer className="h-3.5 w-3.5" />
+            {decayTimer.ready ? decayTimer.formatted : "24:00:00"}
+          </span>
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white ring-1 ring-white/20 group-hover:bg-white/15">
+          Claim now
+          <ChevronRight className="h-3.5 w-3.5" />
+        </span>
+      </div>
+    </Link>
   );
 }
 

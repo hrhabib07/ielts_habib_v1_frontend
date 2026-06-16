@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { CurrentUser } from "@/src/lib/auth-server";
+import { getDecodedTokenClient } from "@/src/lib/auth";
 import {
   getMyScholarshipStatus,
   type ScholarshipStatus,
@@ -32,9 +33,31 @@ export function ScholarshipProvider({
 }) {
   const [status, setStatus] = useState<ScholarshipStatus | null>(null);
   const [loading, setLoading] = useState(false);
+  const [clientIsStudent, setClientIsStudent] = useState(false);
+
+  const isStudent =
+    initialUser?.role === "STUDENT" || (initialUser == null && clientIsStudent);
+
+  useEffect(() => {
+    if (initialUser?.role === "STUDENT") {
+      setClientIsStudent(false);
+      return;
+    }
+    const sync = () => {
+      const decoded = getDecodedTokenClient();
+      setClientIsStudent(decoded?.role === "STUDENT");
+    };
+    sync();
+    window.addEventListener("auth-state-changed", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("auth-state-changed", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [initialUser]);
 
   const refresh = useCallback(async () => {
-    if (!initialUser || initialUser.role !== "STUDENT") {
+    if (!isStudent) {
       setStatus(null);
       return;
     }
@@ -47,20 +70,24 @@ export function ScholarshipProvider({
     } finally {
       setLoading(false);
     }
-  }, [initialUser]);
+  }, [isStudent]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
   useEffect(() => {
-    const onFocus = () => {
-      if (!initialUser || initialUser.role !== "STUDENT") return;
+    const onAuthChange = () => {
+      if (!isStudent) return;
       void refresh();
     };
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [initialUser, refresh]);
+    window.addEventListener("auth-state-changed", onAuthChange);
+    window.addEventListener("focus", onAuthChange);
+    return () => {
+      window.removeEventListener("auth-state-changed", onAuthChange);
+      window.removeEventListener("focus", onAuthChange);
+    };
+  }, [isStudent, refresh]);
 
   const value = useMemo(
     () => ({ status, loading, refresh }),

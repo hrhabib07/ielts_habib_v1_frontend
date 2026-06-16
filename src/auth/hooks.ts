@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { login, register, verifyOtp } from "./api";
 import { setAccessToken } from "../lib/auth";
+import { FOUNDER_OFFER_SESSION_KEY } from "@/src/lib/pricingOffer";
 
 export function useLogin() {
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,12 @@ export function useLogin() {
       } else if (role === "INSTRUCTOR") {
         window.location.href = "/dashboard/instructor";
       } else {
-        window.location.href = "/";
+        try {
+          sessionStorage.setItem(FOUNDER_OFFER_SESSION_KEY, "1");
+        } catch {
+          /* ignore */
+        }
+        window.location.href = "/pricing?checkout=founder";
       }
     } catch (err: unknown) {
       const ax =
@@ -152,7 +158,12 @@ export function useVerifyOtp() {
       } else if (role === "INSTRUCTOR") {
         window.location.href = "/dashboard/instructor";
       } else {
-        window.location.href = "/onboarding";
+        try {
+          sessionStorage.setItem(FOUNDER_OFFER_SESSION_KEY, "1");
+        } catch {
+          /* ignore */
+        }
+        window.location.href = "/pricing?checkout=founder";
       }
     } catch (err: unknown) {
       const msg =

@@ -1,7 +1,7 @@
 import type { ActiveSubscription } from "@/src/lib/api/subscription";
 
-/** Inclusive cutoff — pay before 2 Aug 2026 (local) / end of 1 Aug 2026 UTC window. */
-export const FOUNDING_MEMBER_CUTOFF_ISO = "2026-08-01T23:59:59.999Z";
+/** Inclusive cutoff — last moment to earn Founding pricing (ends before 1 Aug 2026). */
+export const FOUNDING_MEMBER_CUTOFF_ISO = "2026-07-31T23:59:59.999Z";
 
 export const FOUNDING_MEMBER_CUTOFF = new Date(FOUNDING_MEMBER_CUTOFF_ISO);
 

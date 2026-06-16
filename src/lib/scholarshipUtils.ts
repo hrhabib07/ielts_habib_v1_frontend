@@ -1,6 +1,6 @@
-/** Mirrors backend — 60% Founder scholarship until 1 Aug 2026. */
 import { FOUNDING_MEMBER_CUTOFF } from "./foundingMember";
 
+/** Mirrors backend — 60% Founder scholarship for first 24 hours (ends 1 Aug 2026). */
 export const SCHOLARSHIP_WINDOW_HOURS = 24;
 export const FOUNDER_SCHOLARSHIP_PERCENT = 60;
 
@@ -11,7 +11,7 @@ export const SCHOLARSHIP_PHASE_HOURS = SCHOLARSHIP_WINDOW_HOURS;
 export const SCHOLARSHIP_PHASE_DISCOUNTS = [FOUNDER_SCHOLARSHIP_PERCENT] as const;
 
 export function getDecayStateFromStartTime(
-  _scholarshipStartTime: string,
+  scholarshipStartTime: string,
   nowMs: number,
 ): {
   currentTierPercent: number;
@@ -19,7 +19,12 @@ export function getDecayStateFromStartTime(
   remainingMs: number;
   isFullyExpired: boolean;
 } {
-  const windowEndMs = FOUNDING_MEMBER_CUTOFF.getTime();
+  const startMs = new Date(scholarshipStartTime).getTime();
+  const signupWindowEndMs = startMs + SCHOLARSHIP_WINDOW_HOURS * 60 * 60 * 1000;
+  const windowEndMs = Math.min(
+    signupWindowEndMs,
+    FOUNDING_MEMBER_CUTOFF.getTime(),
+  );
   const remainingMs = Math.max(0, windowEndMs - nowMs);
   const isFullyExpired = remainingMs <= 0;
 

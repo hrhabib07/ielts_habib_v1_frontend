@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "@/src/auth/hooks";
 import { Mail, Lock, ArrowRight } from "lucide-react";
+import { FounderScholarshipPromo } from "@/src/components/pricing/FounderScholarshipPromo";
 
 const DevQuickLogin =
   process.env.NODE_ENV === "development"
@@ -31,6 +32,8 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
             Sign in to your GAMLISH account
           </p>
         </div>
+
+        <FounderScholarshipPromo />
 
         <div className="rounded-lg border bg-card p-8 shadow-sm">
           {resetSuccess ? (

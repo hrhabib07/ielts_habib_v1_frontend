@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/src/lib/auth-server";
 import { Suspense } from "react";
 import { SyncAuthCookie } from "@/src/components/auth/SyncAuthCookie";
 import { Footer } from "@/src/components/shared/Footer";
-import { Header } from "@/src/components/shared/Header";
+import { StickySiteChrome } from "@/src/components/shared/StickySiteChrome";
 import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard";
 import { ScholarshipAppShell } from "@/src/components/scholarship/ScholarshipAppShell";
 
@@ -22,7 +22,7 @@ export async function AppShellWithAuth({
       </Suspense>
       <ScholarshipAppShell initialUser={initialUser}>
         <div className="flex min-h-dvh flex-col overflow-x-hidden">
-          <Header initialUser={initialUser} />
+          <StickySiteChrome initialUser={initialUser} />
           <main className="site-scroll-document w-full min-w-0 flex-1">{children}</main>
           <Footer initialUser={initialUser} />
         </div>

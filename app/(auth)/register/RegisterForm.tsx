@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister } from "@/src/auth/hooks";
 import { Mail, ArrowRight, Send } from "lucide-react";
+import { FounderScholarshipPromo } from "@/src/components/pricing/FounderScholarshipPromo";
 
 export function RegisterForm() {
   const { handleRegister, loading, error } = useRegister();
@@ -23,6 +24,8 @@ export function RegisterForm() {
             Enter your email. We&apos;ll send a code — then a short setup and you&apos;re in.
           </p>
         </div>
+
+        <FounderScholarshipPromo />
 
         <div className="rounded-lg border bg-card p-8 shadow-sm">
           <form

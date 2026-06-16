@@ -10,7 +10,10 @@ interface HeaderProps {
 }
 
 /** Unified site navigation — home, reading, profile, and public pages. */
-export function Header({ initialUser = null }: HeaderProps) {
+export function Header({
+  initialUser = null,
+  embedded = false,
+}: HeaderProps & { embedded?: boolean }) {
   const pathname = usePathname();
 
   if (isReadingExamFocusPath(pathname)) {
@@ -21,5 +24,5 @@ export function Header({ initialUser = null }: HeaderProps) {
     return null;
   }
 
-  return <SiteNavBar initialUser={initialUser} />;
+  return <SiteNavBar initialUser={initialUser} embedded={embedded} />;
 }

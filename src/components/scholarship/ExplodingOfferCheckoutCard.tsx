@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useScholarship } from "@/src/contexts/ScholarshipContext";
-import { useClaimExpiryTimer } from "@/src/hooks/useScholarshipTimer";
+import { useScholarshipDecayTimer } from "@/src/hooks/useScholarshipTimer";
+import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
+import {
+  computeDiscountedPrice,
+  FOUNDER_SCHOLARSHIP_PERCENT,
+  PREMIUM_BASE_PRICE_BDT,
+} from "@/src/lib/pricingOffer";
 
 function formatPrice(amount: number): string {
   return new Intl.NumberFormat("en-BD", {
@@ -23,13 +29,16 @@ export function ExplodingOfferCheckoutCard({
   onUpgradeClick,
 }: ExplodingOfferCheckoutCardProps) {
   const { status } = useScholarship();
-  const timer = useClaimExpiryTimer(status?.claimRemainingMs ?? 0);
+  const decayTimer = useScholarshipDecayTimer(resolveScholarshipWindowStart(status));
 
-  if (!status?.isClaimActive || status.activeDiscountPercent <= 0) {
+  if (!decayTimer.ready || decayTimer.currentTierPercent <= 0) {
     return null;
   }
 
-  const discount = status.activeDiscountPercent;
+  const discount = status?.activeDiscountPercent ?? FOUNDER_SCHOLARSHIP_PERCENT;
+  const discountedPrice =
+    status?.discountedPrice ??
+    computeDiscountedPrice(PREMIUM_BASE_PRICE_BDT, discount);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-orange-500/50 bg-gradient-to-br from-red-950 via-orange-950 to-slate-950 p-6 shadow-xl shadow-orange-950/40 md:p-8">
@@ -40,19 +49,20 @@ export function ExplodingOfferCheckoutCard({
       <div className="relative space-y-5">
         <div>
           <p className="text-sm font-semibold text-orange-100">
-            Scholarship claimed — {discount}% locked for checkout
+            Your {discount}% Founder scholarship is active
           </p>
           <p className="mt-1 text-xs text-orange-200/80">
-            Complete payment before the Founder offer ends on 1 August 2026.
+            Pay with bKash before the 24-hour window ends. After that, the price returns to{" "}
+            {PREMIUM_BASE_PRICE_BDT} BDT.
           </p>
         </div>
 
         <div className="flex flex-wrap items-end gap-3">
           <p className="text-lg text-orange-300/70 line-through decoration-orange-400/60">
-            {formatPrice(status.basePrice)}
+            {formatPrice(status?.basePrice ?? PREMIUM_BASE_PRICE_BDT)}
           </p>
           <p className="text-4xl font-bold tracking-tight text-white">
-            {formatPrice(status.discountedPrice)}
+            {formatPrice(discountedPrice)}
           </p>
         </div>
 
@@ -60,7 +70,7 @@ export function ExplodingOfferCheckoutCard({
           <p className="text-center text-xs font-bold uppercase tracking-wider text-orange-300">
             You have{" "}
             <span className="font-mono text-sm tabular-nums text-white animate-pulse">
-              {timer.ready ? timer.formatted : "24:00:00"}
+              {decayTimer.formatted}
             </span>{" "}
             to enroll with your {discount}% discount!
           </p>
