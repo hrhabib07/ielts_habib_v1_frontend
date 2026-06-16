@@ -50,6 +50,7 @@ import {
   isLevelIntroDismissed,
   markLevelIntroDismissed,
 } from "@/src/lib/levelIntroVideoStorage";
+import { usePlatformVideos } from "@/src/contexts/PlatformVideosContext";
 
 const StepQuizSubmitCard = dynamic(
   () =>
@@ -308,12 +309,13 @@ export function LevelContent({
   levelOrder,
 }: LevelContentProps) {
   const router = useRouter();
+  const platformVideos = usePlatformVideos();
   const [content, setContent] = useState<StepContent | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
   const [contentError, setContentError] = useState<string | null>(null);
   const [showSubscriptionPrompt, setShowSubscriptionPrompt] = useState(false);
   const levelIntroConfig =
-    levelOrder != null ? getLevelIntroVideo(levelOrder) : null;
+    levelOrder != null ? getLevelIntroVideo(levelOrder, platformVideos) : null;
   const [introDismissed, setIntroDismissed] = useState(false);
 
   useEffect(() => {

@@ -198,6 +198,9 @@ export interface PlatformConfig {
   configKey: string;
   premiumBasePrice: number;
   scholarshipOfferExpiryHours: number;
+  howItWorksVideoId?: string;
+  level1IntroVideoId?: string;
+  level2IntroVideoId?: string;
 }
 
 export async function adminGetPlatformConfig(): Promise<PlatformConfig> {
@@ -210,6 +213,9 @@ export async function adminGetPlatformConfig(): Promise<PlatformConfig> {
 export async function adminUpdatePlatformConfig(payload: {
   premiumBasePrice?: number;
   scholarshipOfferExpiryHours?: number;
+  howItWorksVideoId?: string;
+  level1IntroVideoId?: string;
+  level2IntroVideoId?: string;
 }): Promise<PlatformConfig> {
   const res = await apiClient.patch<{ success: boolean; data: PlatformConfig }>(
     `${BASE}/platform-config`,

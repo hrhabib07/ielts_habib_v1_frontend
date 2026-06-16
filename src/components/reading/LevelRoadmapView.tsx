@@ -39,6 +39,7 @@ import {
   clearLevelIntroDismissed,
   isLevelIntroDismissed,
 } from "@/src/lib/levelIntroVideoStorage";
+import { usePlatformVideos } from "@/src/contexts/PlatformVideosContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { prefetchStepContent } from "@/src/lib/readingStepContentCache";
@@ -68,11 +69,12 @@ export function LevelRoadmapView(props: {
 }) {
   const { detail, onNavigateToStep, backHref = "/profile/reading" } = props;
   const { level, progress } = detail;
+  const platformVideos = usePlatformVideos();
   const steps = stripRedundantFinalEvaluationSteps(detail.steps);
   const isLevelPassed = progress.passStatus === "PASSED";
   const completedCount = (progress.completedStepIds ?? []).length;
   const totalSteps = steps.length;
-  const introVideo = getLevelIntroVideo(level.order ?? -1);
+  const introVideo = getLevelIntroVideo(level.order ?? -1, platformVideos);
   const firstStep = steps[0] ?? null;
   const [introDismissed, setIntroDismissed] = useState(false);
 

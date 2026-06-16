@@ -320,7 +320,11 @@ export default function SubscriptionPlansAdminPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [premiumBasePrice, setPremiumBasePrice] = useState<number>(0);
+  const [howItWorksVideoId, setHowItWorksVideoId] = useState("");
+  const [level1IntroVideoId, setLevel1IntroVideoId] = useState("");
+  const [level2IntroVideoId, setLevel2IntroVideoId] = useState("");
   const [savingPlatformConfig, setSavingPlatformConfig] = useState(false);
+  const [savingVideos, setSavingVideos] = useState(false);
 
   const fetchPlans = async () => {
     setLoading(true);
@@ -332,6 +336,9 @@ export default function SubscriptionPlansAdminPage() {
       setPlans(data);
       if (platformConfig) {
         setPremiumBasePrice(platformConfig.premiumBasePrice);
+        setHowItWorksVideoId(platformConfig.howItWorksVideoId ?? "");
+        setLevel1IntroVideoId(platformConfig.level1IntroVideoId ?? "");
+        setLevel2IntroVideoId(platformConfig.level2IntroVideoId ?? "");
       }
     } catch {
       setError("Failed to load plans.");
@@ -470,6 +477,98 @@ export default function SubscriptionPlansAdminPage() {
             </>
           ) : (
             "Save base price"
+          )}
+        </Button>
+      </Card>
+
+      {/* YouTube videos — landing + per-level intros */}
+      <Card className="p-6 space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">YouTube videos</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            One field per video. Paste a YouTube ID or full URL. Changes apply on the live site
+            immediately — no redeploy needed.
+          </p>
+        </div>
+
+        <div className="grid gap-5">
+          <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
+            <label className="text-sm font-semibold text-foreground">
+              Landing — How Gamlish works
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Guest homepage walkthrough (not tied to a reading level).
+            </p>
+            <input
+              type="text"
+              value={howItWorksVideoId}
+              onChange={(e) => setHowItWorksVideoId(e.target.value)}
+              placeholder="e.g. Nza4FhxGJYo or https://youtu.be/…"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+
+          <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
+            <label className="text-sm font-semibold text-foreground">
+              Level 1 — Foundation
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Shown at the start of student Level 1 (IELTS Reading Basics).
+            </p>
+            <input
+              type="text"
+              value={level1IntroVideoId}
+              onChange={(e) => setLevel1IntroVideoId(e.target.value)}
+              placeholder="YouTube ID or URL"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+
+          <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
+            <label className="text-sm font-semibold text-foreground">
+              Level 2 — True / False / Not Given
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Shown at the start of student Level 2 only. Level 3+ has no intro video yet.
+            </p>
+            <input
+              type="text"
+              value={level2IntroVideoId}
+              onChange={(e) => setLevel2IntroVideoId(e.target.value)}
+              placeholder="YouTube ID or URL"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          className="gap-2"
+          disabled={savingVideos}
+          onClick={async () => {
+            setSavingVideos(true);
+            setError(null);
+            try {
+              await adminUpdatePlatformConfig({
+                howItWorksVideoId,
+                level1IntroVideoId,
+                level2IntroVideoId,
+              });
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : "Failed to save videos";
+              setError(msg);
+            } finally {
+              setSavingVideos(false);
+            }
+          }}
+        >
+          {savingVideos ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Saving…
+            </>
+          ) : (
+            "Save videos"
           )}
         </Button>
       </Card>

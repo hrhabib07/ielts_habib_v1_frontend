@@ -1,7 +1,7 @@
 "use client";
 
 import { GamlishEmbedVideo } from "@/src/components/shared/GamlishEmbedVideo";
-import { GAMLISH_HOW_IT_WORKS_VIDEO_ID } from "@/src/lib/guest-landing-config";
+import { usePlatformVideos } from "@/src/contexts/PlatformVideosContext";
 import { cn } from "@/lib/utils";
 
 interface GuestLandingVideoProps {
@@ -17,9 +17,11 @@ export function GuestLandingVideo({
   placeholderBody,
   className,
 }: GuestLandingVideoProps) {
+  const { howItWorksVideoId } = usePlatformVideos();
+
   return (
     <GamlishEmbedVideo
-      videoId={GAMLISH_HOW_IT_WORKS_VIDEO_ID}
+      videoId={howItWorksVideoId}
       title={title}
       placeholderTitle={placeholderTitle}
       placeholderBody={placeholderBody}

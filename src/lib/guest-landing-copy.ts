@@ -69,7 +69,7 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
         "Watch the 21 level journey: learn one skill, pass the level, unlock the next.",
       videoPlaceholderTitle: "Video walkthrough",
       videoPlaceholderBody:
-        "Add your YouTube video ID to NEXT_PUBLIC_GAMLISH_HOW_IT_WORKS_VIDEO_ID.",
+        "Video not configured yet. An admin can set it in Dashboard → Subscription Plans → YouTube videos.",
       pillarsTitle: "IELTS Reading tests more than reading",
       examPillars: [
         { title: "Time", icon: "clock" },
@@ -119,7 +119,7 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
         "২১ Level-এর জার্নি: একটি Skill শিখুন, Pass করুন, পরের Level Unlock করুন।",
       videoPlaceholderTitle: "ভিডিও ওয়াকথ্রু",
       videoPlaceholderBody:
-        "NEXT_PUBLIC_GAMLISH_HOW_IT_WORKS_VIDEO_ID-এ YouTube Video ID সেট করুন।",
+        "ভিডিও এখনো সেট করা হয়নি। অ্যাডমিন Dashboard → Subscription Plans → YouTube videos থেকে সেট করতে পারবেন।",
       pillarsTitle: "IELTS Reading শুধু Reading নয়",
       examPillars: [
         { title: "Time", icon: "clock" },
