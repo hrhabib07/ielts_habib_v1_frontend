@@ -1,9 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { useReadingPathState } from "@/src/hooks/useReadingPathState";
 import { ReadingPathZoneCard } from "@/src/components/reading/ReadingPathZoneCard";
+import { ReadingPathAccessBanner } from "@/src/components/reading/ReadingPathAccessBanner";
+import { EarlyAdopterCountdown } from "@/src/components/founding-member/EarlyAdopterCountdown";
+import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { readingPathPremium } from "@/src/lib/readingPathPremium";
 import { READING_PATH_ZONES } from "@/src/lib/readingPathZones";
 import { readingLevelIndexFromOrder } from "@/src/lib/readingLevelOrder";
@@ -38,14 +43,15 @@ export function ReadingLearningPath() {
   const {
     levels,
     loading,
-    currentLevelId,
-    currentStepId,
-    detailCache,
     curriculumDemoAccount,
     currentOrder,
-    isLevelUnlocked,
+    pathSummary,
+    levelStatusById,
+    getLevelAccess,
     displayLevelNumber,
   } = useReadingPathState();
+
+  const { isFoundingMember } = useStudentSession();
 
   const levelsByOrder = useMemo(() => {
     const map = new Map<number, (typeof levels)[0]>();
@@ -80,9 +86,24 @@ export function ReadingLearningPath() {
               Three zones. Twenty-one levels.
             </h1>
             <p className={cn(readingPathPremium.heroBody, "mx-auto mt-2 max-w-2xl lg:mx-0")}>
-              Pick your level inside a zone to start learning. Details load when you open a level.
+              Completed levels show a green check. Premium levels unlock after you subscribe.
             </p>
+            <div className="mt-4 flex flex-col items-center gap-2">
+              {isFoundingMember ? (
+                <FoundingMemberBadge size="md" />
+              ) : (
+                <EarlyAdopterCountdown className="w-full max-w-lg" />
+              )}
+              <Link
+                href="/founding-members"
+                className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-accent hover:underline"
+              >
+                View Founders&apos; Wall
+              </Link>
+            </div>
           </div>
+
+          <ReadingPathAccessBanner pathSummary={pathSummary} className="mb-6" />
 
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-stretch lg:gap-5 xl:gap-6">
             {READING_PATH_ZONES.map((zone, zoneIndex) => {
@@ -103,14 +124,12 @@ export function ReadingLearningPath() {
                   zoneIndex={zoneIndex}
                   levels={zoneLevels}
                   allLevels={levels}
-                  currentLevelId={currentLevelId}
-                  currentStepId={currentStepId}
-                  currentOrder={currentOrder}
-                  detailCache={detailCache}
+                  paymentPending={pathSummary?.paymentStatus === "pending"}
+                  levelStatusById={levelStatusById}
                   curriculumDemoAccount={curriculumDemoAccount}
                   isFutureZone={isFutureZone}
                   displayLevelNumber={displayLevelNumber}
-                  isLevelUnlocked={isLevelUnlocked}
+                  getLevelAccess={getLevelAccess}
                 />
               );
             })}

@@ -4,6 +4,7 @@ import { CheckCircle2, X } from "lucide-react";
 import { ProgressBar } from "./ProgressBar";
 import { LevelSidebarItem } from "./LevelSidebarItem";
 import type { LevelDetailForStudent } from "@/src/lib/api/readingStrictProgression";
+import { displayLevelNumberFromOrder } from "@/src/lib/readingLevelOrder";
 
 interface LevelSidebarProps {
   detail: LevelDetailForStudent;
@@ -52,7 +53,7 @@ export function LevelSidebar({
         </div>
 
         <p className="mb-3 text-xs text-gray-400 dark:text-gray-500">
-          Level {level.order} · {level.levelType}
+          Level {displayLevelNumberFromOrder(level.order)} · {level.levelType}
         </p>
 
         {isLevelPassed ? (

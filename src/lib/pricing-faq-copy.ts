@@ -29,7 +29,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            'No. Gamlish is a gamified, AI-driven adaptive platform. Instead of passively watching videos, you play through 20 Mastery Levels. As you pass strategy lessons and practice sets, your "Water Level" (Readiness Meter) rises. We don\'t just give you practice materials; we mathematically track exactly when you are ready for your target band.',
+            'No. Gamlish is a gamified, AI-driven adaptive platform. Instead of passively watching videos, you play through 21 Mastery Levels. As you pass strategy lessons and practice sets, your "Water Level" (Readiness Meter) rises. We don\'t just give you practice materials; we mathematically track exactly when you are ready for your target band.',
         },
       },
       {
@@ -41,7 +41,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         },
       },
       {
-        question: "How long does it take to complete all 20 levels?",
+        question: "How long does it take to complete all 21 levels?",
         answer: {
           kind: "plain",
           text:
@@ -70,7 +70,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "না। Gamlish একটি গ্যামিফাইড এবং অ্যাডাপ্টিভ প্ল্যাটফর্ম। এখানে শুধু বসে বসে ভিডিও দেখার সুযোগ নেই; আপনাকে ২০টি মাস্টারি লেভেল পার করতে হবে। আপনি যখন স্ট্র্যাটেজি শিখবেন এবং প্র্যাকটিস করবেন, তখন আপনার \"Water Level\" (প্রস্তুতির মাত্রা) বাড়তে থাকবে। আমরা শুধু ম্যাটেরিয়াল দিই না, আপনি টার্গেট স্কোরের জন্য কখন পুরোপুরি প্রস্তুত, তা ম্যাথমেটিক্যালি ট্র্যাক করি।",
+            "না। Gamlish একটি গ্যামিফাইড এবং অ্যাডাপ্টিভ প্ল্যাটফর্ম। এখানে শুধু বসে বসে ভিডিও দেখার সুযোগ নেই; আপনাকে ২১টি মাস্টারি লেভেল পার করতে হবে। আপনি যখন স্ট্র্যাটেজি শিখবেন এবং প্র্যাকটিস করবেন, তখন আপনার \"Water Level\" (প্রস্তুতির মাত্রা) বাড়তে থাকবে। আমরা শুধু ম্যাটেরিয়াল দিই না, আপনি টার্গেট স্কোরের জন্য কখন পুরোপুরি প্রস্তুত, তা ম্যাথমেটিক্যালি ট্র্যাক করি।",
         },
       },
       {
@@ -82,7 +82,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         },
       },
       {
-        question: "২০টি লেভেল শেষ করতে কতদিন সময় লাগে?",
+        question: "২১টি লেভেল শেষ করতে কতদিন সময় লাগে?",
         answer: {
           kind: "plain",
           text:

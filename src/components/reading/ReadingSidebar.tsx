@@ -31,6 +31,7 @@ import {
   shouldUseMockLevelPlaceholder,
 } from "@/src/lib/readingMockLevelsLaunch";
 import { cn } from "@/lib/utils";
+import { displayLevelNumberFromOrder } from "@/src/lib/readingLevelOrder";
 
 const READING_STRICT_PREFIX = "/profile/reading/strict-levels/";
 
@@ -474,7 +475,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                     {isLevelPassed ? (
                       <CheckCircle2 className="h-5 w-5" strokeWidth={2.5} />
                     ) : (
-                      level.order
+                      displayLevelNumberFromOrder(level.order)
                     )}
                   </div>
                   <div className="min-w-0 flex-1 pr-1">

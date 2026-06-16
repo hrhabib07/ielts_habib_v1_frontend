@@ -137,6 +137,40 @@ function unwrap<T>(res: { data?: { data?: T } }): T {
   return d;
 }
 
+export type ReadingPathPaymentStatus = "none" | "pending" | "rejected" | "active";
+
+export interface ReadingPathLevelStatus {
+  levelId: string;
+  order: number;
+  passStatus: string;
+  isPassed: boolean;
+  isCurrent: boolean;
+  isFreeTier: boolean;
+  progressionUnlocked: boolean;
+  premiumLocked: boolean;
+  progressionLocked: boolean;
+}
+
+export interface ReadingPathSummary {
+  currentLevelId: string | null;
+  hasPremiumAccess: boolean;
+  paymentStatus: ReadingPathPaymentStatus;
+  freeLevelsComplete: boolean;
+  nextPremiumLevelId: string | null;
+  levels: ReadingPathLevelStatus[];
+  passedLevelCount: number;
+  totalLevels: number;
+  passedProgressPct: number;
+}
+
+export async function getReadingPathSummary(): Promise<ReadingPathSummary> {
+  const res = await apiClient.get<{
+    success: boolean;
+    data: ReadingPathSummary;
+  }>(`${BASE}/path-summary`);
+  return unwrap(res);
+}
+
 export async function getLevelDetail(
   levelId: string,
 ): Promise<LevelDetailForStudent> {
@@ -211,6 +245,8 @@ export interface SubmitPracticeTestResponse {
   attemptNumber?: number;
   bestBandScore?: number;
   isNewBest?: boolean;
+  progressiveMcqReview?: ProgressiveMcqReviewItemDto[];
+  mcqCorrect?: { correct: number; total: number };
   progress: { _id: string; currentStepIndex: number; completedStepIds: string[]; [key: string]: unknown };
 }
 
@@ -315,6 +351,107 @@ export interface PracticeTestStepContentSentenceLocator {
   sentenceLocator: SentenceLocatorStudentPayloadDto;
 }
 
+export interface GamlishScanningStudentPayloadDto {
+  passageTitle: string;
+  briefing: string;
+  proTip: string;
+  paragraphs: Array<{
+    id: string;
+    sentences: Array<{ id: string; text: string }>;
+  }>;
+  questions: Array<{
+    id: string;
+    label: string;
+    order: number;
+    questionStatement: string;
+  }>;
+}
+
+export interface PracticeTestStepContentGamlishScanning {
+  contentFormat: "GAMLISH_SCANNING";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts?: number | null;
+  gamlishScanning: GamlishScanningStudentPayloadDto;
+}
+
+export interface GamlishTfngStudentPayloadDto {
+  passageTitle: string;
+  briefing: string;
+  proTip: string;
+  instruction: string;
+  paragraphs: Array<{
+    id: string;
+    sentences: Array<{ id: string; text: string }>;
+  }>;
+  questions: Array<{
+    id: string;
+    label: string;
+    order: number;
+    questionStatement: string;
+  }>;
+}
+
+export interface PracticeTestStepContentGamlishTfng {
+  contentFormat: "GAMLISH_TFNG";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts?: number | null;
+  gamlishTfng: GamlishTfngStudentPayloadDto;
+}
+
+export type McqOptionKeyDto = "A" | "B" | "C" | "D";
+
+export interface ProgressiveMcqItemDto {
+  id: string;
+  order: number;
+  contextTitle?: string;
+  contextText: string;
+  questionText: string;
+  options: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
+}
+
+export interface ProgressiveMcqStudentPayloadDto {
+  instruction: string;
+  items: ProgressiveMcqItemDto[];
+}
+
+export interface ProgressiveMcqReviewItemDto {
+  itemId: string;
+  order: number;
+  contextTitle?: string;
+  contextText: string;
+  questionText: string;
+  yourOption: McqOptionKeyDto | null;
+  yourOptionText: string | null;
+  correctOption: McqOptionKeyDto;
+  correctOptionText: string;
+  isCorrect: boolean;
+  explanation: string;
+}
+
+export interface PracticeTestStepContentProgressiveMcq {
+  contentFormat: "PROGRESSIVE_MCQ";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts?: number | null;
+  progressiveMcq: ProgressiveMcqStudentPayloadDto;
+}
+
 /** Practice test — full IELTS mock (3 passages, ~60 min). */
 export interface PracticeTestStepContentFullMock {
   contentFormat: "FULL_MOCK";
@@ -334,6 +471,9 @@ export interface PracticeTestStepContentFullMock {
 export type PracticeTestStepContent =
   | PracticeTestStepContentStandard
   | PracticeTestStepContentSentenceLocator
+  | PracticeTestStepContentGamlishScanning
+  | PracticeTestStepContentGamlishTfng
+  | PracticeTestStepContentProgressiveMcq
   | PracticeTestStepContentFullMock;
 
 export function isFullMockPracticeContent(
@@ -346,6 +486,24 @@ export function isSentenceLocatorPracticeContent(
   c: PracticeTestStepContent,
 ): c is PracticeTestStepContentSentenceLocator {
   return c.contentFormat === "SENTENCE_LOCATOR" && "sentenceLocator" in c;
+}
+
+export function isGamlishScanningPracticeContent(
+  c: PracticeTestStepContent,
+): c is PracticeTestStepContentGamlishScanning {
+  return c.contentFormat === "GAMLISH_SCANNING" && "gamlishScanning" in c;
+}
+
+export function isGamlishTfngPracticeContent(
+  c: PracticeTestStepContent,
+): c is PracticeTestStepContentGamlishTfng {
+  return c.contentFormat === "GAMLISH_TFNG" && "gamlishTfng" in c;
+}
+
+export function isProgressiveMcqPracticeContent(
+  c: PracticeTestStepContent,
+): c is PracticeTestStepContentProgressiveMcq {
+  return c.contentFormat === "PROGRESSIVE_MCQ" && "progressiveMcq" in c;
 }
 
 /**
@@ -530,9 +688,17 @@ export interface FinalPhaseStatus {
 
 export interface FinalTestContentResponse {
   finalTestIndex: 1 | 2 | 3;
-  contentFormat: "STANDARD" | "SENTENCE_LOCATOR";
+  contentFormat:
+    | "STANDARD"
+    | "SENTENCE_LOCATOR"
+    | "GAMLISH_SCANNING"
+    | "GAMLISH_TFNG"
+    | "PROGRESSIVE_MCQ";
   miniTest?: GroupTestMiniTestContent;
   sentenceLocator?: SentenceLocatorStudentPayloadDto;
+  gamlishScanning?: GamlishScanningStudentPayloadDto;
+  gamlishTfng?: GamlishTfngStudentPayloadDto;
+  progressiveMcq?: ProgressiveMcqStudentPayloadDto;
   title?: string;
   timeLimitMinutes?: number;
   isOptionalAttempt: boolean;
@@ -550,6 +716,8 @@ export interface SubmitFinalTestResponse {
   newPassStatus: string;
   newEvaluationMode: string;
   bestFinalBandScore: number | null;
+  progressiveMcqReview?: ProgressiveMcqReviewItemDto[];
+  mcqCorrect?: { correct: number; total: number };
 }
 
 export async function getFinalPhaseStatus(
@@ -640,6 +808,9 @@ export interface PracticeTestStepStatus {
   attemptCount: number;
   passed: boolean;
   canReviewLastAttempt?: boolean;
+  maxAttempts: number | null;
+  attemptsExhausted: boolean;
+  isEmbeddedFinal: boolean;
 }
 
 export async function getPracticeTestStepStatus(
@@ -648,6 +819,25 @@ export async function getPracticeTestStepStatus(
 ): Promise<PracticeTestStepStatus> {
   const res = await apiClient.get<{ success: boolean; data: PracticeTestStepStatus }>(
     `${BASE}/levels/${levelId}/steps/${stepId}/practice-test-status`,
+  );
+  return unwrap(res);
+}
+
+export interface GamlishTfngLocatorCheckResult {
+  unlocked: boolean;
+  isStrongLocator: boolean;
+  attemptNumber: number;
+  message: string;
+}
+
+export async function checkGamlishTfngLocatorClick(
+  levelId: string,
+  stepId: string,
+  payload: { questionId: string; word: string; attemptNumber: number },
+): Promise<GamlishTfngLocatorCheckResult> {
+  const res = await apiClient.post<{ success: boolean; data: GamlishTfngLocatorCheckResult }>(
+    `${BASE}/levels/${levelId}/steps/${stepId}/gamlish-tfng-locator-check`,
+    payload,
   );
   return unwrap(res);
 }

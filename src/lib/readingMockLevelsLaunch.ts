@@ -1,4 +1,5 @@
 import type { Level } from "@/src/lib/api/levels";
+import { formatDisplayLevelLabel } from "@/src/lib/readingLevelOrder";
 import type {
   LevelDetailForStudent,
   LevelDetailStep,
@@ -116,7 +117,7 @@ export function buildMockLevelPlaceholderSteps(order: MockLevelOrder): LevelDeta
 export function buildPlaceholderReadingLevel(order: MockLevelOrder): Level {
   return {
     _id: placeholderLevelId(order),
-    title: `Level ${order} — ${MOCK_LEVEL_TITLES[order]}`,
+    title: `${formatDisplayLevelLabel(order)} — ${MOCK_LEVEL_TITLES[order]}`,
     slug: `reading-level-${order}-mock-placeholder`,
     module: "READING",
     stage: order >= 20 ? "MASTER" : order >= 18 ? "ADVANCED" : "INTEGRATION",
@@ -232,7 +233,7 @@ export function buildMockLevelPlaceholderDetail(
   return {
     level: {
       _id: levelId,
-      title: `Level ${order} — ${MOCK_LEVEL_TITLES[order]}`,
+      title: `${formatDisplayLevelLabel(order)} — ${MOCK_LEVEL_TITLES[order]}`,
       slug: `reading-level-${order}-mock-placeholder`,
       order,
       levelType: order >= 18 ? "SKILL" : "SKILL",
@@ -253,7 +254,7 @@ export function buildMockLevelPlaceholderDetail(
 /** Instructor: suggested titles for publishing draft placeholder levels. */
 export function buildInstructorMockLevelPublishDraft(order: MockLevelOrder) {
   return {
-    title: `Level ${order} — ${MOCK_LEVEL_TITLES[order]}`,
+    title: `${formatDisplayLevelLabel(order)} — ${MOCK_LEVEL_TITLES[order]}`,
     slug: `reading-level-${order}-full-mock`,
     levelType: "SKILL" as const,
     difficulty: order >= 19 ? "advanced" : "intermediate",

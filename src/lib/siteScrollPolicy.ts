@@ -8,6 +8,7 @@
 export function isReadingExamSimulationPath(pathname: string | null): boolean {
   if (!pathname) return false;
   if (pathname.includes("/profile/reading/step-quiz")) return true;
+  if (pathname.includes("/profile/reading/gamlish-scanning-l1")) return true;
   return /\/profile\/reading\/strict-levels\/[^/]+\/(practice-test|final-evaluation)(\/|$)/.test(
     pathname,
   );
@@ -21,6 +22,19 @@ export function isReadingFixedViewportShellPath(pathname: string | null): boolea
   return false;
 }
 
-export function shouldUseDocumentScroll(pathname: string | null): boolean {
+/** Level overview roadmap — normal document scroll (not fixed viewport). */
+export function isReadingLevelRoadmapPath(
+  pathname: string | null,
+  hasStepParam: boolean,
+): boolean {
+  if (!pathname) return false;
+  return /^\/profile\/reading\/strict-levels\/[^/]+$/.test(pathname) && !hasStepParam;
+}
+
+export function shouldUseDocumentScroll(
+  pathname: string | null,
+  hasStepParam = false,
+): boolean {
+  if (isReadingLevelRoadmapPath(pathname, hasStepParam)) return true;
   return !isReadingFixedViewportShellPath(pathname);
 }

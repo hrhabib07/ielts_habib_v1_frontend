@@ -3,8 +3,10 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { animate, useReducedMotion } from "framer-motion";
 import { Plane } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { buildQuadraticFlightPath } from "@/src/components/home/studentJourneyHeroConfig";
 import { WORLD_LAND_CLIP_PATH_D } from "@/src/components/home/worldLandClipPath.generated";
+import { journeyToVisualProgressPercent } from "@/src/lib/journeyVisualProgress";
 
 /** Lucide `Plane` nose aims ~upper-right in viewBox coords; add to path tangent so it follows the arc. */
 const PLANE_ICON_ROTATION_OFFSET_DEG = 42;
@@ -66,6 +68,15 @@ export interface StudentBandJourneyFlightVisualProps {
   to: { x: number; y: number };
   /** 0–100: completed route length and plane position along path. */
   journeyProgressPct: number;
+  className?: string;
+  /** Pin map graphic to top of container (hero layouts that start below a badge). */
+  mapAlign?: "center" | "top";
+  /**
+   * `watermark` — centered map behind hero content, soft radial fade at edges (reference UI).
+   * `background` — full-bleed cover map (legacy).
+   * `inline` — contained map inside a content block (meet fit).
+   */
+  layout?: "inline" | "background" | "watermark";
 }
 
 export function StudentBandJourneyFlightVisual({
@@ -74,6 +85,9 @@ export function StudentBandJourneyFlightVisual({
   from,
   to,
   journeyProgressPct,
+  className,
+  mapAlign = "center",
+  layout = "inline",
 }: StudentBandJourneyFlightVisualProps) {
   const reduceMotion = useReducedMotion();
   const uid = useId().replace(/:/g, "");
@@ -98,7 +112,8 @@ export function StudentBandJourneyFlightVisual({
     glow: 0.45,
   });
 
-  const clampedPct = Math.min(100, Math.max(0, Math.round(journeyProgressPct)));
+  const actualPct = Math.min(100, Math.max(0, journeyProgressPct));
+  const clampedPct = journeyToVisualProgressPercent(actualPct);
 
   useLayoutEffect(() => {
     const el = geometryRef.current;
@@ -159,19 +174,50 @@ export function StudentBandJourneyFlightVisual({
 
   const completedLen =
     pathLen > 0 ? Math.max(0, (visualPct / 100) * pathLen) : 0;
-  const colorStrokeDash =
-    completedLen > 0.5 ? `${completedLen} ${pathLen}` : null;
+  const showFlightTrail = actualPct > 0 && completedLen > 0;
+  const colorStrokeDash = showFlightTrail
+    ? `${completedLen} ${pathLen}`
+    : null;
+
+  const isBackground = layout === "background";
+  const isWatermark = layout === "watermark";
+  const preserveAspectRatio = isBackground
+    ? "xMidYMid slice"
+    : isWatermark
+      ? "xMidYMid meet"
+      : mapAlign === "top" && layout === "inline"
+        ? "xMidYMin meet"
+        : "xMidYMid meet";
+
+  const dotSize = isBackground ? 2.5 : isWatermark ? 2.85 : 3.25;
+  const dotOpacity = isWatermark
+    ? "fill-slate-400/58 dark:fill-slate-300/46"
+    : "fill-slate-300/55 dark:fill-slate-600/45";
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
+      className={cn(
+        "pointer-events-none",
+        isBackground && "absolute inset-0 overflow-hidden",
+        isWatermark &&
+          "absolute inset-0 z-0 [mask-image:radial-gradient(ellipse_94%_90%_at_50%_50%,#000_55%,transparent_95%)] [-webkit-mask-image:radial-gradient(ellipse_94%_90%_at_50%_50%,#000_55%,transparent_95%)]",
+        layout === "inline" && "flex items-center justify-center",
+        className ??
+          (layout === "inline" ? "absolute inset-0 z-0 overflow-hidden" : undefined),
+      )}
       aria-hidden
     >
-      <div className="relative aspect-[2/1] w-[min(88vw,72rem)] max-h-[min(52dvh,480px)] min-h-[200px] shrink-0">
+      <div
+        className={cn(
+          "relative w-full",
+          isBackground ? "h-full min-h-full" : "h-full",
+          layout === "inline" && "min-h-[11rem]",
+        )}
+      >
         <svg
-          className="absolute inset-0 h-full w-full [--hero-map-dot:rgb(51_65_85_/_0.88)] [--hero-map-glow:rgb(30_58_138_/_0.35)] dark:[--hero-map-dot:rgb(148_163_184_/_0.42)] dark:[--hero-map-glow:rgb(125_211_252_/_0.28)]"
+          className="h-full w-full [--hero-map-dot:rgb(148_163_184_/_0.45)] [--hero-map-glow:rgb(30_58_138_/_0.16)] dark:[--hero-map-dot:rgb(148_163_184_/_0.32)] dark:[--hero-map-glow:rgb(125_211_252_/_0.14)]"
           viewBox="0 0 1000 500"
-          preserveAspectRatio="xMidYMid meet"
+          preserveAspectRatio={preserveAspectRatio}
           role="img"
           aria-label={`Flight from ${currentCountryLabel} to ${dreamCountryLabel}`}
         >
@@ -186,16 +232,16 @@ export function StudentBandJourneyFlightVisual({
 
             <pattern
               id={dotPatternId}
-              width={8}
-              height={8}
+              width={isWatermark ? 6.5 : isBackground ? 7 : 8}
+              height={isWatermark ? 6.5 : isBackground ? 7 : 8}
               patternUnits="userSpaceOnUse"
             >
               <rect
                 x={1}
                 y={1}
-                width={3.25}
-                height={3.25}
-                className="fill-gray-200/50 dark:fill-slate-800/50"
+                width={dotSize}
+                height={dotSize}
+                className={dotOpacity}
               />
             </pattern>
 
@@ -252,18 +298,23 @@ export function StudentBandJourneyFlightVisual({
             </linearGradient>
           </defs>
 
-          <g clipPath={`url(#${clipId})`} filter={`url(#${glowFilterId})`}>
+          <g
+            clipPath={`url(#${clipId})`}
+            filter={isWatermark ? undefined : `url(#${glowFilterId})`}
+          >
             <rect x={0} y={0} width={1000} height={500} fill={`url(#${dotPatternId})`} />
           </g>
 
-          <path
-            d={WORLD_LAND_CLIP_PATH_D}
-            fill="none"
-            fillRule="evenodd"
-            strokeWidth={0.4}
-            vectorEffect="non-scaling-stroke"
-            className="stroke-gray-200/45 dark:stroke-slate-700/40"
-          />
+          {!isBackground && !isWatermark ? (
+            <path
+              d={WORLD_LAND_CLIP_PATH_D}
+              fill="none"
+              fillRule="evenodd"
+              strokeWidth={0.4}
+              vectorEffect="non-scaling-stroke"
+              className="stroke-gray-200/45 dark:stroke-slate-700/40"
+            />
+          ) : null}
 
           <circle
             cx={from.x}
@@ -335,30 +386,32 @@ export function StudentBandJourneyFlightVisual({
             </g>
           ) : null}
 
-          <g className="select-none">
-            <text
-              x={from.x}
-              y={from.y + 22}
-              textAnchor="middle"
-              className="fill-muted-foreground text-[11px] font-semibold uppercase tracking-wide"
-              style={{ fontSize: 11 }}
-            >
-              {currentCountryLabel.length > 18
-                ? `${currentCountryLabel.slice(0, 16)}…`
-                : currentCountryLabel}
-            </text>
-            <text
-              x={to.x}
-              y={to.y + 22}
-              textAnchor="middle"
-              className="fill-emerald-700 text-[11px] font-bold uppercase tracking-wide dark:fill-emerald-300"
-              style={{ fontSize: 11 }}
-            >
-              {dreamCountryLabel.length > 18
-                ? `${dreamCountryLabel.slice(0, 16)}…`
-                : dreamCountryLabel}
-            </text>
-          </g>
+          {!isWatermark ? (
+            <g className="select-none">
+              <text
+                x={from.x}
+                y={from.y + 22}
+                textAnchor="middle"
+                className="fill-muted-foreground text-[11px] font-semibold uppercase tracking-wide"
+                style={{ fontSize: 11 }}
+              >
+                {currentCountryLabel.length > 18
+                  ? `${currentCountryLabel.slice(0, 16)}…`
+                  : currentCountryLabel}
+              </text>
+              <text
+                x={to.x}
+                y={to.y + 22}
+                textAnchor="middle"
+                className="fill-emerald-700 text-[11px] font-bold uppercase tracking-wide dark:fill-emerald-300"
+                style={{ fontSize: 11 }}
+              >
+                {dreamCountryLabel.length > 18
+                  ? `${dreamCountryLabel.slice(0, 16)}…`
+                  : dreamCountryLabel}
+              </text>
+            </g>
+          ) : null}
         </svg>
       </div>
     </div>

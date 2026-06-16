@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { RestartRequestItem } from "@/src/lib/api/adminReadingMonitoring";
+import { displayLevelNumberFromOrder } from "@/src/lib/readingLevelOrder";
 import { Loader2 } from "lucide-react";
 
 interface RestartRequestsTableProps {
@@ -66,7 +67,7 @@ export function RestartRequestsTable({
                 <td className="p-3">
                   <div className="font-medium">{row.level?.title ?? row.levelId}</div>
                   <div className="text-xs text-muted-foreground">
-                    {row.level?.slug ? `${row.level.slug} · Level ${row.level.order + 1}` : "—"}
+                    {row.level?.slug ? `${row.level.slug} · Level ${displayLevelNumberFromOrder(row.level.order)}` : "—"}
                   </div>
                 </td>
                 <td className="p-3 max-w-[200px] truncate">

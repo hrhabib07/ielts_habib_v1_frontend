@@ -54,8 +54,13 @@ import {
   type QuizGroup,
   type ReadingQuizContent,
 } from "@/src/lib/api/quizContent";
-import { readingLevelIndexFromOrder } from "@/src/lib/readingLevelOrder";
+import {
+  displayLevelNumberFromOrder,
+  formatInstructorLevelSummary,
+  readingLevelContentCode,
+} from "@/src/lib/readingLevelOrder";
 import { MockLevelsLaunchInstructorBanner } from "@/src/components/reading/MockLevelsLaunchInstructorBanner";
+import { InstructorLevelCodeNotice } from "@/src/components/instructor/InstructorLevelCodeNotice";
 
 export interface LevelVersionSummary {
   publishedVersion?: number;
@@ -779,6 +784,7 @@ export function ReadingLevelsListClient() {
   return (
     <>
       <MockLevelsLaunchInstructorBanner levels={levels} />
+      <InstructorLevelCodeNotice className="mb-4" />
 
       <Card className="rounded-2xl border border-border bg-muted/30 shadow-sm">
         <CardHeader
@@ -962,8 +968,17 @@ export function ReadingLevelsListClient() {
                       className="min-w-0 flex-1"
                     >
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground" title="Level index (0-based)">
-                          L{readingLevelIndexFromOrder(level.order)}
+                        <span
+                          className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary"
+                          title={formatInstructorLevelSummary(level.order)}
+                        >
+                          {displayLevelNumberFromOrder(level.order)}
+                        </span>
+                        <span
+                          className="shrink-0 rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground"
+                          title={`DB content code · order ${level.order}`}
+                        >
+                          {readingLevelContentCode(level.order)}
                         </span>
                         <p className="font-medium text-foreground">
                           {level.title}

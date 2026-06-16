@@ -1,10 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { CheckCircle2, ChevronRight, Clock, Lock, Sparkles } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  CreditCard,
+  Lock,
+  Sparkles,
+} from "lucide-react";
 import type { Level } from "@/src/lib/api/levels";
-import type { LevelDetailForStudent } from "@/src/lib/api/readingStrictProgression";
+import type { ReadingPathLevelStatus } from "@/src/lib/api/readingStrictProgression";
 import {
   getMockLevelLaunchState,
   isMockLevelOrder,
@@ -17,28 +25,35 @@ import { cn } from "@/lib/utils";
 
 export { formatLevelDisplayTitle } from "@/src/lib/formatLevelDisplayTitle";
 
-function isLevelPassed(
-  level: Level,
-  detailCache: Record<string, LevelDetailForStudent>,
-  currentOrder: number,
-): boolean {
-  const cached = detailCache[level._id];
-  if (cached?.progress.passStatus === "PASSED") return true;
-  if (currentOrder < 0) return false;
-  return level.order < currentOrder;
-}
+type LevelAccess = {
+  isPassed: boolean;
+  isCurrent: boolean;
+  accessible: boolean;
+  premiumLocked: boolean;
+  progressionLocked: boolean;
+};
 
 function getLockMessage(params: {
+  access: LevelAccess;
   levelIndex: number;
   levels: Level[];
   displayLevelNumber: (order: number) => number;
+  paymentPending: boolean;
 }): string {
-  const { levelIndex, levels, displayLevelNumber } = params;
+  const { access, levelIndex, levels, displayLevelNumber, paymentPending } = params;
+
+  if (access.premiumLocked) {
+    if (paymentPending) {
+      return "Your payment is being reviewed. Level 3 and beyond will unlock automatically once approved — usually within 24–48 hours.";
+    }
+    return "You finished the free levels. Unlock premium on the pricing page to start Level 3 and continue your 21-level journey.";
+  }
 
   if (levelIndex > 0) {
     const prevNum = displayLevelNumber(levels[levelIndex - 1]!.order);
-    return `Complete Level ${prevNum} to unlock this step. One level at a time — you've got this!`;
+    return `Complete Level ${prevNum} first. One level at a time — you've got this!`;
   }
+
   return "This level unlocks as you progress on your reading path.";
 }
 
@@ -47,34 +62,32 @@ export function ReadingPathZoneCard(props: {
   zoneIndex: number;
   levels: Level[];
   allLevels: Level[];
-  currentLevelId: string | null;
-  currentStepId: string | null;
-  currentOrder: number;
-  detailCache: Record<string, LevelDetailForStudent>;
+  paymentPending: boolean;
+  levelStatusById: Map<string, ReadingPathLevelStatus>;
   curriculumDemoAccount: boolean;
   isFutureZone: boolean;
   displayLevelNumber: (order: number) => number;
-  isLevelUnlocked: (levelIndex: number, level: Level) => boolean;
+  getLevelAccess: (level: Level, levelIndex: number) => LevelAccess;
 }) {
   const {
     zone,
     zoneIndex,
     levels,
     allLevels,
-    currentLevelId,
-    currentStepId,
-    currentOrder,
-    detailCache,
+    paymentPending,
+    levelStatusById,
     curriculumDemoAccount,
     isFutureZone,
     displayLevelNumber,
-    isLevelUnlocked,
+    getLevelAccess,
   } = props;
 
   const router = useRouter();
   const [hintLevelId, setHintLevelId] = useState<string | null>(null);
 
-  const passedInZone = levels.filter((l) => isLevelPassed(l, detailCache, currentOrder)).length;
+  const passedInZone = levels.filter(
+    (l) => levelStatusById.get(l._id)?.isPassed || getLevelAccess(l, allLevels.findIndex((x) => x._id === l._id)).isPassed,
+  ).length;
   const zonePct =
     levels.length > 0 ? Math.round((passedInZone / levels.length) * 100) : 0;
 
@@ -82,14 +95,25 @@ export function ReadingPathZoneCard(props: {
     (params: {
       level: Level;
       levelIndex: number;
-      unlocked: boolean;
+      access: LevelAccess;
       href: string;
     }) => {
-      const { level, unlocked, href } = params;
+      const { level, access, href } = params;
 
-      if (unlocked) {
+      if (access.accessible) {
         setHintLevelId(null);
         router.push(href);
+        return;
+      }
+
+      if (access.premiumLocked) {
+        setHintLevelId(level._id);
+        if (!paymentPending) {
+          router.push("/pricing");
+        }
+        window.setTimeout(() => {
+          setHintLevelId((current) => (current === level._id ? null : current));
+        }, 5200);
         return;
       }
 
@@ -98,7 +122,7 @@ export function ReadingPathZoneCard(props: {
         setHintLevelId((current) => (current === level._id ? null : current));
       }, 4200);
     },
-    [router],
+    [router, paymentPending],
   );
 
   return (
@@ -160,10 +184,8 @@ export function ReadingPathZoneCard(props: {
         )}
         {levels.map((level) => {
           const levelIndex = allLevels.findIndex((l) => l._id === level._id);
-          const unlocked = isLevelUnlocked(levelIndex, level);
+          const access = getLevelAccess(level, levelIndex);
           const mockPlaceholder = shouldUseMockLevelPlaceholder(level.order);
-          const passed = isLevelPassed(level, detailCache, currentOrder);
-          const isCurrent = level._id === currentLevelId;
           const displayNum = displayLevelNumber(level.order);
           const title = formatLevelDisplayTitle(level, displayNum);
 
@@ -173,8 +195,8 @@ export function ReadingPathZoneCard(props: {
                   levelOrder: level.order,
                   levelIndex,
                   levels: allLevels,
-                  currentOrder,
-                  detailCache,
+                  currentOrder: -1,
+                  detailCache: {},
                   contextDetail: null,
                   levelIdFromPath: null,
                   curriculumDemoAccount,
@@ -182,21 +204,17 @@ export function ReadingPathZoneCard(props: {
               : null;
 
           const mockComingSoon = mockLaunchState === "coming_soon";
-
-          const href = `/profile/reading/strict-levels/${level._id}${
-            isCurrent && currentStepId
-              ? `?step=${encodeURIComponent(currentStepId)}`
-              : ""
-          }`;
-          const showHint = hintLevelId === level._id && !unlocked;
+          const href = `/profile/reading/strict-levels/${level._id}`;
+          const showHint = hintLevelId === level._id && !access.accessible;
 
           const rowClass = cn(
             "group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200",
             "cursor-pointer active:scale-[0.99]",
-            isCurrent && "bg-accent/10 ring-1 ring-accent/20",
-            !isCurrent && unlocked && "hover:bg-muted/40 hover:ring-1 hover:ring-accent/10",
-            !unlocked && "hover:bg-muted/25",
-            passed && !isCurrent && "opacity-90",
+            access.isCurrent && "bg-accent/10 ring-1 ring-accent/20",
+            access.isPassed && !access.isCurrent && "bg-emerald-500/5 ring-1 ring-emerald-500/10",
+            !access.isCurrent && !access.isPassed && access.accessible && "hover:bg-muted/40 hover:ring-1 hover:ring-accent/10",
+            access.premiumLocked && "hover:bg-accent/5 hover:ring-1 hover:ring-accent/15",
+            access.progressionLocked && "hover:bg-muted/25 opacity-80",
           );
 
           return (
@@ -208,7 +226,7 @@ export function ReadingPathZoneCard(props: {
                   handleLevelClick({
                     level,
                     levelIndex,
-                    unlocked,
+                    access,
                     href,
                   })
                 }
@@ -216,18 +234,22 @@ export function ReadingPathZoneCard(props: {
                 <span
                   className={cn(
                     "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold transition-transform duration-200 group-hover:scale-105",
-                    passed
-                      ? "bg-accent/15 text-accent"
-                      : isCurrent
+                    access.isPassed
+                      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                      : access.isCurrent
                         ? "bg-accent text-accent-foreground animate-soft-pulse"
-                        : unlocked
-                          ? "bg-muted/60 text-muted-foreground"
-                          : "bg-muted/30 text-muted-foreground/70",
+                        : access.premiumLocked
+                          ? "bg-accent/15 text-accent"
+                          : access.accessible
+                            ? "bg-muted/60 text-muted-foreground"
+                            : "bg-muted/30 text-muted-foreground/70",
                   )}
                 >
-                  {passed ? (
+                  {access.isPassed ? (
                     <CheckCircle2 className="h-3.5 w-3.5" />
-                  ) : !unlocked ? (
+                  ) : access.premiumLocked ? (
+                    <CreditCard className="h-3 w-3" />
+                  ) : !access.accessible ? (
                     <Lock className="h-3 w-3" />
                   ) : (
                     displayNum
@@ -236,22 +258,44 @@ export function ReadingPathZoneCard(props: {
                 <span
                   className={cn(
                     "min-w-0 flex-1 text-sm leading-snug text-left",
-                    isCurrent
+                    access.isCurrent
                       ? "font-semibold text-foreground"
-                      : passed
-                        ? "font-medium text-muted-foreground line-through decoration-border/80"
-                        : "font-medium text-foreground",
+                      : access.isPassed
+                        ? "font-medium text-emerald-700 dark:text-emerald-300"
+                        : access.premiumLocked
+                          ? "font-medium text-foreground"
+                          : "font-medium text-foreground",
                   )}
                 >
                   {title}
                 </span>
-                {mockComingSoon && unlocked && (
+                {access.isPassed && (
+                  <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                    Done
+                  </span>
+                )}
+                {access.premiumLocked && !access.isPassed && (
+                  <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-accent/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-accent">
+                    {paymentPending ? (
+                      <>
+                        <Clock className="h-2.5 w-2.5" />
+                        Review
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-2.5 w-2.5" />
+                        Premium
+                      </>
+                    )}
+                  </span>
+                )}
+                {mockComingSoon && access.accessible && (
                   <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-accent/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-accent">
                     <Clock className="h-2.5 w-2.5" />
                     Soon
                   </span>
                 )}
-                {isCurrent && (
+                {access.isCurrent && (
                   <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-accent px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-accent-foreground">
                     <Sparkles className="h-2.5 w-2.5" />
                     Now
@@ -260,24 +304,32 @@ export function ReadingPathZoneCard(props: {
                 <ChevronRight
                   className={cn(
                     "h-4 w-4 shrink-0 text-muted-foreground/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-accent",
-                    isCurrent && "text-accent",
+                    access.isCurrent && "text-accent",
+                    access.premiumLocked && "text-accent/60",
                   )}
                 />
               </button>
 
               {showHint && (
                 <div
-                  className="animate-fade-up mx-1 mt-1 flex items-start gap-2 rounded-lg border border-accent/20 bg-accent/[0.06] px-3 py-2 text-xs leading-relaxed text-foreground ring-1 ring-accent/10"
+                  className={cn(
+                    "animate-fade-up mx-1 mt-1 flex flex-col gap-2 rounded-lg border px-3 py-2 text-xs leading-relaxed ring-1",
+                    access.premiumLocked
+                      ? "border-accent/25 bg-accent/[0.06] text-foreground ring-accent/10"
+                      : "border-border/50 bg-muted/30 text-muted-foreground ring-border/20",
+                  )}
                   role="status"
                 >
-                  <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
-                  <span>
-                    {getLockMessage({
-                      levelIndex,
-                      levels: allLevels,
-                      displayLevelNumber,
-                    })}
-                  </span>
+                  <span>{getLockMessage({ access, levelIndex, levels: allLevels, displayLevelNumber, paymentPending })}</span>
+                  {access.premiumLocked && !paymentPending && (
+                    <Link
+                      href="/pricing"
+                      className="inline-flex w-fit items-center gap-1 rounded-md bg-accent px-2.5 py-1 text-[11px] font-semibold text-accent-foreground"
+                    >
+                      <CreditCard className="h-3 w-3" />
+                      Go to pricing
+                    </Link>
+                  )}
                 </div>
               )}
             </li>

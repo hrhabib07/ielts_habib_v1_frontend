@@ -1,15 +1,46 @@
-/** Mirrors backend tier boundaries for client-side trial countdown. */
-const TIER_BOUNDARIES_HOURS = [72, 120, 168, 336] as const;
-const TIER_DISCOUNTS = [60, 50, 40, 20, 0] as const;
+/** Mirrors backend — 60% Founder scholarship until 1 Aug 2026. */
+import { FOUNDING_MEMBER_CUTOFF } from "./foundingMember";
 
-function calculateTierPercent(elapsedHours: number): number {
-  if (elapsedHours <= TIER_BOUNDARIES_HOURS[0]) return TIER_DISCOUNTS[0];
-  if (elapsedHours <= TIER_BOUNDARIES_HOURS[1]) return TIER_DISCOUNTS[1];
-  if (elapsedHours <= TIER_BOUNDARIES_HOURS[2]) return TIER_DISCOUNTS[2];
-  if (elapsedHours <= TIER_BOUNDARIES_HOURS[3]) return TIER_DISCOUNTS[3];
-  return TIER_DISCOUNTS[4];
+export const SCHOLARSHIP_WINDOW_HOURS = 24;
+export const FOUNDER_SCHOLARSHIP_PERCENT = 60;
+
+/** @deprecated Use SCHOLARSHIP_WINDOW_HOURS */
+export const SCHOLARSHIP_PHASE_HOURS = SCHOLARSHIP_WINDOW_HOURS;
+
+/** @deprecated Single-tier window only */
+export const SCHOLARSHIP_PHASE_DISCOUNTS = [FOUNDER_SCHOLARSHIP_PERCENT] as const;
+
+export function getDecayStateFromStartTime(
+  _scholarshipStartTime: string,
+  nowMs: number,
+): {
+  currentTierPercent: number;
+  nextTierPercent: number;
+  remainingMs: number;
+  isFullyExpired: boolean;
+} {
+  const windowEndMs = FOUNDING_MEMBER_CUTOFF.getTime();
+  const remainingMs = Math.max(0, windowEndMs - nowMs);
+  const isFullyExpired = remainingMs <= 0;
+
+  if (isFullyExpired) {
+    return {
+      currentTierPercent: 0,
+      nextTierPercent: 0,
+      remainingMs: 0,
+      isFullyExpired: true,
+    };
+  }
+
+  return {
+    currentTierPercent: FOUNDER_SCHOLARSHIP_PERCENT,
+    nextTierPercent: 0,
+    remainingMs,
+    isFullyExpired: false,
+  };
 }
 
+/** @deprecated Use getDecayStateFromStartTime with scholarshipStartTime. */
 export function getTierTimerFromCreatedAt(
   createdAt: string,
   nowMs: number,
@@ -18,37 +49,11 @@ export function getTierTimerFromCreatedAt(
   nextTierPercent: number;
   remainingMs: number;
 } {
-  const createdMs = new Date(createdAt).getTime();
-  const elapsedMs = nowMs - createdMs;
-  const elapsedHours = elapsedMs / (1000 * 60 * 60);
-  const currentTierPercent = calculateTierPercent(elapsedHours);
-
-  if (elapsedHours > TIER_BOUNDARIES_HOURS[3]) {
-    return { currentTierPercent: 0, nextTierPercent: 0, remainingMs: 0 };
-  }
-
-  let boundaryHours: number;
-  let nextTierPercent: number;
-
-  if (elapsedHours <= TIER_BOUNDARIES_HOURS[0]) {
-    boundaryHours = TIER_BOUNDARIES_HOURS[0];
-    nextTierPercent = TIER_DISCOUNTS[1];
-  } else if (elapsedHours <= TIER_BOUNDARIES_HOURS[1]) {
-    boundaryHours = TIER_BOUNDARIES_HOURS[1];
-    nextTierPercent = TIER_DISCOUNTS[2];
-  } else if (elapsedHours <= TIER_BOUNDARIES_HOURS[2]) {
-    boundaryHours = TIER_BOUNDARIES_HOURS[2];
-    nextTierPercent = TIER_DISCOUNTS[3];
-  } else {
-    boundaryHours = TIER_BOUNDARIES_HOURS[3];
-    nextTierPercent = TIER_DISCOUNTS[4];
-  }
-
-  const boundaryMs = boundaryHours * 60 * 60 * 1000;
+  const decay = getDecayStateFromStartTime(createdAt, nowMs);
   return {
-    currentTierPercent,
-    nextTierPercent,
-    remainingMs: Math.max(0, boundaryMs - elapsedMs),
+    currentTierPercent: decay.currentTierPercent,
+    nextTierPercent: decay.nextTierPercent,
+    remainingMs: decay.remainingMs,
   };
 }
 

@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Highlighter, StickyNote, Eraser } from "lucide-react";
+import { usePortalContainer } from "@/src/hooks/usePortalContainer";
 import { getSelectionStringOffsetsInRoot } from "@/src/utils/domTextOffsets";
 
 export type HighlightRange = { paragraphIndex: number; start: number; end: number };
@@ -339,7 +340,7 @@ export function PassageWithHighlightNotes({
 
   const baseSize = 17;
   const sizePx = baseSize * zoomFactor;
-  const canPortal = typeof document !== "undefined";
+  const portalContainer = usePortalContainer();
 
   return (
     <>
@@ -388,7 +389,7 @@ export function PassageWithHighlightNotes({
       </div>
 
       {contextMenu &&
-        canPortal &&
+        portalContainer &&
         createPortal(
           <div
             data-passage-context-menu
@@ -426,11 +427,11 @@ export function PassageWithHighlightNotes({
               </button>
             )}
           </div>,
-          document.body,
+          portalContainer,
         )}
 
       {noteInput &&
-        canPortal &&
+        portalContainer &&
         createPortal(
           <div
             className="fixed inset-0 z-[220] flex items-center justify-center bg-black/30 px-4"
@@ -471,7 +472,7 @@ export function PassageWithHighlightNotes({
               </div>
             </div>
           </div>,
-          document.body,
+          portalContainer,
         )}
     </>
   );

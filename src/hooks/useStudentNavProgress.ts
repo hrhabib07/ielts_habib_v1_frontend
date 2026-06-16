@@ -1,49 +1,43 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProfileSummary } from "@/src/lib/api/profile";
-import type { ProfileSummary } from "@/src/lib/api/types";
 import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
+import { resolveJourneyProgress } from "@/src/lib/journeyVisualProgress";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 
 export function useStudentNavProgress(enabled: boolean) {
-  const [profileSummary, setProfileSummary] = useState<ProfileSummary | null>(null);
-  const [loading, setLoading] = useState(enabled);
+  const { profileSummary, loading: sessionLoading } = useStudentSession();
 
-  useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
-      return;
-    }
-    let cancelled = false;
-    setLoading(true);
-    getProfileSummary()
-      .then((summary) => {
-        if (!cancelled) setProfileSummary(summary);
-      })
-      .catch(() => {
-        if (!cancelled) setProfileSummary(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [enabled]);
+  const loading = enabled && sessionLoading && profileSummary == null;
 
-  const overallProgressPct =
-    profileSummary?.overallProgressPct != null
-      ? Math.round(profileSummary.overallProgressPct)
-      : 0;
+  const journey = resolveJourneyProgress({
+    passedLevelCount: profileSummary?.passedLevelCount,
+    totalLevels: profileSummary?.totalLevels,
+    masteredLevelCount: profileSummary?.masteredLevelCount,
+    overallProgressPct: profileSummary?.overallProgressPct,
+  });
 
   const levelsCompletedCount =
+    profileSummary?.passedLevelCount ??
     profileSummary?.masteredLevelCount ??
-    Math.round((overallProgressPct / 100) * TOTAL_READING_PATH_LEVELS);
+    Math.round((journey.actualPct / 100) * TOTAL_READING_PATH_LEVELS);
+
+  if (!enabled) {
+    return {
+      profileSummary: null,
+      loading: false,
+      overallProgressPct: 0,
+      journeyLabel: journey.label,
+      journeyVisualPct: journey.visualPct,
+      levelsCompletedCount: 0,
+    };
+  }
 
   return {
     profileSummary,
     loading,
-    overallProgressPct,
+    overallProgressPct: journey.actualPct,
+    journeyLabel: journey.label,
+    journeyVisualPct: journey.visualPct,
     levelsCompletedCount,
   };
 }

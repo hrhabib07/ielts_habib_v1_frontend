@@ -23,12 +23,10 @@ import { LevelLayout } from "@/src/components/student-level/LevelLayout";
 import { SetTargetBandForm } from "@/src/components/student-level/SetTargetBandForm";
 import type { NextLevelInfo } from "@/src/components/student-level/LevelLayout";
 import { useReadingLevelDetail } from "@/src/contexts/ReadingLevelDetailContext";
-import { ReadingMainAreaSkeleton } from "@/src/components/reading/ReadingPathSkeleton";
-import { isReadingFoundationL0, isReadingFirstSkillL1, findFirstSkillOrder } from "@/src/lib/readingLevelOrder";
-import { estimateBandFromAccuracy } from "@/src/lib/scholarshipUtils";
-import { ScholarshipRealityCheckModal } from "@/src/components/scholarship/ScholarshipRealityCheckModal";
-import { useScholarship } from "@/src/contexts/ScholarshipContext";
+import { GamlishLevelTransition } from "@/src/components/reading/GamlishLevelTransition";
+import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
 import { MockLevelLaunchView } from "@/src/components/reading/MockLevelLaunchView";
+import { LevelRoadmapView } from "@/src/components/reading/LevelRoadmapView";
 import {
   buildMockLevelPlaceholderDetail,
   getMockLevelLaunchState,
@@ -40,13 +38,13 @@ import {
   type MockLevelOrder,
 } from "@/src/lib/readingMockLevelsLaunch";
 import type { Level } from "@/src/lib/api/levels";
+import { cn } from "@/lib/utils";
 
 export default function ReadingStrictLevelPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setDetail: setContextDetail } = useReadingLevelDetail();
-  const { status: scholarshipStatus, refresh: refreshScholarship } = useScholarship();
+  const { setDetail: setContextDetail, detail: contextDetail } = useReadingLevelDetail();
   const id = params.id;
 
   const [detail, setDetail] = useState<LevelDetailForStudent | null>(null);
@@ -65,28 +63,10 @@ export default function ReadingStrictLevelPage() {
   const [mockLevelOrder, setMockLevelOrder] = useState<MockLevelOrder | null>(null);
   const [mockLaunchState, setMockLaunchState] = useState<MockLevelLaunchState | null>(null);
   const [mockBackHref, setMockBackHref] = useState("/profile/reading");
-  const [firstSkillOrder, setFirstSkillOrder] = useState<number | null>(null);
-  const [realityCheckOpen, setRealityCheckOpen] = useState(false);
-  const l1RealityCheckShownRef = useRef(false);
-
   const stepIdFromUrl = searchParams.get("step");
   const contentUpdatedParam = searchParams.get("contentUpdated");
 
   const lastHandledRestartToVersionIdRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    getLevelsByModule("READING")
-      .then((levels) => {
-        if (!cancelled) setFirstSkillOrder(findFirstSkillOrder(levels));
-      })
-      .catch(() => {
-        if (!cancelled) setFirstSkillOrder(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const resolveMockLaunchContext = useCallback(
     async (levelOrder: MockLevelOrder, routeLevelId: string) => {
@@ -133,8 +113,11 @@ export default function ReadingStrictLevelPage() {
 
   const loadDetail = useCallback(() => {
     if (!id) return;
-    setLoading(true);
-    setError(null);
+    const hasMatchingDetail = detail?.level._id === id || contextDetail?.level._id === id;
+    if (!hasMatchingDetail) {
+      setLoading(true);
+      setError(null);
+    }
     setTargetBandRequired(false);
     setPremiumLock(false);
     setMockLevelOrder(null);
@@ -241,7 +224,7 @@ export default function ReadingStrictLevelPage() {
         setContextDetail(null);
       })
       .finally(() => setLoading(false));
-  }, [id, router, setContextDetail, resolveMockLaunchContext]);
+  }, [id, router, setContextDetail, resolveMockLaunchContext, detail?.level._id, contextDetail?.level._id]);
 
   const clearStepQueryParam = useCallback(() => {
     if (!id) return;
@@ -288,24 +271,15 @@ export default function ReadingStrictLevelPage() {
   }, [contentUpdatedParam, id, router]);
 
   useEffect(() => {
+    if (!id || !contextDetail || contextDetail.level._id !== id) return;
+    setDetail((prev) => prev ?? contextDetail);
+    setLoading(false);
+  }, [id, contextDetail]);
+
+  useEffect(() => {
     loadDetail();
     return () => setContextDetail(null);
   }, [loadDetail, setContextDetail]);
-
-  useEffect(() => {
-    if (!detail || loading || stepIdFromUrl || mockLevelOrder != null) return;
-    const steps = detail.steps;
-    const currentIndex = detail.progress.currentStepIndex ?? 0;
-    const firstIncompleteStep = steps[currentIndex] ?? steps[steps.length - 1];
-    const resolvedStepId =
-      firstIncompleteStep?._id ?? steps[0]?._id;
-    if (resolvedStepId) {
-      router.replace(
-        `/profile/reading/strict-levels/${id}?step=${encodeURIComponent(resolvedStepId)}`,
-        { scroll: false },
-      );
-    }
-  }, [detail, loading, stepIdFromUrl, id, router, mockLevelOrder]);
 
   useEffect(() => {
     if (!detail || detail.progress.passStatus !== "PASSED") {
@@ -383,21 +357,6 @@ export default function ReadingStrictLevelPage() {
     };
   }, [detail?.level.order, detail?.progress.passStatus, nextLevelInfo]);
 
-  useEffect(() => {
-    if (
-      !detail ||
-      detail.progress.passStatus !== "PASSED" ||
-      firstSkillOrder == null ||
-      !isReadingFirstSkillL1(detail.level, firstSkillOrder) ||
-      l1RealityCheckShownRef.current
-    ) {
-      return;
-    }
-    l1RealityCheckShownRef.current = true;
-    void refreshScholarship();
-    setRealityCheckOpen(true);
-  }, [detail, firstSkillOrder, refreshScholarship]);
-
   const handleLevelPassed = useCallback(() => {
     setTimeout(() => {
       loadDetail();
@@ -472,7 +431,7 @@ export default function ReadingStrictLevelPage() {
     Boolean(id && detail?.level._id === id);
 
   if (loading && (!detail || !detailMatchesRoute)) {
-    return <ReadingMainAreaSkeleton className="min-h-[calc(100vh-4rem)]" />;
+    return <GamlishLevelTransition className="min-h-[calc(100vh-4rem)]" />;
   }
 
   if (error || !detail) {
@@ -494,7 +453,7 @@ export default function ReadingStrictLevelPage() {
             </h2>
             <p className="mb-6 text-sm leading-6 text-gray-500 dark:text-gray-400">
               To continue to this level, choose your target IELTS band (4–9).
-              You can update this when moving from Level 0 to Level 1.
+              You can update this when moving from Level 1 to Level 2.
             </p>
             <SetTargetBandForm
               onSuccess={() => {
@@ -584,14 +543,12 @@ export default function ReadingStrictLevelPage() {
   }
 
   if (!detail) {
-    return <ReadingMainAreaSkeleton className="min-h-[calc(100vh-4rem)]" />;
+    return <GamlishLevelTransition className="min-h-[calc(100vh-4rem)]" />;
   }
 
-  const activeStepId =
-    stepIdFromUrl ??
-    detail.steps?.[detail.progress.currentStepIndex ?? 0]?._id ??
-    detail.steps?.[0]?._id ??
-    "";
+  const showRoadmap = !stepIdFromUrl;
+
+  const activeStepId = stepIdFromUrl ?? "";
 
   const isLevel0PassedWithNextLevel =
     isReadingFoundationL0(detail.level) &&
@@ -600,46 +557,19 @@ export default function ReadingStrictLevelPage() {
   const showSetTargetBandOnLevel0 =
     isLevel0PassedWithNextLevel && readingTargetBand === null;
 
-  const targetBandForModal =
-    typeof readingTargetBand === "number" ? readingTargetBand : 6.5;
-  const baselineBandForModal = completionScore
-    ? estimateBandFromAccuracy(completionScore.percentage)
-    : Math.max(4, (readingTargetBand ?? 6) - 1);
-  const scholarshipPercentForModal =
-    scholarshipStatus?.unlockedDiscountPercent ??
-    scholarshipStatus?.currentTierPercent ??
-    60;
-
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
-      <ScholarshipRealityCheckModal
-        open={realityCheckOpen}
-        targetBand={typeof readingTargetBand === "number" ? readingTargetBand : targetBandForModal}
-        baselineBand={baselineBandForModal}
-        scholarshipPercent={scholarshipPercentForModal}
-        onAccept={() => {
-          setRealityCheckOpen(false);
-          router.push("/pricing");
-        }}
-        onRestart={() => {
-          setRealityCheckOpen(false);
-          l1RealityCheckShownRef.current = false;
-          const firstStepId = detail?.steps?.[0]?._id;
-          if (firstStepId && id) {
-            router.replace(
-              `/profile/reading/strict-levels/${id}?step=${encodeURIComponent(firstStepId)}`,
-            );
-          }
-          void loadDetail();
-        }}
-        onClose={() => setRealityCheckOpen(false)}
-      />
+    <div
+      className={cn(
+        "flex flex-col",
+        showRoadmap ? "min-h-0" : "h-full min-h-0 overflow-hidden",
+      )}
+    >
       {showSetTargetBandOnLevel0 && (
         <div className="shrink-0 border-b border-indigo-200/80 bg-indigo-50/90 px-4 py-4 dark:border-indigo-800/80 dark:bg-indigo-950/50 lg:px-6">
           <div className="mx-auto max-w-3xl rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-white/80 dark:bg-indigo-950/40 p-6 shadow-sm">
             <SetTargetBandForm
               heading="Set your desired band score before Level 1"
-              description="Choose your target IELTS band (4–9). You can set or update this when moving from Level 0 to Level 1."
+              description="Choose your target IELTS band (4–9). You can set or update this when moving from Level 1 to Level 2."
               submitLabel="Save and continue to Level 1"
               onSuccess={(band) => {
                 setReadingTargetBandState(band);
@@ -648,24 +578,34 @@ export default function ReadingStrictLevelPage() {
           </div>
         </div>
       )}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <LevelLayout
-          detail={detail}
-          loading={false}
-          completingStepId={completingStepId}
-          onComplete={handleCompleteStep}
-          onLevelPassed={handleLevelPassed}
-          onProgressUpdate={handleProgressUpdate}
-          activeStepId={activeStepId}
-          onNavigate={handleNavigate}
-          hideSidebar
-          nextLevelInfo={nextLevelInfo}
-          completionScore={completionScore}
-          hasFeedbackSubmitted={hasFeedbackSubmitted}
-          onFeedbackSuccess={() => setHasFeedbackSubmitted(true)}
-          onContentUpdateRequired={handleContentUpdateRequired}
-          contentUpdateBannerMessage={contentUpdateBannerMessage}
-        />
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col",
+          showRoadmap ? "min-h-0" : "h-full overflow-hidden",
+        )}
+      >
+        {showRoadmap ? (
+          <LevelRoadmapView detail={detail} onNavigateToStep={handleNavigate} />
+        ) : (
+          <LevelLayout
+            detail={detail}
+            loading={false}
+            completingStepId={completingStepId}
+            onComplete={handleCompleteStep}
+            onLevelPassed={handleLevelPassed}
+            onProgressUpdate={handleProgressUpdate}
+            activeStepId={activeStepId}
+            onNavigate={handleNavigate}
+            hideSidebar
+            showRoadmapLink
+            nextLevelInfo={nextLevelInfo}
+            completionScore={completionScore}
+            hasFeedbackSubmitted={hasFeedbackSubmitted}
+            onFeedbackSuccess={() => setHasFeedbackSubmitted(true)}
+            onContentUpdateRequired={handleContentUpdateRequired}
+            contentUpdateBannerMessage={contentUpdateBannerMessage}
+          />
+        )}
       </div>
     </div>
   );

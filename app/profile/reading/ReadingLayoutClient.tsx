@@ -1,11 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ReadingLevelDetailProvider } from "@/src/contexts/ReadingLevelDetailContext";
-import { cn } from "@/lib/utils";
 import {
   isReadingExamSimulationPath,
   isReadingFixedViewportShellPath,
+  isReadingLevelRoadmapPath,
 } from "@/src/lib/siteScrollPolicy";
 
 export default function ReadingLayoutClient({
@@ -14,32 +14,31 @@ export default function ReadingLayoutClient({
   children: React.ReactNode;
 }) {
   const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams();
+  const hasStepParam = Boolean(searchParams.get("step"));
+  const isLevelRoadmap = isReadingLevelRoadmapPath(pathname, hasStepParam);
   const isExamPage = isReadingExamSimulationPath(pathname);
   const isJourney = pathname === "/profile/reading";
   const isPracticeAttemptReview = pathname.includes("/profile/reading/practice-attempt");
   const isStrictRunner =
-    isReadingFixedViewportShellPath(pathname) && !isExamPage && !isPracticeAttemptReview;
+    isReadingFixedViewportShellPath(pathname) &&
+    !isExamPage &&
+    !isPracticeAttemptReview &&
+    !isLevelRoadmap;
 
   if (isExamPage) {
     return <div className="min-h-[100dvh] w-full">{children}</div>;
   }
 
-  if (isJourney || isPracticeAttemptReview) {
+  if (isJourney || isPracticeAttemptReview || isLevelRoadmap) {
     return <ReadingLevelDetailProvider>{children}</ReadingLevelDetailProvider>;
   }
 
   if (isStrictRunner) {
     return (
       <ReadingLevelDetailProvider>
-        <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
-          <main
-            className={cn(
-              "min-h-0 flex-1 overflow-x-hidden overscroll-y-contain reading-journey-scroll",
-              "overflow-y-auto",
-            )}
-          >
-            {children}
-          </main>
+        <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 w-full flex-col overflow-hidden sm:h-[calc(100dvh-4rem)]">
+          {children}
         </div>
       </ReadingLevelDetailProvider>
     );

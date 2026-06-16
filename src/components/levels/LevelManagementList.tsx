@@ -18,6 +18,7 @@ import {
   type LevelAccessType,
   type CreateLevelPayload,
 } from "@/src/lib/api/levels";
+import { displayLevelNumberFromOrder } from "@/src/lib/readingLevelOrder";
 import {
   ArrowLeft,
   Plus,
@@ -536,7 +537,7 @@ export function LevelManagementList({
                       >
                         <td className="px-4 py-3">
                           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                            {level.order}
+                            {displayLevelNumberFromOrder(level.order)}
                           </span>
                         </td>
                         <td className="px-4 py-3">

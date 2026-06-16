@@ -22,7 +22,7 @@ export function SetTargetBandForm({
   onSuccess,
   submitLabel = "Save and continue",
   heading = "Set your desired band score",
-  description = "Choose your target IELTS band (4–9) before continuing. You can update this when moving from Level 0 to Level 1.",
+  description = "Choose your target IELTS band (4–9) before continuing. You can update this when moving from Level 1 to Level 2.",
   compact = false,
 }: SetTargetBandFormProps) {
   const [band, setBand] = useState<number | null>(null);

@@ -18,7 +18,8 @@ import {
 } from "@/src/features/reading-version";
 import { GroupTestsBulkCreateCard } from "./GroupTestsBulkCreateCard";
 import { L0FinalTestsBuilder } from "./L0FinalTestsBuilder";
-import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
+import { L5ProgressiveMcqFinalTestsBuilder } from "./L5ProgressiveMcqFinalTestsBuilder";
+import { isReadingFoundationL0, isReadingVocabularyL5 } from "@/src/lib/readingLevelOrder";
 import { RefreshCw, Loader2 } from "lucide-react";
 
 interface StepsBuilderSectionProps {
@@ -54,6 +55,10 @@ export function StepsBuilderSection({
   const [syncBusy, setSyncBusy] = useState(false);
   const disabled = versionStatus === "PUBLISHED";
   const isReadingL0Foundation = isReadingFoundationL0({
+    levelType,
+    order: levelOrder,
+  });
+  const isReadingL5Vocabulary = isReadingVocabularyL5({
     levelType,
     order: levelOrder,
   });
@@ -132,6 +137,7 @@ export function StepsBuilderSection({
             disabled={disabled}
             onPracticeTestsChange={handlePracticeTestsChange}
             isL0Foundation={isReadingL0Foundation}
+            isReadingL0Foundation={isReadingL0Foundation}
             finalTestPracticeTestIds={
               isReadingL0Foundation
                 ? (currentDetail.finalTest?.practiceTestIds ?? [])
@@ -144,6 +150,12 @@ export function StepsBuilderSection({
       {isReadingL0Foundation && (
         <p className="rounded-lg border border-indigo-200 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-900 dark:border-indigo-900/50 dark:bg-indigo-950/30 dark:text-indigo-100">
           <strong>Level 0:</strong> configure three sequential final tests in section 2 (not a quiz step).
+        </p>
+      )}
+
+      {isReadingL5Vocabulary && (
+        <p className="rounded-lg border border-violet-200 bg-violet-50/60 px-4 py-3 text-sm text-violet-900 dark:border-violet-900/50 dark:bg-violet-950/30 dark:text-violet-100">
+          <strong>Level 5 (Vocabulary):</strong> use progressive MCQ practice tests and three progressive MCQ finals in section 2.
         </p>
       )}
 
@@ -170,6 +182,35 @@ export function StepsBuilderSection({
           <CardContent className="p-0 pt-6">
             <L0FinalTestsBuilder
               levelId={levelId}
+              versionId={versionId}
+              version={currentDetail.version}
+              disabled={disabled}
+              finalTest={currentDetail.finalTest ?? null}
+              practiceTests={practiceTests}
+              onFinalTestChange={(ft) =>
+                onDetailChange({
+                  ...currentDetail,
+                  finalTest: ft,
+                  groupTests: finalTestAsGroupTestList(ft, []),
+                })
+              }
+              onVersionChange={(v) => onDetailChange({ ...currentDetail, version: v })}
+              onPracticeTestsChange={handlePracticeTestsChange}
+            />
+          </CardContent>
+        </Card>
+      ) : isReadingL5Vocabulary ? (
+        <Card className="rounded-2xl border border-zinc-200/90 bg-white p-6 shadow-sm ring-1 ring-zinc-100">
+          <CardHeader className="p-0 pb-2">
+            <CardTitle className="text-lg font-semibold tracking-tight">
+              2. Final tests (progressive MCQ)
+            </CardTitle>
+            <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+              Three paraphrase-engine finals — context + MCQ, one question at a time.
+            </p>
+          </CardHeader>
+          <CardContent className="p-0 pt-6">
+            <L5ProgressiveMcqFinalTestsBuilder
               versionId={versionId}
               version={currentDetail.version}
               disabled={disabled}

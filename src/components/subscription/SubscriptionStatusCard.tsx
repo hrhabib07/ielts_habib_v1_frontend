@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getMySubscription, type ActiveSubscription } from "@/src/lib/api/subscription";
+import type { ActiveSubscription } from "@/src/lib/api/subscription";
 import { CalendarDays, CheckCircle2, AlertCircle, Zap, Loader2 } from "lucide-react";
+import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 
 function daysUntil(date: string): number {
   return Math.ceil((new Date(date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -20,15 +22,15 @@ function formatDate(date: string): string {
 }
 
 export function SubscriptionStatusCard() {
+  const { subscription, loading: sessionLoading, isFoundingMember } = useStudentSession();
   const [sub, setSub] = useState<ActiveSubscription | null | undefined>(undefined);
 
   useEffect(() => {
-    getMySubscription()
-      .then(setSub)
-      .catch(() => setSub(null));
-  }, []);
+    if (sessionLoading) return;
+    setSub(subscription);
+  }, [subscription, sessionLoading]);
 
-  if (sub === undefined) {
+  if (sub === undefined || sessionLoading) {
     return (
       <Card className="p-5 flex items-center gap-3 text-muted-foreground">
         <Loader2 className="h-5 w-5 animate-spin shrink-0" />
@@ -100,11 +102,9 @@ export function SubscriptionStatusCard() {
               </span>
             </span>
           </div>
-          {sub.isFounderUser && (
-            <span className="inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-400">
-              Founder member
-            </span>
-          )}
+          {isFoundingMember ? (
+            <FoundingMemberBadge size="sm" />
+          ) : null}
         </div>
         {isExpiringSoon && (
           <Link href="/pricing" className="shrink-0">

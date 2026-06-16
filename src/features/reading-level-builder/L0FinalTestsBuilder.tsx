@@ -9,18 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Copy, Check, FileText, Plus, Pencil } from "lucide-react";
 import Link from "next/link";
 import {
+  createGamlishScanningPracticeTest,
   createSentenceLocatorPracticeTest,
   getFinalTestByVersion,
   getPracticeTestPreviewContent,
+  isGamlishScanningPreviewContent,
   isSentenceLocatorPreviewContent,
   updateEvaluationConfig,
   updatePracticeTest,
   upsertFinalTest,
   type FinalTest,
+  type GamlishScanningContentAuthoringPreview,
   type PracticeTest,
   type ReadingLevelVersion,
   type SentenceLocatorContentAuthoringPreview,
 } from "@/src/lib/api/adminReadingVersions";
+import { L0_FINAL_TESTS_BULK_PAYLOAD } from "@/src/lib/reading/gamlishScanning/level0GamlishContent";
 
 const SLOT_LABELS = [
   "Final Test 1 (hardest slot)",
@@ -50,7 +54,8 @@ const SENTENCE_LOCATOR_JSON_PLACEHOLDER = `{
 type BulkL0FinalItem = {
   title?: string;
   timeLimitMinutes?: number;
-  sentenceLocator: SentenceLocatorContentAuthoringPreview;
+  gamlishScanning?: GamlishScanningContentAuthoringPreview;
+  sentenceLocator?: SentenceLocatorContentAuthoringPreview;
 };
 
 function safeJsonParse(raw: string): { ok: true; value: unknown } | { ok: false; error: string } {
@@ -74,31 +79,30 @@ function validateL0FinalBulk(payload: unknown): { finalTests: BulkL0FinalItem[] 
       throw new Error(`finalTests[${i}] must be an object.`);
     }
     const t = item as Record<string, unknown>;
+    const gs = t.gamlishScanning;
     const sl = t.sentenceLocator;
-    if (!sl || typeof sl !== "object" || Array.isArray(sl)) {
-      throw new Error(`finalTests[${i}] must include sentenceLocator (passage + statements).`);
+    const hasGs = gs && typeof gs === "object" && !Array.isArray(gs);
+    const hasSl = sl && typeof sl === "object" && !Array.isArray(sl);
+    if (!hasGs && !hasSl) {
+      throw new Error(
+        `finalTests[${i}] must include gamlishScanning (recommended) or legacy sentenceLocator.`,
+      );
+    }
+    if (hasGs && hasSl) {
+      throw new Error(`finalTests[${i}] must not include both gamlishScanning and sentenceLocator.`);
     }
     out.push({
       title: typeof t.title === "string" ? t.title : undefined,
       timeLimitMinutes: typeof t.timeLimitMinutes === "number" ? t.timeLimitMinutes : undefined,
-      sentenceLocator: sl as SentenceLocatorContentAuthoringPreview,
+      gamlishScanning: hasGs ? (gs as GamlishScanningContentAuthoringPreview) : undefined,
+      sentenceLocator: hasSl ? (sl as SentenceLocatorContentAuthoringPreview) : undefined,
     });
   }
   return { finalTests: out };
 }
 
 function buildSampleBulkPayload(): string {
-  return JSON.stringify(
-    {
-      finalTests: SLOT_LABELS.map((_, i) => ({
-        title: `L0 Final ${i + 1}`,
-        timeLimitMinutes: 25,
-        sentenceLocator: JSON.parse(SENTENCE_LOCATOR_JSON_PLACEHOLDER),
-      })),
-    },
-    null,
-    2,
-  );
+  return JSON.stringify(L0_FINAL_TESTS_BULK_PAYLOAD, null, 2);
 }
 
 function parseSentenceLocatorJson(jsonText: string): SentenceLocatorContentAuthoringPreview {
@@ -150,7 +154,11 @@ export function L0FinalTestsBuilder(props: {
 
   useEffect(() => {
     const ids = finalTest?.practiceTestIds;
-    if (finalTest?.contentFormat === "SENTENCE_LOCATOR" && ids?.length === 3) {
+    if (
+      (finalTest?.contentFormat === "SENTENCE_LOCATOR" ||
+        finalTest?.contentFormat === "GAMLISH_SCANNING") &&
+      ids?.length === 3
+    ) {
       setSlotIds([ids[0], ids[1], ids[2]]);
       return;
     }
@@ -177,15 +185,22 @@ export function L0FinalTestsBuilder(props: {
     void ensureSequentialFinalsConfig().catch(() => setConfigReady(true));
   }, [disabled, ensureSequentialFinalsConfig]);
 
-  const persistPool = async (ids: [string, string, string]) => {
-    const ft = await upsertFinalTest(versionId, { practiceTestIds: ids });
+  const persistPool = async (
+    ids: [string, string, string],
+    contentFormat: "GAMLISH_SCANNING" | "SENTENCE_LOCATOR",
+  ) => {
+    const ft = await upsertFinalTest(versionId, { practiceTestIds: ids, contentFormat });
     onFinalTestChange(ft);
   };
 
   const upsertSlotIds = async (next: (string | null)[]) => {
     setSlotIds(next);
     if (next.every((id): id is string => typeof id === "string" && id.length > 0)) {
-      await persistPool([next[0]!, next[1]!, next[2]!]);
+      const format =
+        practiceTests.find((p) => p._id === next[0])?.contentFormat === "GAMLISH_SCANNING"
+          ? "GAMLISH_SCANNING"
+          : "SENTENCE_LOCATOR";
+      await persistPool([next[0]!, next[1]!, next[2]!], format);
     }
   };
 
@@ -281,20 +296,36 @@ export function L0FinalTestsBuilder(props: {
       await ensureSequentialFinalsConfig();
       const createdIds: string[] = [];
       const createdTests: PracticeTest[] = [];
+      let poolFormat: "GAMLISH_SCANNING" | "SENTENCE_LOCATOR" = "GAMLISH_SCANNING";
       for (let i = 0; i < validated.finalTests.length; i++) {
         const t = validated.finalTests[i]!;
+        if (t.gamlishScanning) {
+          poolFormat = "GAMLISH_SCANNING";
+          const created = await createGamlishScanningPracticeTest(versionId, {
+            title: t.title?.trim() || `L0 Final ${i + 1}`,
+            timeLimitMinutes: t.timeLimitMinutes ?? 25,
+            passType: "BAND",
+            passValue: 0,
+            maxAttempts: null,
+            gamlishScanning: t.gamlishScanning,
+          });
+          createdIds.push(created._id);
+          createdTests.push(created);
+          continue;
+        }
+        poolFormat = "SENTENCE_LOCATOR";
         const created = await createSentenceLocatorPracticeTest(versionId, {
           title: t.title?.trim() || `L0 Final ${i + 1}`,
           timeLimitMinutes: t.timeLimitMinutes ?? 25,
           passType: "BAND",
           passValue: 0,
           maxAttempts: null,
-          sentenceLocator: t.sentenceLocator,
+          sentenceLocator: t.sentenceLocator!,
         });
         createdIds.push(created._id);
         createdTests.push(created);
       }
-      await persistPool([createdIds[0]!, createdIds[1]!, createdIds[2]!]);
+      await persistPool([createdIds[0]!, createdIds[1]!, createdIds[2]!], poolFormat);
       setSlotIds(createdIds as [string, string, string]);
       onPracticeTestsChange([...practiceTests, ...createdTests]);
       setEditingSlot(null);
@@ -317,7 +348,8 @@ export function L0FinalTestsBuilder(props: {
 
   const configuredCount = slotIds.filter(Boolean).length;
   const hasFinalPool =
-    finalTest?.contentFormat === "SENTENCE_LOCATOR" &&
+    (finalTest?.contentFormat === "SENTENCE_LOCATOR" ||
+      finalTest?.contentFormat === "GAMLISH_SCANNING") &&
     (finalTest.practiceTestIds?.length ?? 0) === 3;
 
   const slotPracticeTests = useMemo(() => {
@@ -331,10 +363,10 @@ export function L0FinalTestsBuilder(props: {
           <CardTitle className="text-base">Level 0 final tests</CardTitle>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Create <strong className="text-foreground">three final tests</strong> (not a quiz step).
-            Each test has an embedded <strong className="text-foreground">passage</strong> and{" "}
-            <strong className="text-foreground">statements</strong> students match to sentences — same
-            format as sentence locator practice tests. Students take Final Test 1 → 2 → 3; pass uses
-            their reading target band.
+            Use <strong className="text-foreground">Gamlish scanning</strong> JSON (recommended) or
+            legacy sentence locator. Students take Final Test 1 → 2 → 3; pass uses their reading
+            target band. Bulk JSON:{" "}
+            <code className="rounded bg-muted px-1 text-[11px]">docs/level0/L0_FINAL_TESTS_BULK.json</code>.
           </p>
         </CardHeader>
         <CardContent className="flex flex-wrap items-center gap-2">
@@ -430,7 +462,7 @@ export function L0FinalTestsBuilder(props: {
               rows={12}
               className="font-mono text-xs"
               disabled={disabled || bulkBusy}
-              placeholder='{ "finalTests": [ { "title": "...", "sentenceLocator": { ... } }, ... ] }'
+              placeholder='{ "finalTests": [ { "title": "...", "gamlishScanning": { ... } }, ... ] }'
             />
             {!disabled && (
               <Button type="button" size="sm" disabled={bulkBusy} onClick={() => void applyBulk()}>

@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/src/lib/auth-server";
+import { Suspense } from "react";
 import { SyncAuthCookie } from "@/src/components/auth/SyncAuthCookie";
 import { Footer } from "@/src/components/shared/Footer";
 import { Header } from "@/src/components/shared/Header";
@@ -16,7 +17,9 @@ export async function AppShellWithAuth({
   return (
     <>
       <SyncAuthCookie initialUser={initialUser} />
-      <DocumentScrollGuard />
+      <Suspense fallback={null}>
+        <DocumentScrollGuard />
+      </Suspense>
       <ScholarshipAppShell initialUser={initialUser}>
         <div className="flex min-h-dvh flex-col overflow-x-hidden">
           <Header initialUser={initialUser} />

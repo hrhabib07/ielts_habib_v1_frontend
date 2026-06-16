@@ -13,6 +13,7 @@ import { StepsBuilderSection } from "@/src/features/reading-level-builder/StepsB
 import { PublishWorkflowCard } from "@/src/features/reading-level-builder/PublishWorkflowCard";
 import { PublishChecklist } from "@/src/features/reading-level-builder/PublishChecklist";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { InstructorLevelCodeNotice } from "@/src/components/instructor/InstructorLevelCodeNotice";
 
 interface LevelBuilderClientProps {
   levelId: string;
@@ -84,6 +85,7 @@ export function LevelBuilderClient({ levelId }: LevelBuilderClientProps) {
 
   return (
     <div className="space-y-8">
+      <InstructorLevelCodeNotice />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link

@@ -26,21 +26,21 @@ const MESSAGES: Record<
   practice_test: {
     en: {
       eyebrow: "Free trial complete",
-      body: "Thank you for completing the free part of your journey. You've reached the start of the paid tier on this step. On Level 1, the free track usually includes everything through Practice Test 1. This level isn't done until you unlock what follows (this test, later steps, and the final evaluation). Subscribe to continue without losing momentum toward your desired band score.",
+      body: "Thank you for completing the free part of your journey. You've reached the start of the paid tier on this step. On Level 2, the free track usually includes everything through Practice Test 1. This level isn't done until you unlock what follows (this test, later steps, and the final evaluation). Subscribe to continue without losing momentum toward your desired band score.",
     },
     bn: {
       eyebrow: "ফ্রি ট্রায়াল সম্পন্ন",
-      body: "আপনার ফ্রি অংশ সম্পন্ন করার জন্য ধন্যবাদ। এই ধাপে আপনি পেইড টিয়ারের শুরুতে এসেছেন। লেভেল ১-এ ফ্রি ট্র্যাকে সাধারণত প্র্যাকটিস টেস্ট ১ পর্যন্ত থাকে। বাকি প্র্যাকটিস টেস্ট, পরবর্তী ধাপ ও ফাইনাল ইভ্যালুয়েশন আনলক না করলে এই লেভেল সম্পূর্ণ হয় না। আপনার কাঙ্ক্ষিত ব্যান্ড স্কোরের দিকে এগিয়ে যেতে সাবস্ক্রাইব করুন।",
+      body: "আপনার ফ্রি অংশ সম্পন্ন করার জন্য ধন্যবাদ। এই ধাপে আপনি পেইড টিয়ারের শুরুতে এসেছেন। লেভেল ২-এ ফ্রি ট্র্যাকে সাধারণত প্র্যাকটিস টেস্ট ১ পর্যন্ত থাকে। বাকি প্র্যাকটিস টেস্ট, পরবর্তী ধাপ ও ফাইনাল ইভ্যালুয়েশন আনলক না করলে এই লেভেল সম্পূর্ণ হয় না। আপনার কাঙ্ক্ষিত ব্যান্ড স্কোরের দিকে এগিয়ে যেতে সাবস্ক্রাইব করুন।",
     },
   },
   step_content: {
     en: {
       eyebrow: "Free trial complete",
-      body: "Thank you for your progress. You've finished everything included in the free trial. The rest of this level and Levels 2–20 are for subscribed learners. Upgrade to keep your momentum and complete the structured path to your desired band.",
+      body: "Thank you for your progress. You've finished everything included in the free trial. The rest of this level and Levels 3–21 are for subscribed learners. Upgrade to keep your momentum and complete the structured path to your desired band.",
     },
     bn: {
       eyebrow: "ফ্রি ট্রায়াল সম্পন্ন",
-      body: "আপনার অগ্রগতির জন্য ধন্যবাদ। ফ্রি ট্রায়ালে যা ছিল তা আপনি শেষ করেছেন। এই লেভেলের বাকি অংশ ও লেভেল ২–২০ সাবস্ক্রাইবড শিক্ষার্থীদের জন্য। আপনার লক্ষ্য ব্যান্ডের পথে গতি ধরে রাখতে আপগ্রেড করুন।",
+      body: "আপনার অগ্রগতির জন্য ধন্যবাদ। ফ্রি ট্রায়ালে যা ছিল তা আপনি শেষ করেছেন। এই লেভেলের বাকি অংশ ও লেভেল ৩–২১ সাবস্ক্রাইবড শিক্ষার্থীদের জন্য। আপনার লক্ষ্য ব্যান্ডের পথে গতি ধরে রাখতে আপগ্রেড করুন।",
     },
   },
   final_evaluation: {
@@ -56,11 +56,11 @@ const MESSAGES: Record<
   level: {
     en: {
       eyebrow: "Premium required",
-      body: "You've reached the end of the free track. Full levels, all practice tests, and final evaluations ahead are built for Premium members. Subscribe to unlock this level and the complete 20-level course.",
+      body: "You've reached the end of the free track. Full levels, all practice tests, and final evaluations ahead are built for Premium members. Subscribe to unlock this level and the complete 21-level course.",
     },
     bn: {
       eyebrow: "প্রিমিয়াম প্রয়োজন",
-      body: "আপনি ফ্রি ট্র্যাকের শেষে এসেছেন। সম্পূর্ণ লেভেল, সব প্র্যাকটিস টেস্ট ও ফাইনাল ইভ্যালুয়েশন প্রিমিয়াম সদস্যদের জন্য। এই লেভেল ও সম্পূর্ণ ২০-লেভেল কোর্স আনলক করতে সাবস্ক্রাইব করুন।",
+      body: "আপনি ফ্রি ট্র্যাকের শেষে এসেছেন। সম্পূর্ণ লেভেল, সব প্র্যাকটিস টেস্ট ও ফাইনাল ইভ্যালুয়েশন প্রিমিয়াম সদস্যদের জন্য। এই লেভেল ও সম্পূর্ণ ২১-লেভেল কোর্স আনলক করতে সাবস্ক্রাইব করুন।",
     },
   },
 };

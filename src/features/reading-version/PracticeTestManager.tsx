@@ -21,6 +21,7 @@ import {
   type GroupTestQuestionGroupForPreview,
   isSentenceLocatorPreviewContent,
   isFullMockPreviewContent,
+  isProgressiveMcqPreviewContent,
   type GroupTestMiniTestForPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
@@ -31,8 +32,11 @@ import {
   DraggableWordBank,
 } from "@/src/components/reading/GapFillingQuestionInput";
 import { PracticeTestsBulkCreateCard } from "./PracticeTestsBulkCreateCard";
+import { L1TfngBulkPortal } from "./L1TfngBulkPortal";
+import { ProgressiveMcqBulkCreateCard } from "./ProgressiveMcqBulkCreateCard";
 import { FullMockPracticeBulkPortal } from "./FullMockPracticeBulkPortal";
 import { FULL_MOCK_LEVEL_ORDERS } from "./multiTypeBulkTemplate";
+import { isProgressiveMcqTemplateLevel } from "./levelQuestionTypeMapping";
 import { PracticeTestContentEditor } from "./PracticeTestContentEditor";
 import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
 import {
@@ -236,6 +240,8 @@ export function PracticeTestManager({
     return Array.from(byId.values()).sort((a, b) => a.order - b.order);
   })();
   const sorted = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
+  const isL5ProgressiveMcq = isProgressiveMcqTemplateLevel(levelOrder);
+  const isL1Tfng = levelOrder === 1;
 
   return (
     <div className="space-y-4">
@@ -244,6 +250,28 @@ export function PracticeTestManager({
           versionId={versionId}
           levelOrder={levelOrder}
           disabled={disabled}
+          onMergeCreatedPracticeTests={(created) => {
+            onPracticeTestsChange(
+              [...practiceTests, ...created].sort((a, b) => a.order - b.order),
+            );
+          }}
+        />
+      ) : isL1Tfng ? (
+        <L1TfngBulkPortal
+          versionId={versionId}
+          levelId={levelId}
+          disabled={disabled}
+          onMergeCreatedPracticeTests={(created) => {
+            onPracticeTestsChange(
+              [...practiceTests, ...created].sort((a, b) => a.order - b.order),
+            );
+          }}
+        />
+      ) : isL5ProgressiveMcq ? (
+        <ProgressiveMcqBulkCreateCard
+          versionId={versionId}
+          disabled={disabled}
+          existingPracticeTestCount={sorted.length}
           onMergeCreatedPracticeTests={(created) => {
             onPracticeTestsChange(
               [...practiceTests, ...created].sort((a, b) => a.order - b.order),
@@ -270,7 +298,9 @@ export function PracticeTestManager({
           <p className="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
             {FULL_MOCK_LEVEL_ORDERS.has(levelOrder)
               ? "Levels 17–20: each test is a full 60-minute mock (3 passages). Use the bulk portal above, then add Practice Test steps in the Level Builder."
-              : 'Each test = one passage + question set. Add a step of type "Practice Test" in the Level Builder and select one of these.'}
+              : isL5ProgressiveMcq
+                ? "Level 5: each test is a progressive paraphrase quiz (6 context MCQs, one at a time). Use the builder above, then add Practice Test steps in the Level Builder."
+                : 'Each test = one passage + question set. Add a step of type "Practice Test" in the Level Builder and select one of these.'}
           </p>
         </div>
         {!disabled && (
@@ -290,6 +320,7 @@ export function PracticeTestManager({
                 Delete all
               </Button>
             )}
+            {!isL5ProgressiveMcq && (
             <Button
               type="button"
               size="sm"
@@ -302,6 +333,7 @@ export function PracticeTestManager({
               <Plus className="h-4 w-4" />
               Add practice test
             </Button>
+            )}
           </div>
         )}
       </div>
@@ -336,10 +368,12 @@ export function PracticeTestManager({
                 No practice tests yet
               </p>
               <p className="mt-1 max-w-sm text-sm text-stone-500 dark:text-stone-400">
-                Add your first practice test above. Each test uses one passage question set (one mini test). Students get unlimited attempts until they pass.
+                {isL5ProgressiveMcq
+                  ? "Use the Paraphrase Engine builder above to create your first progressive MCQ test (load the 6-question template, edit, then create)."
+                  : "Add your first practice test above. Each test uses one passage question set (one mini test). Students get unlimited attempts until they pass."}
               </p>
             </div>
-            {!disabled && (
+            {!disabled && !isL5ProgressiveMcq && (
               <Button
                 size="sm"
                 className="gap-2 bg-stone-700 text-white hover:bg-stone-800 dark:bg-stone-600 dark:hover:bg-stone-700"
@@ -359,6 +393,7 @@ export function PracticeTestManager({
           <div className="flex flex-col gap-3 md:hidden">
             {displayList.map((pt, index) => {
               const isCurrentVersion = pt.levelVersionId === versionId;
+              const isProgressiveMcq = pt.contentFormat === "PROGRESSIVE_MCQ";
               return (
               <Card
                 key={pt._id}
@@ -369,6 +404,11 @@ export function PracticeTestManager({
                     <div className="min-w-0">
                       <p className="font-medium text-stone-900 dark:text-stone-100 truncate">
                         {pt.title}
+                        {isProgressiveMcq && (
+                          <span className="ml-1.5 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
+                            Paraphrase MCQ
+                          </span>
+                        )}
                         {!isCurrentVersion && (
                           <span className="ml-1.5 text-[10px] font-normal text-amber-600 dark:text-amber-400">
                             (other version)
@@ -399,6 +439,7 @@ export function PracticeTestManager({
                     </Button>
                     {!disabled && isCurrentVersion && (
                       <>
+                        {!isProgressiveMcq && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -409,6 +450,7 @@ export function PracticeTestManager({
                           <FileEdit className="h-3.5 w-3.5" />
                           Edit content
                         </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -475,6 +517,7 @@ export function PracticeTestManager({
               <tbody>
                 {displayList.map((pt) => {
                   const isCurrentVersion = pt.levelVersionId === versionId;
+                  const isProgressiveMcq = pt.contentFormat === "PROGRESSIVE_MCQ";
                   const sortedIndex = sorted.findIndex((p) => p._id === pt._id);
                   return (
                   <tr
@@ -530,6 +573,11 @@ export function PracticeTestManager({
                         </td>
                         <td className="p-4 font-medium text-stone-900 dark:text-stone-100">
                           {pt.title}
+                          {isProgressiveMcq && (
+                            <span className="ml-1.5 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
+                              Paraphrase MCQ
+                            </span>
+                          )}
                           {!isCurrentVersion && (
                             <span className="ml-1 text-[10px] font-normal text-amber-600 dark:text-amber-400">
                               (other version)
@@ -566,6 +614,7 @@ export function PracticeTestManager({
                             </Button>
                             {!disabled && isCurrentVersion && (
                               <>
+                                {!isProgressiveMcq && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -576,6 +625,7 @@ export function PracticeTestManager({
                                   <FileEdit className="h-3.5 w-3.5" />
                                   Edit content
                                 </Button>
+                                )}
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -1530,15 +1580,18 @@ function PracticeTestPreviewModal({
   onRetry: () => void;
 }) {
   const [passageIndex, setPassageIndex] = useState(0);
+  const [mcqItemIndex, setMcqItemIndex] = useState(0);
   const isSl = content != null && isSentenceLocatorPreviewContent(content);
   const isFullMock = content != null && isFullMockPreviewContent(content);
+  const isProgressiveMcq = content != null && isProgressiveMcqPreviewContent(content);
 
   useEffect(() => {
     setPassageIndex(0);
+    setMcqItemIndex(0);
   }, [content?.practiceTestId]);
 
   const activeMiniTest: GroupTestMiniTestForPreview | undefined = (() => {
-    if (!content || isSl) return undefined;
+    if (!content || isSl || isProgressiveMcq) return undefined;
     if (isFullMock) return content.miniTests[passageIndex];
     if ("miniTest" in content) return content.miniTest;
     return undefined;
@@ -1566,7 +1619,11 @@ function PracticeTestPreviewModal({
             {content ? (
               <>
                 Preview: {content.title}
-                {isFullMock ? (
+                {isProgressiveMcq ? (
+                  <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
+                    Paraphrase MCQ
+                  </span>
+                ) : isFullMock ? (
                   <span className="ml-2 rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
                     Full mock
                   </span>
@@ -1613,6 +1670,72 @@ function PracticeTestPreviewModal({
               </Button>
             </div>
           )}
+          {content && !loading && isProgressiveMcq && (
+            <div className="space-y-6">
+              {content.progressiveMcq.instruction ? (
+                <p className="text-sm text-stone-600 dark:text-stone-300">
+                  {content.progressiveMcq.instruction}
+                </p>
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                {[...content.progressiveMcq.items]
+                  .sort((a, b) => a.order - b.order)
+                  .map((item, idx) => (
+                    <Button
+                      key={item.id}
+                      type="button"
+                      size="sm"
+                      variant={mcqItemIndex === idx ? "default" : "outline"}
+                      className={mcqItemIndex === idx ? "bg-violet-700 hover:bg-violet-800" : ""}
+                      onClick={() => setMcqItemIndex(idx)}
+                    >
+                      Q{item.order}
+                    </Button>
+                  ))}
+              </div>
+              {(() => {
+                const items = [...content.progressiveMcq.items].sort((a, b) => a.order - b.order);
+                const item = items[mcqItemIndex] ?? items[0];
+                if (!item) return null;
+                return (
+                  <div className="space-y-4 rounded-xl border border-stone-200 bg-stone-50/50 p-5 dark:border-stone-700 dark:bg-stone-800/40">
+                    {item.contextTitle ? (
+                      <p className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                        {item.contextTitle}
+                      </p>
+                    ) : null}
+                    <p className="text-[15px] leading-relaxed text-stone-800 dark:text-stone-200">
+                      {item.contextText}
+                    </p>
+                    <p className="text-[15px] font-medium text-stone-900 dark:text-stone-100">
+                      {item.questionText}
+                    </p>
+                    <ul className="list-none space-y-2">
+                      {(["A", "B", "C", "D"] as const).map((key) => (
+                        <li
+                          key={key}
+                          className={`rounded-lg border px-3 py-2 text-sm ${
+                            item.correctOption === key
+                              ? "border-emerald-300 bg-emerald-50/80 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
+                              : "border-stone-200 bg-white text-stone-800 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-200"
+                          }`}
+                        >
+                          <span className="mr-2 font-mono font-semibold">{key})</span>
+                          {item.options[key]}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="rounded-lg border border-blue-200 bg-blue-50/80 px-3 py-2 dark:border-blue-800 dark:bg-blue-950/40">
+                      <span className="text-xs font-semibold uppercase text-blue-700 dark:text-blue-400">
+                        Gamlish Logic (shown after submit):
+                      </span>
+                      <p className="mt-1 text-[14px] text-blue-900 dark:text-blue-200">{item.explanation}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
           {content && !loading && isSl && (
             <div className="space-y-6">
               <section>
@@ -1653,7 +1776,7 @@ function PracticeTestPreviewModal({
               </section>
             </div>
           )}
-          {content && !loading && !isSl && isFullMock && (
+          {content && !loading && !isSl && !isProgressiveMcq && isFullMock && (
             <div className="mb-6 flex flex-wrap gap-2">
               {content.miniTests.map((mt, idx) => (
                 <Button
@@ -1670,7 +1793,7 @@ function PracticeTestPreviewModal({
               ))}
             </div>
           )}
-          {content && !loading && !isSl && activeMiniTest && (
+          {content && !loading && !isSl && !isProgressiveMcq && activeMiniTest && (
             <PracticeTestMiniPreviewBody miniTest={activeMiniTest} />
           )}
         </div>

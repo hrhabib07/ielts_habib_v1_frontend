@@ -7,8 +7,7 @@ import {
 } from "@/src/components/home/guest/GuestLandingLocale";
 import { GuestLandingAmbient } from "@/src/components/home/guest/GuestLandingAmbient";
 import { GuestLandingHero } from "@/src/components/home/guest/GuestLandingHero";
-import { GuestHowToPlay } from "@/src/components/home/guest/GuestHowToPlay";
-import { GuestWhyGamlish } from "@/src/components/home/guest/GuestWhyGamlish";
+import { GuestHowGamlishWorks } from "@/src/components/home/guest/GuestHowGamlishWorks";
 
 function GuestLandingSurface() {
   const { locale } = useGuestLandingLocale();
@@ -26,8 +25,7 @@ function GuestLandingSurface() {
       </div>
       <div className="relative">
         <GuestLandingHero />
-        <GuestHowToPlay />
-        <GuestWhyGamlish />
+        <GuestHowGamlishWorks />
       </div>
     </div>
   );

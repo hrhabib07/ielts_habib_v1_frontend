@@ -7,7 +7,7 @@ import {
   type VersionDetail,
 } from "@/src/lib/api/adminReadingVersions";
 import { Check, X, AlertCircle } from "lucide-react";
-import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
+import { isReadingFoundationL0, isReadingVocabularyL5 } from "@/src/lib/readingLevelOrder";
 
 const MIN_PRACTICE_TESTS = 3;
 
@@ -22,13 +22,19 @@ export function PublishChecklist({ level, detail }: PublishChecklistProps) {
   const config = version.evaluationConfig ?? {};
   const isSkill = level.levelType === "SKILL";
   const isL0 = isReadingFoundationL0(level);
+  const isL5 = isReadingVocabularyL5(level);
   const isBasic = level.difficulty === "basic";
 
+  const finalSlotPracticeIds = new Set(
+    finalTest?.contentFormat === "SENTENCE_LOCATOR" ||
+      finalTest?.contentFormat === "GAMLISH_SCANNING" ||
+      finalTest?.contentFormat === "PROGRESSIVE_MCQ"
+      ? (finalTest.practiceTestIds ?? [])
+      : [],
+  );
+
   const practiceCount =
-    practiceTests?.filter((p) => {
-      if (!isL0 || !finalTest?.practiceTestIds?.length) return true;
-      return !finalTest.practiceTestIds.includes(p._id);
-    }).length ?? 0;
+    practiceTests?.filter((p) => !finalSlotPracticeIds.has(p._id)).length ?? 0;
 
   const practiceStepCount = steps.filter(
     (s) => s.stepType === "PRACTICE_TEST" && !!s.practiceTestId,
@@ -41,11 +47,18 @@ export function PublishChecklist({ level, detail }: PublishChecklistProps) {
 
   const l0FinalsOk =
     isL0 &&
-    finalTest?.contentFormat === "SENTENCE_LOCATOR" &&
+    (finalTest?.contentFormat === "SENTENCE_LOCATOR" ||
+      finalTest?.contentFormat === "GAMLISH_SCANNING") &&
+    (finalTest.practiceTestIds?.length ?? 0) === 3;
+
+  const l5FinalsOk =
+    isL5 &&
+    finalTest?.contentFormat === "PROGRESSIVE_MCQ" &&
     (finalTest.practiceTestIds?.length ?? 0) === 3;
 
   const groupFinalsOk =
     !isL0 &&
+    !isL5 &&
     effectiveGroupTests.length >= 1 &&
     effectiveGroupTests.every((gt) => gt.miniTestIds && gt.miniTestIds.length === 3);
 
@@ -54,14 +67,16 @@ export function PublishChecklist({ level, detail }: PublishChecklistProps) {
 
   const title = isL0
     ? "Publish checklist (Level 0)"
-    : isSkill
-      ? "Publish checklist (Skill)"
-      : "Publish checklist (Foundation)";
+    : isL5
+      ? "Publish checklist (Level 5 — Vocabulary)"
+      : isSkill
+        ? "Publish checklist (Skill)"
+        : "Publish checklist (Foundation)";
 
   const allOk =
     !hasIntegratedLesson &&
     hasMinPractice &&
-    (isL0 ? l0FinalsOk : groupFinalsOk) &&
+    (isL0 ? l0FinalsOk : isL5 ? l5FinalsOk : groupFinalsOk) &&
     maxAttemptsOk;
 
   return (
@@ -82,7 +97,9 @@ export function PublishChecklist({ level, detail }: PublishChecklistProps) {
           label={`At least ${MIN_PRACTICE_TESTS} practice tests (section 1)`}
         />
         {isL0 ? (
-          <Item ok={l0FinalsOk} label="Three sentence locator final tests (section 2)" />
+          <Item ok={l0FinalsOk} label="Three Gamlish scanning final tests (section 2)" />
+        ) : isL5 ? (
+          <Item ok={l5FinalsOk} label="Three progressive MCQ final tests (section 2)" />
         ) : (
           <Item
             ok={groupFinalsOk}

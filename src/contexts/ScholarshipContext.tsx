@@ -54,10 +54,13 @@ export function ScholarshipProvider({
   }, [refresh]);
 
   useEffect(() => {
-    const onFocus = () => void refresh();
+    const onFocus = () => {
+      if (!initialUser || initialUser.role !== "STUDENT") return;
+      void refresh();
+    };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [refresh]);
+  }, [initialUser, refresh]);
 
   const value = useMemo(
     () => ({ status, loading, refresh }),

@@ -51,8 +51,9 @@ export function SiteMobileNav(props: {
   progressLabel: string;
   levelsCompletedCount: number;
   overallProgressPct: number;
+  journeyLabel: string;
+  navProgressBarStyle: { width: string; minWidth?: string };
   streak?: { consecutivePassCount: number; requiredStreak: number } | null;
-  journeyPoints?: number | null;
   trigger: React.ReactNode;
 }) {
   const {
@@ -68,8 +69,9 @@ export function SiteMobileNav(props: {
     progressLabel,
     levelsCompletedCount,
     overallProgressPct,
+    journeyLabel,
+    navProgressBarStyle,
     streak,
-    journeyPoints,
     trigger,
   } = props;
 
@@ -95,28 +97,21 @@ export function SiteMobileNav(props: {
                       {progressLabel}
                     </span>
                     <span className="shrink-0 text-[10px] font-bold tabular-nums text-accent">
-                      {levelsCompletedCount}/{TOTAL_READING_PATH_LEVELS} · {overallProgressPct}%
+                      {levelsCompletedCount}/{TOTAL_READING_PATH_LEVELS} · {journeyLabel}
                     </span>
                   </div>
                   <div className={cn(readingPathPremium.progressTrack, "mt-2 h-1.5")}>
                     <div
                       className={cn(readingPathPremium.progressFill, "transition-all duration-700")}
-                      style={{ width: `${Math.min(100, Math.max(0, overallProgressPct))}%` }}
+                      style={navProgressBarStyle}
                     />
                   </div>
-                  {(streak || journeyPoints != null) && (
+                  {streak && (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {streak && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
-                          <Flame className="h-3 w-3" />
-                          {streak.consecutivePassCount}/{streak.requiredStreak} streak
-                        </span>
-                      )}
-                      {journeyPoints != null && (
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold tabular-nums">
-                          {journeyPoints} pts
-                        </span>
-                      )}
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+                        <Flame className="h-3 w-3" />
+                        {streak.consecutivePassCount}/{streak.requiredStreak} streak
+                      </span>
                     </div>
                   )}
                 </div>

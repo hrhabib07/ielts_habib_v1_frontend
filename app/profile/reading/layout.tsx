@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, getBearerTokenFromCookie } from "@/src/lib/auth-server";
 import { fetchStudentProfileServer } from "@/src/lib/api/server-profile";
-import { isStudentLearningReady } from "@/src/lib/student-learning-gate";
+import { isStudentLearningReady, needsProfileMigration } from "@/src/lib/student-learning-gate";
 import ReadingLayoutClient from "./ReadingLayoutClient";
 
 export default async function ReadingLayout({
@@ -16,11 +16,20 @@ export default async function ReadingLayout({
       redirect("/login");
     }
     const result = await fetchStudentProfileServer(token);
-    if (
-      result.status === "ok" &&
-      !isStudentLearningReady(result.profile)
-    ) {
-      redirect("/onboarding");
+    if (result.status === "ok") {
+      if (!result.profile) {
+        redirect("/onboarding");
+      }
+      if (
+        needsProfileMigration(result.profile) ||
+        !isStudentLearningReady(result.profile)
+      ) {
+        redirect(
+          needsProfileMigration(result.profile)
+            ? "/onboarding?migrate=1"
+            : "/onboarding",
+        );
+      }
     }
   }
 

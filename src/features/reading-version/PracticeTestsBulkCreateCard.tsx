@@ -14,8 +14,11 @@ import { createPassageQuestionSetFromBulkInput } from "./strictReadingBulkUtils"
 import {
   createPracticeTest,
   createSentenceLocatorPracticeTest,
+  createGamlishScanningPracticeTest,
   type SentenceLocatorContentAuthoringPreview,
+  type GamlishScanningContentAuthoringPreview,
 } from "@/src/lib/api/adminReadingVersions";
+import { L0_PRACTICE_TESTS_BULK_PAYLOAD } from "@/src/lib/reading/gamlishScanning/level0GamlishContent";
 import {
   MULTI_TYPE_LEVEL_ORDERS,
   stripPracticeBulkWrapper,
@@ -28,7 +31,6 @@ import {
   EXPECTED_QUESTIONS_BY_LEVEL,
   DEFAULT_SINGLE_TYPE_QUESTIONS,
 } from "./levelQuestionTypeMapping";
-import { readingLevelIndexFromOrder } from "@/src/lib/readingLevelOrder";
 import {
   buildSummaryWithCluesBulkQuestionItems,
   SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC,
@@ -47,51 +49,59 @@ export type BulkPracticeTestsCreatePayload = {
   practiceTests: BulkPracticeTestItemInput[];
 };
 
-type BulkL0SentenceLocatorItem = {
+type BulkL0EmbeddedItem = {
   title?: string;
+  order?: number;
   timeLimitMinutes?: number;
   passType?: string;
   passValue?: number;
   maxAttempts?: number | null;
-  sentenceLocator: SentenceLocatorContentAuthoringPreview;
+  gamlishScanning?: GamlishScanningContentAuthoringPreview;
+  sentenceLocator?: SentenceLocatorContentAuthoringPreview;
 };
 
 /** L15–L19: Passage 2 / 3 / full test / master (and extended pool) — multi-type passage question sets */
 const MULTI_TYPE_LEVELS = MULTI_TYPE_LEVEL_ORDERS;
 
 const L0_BULK_INSTRUCTIONS =
-  "Level 0 uses Sentence locator practice tests (embedded passage + statements, no passage question set). " +
-  "Each practiceTests[] entry must include sentenceLocator (see docs/SENTENCE_LOCATOR_PRACTICE_TEST_JSON.md). " +
-  "You can list 1–3 tests; each is created via POST practice-tests with contentFormat SENTENCE_LOCATOR.";
+  "Level 0 (student Level 1 — Reading Fundamentals) uses Gamlish scanning practice tests. " +
+  "Each practiceTests[] entry must include gamlishScanning (see docs/GAMLISH_SCANNING_PRACTICE_TEST_JSON.md). " +
+  "Legacy sentenceLocator is still accepted. You can list 1–3 tests per bulk run. " +
+  "Omit order on each entry to append at the end of the version (recommended when tests already exist).";
 
-function validateL0SentenceLocatorBulk(payload: unknown): { practiceTests: BulkL0SentenceLocatorItem[] } {
+function validateL0EmbeddedBulk(payload: unknown): { practiceTests: BulkL0EmbeddedItem[] } {
   if (!payload || typeof payload !== "object") throw new Error("Payload must be an object.");
   const p = payload as { practiceTests?: unknown };
   if (!Array.isArray(p.practiceTests) || p.practiceTests.length < 1 || p.practiceTests.length > 3) {
     throw new Error("practiceTests must be an array of 1 to 3 items for Level 0.");
   }
-  const out: BulkL0SentenceLocatorItem[] = [];
+  const out: BulkL0EmbeddedItem[] = [];
   for (let i = 0; i < p.practiceTests.length; i++) {
     const item = p.practiceTests[i];
     if (!item || typeof item !== "object" || Array.isArray(item)) {
       throw new Error(`practiceTests[${i}] must be an object.`);
     }
     const t = item as Record<string, unknown>;
+    const gs = t.gamlishScanning;
     const sl = t.sentenceLocator;
-    if (!sl || typeof sl !== "object" || Array.isArray(sl)) {
+    const hasGs = gs && typeof gs === "object" && !Array.isArray(gs);
+    const hasSl = sl && typeof sl === "object" && !Array.isArray(sl);
+    if (!hasGs && !hasSl) {
       throw new Error(
-        `practiceTests[${i}] must include "sentenceLocator" (object with passageTitle, paragraphs[], statements[]).`,
+        `practiceTests[${i}] must include "gamlishScanning" or legacy "sentenceLocator".`,
       );
     }
-    const slObj = sl as Record<string, unknown>;
-    if (typeof slObj.passageTitle !== "string" || !slObj.passageTitle.trim()) {
-      throw new Error(`practiceTests[${i}].sentenceLocator.passageTitle is required.`);
-    }
-    if (!Array.isArray(slObj.paragraphs) || slObj.paragraphs.length === 0) {
-      throw new Error(`practiceTests[${i}].sentenceLocator.paragraphs must be a non-empty array.`);
-    }
-    if (!Array.isArray(slObj.statements) || slObj.statements.length === 0) {
-      throw new Error(`practiceTests[${i}].sentenceLocator.statements must be a non-empty array.`);
+    if (hasGs) {
+      const gsObj = gs as Record<string, unknown>;
+      if (typeof gsObj.passageTitle !== "string" || !gsObj.passageTitle.trim()) {
+        throw new Error(`practiceTests[${i}].gamlishScanning.passageTitle is required.`);
+      }
+      if (!Array.isArray(gsObj.paragraphs) || gsObj.paragraphs.length === 0) {
+        throw new Error(`practiceTests[${i}].gamlishScanning.paragraphs must be a non-empty array.`);
+      }
+      if (!Array.isArray(gsObj.questions) || gsObj.questions.length === 0) {
+        throw new Error(`practiceTests[${i}].gamlishScanning.questions must be a non-empty array.`);
+      }
     }
     out.push({
       title: typeof t.title === "string" ? t.title : undefined,
@@ -104,7 +114,8 @@ function validateL0SentenceLocatorBulk(payload: unknown): { practiceTests: BulkL
           : typeof t.maxAttempts === "number"
             ? t.maxAttempts
             : undefined,
-      sentenceLocator: sl as SentenceLocatorContentAuthoringPreview,
+      gamlishScanning: hasGs ? (gs as GamlishScanningContentAuthoringPreview) : undefined,
+      sentenceLocator: hasSl ? (sl as SentenceLocatorContentAuthoringPreview) : undefined,
     });
   }
   return { practiceTests: out };
@@ -181,51 +192,7 @@ export function PracticeTestsBulkCreateCard(props: {
       return JSON.stringify(
         {
           __instructions: L0_BULK_INSTRUCTIONS,
-          practiceTests: [
-            {
-              title: "L0 — Sample sentence locator",
-              timeLimitMinutes: 20,
-              passType: "PERCENTAGE",
-              passValue: 60,
-              maxAttempts: null,
-              sentenceLocator: {
-                passageTitle: "Urban green spaces",
-                passageSubTitle: "Sample passage",
-                instruction:
-                  "Click the sentence in the passage that best matches each statement.",
-                paragraphs: [
-                  {
-                    paragraphIndex: 0,
-                    sentences: [
-                      "Cities need trees along major roads.",
-                      "Parks help reduce summer heat.",
-                    ],
-                  },
-                  {
-                    paragraphIndex: 1,
-                    sentences: [
-                      "Residents near parks report lower stress.",
-                      "Funding for upkeep is often uneven.",
-                    ],
-                  },
-                ],
-                statements: [
-                  {
-                    id: "stmt_01",
-                    order: 1,
-                    statement: "People living close to green areas feel less stressed.",
-                    targetParagraphIndex: 1,
-                    targetSentenceIndex: 0,
-                    anchorKeywords: ["stress", "Residents", "parks"],
-                    gamlishHack: "Match stress / wellbeing language in the second paragraph.",
-                    difficulty: "MEDIUM",
-                  },
-                ],
-                reviewAfterEachAttempt: true,
-                showCoachHintsDuringAttempt: false,
-              },
-            },
-          ],
+          ...L0_PRACTICE_TESTS_BULK_PAYLOAD,
         },
         null,
         2,
@@ -313,9 +280,9 @@ export function PracticeTestsBulkCreateCard(props: {
     const stripped = stripPracticeBulkWrapper(parsed.value);
 
     if (levelOrder === 0) {
-      let l0: { practiceTests: BulkL0SentenceLocatorItem[] };
+      let l0: { practiceTests: BulkL0EmbeddedItem[] };
       try {
-        l0 = validateL0SentenceLocatorBulk(stripped);
+        l0 = validateL0EmbeddedBulk(stripped);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Invalid Level 0 payload");
         return;
@@ -326,6 +293,21 @@ export function PracticeTestsBulkCreateCard(props: {
         for (let i = 0; i < l0.practiceTests.length; i++) {
           const t = l0.practiceTests[i];
           if (!t) continue;
+          if (t.gamlishScanning) {
+            const title = (t.title?.trim() || `Gamlish scanning ${i + 1}`).slice(0, 500);
+            const created = await createGamlishScanningPracticeTest(versionId, {
+              title,
+              gamlishScanning: t.gamlishScanning,
+              timeLimitMinutes: t.timeLimitMinutes ?? 25,
+              passType: t.passType ?? "BAND",
+              passValue: typeof t.passValue === "number" ? t.passValue : 0,
+              maxAttempts: t.maxAttempts === undefined ? null : t.maxAttempts,
+              ...(typeof t.order === "number" && t.order >= 1 ? { order: t.order } : {}),
+            });
+            createdPracticeTests.push(created);
+            continue;
+          }
+          if (!t.sentenceLocator) continue;
           const title = (t.title?.trim() || `Sentence locator ${i + 1}`).slice(0, 500);
           const created = await createSentenceLocatorPracticeTest(versionId, {
             title,
@@ -334,7 +316,7 @@ export function PracticeTestsBulkCreateCard(props: {
             passType: t.passType ?? "PERCENTAGE",
             passValue: typeof t.passValue === "number" ? t.passValue : 60,
             maxAttempts: t.maxAttempts === undefined ? null : t.maxAttempts,
-            order: i + 1,
+            ...(typeof t.order === "number" && t.order >= 1 ? { order: t.order } : {}),
           });
           createdPracticeTests.push(created);
         }

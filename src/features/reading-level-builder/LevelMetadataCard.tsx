@@ -17,9 +17,12 @@ import {
 import { VersionStatusBadge } from "@/src/features/reading-version";
 import { Loader2 } from "lucide-react";
 import {
+  formatDisplayLevelLabel,
+  formatInstructorLevelSummary,
   isReadingFoundationL0,
-  readingLevelIndexFromOrder,
+  readingLevelContentCode,
 } from "@/src/lib/readingLevelOrder";
+import { InstructorLevelCodeNotice } from "@/src/components/instructor/InstructorLevelCodeNotice";
 
 const DIFFICULTY_OPTIONS: { value: ReadingLevelDifficulty; label: string }[] = [
   { value: "basic", label: "Basic" },
@@ -120,11 +123,14 @@ export function LevelMetadataCard({
       </CardHeader>
       <CardContent className="space-y-6 p-0">
         {error && <p className="text-sm text-destructive">{error}</p>}
+        <InstructorLevelCodeNotice />
         <form onSubmit={handleSaveLevel} className="space-y-4">
           <p className="text-xs text-muted-foreground">
-            Level index (0-based): <strong>{readingLevelIndexFromOrder(level.order)}</strong> — steps
-            are numbered from 1.
+            Students see <strong>{formatDisplayLevelLabel(level.order)}</strong>. Author with{" "}
+            <strong className="font-mono">{readingLevelContentCode(level.order)}</strong> (DB order{" "}
+            <strong>{level.order}</strong>). Steps are numbered from 1.
           </p>
+          <p className="text-[11px] text-muted-foreground/80">{formatInstructorLevelSummary(level.order)}</p>
           <div>
             <Label htmlFor="level-title">Title</Label>
             <Input

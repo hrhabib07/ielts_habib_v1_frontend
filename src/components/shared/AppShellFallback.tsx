@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { SyncAuthCookie } from "@/src/components/auth/SyncAuthCookie";
 import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard";
 
@@ -9,7 +10,9 @@ export function AppShellFallback() {
   return (
     <>
       <SyncAuthCookie initialUser={null} />
-      <DocumentScrollGuard />
+      <Suspense fallback={null}>
+        <DocumentScrollGuard />
+      </Suspense>
       <div className="flex min-h-dvh flex-col overflow-x-hidden">
         <div
           className="h-14 shrink-0 border-b border-border/50 bg-background/95 sm:h-16"

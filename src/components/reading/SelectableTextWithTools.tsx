@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Highlighter, StickyNote, Eraser } from "lucide-react";
+import { usePortalContainer } from "@/src/hooks/usePortalContainer";
 import { getSelectionStringOffsetsInRoot } from "@/src/utils/domTextOffsets";
 
 export type TextHighlightRange = { start: number; end: number };
@@ -255,7 +256,7 @@ export function SelectableTextWithTools({
     end: n.end,
     noteText: n.text,
   }));
-  const canPortal = typeof document !== "undefined";
+  const portalContainer = usePortalContainer();
 
   return (
     <>
@@ -273,7 +274,7 @@ export function SelectableTextWithTools({
       </span>
 
       {contextMenu &&
-        canPortal &&
+        portalContainer &&
         createPortal(
           <div
             data-selectable-context-menu
@@ -310,11 +311,11 @@ export function SelectableTextWithTools({
               </button>
             )}
           </div>,
-          document.body,
+          portalContainer,
         )}
 
       {noteInput &&
-        canPortal &&
+        portalContainer &&
         createPortal(
           <div
             className="fixed inset-0 z-[220] flex items-center justify-center bg-black/30 px-4"
@@ -357,7 +358,7 @@ export function SelectableTextWithTools({
               </div>
             </div>
           </div>,
-          document.body,
+          portalContainer,
         )}
     </>
   );

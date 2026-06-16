@@ -20,6 +20,7 @@ import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { SiteMobileNav } from "@/src/components/shared/SiteMobileNav";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useStudentNavProgress } from "@/src/hooks/useStudentNavProgress";
+import { journeyProgressBarStyle } from "@/src/lib/journeyVisualProgress";
 import { getDecodedTokenClient, logout } from "@/src/lib/auth";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import type { UserRole } from "@/src/lib/constants";
@@ -28,6 +29,8 @@ import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { cn } from "@/lib/utils";
 import { GuestLandingNavBar } from "@/src/components/home/guest/GuestLandingNavBar";
 import { shouldUseGuestLandingNav } from "@/src/lib/guest-nav-paths";
+import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 
 const STUDENT_LINKS = [
   { href: "/profile/reading", label: "Reading" },
@@ -42,6 +45,7 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
   const [clientUser, setClientUser] = useState<{ role: UserRole; userId: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isFoundingMember } = useStudentSession();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const user = initialUser ?? clientUser;
@@ -49,8 +53,15 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
   const isInstructor = user?.role === "INSTRUCTOR";
   const isAdmin = user?.role === "ADMIN";
 
-  const { profileSummary, loading: progressLoading, overallProgressPct, levelsCompletedCount } =
-    useStudentNavProgress(isStudent);
+  const {
+    profileSummary,
+    loading: progressLoading,
+    overallProgressPct,
+    journeyLabel,
+    levelsCompletedCount,
+  } = useStudentNavProgress(isStudent);
+
+  const navProgressBarStyle = journeyProgressBarStyle(overallProgressPct);
 
   const isJourney = pathname === "/profile/reading";
   const isLevelPage = pathname.includes("/profile/reading/strict-levels/");
@@ -92,7 +103,6 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
 
   const logoHref = "/";
   const streak = profileSummary?.streakInfo;
-  const journeyPoints = profileSummary?.journeyEarnedPoints;
 
   const progressLabel = isLevelPage
     ? "Level in progress"
@@ -120,7 +130,7 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full shrink-0 border-b border-border/50 bg-background/92 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur-md dark:bg-background/88",
+        "sticky top-0 z-50 w-full shrink-0 overflow-visible border-b border-border/50 bg-background/92 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur-md dark:bg-background/88",
         className,
       )}
     >
@@ -182,13 +192,13 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
                     {progressLabel}
                   </span>
                   <span className="shrink-0 text-[10px] font-bold tabular-nums text-accent">
-                    {levelsCompletedCount}/{TOTAL_READING_PATH_LEVELS} · {overallProgressPct}%
+                    {levelsCompletedCount}/{TOTAL_READING_PATH_LEVELS} · {journeyLabel}
                   </span>
                 </div>
                 <div className={cn(readingPathPremium.progressTrack, "mt-1.5 h-1")}>
                   <div
                     className={cn(readingPathPremium.progressFill, "transition-all duration-700")}
-                    style={{ width: `${Math.min(100, Math.max(0, overallProgressPct))}%` }}
+                    style={navProgressBarStyle}
                   />
                 </div>
               </div>
@@ -200,7 +210,7 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
 
         <div
           className={cn(
-            "ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5",
+            "ml-auto flex shrink-0 items-center gap-1 overflow-visible sm:gap-1.5",
             navBrandCompact && "gap-1.5",
           )}
         >
@@ -213,10 +223,9 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
               {streak.consecutivePassCount}/{streak.requiredStreak}
             </div>
           )}
-          {isStudent && journeyPoints != null && (
-            <div className="hidden rounded-full bg-muted/70 px-2 py-1 text-xs font-semibold tabular-nums text-foreground ring-1 ring-border/40 lg:block">
-              {journeyPoints} pts
-            </div>
+
+          {isStudent && isFoundingMember && (
+            <FoundingMemberBadge size="sm" compact className="hidden lg:inline-flex" />
           )}
 
           <ThemeToggleButton />
@@ -319,8 +328,9 @@ export function SiteNavBar(props: { initialUser?: CurrentUser | null; className?
             progressLabel={progressLabel}
             levelsCompletedCount={levelsCompletedCount}
             overallProgressPct={overallProgressPct}
+            journeyLabel={journeyLabel}
+            navProgressBarStyle={navProgressBarStyle}
             streak={streak}
-            journeyPoints={journeyPoints}
             trigger={
               <Button
                 type="button"

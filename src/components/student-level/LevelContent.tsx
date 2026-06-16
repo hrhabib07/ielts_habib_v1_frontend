@@ -42,6 +42,14 @@ import { getStepContentForPreview } from "@/src/lib/api/adminReadingVersions";
 import { EmbeddedLearningBody } from "@/src/components/shared/EmbeddedLearningBody";
 import { QuizFocusedSessionLauncher } from "@/src/components/reading/QuizFocusedSessionLauncher";
 import { FinalEvaluationStartCard } from "@/src/components/reading/FinalEvaluationStartCard";
+import { LevelIntroVideoStep } from "@/src/components/reading/LevelIntroVideoStep";
+import { PracticeTestStepCard } from "@/src/components/reading/PracticeTestStepCard";
+import { isSequentialFinalPracticeStep } from "@/src/lib/levelRoadmapUtils";
+import { getLevelIntroVideo } from "@/src/lib/levelIntroVideos";
+import {
+  isLevelIntroDismissed,
+  markLevelIntroDismissed,
+} from "@/src/lib/levelIntroVideoStorage";
 
 const StepQuizSubmitCard = dynamic(
   () =>
@@ -69,22 +77,6 @@ const PracticeTestPreviewInline = dynamic(
       <div className="flex items-center gap-2 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 text-sm text-gray-400 dark:text-gray-500">
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading preview…
-      </div>
-    ),
-    ssr: false,
-  },
-);
-
-const PracticeTestStepCard = dynamic(
-  () =>
-    import("@/src/components/reading/PracticeTestStepCard").then(
-      (m) => m.PracticeTestStepCard,
-    ),
-  {
-    loading: () => (
-      <div className="flex items-center gap-2 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 text-sm text-gray-400 dark:text-gray-500">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        Loading practice test…
       </div>
     ),
     ssr: false,
@@ -280,6 +272,8 @@ export interface LevelContentProps {
   onNavigateToNextLevel?: () => void;
   /** When true, step nav is rendered by LevelLayout below the scroll area (reading dashboard). */
   dockBottomNav?: boolean;
+  /** Database level order — used for env-based intro videos (Scanning = order 1, TFNG = order 2). */
+  levelOrder?: number;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -311,12 +305,20 @@ export function LevelContent({
   nextLevelInfo,
   onNavigateToNextLevel,
   dockBottomNav = false,
+  levelOrder,
 }: LevelContentProps) {
   const router = useRouter();
   const [content, setContent] = useState<StepContent | null>(null);
   const [contentLoading, setContentLoading] = useState(false);
   const [contentError, setContentError] = useState<string | null>(null);
   const [showSubscriptionPrompt, setShowSubscriptionPrompt] = useState(false);
+  const levelIntroConfig =
+    levelOrder != null ? getLevelIntroVideo(levelOrder) : null;
+  const [introDismissed, setIntroDismissed] = useState(false);
+
+  useEffect(() => {
+    setIntroDismissed(isLevelIntroDismissed(levelId));
+  }, [levelId, step?._id]);
 
   // Fetch step content when step changes and is not locked
   const fetchContent = useCallback(
@@ -437,18 +439,45 @@ export function LevelContent({
   );
 
   const isPracticeTestStep = step.stepType === "PRACTICE_TEST";
-  const showPracticeTestCard =
+  const isFinalEvaluationStep = step.stepType === "FINAL_EVALUATION";
+  const firstPracticeStepIndex =
+    allSteps?.findIndex(
+      (s) =>
+        s.stepType === "PRACTICE_TEST" && !isSequentialFinalPracticeStep(s),
+    ) ?? -1;
+  const isFirstPracticeStep =
     isPracticeTestStep &&
-    !contentLoading &&
+    !isSequentialFinalPracticeStep(step) &&
+    firstPracticeStepIndex >= 0 &&
+    stepIndex === firstPracticeStepIndex + 1;
+  const showLevelIntroVideo =
+    !isPreview &&
+    !isLocked &&
+    isFirstPracticeStep &&
+    levelIntroConfig != null &&
+    !introDismissed;
+  const showPracticeTestLauncher =
+    isPracticeTestStep &&
+    !isPreview &&
+    !isLocked &&
+    !showSubscriptionPrompt &&
     !contentError &&
-    content !== null &&
-    content.type === "PRACTICE_TEST" &&
-    !isPreview;
+    !showLevelIntroVideo;
+  const isFinalPracticeStep = isPracticeTestStep && isSequentialFinalPracticeStep(step);
+  const showFinalEvaluationLauncher =
+    isFinalEvaluationStep && !isPreview && !isLocked && !showSubscriptionPrompt && !contentError;
+  const showPremiumStepLauncher =
+    showLevelIntroVideo || showPracticeTestLauncher || showFinalEvaluationLauncher;
+
+  const handleIntroContinue = useCallback(() => {
+    markLevelIntroDismissed(levelId);
+    setIntroDismissed(true);
+  }, [levelId]);
 
   return (
     <div>
-      {/* Step header — hidden for practice test launcher (card owns context) */}
-      {!showPracticeTestCard && (
+      {/* Step header — hidden when launcher card owns context */}
+      {!showPremiumStepLauncher && (
       <div className="mb-6 flex items-start gap-4">
         <div className={`shrink-0 rounded-xl p-2.5 ${bg}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} />
@@ -456,7 +485,7 @@ export function LevelContent({
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {label}
+              {isFinalPracticeStep ? "Final test" : label}
             </span>
             <span className="text-xs text-gray-400 dark:text-gray-500">
               Step {stepIndex} of {totalSteps}
@@ -513,8 +542,8 @@ export function LevelContent({
       {!isLocked && (
         <div
           className={
-            showPracticeTestCard
-              ? "flex min-h-[min(520px,calc(100dvh-13rem))] flex-col items-center justify-center py-4"
+            showPremiumStepLauncher
+              ? "mx-auto w-full max-w-xl py-1"
               : dockBottomNav
                 ? "space-y-6 pb-6"
                 : "space-y-6 pb-40"
@@ -522,12 +551,12 @@ export function LevelContent({
         >
           <div
             className={
-              showPracticeTestCard
+              showPremiumStepLauncher
                 ? "w-full"
                 : "min-h-50 w-full rounded-2xl border border-border/40 bg-card p-4 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.05)] ring-1 ring-[color:var(--accent)]/[0.04] sm:p-6 dark:border-border/50"
             }
           >
-            {contentLoading && (
+            {contentLoading && !showPremiumStepLauncher && (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-accent" />
                 <span className="ml-2 text-sm text-gray-400 dark:text-gray-500">
@@ -655,20 +684,28 @@ export function LevelContent({
                 />
               ))}
 
-            {/* PRACTICE_TEST: one mini test, unlimited attempts until pass */}
-            {!contentLoading &&
-              !contentError &&
-              content !== null &&
-              content.type === "PRACTICE_TEST" &&
-              !isPreview && (
-                <PracticeTestStepCard
-                  levelId={levelId}
-                  stepId={step._id}
-                  content={content.content}
-                  stepIndex={stepIndex}
-                  totalSteps={totalSteps}
-                />
-              )}
+            {/* PRACTICE_TEST: intro video (L1/L2) then launch card */}
+            {showLevelIntroVideo && levelIntroConfig ? (
+              <LevelIntroVideoStep
+                config={levelIntroConfig}
+                stepIndex={stepIndex}
+                totalSteps={totalSteps}
+                onContinue={handleIntroContinue}
+              />
+            ) : null}
+            {showPracticeTestLauncher && (
+              <PracticeTestStepCard
+                levelId={levelId}
+                stepId={step._id}
+                stepTitle={step.title}
+                content={
+                  content?.type === "PRACTICE_TEST" ? content.content : null
+                }
+                stepIndex={stepIndex}
+                totalSteps={totalSteps}
+                hideInlineProgress={dockBottomNav}
+              />
+            )}
             {step.stepType === "INTEGRATED_LESSON" && (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
                 This lesson type is no longer available. Continue with practice tests, or contact
@@ -751,6 +788,9 @@ export function LevelContent({
                   groupTestsTotal={groupTestsTotal}
                   groupTestsRemaining={groupTestsRemaining}
                   isLocked={isLocked}
+                  stepIndex={stepIndex}
+                  totalSteps={totalSteps}
+                  hideInlineProgress={dockBottomNav}
                 />
               ))}
 

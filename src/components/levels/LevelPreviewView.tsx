@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock, Trophy, Eye } from "lucide-react";
 import type { LevelPreviewResponse } from "@/src/lib/api/levels";
+import { displayLevelNumberFromOrder } from "@/src/lib/readingLevelOrder";
 import { LevelStepCard } from "./LevelStepCard";
 
 export interface LevelPreviewViewProps {
@@ -56,7 +57,7 @@ export function LevelPreviewView({
           <span className="text-xs text-muted-foreground">{level.stage}</span>
           <span className="text-xs text-muted-foreground">·</span>
           <span className="text-xs text-muted-foreground">
-            Level {level.order}
+            Level {displayLevelNumberFromOrder(level.order)}
           </span>
           {level.accessType === "PAID" ? (
             <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">

@@ -320,7 +320,6 @@ export default function SubscriptionPlansAdminPage() {
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [premiumBasePrice, setPremiumBasePrice] = useState<number>(0);
-  const [scholarshipOfferExpiryHours, setScholarshipOfferExpiryHours] = useState<number>(48);
   const [savingPlatformConfig, setSavingPlatformConfig] = useState(false);
 
   const fetchPlans = async () => {
@@ -333,7 +332,6 @@ export default function SubscriptionPlansAdminPage() {
       setPlans(data);
       if (platformConfig) {
         setPremiumBasePrice(platformConfig.premiumBasePrice);
-        setScholarshipOfferExpiryHours(platformConfig.scholarshipOfferExpiryHours);
       }
     } catch {
       setError("Failed to load plans.");
@@ -411,55 +409,41 @@ export default function SubscriptionPlansAdminPage() {
         </div>
       )}
 
-      {/* Scholarship / platform pricing */}
+      {/* Founder scholarship / platform pricing */}
       <Card className="p-6 space-y-4">
         <div>
           <h2 className="text-base font-semibold text-foreground">
-            Fast Action Scholarship
+            Founder Scholarship
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Students earn speed-based discounts after Level 1 — no promo codes. Set the base
-            premium price and exploding-offer window here.
+            New students get one fixed 60% scholarship for their first 24 hours after signup.
+            It is delivered automatically via the welcome email and the top site banner — no
+            promo codes or admin tiers.
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="text-sm font-medium text-foreground">
-              Premium base price (BDT)
-            </label>
-            <input
-              type="number"
-              min={0}
-              value={premiumBasePrice}
-              onChange={(e) => setPremiumBasePrice(Number(e.target.value))}
-              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground">
-              Offer expiry (hours after L1)
-            </label>
-            <input
-              type="number"
-              min={1}
-              value={scholarshipOfferExpiryHours}
-              onChange={(e) => setScholarshipOfferExpiryHours(Number(e.target.value))}
-              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
+        <div className="max-w-sm">
+          <label className="text-sm font-medium text-foreground">
+            Premium base price (BDT)
+          </label>
+          <input
+            type="number"
+            min={0}
+            value={premiumBasePrice}
+            onChange={(e) => setPremiumBasePrice(Number(e.target.value))}
+            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Scholarship checkout uses this price minus 60% during the 24-hour window.
+          </p>
         </div>
 
         <div className="rounded-xl border border-indigo-200/70 bg-indigo-50/50 p-4 text-sm text-indigo-900 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
-          <p className="font-semibold">Tier schedule (registration → Level 1)</p>
-          <ul className="mt-2 space-y-1 text-xs">
-            <li>≤ 3 days — 60%</li>
-            <li>≤ 5 days — 50%</li>
-            <li>≤ 7 days — 40%</li>
-            <li>≤ 14 days — 20%</li>
-            <li>After 14 days — no scholarship</li>
-          </ul>
+          <p className="font-semibold">Fixed offer (not editable)</p>
+          <p className="mt-2 text-xs leading-relaxed">
+            60% off for the first 24 hours after account creation. The banner is hidden during
+            practice tests and final evaluations so students are not interrupted.
+          </p>
         </div>
 
         <Button
@@ -470,12 +454,9 @@ export default function SubscriptionPlansAdminPage() {
             setSavingPlatformConfig(true);
             setError(null);
             try {
-              await adminUpdatePlatformConfig({
-                premiumBasePrice,
-                scholarshipOfferExpiryHours,
-              });
+              await adminUpdatePlatformConfig({ premiumBasePrice });
             } catch (e) {
-              const msg = e instanceof Error ? e.message : "Failed to save scholarship config";
+              const msg = e instanceof Error ? e.message : "Failed to save pricing config";
               setError(msg);
             } finally {
               setSavingPlatformConfig(false);
@@ -488,7 +469,7 @@ export default function SubscriptionPlansAdminPage() {
               Saving…
             </>
           ) : (
-            "Save scholarship settings"
+            "Save base price"
           )}
         </Button>
       </Card>

@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/how-it-works",
-        destination: "/#how-to-play",
+        destination: "/#how-gamlish-works",
         permanent: true,
       },
     ];

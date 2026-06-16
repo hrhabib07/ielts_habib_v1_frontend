@@ -18,9 +18,11 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
   const { copy } = useGuestLandingLocaleState();
   const isHome = pathname === "/";
 
-  const scrollToHowToPlay = () => {
+  const scrollToHowItWorks = () => {
     setMenuOpen(false);
-    document.getElementById("how-to-play")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById("how-gamlish-works")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const howToPlayClassName =
@@ -75,12 +77,12 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
 
                 <nav className="flex flex-col gap-1" aria-label="Guest menu">
                   {isHome ? (
-                    <button type="button" onClick={scrollToHowToPlay} className={howToPlayClassName}>
+                    <button type="button" onClick={scrollToHowItWorks} className={howToPlayClassName}>
                       {copy.ctaSecondary}
                     </button>
                   ) : (
                     <Link
-                      href="/#how-to-play"
+                      href="/#how-gamlish-works"
                       onClick={() => setMenuOpen(false)}
                       className={howToPlayClassName}
                     >

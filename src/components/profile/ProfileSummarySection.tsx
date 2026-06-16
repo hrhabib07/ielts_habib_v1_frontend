@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getProfileSummary } from "@/src/lib/api/profile";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import {
+  journeyProgressBarStyle,
+  resolveJourneyProgress,
+} from "@/src/lib/journeyVisualProgress";
 import { getWeaknessAnalytics } from "@/src/lib/api/testAttempts";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 import type { ProfileSummary } from "@/src/lib/api/types";
@@ -138,37 +142,21 @@ function StatTile({
 /** Client section: fetches and displays profile summary. */
 export function ProfileSummarySection() {
   const router = useRouter();
-  const [data, setData] = useState<ProfileSummary | null>(null);
+  const { profileSummary, loading: sessionLoading } = useStudentSession();
   const [weaknessAnalytics, setWeaknessAnalytics] = useState<WeaknessAnalyticsItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
 
+  const data = profileSummary;
+  const loading = sessionLoading && data == null;
+
   useEffect(() => {
-    let cancelled = false;
-    getProfileSummary()
-      .then((res) => {
-        if (!cancelled && res != null) {
-          if (res.targetBand == null) {
-            setRedirecting(true);
-            router.replace("/onboarding");
-            return;
-          }
-          setData(res);
-        } else if (!cancelled) {
-          setData(null);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setError("Failed to load summary");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
+    if (sessionLoading) return;
+    if (profileSummary?.targetBand == null && profileSummary != null) {
+      setRedirecting(true);
+      router.replace("/onboarding");
+    }
+  }, [profileSummary, sessionLoading, router]);
 
   useEffect(() => {
     if (!data) return;
@@ -211,9 +199,18 @@ export function ProfileSummarySection() {
     recentAttempts,
     recentPracticeAttempts = [],
     overallProgressPct = 0,
-    journeyEarnedPoints,
-    journeyMaxPoints,
+    passedLevelCount,
+    masteredLevelCount,
+    totalLevels,
   } = data;
+
+  const journey = resolveJourneyProgress({
+    passedLevelCount,
+    totalLevels,
+    overallProgressPct,
+    masteredLevelCount,
+  });
+  const courseProgressBarStyle = journeyProgressBarStyle(journey.actualPct);
 
   const bandGap =
     targetBand != null && currentEstimatedBand != null
@@ -298,20 +295,25 @@ export function ProfileSummarySection() {
                 Course journey
               </p>
               <p className="mt-1 text-3xl font-bold tabular-nums text-foreground">
-                {overallProgressPct}%
+                {journey.label}
               </p>
             </div>
-            {journeyEarnedPoints != null && journeyMaxPoints != null ? (
+            {journey.masteredLevelCount > 0 ? (
               <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">{journeyEarnedPoints}</span>
-                <span className="text-muted-foreground"> / {journeyMaxPoints} pts</span>
+                <span className="font-semibold text-foreground">
+                  {journey.masteredLevelCount}
+                </span>
+                <span className="text-muted-foreground">
+                  {" "}
+                  level{journey.masteredLevelCount === 1 ? "" : "s"} passed
+                </span>
               </p>
             ) : null}
           </div>
           <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-gradient-to-r from-primary via-primary/90 to-emerald-500 transition-all duration-700"
-              style={{ width: `${Math.min(100, Math.max(0, overallProgressPct))}%` }}
+              style={courseProgressBarStyle}
             />
           </div>
         </div>

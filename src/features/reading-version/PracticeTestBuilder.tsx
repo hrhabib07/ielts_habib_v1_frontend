@@ -18,12 +18,17 @@ import {
   type UpdatePracticeTestPayload,
   type PracticeTestContentForPreview,
   createSentenceLocatorPracticeTest,
+  createGamlishScanningPracticeTest,
   type CreateSentenceLocatorPracticeTestPayload,
+  type CreateGamlishScanningPracticeTestPayload,
   isSentenceLocatorPreviewContent,
+  isGamlishScanningPreviewContent,
+  isProgressiveMcqPreviewContent,
   isFullMockPreviewContent,
   type SentenceLocatorContentAuthoringPreview,
 } from "@/src/lib/api/adminReadingVersions";
 import { DeleteConfirmDialog } from "@/src/components/shared/DeleteConfirmDialog";
+import { GamlishScanningCreateForm } from "./GamlishScanningCreateForm";
 import { getMyPassageQuestionSets, type PassageQuestionSet } from "@/src/lib/api/instructor";
 import { Trash2, Plus, Loader2, X, Check, Pencil, Eye, ChevronUp, ChevronDown } from "lucide-react";
 
@@ -40,6 +45,8 @@ interface PracticeTestBuilderProps {
   /** Level 0: practice test IDs registered in the final-test pool (section 3). */
   finalTestPracticeTestIds?: string[];
   isL0Foundation?: boolean;
+  /** Reading fundamentals (DB order 0 / student Level 1). */
+  isReadingL0Foundation?: boolean;
 }
 
 export function PracticeTestBuilder({
@@ -49,6 +56,7 @@ export function PracticeTestBuilder({
   onPracticeTestsChange,
   finalTestPracticeTestIds = [],
   isL0Foundation = false,
+  isReadingL0Foundation = false,
 }: PracticeTestBuilderProps) {
   const finalSlotIdSet = new Set(finalTestPracticeTestIds);
   const finalSlotIndex = new Map(
@@ -56,6 +64,7 @@ export function PracticeTestBuilder({
   );
   const [adding, setAdding] = useState(false);
   const [addingLocator, setAddingLocator] = useState(false);
+  const [addingGamlish, setAddingGamlish] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [reorderBusy, setReorderBusy] = useState(false);
@@ -103,6 +112,19 @@ export function PracticeTestBuilder({
       setAddingLocator(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create sentence locator test");
+    }
+  };
+
+  const handleCreateGamlish = async (payload: CreateGamlishScanningPracticeTestPayload) => {
+    setError(null);
+    try {
+      const created = await createGamlishScanningPracticeTest(versionId, payload);
+      onPracticeTestsChange(
+        [...practiceTests, created].sort((a, b) => a.order - b.order),
+      );
+      setAddingGamlish(false);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to create Gamlish scanning test");
     }
   };
 
@@ -169,8 +191,10 @@ export function PracticeTestBuilder({
   };
 
   const sortedList = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
+  const isMisplacedL0Final = (pt: PracticeTest) =>
+    /\b(l0\s*[—–-]\s*)?final\b/i.test(pt.title) && !finalSlotIdSet.has(pt._id);
   const practiceOnlyList = isL0Foundation
-    ? sortedList.filter((p) => !finalSlotIdSet.has(p._id))
+    ? sortedList.filter((p) => !finalSlotIdSet.has(p._id) && !isMisplacedL0Final(p))
     : sortedList;
   const finalOnlyList = isL0Foundation
     ? sortedList.filter((p) => finalSlotIdSet.has(p._id))
@@ -243,10 +267,23 @@ export function PracticeTestBuilder({
               variant="outline"
               size="sm"
               onClick={() => setAdding(true)}
+              disabled={isL0Foundation && practiceOnlyList.length >= 3}
             >
               <Plus className="h-4 w-4 mr-1" />
               Add practice test
             </Button>
+            {isReadingL0Foundation ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setAddingGamlish(true)}
+                disabled={practiceOnlyList.length >= 3}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Gamlish scanning
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="outline"
@@ -266,8 +303,8 @@ export function PracticeTestBuilder({
           above — a <span className="font-medium text-foreground">Practice Test</span> step is added automatically after
           your lessons. (2) Open <span className="font-medium text-foreground">Preview level</span> to verify. (3) Use{" "}
           <span className="font-medium text-foreground">Preview</span> (eye) to
-          verify. Standard tests use a passage question set; Sentence locator embeds JSON (Level 0) — see{" "}
-          <code className="rounded bg-background px-1 py-0.5 text-[11px]">docs/SENTENCE_LOCATOR_PRACTICE_TEST_JSON.md</code>.
+          verify. Standard tests use a passage question set; Reading Fundamentals uses Gamlish scanning JSON — see{" "}
+          <code className="rounded bg-background px-1 py-0.5 text-[11px]">docs/GAMLISH_SCANNING_PRACTICE_TEST_JSON.md</code>.
           {isL0Foundation ? (
             <>
               {" "}
@@ -277,6 +314,11 @@ export function PracticeTestBuilder({
             </>
           ) : null}
         </div>
+        {isL0Foundation && practiceOnlyList.length >= 3 && (
+          <p className="text-xs text-muted-foreground">
+            Level 0 allows exactly 3 practice tests here. Add finals in section 2.
+          </p>
+        )}
         {isL0Foundation && finalOnlyList.length > 0 && (
           <div className="rounded-lg border border-indigo-200/80 bg-indigo-50/40 px-3 py-2.5 dark:border-indigo-900/50 dark:bg-indigo-950/25">
             <p className="text-xs font-medium text-indigo-900 dark:text-indigo-100 mb-2">
@@ -293,6 +335,18 @@ export function PracticeTestBuilder({
               ))}
             </ul>
           </div>
+        )}
+        {addingGamlish && (
+          <GamlishScanningCreateForm
+            nextOrder={
+              practiceTests.length > 0
+                ? Math.max(...practiceTests.map((p) => p.order)) + 1
+                : 1
+            }
+            onSave={handleCreateGamlish}
+            onCancel={() => setAddingGamlish(false)}
+            disabled={disabled}
+          />
         )}
         {addingLocator && (
           <SentenceLocatorCreateForm
@@ -362,7 +416,11 @@ export function PracticeTestBuilder({
                     <span className="text-sm flex-1 font-medium">
                       {pt.contentCode ? `[${pt.contentCode}] ` : ""}
                       {pt.title}
-                      {pt.contentFormat === "SENTENCE_LOCATOR" ? (
+                      {pt.contentFormat === "GAMLISH_SCANNING" ? (
+                        <span className="ml-2 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200">
+                          GS
+                        </span>
+                      ) : pt.contentFormat === "SENTENCE_LOCATOR" ? (
                         <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
                           SL
                         </span>
@@ -1117,6 +1175,34 @@ function PracticeTestPreview({
         </p>
       </div>
     );
+  }
+  if (isProgressiveMcqPreviewContent(previewContent)) {
+    const itemCount = previewContent.progressiveMcq.items.length;
+    return (
+      <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="font-medium text-sm">
+            Preview: {previewContent.title} ({previewContent.timeLimitMinutes} min · pass{" "}
+            {previewContent.passType === "PERCENTAGE"
+              ? `${previewContent.passValue}%`
+              : `band ${previewContent.passValue}`}
+            ){" "}
+            <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
+              Progressive MCQ
+            </span>
+          </h4>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {itemCount} context question{itemCount !== 1 ? "s" : ""} · paraphrase engine format
+        </p>
+      </div>
+    );
+  }
+  if (!("miniTest" in previewContent)) {
+    return null;
   }
   const { miniTest } = previewContent;
   return (

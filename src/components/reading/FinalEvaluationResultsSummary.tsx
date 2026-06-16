@@ -15,8 +15,10 @@ import {
 import type { FinalPhaseStatus } from "@/src/lib/api/readingStrictProgression";
 import { getLevelDetail } from "@/src/lib/api/readingStrictProgression";
 import { getMyProfile, getProfileSummary } from "@/src/lib/api/profile";
+import { getStudentDisplayName } from "@/src/lib/student-display-name";
 import { BRAND } from "@/src/lib/constants";
 import { cn } from "@/lib/utils";
+import { displayLevelNumberFromOrder } from "@/src/lib/readingLevelOrder";
 
 function formatBand(band: number): string {
   return Number.isInteger(band) ? String(band) : band.toFixed(1);
@@ -75,9 +77,7 @@ export function FinalEvaluationResultsSummary({
       getLevelDetail(levelId).catch(() => null),
     ]).then(([profile, summary, level]) => {
       if (cancelled) return;
-      const nick =
-        profile && typeof profile.nickname === "string" ? profile.nickname.trim() : "";
-      setUserName(nick || profile?.name?.trim() || "");
+      setUserName(getStudentDisplayName(profile) ?? "");
       const band =
         summary?.targetBand ??
         profile?.targetBands?.reading ??
@@ -85,7 +85,7 @@ export function FinalEvaluationResultsSummary({
       setTargetBand(typeof band === "number" ? band : null);
       if (level?.level) {
         setLevelTitle(level.level.title);
-        setLevelNumber(level.level.order);
+        setLevelNumber(displayLevelNumberFromOrder(level.level.order));
       }
     });
     return () => {

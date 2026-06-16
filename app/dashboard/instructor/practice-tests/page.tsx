@@ -14,7 +14,7 @@ import {
   type PracticeTest,
 } from "@/src/lib/api/adminReadingVersions";
 import { PracticeTestManager } from "@/src/features/reading-version/PracticeTestManager";
-import { resolveLevelTemplateIndex } from "@/src/features/reading-version/levelQuestionTypeMapping";
+import { resolveLevelTemplateIndex, isProgressiveMcqTemplateLevel } from "@/src/features/reading-version/levelQuestionTypeMapping";
 import {
   ArrowLeft,
   Loader2,
@@ -24,6 +24,7 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
+import { formatInstructorLevelSummary } from "@/src/lib/readingLevelOrder";
 import {
   Select,
   SelectTrigger,
@@ -104,6 +105,10 @@ export default function PracticeTestsPage() {
   }, []);
 
   const selectedLevel = levels.find((l) => l._id === selectedLevelId);
+  const selectedTemplateIndex =
+    selectedLevel != null ? resolveLevelTemplateIndex(selectedLevel) : null;
+  const isL5Selected =
+    selectedTemplateIndex != null && isProgressiveMcqTemplateLevel(selectedTemplateIndex);
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6">
@@ -124,7 +129,9 @@ export default function PracticeTestsPage() {
             Practice Test Management
           </h1>
           <p className="mt-1.5 max-w-2xl text-sm text-stone-500 dark:text-stone-400">
-            Create and manage mini practice tests (one passage + question set each). Students get unlimited attempts until they reach the required score. Add a step of type &quot;Practice Test&quot; in the Level Builder and attach a practice test from this list.
+            {isL5Selected
+              ? "Level 5 uses progressive paraphrase quizzes (context paragraph + MCQ, one question at a time). Load the template, edit your items, create tests here, then attach them as Practice Test steps in the Level Builder."
+              : "Create and manage mini practice tests (one passage + question set each). Students get unlimited attempts until they reach the required score. Add a step of type \"Practice Test\" in the Level Builder and attach a practice test from this list."}
           </p>
         </div>
         <Button variant="outline" size="sm" asChild className="shrink-0 gap-2">
@@ -167,7 +174,8 @@ export default function PracticeTestsPage() {
                   <SelectItem key={l._id} value={l._id}>
                     <span className="font-medium">{l.title}</span>
                     <span className="ml-2 text-stone-500">
-                      #{l.order} · {l.levelType === "FOUNDATION" ? "Foundation" : "Skill"}
+                      {formatInstructorLevelSummary(l.order)} ·{" "}
+                      {l.levelType === "FOUNDATION" ? "Foundation" : "Skill"}
                     </span>
                   </SelectItem>
                 ))}
@@ -235,7 +243,9 @@ export default function PracticeTestsPage() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
-                    Preview any test to see its passage and questions. Attach tests to steps in the Level Builder.
+                    {isL5Selected
+                      ? "Preview progressive MCQ items. Attach tests to steps in the Level Builder."
+                      : "Preview any test to see its passage and questions. Attach tests to steps in the Level Builder."}
                   </p>
                 </div>
                 <Link

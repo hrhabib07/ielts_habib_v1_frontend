@@ -15,6 +15,8 @@ import {
   type FinalTestContentResponse,
   type GroupTestContentForStudent,
   type PracticeTestStepContentSentenceLocator,
+  type PracticeTestStepContentProgressiveMcq,
+  type PracticeTestStepContentGamlishTfng,
 } from "@/src/lib/api/readingStrictProgression";
 import {
   ReadingMockTestView,
@@ -24,6 +26,14 @@ import {
   SentenceLocatorPracticeView,
   type SentenceLocatorPracticeViewHandle,
 } from "@/src/components/reading/SentenceLocatorPracticeView";
+import {
+  ProgressiveMcqPracticeView,
+  type ProgressiveMcqPracticeViewHandle,
+} from "@/src/components/reading/ProgressiveMcqPracticeView";
+import {
+  GamlishTfngPracticeView,
+  type GamlishTfngPracticeViewHandle,
+} from "@/src/components/reading/gamlish-tfng/GamlishTfngPracticeView";
 import { ReadingTestExitDialog } from "@/src/components/reading/ReadingTestExitDialog";
 import { isReadingPremiumLockResponse } from "@/src/lib/readingPremiumLock";
 import { PremiumReadingLockPanel } from "@/src/components/reading/PremiumReadingLockPanel";
@@ -38,7 +48,7 @@ type Phase =
   | "result"
   | "summary"
   | "premium_locked";
-type FinalTestUiMode = "standard" | "sentence_locator";
+type FinalTestUiMode = "standard" | "sentence_locator" | "progressive_mcq" | "gamlish_tfng";
 
 function FinalEvaluationPageContent() {
   const params = useParams<{ id: string }>();
@@ -54,6 +64,10 @@ function FinalEvaluationPageContent() {
   const [content, setContent] = useState<GroupTestContentForStudent | null>(null);
   const [sentenceLocatorContent, setSentenceLocatorContent] =
     useState<PracticeTestStepContentSentenceLocator | null>(null);
+  const [progressiveMcqContent, setProgressiveMcqContent] =
+    useState<PracticeTestStepContentProgressiveMcq | null>(null);
+  const [gamlishTfngContent, setGamlishTfngContent] =
+    useState<PracticeTestStepContentGamlishTfng | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [result, setResult] = useState<{
     passed: boolean;
@@ -68,6 +82,8 @@ function FinalEvaluationPageContent() {
   } | null>(null);
   const mockTestRef = useRef<ReadingMockTestViewHandle>(null);
   const locatorRef = useRef<SentenceLocatorPracticeViewHandle>(null);
+  const progressiveMcqRef = useRef<ProgressiveMcqPracticeViewHandle>(null);
+  const gamlishTfngRef = useRef<GamlishTfngPracticeViewHandle>(null);
   const [exitOpen, setExitOpen] = useState(false);
   const [exitLoading, setExitLoading] = useState(false);
   const [entryCountdownOpen, setEntryCountdownOpen] = useState(!viewResults);
@@ -90,7 +106,11 @@ function FinalEvaluationPageContent() {
     const res =
       testMode === "sentence_locator"
         ? await locatorRef.current?.submitIncompleteForExit()
-        : await mockTestRef.current?.submitIncompleteForExit();
+        : testMode === "gamlish_tfng"
+          ? await gamlishTfngRef.current?.submitIncompleteForExit()
+          : testMode === "progressive_mcq"
+            ? await progressiveMcqRef.current?.submitIncompleteForExit()
+            : await mockTestRef.current?.submitIncompleteForExit();
     setExitLoading(false);
     setExitOpen(false);
     if (!res?.ok) return;
@@ -130,6 +150,8 @@ function FinalEvaluationPageContent() {
     setPhase("loading");
     setContent(null);
     setSentenceLocatorContent(null);
+    setProgressiveMcqContent(null);
+    setGamlishTfngContent(null);
     setErrorMessage(null);
 
     try {
@@ -172,6 +194,34 @@ function FinalEvaluationPageContent() {
           passType: "BAND",
           passValue: 0,
           sentenceLocator: testContent.sentenceLocator,
+        });
+      } else if (
+        testContent.contentFormat === "PROGRESSIVE_MCQ" &&
+        testContent.progressiveMcq
+      ) {
+        setTestMode("progressive_mcq");
+        setProgressiveMcqContent({
+          contentFormat: "PROGRESSIVE_MCQ",
+          practiceTestId: `final-${index}`,
+          title: testContent.title ?? `Final test ${index}`,
+          timeLimitMinutes: testContent.timeLimitMinutes ?? 20,
+          passType: "BAND",
+          passValue: 0,
+          progressiveMcq: testContent.progressiveMcq,
+        });
+      } else if (
+        testContent.contentFormat === "GAMLISH_TFNG" &&
+        testContent.gamlishTfng
+      ) {
+        setTestMode("gamlish_tfng");
+        setGamlishTfngContent({
+          contentFormat: "GAMLISH_TFNG",
+          practiceTestId: `final-${index}`,
+          title: testContent.title ?? `Final test ${index}`,
+          timeLimitMinutes: testContent.timeLimitMinutes ?? 10,
+          passType: "BAND",
+          passValue: 0,
+          gamlishTfng: testContent.gamlishTfng,
         });
       } else if (testContent.miniTest) {
         setTestMode("standard");
@@ -268,6 +318,60 @@ function FinalEvaluationPageContent() {
       setPhase("result");
     },
     [finalIndex, sentenceLocatorContent?.title],
+  );
+
+  const handleTfngSubmitted = useCallback(
+    (res: {
+      passed: boolean;
+      bandScore: number;
+      isMastered?: boolean;
+      levelComplete?: boolean;
+      finalTestIndex?: 1 | 2 | 3;
+      nextFinalTestIndex?: 1 | 2 | 3 | null;
+      scorePercent?: number;
+      statementsCorrect?: { correct: number; total: number };
+    }) => {
+      setResult({
+        passed: res.passed,
+        isMastered: res.isMastered ?? res.passed,
+        bandScore: res.bandScore,
+        levelComplete: res.levelComplete,
+        finalTestIndex: res.finalTestIndex ?? finalIndex ?? undefined,
+        nextFinalTestIndex: res.nextFinalTestIndex,
+        scorePercent: res.scorePercent,
+        statementsCorrect: res.statementsCorrect,
+        title: gamlishTfngContent?.title ?? (finalIndex != null ? `Final test ${finalIndex}` : undefined),
+      });
+      setPhase("result");
+    },
+    [finalIndex, gamlishTfngContent?.title],
+  );
+
+  const handleProgressiveMcqSubmitted = useCallback(
+    (res: {
+      passed: boolean;
+      bandScore: number;
+      isMastered?: boolean;
+      levelComplete?: boolean;
+      finalTestIndex?: 1 | 2 | 3;
+      nextFinalTestIndex?: 1 | 2 | 3 | null;
+      scorePercent?: number;
+      mcqCorrect?: { correct: number; total: number };
+    }) => {
+      setResult({
+        passed: res.passed,
+        isMastered: res.isMastered ?? res.passed,
+        bandScore: res.bandScore,
+        levelComplete: res.levelComplete,
+        finalTestIndex: res.finalTestIndex ?? finalIndex ?? undefined,
+        nextFinalTestIndex: res.nextFinalTestIndex,
+        scorePercent: res.scorePercent,
+        statementsCorrect: res.mcqCorrect,
+        title: progressiveMcqContent?.title ?? (finalIndex != null ? `Final test ${finalIndex}` : undefined),
+      });
+      setPhase("result");
+    },
+    [finalIndex, progressiveMcqContent?.title],
   );
 
   const handleBackToLevel = useCallback(() => {
@@ -370,9 +474,13 @@ function FinalEvaluationPageContent() {
   if (phase === "test" && finalIndex != null) {
     const showLocator =
       testMode === "sentence_locator" && sentenceLocatorContent != null;
+    const showProgressiveMcq =
+      testMode === "progressive_mcq" && progressiveMcqContent != null;
+    const showGamlishTfng =
+      testMode === "gamlish_tfng" && gamlishTfngContent != null;
     const showMock = testMode === "standard" && content != null;
 
-    if (showLocator || showMock) {
+    if (showLocator || showProgressiveMcq || showGamlishTfng || showMock) {
       return (
         <>
           <ReadingTestExitDialog
@@ -386,7 +494,28 @@ function FinalEvaluationPageContent() {
             onCancel={() => setExitOpen(false)}
           />
           <div className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-950">
-            {showLocator ? (
+            {showProgressiveMcq ? (
+              <ProgressiveMcqPracticeView
+                ref={progressiveMcqRef}
+                levelId={levelId}
+                stepId={`final-${finalIndex}`}
+                sessionKey={`final-pmcq-${levelId}-${finalIndex}`}
+                finalTestIndex={finalIndex}
+                content={progressiveMcqContent}
+                onSubmitted={handleProgressiveMcqSubmitted}
+                onRequestExit={() => setExitOpen(true)}
+              />
+            ) : showGamlishTfng ? (
+              <GamlishTfngPracticeView
+                ref={gamlishTfngRef}
+                levelId={levelId}
+                sessionKey={`final-tfng-${levelId}-${finalIndex}`}
+                finalTestIndex={finalIndex}
+                content={gamlishTfngContent}
+                onSubmitted={handleTfngSubmitted}
+                onRequestExit={() => setExitOpen(true)}
+              />
+            ) : showLocator ? (
               <SentenceLocatorPracticeView
                 ref={locatorRef}
                 levelId={levelId}

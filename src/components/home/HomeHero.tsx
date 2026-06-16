@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getProfileSummary, getMyProfile } from "@/src/lib/api/profile";
+import type { ProfileSummary, StudentProfile } from "@/src/lib/api/types";
 import { BookOpen, MapPin, Sparkles, TrendingUp } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import {
@@ -11,22 +12,48 @@ import {
   isActiveStudentSessionClient,
 } from "@/src/lib/auth";
 import { GuestLandingPage } from "@/src/components/home/guest/GuestLandingPage";
-import { StudentBandJourneyFlightVisual } from "@/src/components/home/StudentBandJourneyFlightVisual";
+import { BandScoreWaterDisplay } from "@/src/components/home/BandScoreWaterDisplay";
 import {
   STUDENT_JOURNEY_HERO_MOCK,
   resolveJourneyMapPoint,
 } from "@/src/components/home/studentJourneyHeroConfig";
 import { getStudentDisplayName } from "@/src/lib/student-display-name";
+import { countryCodeToLabel } from "@/src/lib/countryCodes";
+import { ProfileSearchLeaderboard } from "@/src/components/home/ProfileSearchLeaderboard";
+import {
+  journeyProgressBarStyle,
+  resolveJourneyProgress,
+  type ResolvedJourneyProgress,
+} from "@/src/lib/journeyVisualProgress";
+import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
+import { EarlyAdopterCountdown } from "@/src/components/founding-member/EarlyAdopterCountdown";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+
+const StudentBandJourneyFlightVisual = dynamic(
+  () =>
+    import("@/src/components/home/StudentBandJourneyFlightVisual").then(
+      (m) => m.StudentBandJourneyFlightVisual,
+    ),
+  {
+    loading: () => (
+      <div
+        className="absolute inset-0 animate-pulse rounded-2xl bg-muted/25"
+        aria-hidden
+      />
+    ),
+    ssr: false,
+  },
+);
 
 type HeroMode = "minimal" | "student" | "loading";
 
 interface StudentHeroData {
   band: number | null;
-  overallProgressPct: number;
+  journey: ResolvedJourneyProgress;
   userName: string | null;
   currentCountry: string;
   dreamCountry: string;
-  dreamCity: string | null;
+  isFoundingMember: boolean;
 }
 
 interface HomeHeroProps {
@@ -37,27 +64,38 @@ interface HomeHeroProps {
 }
 
 function buildStudentHeroData(
-  summary: Awaited<ReturnType<typeof getProfileSummary>>,
-  profile: Awaited<ReturnType<typeof getMyProfile>>,
+  summary: ProfileSummary | null,
+  profile: StudentProfile | null,
+  isFoundingMember: boolean,
 ): StudentHeroData {
   const band =
-    summary?.targetBand ?? profile?.targetBands?.reading ?? null;
+    summary?.targetBand ??
+    profile?.desiredBandScore ??
+    profile?.targetBands?.reading ??
+    null;
   const overallProgressPct = summary?.overallProgressPct ?? 0;
   const userName = getStudentDisplayName(profile);
   const cur =
-    profile?.profile?.currentCountry?.trim() ||
-    profile?.profile?.country?.trim() ||
+    countryCodeToLabel(profile?.currentCountry) ??
+    profile?.currentCountry?.trim() ??
     null;
-  const dream = profile?.profile?.dreamCountry?.trim() || null;
-  const dreamCity = profile?.profile?.dreamCity?.trim() || null;
+  const dream =
+    countryCodeToLabel(profile?.dreamCountry) ??
+    profile?.dreamCountry?.trim() ??
+    null;
 
   return {
     band,
-    overallProgressPct,
+    journey: resolveJourneyProgress({
+      passedLevelCount: summary?.passedLevelCount,
+      totalLevels: summary?.totalLevels,
+      masteredLevelCount: summary?.masteredLevelCount,
+      overallProgressPct,
+    }),
     userName,
     currentCountry: cur || STUDENT_JOURNEY_HERO_MOCK.currentCountry,
     dreamCountry: dream || STUDENT_JOURNEY_HERO_MOCK.dreamCountry,
-    dreamCity,
+    isFoundingMember,
   };
 }
 
@@ -79,43 +117,32 @@ export function HomeHero({
     isActiveStudentSessionClient();
   const isStudent = serverStudent || clientStudentFallback;
 
-  const [mode, setMode] = useState<HeroMode>(() =>
-    serverStudent ? "loading" : "minimal",
-  );
-  const [studentData, setStudentData] = useState<StudentHeroData | null>(null);
+  const {
+    profileSummary,
+    profile,
+    isFoundingMember,
+    loading: sessionLoading,
+  } = useStudentSession();
 
-  useEffect(() => {
-    if (!isStudent) {
-      setMode("minimal");
-      setStudentData(null);
-      return;
-    }
+  const studentData = useMemo(() => {
+    if (!isStudent) return null;
+    if (sessionLoading && !profileSummary && !profile) return null;
+    return buildStudentHeroData(profileSummary, profile, isFoundingMember);
+  }, [
+    isStudent,
+    sessionLoading,
+    profileSummary,
+    profile,
+    isFoundingMember,
+  ]);
 
-    setMode("loading");
-
-    let cancelled = false;
-
-    (async () => {
-      const [summaryOutcome, profileOutcome] = await Promise.allSettled([
-        getProfileSummary(),
-        getMyProfile(),
-      ]);
-
-      if (cancelled) return;
-
-      const summary =
-        summaryOutcome.status === "fulfilled" ? summaryOutcome.value : null;
-      const profile =
-        profileOutcome.status === "fulfilled" ? profileOutcome.value : null;
-
-      setStudentData(buildStudentHeroData(summary, profile));
-      setMode("student");
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isStudent]);
+  const mode: HeroMode = !isStudent
+    ? "minimal"
+    : studentData
+      ? "student"
+      : sessionLoading
+        ? "loading"
+        : "minimal";
 
   if (mode === "loading") {
     return (
@@ -131,11 +158,11 @@ export function HomeHero({
     return (
       <BandHero
         band={studentData.band}
-        overallProgressPct={studentData.overallProgressPct}
+        journey={studentData.journey}
         userName={studentData.userName}
         currentCountry={studentData.currentCountry}
         dreamCountry={studentData.dreamCountry}
-        dreamCity={studentData.dreamCity}
+        isFoundingMember={studentData.isFoundingMember}
         moduleLabel={STUDENT_JOURNEY_HERO_MOCK.moduleLabel}
         improveSkillsHref={STUDENT_JOURNEY_HERO_MOCK.profileHref}
       />
@@ -182,89 +209,46 @@ function AuthenticatedHomeCta({
   );
 }
 
-/**
- * Large band digits make very low % (e.g. 3%) only a few pixels tall — looks empty.
- * When journey is above 0, use at least this fill height so a sliver of water is visible.
- * True % stays in copy and aria-label. 0% stays empty (no floor).
- */
-const VISUAL_WATER_MIN_PCT = 8;
-
-/** Radial vignette + SVG noise; z-0 only — keeps headline, score, and CTA readable. */
-function BandHeroAtmosphere() {
-  const grainFilterId = useId().replace(/:/g, "");
-
+function JourneyCountryPills({
+  currentCountry,
+  dreamCountry,
+}: {
+  currentCountry: string;
+  dreamCountry: string;
+}) {
   return (
-    <>
-      <div
-        className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_88%_74%_at_50%_44%,rgb(255_255_255_/_0.55)_0%,rgb(255_255_255_/_0.08)_42%,rgb(226_232_240_/_0.5)_100%)] dark:bg-[radial-gradient(ellipse_88%_74%_at_50%_44%,rgb(255_255_255_/_0.08)_0%,transparent_40%,rgb(15_23_42_/_0.82)_100%)]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 z-0 opacity-[0.2] mix-blend-overlay dark:opacity-[0.16] dark:mix-blend-soft-light"
-        aria-hidden
-      >
-        <svg
-          className="h-full w-full"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden
-        >
-          <defs>
-            <filter
-              id={`${grainFilterId}-grain`}
-              x="-20%"
-              y="-20%"
-              width="140%"
-              height="140%"
-            >
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.82"
-                numOctaves="4"
-                stitchTiles="stitch"
-                result="turb"
-              />
-              <feColorMatrix
-                type="saturate"
-                values="0"
-                in="turb"
-                result="mono"
-              />
-            </filter>
-          </defs>
-          <rect
-            width="100%"
-            height="100%"
-            filter={`url(#${grainFilterId}-grain)`}
-            className="opacity-60"
-          />
-        </svg>
-      </div>
-    </>
+    <div className="mt-3 flex flex-wrap items-center justify-center gap-2 sm:mt-3.5">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/95 px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
+        <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" aria-hidden />
+        {currentCountry}
+      </span>
+      <span className="text-muted-foreground/35" aria-hidden>
+        →
+      </span>
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm dark:text-emerald-200">
+        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        {dreamCountry}
+      </span>
+    </div>
   );
-}
-
-function journeyToVisualWaterPercent(journeyPct: number): number {
-  const p = Math.min(100, Math.max(0, Math.round(journeyPct)));
-  if (p <= 0) return 0;
-  return Math.min(100, Math.max(VISUAL_WATER_MIN_PCT, p));
 }
 
 function BandHero({
   band,
-  overallProgressPct,
+  journey,
   userName,
   currentCountry,
   dreamCountry,
-  dreamCity,
+  isFoundingMember,
   moduleLabel,
   improveSkillsHref,
 }: {
   band: number | null;
-  overallProgressPct: number;
+  journey: ResolvedJourneyProgress;
   userName: string | null;
   currentCountry: string;
   dreamCountry: string;
-  dreamCity: string | null;
+  isFoundingMember: boolean;
   moduleLabel: string;
   improveSkillsHref: string;
 }) {
@@ -281,131 +265,102 @@ function BandHero({
   const fromPoint = resolveJourneyMapPoint(currentCountry, "from");
   const toPoint = resolveJourneyMapPoint(dreamCountry, "to");
 
-  const targetFillPct =
-    band == null ? 0 : journeyToVisualWaterPercent(overallProgressPct);
-
-  const [fillPct, setFillPct] = useState(0);
-  const fillRef = useRef(0);
-
-  useEffect(() => {
-    const target = targetFillPct;
-    const from = fillRef.current;
-    if (from === target) return;
-
-    let raf = 0;
-    const duration = 2200;
-    const start = performance.now();
-
-    const tick = (now: number) => {
-      const elapsed = now - start;
-      const t = Math.min(1, elapsed / duration);
-      const eased = 1 - (1 - t) * (1 - t);
-      const pct = Math.round(from + eased * (target - from));
-      fillRef.current = pct;
-      setFillPct(pct);
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [targetFillPct]);
-
   const moduleLower = moduleLabel.toLowerCase();
 
-  const dreamLine =
-    dreamCity != null && dreamCity.length > 0
-      ? `Your journey toward ${dreamCity}, ${dreamCountry}, is underway.`
-      : `Your dream to study in ${dreamCountry} is within reach.`;
+  const dreamLine = `Your dream to study in ${dreamCountry} is within reach.`;
+
+  const flightVisualProps = {
+    currentCountryLabel: currentCountry,
+    dreamCountryLabel: dreamCountry,
+    from: fromPoint,
+    to: toPoint,
+    journeyProgressPct: journey.actualPct,
+  };
+
+  const progressBarStyle = journeyProgressBarStyle(journey.actualPct);
 
   return (
-    <section className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center overflow-x-clip bg-background px-4 py-12 text-center sm:px-6 sm:py-16">
-      <StudentBandJourneyFlightVisual
-        currentCountryLabel={currentCountry}
-        dreamCountryLabel={dreamCountry}
-        from={fromPoint}
-        to={toPoint}
-        journeyProgressPct={overallProgressPct}
-      />
-      <BandHeroAtmosphere />
-
-      {/* Ambient glow */}
-      <div
-        className="pointer-events-none absolute left-1/2 top-[18%] h-64 w-64 -translate-x-1/2 rounded-full bg-accent/10 blur-3xl dark:bg-accent/15"
-        aria-hidden
-      />
-
-      <div className="relative z-10 flex w-full max-w-2xl flex-col items-center">
-        <div className="inline-flex max-w-[min(100%,20rem)] items-center gap-2 rounded-full border border-accent/15 bg-card/80 px-3 py-1.5 shadow-sm ring-1 ring-accent/10 backdrop-blur-sm sm:max-w-none">
-          <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
-          <span className="truncate text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground sm:tracking-[0.2em]">
-            {headerLine}
-          </span>
+    <section className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center bg-background px-4 py-10 text-center sm:px-6 sm:py-12">
+      <div className="relative z-10 flex w-full max-w-3xl flex-col items-center">
+        <div className="relative z-20 flex flex-col items-center gap-2">
+          <div className="inline-flex max-w-[min(100%,20rem)] items-center gap-2 rounded-full border border-border/50 bg-card/90 px-3.5 py-1.5 shadow-sm sm:max-w-none">
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-accent" />
+            <span className="truncate text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground sm:tracking-[0.2em]">
+              {headerLine}
+            </span>
+          </div>
+          {isFoundingMember ? (
+            <FoundingMemberBadge size="md" />
+          ) : (
+            <EarlyAdopterCountdown className="max-w-md" />
+          )}
         </div>
 
         {bandLabel != null ? (
           <>
-            <p className="mt-8 text-balance text-lg font-medium text-foreground sm:text-xl">
-              Let&apos;s reach your goal of a
-            </p>
+            <div
+              className="mx-auto mt-3 h-px w-28 bg-gradient-to-r from-transparent via-border to-transparent sm:mt-4 sm:w-36"
+              aria-hidden
+            />
 
-            <div className="band-score-container relative my-6 flex min-h-[7.5rem] items-center justify-center sm:my-8">
-              <div
-                className="pointer-events-none absolute inset-0 rounded-full bg-accent/5 blur-2xl"
-                aria-hidden
-              />
-              <span
-                className="band-score-fill font-bold tabular-nums select-none text-[clamp(4.5rem,16vw,7.5rem)] leading-none tracking-tight"
-                style={{ "--fill-pct": `${fillPct}%` } as React.CSSProperties}
-                aria-hidden
-              >
-                {bandLabel}
-              </span>
-              <span
-                className="band-score-outline font-bold tabular-nums select-none text-[clamp(4.5rem,16vw,7.5rem)] leading-none tracking-tight"
-                aria-label={`Target band score ${bandLabel}, ${overallProgressPct}% complete`}
-              >
-                {bandLabel}
-              </span>
+            <div className="relative isolate mt-3 w-full max-w-3xl sm:mt-4">
+              <div className="relative aspect-[2/1] w-full">
+                <StudentBandJourneyFlightVisual
+                  {...flightVisualProps}
+                  layout="watermark"
+                />
+
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-2">
+                  <div className="flex w-full flex-col items-center gap-1 sm:gap-1.5">
+                    <p className="text-balance text-lg font-medium leading-snug text-foreground sm:text-xl">
+                      Let&apos;s reach your goal of a
+                    </p>
+
+                    {band != null ? (
+                      <BandScoreWaterDisplay
+                        band={band}
+                        overallProgressPct={journey.actualPct}
+                        className="py-0.5"
+                      />
+                    ) : null}
+
+                    <p className="text-balance text-lg font-semibold leading-snug text-foreground sm:text-xl">
+                      in IELTS {moduleLabel}
+                    </p>
+                  </div>
+
+                  <JourneyCountryPills
+                    currentCountry={currentCountry}
+                    dreamCountry={dreamCountry}
+                  />
+                </div>
+              </div>
             </div>
 
-            <p className="text-balance text-lg font-semibold text-foreground sm:text-xl">
-              in IELTS {moduleLabel}
-            </p>
-
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
-                <MapPin className="h-3.5 w-3.5 text-accent" />
-                {currentCountry}
-              </span>
-              <span className="text-muted-foreground/50" aria-hidden>
-                →
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm dark:text-emerald-200">
-                <MapPin className="h-3.5 w-3.5" />
-                {dreamCity ? `${dreamCity}, ${dreamCountry}` : dreamCountry}
-              </span>
-            </div>
-
-            <p className="mt-6 max-w-lg text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mt-4 max-w-lg text-balance text-sm leading-relaxed text-muted-foreground sm:mt-5 sm:text-base">
               {dreamLine}
             </p>
 
-            <div className="mt-5 w-full max-w-md rounded-2xl border border-border/40 bg-card/70 px-4 py-3 shadow-sm ring-1 ring-accent/[0.06] backdrop-blur-sm">
-              <div className="mb-2 flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="mt-4 w-full max-w-md rounded-2xl border border-border/50 bg-card px-4 py-3 shadow-sm sm:mt-5">
+              <div className="mb-2.5 flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 <span className="inline-flex items-center gap-1">
                   <TrendingUp className="h-3 w-3 text-accent" />
                   Journey progress
                 </span>
-                <span className="tabular-nums text-accent">{overallProgressPct}%</span>
+                <span className="tabular-nums text-accent">{journey.label}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted/80">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-accent/80 transition-all duration-1000 ease-out"
-                  style={{ width: `${Math.min(100, Math.max(0, overallProgressPct))}%` }}
+                  style={progressBarStyle}
                 />
               </div>
-              <p className="mt-2 text-xs text-muted-foreground/90">
-                Keep going — your Band {bandLabel} is closer than you think.
+              <p className="mt-2.5 text-xs text-muted-foreground/90">
+                {journey.masteredLevelCount > 0
+                  ? `${journey.masteredLevelCount} of 21 levels passed`
+                  : "Keep going"}
+                {" — "}
+                your Band {bandLabel} is closer than you think.
               </p>
             </div>
           </>
@@ -433,11 +388,11 @@ function BandHero({
         )}
 
         {bandLabel != null ? (
-          <div className="flex w-full justify-center pt-8 pb-4 sm:pt-10">
+          <div className="flex w-full justify-center pt-6 pb-2 sm:pt-7">
             <Link href={improveSkillsHref} className="w-full max-w-sm sm:w-auto">
               <Button
                 size="lg"
-                className="group h-12 w-full gap-2.5 bg-accent text-base font-semibold shadow-[0_4px_20px_-4px_rgba(30,58,138,0.45)] transition-all hover:-translate-y-0.5 hover:bg-accent/90 hover:shadow-[0_8px_28px_-6px_rgba(30,58,138,0.5)] sm:px-8"
+                className="group h-12 w-full gap-2.5 bg-accent text-base font-semibold shadow-[0_4px_20px_-4px_rgba(30,58,138,0.45)] transition-all hover:-translate-y-0.5 hover:bg-accent/90 hover:shadow-[0_8px_28px_-6px_rgba(30,58,138,0.5)] sm:px-10"
               >
                 <BookOpen className="h-4 w-4 transition-transform group-hover:scale-110" />
                 Improve your {moduleLower} skills
@@ -445,6 +400,10 @@ function BandHero({
             </Link>
           </div>
         ) : null}
+
+        <div className="mt-5 w-full max-w-2xl px-2 pb-6 sm:mt-6">
+          <ProfileSearchLeaderboard compact />
+        </div>
       </div>
     </section>
   );

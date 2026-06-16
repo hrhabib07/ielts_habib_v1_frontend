@@ -125,7 +125,7 @@ export interface GroupTest {
 export interface FinalTest {
   _id: string;
   levelVersionId: string;
-  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR";
+  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR" | "GAMLISH_SCANNING" | "GAMLISH_TFNG" | "PROGRESSIVE_MCQ";
   miniTestIds?: [string, string, string];
   practiceTestIds?: [string, string, string];
   createdAt?: string;
@@ -137,13 +137,16 @@ export function finalTestAsGroupTestList(
   legacyGroupTests?: GroupTest[],
 ): GroupTest[] {
   if (finalTest) {
-    const isSentenceLocator = finalTest.contentFormat === "SENTENCE_LOCATOR";
+    const isEmbeddedFinal =
+      finalTest.contentFormat === "SENTENCE_LOCATOR" ||
+      finalTest.contentFormat === "GAMLISH_SCANNING" ||
+      finalTest.contentFormat === "PROGRESSIVE_MCQ";
     return [
       {
         _id: finalTest._id,
         levelVersionId: finalTest.levelVersionId,
         orderInPool: 1,
-        miniTestIds: isSentenceLocator
+        miniTestIds: isEmbeddedFinal
           ? (finalTest.practiceTestIds ?? ["", "", ""])
           : (finalTest.miniTestIds ?? ["", "", ""]),
         createdAt: finalTest.createdAt,
@@ -159,7 +162,7 @@ export interface PracticeTest {
   levelVersionId: string;
   title: string;
   contentCode?: string;
-  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR" | "FULL_MOCK";
+  contentFormat?: "STANDARD" | "SENTENCE_LOCATOR" | "GAMLISH_SCANNING" | "GAMLISH_TFNG" | "PROGRESSIVE_MCQ" | "FULL_MOCK";
   miniTestId?: string;
   miniTestIds?: [string, string, string];
   timeLimitMinutes: number;
@@ -556,6 +559,7 @@ export async function upsertFinalTest(
     miniTestIds?: [string, string, string];
     passageQuestionSetIds?: [string, string, string];
     practiceTestIds?: [string, string, string];
+    contentFormat?: "SENTENCE_LOCATOR" | "GAMLISH_SCANNING" | "GAMLISH_TFNG" | "PROGRESSIVE_MCQ";
   },
 ): Promise<FinalTest> {
   const res = await apiClient.put<{
@@ -682,6 +686,9 @@ export interface UpdatePracticeTestPayload {
   order?: number;
   /** Replace full sentence locator payload (draft version only). */
   sentenceLocatorContent?: SentenceLocatorContentAuthoringPreview;
+  gamlishScanningContent?: GamlishScanningContentAuthoringPreview;
+  gamlishTfngContent?: GamlishTfngContentAuthoringPreview;
+  progressiveMcqContent?: ProgressiveMcqContentAuthoringPreview;
 }
 
 export async function listPracticeTests(versionId: string): Promise<PracticeTest[]> {
@@ -727,6 +734,161 @@ export async function createSentenceLocatorPracticeTest(
       timeLimitMinutes: payload.timeLimitMinutes,
       passType: payload.passType,
       passValue: payload.passValue ?? 60,
+      maxAttempts: payload.maxAttempts,
+      order: payload.order,
+    },
+  );
+  return unwrap(res);
+}
+
+export interface GamlishScanningQuestionAuthoringPreview {
+  id: string;
+  label: string;
+  order: number;
+  questionStatement: string;
+  targetKeywords: string[];
+  strongLocator: string | null;
+  correctSentenceId: string;
+  locatorSentenceIds?: string[];
+}
+
+export interface GamlishScanningContentAuthoringPreview {
+  passageTitle: string;
+  briefing?: string;
+  proTip?: string;
+  paragraphs: Array<{
+    id: string;
+    sentences: Array<{ id: string; text: string }>;
+  }>;
+  questions: GamlishScanningQuestionAuthoringPreview[];
+}
+
+export interface GamlishTfngQuestionAuthoringPreview {
+  id: string;
+  label: string;
+  order: number;
+  questionStatement: string;
+  targetKeywords: string[];
+  isAnchor: boolean;
+  anchorPhrase: string | null;
+  correctAnswer: "TRUE" | "FALSE" | "NOT GIVEN";
+  correctSentenceId: string;
+  logic?: string;
+}
+
+export interface GamlishTfngErrorTagAuthoringPreview {
+  tag: string;
+  trigger?: string;
+  feedback: string;
+}
+
+export interface GamlishTfngContentAuthoringPreview {
+  passageTitle: string;
+  briefing?: string;
+  proTip?: string;
+  instruction?: string;
+  paragraphs: Array<{
+    id: string;
+    sentences: Array<{ id: string; text: string }>;
+  }>;
+  questions: [
+    GamlishTfngQuestionAuthoringPreview,
+    GamlishTfngQuestionAuthoringPreview,
+    GamlishTfngQuestionAuthoringPreview,
+    GamlishTfngQuestionAuthoringPreview,
+  ];
+  errorTags?: GamlishTfngErrorTagAuthoringPreview[];
+}
+
+export interface CreateGamlishScanningPracticeTestPayload {
+  title: string;
+  contentCode?: string;
+  gamlishScanning: GamlishScanningContentAuthoringPreview;
+  timeLimitMinutes?: number;
+  passType?: string;
+  passValue?: number;
+  maxAttempts?: number | null;
+  order?: number;
+}
+
+export async function createGamlishScanningPracticeTest(
+  versionId: string,
+  payload: CreateGamlishScanningPracticeTestPayload,
+): Promise<PracticeTest> {
+  const res = await apiClient.post<{ success: boolean; data: PracticeTest }>(
+    `${BASE}/versions/${versionId}/practice-tests`,
+    {
+      title: payload.title,
+      contentCode: payload.contentCode,
+      contentFormat: "GAMLISH_SCANNING",
+      gamlishScanning: payload.gamlishScanning,
+      timeLimitMinutes: payload.timeLimitMinutes,
+      passType: payload.passType ?? "BAND",
+      passValue: payload.passValue ?? 0,
+      maxAttempts: payload.maxAttempts,
+      order: payload.order,
+    },
+  );
+  return unwrap(res);
+}
+
+export interface CreateGamlishTfngPracticeTestPayload {
+  title: string;
+  contentCode?: string;
+  gamlishTfng: GamlishTfngContentAuthoringPreview;
+  timeLimitMinutes?: number;
+  passType?: string;
+  passValue?: number;
+  maxAttempts?: number | null;
+  order?: number;
+}
+
+export async function createGamlishTfngPracticeTest(
+  versionId: string,
+  payload: CreateGamlishTfngPracticeTestPayload,
+): Promise<PracticeTest> {
+  const res = await apiClient.post<{ success: boolean; data: PracticeTest }>(
+    `${BASE}/versions/${versionId}/practice-tests`,
+    {
+      title: payload.title,
+      contentCode: payload.contentCode,
+      contentFormat: "GAMLISH_TFNG",
+      gamlishTfng: payload.gamlishTfng,
+      timeLimitMinutes: payload.timeLimitMinutes,
+      passType: payload.passType ?? "BAND",
+      passValue: payload.passValue ?? 0,
+      maxAttempts: payload.maxAttempts,
+      order: payload.order,
+    },
+  );
+  return unwrap(res);
+}
+
+export interface CreateProgressiveMcqPracticeTestPayload {
+  title: string;
+  contentCode?: string;
+  progressiveMcq: ProgressiveMcqContentAuthoringPreview;
+  timeLimitMinutes?: number;
+  passType?: string;
+  passValue?: number;
+  maxAttempts?: number | null;
+  order?: number;
+}
+
+export async function createProgressiveMcqPracticeTest(
+  versionId: string,
+  payload: CreateProgressiveMcqPracticeTestPayload,
+): Promise<PracticeTest> {
+  const res = await apiClient.post<{ success: boolean; data: PracticeTest }>(
+    `${BASE}/versions/${versionId}/practice-tests`,
+    {
+      title: payload.title,
+      contentCode: payload.contentCode,
+      contentFormat: "PROGRESSIVE_MCQ",
+      progressiveMcq: payload.progressiveMcq,
+      timeLimitMinutes: payload.timeLimitMinutes,
+      passType: payload.passType ?? "BAND",
+      passValue: payload.passValue ?? 0,
       maxAttempts: payload.maxAttempts,
       order: payload.order,
     },
@@ -816,6 +978,24 @@ export interface SentenceLocatorStatementAuthoringPreview {
   difficulty?: "EASY" | "MEDIUM" | "HARD";
 }
 
+export interface ProgressiveMcqItemAuthoringPreview {
+  id: string;
+  order: number;
+  contextTitle?: string;
+  contextText: string;
+  questionText: string;
+  options: { A: string; B: string; C: string; D: string };
+  correctOption: "A" | "B" | "C" | "D";
+  explanation: string;
+  logicType?: "WORD_SWAP" | "GRAMMAR_CHANGE" | "SENTENCE_FLIP";
+}
+
+export interface ProgressiveMcqContentAuthoringPreview {
+  instruction?: string;
+  items: ProgressiveMcqItemAuthoringPreview[];
+  reviewAfterEachAttempt?: boolean;
+}
+
 export interface SentenceLocatorContentAuthoringPreview {
   passageTitle: string;
   passageSubTitle?: string;
@@ -837,6 +1017,39 @@ export interface PracticeTestContentForPreviewSentenceLocator {
   sentenceLocator: SentenceLocatorContentAuthoringPreview;
 }
 
+export interface PracticeTestContentForPreviewGamlishScanning {
+  contentFormat: "GAMLISH_SCANNING";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts: number | null;
+  gamlishScanning: GamlishScanningContentAuthoringPreview;
+}
+
+export interface PracticeTestContentForPreviewGamlishTfng {
+  contentFormat: "GAMLISH_TFNG";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts: number | null;
+  gamlishTfng: GamlishTfngContentAuthoringPreview;
+}
+
+export interface PracticeTestContentForPreviewProgressiveMcq {
+  contentFormat: "PROGRESSIVE_MCQ";
+  practiceTestId: string;
+  title: string;
+  timeLimitMinutes: number;
+  passType: string;
+  passValue: number;
+  maxAttempts: number | null;
+  progressiveMcq: ProgressiveMcqContentAuthoringPreview;
+}
+
 export interface PracticeTestContentForPreviewFullMock {
   contentFormat: "FULL_MOCK";
   practiceTestId: string;
@@ -855,6 +1068,9 @@ export interface PracticeTestContentForPreviewFullMock {
 export type PracticeTestContentForPreview =
   | PracticeTestContentForPreviewStandard
   | PracticeTestContentForPreviewSentenceLocator
+  | PracticeTestContentForPreviewGamlishScanning
+  | PracticeTestContentForPreviewGamlishTfng
+  | PracticeTestContentForPreviewProgressiveMcq
   | PracticeTestContentForPreviewFullMock;
 
 export function isFullMockPreviewContent(
@@ -863,10 +1079,28 @@ export function isFullMockPreviewContent(
   return c.contentFormat === "FULL_MOCK" && "miniTests" in c;
 }
 
+export function isProgressiveMcqPreviewContent(
+  c: PracticeTestContentForPreview,
+): c is PracticeTestContentForPreviewProgressiveMcq {
+  return c.contentFormat === "PROGRESSIVE_MCQ" && "progressiveMcq" in c;
+}
+
 export function isSentenceLocatorPreviewContent(
   c: PracticeTestContentForPreview,
 ): c is PracticeTestContentForPreviewSentenceLocator {
   return c.contentFormat === "SENTENCE_LOCATOR" && "sentenceLocator" in c;
+}
+
+export function isGamlishScanningPreviewContent(
+  c: PracticeTestContentForPreview,
+): c is PracticeTestContentForPreviewGamlishScanning {
+  return c.contentFormat === "GAMLISH_SCANNING" && "gamlishScanning" in c;
+}
+
+export function isGamlishTfngPreviewContent(
+  c: PracticeTestContentForPreview,
+): c is PracticeTestContentForPreviewGamlishTfng {
+  return c.contentFormat === "GAMLISH_TFNG" && "gamlishTfng" in c;
 }
 
 export interface InstructorStatementFeedbackRow {

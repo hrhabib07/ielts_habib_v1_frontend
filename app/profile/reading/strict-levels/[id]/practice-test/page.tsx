@@ -13,10 +13,16 @@ import {
 import {
   type PracticeTestStepContent,
   isSentenceLocatorPracticeContent,
+  isGamlishScanningPracticeContent,
+  isGamlishTfngPracticeContent,
+  isProgressiveMcqPracticeContent,
   isFullMockPracticeContent,
 } from "@/src/lib/api/readingStrictProgression";
 import type { PracticeTestReadingViewHandle } from "@/src/components/reading/PracticeTestReadingView";
 import type { SentenceLocatorPracticeViewHandle } from "@/src/components/reading/SentenceLocatorPracticeView";
+import type { GamlishScanningPracticeViewHandle } from "@/src/components/reading/gamlish-scanning/GamlishScanningPracticeView";
+import type { GamlishTfngPracticeViewHandle } from "@/src/components/reading/gamlish-tfng/GamlishTfngPracticeView";
+import type { ProgressiveMcqPracticeViewHandle } from "@/src/components/reading/ProgressiveMcqPracticeView";
 import type { ReadingMockTestViewHandle } from "@/src/components/reading/ReadingMockTestView";
 import { ReadingAssessmentResultView } from "@/src/components/reading/ReadingAssessmentResultView";
 import { ReadingTestExitDialog } from "@/src/components/reading/ReadingTestExitDialog";
@@ -50,6 +56,30 @@ const SentenceLocatorPracticeView = dynamic(
   () =>
     import("@/src/components/reading/SentenceLocatorPracticeView").then(
       (m) => m.SentenceLocatorPracticeView,
+    ),
+  { ssr: false, loading: () => null },
+);
+
+const GamlishScanningPracticeView = dynamic(
+  () =>
+    import("@/src/components/reading/gamlish-scanning/GamlishScanningPracticeView").then(
+      (m) => m.GamlishScanningPracticeView,
+    ),
+  { ssr: false, loading: () => null },
+);
+
+const GamlishTfngPracticeView = dynamic(
+  () =>
+    import("@/src/components/reading/gamlish-tfng/GamlishTfngPracticeView").then(
+      (m) => m.GamlishTfngPracticeView,
+    ),
+  { ssr: false, loading: () => null },
+);
+
+const ProgressiveMcqPracticeView = dynamic(
+  () =>
+    import("@/src/components/reading/ProgressiveMcqPracticeView").then(
+      (m) => m.ProgressiveMcqPracticeView,
     ),
   { ssr: false, loading: () => null },
 );
@@ -98,6 +128,9 @@ function PracticeTestContent() {
   const testRef = useRef<
     | PracticeTestReadingViewHandle
     | SentenceLocatorPracticeViewHandle
+    | GamlishScanningPracticeViewHandle
+    | GamlishTfngPracticeViewHandle
+    | ProgressiveMcqPracticeViewHandle
     | ReadingMockTestViewHandle
     | null
   >(null);
@@ -133,7 +166,11 @@ function PracticeTestContent() {
 
   const applyPracticeContent = useCallback(async (practiceContent: PracticeTestStepContent) => {
     preloadPracticeTestViews();
-    if (isSentenceLocatorPracticeContent(practiceContent)) {
+    if (isGamlishScanningPracticeContent(practiceContent)) {
+      await import("@/src/components/reading/gamlish-scanning/GamlishScanningPracticeView");
+    } else if (isGamlishTfngPracticeContent(practiceContent)) {
+      await import("@/src/components/reading/gamlish-tfng/GamlishTfngPracticeView");
+    } else if (isSentenceLocatorPracticeContent(practiceContent)) {
       await import("@/src/components/reading/SentenceLocatorPracticeView");
     } else if (isFullMockPracticeContent(practiceContent)) {
       await import("@/src/components/reading/ReadingMockTestView");
@@ -359,7 +396,34 @@ function PracticeTestContent() {
           onCancel={() => setExitOpen(false)}
         />
         <div className="fixed inset-0 z-50 flex h-screen flex-col bg-slate-50 dark:bg-slate-950">
-          {isSentenceLocatorPracticeContent(content) ? (
+          {isProgressiveMcqPracticeContent(content) ? (
+            <ProgressiveMcqPracticeView
+              ref={testRef}
+              levelId={levelId}
+              stepId={stepId!}
+              content={content}
+              onSubmitted={handleSubmitted}
+              onRequestExit={openExitDialog}
+            />
+          ) : isGamlishTfngPracticeContent(content) ? (
+            <GamlishTfngPracticeView
+              ref={testRef}
+              levelId={levelId}
+              stepId={stepId!}
+              content={content}
+              onSubmitted={handleSubmitted}
+              onRequestExit={openExitDialog}
+            />
+          ) : isGamlishScanningPracticeContent(content) ? (
+            <GamlishScanningPracticeView
+              ref={testRef}
+              levelId={levelId}
+              stepId={stepId!}
+              content={content}
+              onSubmitted={handleSubmitted}
+              onRequestExit={openExitDialog}
+            />
+          ) : isSentenceLocatorPracticeContent(content) ? (
             <SentenceLocatorPracticeView
               ref={testRef}
               levelId={levelId}
@@ -406,18 +470,37 @@ function PracticeTestContent() {
   }
 
   if (phase === "result" && result) {
-    const isSl = content != null && isSentenceLocatorPracticeContent(content);
-    const showReview = Boolean(result.attemptId) && (isSl || result.passed);
+    const isSl =
+      content != null &&
+      (isSentenceLocatorPracticeContent(content) ||
+        isGamlishScanningPracticeContent(content) ||
+        isGamlishTfngPracticeContent(content));
+    const isPm = content != null && isProgressiveMcqPracticeContent(content);
+    const showReview = Boolean(result.attemptId) && (isSl || result.passed) && !isPm;
     const statementsCorrect =
       result.statementsCorrect ??
-      (isSl && content?.sentenceLocator?.statements?.length
+      (isSl && content && isSentenceLocatorPracticeContent(content) && content.sentenceLocator.statements.length
         ? {
             correct: Math.round(
               (result.scorePercent / 100) * content.sentenceLocator.statements.length,
             ),
             total: content.sentenceLocator.statements.length,
           }
-        : undefined);
+        : isSl && content && isGamlishTfngPracticeContent(content)
+          ? {
+              correct: Math.round(
+                (result.scorePercent / 100) * content.gamlishTfng.questions.length,
+              ),
+              total: content.gamlishTfng.questions.length,
+            }
+          : isSl && content && isGamlishScanningPracticeContent(content)
+          ? {
+              correct: Math.round(
+                (result.scorePercent / 100) * content.gamlishScanning.questions.length,
+              ),
+              total: content.gamlishScanning.questions.length,
+            }
+          : undefined);
 
     return (
       <ReadingAssessmentResultView

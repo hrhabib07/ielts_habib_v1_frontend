@@ -12,8 +12,20 @@ import {
 } from "@/src/lib/api/subscription";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { PricingFaqSection } from "@/src/components/pricing/PricingFaqSection";
+import {
+  hasBlockingPaymentStatus,
+  PaymentApplicationStatusCard,
+} from "@/src/components/pricing/PaymentApplicationStatusCard";
 import { ExplodingOfferCheckoutCard } from "@/src/components/scholarship/ExplodingOfferCheckoutCard";
+import { ScholarshipDecayClaimCard } from "@/src/components/scholarship/ScholarshipDecayClaimCard";
+import { EarlyAdopterCountdown } from "@/src/components/founding-member/EarlyAdopterCountdown";
+import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
+import {
+  isFoundingMemberEligible,
+  isFoundingMemberWindowOpen,
+} from "@/src/lib/foundingMember";
 import { useScholarship } from "@/src/contexts/ScholarshipContext";
+import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
 
 function formatDuration(days: number): string {
   const totalMonths = Math.max(1, Math.floor(days / 30));
@@ -52,9 +64,10 @@ function extractBkashNumber(text: string | null | undefined): string | null {
 interface PurchaseFormProps {
   plan: SubscriptionPlan;
   onClose: () => void;
+  onSubmitted: () => void;
 }
 
-function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
+function PurchaseForm({ plan, onClose, onSubmitted }: PurchaseFormProps) {
   const { status: scholarshipStatus } = useScholarship();
   const [txId, setTxId] = useState("");
   const [senderNumber, setSenderNumber] = useState("");
@@ -65,7 +78,7 @@ function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
 
   const basePrice = plan.discountPrice ?? plan.price;
   const scholarshipActive = Boolean(
-    scholarshipStatus?.isOfferActive && scholarshipStatus.activeDiscountPercent > 0,
+    scholarshipStatus?.isClaimActive && scholarshipStatus.activeDiscountPercent > 0,
   );
 
   const discountAmount = scholarshipActive
@@ -108,6 +121,7 @@ function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
         senderNumber: senderNumber.trim() || undefined,
         paidAmount,
       });
+      onSubmitted();
       setSuccess(true);
     } catch {
       setError("Failed to submit. Please try again.");
@@ -124,11 +138,11 @@ function PurchaseForm({ plan, onClose }: PurchaseFormProps) {
         </div>
         <h3 className="text-lg font-semibold text-foreground">Payment submitted!</h3>
         <p className="text-sm text-muted-foreground">
-          Your payment proof has been submitted. You will receive access within 24–48 hours
-          after verification by our team.
+          Your payment proof has been submitted. Track your application status above.
+          You will receive access within 24–48 hours after verification.
         </p>
         <Button variant="outline" onClick={onClose}>
-          Back to plans
+          View application status
         </Button>
       </div>
     );
@@ -292,15 +306,19 @@ function PlanCard({
   plan,
   onPurchase,
   isLoggedIn,
+  purchaseDisabled,
+  purchaseDisabledReason,
 }: {
   plan: SubscriptionPlan;
   onPurchase: (plan: SubscriptionPlan) => void;
   isLoggedIn: boolean;
+  purchaseDisabled?: boolean;
+  purchaseDisabledReason?: string;
 }) {
   const { status: scholarshipStatus } = useScholarship();
   const basePrice = plan.discountPrice ?? plan.price;
   const scholarshipActive = Boolean(
-    scholarshipStatus?.isOfferActive && scholarshipStatus.activeDiscountPercent > 0,
+    scholarshipStatus?.isClaimActive && scholarshipStatus.activeDiscountPercent > 0,
   );
   const effectivePrice = scholarshipActive
     ? Math.max(0, basePrice - Math.round((basePrice * scholarshipStatus!.activeDiscountPercent) / 100))
@@ -355,10 +373,16 @@ function PlanCard({
 
       <div className="mt-8 flex flex-col gap-2">
         {isLoggedIn ? (
-          <Button className="w-full gap-2" onClick={() => onPurchase(plan)}>
-            <Zap className="h-4 w-4" />
-            Get access
-          </Button>
+          purchaseDisabled ? (
+            <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-center text-xs text-amber-800 dark:text-amber-200">
+              {purchaseDisabledReason ?? "Checkout is unavailable right now."}
+            </p>
+          ) : (
+            <Button className="w-full gap-2" onClick={() => onPurchase(plan)}>
+              <Zap className="h-4 w-4" />
+              Get access
+            </Button>
+          )
         ) : (
           <>
             <Link href="/register">
@@ -381,20 +405,92 @@ function PlanCard({
 
 interface PricingContentProps {
   initialUser: CurrentUser | null;
+  autoOpenCheckout?: boolean;
 }
 
-export function PricingContent({ initialUser }: PricingContentProps) {
+export function PricingContent({
+  initialUser,
+  autoOpenCheckout = false,
+}: PricingContentProps) {
   const { status: scholarshipStatus } = useScholarship();
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const isLoggedIn = !!initialUser;
 
+  const {
+    activeSubscription,
+    latestRequest,
+    loading: paymentStatusLoading,
+    refresh: refreshPaymentStatus,
+    hasActiveAccess,
+    isPendingReview,
+    isRejected,
+  } = usePaymentApplicationStatus(isLoggedIn);
+
+  const checkoutBlocked = hasBlockingPaymentStatus(
+    activeSubscription,
+    latestRequest,
+  );
+
+  const showStatusCard =
+    isLoggedIn &&
+    !paymentStatusLoading &&
+    (hasActiveAccess || isPendingReview || isRejected);
+
+  const showExplodingOffer =
+    !selectedPlan &&
+    !loading &&
+    !paymentStatusLoading &&
+    !checkoutBlocked &&
+    scholarshipStatus?.isClaimActive;
+
+  const showDecayClaim =
+    !selectedPlan && !loading && !checkoutBlocked;
+
+  const showFoundingMemberBadge =
+    isLoggedIn && isFoundingMemberEligible(activeSubscription);
+
+  const showFoundingCountdown =
+    !showFoundingMemberBadge && isFoundingMemberWindowOpen();
+
   useEffect(() => {
     getPublicPlans()
       .then(setPlans)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (
+      !autoOpenCheckout ||
+      loading ||
+      paymentStatusLoading ||
+      checkoutBlocked ||
+      !isLoggedIn ||
+      !plans[0]
+    ) {
+      return;
+    }
+    setSelectedPlan(plans[0]);
+  }, [
+    autoOpenCheckout,
+    loading,
+    paymentStatusLoading,
+    checkoutBlocked,
+    isLoggedIn,
+    plans,
+  ]);
+
+  const handlePurchaseSubmitted = () => {
+    setSelectedPlan(null);
+    void refreshPaymentStatus();
+  };
+
+  const handleApplyAgain = () => {
+    if (plans[0]) {
+      setSelectedPlan(plans[0]);
+    }
+  };
 
   return (
     <main className="relative mx-auto max-w-4xl px-4 py-12 sm:px-6 md:py-20 space-y-12 md:space-y-16">
@@ -410,31 +506,50 @@ export function PricingContent({ initialUser }: PricingContentProps) {
           Unlock Reading mastery
         </h1>
         <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Complete Levels 0–1 fast to unlock a speed-based scholarship on Premium — no promo codes.
+          Claim your 60% Founder scholarship — available until 1 August 2026.
         </p>
+        {(showFoundingMemberBadge || showFoundingCountdown) && (
+          <div className="mx-auto flex max-w-md flex-col items-center gap-2 pt-2">
+            {showFoundingMemberBadge ? (
+              <FoundingMemberBadge size="md" />
+            ) : (
+              <EarlyAdopterCountdown className="w-full" />
+            )}
+            <Link
+              href="/founding-members"
+              className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-accent hover:underline"
+            >
+              See the Founders&apos; Wall
+            </Link>
+          </div>
+        )}
       </div>
 
-      {!selectedPlan && !loading && scholarshipStatus?.isOfferActive && (
-        <ExplodingOfferCheckoutCard />
+      {showStatusCard && (
+        <PaymentApplicationStatusCard
+          activeSubscription={activeSubscription}
+          latestRequest={latestRequest}
+          onApplyAgain={isRejected ? handleApplyAgain : undefined}
+        />
       )}
 
-      {!selectedPlan && !loading && scholarshipStatus?.inTrialPhase && !scholarshipStatus.isOfferActive && (
-        <Card className="relative overflow-hidden rounded-2xl border border-slate-700/40 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-6 text-slate-100 shadow-sm">
-          <p className="text-sm font-semibold">Fast Action Scholarship</p>
-          <p className="mt-1 text-sm text-slate-400">
-            Finish Level 1 quickly after signup to unlock up to 60% off Premium. Your tier is shown
-            in the banner above while you train.
-          </p>
-        </Card>
+      {showExplodingOffer && (
+        <ExplodingOfferCheckoutCard onUpgradeClick={() => plans[0] && setSelectedPlan(plans[0])} />
       )}
+
+      {showDecayClaim && <ScholarshipDecayClaimCard />}
 
       {selectedPlan ? (
-        <PurchaseForm plan={selectedPlan} onClose={() => setSelectedPlan(null)} />
-      ) : loading ? (
+        <PurchaseForm
+          plan={selectedPlan}
+          onClose={() => setSelectedPlan(null)}
+          onSubmitted={handlePurchaseSubmitted}
+        />
+      ) : loading || (isLoggedIn && paymentStatusLoading) ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      ) : plans.length === 0 ? (
+      ) : hasActiveAccess ? null : plans.length === 0 ? (
         <Card className="p-8 text-center text-muted-foreground">
           <p>No plans available right now. Check back soon.</p>
         </Card>
@@ -446,6 +561,8 @@ export function PricingContent({ initialUser }: PricingContentProps) {
               plan={plan}
               onPurchase={setSelectedPlan}
               isLoggedIn={isLoggedIn}
+              purchaseDisabled={isPendingReview}
+              purchaseDisabledReason="Your payment is under review. Please wait for admin verification."
             />
           ))}
         </div>

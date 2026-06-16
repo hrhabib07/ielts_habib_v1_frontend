@@ -86,5 +86,7 @@ export function peekPracticeTestContentCached(
 export function preloadPracticeTestViews(): void {
   if (typeof window === "undefined") return;
   void import("@/src/components/reading/SentenceLocatorPracticeView");
+  void import("@/src/components/reading/gamlish-scanning/GamlishScanningPracticeView");
+  void import("@/src/components/reading/ProgressiveMcqPracticeView");
   void import("@/src/components/reading/PracticeTestReadingView");
 }

@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getLevelsByModule, getCurrentLevel } from "@/src/lib/api/levels";
-import { getLevelDetail } from "@/src/lib/api/readingStrictProgression";
+import {
+  getLevelDetail,
+  getReadingPathSummary,
+  type ReadingPathLevelStatus,
+  type ReadingPathSummary,
+} from "@/src/lib/api/readingStrictProgression";
 import type { Level } from "@/src/lib/api/levels";
 import type { LevelDetailForStudent } from "@/src/lib/api/readingStrictProgression";
-import { getProfileSummary } from "@/src/lib/api/profile";
-import type { ProfileSummary } from "@/src/lib/api/types";
 import {
   buildMockLevelPlaceholderDetail,
   getMockLevelLaunchState,
@@ -16,7 +19,9 @@ import {
   mergeReadingLevelsWithMockPlaceholders,
   shouldUseMockLevelPlaceholder,
 } from "@/src/lib/readingMockLevelsLaunch";
-import { readingLevelIndexFromOrder } from "@/src/lib/readingLevelOrder";
+import {
+  displayLevelNumberFromOrder,
+} from "@/src/lib/readingLevelOrder";
 import { zoneIdForLevelOrder } from "@/src/lib/readingPathZones";
 
 type DetailCache = Record<string, LevelDetailForStudent>;
@@ -24,23 +29,6 @@ type DetailCache = Record<string, LevelDetailForStudent>;
 function getCurrentLevelOrder(levels: Level[], currentLevelId: string | null): number {
   if (!currentLevelId) return -1;
   return levels.find((l) => l._id === currentLevelId)?.order ?? -1;
-}
-
-function isLevelUnlockedStrict(
-  levelIndex: number,
-  levelOrder: number,
-  currentOrder: number,
-  levels: Level[],
-  detailCache: DetailCache,
-  curriculumDemoAccount: boolean,
-): boolean {
-  if (curriculumDemoAccount) return true;
-  if (levelIndex === 0) return true;
-  if (levelOrder <= currentOrder) return true;
-  const prev = levels[levelIndex - 1];
-  if (!prev) return true;
-  if (detailCache[prev._id]?.progress.passStatus === "PASSED") return true;
-  return false;
 }
 
 export function useReadingPathState() {
@@ -51,7 +39,7 @@ export function useReadingPathState() {
   const [expandedLevelId, setExpandedLevelId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [curriculumDemoAccount, setCurriculumDemoAccount] = useState(false);
-  const [profileSummary, setProfileSummary] = useState<ProfileSummary | null>(null);
+  const [pathSummary, setPathSummary] = useState<ReadingPathSummary | null>(null);
   const requestedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -60,9 +48,9 @@ export function useReadingPathState() {
     Promise.all([
       getLevelsByModule("READING"),
       getCurrentLevel("READING").catch(() => null),
-      getProfileSummary().catch(() => null),
+      getReadingPathSummary().catch(() => null),
     ])
-      .then(([levelsData, progress, summary]) => {
+      .then(([levelsData, progress, path]) => {
         if (cancelled) return;
         const merged = mergeReadingLevelsWithMockPlaceholders(levelsData);
         setLevels(merged);
@@ -71,11 +59,11 @@ export function useReadingPathState() {
             ? (progress.levelId as Level)._id
             : typeof progress?.levelId === "string"
               ? progress.levelId
-              : null;
+              : path?.currentLevelId ?? null;
         setCurrentLevelId(levelId ?? null);
         setCurrentStepId(progress?.currentStepId ?? null);
         setCurriculumDemoAccount(progress?.curriculumDemoAccount === true);
-        setProfileSummary(summary);
+        setPathSummary(path);
         if (levelId) {
           setExpandedLevelId(levelId);
         }
@@ -88,16 +76,38 @@ export function useReadingPathState() {
     };
   }, []);
 
+  const levelStatusById = useMemo(() => {
+    const map = new Map<string, ReadingPathLevelStatus>();
+    for (const row of pathSummary?.levels ?? []) {
+      map.set(row.levelId, row);
+    }
+    return map;
+  }, [pathSummary]);
+
   const currentOrder = getCurrentLevelOrder(levels, currentLevelId);
   const activeZoneId = useMemo(
     () => (currentOrder >= 0 ? zoneIdForLevelOrder(currentOrder) : "beginner"),
     [currentOrder],
   );
 
-  const isLevelUnlocked = useCallback(
-    (levelIndex: number, level: Level) => {
+  const getLevelAccess = useCallback(
+    (level: Level, levelIndex: number) => {
+      const fromApi = levelStatusById.get(level._id);
+      if (fromApi) {
+        const accessible =
+          fromApi.isPassed ||
+          (fromApi.progressionUnlocked && !fromApi.premiumLocked);
+        return {
+          isPassed: fromApi.isPassed,
+          isCurrent: fromApi.isCurrent,
+          accessible,
+          premiumLocked: fromApi.premiumLocked,
+          progressionLocked: fromApi.progressionLocked,
+        };
+      }
+
       if (shouldUseMockLevelPlaceholder(level.order)) {
-        return isMockLevelUnlockedForStudent(
+        const unlocked = isMockLevelUnlockedForStudent(
           levelIndex,
           level.order,
           currentOrder,
@@ -107,17 +117,38 @@ export function useReadingPathState() {
           null,
           curriculumDemoAccount,
         );
+        return {
+          isPassed: false,
+          isCurrent: level._id === currentLevelId,
+          accessible: unlocked,
+          premiumLocked: false,
+          progressionLocked: !unlocked,
+        };
       }
-      return isLevelUnlockedStrict(
-        levelIndex,
-        level.order,
-        currentOrder,
-        levels,
-        detailCache,
-        curriculumDemoAccount,
-      );
+
+      return {
+        isPassed: false,
+        isCurrent: level._id === currentLevelId,
+        accessible: levelIndex === 0 || level.order <= currentOrder,
+        premiumLocked: false,
+        progressionLocked: levelIndex > 0 && level.order > currentOrder,
+      };
     },
-    [currentOrder, levels, detailCache, curriculumDemoAccount],
+    [
+      levelStatusById,
+      currentOrder,
+      levels,
+      detailCache,
+      curriculumDemoAccount,
+      currentLevelId,
+    ],
+  );
+
+  const isLevelUnlocked = useCallback(
+    (levelIndex: number, level: Level) => {
+      return getLevelAccess(level, levelIndex).accessible;
+    },
+    [getLevelAccess],
   );
 
   const loadLevelDetail = useCallback(
@@ -170,37 +201,21 @@ export function useReadingPathState() {
     if (!currentLevelId || levels.length === 0) return;
     const level = levels.find((l) => l._id === currentLevelId);
     if (level) loadLevelDetail(currentLevelId, level.order);
-    const idx = levels.findIndex((l) => l._id === currentLevelId);
-    if (idx > 0) {
-      const prev = levels[idx - 1];
-      if (prev) loadLevelDetail(prev._id, prev.order);
-    }
   }, [currentLevelId, levels, loadLevelDetail]);
 
   const overallProgressPct = useMemo(() => {
-    if (profileSummary?.overallProgressPct != null) {
-      return Math.round(profileSummary.overallProgressPct);
+    if (pathSummary?.passedProgressPct != null) {
+      return pathSummary.passedProgressPct;
     }
-    const passedCount = levels.filter((l) => {
-      const d = detailCache[l._id];
-      return d?.progress.passStatus === "PASSED";
-    }).length;
-    if (levels.length === 0) return 0;
-    return Math.round((passedCount / levels.length) * 100);
-  }, [profileSummary?.overallProgressPct, levels, detailCache]);
+    return 0;
+  }, [pathSummary?.passedProgressPct]);
 
   const levelsCompletedCount = useMemo(() => {
-    const currentIdx =
-      currentOrder >= 0 ? readingLevelIndexFromOrder(currentOrder) : -1;
-    return levels.filter((l) => {
-      if (detailCache[l._id]?.progress.passStatus === "PASSED") return true;
-      if (currentIdx >= 0) {
-        const idx = readingLevelIndexFromOrder(l.order);
-        return idx >= 0 && idx < currentIdx;
-      }
-      return false;
-    }).length;
-  }, [levels, detailCache, currentOrder]);
+    if (pathSummary?.passedLevelCount != null) {
+      return pathSummary.passedLevelCount;
+    }
+    return levels.filter((l) => levelStatusById.get(l._id)?.isPassed).length;
+  }, [pathSummary?.passedLevelCount, levels, levelStatusById]);
 
   const toggleLevel = useCallback(
     (levelId: string, levelOrder: number, canExpand: boolean) => {
@@ -212,7 +227,7 @@ export function useReadingPathState() {
   );
 
   const displayLevelNumber = useCallback((order: number) => {
-    return readingLevelIndexFromOrder(order);
+    return displayLevelNumberFromOrder(order);
   }, []);
 
   return {
@@ -224,11 +239,13 @@ export function useReadingPathState() {
     activeZoneId,
     expandedLevelId,
     detailCache,
-    profileSummary,
+    pathSummary,
+    levelStatusById,
     overallProgressPct,
     levelsCompletedCount,
     curriculumDemoAccount,
     isLevelUnlocked,
+    getLevelAccess,
     toggleLevel,
     displayLevelNumber,
     loadLevelDetail,

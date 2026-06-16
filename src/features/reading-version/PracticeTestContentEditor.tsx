@@ -12,6 +12,7 @@ import {
   type GroupTestQuestionGroupForPreview,
   type GroupTestQuestionForPreview,
   isSentenceLocatorPreviewContent,
+  isProgressiveMcqPreviewContent,
   isFullMockPreviewContent,
 } from "@/src/lib/api/adminReadingVersions";
 import {
@@ -171,6 +172,30 @@ export function PracticeTestContentEditor({
     );
   }
 
+  if (content && isProgressiveMcqPreviewContent(content)) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="flex max-w-md flex-col gap-4 rounded-xl bg-white p-6 dark:bg-slate-900">
+          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+            Progressive MCQ practice test
+          </h2>
+          <p className="text-sm text-stone-600 dark:text-stone-400">
+            Edit via bulk JSON in the Practice tests section, or update{" "}
+            <code className="text-xs">progressiveMcqContent</code> through the API. See{" "}
+            <code className="text-xs">docs/PROGRESSIVE_MCQ_L5_JSON.md</code>.
+          </p>
+          <p className="text-sm text-stone-500">
+            {content.progressiveMcq.items.length} item
+            {content.progressiveMcq.items.length !== 1 ? "s" : ""} in this test.
+          </p>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (content && isFullMockPreviewContent(content)) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -202,6 +227,10 @@ export function PracticeTestContentEditor({
         </div>
       </div>
     );
+  }
+
+  if (!content || !("miniTest" in content)) {
+    return null;
   }
 
   const passage = content.miniTest.passage;
@@ -797,17 +826,21 @@ function JsonTab({
 }) {
   const jsonText = isSentenceLocatorPreviewContent(content)
     ? JSON.stringify({ sentenceLocator: content.sentenceLocator }, null, 2)
+    : isProgressiveMcqPreviewContent(content)
+      ? JSON.stringify({ progressiveMcq: content.progressiveMcq }, null, 2)
     : isFullMockPreviewContent(content)
       ? JSON.stringify({ miniTests: content.miniTests }, null, 2)
-      : JSON.stringify(
-          {
-            passage: content.miniTest.passage,
-            questionGroups: content.miniTest.questionGroups,
-            questions: content.miniTest.questions,
-          },
-          null,
-          2,
-        );
+      : "miniTest" in content
+        ? JSON.stringify(
+            {
+              passage: content.miniTest.passage,
+              questionGroups: content.miniTest.questionGroups,
+              questions: content.miniTest.questions,
+            },
+            null,
+            2,
+          )
+        : "{}";
   const [copyFeedback, setCopyFeedback] = useState(false);
 
   const handleCopy = async () => {
@@ -821,6 +854,8 @@ function JsonTab({
       <p className="text-sm text-stone-500 dark:text-stone-400">
         {isSentenceLocatorPreviewContent(content)
           ? "Read-only export of sentence locator authoring data. To change content, use Practice tests → edit (JSON) on the level version."
+          : isProgressiveMcqPreviewContent(content)
+            ? "Read-only export of progressive MCQ authoring data. Edit via bulk JSON — see docs/PROGRESSIVE_MCQ_L5_JSON.md."
           : "Export the full content as JSON. Use this to inspect structure or prepare bulk edits. To apply changes, edit the passage or questions in their tabs."}
       </p>
       <div className="flex gap-2">

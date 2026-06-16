@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GroupTestsBulkCreateCard } from "@/src/features/reading-level-builder/GroupTestsBulkCreateCard";
 import { L0FinalTestsBuilder } from "@/src/features/reading-level-builder/L0FinalTestsBuilder";
 import { isReadingFoundationL0 } from "@/src/lib/readingLevelOrder";
+import { InstructorLevelCodeNotice } from "@/src/components/instructor/InstructorLevelCodeNotice";
 
 interface VersionEditClientProps {
   levelId: string;
@@ -126,6 +127,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
 
   return (
     <div className="space-y-6">
+      <InstructorLevelCodeNotice />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
@@ -224,7 +226,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
           <CardTitle className="text-base">1. Practice tests</CardTitle>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
             Add at least three practice tests. Steps sync automatically when you save (standard passage sets or
-            sentence locator JSON for Level 0).
+            Gamlish scanning JSON for Reading Fundamentals / DB Level 0).
           </p>
         </CardHeader>
         <CardContent>
@@ -233,6 +235,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
             practiceTests={practiceTests ?? []}
             disabled={disabled}
             onPracticeTestsChange={handlePracticeTestsChange}
+            isReadingL0Foundation={isReadingL0Foundation}
           />
         </CardContent>
       </Card>

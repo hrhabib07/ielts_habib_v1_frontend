@@ -53,10 +53,10 @@ export function Footer({ initialUser = null }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="/#how-to-play"
+                  href="/#how-gamlish-works"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  How to play
+                  How it works
                 </Link>
               </li>
               <li>
@@ -65,6 +65,14 @@ export function Footer({ initialUser = null }: FooterProps) {
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Plans &amp; pricing
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/founding-members"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Founders&apos; Wall
                 </Link>
               </li>
               <li>

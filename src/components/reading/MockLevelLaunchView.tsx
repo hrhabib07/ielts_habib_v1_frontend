@@ -19,6 +19,7 @@ import {
   type MockLevelOrder,
 } from "@/src/lib/readingMockLevelsLaunch";
 import { cn } from "@/lib/utils";
+import { formatDisplayLevelLabel } from "@/src/lib/readingLevelOrder";
 
 const STEP_ICONS: Record<string, typeof BookOpen> = {
   INSTRUCTION: Sparkles,
@@ -65,7 +66,7 @@ export function MockLevelLaunchView(props: {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              Level {levelOrder} · {MOCK_LEVEL_TITLES[levelOrder]}
+              {formatDisplayLevelLabel(levelOrder)} · {MOCK_LEVEL_TITLES[levelOrder]}
             </p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
               {isComingSoon ? "Coming soon" : "Level locked"}
@@ -73,7 +74,7 @@ export function MockLevelLaunchView(props: {
             <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
               {isComingSoon
                 ? MOCK_LEVEL_LAUNCH_MESSAGE
-                : `Complete Level ${levelOrder - 1} to unlock this full reading mock path.`}
+                : `Complete ${formatDisplayLevelLabel(levelOrder - 1)} to unlock this full reading mock path.`}
             </p>
             {isComingSoon && (
               <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-white/80 px-3 py-1 text-xs font-medium text-indigo-800 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-200">

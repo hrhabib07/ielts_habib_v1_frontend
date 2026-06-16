@@ -35,6 +35,9 @@ function buildPreviewDetail(
   }));
 
   const hasFinalEvalStep = steps.some((s) => s.stepType === "FINAL_EVALUATION");
+  const hasEmbeddedFinalPracticeSteps = steps.some(
+    (s) => s.stepType === "PRACTICE_TEST" && /\bfinal\b/i.test(s.title),
+  );
   const evalType = detail.version.evaluationConfig?.finalEvaluationType ?? "GROUP_TEST";
   const isSkillWithGroupTests =
     level.levelType === "SKILL" &&
@@ -43,13 +46,18 @@ function buildPreviewDetail(
   const isFoundationL0BandFinals =
     isReadingFoundationL0(level) &&
     (detail.finalTest?.contentFormat === "SENTENCE_LOCATOR" ||
-      (evalType === "GROUP_TEST" || evalType === "SEQUENTIAL_FINALS"));
+      evalType === "GROUP_TEST" ||
+      evalType === "SEQUENTIAL_FINALS");
 
   let finalSteps = steps;
   let currentStepIndex = steps.length;
   let completedStepIds = steps.map((s) => s._id);
 
-  if (!hasFinalEvalStep && (isSkillWithGroupTests || isFoundationL0BandFinals)) {
+  if (
+    !hasFinalEvalStep &&
+    !hasEmbeddedFinalPracticeSteps &&
+    (isSkillWithGroupTests || isFoundationL0BandFinals)
+  ) {
     const syntheticId = `preview-final-${detail.version._id}`;
     finalSteps = [
       ...steps,

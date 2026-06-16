@@ -11,6 +11,7 @@ export function isReadingPremiumLockMessage(
     m.includes("paid reading module") ||
     m.includes("subscribe to continue") ||
     m.includes("active reading subscription") ||
+    m.includes("levels 2 and above require") ||
     m.includes("practice test 2 onward")
   );
 }

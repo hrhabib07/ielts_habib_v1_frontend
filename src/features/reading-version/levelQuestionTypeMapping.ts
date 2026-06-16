@@ -188,3 +188,8 @@ export function resolveLevelTemplateIndex(params: {
   // Last resort: original behavior (order is typically 1-based).
   return clamp(order - 1);
 }
+
+/** Template index from resolveLevelTemplateIndex — Level 5 = Paraphrase Engine / Progressive MCQ. */
+export function isProgressiveMcqTemplateLevel(levelOrder: number): boolean {
+  return levelOrder === 5;
+}

@@ -1,12 +1,13 @@
-/** Preferred greeting name: nickname, else first token of legal name. */
+import type { StudentProfile } from "@/src/lib/api/types";
+
+/** Preferred greeting name: displayName, else username. */
 export function getStudentDisplayName(
-  profile: { nickname?: string | null; name?: string | null } | null | undefined,
+  profile: { displayName?: string | null; username?: string | null } | null | undefined,
 ): string | null {
   if (!profile) return null;
-  const nick = profile.nickname?.trim();
-  if (nick) return nick;
-  const legal = profile.name?.trim();
-  if (!legal) return null;
-  const first = legal.split(/\s+/)[0];
-  return first || null;
+  const display = profile.displayName?.trim();
+  if (display) return display;
+  const handle = profile.username?.trim();
+  if (handle) return handle;
+  return null;
 }

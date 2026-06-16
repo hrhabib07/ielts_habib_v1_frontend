@@ -3,11 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   formatCountdownMs,
-  getTierTimerFromCreatedAt,
+  getDecayStateFromStartTime,
 } from "@/src/lib/scholarshipUtils";
 
 export interface ScholarshipTimerState {
-  /** False until client mount — avoids hydration mismatch. */
   ready: boolean;
   currentTierPercent: number;
   nextTierPercent: number;
@@ -16,9 +15,11 @@ export interface ScholarshipTimerState {
 }
 
 /**
- * Real-time countdown until the next scholarship tier drops (trial phase).
+ * Live countdown until the current decay tier drops.
  */
-export function useScholarshipTimer(createdAt: string | null | undefined): ScholarshipTimerState {
+export function useScholarshipDecayTimer(
+  scholarshipStartTime: string | null | undefined,
+): ScholarshipTimerState {
   const [nowMs, setNowMs] = useState<number | null>(null);
 
   useEffect(() => {
@@ -28,29 +29,37 @@ export function useScholarshipTimer(createdAt: string | null | undefined): Schol
   }, []);
 
   return useMemo(() => {
-    if (!createdAt || nowMs == null) {
+    if (!scholarshipStartTime || nowMs == null) {
       return {
         ready: false,
         currentTierPercent: 60,
-        nextTierPercent: 50,
+        nextTierPercent: 0,
         remainingMs: 0,
         formatted: "--:--:--",
       };
     }
 
-    const timer = getTierTimerFromCreatedAt(createdAt, nowMs);
+    const timer = getDecayStateFromStartTime(scholarshipStartTime, nowMs);
     return {
       ready: true,
       ...timer,
       formatted: formatCountdownMs(timer.remainingMs),
     };
-  }, [createdAt, nowMs]);
+  }, [scholarshipStartTime, nowMs]);
+}
+
+/** @deprecated Use useScholarshipDecayTimer */
+export function useScholarshipTimer(createdAt: string | null | undefined): ScholarshipTimerState {
+  return useScholarshipDecayTimer(createdAt);
 }
 
 /**
- * Countdown for the exploding offer expiry window.
+ * Countdown for the 48-hour claim checkout window.
  */
-export function useOfferExpiryTimer(remainingMs: number): { ready: boolean; formatted: string } {
+export function useClaimExpiryTimer(claimRemainingMs: number): {
+  ready: boolean;
+  formatted: string;
+} {
   const [nowMs, setNowMs] = useState<number | null>(null);
   const [anchorMs, setAnchorMs] = useState<number | null>(null);
 
@@ -59,14 +68,22 @@ export function useOfferExpiryTimer(remainingMs: number): { ready: boolean; form
     setAnchorMs(Date.now());
     const id = window.setInterval(() => setNowMs(Date.now()), 1000);
     return () => window.clearInterval(id);
-  }, [remainingMs]);
+  }, [claimRemainingMs]);
 
   return useMemo(() => {
     if (nowMs == null || anchorMs == null) {
       return { ready: false, formatted: "--:--:--" };
     }
     const elapsed = nowMs - anchorMs;
-    const left = Math.max(0, remainingMs - elapsed);
+    const left = Math.max(0, claimRemainingMs - elapsed);
     return { ready: true, formatted: formatCountdownMs(left) };
-  }, [nowMs, anchorMs, remainingMs]);
+  }, [nowMs, anchorMs, claimRemainingMs]);
+}
+
+/** @deprecated Use useClaimExpiryTimer */
+export function useOfferExpiryTimer(remainingMs: number): {
+  ready: boolean;
+  formatted: string;
+} {
+  return useClaimExpiryTimer(remainingMs);
 }

@@ -6,7 +6,7 @@ import {
 } from "@/src/lib/auth-server";
 import { getRedirectPathForRole } from "@/src/lib/auth-redirects";
 import { fetchStudentProfileServer } from "@/src/lib/api/server-profile";
-import { isStudentLearningReady } from "@/src/lib/student-learning-gate";
+import { isStudentLearningReady, needsProfileMigration } from "@/src/lib/student-learning-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +16,18 @@ export default async function HomePage() {
     const token = await getBearerTokenFromCookie();
     if (token) {
       const result = await fetchStudentProfileServer(token);
-      if (
-        result.status === "ok" &&
-        !isStudentLearningReady(result.profile)
-      ) {
+      if (result.status === "ok" && result.profile) {
+        if (
+          needsProfileMigration(result.profile) ||
+          !isStudentLearningReady(result.profile)
+        ) {
+          redirect(
+            needsProfileMigration(result.profile)
+              ? "/onboarding?migrate=1"
+              : "/onboarding",
+          );
+        }
+      } else if (result.status === "ok" && !result.profile) {
         redirect("/onboarding");
       }
     }
