@@ -340,7 +340,7 @@ export default function QuestionSetsPage() {
             <Label>
               Instruction
               <span className="ml-1 text-xs font-normal text-muted-foreground">
-                (auto-filled from type — override if needed)
+                (auto-filled from type. override if needed)
               </span>
             </Label>
             <textarea

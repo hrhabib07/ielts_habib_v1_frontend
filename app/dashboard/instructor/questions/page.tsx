@@ -44,7 +44,7 @@ function getQuestionListSummary(q: Question): string {
   if (typeof content === "string") {
     return content.slice(0, 60) + (content.length > 60 ? "…" : "");
   }
-  return "—";
+  return "";
 }
 
 /** Sample JSON per question type. Metadata matches the type (MCQ=options+correctAnswer, TFNG=correctAnswer only, gap=blanks). */
@@ -558,7 +558,7 @@ export default function QuestionsPage() {
       return pid === passageId;
     });
 
-  /* Type derived from the selected question set — read-only, never sent to API */
+  /* Type derived from the selected question set. read-only, never sent to API */
   const derivedType =
     questionSets.find((s) => s._id === form.questionSetId)?.questionType ?? null;
 

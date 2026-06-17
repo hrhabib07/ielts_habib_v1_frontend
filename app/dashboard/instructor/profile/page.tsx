@@ -55,7 +55,7 @@ export default function InstructorProfilePage() {
               </span>
             </div>
             <p className="mt-2 text-2xl font-semibold text-stone-900 dark:text-stone-100">
-              —
+              
             </p>
           </div>
           <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900/50">
@@ -66,7 +66,7 @@ export default function InstructorProfilePage() {
               </span>
             </div>
             <p className="mt-2 text-2xl font-semibold text-stone-900 dark:text-stone-100">
-              —
+              
             </p>
           </div>
           <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900/50">
@@ -92,7 +92,7 @@ export default function InstructorProfilePage() {
               </span>
             </div>
             <p className="mt-2 text-2xl font-semibold text-stone-900 dark:text-stone-100">
-              —
+              
             </p>
           </div>
         </div>

@@ -39,11 +39,11 @@ function AnswerBlock({ a }: { a: TestAttemptAnswer }) {
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <div>
             <span className="text-muted-foreground">Your answer:</span>
-            <p className="font-medium">{a.studentAnswer || "—"}</p>
+            <p className="font-medium">{a.studentAnswer || ""}</p>
           </div>
           <div>
             <span className="text-muted-foreground">Correct answer:</span>
-            <p className="font-medium">{correctStr || "—"}</p>
+            <p className="font-medium">{correctStr || ""}</p>
           </div>
         </div>
 

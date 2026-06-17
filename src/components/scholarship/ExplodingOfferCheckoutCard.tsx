@@ -6,9 +6,10 @@ import { useScholarship } from "@/src/contexts/ScholarshipContext";
 import { useScholarshipDecayTimer } from "@/src/hooks/useScholarshipTimer";
 import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
 import {
-  computeDiscountedPrice,
   FOUNDER_SCHOLARSHIP_PERCENT,
+  FOUNDER_SCHOLARSHIP_PRICE_BDT,
   PREMIUM_BASE_PRICE_BDT,
+  PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
 
 function formatPrice(amount: number): string {
@@ -37,8 +38,8 @@ export function ExplodingOfferCheckoutCard({
 
   const discount = status?.activeDiscountPercent ?? FOUNDER_SCHOLARSHIP_PERCENT;
   const discountedPrice =
-    status?.discountedPrice ??
-    computeDiscountedPrice(PREMIUM_BASE_PRICE_BDT, discount);
+    status?.discountedPrice ?? FOUNDER_SCHOLARSHIP_PRICE_BDT;
+  const listPrice = status?.basePrice ?? PREMIUM_LIST_PRICE_BDT;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-orange-500/50 bg-gradient-to-br from-red-950 via-orange-950 to-slate-950 p-6 shadow-xl shadow-orange-950/40 md:p-8">
@@ -53,13 +54,13 @@ export function ExplodingOfferCheckoutCard({
           </p>
           <p className="mt-1 text-xs text-orange-200/80">
             Pay with bKash before the 24-hour window ends. After that, the price returns to{" "}
-            {PREMIUM_BASE_PRICE_BDT} BDT.
+            {PREMIUM_BASE_PRICE_BDT} BDT for 6 months.
           </p>
         </div>
 
         <div className="flex flex-wrap items-end gap-3">
           <p className="text-lg text-orange-300/70 line-through decoration-orange-400/60">
-            {formatPrice(status?.basePrice ?? PREMIUM_BASE_PRICE_BDT)}
+            {formatPrice(listPrice)}
           </p>
           <p className="text-4xl font-bold tracking-tight text-white">
             {formatPrice(discountedPrice)}

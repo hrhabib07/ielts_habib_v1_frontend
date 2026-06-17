@@ -72,9 +72,9 @@ export interface StudentBandJourneyFlightVisualProps {
   /** Pin map graphic to top of container (hero layouts that start below a badge). */
   mapAlign?: "center" | "top";
   /**
-   * `watermark` — centered map behind hero content, soft radial fade at edges (reference UI).
-   * `background` — full-bleed cover map (legacy).
-   * `inline` — contained map inside a content block (meet fit).
+   * `watermark`. centered map behind hero content, soft radial fade at edges (reference UI).
+   * `background`. full-bleed cover map (legacy).
+   * `inline`. contained map inside a content block (meet fit).
    */
   layout?: "inline" | "background" | "watermark";
 }

@@ -1,6 +1,6 @@
 /**
  * Country label → {x,y} in hero map viewBox (same projection as worldLandClipPath.generated).
- * Auto-generated — run: node scripts/generate-world-clip.mjs
+ * Auto-generated. run: node scripts/generate-world-clip.mjs
  */
 export const JOURNEY_COUNTRY_ANCHORS: Record<string, { x: number; y: number }> = {
   "bangladesh": {

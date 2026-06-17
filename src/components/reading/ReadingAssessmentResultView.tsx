@@ -78,14 +78,14 @@ export function ReadingAssessmentResultView({
         : "Keep practising";
 
   const subline = levelComplete
-    ? "You finished every step in this level. Great work — you can move on when you're ready."
+    ? "You finished every step in this level. Great work. you can move on when you're ready."
     : variant === "final"
       ? isMastered
         ? "You reached your target band. This level counts toward your course progress."
         : passed
           ? "You hit your target band on this final. Return to the level to see your progress."
           : nextFinalTestIndex != null
-            ? `Band ${formatBand(bandScore)} — return to the level to take Final Test ${nextFinalTestIndex}.`
+            ? `Band ${formatBand(bandScore)}. return to the level to take Final Test ${nextFinalTestIndex}.`
             : finalTestIndex != null && finalTestIndex >= 3
               ? `Band ${formatBand(bandScore)}. You may advance to the next level; mastery needs your target band on a final.`
               : `Band ${formatBand(bandScore)}. Review your answers or try the next final when it unlocks.`

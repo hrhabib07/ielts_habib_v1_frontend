@@ -79,7 +79,7 @@ export default function AdminUsersPage() {
           <Shield className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
           <p className="text-sm text-muted-foreground">
             <strong className="text-foreground">Admin bypass:</strong> Private accounts still
-            show full progress, test scores, and analytics here — regardless of{" "}
+            show full progress, test scores, and analytics here. regardless of{" "}
             <code className="rounded bg-muted px-1">isPrivate</code>.
           </p>
         </div>
@@ -162,31 +162,31 @@ export default function AdminUsersPage() {
         <section>
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
             <User className="h-5 w-5" />
-            Full profile — admin view
+            Full profile. admin view
           </h2>
           <Card className="space-y-6 p-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Detail label="Email" value={selected.user.email} />
-              <Detail label="Username" value={selected.user.username ?? "—"} />
-              <Detail label="Display name" value={selected.user.displayName ?? "—"} />
+              <Detail label="Username" value={selected.user.username ?? ""} />
+              <Detail label="Display name" value={selected.user.displayName ?? ""} />
               <Detail
                 label="Privacy"
                 value={selected.user.isPrivate ? "Private (admin bypass active)" : "Public"}
               />
               <Detail
                 label="Current country"
-                value={selected.user.currentCountryLabel ?? selected.user.currentCountry ?? "—"}
+                value={selected.user.currentCountryLabel ?? selected.user.currentCountry ?? ""}
               />
               <Detail
                 label="Dream country"
-                value={selected.user.dreamCountryLabel ?? selected.user.dreamCountry ?? "—"}
+                value={selected.user.dreamCountryLabel ?? selected.user.dreamCountry ?? ""}
               />
               <Detail
                 label="Desired band"
                 value={
                   selected.user.desiredBandScore != null
                     ? String(selected.user.desiredBandScore)
-                    : "—"
+                    : ""
                 }
               />
               <Detail
@@ -194,7 +194,7 @@ export default function AdminUsersPage() {
                 value={
                   selected.user.readingTargetBand != null
                     ? String(selected.user.readingTargetBand)
-                    : "—"
+                    : ""
                 }
               />
             </div>

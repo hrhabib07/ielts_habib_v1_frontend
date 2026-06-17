@@ -12,6 +12,7 @@ import {
   FOUNDER_SCHOLARSHIP_PERCENT,
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
   PREMIUM_BASE_PRICE_BDT,
+  PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
 import { isFoundingMemberWindowOpen } from "@/src/lib/foundingMember";
 
@@ -93,7 +94,7 @@ export function FounderWelcomeModal() {
             <>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5">
                 <p className="text-sm text-violet-200/90 line-through">
-                  {PREMIUM_BASE_PRICE_BDT} BDT
+                  {PREMIUM_LIST_PRICE_BDT} BDT
                 </p>
                 <p className="mt-1 text-5xl font-extrabold tracking-tight text-white">
                   {FOUNDER_SCHOLARSHIP_PRICE_BDT}

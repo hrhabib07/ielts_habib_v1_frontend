@@ -20,7 +20,7 @@ export default function DirectoryPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-foreground">Site directory</h1>
         <p className="mt-3 text-pretty text-muted-foreground">
           Index of programmatic landing pages for IELTS question types and high-intent topics. Linked
-          from the footer for crawlers and users who prefer a flat map—not primary navigation noise.
+          from the footer for crawlers and users who prefer a flat mapnot primary navigation noise.
         </p>
       </header>
       <nav aria-label="Programmatic SEO pages">

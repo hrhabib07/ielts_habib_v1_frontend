@@ -4,7 +4,7 @@ import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard
 
 /**
  * Suspense fallback while AppShellWithAuth resolves.
- * No Header/Footer and no page children — prevents duplicate shells in the DOM during auth streaming.
+ * No Header/Footer and no page children. prevents duplicate shells in the DOM during auth streaming.
  */
 export function AppShellFallback() {
   return (

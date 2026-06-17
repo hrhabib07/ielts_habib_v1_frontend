@@ -55,13 +55,13 @@ export function QuizFocusedSessionLauncher({
             {n > 0 ? (
               <span className="text-slate-500 dark:text-slate-400">
                 {" "}
-                — {n} question{n !== 1 ? "s" : ""}
+               . {n} question{n !== 1 ? "s" : ""}
               </span>
             ) : null}
           </p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-slate-500 dark:text-slate-400">
             <li>Opens in a dedicated page without the lesson sidebar or other steps.</li>
-            <li>Stay in the quiz until you submit — this reduces switching to notes or videos mid-attempt.</li>
+            <li>Stay in the quiz until you submit. this reduces switching to notes or videos mid-attempt.</li>
           </ul>
         </div>
       </div>

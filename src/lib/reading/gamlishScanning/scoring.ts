@@ -78,19 +78,19 @@ function scoreKeywordBonus(
 
 function getFeedbackMessage(finalBandScore: number): string {
   if (finalBandScore >= 8.5) {
-    return "Elite scanner! You read like a Band 9 candidate — precise, fast, and fearless.";
+    return "Elite scanner! You read like a Band 9 candidate: precise, fast, and fearless.";
   }
   if (finalBandScore >= 7.5) {
     return "Outstanding work! Your locator instincts and sentence precision are exam-ready.";
   }
   if (finalBandScore >= 6.5) {
-    return "Strong performance! You are building real IELTS scanning muscle — keep sharpening those locators.";
+    return "Strong performance! You are building real IELTS scanning muscle. Keep sharpening those locators.";
   }
   if (finalBandScore >= 5.5) {
-    return "Solid progress! You found key areas in the text — a little more precision will push you higher.";
+    return "Solid progress! You found key areas in the text. A little more precision will push you higher.";
   }
   if (finalBandScore >= 4.5) {
-    return "Good effort! Gamlish rewards every attempt — refine your keyword strategy and try again.";
+    return "Good effort! Gamlish rewards every attempt. Refine your keyword strategy and try again.";
   }
   return "Brave start! Every master scanner began here. Highlight your locators first, then lock each answer in order.";
 }

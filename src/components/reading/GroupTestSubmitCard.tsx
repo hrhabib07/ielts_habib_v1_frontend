@@ -239,7 +239,7 @@ function QuestionInput({
     );
   }
 
-  /* TRUE/FALSE/NOT GIVEN and YES/NO/NOT GIVEN — official IELTS style radio buttons */
+  /* TRUE/FALSE/NOT GIVEN and YES/NO/NOT GIVEN. official IELTS style radio buttons */
   if (question.type === "TRUE_FALSE_NOT_GIVEN" || question.type === "YES_NO_NOT_GIVEN") {
     const options =
       question.options?.length
@@ -283,7 +283,7 @@ function QuestionInput({
             type="text"
             value={Array.isArray(value) ? value[0] ?? "" : value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={question.blanks[0]?.options?.length ? `Choose: ${question.blanks[0].options.join(", ")}` : `Answer (max ${question.blanks[0]?.wordLimit ?? "—"} words)`}
+            placeholder={question.blanks[0]?.options?.length ? `Choose: ${question.blanks[0].options.join(", ")}` : `Answer (max ${question.blanks[0]?.wordLimit ?? ""} words)`}
             disabled={disabled}
             className="max-w-md"
           />
@@ -448,7 +448,7 @@ export function GroupTestSubmitCard({
             <div key={i} className="flex items-center gap-2">
               <span>Passage {i + 1}:</span>
               <span className={r.passed ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}>
-                Band {r.bandScore} {r.passed ? "✓" : "✗"}
+                Band {r.bandScore} {r.passed ? "✓" : "�"}
               </span>
             </div>
           ))}

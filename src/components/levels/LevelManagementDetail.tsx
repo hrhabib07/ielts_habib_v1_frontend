@@ -513,7 +513,7 @@ export function LevelManagementDetail({
         />
       </Card>
 
-      {/* 🧪 Full Test Flow — Determines level completion */}
+      {/* 🧪 Full Test Flow. Determines level completion */}
       <Card className="p-6">
         <FullTestBuilder
           levelId={effectiveId}

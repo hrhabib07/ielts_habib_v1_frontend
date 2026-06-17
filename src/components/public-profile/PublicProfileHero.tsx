@@ -144,7 +144,7 @@ export function PublicProfileHero({
                   />
                 </div>
                 <p className="mt-2.5 text-xs text-muted-foreground/90">
-                  Keep going — Band {bandLabel} is closer than you think.
+                  Keep going. Band {bandLabel} is closer than you think.
                 </p>
               </div>
             ) : null}

@@ -13,7 +13,7 @@ import {
 import { motion, type Variants } from "framer-motion";
 import { BRAND } from "@/src/lib/constants";
 const SCORES = [5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0] as const;
-/** Tailwind `md` is 768px — below that, single-column band UI */
+/** Tailwind `md` is 768px. below that, single-column band UI */
 const MOBILE_HERO_MAX_WIDTH_PX = 767;
 
 export interface PositionState {
@@ -89,7 +89,7 @@ interface StreamGeom {
   readonly elbowY: number;
   /** Top of band text ink (for socket / flange) */
   readonly inkTopY: number;
-  /** Pipe end Y (slightly below ink top — overlaps stroked outline) */
+  /** Pipe end Y (slightly below ink top. overlaps stroked outline) */
   readonly bandTopX: number;
   readonly bandTopY: number;
   /** Smooth cubic path (non–plumb-only): droplets / normals use this */
@@ -100,13 +100,13 @@ interface StreamGeom {
 const PIPE_INK_OVERLAP_PX = 14;
 /**
  * Spout circle center vs visual pour opening after tilt (overlay SVG px).
- * Screenshot: pipe sat below + left of rim — shift start right and up to meet the mouth.
+ * Screenshot: pipe sat below + left of rim. shift start right and up to meet the mouth.
  */
 const PIPE_MOUTH_NUDGE_X_PX = 26;
 const PIPE_MOUTH_NUDGE_Y_PX = -52;
 
 /**
- * Smooth cubic Bézier from jar mouth to band top — one continuous pour, no sharp 90° elbow
+ * Smooth cubic Bézier from jar mouth to band top. one continuous pour, no sharp 90° elbow
  * (desktop and mobile; droplets / stroke use `cubic` sampling).
  */
 function buildSmoothPour(
@@ -244,7 +244,7 @@ function bandInkTopCenterInViewport(
   }
 }
 
-/** No blur on sides — left stays vivid (filled), right stays sharp (outline-only) */
+/** No blur on sides. left stays vivid (filled), right stays sharp (outline-only) */
 const carouselSlotVariants: Variants = {
   center: {
     scale: 1.26,
@@ -258,14 +258,14 @@ const carouselSlotVariants: Variants = {
     filter: "none",
     transition: { duration: SLIDE_DURATION_S, ease: SLIDE_EASE },
   },
-  /** Next band visible before it becomes center — closer to final size for smoother anticipation */
+  /** Next band visible before it becomes center. closer to final size for smoother anticipation */
   rightPreview: {
     scale: 1.12,
     opacity: 1,
     filter: "none",
     transition: { duration: SLIDE_DURATION_S, ease: SLIDE_EASE },
   },
-  /** While the strip translates, DOM “center” ≠ visual center — equal weight avoids tiny incoming glyph */
+  /** While the strip translates, DOM “center” ≠ visual center. equal weight avoids tiny incoming glyph */
   slideUniform: {
     scale: 1.18,
     opacity: 1,
@@ -274,7 +274,7 @@ const carouselSlotVariants: Variants = {
   },
 };
 
-/** Narrow viewports: one band at a time — slides left when advancing */
+/** Narrow viewports: one band at a time. slides left when advancing */
 const mobileBandExitVariants: Variants = {
   settled: { x: 0, opacity: 1 },
   exiting: { x: -48, opacity: 0.12 },
@@ -515,7 +515,7 @@ function JarWithLiquid({
             ease: pouring ? POUR_EASE : SLIDE_EASE,
           }}
         />
-        {/* PNG logo: no plate behind it — centered on the glass; GAMLISH as before */}
+        {/* PNG logo: no plate behind it. centered on the glass; GAMLISH as before */}
         <g transform="translate(60 50)">
           <image
             href={BRAND.logoUrl}
@@ -577,7 +577,7 @@ function slotRole(i: number): PositionState["slot"] {
 
 export function HeroAnimation() {
   const uid = useId();
-  /** Same stops as jar liquid — defs live on the stream SVG so `url(#id)` resolves reliably */
+  /** Same stops as jar liquid. defs live on the stream SVG so `url(#id)` resolves reliably */
   const streamJarMatchGradId = `${uid}-stream-jar-match`;
   const streamShimmerId = `${uid}-stream-shimmer`;
   const jarUid = `${uid}-jar`;
@@ -588,9 +588,9 @@ export function HeroAnimation() {
   const [cycleStep, setCycleStep] = useState<CycleStep>("connect");
   const slideGuard = useRef(false);
   const pendingSlideComplete = useRef(false);
-  /** Stream SVG coords must use this box — same parent as `inset-0` overlay (not the outer section). */
+  /** Stream SVG coords must use this box. same parent as `inset-0` overlay (not the outer section). */
   const streamTrackRef = useRef<HTMLDivElement>(null);
-  /** Paths are drawn in this SVG’s viewport — mouth/band math must use this rect, not the track alone. */
+  /** Paths are drawn in this SVG’s viewport. mouth/band math must use this rect, not the track alone. */
   const streamSvgRef = useRef<SVGSVGElement>(null);
   const centerScoreSvgRef = useRef<SVGSVGElement>(null);
   const spoutRef = useRef<SVGCircleElement>(null);
@@ -611,7 +611,7 @@ export function HeroAnimation() {
   /**
    * Four logical scores: prev | active | next | next-next.
    * Viewport shows three columns; the fourth sits clipped to the right so when we slide −1 step,
-   * the upcoming band is already mounted — no empty center / missing right.
+   * the upcoming band is already mounted. no empty center / missing right.
    */
   const stripIndices = useMemo(
     () => [0, 1, 2, 3].map((k) => (currentIndex - 1 + k + n) % n),

@@ -7,7 +7,7 @@ import { AppShellFallback } from "@/src/components/shared/AppShellFallback";
 import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
 
 /**
- * Runtime font loading (browser only) — avoids next/font/google network fetch at build time,
+ * Runtime font loading (browser only). avoids next/font/google network fetch at build time,
  * which fails in offline CI and restricted networks.
  */
 const RUNTIME_FONT_STYLESHEET =
@@ -15,7 +15,7 @@ const RUNTIME_FONT_STYLESHEET =
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppOrigin()),
-  title: "GAMLISH — The Game of English",
+  title: "GAMLISH. The Game of English",
   description:
     "Master English through focused practice. GAMLISH offers structured Reading and Writing modules with clarity, strategy, and confidence.",
   icons: {

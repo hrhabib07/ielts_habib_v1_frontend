@@ -521,7 +521,7 @@ export const GamlishScanningPracticeView = forwardRef<
               </p>
             ) : null}
             <p className="mb-3 text-center text-xs text-slate-500 dark:text-slate-400">
-              Click or drag anywhere in a sentence — it snaps to the{" "}
+              Click or drag anywhere in a sentence. it snaps to the{" "}
               <span className="font-medium">full sentence</span> →{" "}
               <span className="font-medium">Pick as Answer</span> → Q1, Q2, or Q3
             </p>

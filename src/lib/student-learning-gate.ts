@@ -48,7 +48,7 @@ export function getMigrationReasons(profile: StudentProfile | null): string[] {
 
   if (profile.profileCompletion?.missingUsername || !profile.username?.trim()) {
     reasons.push(
-      "You need a permanent username — it powers your public profile link and cannot be changed later.",
+      "You need a permanent username. It powers your public profile link and cannot be changed later.",
     );
   }
 

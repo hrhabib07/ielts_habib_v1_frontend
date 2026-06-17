@@ -273,7 +273,7 @@ export interface LevelContentProps {
   onNavigateToNextLevel?: () => void;
   /** When true, step nav is rendered by LevelLayout below the scroll area (reading dashboard). */
   dockBottomNav?: boolean;
-  /** Database level order — used for env-based intro videos (Scanning = order 1, TFNG = order 2). */
+  /** Database level order. used for env-based intro videos (Scanning = order 1, TFNG = order 2). */
   levelOrder?: number;
 }
 
@@ -478,7 +478,7 @@ export function LevelContent({
 
   return (
     <div>
-      {/* Step header — hidden when launcher card owns context */}
+      {/* Step header. hidden when launcher card owns context */}
       {!showPremiumStepLauncher && (
       <div className="mb-6 flex items-start gap-4">
         <div className={`shrink-0 rounded-xl p-2.5 ${bg}`}>
@@ -753,7 +753,7 @@ export function LevelContent({
                 />
               ))}
 
-            {/* FINAL_EVALUATION: Start button only — actual test runs in dedicated mock environment */}
+            {/* FINAL_EVALUATION: Start button only. actual test runs in dedicated mock environment */}
             {!contentLoading &&
               !contentError &&
               step.stepType === "FINAL_EVALUATION" &&
@@ -781,7 +781,7 @@ export function LevelContent({
                     </Link>
                   )}
                   <p className="mt-3 text-xs text-[#1e3a8a]/70 dark:text-slate-400">
-                    Preview only — submission is disabled.
+                    Preview only. submission is disabled.
                   </p>
                 </div>
               ) : (
@@ -804,7 +804,7 @@ export function LevelContent({
                 <PassageQuestionContentRenderer content={content.content} />
               )}
 
-            {/* No contentId — step has no linked content (exclude steps with their own UI) */}
+            {/* No contentId. step has no linked content (exclude steps with their own UI) */}
             {!contentLoading &&
               !contentError &&
               content === null &&
@@ -817,7 +817,7 @@ export function LevelContent({
               )}
           </div>
 
-          {/* Mark complete button (not for quiz, practice test, or FINAL_EVALUATION — practice test uses submit + unlimited tries) */}
+          {/* Mark complete button (not for quiz, practice test, or FINAL_EVALUATION. practice test uses submit + unlimited tries) */}
           {!isQuizStep &&
             step.stepType !== "PRACTICE_TEST" &&
             step.stepType !== "FINAL_EVALUATION" &&
@@ -856,7 +856,7 @@ export function LevelContent({
             </div>
           )}
 
-          {/* Completed state (not for practice test — completion comes from passing the test; they can keep trying) */}
+          {/* Completed state (not for practice test. completion comes from passing the test; they can keep trying) */}
           {isCompleted &&
             !isQuizStep &&
             step.stepType !== "PRACTICE_TEST" &&
@@ -869,7 +869,7 @@ export function LevelContent({
             </div>
           )}
 
-          {/* Level passed — inline Next level button (visible without scrolling to banner) */}
+          {/* Level passed. inline Next level button (visible without scrolling to banner) */}
           {isLevelPassed && nextLevelInfo && onNavigateToNextLevel && (
             <div className="rounded-2xl border-2 border-[#1e3a8a]/40 dark:border-[#3b82f6]/50 bg-[#1e3a8a]/5 dark:bg-[#1e3a8a]/20 p-5 shadow-sm">
               <p className="text-sm font-semibold text-[#0f172a] dark:text-slate-100">

@@ -6,11 +6,11 @@ import { Sparkles, ChevronRight } from "lucide-react";
 import {
   FOUNDER_SCHOLARSHIP_PERCENT,
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
-  PREMIUM_BASE_PRICE_BDT,
+  PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
 import { isReadingExamSimulationPath } from "@/src/lib/siteScrollPolicy";
 
-/** Sticky promo for guests — create account to unlock 24h Founder scholarship. */
+/** Sticky promo for guests: create account to unlock 24h Founder scholarship. */
 export function GuestScholarshipBanner() {
   const pathname = usePathname();
 
@@ -31,9 +31,9 @@ export function GuestScholarshipBanner() {
       <span className="mx-auto inline-flex max-w-4xl flex-wrap items-center justify-center gap-x-2 gap-y-1">
         <Sparkles className="h-4 w-4 shrink-0 text-amber-300" aria-hidden />
         <span className="font-semibold">
-          New students: {FOUNDER_SCHOLARSHIP_PERCENT}% Founder scholarship —{" "}
+          New students: {FOUNDER_SCHOLARSHIP_PERCENT}% off · pay only{" "}
           <span className="text-white">{FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT</span>{" "}
-          <span className="text-violet-300/80 line-through">{PREMIUM_BASE_PRICE_BDT} BDT</span> in
+          <span className="text-violet-300/80 line-through">{PREMIUM_LIST_PRICE_BDT} BDT</span> in
           your first <span className="text-amber-200">24 hours</span>
         </span>
         <span className="inline-flex items-center gap-0.5 text-xs font-bold uppercase tracking-wide text-amber-200 group-hover:text-white">

@@ -94,7 +94,7 @@ export function SnapWordQuestion({
         })}
       </p>
       <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
-        Tap words to highlight keywords — no drag selection.
+        Tap words to highlight keywords. no drag selection.
       </p>
     </article>
   );

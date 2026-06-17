@@ -237,7 +237,7 @@ export default function QuestionSetPreviewModal({ passage, questionSet, onClose 
         {/* ── two-column layout at md+ ── */}
         <div className="grid md:grid-cols-2 md:divide-x md:divide-stone-200">
 
-          {/* LEFT — passage */}
+          {/* LEFT. passage */}
           <div className="overflow-y-auto px-7 py-8 md:max-h-[78vh]">
             {/* passage meta */}
             <div className="mb-4 flex flex-wrap gap-2 text-xs text-stone-500">
@@ -288,7 +288,7 @@ export default function QuestionSetPreviewModal({ passage, questionSet, onClose 
             </div>
           </div>
 
-          {/* RIGHT — question set */}
+          {/* RIGHT. question set */}
           <div className="overflow-y-auto px-7 py-8 md:max-h-[78vh]">
             {/* section header */}
             <div className="mb-4 flex items-center gap-2">
@@ -322,7 +322,7 @@ export default function QuestionSetPreviewModal({ passage, questionSet, onClose 
                     </span>
                     <div className="flex-1 border-b border-dashed border-stone-300 pb-1">
                       <span className="text-xs italic text-stone-400">
-                        Question {n} — no content added yet
+                        Question {n}. no content added yet
                       </span>
                     </div>
                   </li>
@@ -339,7 +339,7 @@ export default function QuestionSetPreviewModal({ passage, questionSet, onClose 
         {/* ── footer ── */}
         <div className="flex items-center justify-between border-t border-stone-200 bg-stone-50 px-6 py-3 rounded-b-xl">
           <p className="text-xs italic text-stone-400">
-            Read-only preview — add questions in the Questions tab
+            Read-only preview. add questions in the Questions tab
           </p>
           <button
             onClick={onClose}

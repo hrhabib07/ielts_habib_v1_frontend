@@ -388,7 +388,7 @@ export const SentenceLocatorPracticeView = forwardRef<
               <div className="mx-auto max-w-xl space-y-4">
                 <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                    Statement — highlight keywords
+                    Statement. highlight keywords
                   </p>
                   <SelectableTextWithTools
                     blockId={activeStatement.id}

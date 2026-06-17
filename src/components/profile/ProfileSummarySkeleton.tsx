@@ -1,4 +1,4 @@
-/** Loading skeleton for profile summary — matches dashboard layout. */
+/** Loading skeleton for profile summary. matches dashboard layout. */
 export function ProfileSummarySkeleton() {
   return (
     <div className="w-full space-y-8">

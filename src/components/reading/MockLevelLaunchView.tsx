@@ -163,7 +163,7 @@ export function MockLevelLaunchView(props: {
           <div className="flex gap-3">
             <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
             <p className="text-sm text-emerald-900 dark:text-emerald-100">
-              You&apos;ve reached the mock-test levels — great progress. Your place is saved; tests
+              You&apos;ve reached the mock-test levels. great progress. Your place is saved; tests
               unlock automatically when content is published (no extra setup needed).
             </p>
           </div>

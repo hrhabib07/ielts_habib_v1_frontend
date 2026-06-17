@@ -420,7 +420,7 @@ export function UnifiedLevelManage({
                 </div>
                 <div>
                   <dt className="text-muted-foreground">Description</dt>
-                  <dd>{level.description || "—"}</dd>
+                  <dd>{level.description || ""}</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">Access</dt>

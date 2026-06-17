@@ -132,7 +132,7 @@ export function LevelFeedbackForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <p className="text-sm text-slate-600 dark:text-slate-400">
-        Your feedback helps us improve. Rate this level—it takes less than 30 seconds.
+        Your feedback helps us improve. Rate this levelit takes less than 30 seconds.
       </p>
 
       <div className="space-y-3">

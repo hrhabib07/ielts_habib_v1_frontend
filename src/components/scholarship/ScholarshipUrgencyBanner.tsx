@@ -12,7 +12,7 @@ import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
 import {
   FOUNDER_SCHOLARSHIP_PERCENT,
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
-  PREMIUM_BASE_PRICE_BDT,
+  PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
 
 export function ScholarshipUrgencyBanner() {
@@ -59,9 +59,9 @@ export function ScholarshipUrgencyBanner() {
           Founder scholarship
         </span>
         <span className="font-semibold leading-snug">
-          <span className="text-amber-300">{FOUNDER_SCHOLARSHIP_PERCENT}% off</span> — pay{" "}
+          <span className="text-amber-300">{FOUNDER_SCHOLARSHIP_PERCENT}% off</span>. Pay{" "}
           <span className="text-white">{FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT</span>{" "}
-          <span className="text-violet-300/80 line-through">{PREMIUM_BASE_PRICE_BDT} BDT</span>{" "}
+          <span className="text-violet-300/80 line-through">{PREMIUM_LIST_PRICE_BDT} BDT</span>{" "}
           if you enroll within{" "}
           <span className="inline-flex items-center gap-1 font-mono text-base tabular-nums text-amber-200">
             <Timer className="h-3.5 w-3.5" />

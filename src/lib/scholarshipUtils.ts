@@ -1,8 +1,10 @@
 import { FOUNDING_MEMBER_CUTOFF } from "./foundingMember";
+import { FOUNDER_SCHOLARSHIP_PERCENT } from "./pricingOffer";
 
-/** Mirrors backend — 60% Founder scholarship for first 24 hours (ends 1 Aug 2026). */
+/** Mirrors backend: 93% Founder scholarship for first 24 hours (ends 1 Aug 2026). */
 export const SCHOLARSHIP_WINDOW_HOURS = 24;
-export const FOUNDER_SCHOLARSHIP_PERCENT = 60;
+
+export { FOUNDER_SCHOLARSHIP_PERCENT };
 
 /** @deprecated Use SCHOLARSHIP_WINDOW_HOURS */
 export const SCHOLARSHIP_PHASE_HOURS = SCHOLARSHIP_WINDOW_HOURS;

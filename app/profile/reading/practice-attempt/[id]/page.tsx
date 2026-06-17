@@ -34,7 +34,7 @@ type ReviewFilter = "all" | "correct" | "incorrect";
 
 function formatAnswer(val: string | string[]): string {
   if (Array.isArray(val)) return val.filter(Boolean).join(", ");
-  return String(val ?? "—").trim() || "—";
+  return String(val ?? "").trim() || "";
 }
 
 function AnchorHitsBar({ hits, total }: { hits: number; total: number }) {
@@ -77,7 +77,7 @@ function SentenceLocatorReviewRow({
 }) {
   const isCorrect = item.isCorrect;
   const yourStr = item.yourSentence?.trim() || "No sentence selected";
-  const correctStr = item.correctSentence?.trim() || "—";
+  const correctStr = item.correctSentence?.trim() || "";
   const hasHack = Boolean(item.gamlishHack?.trim());
 
   return (
@@ -387,7 +387,7 @@ export default function PracticeAttemptReviewPage() {
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {data.passed
-                    ? "You passed this practice test. Study each statement below — report any unfair questions so instructors can fix them."
+                    ? "You passed this practice test. Study each statement below. report any unfair questions so instructors can fix them."
                     : "Review your answers below. You can flag statements that felt wrong or unfair."}
                 </p>
               </div>

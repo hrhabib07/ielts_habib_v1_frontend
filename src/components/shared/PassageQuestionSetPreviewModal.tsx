@@ -199,7 +199,7 @@ export default function PassageQuestionSetPreviewModal({
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-stone-200 bg-stone-50 px-6 py-3 rounded-b-xl">
           <p className="text-xs text-stone-400 italic">
-            Read-only preview — use this set in Practice Tests or Group Tests
+            Read-only preview. use this set in Practice Tests or Group Tests
           </p>
           <button
             onClick={onClose}

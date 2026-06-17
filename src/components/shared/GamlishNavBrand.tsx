@@ -33,7 +33,7 @@ export function GamlishNavBrand({
           "dark:bg-white dark:ring-white/20",
         )}
       >
-        {/* Native img — reliable in nav; Next/Image was not painting for some users */}
+        {/* Native img. reliable in nav; Next/Image was not painting for some users */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={logoSrc}

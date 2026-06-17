@@ -125,7 +125,7 @@ function PurchaseForm({ plan, onClose, onSubmitted }: PurchaseFormProps) {
         </div>
         <h3 className="text-xl font-bold text-foreground">Payment submitted!</h3>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          We received your bKash proof. Our team verifies manually — premium unlocks within
+          We received your bKash proof. Our team verifies manually. premium unlocks within
           24–48 hours. You&apos;ll get an email when access is active.
         </p>
         <Button variant="outline" onClick={onClose}>

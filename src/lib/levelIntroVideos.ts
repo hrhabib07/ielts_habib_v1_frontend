@@ -44,7 +44,7 @@ function configForDisplayLevel(
     return buildConfig(videos.level2IntroVideoId, {
       eyebrow: "Level 2 · True / False / Not Given",
       title: "How to complete this level",
-      body: "Watch this first. Learn how to find the GPS anchor in the passage, unlock the text block, and decide whether each statement is True, False, or Not Given — without falling into keyword traps.",
+      body: "Watch this first. Learn how to find the GPS anchor in the passage, unlock the text block, and decide whether each statement is True, False, or Not Given without falling into keyword traps.",
       placeholderTitle: "Level 2 intro video",
       placeholderBody: PLACEHOLDER_BODY,
     });

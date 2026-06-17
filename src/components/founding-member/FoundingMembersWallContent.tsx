@@ -42,7 +42,7 @@ export function FoundingMembersWallContent() {
           Founders&apos; Wall
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          The pioneers who backed Gamlish before 1 August 2026. This list is permanent —
+          The pioneers who backed Gamlish before 1 August 2026. This list is permanent 
           the badge will never be issued again.
         </p>
         <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">

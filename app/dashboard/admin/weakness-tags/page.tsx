@@ -238,7 +238,7 @@ function TagModal({ mode, initial, onClose, onSave }: TagModalProps) {
               Description{" "}
               <span className="text-destructive">*</span>
               <span className="ml-1 font-normal text-xs text-muted-foreground">
-                — explain the mistake pattern (min 1 char)
+               . explain the mistake pattern (min 1 char)
               </span>
             </Label>
             <textarea
@@ -702,7 +702,7 @@ export default function WeaknessTagsAdminPage() {
                   WEAKNESS_TAG_CATEGORIES.find(
                     (c) => c.value === filterCategory,
                   )?.label
-                } — ${filteredTags.length} tag${
+                }. ${filteredTags.length} tag${
                   filteredTags.length !== 1 ? "s" : ""
                 }`}
           </h2>
@@ -744,7 +744,7 @@ export default function WeaknessTagsAdminPage() {
             <AlertCircle className="mx-auto h-8 w-8 text-destructive" />
             <p className="text-sm font-medium text-destructive">{loadError}</p>
             <p className="text-xs text-muted-foreground">
-              You can still create tags using the button above — the list will
+              You can still create tags using the button above. the list will
               refresh after a successful create.
             </p>
             <Button

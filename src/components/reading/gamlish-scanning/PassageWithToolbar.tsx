@@ -39,7 +39,7 @@ interface ToolbarState {
   end: number;
   selectedText: string;
   sentenceId: string;
-  /** Raw drag range — used only for free-form Highlight / Note. */
+  /** Raw drag range. used only for free-form Highlight / Note. */
   rawStart: number;
   rawEnd: number;
   snappedFromPartial: boolean;
@@ -462,9 +462,9 @@ export function PassageWithToolbar({
                 {!toolbar.existingAnswerQuestionId ? (
                   <p className="max-w-xs rounded-md bg-slate-900/95 px-2.5 py-1 text-center text-[10px] leading-snug text-slate-300 shadow-lg">
                     {toolbar.overlappingHighlightIds.length > 0
-                      ? "Highlighted text selected — erase or choose another action:"
+                      ? "Highlighted text selected. erase or choose another action:"
                       : toolbar.crossedSentences
-                        ? "Selection crossed sentences — locking the best match:"
+                        ? "Selection crossed sentences. locking the best match:"
                         : toolbar.snappedFromPartial
                           ? "Expanded to the full sentence:"
                           : "Lock this sentence as your answer:"}

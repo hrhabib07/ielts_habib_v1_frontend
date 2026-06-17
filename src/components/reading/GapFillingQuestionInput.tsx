@@ -65,7 +65,7 @@ export function DraggableWordBank({ options }: { options: string[] }) {
     <div className="mb-4 rounded-md border border-amber-200 bg-amber-50/70 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/30">
       <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-200">
         Choose your answers from the box below
-        {list.length > 0 ? " — you can drag options into the gaps" : ""}
+        {list.length > 0 ? ". you can drag options into the gaps" : ""}
       </p>
       {list.length > 0 ? (
         <div className="flex flex-wrap gap-2">

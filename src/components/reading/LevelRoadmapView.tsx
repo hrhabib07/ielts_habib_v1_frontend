@@ -171,7 +171,7 @@ export function LevelRoadmapView(props: {
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
                   {isLevelPassed
                     ? "You cleared every step. Revisit any practice or final to sharpen your skills."
-                    : "Your level roadmap — see every practice, lesson, and final test in order. Pick up exactly where you left off."}
+                    : "Your level roadmap. see every practice, lesson, and final test in order. Pick up exactly where you left off."}
                 </p>
               </div>
 

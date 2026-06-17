@@ -428,7 +428,7 @@ export const L0_FINAL_3_JELLYFISH = buildContent(
 export const L0_PRACTICE_TESTS_BULK_PAYLOAD = {
   practiceTests: [
     {
-      title: "L0 — Practice 1: The Evolution of Football",
+      title: "L0 · Practice 1: The Evolution of Football",
       passType: "BAND" as const,
       passValue: 0,
       timeLimitMinutes: 25,
@@ -436,7 +436,7 @@ export const L0_PRACTICE_TESTS_BULK_PAYLOAD = {
       gamlishScanning: L0_PRACTICE_1_FOOTBALL,
     },
     {
-      title: "L0 — Practice 2: Billionaire Space Race",
+      title: "L0 · Practice 2: Billionaire Space Race",
       passType: "BAND" as const,
       passValue: 0,
       timeLimitMinutes: 25,
@@ -444,7 +444,7 @@ export const L0_PRACTICE_TESTS_BULK_PAYLOAD = {
       gamlishScanning: L0_PRACTICE_2_SPACE,
     },
     {
-      title: "L0 — Practice 3: South Indian Cinema",
+      title: "L0 · Practice 3: South Indian Cinema",
       passType: "BAND" as const,
       passValue: 0,
       timeLimitMinutes: 25,
@@ -457,17 +457,17 @@ export const L0_PRACTICE_TESTS_BULK_PAYLOAD = {
 export const L0_FINAL_TESTS_BULK_PAYLOAD = {
   finalTests: [
     {
-      title: "L0 — Final 1: Forensics",
+      title: "L0 · Final 1: Forensics",
       timeLimitMinutes: 25,
       gamlishScanning: L0_FINAL_1_FORENSICS,
     },
     {
-      title: "L0 — Final 2: Coffee Economy",
+      title: "L0 · Final 2: Coffee Economy",
       timeLimitMinutes: 25,
       gamlishScanning: L0_FINAL_2_COFFEE,
     },
     {
-      title: "L0 — Final 3: Immortal Jellyfish",
+      title: "L0 · Final 3: Immortal Jellyfish",
       timeLimitMinutes: 25,
       gamlishScanning: L0_FINAL_3_JELLYFISH,
     },

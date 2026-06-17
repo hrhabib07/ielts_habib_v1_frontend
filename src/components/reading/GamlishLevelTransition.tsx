@@ -4,7 +4,7 @@ import { Map } from "lucide-react";
 import { readingPathPremium } from "@/src/lib/readingPathPremium";
 import { cn } from "@/lib/utils";
 
-/** Minimal branded transition — no gray skeleton blocks. */
+/** Minimal branded transition. no gray skeleton blocks. */
 export function GamlishLevelTransition({ className }: { className?: string }) {
   return (
     <div

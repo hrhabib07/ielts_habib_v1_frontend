@@ -21,7 +21,7 @@ export function RegisterForm() {
             Create your account
           </h1>
           <p className="text-muted-foreground">
-            Enter your email. We&apos;ll send a code — then a short setup and you&apos;re in.
+            Enter your email. We&apos;ll send a code. then a short setup and you&apos;re in.
           </p>
         </div>
 

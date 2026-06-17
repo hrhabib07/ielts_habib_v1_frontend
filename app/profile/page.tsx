@@ -298,7 +298,7 @@ export default function ProfilePage() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-800 dark:text-emerald-400">
                   Support
                 </p>
-                <p className="mt-1 font-semibold text-foreground">WhatsApp only — we reply to messages</p>
+                <p className="mt-1 font-semibold text-foreground">WhatsApp only. we reply to messages</p>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   For billing, access, or product questions, message us on WhatsApp.
                 </p>
@@ -434,9 +434,9 @@ export default function ProfilePage() {
             <div className="grid gap-6 md:grid-cols-2">
               {(
                 [
-                  { label: "Username", value: username.trim() || "—" },
-                  { label: "Display name", value: displayName.trim() || "—" },
-                  { label: "Phone", value: phone.trim() || "—" },
+                  { label: "Username", value: username.trim() || "" },
+                  { label: "Display name", value: displayName.trim() || "" },
+                  { label: "Phone", value: phone.trim() || "" },
                   {
                     label: "Current country",
                     value: countryCodeToLabel(currentCountry) ?? currentCountry,
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
                   <Input id="username" value={username} readOnly disabled className="bg-muted/40" />
-                  <p className="text-xs text-muted-foreground">Permanent — cannot be changed.</p>
+                  <p className="text-xs text-muted-foreground">Permanent. cannot be changed.</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="displayName">Display name</Label>

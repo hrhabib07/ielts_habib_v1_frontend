@@ -91,8 +91,8 @@ export default function VersionPreviewPage() {
         </Link>
         <span className="rounded-full bg-teal-500/20 px-2.5 py-0.5 text-xs font-medium text-teal-700 dark:text-teal-400">
           {detail.version.status === "PUBLISHED"
-            ? "Preview — published version (read-only)"
-            : "Preview — draft (not yet published)"}
+            ? "Preview. published version (read-only)"
+            : "Preview. draft (not yet published)"}
         </span>
         <h1 className="truncate text-sm font-medium text-muted-foreground">
           {level.title} · Version {detail.version.version}

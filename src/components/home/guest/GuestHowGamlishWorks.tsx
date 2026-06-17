@@ -46,7 +46,7 @@ export function GuestHowGamlishWorks() {
       aria-labelledby="how-gamlish-video-heading"
     >
       <div className="mx-auto max-w-5xl space-y-16 sm:space-y-20">
-        {/* Video — primary focus */}
+        {/* Video. primary focus */}
         <motion.div
           className="text-center"
           initial={reduceMotion ? false : { opacity: 0, y: 20 }}
@@ -74,7 +74,7 @@ export function GuestHowGamlishWorks() {
           />
         </motion.div>
 
-        {/* Three pillars — icon strip */}
+        {/* Three pillars. icon strip */}
         <motion.div
           initial={reduceMotion ? false : "hidden"}
           whileInView="visible"
@@ -108,7 +108,7 @@ export function GuestHowGamlishWorks() {
           </ul>
         </motion.div>
 
-        {/* 21 levels — visual */}
+        {/* 21 levels. visual */}
         <motion.div
           className="grid items-center gap-8 lg:grid-cols-2 lg:gap-10"
           initial={reduceMotion ? false : { opacity: 0, y: 24 }}
@@ -137,7 +137,7 @@ export function GuestHowGamlishWorks() {
           </div>
         </motion.div>
 
-        {/* Skills — compact row */}
+        {/* Skills. compact row */}
         <motion.div
           initial={reduceMotion ? false : "hidden"}
           whileInView="visible"

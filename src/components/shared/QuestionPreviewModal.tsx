@@ -633,7 +633,7 @@ export default function QuestionPreviewModal({
         {/* Two-column body */}
         <div className="grid md:grid-cols-2 md:divide-x md:divide-stone-200">
 
-          {/* LEFT — passage */}
+          {/* LEFT. passage */}
           <div className="overflow-y-auto px-7 py-8 md:max-h-[78vh]">
             <div className="mb-4 flex flex-wrap gap-2 text-xs text-stone-500">
               <span className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-stone-100 px-2.5 py-0.5">
@@ -683,7 +683,7 @@ export default function QuestionPreviewModal({
             </div>
           </div>
 
-          {/* RIGHT — question */}
+          {/* RIGHT. question */}
           <div className="overflow-y-auto px-7 py-8 md:max-h-[78vh]">
             {/* Instruction box */}
             <div className="mb-5 rounded-md border border-stone-200 bg-amber-50/60 p-4">
@@ -727,7 +727,7 @@ export default function QuestionPreviewModal({
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-stone-200 bg-stone-50 px-6 py-3 rounded-b-xl">
           <p className="text-xs italic text-stone-400">
-            Read-only preview — no correct answer shown
+            Read-only preview. no correct answer shown
           </p>
           <button
             onClick={onClose}

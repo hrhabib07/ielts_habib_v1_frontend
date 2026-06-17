@@ -87,7 +87,7 @@ function StatTile(props: {
 }
 
 /**
- * Pre-test launch — aligned with Gamlish reading-path surfaces (light, premium SaaS).
+ * Pre-test launch. aligned with Gamlish reading-path surfaces (light, premium SaaS).
  */
 export function PracticeTestStepCard({
   levelId,
@@ -193,7 +193,7 @@ export function PracticeTestStepCard({
             </div>
             {hasAttempts && (
               <span className="rounded-full bg-muted/60 px-2.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
-                {status!.attemptCount}× tried
+                {status!.attemptCount}� tried
               </span>
             )}
           </div>
@@ -221,7 +221,7 @@ export function PracticeTestStepCard({
                 {isFinal
                   ? attemptsExhausted && !status?.passed
                     ? "One attempt used. Continue to the next final below, or pass at target band to finish the level."
-                    : "One attempt only — pass at target band to complete the level, or move on to the next final."
+                    : "One attempt only. pass at target band to complete the level, or move on to the next final."
                   : isSl
                     ? "Match each statement to the exact sentence in the passage."
                     : "One timed passage. Hit your target band to unlock the next step."}

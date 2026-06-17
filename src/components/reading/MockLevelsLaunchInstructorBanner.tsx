@@ -45,7 +45,7 @@ export function MockLevelsLaunchInstructorBanner(props: { levels: ReadingLevel[]
           </div>
           <div>
             <CardTitle className="text-base font-semibold text-foreground">
-              Launch mode — Levels 18–21 (DB orders 17–20, mock placeholders)
+              Launch mode. Levels 18–21 (DB orders 17–20, mock placeholders)
             </CardTitle>
             <p className="mt-1 text-sm text-muted-foreground">
               Students see locked previews until they reach each level, then &quot;Coming soon&quot; until

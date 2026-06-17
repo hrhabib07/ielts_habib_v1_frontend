@@ -83,7 +83,7 @@ export function ContentPreviewView({
         <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
           <Eye className="h-5 w-5 shrink-0" />
           <p className="text-sm font-medium">
-            Preview Mode — This content is not editable here
+            Preview Mode. This content is not editable here
           </p>
         </div>
         <p className="mt-1 text-xs text-amber-700 dark:text-amber-300/90">

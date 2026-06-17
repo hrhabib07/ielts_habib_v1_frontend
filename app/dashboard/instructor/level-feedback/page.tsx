@@ -232,7 +232,7 @@ export default function LevelFeedbackPage() {
                         typeof f.levelId === "object" &&
                         "_id" in f.levelId
                       ? String((f.levelId as { _id: string })._id)
-                      : "—");
+                      : "");
                 return (
                   <li
                     key={f._id}

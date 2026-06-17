@@ -6,6 +6,7 @@ import {
   FOUNDER_SCHOLARSHIP_PERCENT,
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
   PREMIUM_BASE_PRICE_BDT,
+  PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
 
 export function FoundingMemberPricingAlert() {
@@ -43,7 +44,7 @@ export function FoundingMemberPricingAlert() {
           {windowOpen ? (
             <>
               <p className="text-base font-bold text-foreground">
-                Before 1 August 2026 — Founder pricing
+                Before 1 August 2026 · Founder pricing
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
@@ -63,6 +64,9 @@ export function FoundingMemberPricingAlert() {
                     First 24 hours only
                   </p>
                   <p className="mt-1 text-lg font-bold text-foreground">
+                    <span className="text-sm font-medium text-muted-foreground line-through">
+                      {PREMIUM_LIST_PRICE_BDT} BDT
+                    </span>{" "}
                     {FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -78,7 +82,7 @@ export function FoundingMemberPricingAlert() {
           ) : (
             <>
               <p className="text-base font-bold text-foreground">
-                Standard pricing — from 1 August 2026
+                Standard pricing from 1 August 2026
               </p>
               <p className="text-muted-foreground">
                 Premium Reading is now{" "}

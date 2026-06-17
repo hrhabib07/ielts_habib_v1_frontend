@@ -67,7 +67,7 @@ export function ProgressiveMcqReviewBreakdown(props: {
                     {item.yourOption ? (
                       <>
                         <span className="font-semibold">{item.yourOption})</span>{" "}
-                        {item.yourOptionText ?? "—"}
+                        {item.yourOptionText ?? ""}
                       </>
                     ) : (
                       <span className="text-slate-400">No answer</span>

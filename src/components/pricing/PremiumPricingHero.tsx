@@ -17,6 +17,7 @@ import {
   FOUNDER_SCHOLARSHIP_PERCENT,
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
   PREMIUM_BASE_PRICE_BDT,
+  PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
 import type { ScholarshipStatus } from "@/src/lib/api/scholarship";
 import { isFoundingMemberWindowOpen } from "@/src/lib/foundingMember";
@@ -81,13 +82,13 @@ export function PremiumPricingHero({
           <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             {scholarshipActive
               ? "Your Founder scholarship is live"
-              : "Master IELTS Reading — the Gamlish way"}
+              : "Master IELTS Reading the Gamlish way"}
           </h1>
           <p className="mx-auto max-w-lg text-sm leading-relaxed text-violet-200/85 sm:text-base">
             {scholarshipActive
-              ? `Pay ${FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT now — ${FOUNDER_SCHOLARSHIP_PERCENT}% off ${PREMIUM_BASE_PRICE_BDT} BDT. Your window closes when the timer hits zero.`
+              ? `Pay ${FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT now. ${FOUNDER_SCHOLARSHIP_PERCENT}% off ${PREMIUM_LIST_PRICE_BDT} BDT for 6 months. Your window closes when the timer hits zero.`
               : foundingWindowOpen
-                ? `${PREMIUM_BASE_PRICE_BDT} BDT unlocks 6 months of premium — priced like one month. Founder badge included before 1 August 2026.`
+                ? `${PREMIUM_BASE_PRICE_BDT} BDT unlocks 6 months of premium. Priced like one month. Founder badge included before 1 August 2026.`
                 : `${PREMIUM_BASE_PRICE_BDT} BDT per month for full premium Reading access.`}
           </p>
         </div>
@@ -123,8 +124,8 @@ export function PremiumPricingHero({
           {foundingWindowOpen && (
             <p className="mt-4 text-sm text-violet-200/80">
               <BadgeCheck className="mr-1 inline h-4 w-4 text-emerald-400" />
-              <strong className="text-white">6 months</strong> access — special Founder bundle
-              (displayed as 1-month price)
+              <strong className="text-white">6 months</strong> access. Special Founder bundle
+              (regular {PREMIUM_LIST_PRICE_BDT} BDT)
             </p>
           )}
         </div>
@@ -168,7 +169,7 @@ export function PremiumPricingHero({
                 className="h-14 min-w-[280px] rounded-full bg-gradient-to-r from-violet-500 to-indigo-600 px-8 text-base font-bold shadow-lg shadow-violet-500/30"
                 asChild
               >
-                <a href="/register">Create account — 60% off for 24 hours</a>
+                <a href="/register">Create account · {FOUNDER_SCHOLARSHIP_PERCENT}% off for 24 hours</a>
               </Button>
               <a
                 href="/login"

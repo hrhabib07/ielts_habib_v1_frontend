@@ -157,11 +157,11 @@ function SequentialFinalEvaluationCard({
   const statusLine = isLocked
     ? "Complete all practice tests to unlock your finals."
     : status.isMastered
-      ? "Level mastered — you passed a final at target band."
+      ? "Level mastered. you passed a final at target band."
       : nextIndex != null
         ? `Ready for Final Test ${nextIndex}. Pass at target band to master this level.`
         : hasAttempts
-          ? "All three finals attempted — review your scores below."
+          ? "All three finals attempted. review your scores below."
           : "Final evaluation unlocks after practice tests.";
 
   useEffect(() => {
@@ -225,7 +225,7 @@ function SequentialFinalEvaluationCard({
               </h1>
               <p className={cn(readingPathPremium.heroBody, "mt-2")}>
                 Three focused reading finals in sequence. Pass any one at your target band to
-                complete the level — or work through all three to build confidence.
+                complete the level. or work through all three to build confidence.
               </p>
             </div>
           </div>
@@ -415,7 +415,7 @@ function LegacyGroupTestFinalCard({
                 ? attempted === 0
                   ? `${remaining} attempt${remaining !== 1 ? "s" : ""} available`
                   : `${remaining} attempt${remaining !== 1 ? "s" : ""} remaining`
-                : "All attempts completed — view your results."}
+                : "All attempts completed. view your results."}
             </p>
           ) : null}
 

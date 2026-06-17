@@ -33,7 +33,7 @@ export function Footer({ initialUser = null }: FooterProps) {
           <div className="md:col-span-4 space-y-4">
             <GamlishLogo iconMark className="text-lg" />
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Performance-driven IELTS Reading preparation — structured levels and readiness you
+              Performance-driven IELTS Reading preparation. structured levels and readiness you
               can measure.
             </p>
           </div>
@@ -139,7 +139,7 @@ export function Footer({ initialUser = null }: FooterProps) {
             </h4>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Need help with access, billing, or how Gamlish works? Message us on{" "}
-              <strong className="font-medium text-foreground">WhatsApp only</strong> — we reply to
+              <strong className="font-medium text-foreground">WhatsApp only</strong>. we reply to
               chats on this number.{" "}
               <span className="text-foreground">Please do not call;</span> we do not provide phone
               support on this line.

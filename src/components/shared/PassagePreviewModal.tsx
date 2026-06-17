@@ -155,7 +155,7 @@ export default function PassagePreviewModal({
                       className="text-stone-600"
                       style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
                     >
-                      — {g.definition}
+                     . {g.definition}
                     </dd>
                   </div>
                 ))}
@@ -167,7 +167,7 @@ export default function PassagePreviewModal({
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-stone-200 bg-stone-50 px-6 py-3 rounded-b-xl">
           <p className="text-xs text-stone-400 italic">
-            Read-only preview — no questions shown
+            Read-only preview. no questions shown
           </p>
           <button
             onClick={onClose}

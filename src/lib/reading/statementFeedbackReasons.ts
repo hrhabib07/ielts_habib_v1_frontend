@@ -32,7 +32,7 @@ export const STATEMENT_FEEDBACK_REASONS = [
   {
     value: "OTHER",
     label: "Other",
-    description: "Something else — add a short note below.",
+    description: "Something else. Add a short note below.",
   },
 ] as const;
 

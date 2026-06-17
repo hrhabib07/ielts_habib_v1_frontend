@@ -89,7 +89,7 @@ function BandRing({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold tabular-nums tracking-tight text-foreground">
-            {value ?? "—"}
+            {value ?? ""}
           </span>
         </div>
       </div>
@@ -220,12 +220,12 @@ export function ProfileSummarySection() {
   const legacyRows = recentAttempts.map((a) => ({
     key: `legacy-${a._id ?? Math.random()}`,
     type: a.readingTestType ?? "Reading",
-    band: a.bandScore ?? "—",
+    band: a.bandScore ?? "",
     score:
       a.correctAnswers != null && a.totalQuestions != null
         ? `${a.correctAnswers}/${a.totalQuestions}`
-        : "—",
-    date: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "—",
+        : "",
+    date: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "",
     sortDate: a.createdAt ? new Date(a.createdAt).getTime() : 0,
     reviewHref: a._id ? `/profile/reading/attempt/${a._id}` : null,
     passed: a.bandScore != null && targetBand != null ? a.bandScore >= targetBand : null,
@@ -235,7 +235,7 @@ export function ProfileSummarySection() {
     type: "Practice",
     band: a.bandScore,
     score: `${a.scorePercent}%`,
-    date: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "—",
+    date: a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "",
     sortDate: a.createdAt ? new Date(a.createdAt).getTime() : 0,
     reviewHref: `/profile/reading/practice-attempt/${a._id}`,
     passed: a.passed,
@@ -324,13 +324,13 @@ export function ProfileSummarySection() {
         <StatTile
           icon={Target}
           label="Target band"
-          value={targetBand != null ? String(targetBand) : "—"}
+          value={targetBand != null ? String(targetBand) : ""}
           gradient="from-indigo-500 to-violet-600"
         />
         <StatTile
           icon={TrendingUp}
           label="Current band"
-          value={currentEstimatedBand != null ? String(currentEstimatedBand) : "—"}
+          value={currentEstimatedBand != null ? String(currentEstimatedBand) : ""}
           gradient="from-emerald-500 to-teal-600"
         />
         <StatTile
@@ -339,7 +339,7 @@ export function ProfileSummarySection() {
           value={
             currentLevel
               ? `L${currentLevel.levelNumber}`
-              : "—"
+              : ""
           }
           hint={
             currentLevel ? `${currentLevel.progressPercentage}% complete` : undefined
@@ -352,7 +352,7 @@ export function ProfileSummarySection() {
           value={
             streakInfo
               ? `${streakInfo.consecutivePassCount}/${streakInfo.requiredStreak}`
-              : "—"
+              : ""
           }
           hint="Consecutive passes toward readiness"
           gradient="from-orange-500 to-amber-600"
@@ -371,7 +371,7 @@ export function ProfileSummarySection() {
                 Continue your reading journey
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Pick up exactly where you left off — lessons, quizzes, and practice tests.
+                Pick up exactly where you left off. lessons, quizzes, and practice tests.
               </p>
             </div>
           </div>
@@ -406,7 +406,7 @@ export function ProfileSummarySection() {
                 Weakness snapshot
               </h2>
               <p className="text-sm text-muted-foreground">
-                Question types ranked by accuracy — focus on the lowest first.
+                Question types ranked by accuracy. focus on the lowest first.
               </p>
             </div>
           </div>
@@ -523,7 +523,7 @@ export function ProfileSummarySection() {
                     </span>
                   </div>
                   <span className="ml-3 shrink-0 rounded-full bg-destructive/10 px-2.5 py-0.5 text-xs font-bold text-destructive">
-                    ×{item.count}
+                    �{item.count}
                   </span>
                 </li>
               ))}
@@ -538,7 +538,7 @@ export function ProfileSummarySection() {
                 {(() => {
                   const top = weaknessAnalytics[0];
                   if (!top) return null;
-                  return `"${top.name}" (${CATEGORY_LABELS[top.category] ?? top.category}) — review explanation notes after each incorrect answer.`;
+                  return `"${top.name}" (${CATEGORY_LABELS[top.category] ?? top.category}). review explanation notes after each incorrect answer.`;
                 })()}
               </p>
             </div>
@@ -574,7 +574,7 @@ export function ProfileSummarySection() {
                 <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/50 bg-background/80 px-4 py-3 transition-all hover:border-border hover:bg-muted/30 sm:flex-nowrap">
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
-                      {typeof r.band === "number" ? r.band : "—"}
+                      {typeof r.band === "number" ? r.band : ""}
                     </div>
                     <div className="min-w-0">
                       <p className="truncate font-medium text-foreground">{r.type}</p>

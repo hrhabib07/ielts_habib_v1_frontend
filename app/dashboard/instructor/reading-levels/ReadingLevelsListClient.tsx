@@ -748,7 +748,7 @@ export function ReadingLevelsListClient() {
   const lastUpdated = (level: ReadingLevel, levelId: string) => {
     const s = summary(levelId);
     if (s.publishedUpdatedAt) return formatDate(s.publishedUpdatedAt);
-    return level.updatedAt ? formatDate(level.updatedAt) : "—";
+    return level.updatedAt ? formatDate(level.updatedAt) : "";
   };
   function formatDate(iso: string) {
     try {
@@ -759,7 +759,7 @@ export function ReadingLevelsListClient() {
         year: "numeric",
       });
     } catch {
-      return "—";
+      return "";
     }
   }
 
@@ -1002,7 +1002,7 @@ export function ReadingLevelsListClient() {
                         {level.levelType}
                         {level.difficulty ? ` · ${level.difficulty}` : ""} · {level.slug}
                         {" · "}
-                        v{s.publishedVersion ?? "—"}
+                        v{s.publishedVersion ?? ""}
                         {" · "}
                         {lastUpd}
                       </p>
@@ -1316,7 +1316,7 @@ function LevelFormModal({
                     className="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm"
                     disabled={busy}
                   >
-                    <option value="">— Select —</option>
+                    <option value=""> Select </option>
                     {DIFFICULTY_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>
                         {o.label}
@@ -1335,7 +1335,7 @@ function LevelFormModal({
                   className="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm"
                   disabled={busy}
                 >
-                  <option value="">— Select —</option>
+                  <option value=""> Select </option>
                   {DIFFICULTY_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}

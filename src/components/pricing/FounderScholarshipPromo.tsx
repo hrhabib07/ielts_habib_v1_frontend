@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 import {
   FOUNDER_SCHOLARSHIP_PERCENT,
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
-  PREMIUM_BASE_PRICE_BDT,
+  PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
 
 export function FounderScholarshipPromo() {
@@ -22,9 +22,9 @@ export function FounderScholarshipPromo() {
           <p className="leading-relaxed text-muted-foreground">
             Create your account and pay{" "}
             <strong className="text-foreground">{FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT</strong>{" "}
-            instead of {PREMIUM_BASE_PRICE_BDT} BDT in your first{" "}
+            instead of {PREMIUM_LIST_PRICE_BDT} BDT in your first{" "}
             <strong className="text-foreground">24 hours</strong>. Before 1 August 2026 you also
-            get <strong className="text-foreground">6 months</strong> of premium Reading — priced
+            get <strong className="text-foreground">6 months</strong> of premium Reading. Priced
             like one month.
           </p>
           <Link

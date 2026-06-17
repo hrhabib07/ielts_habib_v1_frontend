@@ -9,7 +9,7 @@ interface HeaderProps {
   initialUser?: CurrentUser | null;
 }
 
-/** Unified site navigation — home, reading, profile, and public pages. */
+/** Unified site navigation. home, reading, profile, and public pages. */
 export function Header({
   initialUser = null,
   embedded = false,

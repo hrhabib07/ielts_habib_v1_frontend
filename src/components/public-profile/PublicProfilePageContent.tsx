@@ -21,7 +21,7 @@ interface PublicProfilePageContentProps {
 }
 
 function formatDate(iso?: string): string {
-  if (!iso) return "—";
+  if (!iso) return "";
   try {
     return new Date(iso).toLocaleDateString(undefined, {
       month: "short",
@@ -215,7 +215,7 @@ export function PublicProfilePageContent({ initialProfile }: PublicProfilePageCo
                       {attempt.readingTestType ?? "Reading"} · {formatDate(attempt.createdAt)}
                     </span>
                     <span className="font-semibold tabular-nums text-foreground">
-                      Band {attempt.bandScore ?? "—"}
+                      Band {attempt.bandScore ?? ""}
                     </span>
                   </li>
                 ))}

@@ -80,7 +80,7 @@ export default function LevelPreviewPage() {
           Back to levels
         </Link>
         <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">
-          Preview — published version only
+          Preview. published version only
         </span>
         <h1 className="truncate text-sm font-medium text-muted-foreground">
           {level.title}

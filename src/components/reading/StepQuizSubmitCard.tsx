@@ -819,7 +819,7 @@ function QuizAttemptReview({
                       : "text-red-700 dark:text-red-300"
                   }
                 >
-                  {a.selectedAnswer.join(", ") || "—"}
+                  {a.selectedAnswer.join(", ") || ""}
                 </span>
               </div>
               {!a.isCorrect && (

@@ -9,6 +9,8 @@ import {
   FOUNDER_OFFER_SESSION_KEY,
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
   PREMIUM_BASE_PRICE_BDT,
+  PREMIUM_LIST_PRICE_BDT,
+  FOUNDER_SCHOLARSHIP_PERCENT,
 } from "@/src/lib/pricingOffer";
 
 export function FounderOfferLoginNotice() {
@@ -44,14 +46,14 @@ export function FounderOfferLoginNotice() {
         <div className="min-w-0 flex-1 space-y-1 text-sm">
           <p className="font-semibold text-emerald-50">
             {scholarshipLive
-              ? "Your 60% Founder scholarship is active!"
-              : "Welcome back — premium Reading is ready"}
+              ? `Your ${FOUNDER_SCHOLARSHIP_PERCENT}% Founder scholarship is active!`
+              : "Welcome back. Premium Reading is ready"}
           </p>
           {scholarshipLive ? (
             <p className="text-emerald-100/80">
               Pay{" "}
               <strong className="text-white">{FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT</strong> instead
-              of {PREMIUM_BASE_PRICE_BDT} BDT. Your discount ends in{" "}
+              of {PREMIUM_LIST_PRICE_BDT} BDT. Your discount ends in{" "}
               <strong className="font-mono text-white tabular-nums">
                 {decayTimer.formatted}
               </strong>

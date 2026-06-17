@@ -276,7 +276,7 @@ export function LevelLayout({
                         : showContinue
                           ? nextLevelInfo
                             ? "You passed every step. The next level is unlocked whenever you're ready."
-                            : "Congratulations — you've finished every level in this path."
+                            : "Congratulations. you've finished every level in this path."
                           : "Checking your progress…"}
                     </p>
                   </div>

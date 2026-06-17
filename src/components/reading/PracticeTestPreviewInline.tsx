@@ -146,7 +146,7 @@ function renderPassageContent(content: unknown): ReactNode {
 }
 
 function formatCorrectAnswer(correctAnswer: string | string[] | undefined): string {
-  if (correctAnswer == null) return "—";
+  if (correctAnswer == null) return "";
   if (Array.isArray(correctAnswer)) return correctAnswer.join(", ");
   return String(correctAnswer);
 }
@@ -333,7 +333,7 @@ export function PracticeTestPreviewInline({
         <div className="flex flex-col gap-3 rounded-xl border border-violet-200 bg-violet-50/50 px-4 py-3 dark:border-violet-900 dark:bg-violet-950/30 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">
-              Sentence locator (Level 0) — instructor preview
+              Sentence locator (Level 0). instructor preview
             </p>
             <p className="mt-1 text-sm text-violet-800 dark:text-violet-200">
               {title} · {timeLimitMinutes} min · Pass:{" "}
@@ -377,7 +377,7 @@ export function PracticeTestPreviewInline({
           <div className="space-y-3">
             {sortedStatements.map((st) => {
               const para = sentenceLocator.paragraphs.find((x) => x.paragraphIndex === st.targetParagraphIndex);
-              const targetText = para?.sentences[st.targetSentenceIndex] ?? "—";
+              const targetText = para?.sentences[st.targetSentenceIndex] ?? "";
               return (
                 <div
                   key={st.id}
@@ -389,7 +389,7 @@ export function PracticeTestPreviewInline({
                   {showCorrectAnswers && (
                     <p className="mt-2 text-xs text-emerald-800 dark:text-emerald-200">
                       <span className="font-semibold">Target: </span>P{st.targetParagraphIndex + 1} · S
-                      {st.targetSentenceIndex + 1} — {targetText}
+                      {st.targetSentenceIndex + 1}. {targetText}
                     </p>
                   )}
                   {st.anchorKeywords && st.anchorKeywords.length > 0 && showCorrectAnswers && (
@@ -443,7 +443,7 @@ export function PracticeTestPreviewInline({
       <div className="flex flex-col gap-3 rounded-xl border border-teal-200 bg-teal-50/50 px-4 py-3 dark:border-teal-800 dark:bg-teal-950/30 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-teal-800 dark:text-teal-200">
-            Instructor preview — same layout as students see (not submittable)
+            Instructor preview. same layout as students see (not submittable)
           </p>
           <p className="mt-1 text-sm text-teal-700 dark:text-teal-300">
             {title} · {timeLimitMinutes} min · Pass:{" "}

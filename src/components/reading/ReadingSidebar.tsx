@@ -492,7 +492,7 @@ export function ReadingSidebar({ onCollapse }: { onCollapse?: () => void }) {
                         ? isLevelPassed
                           ? "Completed"
                           : `${completedCount}/${stepCount} steps`
-                        : "—"}
+                        : ""}
                     </p>
                   </div>
                   {!unlocked && (

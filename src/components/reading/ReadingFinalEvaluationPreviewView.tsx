@@ -127,7 +127,7 @@ function renderLineWithGapBoxes(
 }
 
 function formatCorrectAnswer(correctAnswer: string | string[] | undefined): string {
-  if (correctAnswer == null) return "—";
+  if (correctAnswer == null) return "";
   if (Array.isArray(correctAnswer)) return correctAnswer.join(", ");
   return String(correctAnswer);
 }
@@ -299,7 +299,7 @@ export function ReadingFinalEvaluationPreviewView({
     <div className="flex h-full min-h-0 flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg">
       <div className="flex shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-amber-50 dark:bg-amber-950/30 px-4 py-2.5">
         <span className="text-sm font-semibold text-amber-800 dark:text-amber-200">
-          Preview — {groupLabel} (answers visible, not submittable)
+          Preview. {groupLabel} (answers visible, not submittable)
         </span>
         <div className="flex gap-1">
           {content.miniTests.map((_, idx) => (

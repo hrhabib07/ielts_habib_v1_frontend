@@ -118,7 +118,7 @@ export function ProfilePrivacySettings({
             type="checkbox"
             role="switch"
             aria-checked={isPrivate}
-            aria-label="Private profile — hide progress and scores on your public page"
+            aria-label="Private profile. hide progress and scores on your public page"
             checked={isPrivate}
             disabled={updating}
             onChange={(e) => handleToggle(e.target.checked)}

@@ -36,7 +36,7 @@ export async function generateMetadata({
     title: `${profile.displayName} (@${profile.username}) · Gamlish`,
     description: profile.isPrivate
       ? "Private Gamlish profile"
-      : `We believe ${profile.displayName} can achieve their IELTS goal of Band ${profile.desiredBandScore ?? profile.progress?.targetBand ?? "—"}.`,
+      : `We believe ${profile.displayName} can achieve their IELTS goal of Band ${profile.desiredBandScore ?? profile.progress?.targetBand ?? ""}.`,
   };
 }
 

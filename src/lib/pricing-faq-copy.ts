@@ -37,7 +37,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Currently, Gamlish is hyper-focused exclusively on the Reading module—the section students struggle with and fear the most. We built an entirely gamified system to completely eliminate this specific fear and turn it into your highest-scoring module.",
+            "Currently, Gamlish is hyper-focused exclusively on the Reading module. This is the section students struggle with and fear the most. We built an entirely gamified system to completely eliminate this specific fear and turn it into your highest-scoring module.",
         },
       },
       {
@@ -78,7 +78,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "বর্তমানে Gamlish শুধুমাত্র রিডিং মডিউলের (Reading module) ওপর ফোকাস করছে—যে মডিউলটিতে স্টুডেন্টরা সবচেয়ে বেশি ভয় পায়। রিডিংয়ের এই ভয়কে চিরতরে দূর করে এটিকে আপনার সবচেয়ে স্ট্রং মডিউলে পরিণত করতেই আমাদের এই স্পেশাল গ্যামিফাইড সিস্টেম।",
+            "বর্তমানে Gamlish শুধুমাত্র রিডিং মডিউলের (Reading module) ওপর ফোকাস করছে। যে মডিউলটিতে স্টুডেন্টরা সবচেয়ে বেশি ভয় পায়। রিডিংয়ের এই ভয়কে চিরতরে দূর করে এটিকে আপনার সবচেয়ে স্ট্রং মডিউলে পরিণত করতেই আমাদের এই স্পেশাল গ্যামিফাইড সিস্টেম।",
         },
       },
       {

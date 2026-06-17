@@ -159,7 +159,7 @@ export function StepBuilderAddForm({
     >
       <h4 className="text-sm font-semibold text-foreground">➕ Add new step</h4>
       <p className="text-xs text-muted-foreground">
-        For <strong>Quiz, Practice, or Full Test</strong> — select a Question Set. For <strong>Intro, Note, Video, or Analytics</strong> — select content from Content Management. Create content at{" "}
+        For <strong>Quiz, Practice, or Full Test</strong>. select a Question Set. For <strong>Intro, Note, Video, or Analytics</strong>. select content from Content Management. Create content at{" "}
         <a href="/dashboard/instructor/contents" className="underline text-primary hover:no-underline" target="_blank" rel="noopener noreferrer">
           Dashboard → Content Management
         </a>

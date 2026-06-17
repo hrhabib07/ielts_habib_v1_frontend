@@ -115,8 +115,8 @@ export function FinalEvaluationResultsSummary({
 
   const handleShare = async () => {
     const text = levelComplete
-      ? `I just cleared ${levelTitle || "a reading level"} on GAMLISH with a best final band of ${bestBand != null ? formatBand(bestBand) : "—"}! 🎯`
-      : `My GAMLISH reading final scores — best band ${bestBand != null ? formatBand(bestBand) : "—"}.`;
+      ? `I just cleared ${levelTitle || "a reading level"} on GAMLISH with a best final band of ${bestBand != null ? formatBand(bestBand) : ""}! 🎯`
+      : `My GAMLISH reading final scores. best band ${bestBand != null ? formatBand(bestBand) : ""}.`;
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
         await navigator.share({
@@ -258,7 +258,7 @@ export function FinalEvaluationResultsSummary({
                   </div>
                 </div>
 
-                {/* Best band — desktop inline */}
+                {/* Best band. desktop inline */}
                 {bestBand != null && (
                   <div className="hidden shrink-0 items-center gap-4 lg:flex">
                     <div className="h-12 w-px bg-white/10" aria-hidden />
@@ -290,7 +290,7 @@ export function FinalEvaluationResultsSummary({
                   );
                 })}
 
-                {/* Best band tile — mobile/tablet only (desktop has dial) */}
+                {/* Best band tile. mobile/tablet only (desktop has dial) */}
                 {bestBand != null && (
                   <div
                     className={cn(
@@ -302,7 +302,7 @@ export function FinalEvaluationResultsSummary({
                   </div>
                 )}
 
-                {/* Best band tile — desktop 4th column */}
+                {/* Best band tile. desktop 4th column */}
                 {bestBand != null && (
                   <div
                     className={cn(
@@ -522,7 +522,7 @@ function ScoreTile({
           Start
         </Link>
       ) : (
-        <p className="mt-3 text-lg font-light text-white/20 sm:text-xl">—</p>
+        <p className="mt-3 text-lg font-light text-white/20 sm:text-xl"></p>
       )}
     </div>
   );

@@ -245,7 +245,7 @@ export function VersionEditClient({ levelId, versionId }: VersionEditClientProps
             <CardHeader>
               <CardTitle className="text-base">2. Final tests (passage + questions)</CardTitle>
               <p className="text-xs text-muted-foreground mt-1">
-                Add three final tests — not a final quiz step. Each test: passage paragraphs +
+                Add three final tests. not a final quiz step. Each test: passage paragraphs +
                 statement questions.
               </p>
             </CardHeader>

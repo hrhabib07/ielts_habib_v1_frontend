@@ -7,7 +7,7 @@ import { READING_PATH_ZONES } from "@/src/lib/readingPathZones";
 import { cn } from "@/lib/utils";
 
 function formatDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "";
   try {
     return new Date(iso).toLocaleDateString(undefined, {
       month: "short",
@@ -50,7 +50,7 @@ export function PublicProfileTrophyRoom({
                   {scholarship.meritPercent}% Merit-Based Scholarship
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                  Unlocks from Level 1 completion speed — faster finishers earn up to{" "}
+                  Unlocks from Level 1 completion speed. faster finishers earn up to{" "}
                   {scholarship.meritPercent}% off premium access.
                 </p>
               </div>

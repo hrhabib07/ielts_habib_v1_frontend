@@ -35,7 +35,7 @@ export function ReadingPathAccessBanner(props: {
                 Payment under review
               </p>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                You finished the free levels — great work. We are verifying your bKash
+                You finished the free levels. great work. We are verifying your bKash
                 payment now. Levels 3–21 unlock automatically once approved (usually
                 within 24–48 hours).
               </p>
@@ -108,7 +108,7 @@ export function ReadingPathAccessBanner(props: {
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">
-              Free levels complete — unlock the full course
+              Free levels complete. unlock the full course
             </p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
               Levels 1 and 2 are done. Subscribe to unlock Level 3 through Level 21,

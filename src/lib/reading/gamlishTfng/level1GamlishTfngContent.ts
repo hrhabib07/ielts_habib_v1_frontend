@@ -857,16 +857,16 @@ export const L1_FINAL_3 = buildContent(
 
 export const L1_PRACTICE_TESTS_BULK_PAYLOAD = {
   practiceTests: [
-    { title: "L1 — Practice 1: The Dopamine Loop", gamlishTfng: L1_PRACTICE_1 },
-    { title: "L1 — Practice 2: The Cost of Connection", gamlishTfng: L1_PRACTICE_2 },
-    { title: "L1 — Practice 3: Architecture of Boredom", gamlishTfng: L1_PRACTICE_3 },
+    { title: "L1 · Practice 1: The Dopamine Loop", gamlishTfng: L1_PRACTICE_1 },
+    { title: "L1 · Practice 2: The Cost of Connection", gamlishTfng: L1_PRACTICE_2 },
+    { title: "L1 · Practice 3: Architecture of Boredom", gamlishTfng: L1_PRACTICE_3 },
   ],
 };
 
 export const L1_FINAL_TESTS_BULK_PAYLOAD = {
   finalTests: [
-    { title: "L1 — Final 1: The Academic Deficit", gamlishTfng: L1_FINAL_1 },
-    { title: "L1 — Final 2: The Illusion of Validation", gamlishTfng: L1_FINAL_2 },
-    { title: "L1 — Final 3: Beyond the Pixel", gamlishTfng: L1_FINAL_3 },
+    { title: "L1 · Final 1: The Academic Deficit", gamlishTfng: L1_FINAL_1 },
+    { title: "L1 · Final 2: The Illusion of Validation", gamlishTfng: L1_FINAL_2 },
+    { title: "L1 · Final 3: Beyond the Pixel", gamlishTfng: L1_FINAL_3 },
   ],
 };

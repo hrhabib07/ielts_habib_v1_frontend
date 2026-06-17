@@ -174,7 +174,7 @@ export default function OnboardingPageContent() {
         return;
       }
       if (usernameStatus === "checking") {
-        setError("Still checking username availability — try again in a moment.");
+        setError("Still checking username availability. try again in a moment.");
         return;
       }
       if (usernameStatus !== "available") {
@@ -259,7 +259,7 @@ export default function OnboardingPageContent() {
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
           {isMigration
             ? "We need a few details before you can continue using your dashboard."
-            : "Set up your profile — then you're straight into Reading."}
+            : "Set up your profile. then you're straight into Reading."}
         </p>
       </div>
 

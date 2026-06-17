@@ -204,7 +204,7 @@ function QuestionBlock({
         {hasTools && !isStructuredNoteQuestion(question) && !isStructuredTableQuestion(question) ? (
           <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 dark:border-slate-600 dark:bg-slate-900/90">
             <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Question wording — highlight or note
+              Question wording. highlight or note
             </p>
             <SelectableTextWithTools
               blockId={question._id}
@@ -231,7 +231,7 @@ function QuestionBlock({
     );
   }
 
-  /* TRUE/FALSE/NOT GIVEN and YES/NO/NOT GIVEN — official IELTS style radio buttons */
+  /* TRUE/FALSE/NOT GIVEN and YES/NO/NOT GIVEN. official IELTS style radio buttons */
   if (question.type === "TRUE_FALSE_NOT_GIVEN" || question.type === "YES_NO_NOT_GIVEN") {
     const options =
       question.options?.length
@@ -313,7 +313,7 @@ function QuestionBlock({
             placeholder={
               question.blanks[0]?.options?.length
                 ? `Choose: ${question.blanks[0].options.join(", ")}`
-                : `Answer (max ${question.blanks[0]?.wordLimit ?? "—"} words)`
+                : `Answer (max ${question.blanks[0]?.wordLimit ?? ""} words)`
             }
             disabled={disabled}
             className={`min-w-[200px] ${QUESTION_INPUT_BASE}`}

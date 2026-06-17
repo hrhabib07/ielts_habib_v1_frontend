@@ -101,7 +101,7 @@ export default function GroupTestsPage() {
                 {levels.map((l) => (
                   <option key={l._id} value={l._id}>
                     {l.title} (order {l.order})
-                    {l.levelType === "FOUNDATION" ? " — Foundation" : " — Skill"}
+                    {l.levelType === "FOUNDATION" ? ". Foundation" : ". Skill"}
                   </option>
                 ))}
               </select>

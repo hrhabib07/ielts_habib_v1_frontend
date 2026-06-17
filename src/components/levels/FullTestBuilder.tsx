@@ -227,7 +227,7 @@ export function FullTestBuilder({
                 Full Test Group {groupIndex}
               </p>
               {isNewEmptyGroup && (
-                <span className="text-xs text-muted-foreground">New — assign all 3 mini tests</span>
+                <span className="text-xs text-muted-foreground">New. assign all 3 mini tests</span>
               )}
             </div>
             <div className="grid gap-4 sm:grid-cols-3">

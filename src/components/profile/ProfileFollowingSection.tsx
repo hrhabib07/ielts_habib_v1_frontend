@@ -50,7 +50,7 @@ export function ProfileFollowingSection() {
             Profiles you follow
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            One-way follows — only you see this list. Follower counts are never shown
+            One-way follows. only you see this list. Follower counts are never shown
             anywhere on Gamlish.
           </p>
         </div>

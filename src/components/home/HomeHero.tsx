@@ -359,7 +359,7 @@ function BandHero({
                 {journey.masteredLevelCount > 0
                   ? `${journey.masteredLevelCount} of 21 levels passed`
                   : "Keep going"}
-                {" — "}
+                {". "}
                 your Band {bandLabel} is closer than you think.
               </p>
             </div>

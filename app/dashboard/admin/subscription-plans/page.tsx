@@ -16,6 +16,10 @@ import {
 } from "@/src/lib/api/admin";
 import type { SubscriptionPlan } from "@/src/lib/api/subscription";
 import {
+  FOUNDER_SCHOLARSHIP_PERCENT,
+  FOUNDER_SCHOLARSHIP_PRICE_BDT,
+} from "@/src/lib/pricingOffer";
+import {
   ArrowLeft,
   Plus,
   Pencil,
@@ -423,8 +427,8 @@ export default function SubscriptionPlansAdminPage() {
             Founder Scholarship
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            New students get one fixed 60% scholarship for their first 24 hours after signup.
-            It is delivered automatically via the welcome email and the top site banner — no
+            New students get one fixed {FOUNDER_SCHOLARSHIP_PERCENT}% scholarship for their first 24 hours after signup.
+            It is delivered automatically via the welcome email and the top site banner. no
             promo codes or admin tiers.
           </p>
         </div>
@@ -441,14 +445,14 @@ export default function SubscriptionPlansAdminPage() {
             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
           <p className="mt-1.5 text-xs text-muted-foreground">
-            Scholarship checkout uses this price minus 60% during the 24-hour window.
+            Scholarship checkout charges {FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT ({FOUNDER_SCHOLARSHIP_PERCENT}% off list price) during the 24-hour window.
           </p>
         </div>
 
         <div className="rounded-xl border border-indigo-200/70 bg-indigo-50/50 p-4 text-sm text-indigo-900 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
           <p className="font-semibold">Fixed offer (not editable)</p>
           <p className="mt-2 text-xs leading-relaxed">
-            60% off for the first 24 hours after account creation. The banner is hidden during
+            {FOUNDER_SCHOLARSHIP_PERCENT}% off for the first 24 hours after account creation. The banner is hidden during
             practice tests and final evaluations so students are not interrupted.
           </p>
         </div>
@@ -481,20 +485,20 @@ export default function SubscriptionPlansAdminPage() {
         </Button>
       </Card>
 
-      {/* YouTube videos — landing + per-level intros */}
+      {/* YouTube videos. landing + per-level intros */}
       <Card className="p-6 space-y-4">
         <div>
           <h2 className="text-base font-semibold text-foreground">YouTube videos</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             One field per video. Paste a YouTube ID or full URL. Changes apply on the live site
-            immediately — no redeploy needed.
+            immediately. no redeploy needed.
           </p>
         </div>
 
         <div className="grid gap-5">
           <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
             <label className="text-sm font-semibold text-foreground">
-              Landing — How Gamlish works
+              Landing. How Gamlish works
             </label>
             <p className="text-xs text-muted-foreground">
               Guest homepage walkthrough (not tied to a reading level).
@@ -510,7 +514,7 @@ export default function SubscriptionPlansAdminPage() {
 
           <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
             <label className="text-sm font-semibold text-foreground">
-              Level 1 — Foundation
+              Level 1. Foundation
             </label>
             <p className="text-xs text-muted-foreground">
               Shown at the start of student Level 1 (IELTS Reading Basics).
@@ -526,7 +530,7 @@ export default function SubscriptionPlansAdminPage() {
 
           <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
             <label className="text-sm font-semibold text-foreground">
-              Level 2 — True / False / Not Given
+              Level 2. True / False / Not Given
             </label>
             <p className="text-xs text-muted-foreground">
               Shown at the start of student Level 2 only. Level 3+ has no intro video yet.

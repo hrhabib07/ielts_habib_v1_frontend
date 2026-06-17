@@ -245,7 +245,7 @@ function TagModal({ mode, initial, onClose, onSave }: TagModalProps) {
               Description{" "}
               <span className="text-destructive">*</span>
               <span className="ml-1 font-normal text-xs text-muted-foreground">
-                — explain the mistake pattern
+               . explain the mistake pattern
               </span>
             </Label>
             <textarea
@@ -721,7 +721,7 @@ export default function InstructorWeaknessTagsPage() {
                       WEAKNESS_TAG_CATEGORIES.find(
                         (c) => c.value === filterCategory,
                       )?.label
-                    } — ${filteredAll.length} tag${
+                    }. ${filteredAll.length} tag${
                       filteredAll.length !== 1 ? "s" : ""
                     }`}
               </h2>
