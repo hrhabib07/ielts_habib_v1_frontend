@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
 import { getAppOrigin } from "@/src/lib/api-base-url";
+import { GAMLISH_BRAND } from "@/src/lib/gamlish-brand";
 import { ThemeProvider } from "@/src/components/shared/ThemeProvider";
 import { AppShellFallback } from "@/src/components/shared/AppShellFallback";
 import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
@@ -15,9 +16,8 @@ const RUNTIME_FONT_STYLESHEET =
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppOrigin()),
-  title: "GAMLISH. The Game of English",
-  description:
-    "Master English through focused practice. GAMLISH offers structured Reading and Writing modules with clarity, strategy, and confidence.",
+  title: GAMLISH_BRAND.metaTitle,
+  description: GAMLISH_BRAND.metaDescription,
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -34,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="bn" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link

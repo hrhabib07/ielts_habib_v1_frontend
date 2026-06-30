@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyJwtToken } from "@/src/lib/jwt-verify";
 
 const TOKEN_COOKIE = "ielts_habib_token";
 
@@ -18,6 +19,11 @@ export async function POST(request: NextRequest) {
   const token = typeof body?.token === "string" ? body.token.trim() : null;
   if (!token) {
     return NextResponse.json({ error: "Missing token" }, { status: 400 });
+  }
+
+  const verified = await verifyJwtToken(token);
+  if (!verified) {
+    return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
   }
 
   const res = NextResponse.json({ ok: true });

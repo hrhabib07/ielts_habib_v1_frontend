@@ -28,14 +28,29 @@ import { readingPathPremium } from "@/src/lib/readingPathPremium";
 import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { cn } from "@/lib/utils";
 import { GuestLandingNavBar } from "@/src/components/home/guest/GuestLandingNavBar";
+import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import { shouldUseGuestLandingNav } from "@/src/lib/guest-nav-paths";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 
-const STUDENT_LINKS = [
+import {
+  ENABLE_READING,
+  PRIMARY_STUDENT_HREF,
+  PRIMARY_STUDENT_LABEL,
+} from "@/src/lib/platform-config";
+
+const STUDENT_LINKS_READING = [
   { href: "/profile/reading", label: "Reading" },
   { href: "/profile", label: "My profile" },
 ] as const;
+
+const STUDENT_LINKS_PLAYER = [
+  { href: "/player", label: "খেলা" },
+  { href: "/squad", label: "স্কোয়াড" },
+  { href: "/profile", label: "আমার প্রোফাইল" },
+] as const;
+
+const STUDENT_LINKS = ENABLE_READING ? STUDENT_LINKS_READING : STUDENT_LINKS_PLAYER;
 
 const PUBLIC_LINKS = [{ href: "/pricing", label: "Plans & pricing" }] as const;
 
@@ -67,9 +82,10 @@ export function SiteNavBar(props: {
 
   const navProgressBarStyle = journeyProgressBarStyle(overallProgressPct);
 
-  const isJourney = pathname === "/profile/reading";
-  const isLevelPage = pathname.includes("/profile/reading/strict-levels/");
-  const isReadingArea = pathname.startsWith("/profile/reading");
+  const isJourney = ENABLE_READING && pathname === "/profile/reading";
+  const isLevelPage = ENABLE_READING && pathname.includes("/profile/reading/strict-levels/");
+  const isReadingArea = ENABLE_READING && pathname.startsWith("/profile/reading");
+  const isPlayerArea = !ENABLE_READING && pathname.startsWith("/player");
 
   useEffect(() => {
     const updateUser = () => {
@@ -114,7 +130,9 @@ export function SiteNavBar(props: {
       ? "Your path"
       : isReadingArea
         ? "Reading journey"
-        : "Your path";
+        : isPlayerArea
+          ? "English journey"
+          : "Your path";
 
   const navLinkClass = (active: boolean) =>
     cn(
@@ -180,7 +198,7 @@ export function SiteNavBar(props: {
           )}
         </nav>
 
-        {isStudent ? (
+        {isStudent && ENABLE_READING ? (
           <div className="mx-auto hidden min-w-0 max-w-sm flex-1 px-2 lg:block lg:max-w-md">
             {progressLoading ? (
               <div className="h-[46px] animate-pulse rounded-xl bg-muted/40" />
@@ -231,6 +249,8 @@ export function SiteNavBar(props: {
           {isStudent && isFoundingMember && (
             <FoundingMemberBadge size="sm" compact className="hidden lg:inline-flex" />
           )}
+
+          <GuestLandingLanguageToggle className="hidden sm:inline-flex" />
 
           <ThemeToggleButton />
 

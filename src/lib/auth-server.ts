@@ -1,18 +1,12 @@
 import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
 import type { UserRole } from "@/src/lib/constants";
+import { verifyJwtToken } from "@/src/lib/jwt-verify";
 
 const TOKEN_COOKIE = "ielts_habib_token";
 
 export interface CurrentUser {
   userId: string;
   role: UserRole;
-}
-
-interface JwtPayload {
-  userId: string;
-  role: UserRole;
-  exp: number;
 }
 
 /**
@@ -27,26 +21,6 @@ export async function getBearerTokenFromCookie(): Promise<string | null> {
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const token = await getBearerTokenFromCookie();
-
   if (!token) return null;
-
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    return null;
-  }
-
-  try {
-    const { payload } = await jwtVerify(
-      token,
-      new TextEncoder().encode(secret),
-      { algorithms: ["HS256"] }
-    );
-    const { userId, role, exp } = payload as unknown as JwtPayload;
-    if (!userId || !role || typeof exp !== "number") return null;
-    if (exp * 1000 < Date.now()) return null;
-    if (role !== "STUDENT" && role !== "INSTRUCTOR" && role !== "ADMIN") return null;
-    return { userId: String(userId), role };
-  } catch {
-    return null;
-  }
+  return verifyJwtToken(token);
 }

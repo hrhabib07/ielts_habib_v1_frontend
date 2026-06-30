@@ -4,10 +4,12 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { ReadingAdminGate } from "@/src/components/dashboard/ReadingAdminGate";
 import { ReadingMonitoringClient } from "@/app/dashboard/instructor/reading-monitoring/ReadingMonitoringClient";
 
 export default function AdminReadingMonitoringPage() {
   return (
+    <ReadingAdminGate>
     <div className="space-y-6">
       <div className="space-y-2">
         <Button variant="ghost" size="sm" asChild>
@@ -22,5 +24,6 @@ export default function AdminReadingMonitoringPage() {
         <ReadingMonitoringClient viewBasePath="/dashboard/admin/students" />
       </Suspense>
     </div>
+    </ReadingAdminGate>
   );
 }

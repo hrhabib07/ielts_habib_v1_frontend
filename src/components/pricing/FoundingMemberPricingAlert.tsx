@@ -85,9 +85,9 @@ export function FoundingMemberPricingAlert() {
                 Standard pricing from 1 August 2026
               </p>
               <p className="text-muted-foreground">
-                Premium Reading is now{" "}
+                English Foundations is now{" "}
                 <strong className="text-foreground">{PREMIUM_BASE_PRICE_BDT} BDT per month</strong>{" "}
-                with no bundle discount. The 6-month Founder bundle and badge are no longer
+                with no bundle discount. The full-course Founder bundle and badge are no longer
                 available.
               </p>
             </>

@@ -12,6 +12,8 @@ import {
   isActiveStudentSessionClient,
 } from "@/src/lib/auth";
 import { GuestLandingPage } from "@/src/components/home/guest/GuestLandingPage";
+import { StudentEnglishHome } from "@/src/components/home/StudentEnglishHome";
+import { ENABLE_READING } from "@/src/lib/platform-config";
 import { BandScoreWaterDisplay } from "@/src/components/home/BandScoreWaterDisplay";
 import {
   STUDENT_JOURNEY_HERO_MOCK,
@@ -116,6 +118,10 @@ export function HomeHero({
     initialUser == null &&
     isActiveStudentSessionClient();
   const isStudent = serverStudent || clientStudentFallback;
+
+  if (!ENABLE_READING && isStudent) {
+    return <StudentEnglishHome />;
+  }
 
   const {
     profileSummary,

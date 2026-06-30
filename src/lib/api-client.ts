@@ -2,6 +2,8 @@ import axios from "axios";
 import { clearAuth, getAccessToken } from "./auth";
 import { getApiBaseUrl } from "./api-base-url";
 
+let handlingUnauthorized = false;
+
 const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
@@ -23,11 +25,19 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && typeof window !== "undefined" && !handlingUnauthorized) {
+      handlingUnauthorized = true;
       clearAuth();
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
+      fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" })
+        .catch(() => undefined)
+        .finally(() => {
+          const path = window.location.pathname;
+          if (!path.startsWith("/login") && !path.startsWith("/register")) {
+            window.location.href = "/login";
+          } else {
+            handlingUnauthorized = false;
+          }
+        });
     }
     return Promise.reject(error);
   },

@@ -7,6 +7,7 @@ import {
 import { getRedirectPathForRole } from "@/src/lib/auth-redirects";
 import { fetchStudentProfileServer } from "@/src/lib/api/server-profile";
 import { isStudentLearningReady, needsProfileMigration } from "@/src/lib/student-learning-gate";
+import { PRIMARY_STUDENT_HREF, PRIMARY_STUDENT_LABEL } from "@/src/lib/platform-config";
 
 export const dynamic = "force-dynamic";
 
@@ -32,15 +33,15 @@ export default async function HomePage() {
       }
     }
   }
-  /** Logged-in students land on home; hero CTA still points to Reading (not a duplicate “home” link). */
+  /** Logged-in students land on home; hero CTA points to primary product. */
   const roleCtaHref = initialUser
     ? initialUser.role === "STUDENT"
-      ? "/profile/reading"
+      ? PRIMARY_STUDENT_HREF
       : getRedirectPathForRole(initialUser.role)
     : null;
   const roleCtaLabel =
     initialUser?.role === "STUDENT"
-      ? "Continue to Reading"
+      ? `Continue to ${PRIMARY_STUDENT_LABEL}`
       : initialUser?.role === "ADMIN"
         ? "Go to Admin Panel"
         : initialUser?.role === "INSTRUCTOR"

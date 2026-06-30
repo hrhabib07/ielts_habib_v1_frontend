@@ -18,16 +18,25 @@ import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { logout } from "@/src/lib/auth";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import type { UserRole } from "@/src/lib/constants";
+import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import { cn } from "@/lib/utils";
 
 type NavUser = CurrentUser | { role: UserRole; userId: string } | null;
 
+import { ENABLE_READING } from "@/src/lib/platform-config";
+
 const PUBLIC_LINKS = [{ href: "/pricing", label: "Plans & pricing" }] as const;
 
-const STUDENT_LINKS = [
-  { href: "/profile/reading", label: "Reading" },
-  { href: "/profile", label: "My profile" },
-] as const;
+const STUDENT_LINKS = ENABLE_READING
+  ? ([
+      { href: "/profile/reading", label: "Reading" },
+      { href: "/profile", label: "My profile" },
+    ] as const)
+  : ([
+      { href: "/player", label: "Play" },
+      { href: "/squad", label: "Squad" },
+      { href: "/profile", label: "My profile" },
+    ] as const);
 
 function mobileLinkClass(active: boolean) {
   return cn(
@@ -86,7 +95,10 @@ export function SiteMobileNav(props: {
       >
         <SheetTitle className="sr-only">Navigation menu</SheetTitle>
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain px-5 pb-8 pt-14 [-webkit-overflow-scrolling:touch]">
-          {isStudent && (
+          <div className="mb-5">
+            <GuestLandingLanguageToggle className="w-full max-w-[11rem]" />
+          </div>
+          {isStudent && ENABLE_READING && (
             <div className="mb-6">
               {progressLoading ? (
                 <div className="h-[52px] animate-pulse rounded-xl bg-muted/50" />

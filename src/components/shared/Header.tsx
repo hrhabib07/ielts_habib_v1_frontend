@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { isReadingExamFocusPath } from "@/src/lib/examFocusPaths";
+import { isImmersiveAuthPath } from "@/src/lib/immersive-auth-paths";
 import { SiteNavBar } from "@/src/components/shared/SiteNavBar";
 
 interface HeaderProps {
@@ -17,6 +18,10 @@ export function Header({
   const pathname = usePathname();
 
   if (isReadingExamFocusPath(pathname)) {
+    return null;
+  }
+
+  if (isImmersiveAuthPath(pathname)) {
     return null;
   }
 

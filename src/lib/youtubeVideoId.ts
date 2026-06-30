@@ -19,6 +19,8 @@ export function parseYouTubeVideoId(raw: string | undefined | null): string {
     if (v) return v;
     const embed = url.pathname.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
     if (embed?.[1]) return embed[1];
+    const shorts = url.pathname.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
+    if (shorts?.[1]) return shorts[1];
   } catch {
     /* not a URL */
   }

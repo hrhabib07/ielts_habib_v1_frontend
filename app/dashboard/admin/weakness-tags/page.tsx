@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { ReadingAdminGate } from "@/src/components/dashboard/ReadingAdminGate";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -515,6 +516,7 @@ export default function WeaknessTagsAdminPage() {
       : { ...EMPTY_FORM };
 
   return (
+    <ReadingAdminGate>
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
       {/* ── page header ── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -957,5 +959,6 @@ export default function WeaknessTagsAdminPage() {
         />
       )}
     </div>
+    </ReadingAdminGate>
   );
 }

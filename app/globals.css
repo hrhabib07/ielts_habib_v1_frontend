@@ -502,6 +502,43 @@
   }
 }
 
+@keyframes camp-mission-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+.camp-path-flow {
+  stroke-dasharray: 10 12;
+  animation: camp-path-march 1.4s linear infinite;
+}
+
+@keyframes camp-path-march {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+
+.camp-mission-pulse {
+  animation: camp-mission-glow 2.2s ease-in-out infinite;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 35%, transparent);
+}
+
+.camp-map-spine {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--accent) 55%, transparent),
+    color-mix(in oklch, var(--primary) 35%, transparent)
+  );
+}
+
 /* Guest landing — subtle premium motion */
 .guest-landing-grid {
   background-image:
@@ -750,6 +787,8 @@
   .guest-hero-accent-gradient,
   .guest-journey-level-active,
   .guest-journey-shimmer,
+  .camp-mission-pulse,
+  .camp-path-flow,
   .guest-eyebrow-shimmer::after,
   .guest-bottom-cta {
     animation: none !important;

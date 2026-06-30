@@ -10,10 +10,12 @@ import {
   zoneStateForActiveLevel,
 } from "@/src/hooks/useLandingJourneyProgress";
 
-const ZONE_LEVELS = [
-  ["L0", "L1", "L2", "L3", "L4", "L5", "L6"],
-  ["L7", "L8", "L9", "L10", "L11", "L12", "L13"],
-  ["L14", "L15", "L16", "L17", "L18", "L19", "L20"],
+/** Mission labels per camp (21 missions across 4 camps). */
+const ZONE_MISSIONS = [
+  ["M01", "M02", "M03", "M04", "M05"],
+  ["M06", "M07", "M08", "M09", "M10"],
+  ["M11", "M12", "M13", "M14", "M15"],
+  ["M16", "M17", "M18", "M19", "M20", "M21"],
 ] as const;
 
 function AnimatedReadiness({ value }: { value: number }) {
@@ -81,11 +83,16 @@ export function LandingPathMockup({
         </span>
       </div>
 
-      <div className={cn("relative grid grid-cols-1 sm:grid-cols-3", compact ? "mt-2 gap-2" : "gap-3")}>
+      <div
+        className={cn(
+          "relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+          compact ? "mt-2 gap-2" : "gap-3",
+        )}
+      >
         {copy.mockupZones.map((zone, zoneIndex) => {
-          const levels = ZONE_LEVELS[zoneIndex] ?? [];
+          const missions = ZONE_MISSIONS[zoneIndex] ?? [];
           const { done, active, locked } = zoneStateForActiveLevel(zoneIndex, activeLevel);
-          const barPct = levels.length > 0 ? (done / levels.length) * 100 : 0;
+          const barPct = missions.length > 0 ? (done / missions.length) * 100 : 0;
 
           return (
             <div
@@ -104,7 +111,7 @@ export function LandingPathMockup({
                   <Lock className="h-3 w-3 text-muted-foreground" />
                 ) : (
                   <span className="text-[10px] tabular-nums text-muted-foreground">
-                    {done}/{levels.length}
+                    {done}/{missions.length}
                   </span>
                 )}
               </div>
@@ -118,12 +125,12 @@ export function LandingPathMockup({
                 />
               </div>
               <ul className="mt-2.5 flex flex-wrap gap-1">
-                {levels.map((lv, i) => {
+                {missions.map((missionId, i) => {
                   const passed = i < done;
                   const current = i === active;
                   return (
                     <li
-                      key={lv}
+                      key={missionId}
                       className={cn(
                         "flex h-6 min-w-[1.75rem] items-center justify-center rounded-md px-1 text-[9px] font-bold tabular-nums transition-colors duration-300",
                         passed &&
@@ -139,7 +146,7 @@ export function LandingPathMockup({
                     >
                       {passed ? (
                         <motion.span
-                          key={`check-${lv}`}
+                          key={`check-${missionId}`}
                           initial={{ scale: 0.6, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ duration: 0.25 }}
@@ -147,7 +154,7 @@ export function LandingPathMockup({
                           <Check className="h-2.5 w-2.5" strokeWidth={3} />
                         </motion.span>
                       ) : (
-                        lv
+                        missionId
                       )}
                     </li>
                   );

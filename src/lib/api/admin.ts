@@ -6,7 +6,7 @@ const BASE = "/admin";
 export interface AdminCoupon {
   _id: string;
   code: string;
-  module: "READING" | "LISTENING" | "WRITING" | "SPEAKING";
+  module: "READING" | "LISTENING" | "WRITING" | "SPEAKING" | "ENGLISH";
   discountType: "PERCENT" | "FIXED";
   discountValue: number;
   durationOverrideDays?: number;
@@ -77,8 +77,8 @@ export interface CreatePlanPayload {
   slug: string;
   description: string;
   features?: string[];
-  module: "READING" | "LISTENING" | "WRITING" | "SPEAKING";
-  modulesIncluded: Array<"READING" | "LISTENING" | "WRITING" | "SPEAKING">;
+  module: "READING" | "LISTENING" | "WRITING" | "SPEAKING" | "ENGLISH";
+  modulesIncluded: Array<"READING" | "LISTENING" | "WRITING" | "SPEAKING" | "ENGLISH">;
   durationInDays: number;
   price: number;
   discountPrice?: number;
@@ -93,8 +93,8 @@ export interface UpdatePlanPayload {
   slug?: string;
   description?: string;
   features?: string[];
-  module?: "READING" | "LISTENING" | "WRITING" | "SPEAKING";
-  modulesIncluded?: Array<"READING" | "LISTENING" | "WRITING" | "SPEAKING">;
+  module?: "READING" | "LISTENING" | "WRITING" | "SPEAKING" | "ENGLISH";
+  modulesIncluded?: Array<"READING" | "LISTENING" | "WRITING" | "SPEAKING" | "ENGLISH">;
   durationInDays?: number;
   price?: number;
   discountPrice?: number | null;

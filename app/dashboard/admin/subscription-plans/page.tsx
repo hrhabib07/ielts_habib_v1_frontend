@@ -30,7 +30,7 @@ import {
   X,
 } from "lucide-react";
 
-const ALL_MODULES = ["READING", "LISTENING", "WRITING", "SPEAKING"] as const;
+const ALL_MODULES = ["READING", "LISTENING", "WRITING", "SPEAKING", "ENGLISH"] as const;
 
 function formatDuration(days: number): string {
   const totalMonths = Math.max(1, Math.round(days / 30));

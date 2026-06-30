@@ -1,22 +1,19 @@
+import { GAMLISH_BRAND } from "@/src/lib/gamlish-brand";
+
 export type UserRole = "STUDENT" | "INSTRUCTOR" | "ADMIN";
 
+/** Single transparent logo — same asset in light/dark; no wrapper, no alternate dark file. */
+const GAMLISH_LOGO_URL = "/brand/gamlish-logo.png";
+
 export const BRAND = {
-  logoUrl:
-    "https://res.cloudinary.com/daqvhd097/image/upload/v1772646945/gamlish_logo-no-bg_rr1d5e.png",
-  /** Nav G mark — local file (white pad so it shows on light + dark headers). */
-  navLogoUrl: "/brand/gamlish-logo.png",
-  /** Remote fallback if /public file missing in deploy. */
-  navLogoRemoteUrl:
-    "https://res.cloudinary.com/daqvhd097/image/upload/w_128,h_128,c_pad,b_rgb:ffffff,q_auto,f_png/v1772646945/gamlish_logo-no-bg_rr1d5e.png",
-  /** G mark only — footer / compact surfaces. */
-  iconMarkUrl:
-    "https://res.cloudinary.com/daqvhd097/image/upload/c_crop,w_96,h_96,x_0,y_0,g_west,q_auto,f_auto/v1772646945/gamlish_logo-no-bg_rr1d5e.png",
-  tagline: "The Game of English",
-  headline: "The Game of English",
-  subheadline:
-    "Performance-driven English mastery. Skill trees. Clearance. Proof.",
-  cta: "Begin Initial Calibration",
-  heroSubtext: "No videos to watch. Only levels to clear.",
+  logoUrl: GAMLISH_LOGO_URL,
+  navLogoUrl: GAMLISH_LOGO_URL,
+  iconMarkUrl: GAMLISH_LOGO_URL,
+  tagline: GAMLISH_BRAND.taglineLine2,
+  headline: GAMLISH_BRAND.heroLine,
+  subheadline: GAMLISH_BRAND.metaDescription,
+  cta: "Mission 01 ফ্রি শুরু করো",
+  heroSubtext: "খেলার ছলেই ইংরেজি শেখো। মিশন পার করলেই এগিয়ে যাও।",
 } as const;
 
 interface MenuItem {

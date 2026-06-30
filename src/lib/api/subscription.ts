@@ -1,7 +1,7 @@
 import apiClient from "../api-client";
 import { dedupeRequest } from "./dedupe-request";
 
-export type ModuleType = "READING" | "LISTENING" | "WRITING" | "SPEAKING";
+export type ModuleType = "READING" | "LISTENING" | "WRITING" | "SPEAKING" | "ENGLISH";
 
 export interface SubscriptionPlan {
   _id: string;

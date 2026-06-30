@@ -25,35 +25,35 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
     banglaLabel: "বাংলা",
     items: [
       {
-        question: "Is Gamlish just another video course or mock test website?",
+        question: "Is Gamlish just another video course?",
         answer: {
           kind: "plain",
           text:
-            'No. Gamlish is a gamified, AI-driven adaptive platform. Instead of passively watching videos, you play through 21 Mastery Levels. As you pass strategy lessons and practice sets, your "Water Level" (Readiness Meter) rises. We don\'t just give you practice materials; we mathematically track exactly when you are ready for your target band.',
+            "No. Gamlish is a gamified English Foundations course. You play through camps and missions with story levels, videos, and evaluations. XP, coins, and camp progress show how far you have come.",
         },
       },
       {
-        question: "Does Gamlish cover all four IELTS modules?",
+        question: "What do I get for free?",
         answer: {
           kind: "plain",
           text:
-            "Currently, Gamlish is hyper-focused exclusively on the Reading module. This is the section students struggle with and fear the most. We built an entirely gamified system to completely eliminate this specific fear and turn it into your highest-scoring module.",
+            "Mission 01 is completely free. You can create an account, play the first mission, and see how the Game of English works before you upgrade.",
         },
       },
       {
-        question: "How long does it take to complete all 21 levels?",
+        question: "How long does the full course take?",
         answer: {
           kind: "plain",
           text:
-            "Because Gamlish is adaptive, the timeline depends on your current English proficiency and your target band. If your target is much higher than your current skill, the system will hold you back and challenge you until you improve. On average, a dedicated student reaches the 90% Readiness Zone in 3 to 6 weeks.",
+            "English Foundations has 4 camps and 21 missions. Most students move at their own pace. A dedicated learner can finish a camp in a few weeks, but you keep access for the full subscription period.",
         },
       },
       {
-        question: "Can I practice on my mobile phone, or do I need a computer?",
+        question: "Can I play on my phone?",
         answer: {
           kind: "plain",
           text:
-            "You can seamlessly access strategy lessons and practice sets on your mobile phone. However, to build real exam stamina and simulate the official Computer-Delivered IELTS environment, we strongly recommend taking the mandatory Final Tests on a desktop or laptop.",
+            "Yes. Story levels, videos, and evaluations work on mobile. A larger screen can feel more comfortable for longer sessions, but you do not need a computer to start.",
         },
       },
     ],
@@ -66,35 +66,35 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
     banglaLabel: "বাংলা",
     items: [
       {
-        question: "Gamlish কি সাধারণ কোনো ভিডিও কোর্স বা মক টেস্টের ওয়েবসাইট?",
+        question: "Gamlish কি সাধারণ কোনো ভিডিও কোর্স?",
         answer: {
           kind: "plain",
           text:
-            "না। Gamlish একটি গ্যামিফাইড এবং অ্যাডাপ্টিভ প্ল্যাটফর্ম। এখানে শুধু বসে বসে ভিডিও দেখার সুযোগ নেই; আপনাকে ২১টি মাস্টারি লেভেল পার করতে হবে। আপনি যখন স্ট্র্যাটেজি শিখবেন এবং প্র্যাকটিস করবেন, তখন আপনার \"Water Level\" (প্রস্তুতির মাত্রা) বাড়তে থাকবে। আমরা শুধু ম্যাটেরিয়াল দিই না, আপনি টার্গেট স্কোরের জন্য কখন পুরোপুরি প্রস্তুত, তা ম্যাথমেটিক্যালি ট্র্যাক করি।",
+            "না। Gamlish একটি গ্যামিফাইড English Foundations কোর্স। এখানে ক্যাম্প ও মিশনের মাধ্যমে স্টোরি, ভিডিও ও ইভ্যালুয়েশন লেভেল পার করতে হয়। XP, কয়েন ও ক্যাম্প প্রোগ্রেস দেখায় আপনি কতদূর এগিয়েছেন।",
         },
       },
       {
-        question: "Gamlish কি IELTS-এর ৪টি মডিউলই কভার করে?",
+        question: "ফ্রিতে কী পাব?",
         answer: {
           kind: "plain",
           text:
-            "বর্তমানে Gamlish শুধুমাত্র রিডিং মডিউলের (Reading module) ওপর ফোকাস করছে। যে মডিউলটিতে স্টুডেন্টরা সবচেয়ে বেশি ভয় পায়। রিডিংয়ের এই ভয়কে চিরতরে দূর করে এটিকে আপনার সবচেয়ে স্ট্রং মডিউলে পরিণত করতেই আমাদের এই স্পেশাল গ্যামিফাইড সিস্টেম।",
+            "Mission 01 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলে Game of English কীভাবে কাজ করে দেখতে পারবেন, আপগ্রেডের আগেই।",
         },
       },
       {
-        question: "২১টি লেভেল শেষ করতে কতদিন সময় লাগে?",
+        question: "পুরো কোর্স শেষ করতে কতদিন লাগে?",
         answer: {
           kind: "plain",
           text:
-            "যেহেতু Gamlish একটি অ্যাডাপ্টিভ সিস্টেম, তাই এর সময়কাল আপনার বর্তমান স্কিল এবং টার্গেট ব্যান্ডের ওপর নির্ভর করে। টার্গেট স্কোর যদি বর্তমান স্কিলের চেয়ে অনেক বেশি হয়, তবে সিস্টেম আপনাকে স্কিল ইমপ্রুভ না হওয়া পর্যন্ত সামনে যেতে দেবে না। সাধারণত, নিয়মিত প্র্যাকটিস করলে একজন স্টুডেন্ট ৩ থেকে ৬ সপ্তাহের মধ্যে ৯০% 'রেডিনেস জোন'-এ পৌঁছে যায়।",
+            "English Foundations-এ ৪টি ক্যাম্প ও ২১টি মিশন আছে। নিজের গতিতে এগোবেন। নিয়মিত খেললে একটা ক্যাম্প কয়েক সপ্তাহে শেষ করা যায়; সাবস্ক্রিপশনের পুরো সময় অ্যাক্সেস থাকবে।",
         },
       },
       {
-        question: "আমি কি মোবাইল ফোনে প্র্যাকটিস করতে পারব, নাকি কম্পিউটার লাগবে?",
+        question: "আমি কি মোবাইলে খেলতে পারব?",
         answer: {
           kind: "plain",
           text:
-            "আপনি মোবাইল ফোনে খুব সহজেই স্ট্র্যাটেজি লেসন এবং প্র্যাকটিস সেটগুলো করতে পারবেন। তবে মেইন পরীক্ষার আসল অভিজ্ঞতা পেতে এবং কম্পিউটার-ডেলিভারড আইইএলটিএস-এর (Computer-Delivered IELTS) সাথে অভ্যস্ত হতে, আমরা মক টেস্টগুলো ডেস্কটপ বা ল্যাপটপে দেওয়ার কঠোর পরামর্শ দিই।",
+            "হ্যাঁ। স্টোরি, ভিডিও ও ইভ্যালুয়েশন মোবাইলে চলে। লম্বা সেশনের জন্য বড় স্ক্রিন আরামদায়ক হতে পারে, কিন্তু শুরু করতে কম্পিউটার দরকার নেই।",
         },
       },
     ],

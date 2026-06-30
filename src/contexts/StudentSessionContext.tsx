@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { CurrentUser } from "@/src/lib/auth-server";
-import { getDecodedTokenClient } from "@/src/lib/auth";
+import { isActiveStudentSessionClient } from "@/src/lib/auth";
 import { getMyProfile, getProfileSummary } from "@/src/lib/api/profile";
 import { getMySubscription, type ActiveSubscription } from "@/src/lib/api/subscription";
 import type { ProfileSummary, StudentProfile } from "@/src/lib/api/types";
@@ -61,8 +61,7 @@ export function StudentSessionProvider({
       return;
     }
     const sync = () => {
-      const decoded = getDecodedTokenClient();
-      setClientIsStudent(decoded?.role === "STUDENT");
+      setClientIsStudent(isActiveStudentSessionClient());
     };
     sync();
     window.addEventListener("auth-state-changed", sync);

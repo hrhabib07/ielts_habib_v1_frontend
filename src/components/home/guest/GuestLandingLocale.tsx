@@ -33,47 +33,9 @@ export function useGuestLandingLocale() {
   return ctx;
 }
 
-/** Compact EN/BN toggle for the landing nav bar */
-export function GuestLandingLanguageToggle({ className }: { className?: string }) {
-  const { locale, copy, setLocale } = useGuestLandingLocaleState();
-
-  return (
-    <div
-      className={cn(
-        "inline-flex rounded-full border border-border/60 bg-muted/30 p-0.5 shadow-sm backdrop-blur-md dark:bg-muted/20",
-        className,
-      )}
-      role="group"
-      aria-label={copy.languageToggleAria}
-    >
-      <button
-        type="button"
-        onClick={() => setLocale("en")}
-        className={cn(
-          "min-w-[2.5rem] rounded-full px-2.5 py-1.5 text-xs font-semibold tracking-wide transition-all sm:min-w-[2.75rem] sm:px-3",
-          locale === "en"
-            ? "bg-background text-foreground shadow-sm ring-1 ring-border/50"
-            : "text-muted-foreground hover:text-foreground",
-        )}
-        aria-pressed={locale === "en"}
-      >
-        {copy.englishLabel}
-      </button>
-      <button
-        type="button"
-        onClick={() => setLocale("bn")}
-        className={cn(
-          "min-w-[2.5rem] rounded-full px-2.5 py-1.5 text-xs font-semibold tracking-wide transition-all sm:min-w-[2.75rem] sm:px-3",
-          locale === "bn"
-            ? "bg-background text-foreground shadow-sm ring-1 ring-border/50"
-            : "text-muted-foreground hover:text-foreground",
-        )}
-        aria-pressed={locale === "bn"}
-      >
-        {copy.banglaLabel}
-      </button>
-    </div>
-  );
+/** Compact EN/BN toggle — hidden; Bangladesh audience uses Bangla only. */
+export function GuestLandingLanguageToggle(_props: { className?: string }) {
+  return null;
 }
 
 export const guestGlassCardClass =

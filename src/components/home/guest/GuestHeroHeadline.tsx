@@ -33,13 +33,13 @@ export function GuestHeroHeadline({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.04, ease: GUEST_EASE }}
     >
-      <span className="block leading-[1.08] text-foreground">{line1}</span>
+      <span className="block leading-[1.2] text-foreground">{line1}</span>
       {line2 ? (
-        <span className="mt-1 block overflow-visible leading-[1.05] sm:mt-1.5">
+        <span className="mt-3 block overflow-visible leading-[1.25] sm:mt-4">
           <span
             className={cn(
               accentOnLine2
-                ? "guest-hero-accent-word guest-hero-accent-gradient inline-block bg-gradient-to-r from-primary via-accent to-accent bg-clip-text pb-[0.08em] text-transparent"
+                ? "guest-hero-accent-word guest-hero-accent-gradient inline-block bg-gradient-to-r from-primary via-accent to-accent bg-clip-text pb-1 pt-0.5 text-transparent"
                 : "text-foreground",
             )}
           >

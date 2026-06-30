@@ -148,9 +148,16 @@ export const SentenceLocatorPracticeView = forwardRef<
     };
   }, [dragging]);
 
-  const setLock = useCallback((statementId: string, lock: SentenceLock) => {
-    setLocks((prev) => ({ ...prev, [statementId]: lock }));
-  }, []);
+  const setLock = useCallback(
+    (statementId: string, lock: SentenceLock) => {
+      setLocks((prev) => ({ ...prev, [statementId]: lock }));
+      const idx = statements.findIndex((s) => s.id === statementId);
+      if (idx >= 0 && idx < statements.length - 1 && idx === activeIdx) {
+        window.setTimeout(() => setActiveIdx(idx + 1), 280);
+      }
+    },
+    [statements, activeIdx],
+  );
 
   const addKeyword = useCallback((statementId: string, r: TextHighlightRange) => {
     setKeywords((prev) => ({
@@ -241,6 +248,8 @@ export const SentenceLocatorPracticeView = forwardRef<
   const isLastStatement = activeIdx === statements.length - 1;
   const answeredCount = statements.filter((s) => locks[s.id] != null).length;
   const allAnswered = answeredCount === statements.length;
+  const progressPercent =
+    statements.length > 0 ? ((activeIdx + 1) / statements.length) * 100 : 0;
 
   const goPrev = () => setActiveIdx((i) => Math.max(0, i - 1));
   const goNext = () => setActiveIdx((i) => Math.min(statements.length - 1, i + 1));
@@ -272,6 +281,20 @@ export const SentenceLocatorPracticeView = forwardRef<
           {timeDisplay}
         </div>
       </header>
+
+      <div
+        className="h-1 shrink-0 bg-slate-200 dark:bg-slate-800"
+        role="progressbar"
+        aria-valuenow={Math.round(progressPercent)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Statement progress"
+      >
+        <div
+          className="h-full bg-indigo-600 transition-all duration-300 ease-out dark:bg-indigo-500"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <section
@@ -349,14 +372,14 @@ export const SentenceLocatorPracticeView = forwardRef<
                   of {statements.length}
                 </span>
               </p>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <p className="text-xs tabular-nums text-slate-400 dark:text-slate-500">
                 {answeredCount}/{statements.length} locked
               </p>
             </div>
             <div
-              className="mt-3 flex items-center gap-1.5"
+              className="mt-2.5 flex items-center justify-center gap-1"
               role="tablist"
-              aria-label="Statement progress"
+              aria-label="Jump to statement"
             >
               {statements.map((st, idx) => {
                 const isActive = idx === activeIdx;
@@ -370,12 +393,12 @@ export const SentenceLocatorPracticeView = forwardRef<
                     aria-label={`Statement ${idx + 1}${isAnswered ? ", answered" : ", not answered"}`}
                     onClick={() => setActiveIdx(idx)}
                     className={cn(
-                      "h-2 min-w-0 flex-1 rounded-full transition-all",
+                      "h-1.5 w-1.5 rounded-full transition-all",
                       isActive
-                        ? "bg-indigo-600 dark:bg-indigo-500"
+                        ? "scale-125 bg-indigo-600 dark:bg-indigo-400"
                         : isAnswered
-                          ? "bg-emerald-400/90 dark:bg-emerald-500/80"
-                          : "bg-slate-200 dark:bg-slate-700",
+                          ? "bg-emerald-400/80 dark:bg-emerald-500/70"
+                          : "bg-slate-300 dark:bg-slate-600",
                     )}
                   />
                 );

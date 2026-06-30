@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, X, BarChart3, BookOpen, Activity, Hash, FileText, Layers, FileQuestion, Tag, LayoutDashboard, Settings, Users, ListChecks, ClipboardCheck, BookMarked, FolderKanban } from "lucide-react";
+import { GraduationCap, X } from "lucide-react";
 import type { UserRole } from "@/src/lib/constants";
+import { ENABLE_READING } from "@/src/lib/platform-config";
+import { getDashboardNavGroups } from "@/src/lib/dashboard-nav";
 
 function isNavItemActive(pathname: string, href: string): boolean {
   if (pathname === href) return true;
@@ -23,46 +25,6 @@ export interface DashboardNavGroup {
   roles?: UserRole[];
 }
 
-const INSTRUCTOR_MAIN: DashboardNavGroup = {
-  title: "MAIN",
-  roles: ["INSTRUCTOR", "ADMIN"],
-  items: [
-    { label: "Dashboard", href: "/dashboard/instructor", icon: BarChart3 },
-    { label: "Reading Levels", href: "/dashboard/instructor/reading-levels", icon: BookOpen },
-    { label: "Reading Monitoring", href: "/dashboard/instructor/reading-monitoring", icon: Activity },
-  ],
-};
-
-const INSTRUCTOR_CONTENT: DashboardNavGroup = {
-  title: "CONTENT",
-  roles: ["INSTRUCTOR", "ADMIN"],
-  items: [
-    { label: "Practice Test Manager", href: "/dashboard/instructor/practice-tests", icon: ClipboardCheck },
-    { label: "Group Tests", href: "/dashboard/instructor/group-tests", icon: ListChecks },
-    { label: "Passage Codes", href: "/dashboard/instructor/passage-codes", icon: Hash },
-    { label: "Passages", href: "/dashboard/instructor/passages", icon: FileText },
-    { label: "Question Sets", href: "/dashboard/instructor/question-sets", icon: Layers },
-    { label: "Questions", href: "/dashboard/instructor/questions", icon: FileQuestion },
-    { label: "Passage Question Sets", href: "/dashboard/instructor/passage-question-sets", icon: Layers },
-    { label: "Weakness Tags", href: "/dashboard/instructor/weakness-tags", icon: Tag },
-  ],
-};
-
-const ADMIN_NAV: DashboardNavGroup = {
-  title: "ADMIN",
-  roles: ["ADMIN"],
-  items: [
-    { label: "Admin Home", href: "/dashboard/admin", icon: LayoutDashboard },
-    { label: "Levels", href: "/dashboard/admin/levels", icon: BookOpen },
-    { label: "Content", href: "/dashboard/admin/content", icon: FolderKanban },
-    { label: "Weakness Tags", href: "/dashboard/admin/weakness-tags", icon: Tag },
-    { label: "Subscription Plans", href: "/dashboard/admin/subscription-plans", icon: Settings },
-    { label: "Instructor Requests", href: "/admin/instructor-requests", icon: Users },
-  ],
-};
-
-const ALL_GROUPS = [INSTRUCTOR_MAIN, INSTRUCTOR_CONTENT, ADMIN_NAV];
-
 interface DashboardSidebarProps {
   role: UserRole | null;
   isMobileOpen: boolean;
@@ -71,7 +33,7 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ role, isMobileOpen, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const groups = role ? ALL_GROUPS.filter((g) => !g.roles || g.roles.includes(role)) : [];
+  const groups = role ? getDashboardNavGroups(role, ENABLE_READING) : [];
   const versionEditCtx = pathname.match(
     /^\/dashboard\/instructor\/reading-levels\/([^/]+)\/versions\/([^/]+)\/edit$/,
   );

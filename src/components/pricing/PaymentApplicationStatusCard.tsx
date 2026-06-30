@@ -13,6 +13,7 @@ import type {
   SubscriptionPlan,
   SubscriptionRequest,
 } from "@/src/lib/api/subscription";
+import { ENABLE_READING, PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
 
 function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat("en-GB", {
@@ -57,7 +58,8 @@ export function PaymentApplicationStatusCard({
                 Premium access active
               </p>
               <p className="mt-1 text-sm text-emerald-100/80">
-                Your payment was verified. You have full Reading module access until{" "}
+                Your payment was verified. You have full{" "}
+                {ENABLE_READING ? "Reading module" : "English Foundations"} access until{" "}
                 <strong>{formatDateTime(activeSubscription.endDate)}</strong>.
               </p>
             </div>
@@ -65,7 +67,9 @@ export function PaymentApplicationStatusCard({
               asChild
               className="bg-emerald-600 hover:bg-emerald-500"
             >
-              <Link href="/profile/reading">Go to Reading</Link>
+              <Link href={ENABLE_READING ? "/profile/reading" : PRIMARY_STUDENT_HREF}>
+                {ENABLE_READING ? "Go to Reading" : "Go to camp map"}
+              </Link>
             </Button>
           </div>
         </div>

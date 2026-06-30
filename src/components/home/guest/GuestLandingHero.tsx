@@ -45,7 +45,7 @@ export function GuestLandingHero() {
           </p>
         </motion.div>
 
-        <GuestHeroHeadline className="mx-auto mt-5 max-w-2xl sm:mt-6" accentMode="easy" />
+          <GuestHeroHeadline className="mx-auto mt-5 max-w-2xl sm:mt-6" accentMode="game" />
 
         <motion.p
           className="mx-auto mt-4 max-w-md text-pretty text-base text-muted-foreground sm:text-lg"

@@ -46,11 +46,33 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
         </Link>
 
         <div className="hidden shrink-0 items-center gap-2 sm:gap-2.5 lg:flex">
+          <Link
+            href="/login"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+          >
+            {copy.navLogin}
+          </Link>
+          <Link href="/register">
+            <Button className="h-9 rounded-full px-4 text-sm font-semibold">
+              {copy.navRegister}
+            </Button>
+          </Link>
           <GuestLandingLanguageToggle />
           <ThemeToggleButton />
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
+          <Link
+            href="/login"
+            className="rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:px-3 sm:text-sm"
+          >
+            {copy.navLogin}
+          </Link>
+          <Link href="/register">
+            <Button className="h-8 rounded-full px-3 text-xs font-semibold sm:h-9 sm:px-4 sm:text-sm">
+              {copy.navRegister}
+            </Button>
+          </Link>
           <GuestLandingLanguageToggle className="scale-[0.92] origin-right sm:scale-100" />
           <ThemeToggleButton />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -106,7 +128,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                 </nav>
 
                 <Link href="/register" onClick={() => setMenuOpen(false)} className="mt-auto block">
-                  <Button className="h-11 w-full rounded-full font-semibold">{copy.ctaPrimary}</Button>
+                  <Button className="h-11 w-full rounded-full font-semibold">{copy.navRegister}</Button>
                 </Link>
               </div>
             </SheetContent>

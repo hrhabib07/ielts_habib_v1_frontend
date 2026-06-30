@@ -27,6 +27,8 @@ import {
 } from "@/src/lib/pricingOffer";
 import { resolveBkashNumber } from "@/src/lib/bkash";
 import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
+import { filterPublicPricingPlans } from "@/src/lib/pricing-public";
+import { ENABLE_READING } from "@/src/lib/platform-config";
 
 function resolvePayableAmount(
   basePrice: number,
@@ -169,7 +171,9 @@ function PurchaseForm({ plan, onClose, onSubmitted }: PurchaseFormProps) {
         <div className="rounded-xl border border-border/60 bg-muted/30 p-4 text-sm">
           <p className="font-medium text-foreground">{plan.name}</p>
           <p className="mt-1 text-muted-foreground">
-            Full Reading module · structured levels · mock tests
+            {ENABLE_READING
+              ? "Full Reading module · structured levels · mock tests"
+              : "English Foundations · all camps & missions · Mission 02+"}
           </p>
         </div>
       </div>
@@ -321,7 +325,7 @@ export function PricingContent({
 
   useEffect(() => {
     getPublicPlans()
-      .then(setPlans)
+      .then((all) => setPlans(filterPublicPricingPlans(all)))
       .finally(() => setLoading(false));
   }, []);
 
@@ -377,8 +381,14 @@ export function PricingContent({
             scholarshipStatus={scholarshipStatus}
             isLoggedIn={isLoggedIn}
             onPurchase={handleStartPurchase}
-            purchaseDisabled={isPendingReview}
-            purchaseDisabledReason="Your payment is under review. Please wait for verification."
+            purchaseDisabled={isPendingReview || !primaryPlan}
+            purchaseDisabledReason={
+              isPendingReview
+                ? "Your payment is under review. Please wait for verification."
+                : !primaryPlan
+                  ? "Checkout is not available yet. Mission 01 is free. Start on the camp map."
+                  : undefined
+            }
           />
           <FoundingMemberPricingAlert />
         </>
@@ -393,10 +403,6 @@ export function PricingContent({
       ) : loading || (isLoggedIn && paymentStatusLoading) ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : !hasActiveAccess && !primaryPlan ? (
-        <div className="rounded-2xl border p-8 text-center text-muted-foreground">
-          <p>No plans available right now. Check back soon.</p>
         </div>
       ) : null}
 

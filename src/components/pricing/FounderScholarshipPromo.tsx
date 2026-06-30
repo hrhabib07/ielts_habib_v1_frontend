@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import {
   FOUNDER_SCHOLARSHIP_PERCENT,
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
@@ -23,15 +23,15 @@ export function FounderScholarshipPromo() {
             Create your account and pay{" "}
             <strong className="text-foreground">{FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT</strong>{" "}
             instead of {PREMIUM_LIST_PRICE_BDT} BDT in your first{" "}
-            <strong className="text-foreground">24 hours</strong>. Before 1 August 2026 you also
-            get <strong className="text-foreground">6 months</strong> of premium Reading. Priced
-            like one month.
+            <strong className="text-foreground">24 hours</strong>. Unlock the full English
+            Foundations course. Priced like one month.
           </p>
           <Link
             href="/pricing"
-            className="inline-flex text-xs font-semibold text-violet-600 underline underline-offset-2 hover:text-violet-500 dark:text-violet-400"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-violet-600 underline-offset-2 hover:text-violet-500 hover:underline dark:text-violet-400"
           >
-            See pricing &amp; pay with bKash →
+            See pricing and pay with bKash
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       </div>

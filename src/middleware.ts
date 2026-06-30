@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyJwtToken } from "@/src/lib/jwt-verify";
 
 const TOKEN_COOKIE = "ielts_habib_token";
 const AUTH_ROUTES = [
@@ -21,50 +22,20 @@ function getRedirectPathForRole(role: string): string {
   return ROLE_REDIRECT_PATH[role] ?? "/";
 }
 
-/**
- * Decode JWT payload in Edge without external libs (base64url only).
- * Returns { role } only if role is valid; null on malformed/expired/invalid.
- */
-function decodeJwtPayload(token: string): { role: string } | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const payloadPart = parts[1];
-    if (!payloadPart) return null;
-
-    let base64 = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
-    const pad = base64.length % 4;
-    if (pad) base64 += "====".slice(0, 4 - pad);
-
-    const decoded = atob(base64);
-    const payload = JSON.parse(decoded) as { role?: string; exp?: number };
-    const role = payload.role;
-
-    if (role !== "STUDENT" && role !== "INSTRUCTOR" && role !== "ADMIN") return null;
-    if (
-      typeof payload.exp === "number" &&
-      payload.exp * 1000 < Date.now()
-    ) {
-      return null;
-    }
-    return { role };
-  } catch {
-    return null;
-  }
-}
-
 function clearTokenCookie(response: NextResponse): void {
   response.cookies.set(TOKEN_COOKIE, "", {
     path: "/",
     maxAge: 0,
     expires: new Date(0),
+    httpOnly: true,
+    sameSite: "lax",
   });
 }
 
 const DISABLE_AUTH_REDIRECT =
   process.env.DISABLE_MIDDLEWARE_AUTH_REDIRECT === "true";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   if (DISABLE_AUTH_REDIRECT) {
     return NextResponse.next();
   }
@@ -75,14 +46,15 @@ export function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
+  const verifiedUser = token ? await verifyJwtToken(token) : null;
+
   if (isAuthRoute) {
     if (!token) {
       return NextResponse.next();
     }
 
-    const payload = decodeJwtPayload(token);
-    if (payload) {
-      const redirectPath = getRedirectPathForRole(payload.role);
+    if (verifiedUser) {
+      const redirectPath = getRedirectPathForRole(verifiedUser.role);
       return NextResponse.redirect(new URL(redirectPath, request.url));
     }
 
@@ -95,8 +67,7 @@ export function middleware(request: NextRequest) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-    const payload = decodeJwtPayload(token);
-    if (!payload) {
+    if (!verifiedUser) {
       const res = NextResponse.redirect(new URL("/login", request.url));
       clearTokenCookie(res);
       return res;
@@ -108,8 +79,7 @@ export function middleware(request: NextRequest) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-    const payload = decodeJwtPayload(token);
-    if (!payload) {
+    if (!verifiedUser) {
       const res = NextResponse.redirect(new URL("/login", request.url));
       clearTokenCookie(res);
       return res;
@@ -121,25 +91,24 @@ export function middleware(request: NextRequest) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-    const payload = decodeJwtPayload(token);
-    if (!payload) {
+    if (!verifiedUser) {
       const res = NextResponse.redirect(new URL("/login", request.url));
       clearTokenCookie(res);
       return res;
     }
-    const path = getRedirectPathForRole(payload.role);
-    if (pathname.startsWith("/dashboard/admin") && payload.role !== "ADMIN") {
+    const path = getRedirectPathForRole(verifiedUser.role);
+    if (pathname.startsWith("/dashboard/admin") && verifiedUser.role !== "ADMIN") {
       return NextResponse.redirect(new URL(path, request.url));
     }
     if (
       pathname.startsWith("/dashboard/instructor") &&
-      payload.role !== "INSTRUCTOR"
+      verifiedUser.role !== "INSTRUCTOR"
     ) {
       return NextResponse.redirect(new URL(path, request.url));
     }
     if (
       pathname.startsWith("/dashboard/student") &&
-      payload.role !== "STUDENT"
+      verifiedUser.role !== "STUDENT"
     ) {
       return NextResponse.redirect(new URL(path, request.url));
     }

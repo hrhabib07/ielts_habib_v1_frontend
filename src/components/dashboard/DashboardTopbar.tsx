@@ -9,6 +9,8 @@ import { getInstructorPageTitle } from "@/src/components/instructor/dashboard/na
 
 const DASHBOARD_TITLES: Record<string, string> = {
   "/dashboard/admin": "Admin",
+  "/dashboard/admin/english": "English Content",
+  "/dashboard/admin/users": "Students",
   "/dashboard/admin/levels": "Level Management",
   "/dashboard/admin/levels/new": "New Level",
   "/dashboard/admin/content": "Content",
@@ -18,6 +20,7 @@ const DASHBOARD_TITLES: Record<string, string> = {
 };
 
 function getPageTitle(pathname: string): string {
+  if (pathname.startsWith("/dashboard/admin/english/missions/")) return "Edit Mission";
   if (DASHBOARD_TITLES[pathname]) return DASHBOARD_TITLES[pathname];
   const instructorTitle = getInstructorPageTitle(pathname);
   if (instructorTitle !== "Instructor") return instructorTitle;

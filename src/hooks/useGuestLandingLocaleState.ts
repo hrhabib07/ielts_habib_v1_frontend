@@ -10,56 +10,34 @@ import {
 
 export const GUEST_LANDING_LOCALE_CHANGE_EVENT = "gamlish-guest-landing-locale-change";
 
-function readStoredLocale(): GuestLandingLocale | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(GUEST_LANDING_LOCALE_STORAGE_KEY);
-    return raw === "bn" || raw === "en" ? raw : null;
-  } catch {
-    return null;
-  }
-}
+/** Bangladesh-first product: UI copy is always Bangla. */
+const FIXED_LOCALE: GuestLandingLocale = "bn";
 
 export function useGuestLandingLocaleState() {
-  const [locale, setLocaleState] = useState<GuestLandingLocale>("en");
+  const [locale, setLocaleState] = useState<GuestLandingLocale>(FIXED_LOCALE);
 
   useEffect(() => {
-    const stored = readStoredLocale();
-    if (stored) setLocaleState(stored);
-
-    const onLocaleChange = (event: Event) => {
-      const detail = (event as CustomEvent<GuestLandingLocale>).detail;
-      if (detail === "en" || detail === "bn") setLocaleState(detail);
-    };
-
-    const onStorage = (event: StorageEvent) => {
-      if (event.key !== GUEST_LANDING_LOCALE_STORAGE_KEY) return;
-      if (event.newValue === "en" || event.newValue === "bn") {
-        setLocaleState(event.newValue);
-      }
-    };
-
-    window.addEventListener(GUEST_LANDING_LOCALE_CHANGE_EVENT, onLocaleChange);
-    window.addEventListener("storage", onStorage);
-    return () => {
-      window.removeEventListener(GUEST_LANDING_LOCALE_CHANGE_EVENT, onLocaleChange);
-      window.removeEventListener("storage", onStorage);
-    };
+    setLocaleState(FIXED_LOCALE);
+    try {
+      window.localStorage.setItem(GUEST_LANDING_LOCALE_STORAGE_KEY, FIXED_LOCALE);
+    } catch {
+      /* ignore */
+    }
   }, []);
 
-  const setLocale = useCallback((next: GuestLandingLocale) => {
-    setLocaleState(next);
+  const setLocale = useCallback((_next: GuestLandingLocale) => {
+    setLocaleState(FIXED_LOCALE);
     try {
-      window.localStorage.setItem(GUEST_LANDING_LOCALE_STORAGE_KEY, next);
+      window.localStorage.setItem(GUEST_LANDING_LOCALE_STORAGE_KEY, FIXED_LOCALE);
     } catch {
       /* ignore */
     }
     window.dispatchEvent(
-      new CustomEvent(GUEST_LANDING_LOCALE_CHANGE_EVENT, { detail: next }),
+      new CustomEvent(GUEST_LANDING_LOCALE_CHANGE_EVENT, { detail: FIXED_LOCALE }),
     );
   }, []);
 
-  const copy = useMemo(() => GUEST_LANDING_COPY[locale], [locale]);
+  const copy = useMemo(() => GUEST_LANDING_COPY[FIXED_LOCALE], []);
 
   return { locale, copy, setLocale };
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ReadingAdminGate } from "@/src/components/dashboard/ReadingAdminGate";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -211,6 +212,7 @@ export default function AdminContentPage() {
   ];
 
   return (
+    <ReadingAdminGate>
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -566,5 +568,6 @@ export default function AdminContentPage() {
         </Card>
       )}
     </div>
+    </ReadingAdminGate>
   );
 }

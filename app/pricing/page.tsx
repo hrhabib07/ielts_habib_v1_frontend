@@ -8,8 +8,7 @@ export default async function PricingPage({
 }) {
   const initialUser = await getCurrentUser();
   const params = await searchParams;
-  const autoOpenCheckout =
-    params.checkout === "founder" || params.checkout === "1";
+  const autoOpenCheckout = params.checkout === "1";
 
   return (
     <PricingContent

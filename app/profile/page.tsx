@@ -12,6 +12,8 @@ import type { StudentProfile } from "@/src/lib/api/types";
 import { CountryCodeSelect } from "@/src/components/profile/CountryCodeSelect";
 import { ProfileChangePassword } from "@/src/components/profile/ProfileChangePassword";
 import { ProfileSummarySection } from "@/src/components/profile/ProfileSummarySection";
+import { ProfileEnglishSummarySection } from "@/src/components/profile/ProfileEnglishSummarySection";
+import { ProfileSquadSection } from "@/src/components/squad/ProfileSquadSection";
 import { ProfilePrivacySettings } from "@/src/components/profile/ProfilePrivacySettings";
 import { ProfileFollowingSection } from "@/src/components/profile/ProfileFollowingSection";
 import { ProfilePageSkeleton } from "@/src/components/profile/ProfilePageSkeleton";
@@ -22,6 +24,7 @@ import {
 import {
   BookOpen,
   CreditCard,
+  Gamepad2,
   Globe2,
   Link2,
   Lock,
@@ -40,6 +43,10 @@ import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMe
 import { formatSubscriptionDuration } from "@/src/lib/formatSubscriptionDuration";
 import { isFoundingMemberEligible } from "@/src/lib/foundingMember";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { ENABLE_READING, PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
+import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
+import { PROFILE_PAGE_COPY } from "@/src/lib/profile-page-copy";
+import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 
 function formatSubscriptionDate(iso: string): string {
   try {
@@ -67,6 +74,8 @@ function subscriptionStatusLabel(status: ActiveSubscription["status"]): string {
 }
 
 export default function ProfilePage() {
+  const { locale } = useGuestLandingLocaleState();
+  const copy = PROFILE_PAGE_COPY[locale];
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -127,7 +136,7 @@ export default function ProfilePage() {
       setError("Display name is required.");
       return;
     }
-    if (currentCountry === dreamCountry) {
+    if (ENABLE_READING && currentCountry === dreamCountry) {
       setCountryWarning(SAME_COUNTRY_WARNING);
       return;
     }
@@ -135,18 +144,25 @@ export default function ProfilePage() {
     setError(null);
     setSuccess(null);
     try {
-      const updated = await updateProfile({
-        displayName: displayName.trim(),
-        currentCountry,
-        dreamCountry,
-        profile: phone.trim() ? { phone: phone.trim() } : undefined,
-      });
+      const updated = await updateProfile(
+        ENABLE_READING
+          ? {
+              displayName: displayName.trim(),
+              currentCountry,
+              dreamCountry,
+              profile: phone.trim() ? { phone: phone.trim() } : undefined,
+            }
+          : {
+              displayName: displayName.trim(),
+              profile: phone.trim() ? { phone: phone.trim() } : undefined,
+            },
+      );
       if (updated) {
         setProfileRecord(updated);
         resetPersonalFormFromRecord(updated);
         void refreshSession();
       }
-      setSuccess("Profile updated successfully.");
+      setSuccess(copy.saveSuccess);
       setEditingPersonalDetails(false);
     } catch (err: unknown) {
       const msg =
@@ -202,6 +218,9 @@ export default function ProfilePage() {
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:space-y-10 md:px-6 md:py-10">
+        <div className="flex justify-end sm:hidden">
+          <GuestLandingLanguageToggle />
+        </div>
         <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-lg shadow-black/[0.03] dark:shadow-black/20">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-emerald-500/[0.05]" aria-hidden />
           <div className="relative p-6 md:p-8">
@@ -218,7 +237,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-                    Student workspace
+                    {copy.workspaceLabel}
                   </p>
                   <h1 className="mt-1 truncate text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                     {displayName.trim() || "Student"}
@@ -228,7 +247,7 @@ export default function ProfilePage() {
                       <FoundingMemberBadge size="md" />
                     </div>
                   )}
-                  {username && (
+                  {username && ENABLE_READING && (
                     <p className="mt-1 text-sm text-muted-foreground">@{username}</p>
                   )}
                   {phone?.trim() ? (
@@ -238,6 +257,18 @@ export default function ProfilePage() {
                     </p>
                   ) : null}
                   <div className="mt-4 flex flex-wrap gap-2">
+                    {!ENABLE_READING ? (
+                      <>
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/25 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                          <Gamepad2 className="h-3 w-3" />
+                          {copy.englishPlayer}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                          {copy.mission01Free}
+                        </span>
+                      </>
+                    ) : (
+                      <>
                     <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-foreground">
                       <Globe2 className="h-3 w-3 text-muted-foreground" />
                       {countryCodeToLabel(currentCountry) ?? currentCountry}
@@ -251,6 +282,8 @@ export default function ProfilePage() {
                         Target · Band {readingTarget}
                       </span>
                     )}
+                      </>
+                    )}
                     {isPrivate && (
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-muted-foreground/20 bg-muted/50 px-3 py-1 text-xs font-medium">
                         <Lock className="h-3 w-3" />
@@ -258,7 +291,7 @@ export default function ProfilePage() {
                       </span>
                     )}
                   </div>
-                  {publicProfileUrl && (
+                  {publicProfileUrl && ENABLE_READING && (
                     <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
                       <Link2 className="h-3.5 w-3.5" />
                       Public link:{" "}
@@ -271,16 +304,25 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex shrink-0 flex-wrap gap-2 lg:flex-col lg:items-stretch xl:flex-row">
+                {ENABLE_READING ? (
                 <Button asChild size="lg" className="gap-2 shadow-md shadow-primary/15">
                   <Link href="/profile/reading">
                     <BookOpen className="h-4 w-4" />
                     Open Reading
                   </Link>
                 </Button>
+                ) : (
+                <Button asChild size="lg" className="gap-2 shadow-md shadow-primary/15">
+                  <Link href={PRIMARY_STUDENT_HREF}>
+                    <Gamepad2 className="h-4 w-4" />
+                    {copy.openCampMap}
+                  </Link>
+                </Button>
+                )}
                 <Button asChild variant="secondary" size="lg" className="gap-2">
-                  <Link href="/pricing">
+                  <Link href="/pricing?course=english-foundations">
                     <CreditCard className="h-4 w-4" />
-                    Plans
+                    {copy.plans}
                   </Link>
                 </Button>
               </div>
@@ -296,11 +338,11 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-800 dark:text-emerald-400">
-                  Support
+                  {copy.supportTitle}
                 </p>
-                <p className="mt-1 font-semibold text-foreground">WhatsApp only. we reply to messages</p>
+                <p className="mt-1 font-semibold text-foreground">{copy.supportHeadline}</p>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  For billing, access, or product questions, message us on WhatsApp.
+                  {copy.supportBody}
                 </p>
               </div>
             </div>
@@ -317,25 +359,30 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        <section aria-labelledby="reading-overview-heading" className="scroll-mt-8">
+        <section aria-labelledby="progress-overview-heading" className="scroll-mt-8">
           <div className="mb-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">
-              Analytics
+              {copy.analyticsLabel}
             </p>
             <h2
-              id="reading-overview-heading"
+              id="progress-overview-heading"
               className="mt-1 text-xl font-bold tracking-tight text-foreground md:text-2xl"
             >
-              Reading progress
+              {ENABLE_READING ? "Reading progress" : copy.progressTitle}
             </h2>
           </div>
-          <ProfileSummarySection />
+          {ENABLE_READING ? <ProfileSummarySection /> : <ProfileEnglishSummarySection />}
+          {!ENABLE_READING ? (
+            <div className="mt-6">
+              <ProfileSquadSection />
+            </div>
+          ) : null}
         </section>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="border-border/70 p-6 shadow-sm md:p-7">
             <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground md:text-xl">
-              Account security
+              {copy.accountSecurity}
             </h2>
             <ProfileChangePassword />
           </Card>
@@ -347,10 +394,10 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0 flex-1">
                 <h2 className="text-lg font-semibold tracking-tight text-foreground md:text-xl">
-                  Subscription
+                  {copy.subscription}
                 </h2>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Active plan and renewal window.
+                  {copy.subscriptionHint}
                 </p>
               </div>
             </div>
@@ -360,7 +407,7 @@ export default function ProfilePage() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="font-medium text-foreground">
                     {subscription.planId?.name?.replace(/\(\s*1\s*month\s*\)/gi, "(6 Months)") ??
-                      "Gamlish Reading Mastery (6 Months)"}
+                      (ENABLE_READING ? "Gamlish Reading Mastery (6 Months)" : "English Foundations")}
                   </p>
                   <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                     {subscriptionStatusLabel(subscription.status)}
@@ -383,11 +430,11 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="rounded-xl border border-dashed border-border bg-muted/10 p-6 text-center">
-                <p className="text-sm text-muted-foreground">No active subscription.</p>
+                <p className="text-sm text-muted-foreground">{copy.noSubscription}</p>
                 <Button asChild className="mt-4 gap-2">
-                  <Link href="/pricing">
+                  <Link href="/pricing?course=english-foundations">
                     <Sparkles className="h-4 w-4" />
-                    View plans
+                    {copy.viewPlans}
                   </Link>
                 </Button>
               </div>
@@ -399,11 +446,12 @@ export default function ProfilePage() {
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 className="text-lg font-semibold tracking-tight text-foreground md:text-xl">
-                Profile settings
+                {copy.profileSettings}
               </h2>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                Display name, countries, and phone. Username is permanent and cannot be changed.
-                Profile visibility is managed below.
+                {ENABLE_READING
+                  ? "Display name, countries, and phone. Username is permanent and cannot be changed. Profile visibility is managed below."
+                  : copy.profileSettingsHint}
               </p>
             </div>
             {!editingPersonalDetails ? (
@@ -419,7 +467,7 @@ export default function ProfilePage() {
                 }}
               >
                 <Pencil className="h-4 w-4" aria-hidden />
-                Edit
+                {copy.edit}
               </Button>
             ) : null}
           </div>
@@ -433,26 +481,31 @@ export default function ProfilePage() {
           {!editingPersonalDetails ? (
             <div className="grid gap-6 md:grid-cols-2">
               {(
-                [
-                  { label: "Username", value: username.trim() || "" },
-                  { label: "Display name", value: displayName.trim() || "" },
-                  { label: "Phone", value: phone.trim() || "" },
-                  {
-                    label: "Current country",
-                    value: countryCodeToLabel(currentCountry) ?? currentCountry,
-                  },
-                  {
-                    label: "Dream country",
-                    value: countryCodeToLabel(dreamCountry) ?? dreamCountry,
-                  },
-                ] as const
+                ENABLE_READING
+                  ? [
+                      { label: "Username", value: username.trim() || "" },
+                      { label: "Display name", value: displayName.trim() || "" },
+                      { label: copy.phone, value: phone.trim() || "" },
+                      {
+                        label: "Current country",
+                        value: countryCodeToLabel(currentCountry) ?? currentCountry,
+                      },
+                      {
+                        label: "Dream country",
+                        value: countryCodeToLabel(dreamCountry) ?? dreamCountry,
+                      },
+                    ]
+                  : [
+                      { label: copy.nickname, value: displayName.trim() || "" },
+                      { label: copy.phone, value: phone.trim() || "" },
+                    ]
               ).map((row) => (
                 <div key={row.label} className="space-y-1.5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                     {row.label}
                   </p>
                   <p className="rounded-xl border border-border/50 bg-muted/25 px-3.5 py-2.5 text-sm text-foreground">
-                    {row.value}
+                    {row.value || "-"}
                   </p>
                 </div>
               ))}
@@ -460,6 +513,8 @@ export default function ProfilePage() {
           ) : (
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
+                {ENABLE_READING ? (
+                  <>
                 <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
                   <Input id="username" value={username} readOnly disabled className="bg-muted/40" />
@@ -475,7 +530,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{copy.phone}</Label>
                   <Input
                     id="phone"
                     value={phone}
@@ -499,6 +554,30 @@ export default function ProfilePage() {
                     onValueChange={setDreamCountry}
                   />
                 </div>
+                  </>
+                ) : (
+                  <>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="displayName">{copy.nickname}</Label>
+                  <Input
+                    id="displayName"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                    autoComplete="nickname"
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="phone">{copy.phone}</Label>
+                  <Input
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    autoComplete="tel"
+                  />
+                </div>
+                  </>
+                )}
               </div>
               {countryWarning && (
                 <p className="text-sm text-destructive">{countryWarning}</p>
@@ -506,7 +585,7 @@ export default function ProfilePage() {
               {error && <p className="text-sm text-destructive">{error}</p>}
               <div className="flex flex-wrap gap-2">
                 <Button type="submit" disabled={saving}>
-                  {saving ? "Saving…" : "Save changes"}
+                  {saving ? copy.saving : copy.save}
                 </Button>
                 <Button
                   type="button"
@@ -516,7 +595,7 @@ export default function ProfilePage() {
                   onClick={handleCancelPersonalEdit}
                 >
                   <X className="h-4 w-4" aria-hidden />
-                  Cancel
+                  {copy.cancel}
                 </Button>
               </div>
             </form>

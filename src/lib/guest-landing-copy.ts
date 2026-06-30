@@ -1,144 +1,302 @@
 import type {
+
   GuestHowGamlishWorksCopy,
+
   GuestLandingZoneMockCopy,
+
 } from "@/src/lib/guest-how-it-works-types";
 
+
+
 export type {
+
   GuestHowGamlishWorksCopy,
+
   GuestHowItWorksPillar,
+
   GuestHowItWorksPillarIcon,
+
   GuestHowItWorksSkill,
+
   GuestHowItWorksSkillIcon,
+
   GuestLandingZoneMockCopy,
+
 } from "@/src/lib/guest-how-it-works-types";
+
+
 
 export type GuestLandingLocale = "en" | "bn";
 
+
+
 export const GUEST_LANDING_LOCALE_STORAGE_KEY = "gamlish-guest-landing-locale";
 
+
+
 const SHARED_HERO = {
+
   brandTaglineName: "Gamlish",
+
   brandTaglineSuffix: "The game of English",
-  heroEyebrow: "21 Levels · One Goal",
-  heroHeadlineLine1: "Gamlish makes IELTS Reading",
-  heroHeadlineLine2: "easy",
-  heroSubheadline: "Learn through gameplay. One level at a time.",
+
+  heroEyebrow: "4 Camps · 21 Missions",
+
+  heroHeadlineLine1: "Master English by",
+
+  heroHeadlineLine2: "playing missions",
+
+  heroSubheadline:
+
+    "Videos, evaluations, and rewards. Not boring textbooks.",
+
 } as const;
+
+
 
 export interface GuestLandingCopy {
+
   readonly languageToggleAria: string;
+
   readonly englishLabel: string;
+
   readonly banglaLabel: string;
+
   readonly brandTaglineName: string;
+
   readonly brandTaglineSuffix: string;
+
   readonly heroEyebrow: string;
+
   readonly heroHeadlineLine1: string;
+
   readonly heroHeadlineLine2: string;
+
   readonly heroSubheadline: string;
+
   readonly ctaPrimary: string;
+
   readonly ctaSecondary: string;
+
   readonly navPricing: string;
+
   readonly navLogin: string;
+
+  readonly navRegister: string;
+
   readonly mockupJourneyTitle: string;
+
   readonly mockupReadinessLabel: string;
+
   readonly mockupZones: readonly GuestLandingZoneMockCopy[];
+
   readonly howItWorks: GuestHowGamlishWorksCopy;
+
 }
 
+
+
 export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = {
+
   en: {
+
     languageToggleAria: "Choose landing page language",
+
     englishLabel: "EN",
+
     banglaLabel: "BN",
+
     ...SHARED_HERO,
-    ctaPrimary: "Start playing for free",
+
+    ctaPrimary: "Start Mission 01 free",
+
     ctaSecondary: "How it works",
+
     navPricing: "Plans & pricing",
+
     navLogin: "Login",
-    mockupJourneyTitle: "Reading journey",
-    mockupReadinessLabel: "Readiness",
+
+    navRegister: "Create account",
+
+    mockupJourneyTitle: "Camp map",
+
+    mockupReadinessLabel: "Progress",
+
     mockupZones: [
-      { zoneLabel: "Zone 1", title: "Beginner" },
-      { zoneLabel: "Zone 2", title: "Intermediate" },
-      { zoneLabel: "Zone 3", title: "Advanced" },
+
+      { zoneLabel: "Camp 1", title: "The Foundation" },
+
+      { zoneLabel: "Camp 2", title: "Action Kingdom" },
+
+      { zoneLabel: "Camp 3", title: "Time Travel" },
+
+      { zoneLabel: "Camp 4", title: "Real English" },
+
     ],
+
     howItWorks: {
+
       videoEyebrow: "See it in action",
+
       videoTitle: "How Gamlish works",
+
       videoSubtitle:
-        "Watch the 21 level journey: learn one skill, pass the level, unlock the next.",
+
+        "Watch the mission loop: opening story, learning video, evaluation levels, then unlock the next mission.",
+
       videoPlaceholderTitle: "Video walkthrough",
+
       videoPlaceholderBody:
-        "Video not configured yet. An admin can set it in Dashboard → Subscription Plans → YouTube videos.",
-      pillarsTitle: "IELTS Reading tests more than reading",
+
+        "Video not configured yet. An admin can set it in Dashboard, Subscription Plans, YouTube videos.",
+
+      pillarsTitle: "English should feel like a game",
+
       examPillars: [
-        { title: "Time", icon: "clock" },
-        { title: "Focus", icon: "focus" },
-        { title: "Strategy", icon: "brain" },
+
+        { title: "Missions", icon: "brain" },
+
+        { title: "Rewards", icon: "clock" },
+
+        { title: "Progress", icon: "focus" },
+
       ],
-      levelsTitle: "21 levels to your band score",
-      levelsLine: "One skill per level. Pass to unlock the next.",
-      levelsBadge: "21 levels",
-      skillsTitle: "Build real exam skills",
+
+      levelsTitle: "21 missions across 4 camps",
+
+      levelsLine: "Mission 01 is free. Unlock the full course to continue.",
+
+      levelsBadge: "21 missions",
+
+      skillsTitle: "Build real English skills",
+
       skills: [
-        { label: "Find answers faster", icon: "zap" },
-        { label: "Manage time", icon: "clock" },
-        { label: "Stay calm", icon: "wind" },
-        { label: "Read naturally", icon: "book" },
-        { label: "Grow confidence", icon: "trending" },
+
+        { label: "Word order & grammar", icon: "book" },
+
+        { label: "Translation practice", icon: "zap" },
+
+        { label: "Story challenges", icon: "wind" },
+
+        { label: "Inspection rounds", icon: "clock" },
+
+        { label: "XP & unlocks", icon: "trending" },
+
       ],
-      bottomCtaTitle: "Ready for Level 1?",
-      bottomCtaSub: "Levels 1 and 2 are free. No credit card required.",
+
+      bottomCtaTitle: "Ready for Mission 01?",
+
+      bottomCtaSub: "Camp 1 Mission 1 is free. No credit card required.",
+
     },
+
   },
+
   bn: {
+
     languageToggleAria: "ল্যান্ডিং পেজের ভাষা বেছে নিন",
+
     englishLabel: "EN",
+
     banglaLabel: "BN",
+
     brandTaglineName: "Gamlish",
-    brandTaglineSuffix: "The game of English",
-    heroEyebrow: "২১ Level · একটি লক্ষ্য",
-    heroHeadlineLine1: "Gamlish IELTS Reading কে",
-    heroHeadlineLine2: "সহজ করে",
-    heroSubheadline: "খেলার মাধ্যমে শিখুন। এক একটি Level করে এগিয়ে যান।",
-    ctaPrimary: "বিনামূল্যে খেলা শুরু করুন",
-    ctaSecondary: "কীভাবে কাজ করে দেখুন",
+
+    brandTaglineSuffix: "খেলার ছলেই ইংরেজি শিখি!",
+
+    heroEyebrow: "৪টি ক্যাম্প · ২১টি মিশন",
+
+    heroHeadlineLine1: "ইংরেজি শেখার",
+
+    heroHeadlineLine2: "গেইম খেলো",
+
+    heroSubheadline:
+      "গ্যামলিশে খেলার ছলেই ইংরেজি। ভিডিও, মূল্যায়ন আর রিওয়ার্ড। বোরিং পাঠ্যবই নয়।",
+
+    ctaPrimary: "Mission 01 ফ্রি শুরু করুন",
+
+    ctaSecondary: "কীভাবে কাজ করে",
+
     navPricing: "প্ল্যান ও মূল্য",
+
     navLogin: "লগইন",
-    mockupJourneyTitle: "রিডিং জার্নি",
-    mockupReadinessLabel: "রেডিনেস",
+
+    navRegister: "অ্যাকাউন্ট খুলুন",
+
+    mockupJourneyTitle: "ক্যাম্প ম্যাপ",
+
+    mockupReadinessLabel: "অগ্রগতি",
+
     mockupZones: [
-      { zoneLabel: "জোন ১", title: "বিগিনার" },
-      { zoneLabel: "জোন ২", title: "ইন্টারমিডিয়েট" },
-      { zoneLabel: "জোন ৩", title: "অ্যাডভান্সড" },
+
+      { zoneLabel: "ক্যাম্প ১", title: "The Foundation" },
+
+      { zoneLabel: "ক্যাম্প ২", title: "Action Kingdom" },
+
+      { zoneLabel: "ক্যাম্প ৩", title: "Time Travel" },
+
+      { zoneLabel: "ক্যাম্প ৪", title: "Real English" },
+
     ],
+
     howItWorks: {
+
       videoEyebrow: "দেখুন কীভাবে",
+
       videoTitle: "Gamlish কীভাবে কাজ করে",
+
       videoSubtitle:
-        "২১ Level-এর জার্নি: একটি Skill শিখুন, Pass করুন, পরের Level Unlock করুন।",
-      videoPlaceholderTitle: "ভিডিও ওয়াকথ্রু",
+
+        "মিশন লুপ দেখুন: শুরুর গল্প, শেখার ভিডিও, মূল্যায়নের ধাপ, তারপর পরের মিশন আনলক।",
+
+      videoPlaceholderTitle: "ভিডিও ওয়াকথ্রু",
+
       videoPlaceholderBody:
-        "ভিডিও এখনো সেট করা হয়নি। অ্যাডমিন Dashboard → Subscription Plans → YouTube videos থেকে সেট করতে পারবেন।",
-      pillarsTitle: "IELTS Reading শুধু Reading নয়",
+
+        "ভিডিও এখনো সেট করা হয়নি। অ্যাডমিন Dashboard থেকে Subscription Plans, YouTube videos-এ সেট করতে পারবেন।",
+
+      pillarsTitle: "ইংরেজি শেখা যেন গেমের মতো লাগে",
+
       examPillars: [
-        { title: "Time", icon: "clock" },
-        { title: "Focus", icon: "focus" },
-        { title: "Strategy", icon: "brain" },
+
+        { title: "মিশন", icon: "brain" },
+
+        { title: "রিওয়ার্ড", icon: "clock" },
+
+        { title: "অগ্রগতি", icon: "focus" },
+
       ],
-      levelsTitle: "Band Score-এর পথে ২১ Level",
-      levelsLine: "প্রতি Level-এ একটি Skill। Pass করলে Unlock।",
-      levelsBadge: "২১ Level",
-      skillsTitle: "পরীক্ষার দক্ষতা গড়ুন",
+
+      levelsTitle: "৪টি ক্যাম্পে ২১টি মিশন",
+
+      levelsLine: "Mission 01 ফ্রি। পুরো কোর্স চালিয়ে যেতে আনলক করুন।",
+
+      levelsBadge: "২১ মিশন",
+
+      skillsTitle: "আসল ইংরেজি দক্ষতা গড়ুন",
+
       skills: [
-        { label: "দ্রুত উত্তর", icon: "zap" },
-        { label: "সময় ব্যবস্থাপনা", icon: "clock" },
-        { label: "শান্ত থাকা", icon: "wind" },
-        { label: "Passage বোঝা", icon: "book" },
-        { label: "আত্মবিশ্বাস", icon: "trending" },
+
+        { label: "ওয়ার্ড অর্ডার ও গ্রামার", icon: "book" },
+
+        { label: "অনুবাদ অনুশীলন", icon: "zap" },
+
+        { label: "স্টোরি চ্যালেঞ্জ", icon: "wind" },
+
+        { label: "ইনস্পেকশন রাউন্ড", icon: "clock" },
+
+        { label: "XP ও আনলক", icon: "trending" },
+
       ],
-      bottomCtaTitle: "Level 1 দিয়ে শুরু?",
-      bottomCtaSub: "Level 1 ও 2 সম্পূর্ণ ফ্রি। কোনো কার্ড লাগবে না।",
+
+      bottomCtaTitle: "Mission 01 দিয়ে শুরু করবেন?",
+
+      bottomCtaSub: "ক্যাম্প ১ এর Mission 01 ফ্রি। কোনো কার্ড লাগবে না।",
+
     },
+
   },
+
 } as const;
+
+

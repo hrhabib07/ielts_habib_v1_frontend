@@ -3,6 +3,7 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { GAMLISH_BRAND } from "@/src/lib/gamlish-brand";
 
 type Phase = "settle" | "whisper" | "finalTouch" | "crossfade" | "hold";
 
@@ -86,27 +87,16 @@ export function GamlishWordmarkAnimation({
     };
   }, [reducedMotion, clearTimers, schedule, isNav]);
 
-  if (reducedMotion) {
-    if (isNav) {
-      return (
-        <span
-          className={cn(
-            "text-[11px] font-medium leading-none tracking-tight text-muted-foreground sm:text-xs",
-            className,
-          )}
-        >
-          The Game of English
-        </span>
-      );
-    }
+  if (reducedMotion || isNav) {
     return (
       <span
         className={cn(
-          "text-lg font-semibold leading-none tracking-tight text-foreground",
+          "font-medium leading-snug tracking-normal text-muted-foreground",
+          isNav ? "text-[11px] sm:text-xs" : "text-sm sm:text-base",
           className,
         )}
       >
-        Gamlish
+        {GAMLISH_BRAND.taglineLine2}
       </span>
     );
   }

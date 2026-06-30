@@ -22,6 +22,16 @@ export async function getMyProfile(): Promise<StudentProfile | null> {
   });
 }
 
+export async function completeEnglishProfile(
+  nickname: string,
+): Promise<StudentProfile | null> {
+  const res = await apiClient.post<ApiResponse<StudentProfile>>(
+    `${BASE}/me/complete-english`,
+    { nickname: nickname.trim() },
+  );
+  return res.data?.data ?? null;
+}
+
 /**
  * POST /api/students/me/complete — initial profile setup (username set once).
  */
