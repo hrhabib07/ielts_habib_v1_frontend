@@ -32,19 +32,13 @@ export function ScholarshipProvider({
   children: ReactNode;
 }) {
   const [status, setStatus] = useState<ScholarshipStatus | null>(null);
-  const [clientIsStudent, setClientIsStudent] = useState(() =>
-    initialUser == null ? isActiveStudentSessionClient() : false,
-  );
+  // Start false on SSR/first paint; sync from localStorage after mount.
+  const [clientIsStudent, setClientIsStudent] = useState(false);
 
   const isStudent =
     initialUser?.role === "STUDENT" || (initialUser == null && clientIsStudent);
 
-  const [loading, setLoading] = useState(() =>
-    Boolean(
-      initialUser?.role === "STUDENT" ||
-        (initialUser == null && isActiveStudentSessionClient()),
-    ),
-  );
+  const [loading, setLoading] = useState(() => initialUser?.role === "STUDENT");
 
   useEffect(() => {
     if (initialUser?.role === "STUDENT") {

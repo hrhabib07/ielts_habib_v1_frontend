@@ -47,8 +47,8 @@ export function SyncAuthCookie({ initialUser }: { initialUser: CurrentUser | nul
       }
 
       if (initialUser == null && hasUsableClientToken() && clientToken) {
-        const ok = await syncAuthCookie(clientToken);
-        if (!cancelled && ok) {
+        const synced = await syncAuthCookie(clientToken);
+        if (!cancelled && synced.ok) {
           router.refresh();
         }
         return;

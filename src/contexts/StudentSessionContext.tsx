@@ -46,9 +46,9 @@ export function StudentSessionProvider({
   initialUser: CurrentUser | null;
   children: ReactNode;
 }) {
-  const [clientIsStudent, setClientIsStudent] = useState(() =>
-    initialUser == null ? isActiveStudentSessionClient() : false,
-  );
+  // Always start false on server + first client paint to avoid hydration mismatch.
+  // Detect student token only after mount.
+  const [clientIsStudent, setClientIsStudent] = useState(false);
   const [profileSummary, setProfileSummary] = useState<ProfileSummary | null>(null);
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [subscription, setSubscription] = useState<ActiveSubscription | null>(null);
@@ -56,10 +56,7 @@ export function StudentSessionProvider({
   const isStudent =
     initialUser?.role === "STUDENT" || (initialUser == null && clientIsStudent);
 
-  const [loading, setLoading] = useState(() =>
-    initialUser?.role === "STUDENT" ||
-    (initialUser == null && isActiveStudentSessionClient()),
-  );
+  const [loading, setLoading] = useState(() => initialUser?.role === "STUDENT");
 
   useEffect(() => {
     if (initialUser?.role === "STUDENT") {

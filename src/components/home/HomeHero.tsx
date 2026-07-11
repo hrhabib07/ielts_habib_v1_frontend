@@ -111,23 +111,20 @@ export function HomeHero({
     setAuthBootstrapped(true);
   }, []);
 
-  const serverStudent = initialUser?.role === "STUDENT";
-  const clientStudentFallback =
-    authBootstrapped &&
-    initialUser == null &&
-    isActiveStudentSessionClient();
-  const isStudent = serverStudent || clientStudentFallback;
-
-  if (!ENABLE_READING && isStudent) {
-    return <StudentEnglishHome />;
-  }
-
+  // Hooks must run unconditionally (Rules of Hooks). Early-return after these.
   const {
     profileSummary,
     profile,
     isFoundingMember,
     loading: sessionLoading,
   } = useStudentSession();
+
+  const serverStudent = initialUser?.role === "STUDENT";
+  const clientStudentFallback =
+    authBootstrapped &&
+    initialUser == null &&
+    isActiveStudentSessionClient();
+  const isStudent = serverStudent || clientStudentFallback;
 
   const studentData = useMemo(() => {
     if (!isStudent) return null;
@@ -140,6 +137,10 @@ export function HomeHero({
     profile,
     isFoundingMember,
   ]);
+
+  if (!ENABLE_READING && isStudent) {
+    return <StudentEnglishHome />;
+  }
 
   const mode: HeroMode = !isStudent
     ? "minimal"

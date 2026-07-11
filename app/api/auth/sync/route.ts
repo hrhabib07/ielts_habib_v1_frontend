@@ -25,10 +25,14 @@ export async function POST(request: NextRequest) {
 
   const verified = await verifyJwtToken(token);
   if (!verified) {
+    const secretConfigured = Boolean(process.env.JWT_SECRET?.trim());
     return NextResponse.json(
       {
         error: "Invalid or expired token",
-        hint: "Ensure JWT_SECRET on Vercel matches Railway exactly.",
+        code: secretConfigured ? "JWT_SECRET_MISMATCH" : "JWT_SECRET_MISSING",
+        hint: secretConfigured
+          ? "JWT_SECRET on Vercel does not match Railway. Copy Railway JWT_SECRET into Vercel Production, then Redeploy."
+          : "JWT_SECRET is missing on Vercel. Add it under Project → Settings → Environment Variables (Production), then Redeploy.",
       },
       { status: 401 },
     );

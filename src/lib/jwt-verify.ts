@@ -11,7 +11,7 @@ export interface VerifiedJwtUser {
  * Returns null when the secret is missing, the token is invalid, or it is expired.
  */
 export async function verifyJwtToken(token: string): Promise<VerifiedJwtUser | null> {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_SECRET?.trim();
   if (!secret) return null;
 
   try {
@@ -22,9 +22,12 @@ export async function verifyJwtToken(token: string): Promise<VerifiedJwtUser | n
     const role = payload.role;
     const exp = payload.exp;
     if (typeof userId !== "string" && typeof userId !== "number") return null;
-    if (role !== "STUDENT" && role !== "INSTRUCTOR" && role !== "ADMIN") return null;
+    const roleUpper = String(role).toUpperCase();
+    if (roleUpper !== "STUDENT" && roleUpper !== "INSTRUCTOR" && roleUpper !== "ADMIN") {
+      return null;
+    }
     if (typeof exp === "number" && exp * 1000 < Date.now()) return null;
-    return { userId: String(userId), role };
+    return { userId: String(userId), role: roleUpper as UserRole };
   } catch {
     return null;
   }

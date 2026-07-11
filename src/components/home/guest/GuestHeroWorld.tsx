@@ -15,6 +15,7 @@ export function GuestHeroWorld({ className }: { className?: string }) {
   const reduceMotion = useReducedMotion();
   const { copy } = useGuestLandingLocale();
   const zones = copy.mockupZones;
+  const preferReduced = Boolean(reduceMotion);
 
   return (
     <motion.div
@@ -23,16 +24,14 @@ export function GuestHeroWorld({ className }: { className?: string }) {
         className,
       )}
       aria-hidden
-      initial={reduceMotion ? false : { opacity: 0, y: 28, scale: 0.985 }}
+      initial={preferReduced ? false : { opacity: 0, y: 28, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.85, delay: 0.18, ease: GUEST_EASE }}
     >
-      {/* Terrain plane */}
       <div className="absolute inset-0 bg-gradient-to-b from-[color-mix(in_srgb,var(--primary)_92%,#1e3a8a)] via-[color-mix(in_srgb,var(--primary)_88%,#1e293b)] to-[color-mix(in_srgb,var(--primary)_75%,#0f172a)] dark:from-primary dark:via-primary/95 dark:to-background" />
       <div className="guest-hero-world-mesh absolute inset-0 opacity-40" />
       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/25 to-transparent" />
 
-      {/* Floating grammar chips */}
       <div className="pointer-events-none absolute inset-0 hidden sm:block">
         {FLOAT_WORDS.map((word, i) => (
           <motion.span
@@ -43,7 +42,7 @@ export function GuestHeroWorld({ className }: { className?: string }) {
               top: `${10 + (i % 4) * 8}%`,
             }}
             animate={
-              reduceMotion
+              preferReduced
                 ? undefined
                 : { y: [0, -6, 0], opacity: [0.55, 0.9, 0.55] }
             }
@@ -81,7 +80,6 @@ export function GuestHeroWorld({ className }: { className?: string }) {
             </filter>
           </defs>
 
-          {/* Soft hills */}
           <path
             d="M0 260 C120 220 200 280 320 240 C440 200 480 280 620 230 C760 180 860 250 960 210 L960 320 L0 320 Z"
             fill="rgba(180,204,232,0.08)"
@@ -91,19 +89,17 @@ export function GuestHeroWorld({ className }: { className?: string }) {
             fill="rgba(15,23,42,0.35)"
           />
 
-          {/* Journey path */}
           <motion.path
             d="M 70 230 C 180 210, 220 160, 300 150 S 460 190, 520 140 S 680 80, 760 110 S 880 150, 900 90"
             stroke="url(#guest-path-stroke)"
             strokeWidth="3.5"
             strokeLinecap="round"
             strokeDasharray="8 10"
-            initial={reduceMotion ? undefined : { pathLength: 0, opacity: 0.4 }}
+            initial={preferReduced ? undefined : { pathLength: 0, opacity: 0.4 }}
             animate={{ pathLength: 1, opacity: 1 }}
             transition={{ duration: 1.6, delay: 0.35, ease: GUEST_EASE }}
           />
 
-          {/* Camp nodes */}
           {[
             { cx: 70, cy: 230, label: zones[0]?.zoneLabel ?? "Camp 1", title: zones[0]?.title ?? "" },
             { cx: 300, cy: 150, label: zones[1]?.zoneLabel ?? "Camp 2", title: zones[1]?.title ?? "" },
@@ -120,12 +116,12 @@ export function GuestHeroWorld({ className }: { className?: string }) {
                 strokeWidth={i === 0 ? 2.5 : 1.5}
                 strokeOpacity={i === 0 ? 1 : 0.45}
                 filter={i === 0 ? "url(#guest-soft-glow)" : undefined}
-                initial={reduceMotion ? false : { scale: 0 }}
-                animate={{ scale: 1 }}
+                initial={preferReduced ? false : { scale: 0.35, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.55 + i * 0.12, type: "spring", stiffness: 220, damping: 16 }}
                 style={{ transformOrigin: `${node.cx}px ${node.cy}px` }}
               />
-              {i === 0 ? (
+              {i === 0 && !preferReduced ? (
                 <motion.circle
                   cx={node.cx}
                   cy={node.cy}
@@ -133,13 +129,21 @@ export function GuestHeroWorld({ className }: { className?: string }) {
                   stroke="#b4cce8"
                   strokeWidth="1.5"
                   fill="none"
-                  opacity={0.5}
-                  animate={
-                    reduceMotion
-                      ? undefined
-                      : { r: [24, 34, 24], opacity: [0.55, 0.1, 0.55] }
-                  }
+                  initial={{ scale: 0.85, opacity: 0.55 }}
+                  animate={{ scale: [0.85, 1.2, 0.85], opacity: [0.55, 0.1, 0.55] }}
                   transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                  style={{ transformOrigin: `${node.cx}px ${node.cy}px` }}
+                />
+              ) : null}
+              {i === 0 && preferReduced ? (
+                <circle
+                  cx={node.cx}
+                  cy={node.cy}
+                  r={28}
+                  stroke="#b4cce8"
+                  strokeWidth="1.5"
+                  fill="none"
+                  opacity={0.35}
                 />
               ) : null}
               <text
@@ -163,10 +167,9 @@ export function GuestHeroWorld({ className }: { className?: string }) {
             </g>
           ))}
 
-          {/* Traveler */}
           <motion.g
             animate={
-              reduceMotion
+              preferReduced
                 ? undefined
                 : { x: [0, 8, 0], y: [0, -4, 0] }
             }

@@ -18,9 +18,10 @@ export function useLogin() {
       setAccessToken(token);
 
       const synced = await syncAuthCookie(token);
-      if (!synced) {
+      if (!synced.ok) {
         setError(
-          "Signed in, but session cookie could not be saved. Check that JWT_SECRET on Vercel matches Railway, then try again.",
+          synced.hint ??
+            "Signed in, but session cookie could not be saved. Check that JWT_SECRET on Vercel matches Railway, then try again.",
         );
         return;
       }
@@ -147,9 +148,10 @@ export function useVerifyOtp() {
       if (token) {
         setAccessToken(token);
         const synced = await syncAuthCookie(token);
-        if (!synced) {
+        if (!synced.ok) {
           setError(
-            "Account created, but session cookie could not be saved. Check JWT_SECRET on Vercel matches Railway, then sign in.",
+            synced.hint ??
+              "Account created, but session cookie could not be saved. Check JWT_SECRET on Vercel matches Railway, then sign in.",
           );
           return;
         }
