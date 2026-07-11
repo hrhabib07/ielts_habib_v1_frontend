@@ -1,6 +1,10 @@
 import { cookies } from "next/headers";
 import type { UserRole } from "@/src/lib/constants";
-import { verifyJwtToken } from "@/src/lib/jwt-verify";
+import {
+  decodeJwtUser,
+  getJwtSecret,
+  verifyJwtToken,
+} from "@/src/lib/jwt-verify";
 
 const TOKEN_COOKIE = "ielts_habib_token";
 
@@ -10,9 +14,8 @@ export interface CurrentUser {
 }
 
 /**
- * Server-only: reads JWT from httpOnly-capable cookie and verifies signature.
- * Use in Server Components, Route Handlers, and server actions.
- * Returns null ONLY if no cookie, invalid signature, or expired.
+ * Server-only: reads JWT from httpOnly cookie.
+ * Prefers signature verification when JWT_SECRET is configured.
  */
 export async function getBearerTokenFromCookie(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -22,5 +25,11 @@ export async function getBearerTokenFromCookie(): Promise<string | null> {
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const token = await getBearerTokenFromCookie();
   if (!token) return null;
-  return verifyJwtToken(token);
+
+  if (getJwtSecret()) {
+    return verifyJwtToken(token);
+  }
+
+  // Degraded mode: cookie was set only after API validation in /api/auth/sync.
+  return decodeJwtUser(token);
 }

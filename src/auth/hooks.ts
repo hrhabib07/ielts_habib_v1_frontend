@@ -17,14 +17,8 @@ export function useLogin() {
 
       setAccessToken(token);
 
-      const synced = await syncAuthCookie(token);
-      if (!synced.ok) {
-        setError(
-          synced.hint ??
-            "Signed in, but session cookie could not be saved. Check that JWT_SECRET on Vercel matches Railway, then try again.",
-        );
-        return;
-      }
+      // Best-effort cookie sync — never block login if sync fails.
+      await syncAuthCookie(token);
 
       if (role === "ADMIN") {
         window.location.href = "/dashboard/admin";
@@ -147,14 +141,7 @@ export function useVerifyOtp() {
 
       if (token) {
         setAccessToken(token);
-        const synced = await syncAuthCookie(token);
-        if (!synced.ok) {
-          setError(
-            synced.hint ??
-              "Account created, but session cookie could not be saved. Check JWT_SECRET on Vercel matches Railway, then sign in.",
-          );
-          return;
-        }
+        await syncAuthCookie(token);
       }
 
       if (role === "ADMIN") {

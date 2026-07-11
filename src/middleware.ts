@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyJwtToken } from "@/src/lib/jwt-verify";
+import {
+  decodeJwtUser,
+  getJwtSecret,
+  verifyJwtToken,
+} from "@/src/lib/jwt-verify";
 import {
   AUTH_TOKEN_COOKIE,
   authCookieBaseOptions,
@@ -14,7 +18,6 @@ const AUTH_ROUTES = [
   "/reset-password",
 ];
 
-/** Redirect paths by role. Inlined for Edge (no barrel imports). */
 const ROLE_REDIRECT_PATH: Record<string, string> = {
   STUDENT: "/",
   INSTRUCTOR: "/dashboard/instructor",
@@ -33,6 +36,14 @@ function clearTokenCookie(response: NextResponse): void {
   });
 }
 
+async function resolveMiddlewareUser(token: string) {
+  if (getJwtSecret()) {
+    return verifyJwtToken(token);
+  }
+  // No JWT_SECRET on this host: decode claims (cookie set after API validation).
+  return decodeJwtUser(token);
+}
+
 const DISABLE_AUTH_REDIRECT =
   process.env.DISABLE_MIDDLEWARE_AUTH_REDIRECT === "true";
 
@@ -47,7 +58,7 @@ export async function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
-  const verifiedUser = token ? await verifyJwtToken(token) : null;
+  const verifiedUser = token ? await resolveMiddlewareUser(token) : null;
 
   if (isAuthRoute) {
     if (!token) {

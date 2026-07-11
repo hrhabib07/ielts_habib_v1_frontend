@@ -1,12 +1,14 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { verifyJwtToken } from "@/src/lib/jwt-verify";
-import { AUTH_TOKEN_COOKIE } from "@/src/lib/auth-cookie";
+import { resolveJwtUser } from "@/src/lib/jwt-verify";
+import {
+  AUTH_TOKEN_COOKIE,
+  authCookieBaseOptions,
+} from "@/src/lib/auth-cookie";
 
 /**
  * GET /api/auth/bootstrap
- * Returns the verified JWT from the httpOnly cookie so the client can restore
- * Bearer auth in localStorage after tab reopen / storage loss.
+ * Returns the JWT from the httpOnly cookie so the client can restore Bearer auth.
  */
 export async function GET() {
   const jar = await cookies();
@@ -16,14 +18,11 @@ export async function GET() {
     return NextResponse.json({ token: null });
   }
 
-  const verified = await verifyJwtToken(token);
+  const verified = await resolveJwtUser(token);
   if (!verified) {
     const res = NextResponse.json({ token: null });
     res.cookies.set(AUTH_TOKEN_COOKIE, "", {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      ...authCookieBaseOptions(),
       maxAge: 0,
       expires: new Date(0),
     });

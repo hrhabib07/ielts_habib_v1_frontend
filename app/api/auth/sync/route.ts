@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyJwtToken } from "@/src/lib/jwt-verify";
+import { resolveJwtUser } from "@/src/lib/jwt-verify";
 import {
   AUTH_TOKEN_COOKIE,
   authCookieBaseOptions,
@@ -9,6 +9,7 @@ import {
 /**
  * POST /api/auth/sync
  * Client sends JWT after login; Next sets httpOnly cookie for RSC + middleware.
+ * Validates via JWT_SECRET when present, otherwise via Railway API.
  */
 export async function POST(request: NextRequest) {
   let body: { token?: string };
@@ -23,16 +24,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing token" }, { status: 400 });
   }
 
-  const verified = await verifyJwtToken(token);
+  const verified = await resolveJwtUser(token);
   if (!verified) {
-    const secretConfigured = Boolean(process.env.JWT_SECRET?.trim());
     return NextResponse.json(
       {
         error: "Invalid or expired token",
-        code: secretConfigured ? "JWT_SECRET_MISMATCH" : "JWT_SECRET_MISSING",
-        hint: secretConfigured
-          ? "JWT_SECRET on Vercel does not match Railway. Copy Railway JWT_SECRET into Vercel Production, then Redeploy."
-          : "JWT_SECRET is missing on Vercel. Add it under Project → Settings → Environment Variables (Production), then Redeploy.",
+        code: "TOKEN_REJECTED",
+        hint: "Token was rejected. Confirm Railway API is up and JWT_SECRET matches if set on this host.",
       },
       { status: 401 },
     );

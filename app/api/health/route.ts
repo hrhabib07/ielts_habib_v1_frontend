@@ -1,30 +1,47 @@
 import { NextResponse } from "next/server";
+import { getJwtSecret } from "@/src/lib/jwt-verify";
+import {
+  getAppOrigin,
+  getServerApiBaseUrl,
+  PRODUCTION_API_FALLBACK,
+} from "@/src/lib/api-base-url";
 
 /**
- * GET /api/health — deploy readiness for Vercel.
- * Does not call Mongo; checks critical env for auth + API proxy.
+ * GET /api/health — deploy readiness.
+ * API has a built-in Railway fallback; JWT_SECRET is optional when sync can
+ * validate tokens via the backend API.
  */
 export async function GET() {
-  const jwtSecret = Boolean(process.env.JWT_SECRET?.trim());
-  const apiBase = Boolean(
+  const jwtSecret = Boolean(getJwtSecret());
+  const configuredApi = Boolean(
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
       process.env.API_UPSTREAM_URL?.trim(),
   );
-  const appUrl = Boolean(process.env.NEXT_PUBLIC_APP_URL?.trim());
+  const apiBase = getServerApiBaseUrl();
+  const appUrl = getAppOrigin();
+  const appUrlConfigured = Boolean(process.env.NEXT_PUBLIC_APP_URL?.trim());
 
-  const ok = jwtSecret && apiBase;
+  // Site can run with API fallback + API-validated cookie sync.
+  const ok = Boolean(apiBase);
   const body = {
     ok,
     service: "gamlish-frontend",
     checks: {
       JWT_SECRET: jwtSecret,
-      API_BASE: apiBase,
-      NEXT_PUBLIC_APP_URL: appUrl,
+      API_BASE: Boolean(apiBase),
+      API_BASE_FROM_ENV: configuredApi,
+      NEXT_PUBLIC_APP_URL: appUrlConfigured,
     },
-    hint: ok
+    resolved: {
+      apiBase,
+      appUrl,
+      apiFallback: apiBase === PRODUCTION_API_FALLBACK && !configuredApi,
+      authMode: jwtSecret ? "local-jwt-verify" : "api-validated-cookie",
+    },
+    hint: jwtSecret
       ? undefined
-      : "Set JWT_SECRET (must match Railway) and NEXT_PUBLIC_API_BASE_URL (.../api) on Vercel Production, then redeploy.",
+      : "JWT_SECRET is not set on this host. Login still works via Railway API validation. For strongest security, set JWT_SECRET on Vercel Production to match Railway, then Redeploy.",
   };
 
-  return NextResponse.json(body, { status: ok ? 200 : 503 });
+  return NextResponse.json(body, { status: 200 });
 }

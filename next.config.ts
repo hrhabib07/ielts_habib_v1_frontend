@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const PRODUCTION_API =
   "https://ieltshabibv1backend-production.up.railway.app/api";
+const PRODUCTION_APP_URL = "https://gamlish.com";
 
 function resolveUpstreamApiBase(): string {
   const raw =
@@ -19,9 +20,18 @@ const apiOrigin = apiBase.replace(/\/api\/?$/, "");
 
 const nextConfig: NextConfig = {
   /**
-   * Same-origin proxy for browser API calls in all environments.
-   * Avoids cross-origin CORS breakage between Vercel and Railway after login.
+   * Production public URL fallbacks when Vercel env was only set on Preview.
+   * JWT_SECRET remains optional (sync can validate via Railway API).
    */
+  env:
+    process.env.NODE_ENV === "production"
+      ? {
+          NEXT_PUBLIC_API_BASE_URL:
+            process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || PRODUCTION_API,
+          NEXT_PUBLIC_APP_URL:
+            process.env.NEXT_PUBLIC_APP_URL?.trim() || PRODUCTION_APP_URL,
+        }
+      : {},
   async rewrites() {
     return {
       beforeFiles: [
