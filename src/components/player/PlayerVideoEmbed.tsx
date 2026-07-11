@@ -38,7 +38,7 @@ export function PlayerVideoEmbed({
     return (
       <div
         className={cn(
-          "flex aspect-video items-center justify-center rounded-2xl border border-dashed border-amber-500/40 bg-amber-500/5 px-6 text-center text-sm text-muted-foreground",
+          "flex aspect-video items-center justify-center rounded-2xl border border-dashed border-primary/30 bg-primary/5 px-6 text-center text-sm text-muted-foreground",
           className,
         )}
       >

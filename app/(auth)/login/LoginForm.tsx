@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "@/src/auth/hooks";
-import { Mail, Lock, ArrowRight } from "lucide-react";
-import { FounderScholarshipPromo } from "@/src/components/pricing/FounderScholarshipPromo";
+import { Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { brandSurfaces } from "@/src/lib/brand-theme";
+import { useFounderLaunchCopy } from "@/src/hooks/useLocalizedCopy";
+import { cn } from "@/lib/utils";
 
 const DevQuickLogin =
   process.env.NODE_ENV === "development"
@@ -19,6 +21,7 @@ const DevQuickLogin =
     : () => null;
 
 export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) {
+  const founderCopy = useFounderLaunchCopy();
   const { handleLogin, loading, error } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,12 +36,22 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
           </p>
         </div>
 
-        <FounderScholarshipPromo />
+        <Link
+          href="/pricing"
+          className={cn("block rounded-2xl border p-4 text-center font-bengali text-sm shadow-sm transition hover:border-primary/40", brandSurfaces.midnightCard)}
+        >
+          <p className="font-semibold text-primary-foreground/90">{founderCopy.eyebrow}</p>
+          <p className="mt-1 text-primary-foreground/75">{founderCopy.trust}</p>
+          <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary-foreground">
+            <Sparkles className="h-3.5 w-3.5" />
+            Founder Launch দেখুন
+          </span>
+        </Link>
 
         <div className="rounded-lg border bg-card p-8 shadow-sm">
           {resetSuccess ? (
             <div
-              className="mb-6 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-800 dark:text-emerald-200"
+              className="mb-6 rounded-md border border-primary/25 bg-primary/10 p-3 text-sm text-primary"
               role="status"
             >
               Your password was reset. Sign in with your new password.

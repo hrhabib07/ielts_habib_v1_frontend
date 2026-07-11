@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createSquad } from "@/src/lib/api/squad";
-import { SQUAD_UI } from "@/src/lib/squad-ui-copy";
+import { useSquadUiCopy } from "@/src/hooks/useLocalizedCopy";
 
 export default function SquadCreatePage() {
+  const SQUAD_UI = useSquadUiCopy();
   const router = useRouter();
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,7 @@ export default function SquadCreatePage() {
     <div className="mx-auto max-w-md px-4 py-10 font-bengali">
       <Link href="/squad" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
-        ফিরে যাও
+        {SQUAD_UI.back}
       </Link>
       <h1 className="text-2xl font-black">{SQUAD_UI.createTitle}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{SQUAD_UI.createHint}</p>

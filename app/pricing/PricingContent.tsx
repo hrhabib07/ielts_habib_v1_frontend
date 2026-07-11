@@ -1,412 +1,131 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Check, Copy, Loader2, ShieldCheck, Smartphone } from "lucide-react";
-import {
-  getPublicPlans,
-  submitSubscriptionRequest,
-  type SubscriptionPlan,
-} from "@/src/lib/api/subscription";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
-import { PricingFaqSection } from "@/src/components/pricing/PricingFaqSection";
+import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
+import { FounderLaunchPricingCard } from "@/src/components/pricing/FounderLaunchPricingCard";
+import { BkashCheckoutForm } from "@/src/components/pricing/BkashCheckoutForm";
 import {
   hasBlockingPaymentStatus,
   PaymentApplicationStatusCard,
 } from "@/src/components/pricing/PaymentApplicationStatusCard";
-import { FoundingMemberPricingAlert } from "@/src/components/pricing/FoundingMemberPricingAlert";
-import { PremiumPricingHero } from "@/src/components/pricing/PremiumPricingHero";
+import { PricingFaqSection } from "@/src/components/pricing/PricingFaqSection";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
-import { isFoundingMemberEligible } from "@/src/lib/foundingMember";
-import { useScholarship } from "@/src/contexts/ScholarshipContext";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
-import { useScholarshipDecayTimer } from "@/src/hooks/useScholarshipTimer";
-import {
-  computeDiscountedPrice,
-  FOUNDER_SCHOLARSHIP_PERCENT,
-} from "@/src/lib/pricingOffer";
-import { resolveBkashNumber } from "@/src/lib/bkash";
-import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
-import { filterPublicPricingPlans } from "@/src/lib/pricing-public";
-import { ENABLE_READING } from "@/src/lib/platform-config";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { Button } from "@/components/ui/button";
+import { brandStatus } from "@/src/lib/brand-theme";
+import { cn } from "@/lib/utils";
 
-function resolvePayableAmount(
-  basePrice: number,
-  scholarshipStatus: ReturnType<typeof useScholarship>["status"],
-  decayTimer: { ready: boolean; currentTierPercent: number },
-): { payableAmount: number; discountPercent: number; scholarshipActive: boolean } {
-  const apiDiscount = scholarshipStatus?.activeDiscountPercent ?? 0;
-  const timerDiscount =
-    decayTimer.ready && decayTimer.currentTierPercent > 0
-      ? FOUNDER_SCHOLARSHIP_PERCENT
-      : 0;
-  const discountPercent = apiDiscount > 0 ? apiDiscount : timerDiscount;
-  const scholarshipActive = discountPercent > 0;
-  const payableAmount =
-    scholarshipActive && scholarshipStatus?.discountedPrice
-      ? scholarshipStatus.discountedPrice
-      : computeDiscountedPrice(basePrice, discountPercent);
-  return { payableAmount, discountPercent, scholarshipActive };
-}
+export function PricingContent({ initialUser }: { initialUser: CurrentUser | null }) {
+  const [pricing, setPricing] = useState<PublicPricing | null>(null);
+  const [pricingError, setPricingError] = useState<string | null>(null);
+  const [pricingLoading, setPricingLoading] = useState(true);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
-interface PurchaseFormProps {
-  plan: SubscriptionPlan;
-  onClose: () => void;
-  onSubmitted: () => void;
-}
+  const isLoggedIn = Boolean(initialUser);
+  const { isFoundingMember } = useStudentSession();
+  const payment = usePaymentApplicationStatus(isLoggedIn);
+  const hasActiveAccess = payment.hasActiveAccess;
+  const hasPurchased = payment.hasPurchased;
+  const blocked = hasBlockingPaymentStatus(payment.activeSubscription, payment.latestRequest);
 
-function PurchaseForm({ plan, onClose, onSubmitted }: PurchaseFormProps) {
-  const { status: scholarshipStatus } = useScholarship();
-  const [txId, setTxId] = useState("");
-  const [senderNumber, setSenderNumber] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [copiedNumber, setCopiedNumber] = useState(false);
-
-  const basePrice = plan.discountPrice ?? plan.price;
-  const decayTimer = useScholarshipDecayTimer(
-    resolveScholarshipWindowStart(scholarshipStatus),
-  );
-  const { payableAmount, discountPercent, scholarshipActive } = resolvePayableAmount(
-    basePrice,
-    scholarshipStatus,
-    decayTimer,
-  );
-  const bkashNumber = resolveBkashNumber(plan.manualPaymentInstructions);
-
-  const handleCopyBkashNumber = async () => {
-    if (!bkashNumber) return;
+  const loadPricing = useCallback(async () => {
+    setPricingLoading(true);
+    setPricingError(null);
     try {
-      await navigator.clipboard.writeText(bkashNumber);
-      setCopiedNumber(true);
-      window.setTimeout(() => setCopiedNumber(false), 1600);
+      const data = await getPublicPricing();
+      setPricing(data);
     } catch {
-      setCopiedNumber(false);
+      setPricingError("মূল্য লোড করা যায়নি। পেজ রিফ্রেশ করুন।");
+    } finally {
+      setPricingLoading(false);
     }
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!txId.trim()) {
-      setError("Transaction ID is required.");
+  useEffect(() => {
+    loadPricing();
+  }, [loadPricing]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") === "1" && isLoggedIn && !blocked && !hasPurchased) {
+      setCheckoutOpen(true);
+    }
+  }, [isLoggedIn, blocked, hasPurchased]);
+
+  const handleUpgrade = () => {
+    if (!isLoggedIn) {
+      window.location.href = `/login?redirect=${encodeURIComponent("/pricing?checkout=1")}`;
       return;
     }
-    setSubmitting(true);
-    setError(null);
-    try {
-      await submitSubscriptionRequest({
-        planId: plan._id,
-        paymentMethod: "BKASH",
-        transactionId: txId.trim(),
-        senderNumber: senderNumber.trim() || undefined,
-        paidAmount: payableAmount,
-      });
-      onSubmitted();
-      setSuccess(true);
-    } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { message?: string } } }).response?.data
-              ?.message
-          : null;
-      setError(
-        msg ??
-          "Failed to submit. Check your transaction ID and that you sent the exact amount.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
+    if (blocked || hasPurchased) return;
+    setCheckoutOpen(true);
   };
 
-  if (success) {
+  if (pricingLoading) {
     return (
-      <div className="rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-emerald-500/5 to-card p-10 text-center space-y-4">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
-          <Check className="h-7 w-7 text-emerald-600" />
-        </div>
-        <h3 className="text-xl font-bold text-foreground">Payment submitted!</h3>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          We received your bKash proof. Our team verifies manually. premium unlocks within
-          24–48 hours. You&apos;ll get an email when access is active.
-        </p>
-        <Button variant="outline" onClick={onClose}>
-          Done
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (pricingError || !pricing) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-16 text-center font-bengali">
+        <p className="text-destructive">{pricingError ?? "মূল্য পাওয়া যায়নি"}</p>
+        <Button className="mt-4 rounded-xl" onClick={loadPricing}>
+          আবার চেষ্টা করুন
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-8 space-y-6 shadow-lg">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Step 2 of 2
-          </p>
-          <h3 className="text-xl font-bold text-foreground">Pay with bKash</h3>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          Back
-        </button>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
-          <p className="text-xs font-medium text-muted-foreground">You pay</p>
-          <p className="mt-1 text-3xl font-extrabold text-foreground">
-            {payableAmount.toLocaleString()}{" "}
-            <span className="text-lg font-semibold">BDT</span>
-          </p>
-          {scholarshipActive && (
-            <p className="mt-1 text-xs text-violet-600 dark:text-violet-400">
-              {discountPercent}% Founder scholarship applied
-            </p>
-          )}
-        </div>
-        <div className="rounded-xl border border-border/60 bg-muted/30 p-4 text-sm">
-          <p className="font-medium text-foreground">{plan.name}</p>
-          <p className="mt-1 text-muted-foreground">
-            {ENABLE_READING
-              ? "Full Reading module · structured levels · mock tests"
-              : "English Foundations · all camps & missions · Mission 02+"}
-          </p>
-        </div>
-      </div>
-
-      {bkashNumber ? (
-        <div className="rounded-2xl border-2 border-dashed border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-6">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white">
-              <Smartphone className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground">
-                1. Send money to this bKash number
-              </p>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <span className="text-3xl font-extrabold tracking-wide text-emerald-700 dark:text-emerald-400">
-                  {bkashNumber}
-                </span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5 border-emerald-500/40"
-                  onClick={() => void handleCopyBkashNumber()}
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                  {copiedNumber ? "Copied!" : "Copy"}
-                </Button>
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Send exactly{" "}
-                <strong className="text-foreground">
-                  {payableAmount.toLocaleString()} BDT
-                </strong>{" "}
-                via bKash Send Money.
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="rounded-xl border p-4 text-sm text-muted-foreground whitespace-pre-line">
-          {plan.manualPaymentInstructions ??
-            `Send ${payableAmount.toLocaleString()} BDT via bKash and enter your transaction ID below.`}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <p className="text-sm font-semibold text-foreground">
-          2. Paste your bKash transaction ID
-        </p>
-
-        <div>
-          <label htmlFor="txId" className="text-sm font-medium text-foreground">
-            Transaction ID <span className="text-destructive">*</span>
-          </label>
-          <input
-            id="txId"
-            type="text"
-            value={txId}
-            onChange={(e) => setTxId(e.target.value)}
-            placeholder="e.g. 8N6XXXXX"
-            className="mt-1.5 w-full rounded-xl border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/40"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="senderNumber" className="text-sm font-medium text-foreground">
-            Your bKash number (optional)
-          </label>
-          <input
-            id="senderNumber"
-            type="text"
-            value={senderNumber}
-            onChange={(e) => setSenderNumber(e.target.value)}
-            placeholder="01XXXXXXXXX"
-            className="mt-1.5 w-full rounded-xl border bg-background px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/40"
-          />
-        </div>
-
-        {error && (
-          <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {error}
-          </p>
-        )}
-
-        <Button
-          type="submit"
-          size="lg"
-          className="h-12 w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-base font-bold"
-          disabled={submitting}
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting…
-            </>
-          ) : (
-            <>
-              <ShieldCheck className="mr-2 h-4 w-4" />
-              Submit payment proof
-            </>
-          )}
-        </Button>
-      </form>
-    </div>
-  );
-}
-
-interface PricingContentProps {
-  initialUser: CurrentUser | null;
-  autoOpenCheckout?: boolean;
-}
-
-export function PricingContent({
-  initialUser,
-  autoOpenCheckout = false,
-}: PricingContentProps) {
-  const { status: scholarshipStatus } = useScholarship();
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
-  const isLoggedIn = !!initialUser;
-
-  const {
-    activeSubscription,
-    latestRequest,
-    loading: paymentStatusLoading,
-    refresh: refreshPaymentStatus,
-    hasActiveAccess,
-    isPendingReview,
-    isRejected,
-  } = usePaymentApplicationStatus(isLoggedIn);
-
-  const checkoutBlocked = hasBlockingPaymentStatus(
-    activeSubscription,
-    latestRequest,
-  );
-
-  const showStatusCard =
-    isLoggedIn &&
-    !paymentStatusLoading &&
-    (hasActiveAccess || isPendingReview || isRejected);
-
-  const showFoundingMemberBadge =
-    isLoggedIn && isFoundingMemberEligible(activeSubscription);
-
-  const primaryPlan = plans[0] ?? null;
-
-  useEffect(() => {
-    getPublicPlans()
-      .then((all) => setPlans(filterPublicPricingPlans(all)))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    if (
-      !autoOpenCheckout ||
-      loading ||
-      paymentStatusLoading ||
-      checkoutBlocked ||
-      !isLoggedIn ||
-      !primaryPlan
-    ) {
-      return;
-    }
-    setSelectedPlan(primaryPlan);
-  }, [
-    autoOpenCheckout,
-    loading,
-    paymentStatusLoading,
-    checkoutBlocked,
-    isLoggedIn,
-    primaryPlan,
-  ]);
-
-  const handlePurchaseSubmitted = () => {
-    setSelectedPlan(null);
-    void refreshPaymentStatus();
-  };
-
-  const handleStartPurchase = () => {
-    if (primaryPlan) setSelectedPlan(primaryPlan);
-  };
-
-  return (
-    <main className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6 md:py-16 space-y-10">
-      {showFoundingMemberBadge && (
+    <div className="mx-auto max-w-3xl space-y-8 px-4 py-8 font-bengali md:py-12">
+      {isFoundingMember ? (
         <div className="flex justify-center">
-          <FoundingMemberBadge size="md" />
+          <FoundingMemberBadge />
         </div>
-      )}
+      ) : null}
 
-      {showStatusCard && (
+      {isLoggedIn ? (
         <PaymentApplicationStatusCard
-          activeSubscription={activeSubscription}
-          latestRequest={latestRequest}
-          onApplyAgain={isRejected ? handleStartPurchase : undefined}
+          activeSubscription={payment.activeSubscription}
+          latestRequest={payment.latestRequest}
+          onApplyAgain={() => setCheckoutOpen(true)}
         />
-      )}
+      ) : null}
 
-      {!selectedPlan && !hasActiveAccess && (
-        <>
-          <PremiumPricingHero
-            scholarshipStatus={scholarshipStatus}
-            isLoggedIn={isLoggedIn}
-            onPurchase={handleStartPurchase}
-            purchaseDisabled={isPendingReview || !primaryPlan}
-            purchaseDisabledReason={
-              isPendingReview
-                ? "Your payment is under review. Please wait for verification."
-                : !primaryPlan
-                  ? "Checkout is not available yet. Mission 01 is free. Start on the camp map."
-                  : undefined
-            }
-          />
-          <FoundingMemberPricingAlert />
-        </>
-      )}
-
-      {selectedPlan ? (
-        <PurchaseForm
-          plan={selectedPlan}
-          onClose={() => setSelectedPlan(null)}
-          onSubmitted={handlePurchaseSubmitted}
+      {checkoutOpen && isLoggedIn && !hasPurchased && !blocked ? (
+        <BkashCheckoutForm
+          pricing={pricing}
+          onClose={() => setCheckoutOpen(false)}
+          onSubmitted={() => payment.refresh()}
         />
-      ) : loading || (isLoggedIn && paymentStatusLoading) ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      ) : !hasPurchased && !blocked ? (
+        <FounderLaunchPricingCard
+          pricing={pricing}
+          onUpgrade={handleUpgrade}
+          disabled={blocked}
+        />
+      ) : hasActiveAccess ? (
+        <div className={cn("rounded-3xl border p-8 text-center", brandStatus.success.card)}>
+          <h2 className="text-xl font-bold text-foreground">আপনার প্রিমিয়াম অ্যাক্সেস সক্রিয়</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            সব ক্যাম্প ও মিশন উপভোগ করতে প্লেয়ারে ফিরে যান।
+          </p>
+          <Button asChild className="mt-4 rounded-xl">
+            <Link href="/player">খেলা চালিয়ে যান</Link>
+          </Button>
         </div>
       ) : null}
 
       <PricingFaqSection />
-    </main>
+    </div>
   );
 }

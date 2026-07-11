@@ -7,6 +7,7 @@ import {
 } from "@/src/components/home/guest/GuestLandingLocale";
 import { GuestLandingAmbient } from "@/src/components/home/guest/GuestLandingAmbient";
 import { GuestLandingHero } from "@/src/components/home/guest/GuestLandingHero";
+import { GuestPlayMoment } from "@/src/components/home/guest/GuestPlayMoment";
 import { GuestHowGamlishWorks } from "@/src/components/home/guest/GuestHowGamlishWorks";
 
 function GuestLandingSurface() {
@@ -15,7 +16,7 @@ function GuestLandingSurface() {
   return (
     <div
       className={cn(
-        "relative isolate bg-background text-foreground",
+        "guest-landing-surface relative isolate overflow-x-hidden bg-background text-foreground",
         locale === "bn" && "font-bengali",
       )}
       lang={locale === "bn" ? "bn" : "en"}
@@ -25,6 +26,7 @@ function GuestLandingSurface() {
       </div>
       <div className="relative">
         <GuestLandingHero />
+        <GuestPlayMoment />
         <GuestHowGamlishWorks />
       </div>
     </div>

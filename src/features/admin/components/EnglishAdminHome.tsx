@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SubscriptionRequestsTable } from "@/src/features/admin-approval/components/SubscriptionRequestsTable";
 import { PendingInstructorRequests } from "@/src/features/admin-approval/components/PendingInstructorRequests";
+import { PendingSubscriptionRequests } from "@/src/features/admin-approval/components/PendingSubscriptionRequests";
 import {
   ArrowLeft,
   ChevronRight,
@@ -31,6 +31,16 @@ export function EnglishAdminHome() {
           </Button>
         </Link>
       </div>
+
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-5 w-5 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">New student enrollments</h2>
+        </div>
+        <Card className="p-6">
+          <PendingSubscriptionRequests />
+        </Card>
+      </section>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link href="/dashboard/admin/english">
@@ -65,29 +75,23 @@ export function EnglishAdminHome() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/admin/subscription-plans">
+        <Link href="/dashboard/admin/pricing">
           <Card className="h-full p-5 transition-shadow hover:shadow-md">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-500/10">
                 <PackageCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-foreground">Subscription plans</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">Pricing and English access tiers</p>
+                <p className="font-semibold text-foreground">Pricing & payments</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Founder Launch price, bKash, and payment verification
+                </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
             </div>
           </Card>
         </Link>
       </div>
-
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-semibold text-foreground">Subscription requests</h2>
-        </div>
-        <SubscriptionRequestsTable />
-      </section>
 
       <section className="space-y-4">
         <div className="flex items-center gap-2">

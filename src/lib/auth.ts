@@ -8,28 +8,27 @@ export interface JwtPayload {
   exp: number;
 }
 
+/**
+ * Persist Bearer token for API calls (localStorage only).
+ * Do NOT mirror into document.cookie — that conflicts with the httpOnly
+ * cookie set by POST /api/auth/sync and breaks production session recovery.
+ */
 export function setAccessToken(token: string): void {
-  document.cookie = `${TOKEN_KEY}=${token}; path=/; SameSite=Lax`;
-
-  // optional: localStorage (for client utilities)
+  if (typeof window === "undefined") return;
   localStorage.setItem(TOKEN_KEY, token);
-  
-  // Dispatch custom event for auth state change
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("auth-state-changed"));
-  }
+  window.dispatchEvent(new CustomEvent("auth-state-changed"));
 }
 
 export function getAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
   return localStorage.getItem(TOKEN_KEY);
 }
 
 export function clearAuth(): void {
-  // remove cookie
-  document.cookie = `${TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
-
-  // remove localStorage
+  if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
+  // Clear legacy non-httpOnly cookie from older clients (same name).
+  document.cookie = `${TOKEN_KEY}=; path=/; Max-Age=0; SameSite=Lax`;
 }
 
 export function logout(): void {
@@ -39,13 +38,12 @@ export function logout(): void {
   fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" }).finally(
     () => {
       window.location.href = "/login";
-    }
+    },
   );
 }
 
 export function getTokenFromClient(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
+  return getAccessToken();
 }
 
 export function getDecodedTokenClient(): JwtPayload | null {
@@ -60,14 +58,7 @@ export function getDecodedTokenClient(): JwtPayload | null {
 }
 
 export function getDecodedToken(): JwtPayload | null {
-  const token = getAccessToken();
-  if (!token) return null;
-
-  try {
-    return jwtDecode<JwtPayload>(token);
-  } catch {
-    return null;
-  }
+  return getDecodedTokenClient();
 }
 
 function isJwtPayloadUsable(p: JwtPayload | null): p is JwtPayload {
@@ -75,18 +66,55 @@ function isJwtPayloadUsable(p: JwtPayload | null): p is JwtPayload {
   return p.exp * 1000 >= Date.now();
 }
 
-/** Client-only: non-expired JWT in localStorage (API Bearer). Independent of server cookie verification. */
+/** Client-only: non-expired JWT in localStorage (API Bearer). */
 export function hasUsableClientToken(): boolean {
   if (typeof window === "undefined") return false;
   return isJwtPayloadUsable(getDecodedTokenClient());
 }
 
 /**
- * Client-only: session is an active STUDENT (for UI that cannot rely on RSC getCurrentUser(), e.g. missing JWT_SECRET on the host).
+ * Client-only: active STUDENT session from localStorage JWT.
  */
 export function isActiveStudentSessionClient(): boolean {
   if (typeof window === "undefined") return false;
   const p = getDecodedTokenClient();
   if (!isJwtPayloadUsable(p)) return false;
   return String(p.role).toUpperCase() === "STUDENT";
+}
+
+/** Sync JWT into the Next.js httpOnly cookie. Returns false if sync failed. */
+export async function syncAuthCookie(token: string): Promise<boolean> {
+  try {
+    const res = await fetch("/api/auth/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+      credentials: "same-origin",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Restore Bearer from httpOnly cookie when localStorage is empty
+ * (e.g. private mode quirks, cleared storage, or older clients).
+ */
+export async function hydrateAccessTokenFromCookie(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/auth/bootstrap", {
+      method: "GET",
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { token?: string | null };
+    const token = typeof json.token === "string" ? json.token.trim() : null;
+    if (!token) return null;
+    setAccessToken(token);
+    return token;
+  } catch {
+    return null;
+  }
 }

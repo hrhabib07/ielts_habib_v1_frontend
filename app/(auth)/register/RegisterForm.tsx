@@ -32,7 +32,7 @@ function RegisterHeroPanel({ locale }: { locale: "en" | "bn" }) {
   return (
     <aside className="relative hidden w-[44%] shrink-0 flex-col justify-between overflow-hidden bg-slate-950 px-10 py-10 text-white xl:w-[48%] xl:px-12 xl:py-12 lg:flex">
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_15%_0%,rgba(99,102,241,0.5),transparent_58%),radial-gradient(ellipse_55%_45%_at_95%_100%,rgba(139,92,246,0.32),transparent_52%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_15%_0%,rgba(15,23,42,0.55),transparent_58%),radial-gradient(ellipse_55%_45%_at_95%_100%,rgba(30,58,138,0.35),transparent_52%)]"
         aria-hidden
       />
 
@@ -46,8 +46,8 @@ function RegisterHeroPanel({ locale }: { locale: "en" | "bn" }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-indigo-100">
-          <Sparkles className="h-3.5 w-3.5 text-amber-300" aria-hidden />
+        <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/85">
+          <Sparkles className="h-3.5 w-3.5 text-white/90" aria-hidden />
           {locale === "bn" ? "৪ ক্যাম্প · ২১ মিশন" : "4 camps · 21 missions"}
         </p>
 
@@ -65,11 +65,11 @@ function RegisterHeroPanel({ locale }: { locale: "en" | "bn" }) {
             <li key={item} className="flex items-center gap-3 text-sm text-slate-200">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/12">
                 {idx === 0 ? (
-                  <Trophy className="h-3.5 w-3.5 text-amber-300" />
+                  <Trophy className="h-3.5 w-3.5 text-white/90" />
                 ) : idx === 1 ? (
-                  <Swords className="h-3.5 w-3.5 text-sky-300" />
+                  <Swords className="h-3.5 w-3.5 text-white/80" />
                 ) : (
-                  <Zap className="h-3.5 w-3.5 text-violet-300" />
+                  <Zap className="h-3.5 w-3.5 text-white/75" />
                 )}
               </span>
               {item}
@@ -200,7 +200,7 @@ export function RegisterForm() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="h-11 w-full rounded-xl bg-indigo-600 text-[15px] font-semibold hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+                    className="h-11 w-full rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground hover:bg-primary/90"
                     size="lg"
                   >
                     {loading ? (
@@ -216,22 +216,22 @@ export function RegisterForm() {
 
                 <div className="mt-5 grid gap-2 border-t border-border/50 pt-4 text-[11px] text-muted-foreground sm:grid-cols-3">
                   <span className="inline-flex items-center gap-1.5">
-                    <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                    <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
                     {copy.trustOtp}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-indigo-600" />
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />
                     {copy.trustFree}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-violet-600" />
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />
                     {copy.trustSecure}
                   </span>
                 </div>
 
                 <p className="mt-4 text-center text-sm">
                   <span className="text-muted-foreground">{copy.hasAccount} </span>
-                  <Link href="/login" className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
+                  <Link href="/login" className="font-semibold text-primary hover:underline">
                     {copy.signIn}
                   </Link>
                 </p>

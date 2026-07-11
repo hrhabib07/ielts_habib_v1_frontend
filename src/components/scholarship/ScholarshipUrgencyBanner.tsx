@@ -19,7 +19,7 @@ export function ScholarshipUrgencyBanner() {
   const pathname = usePathname();
   const { status } = useScholarship();
   const { subscription, loading: sessionLoading } = useStudentSession();
-  const { isPendingReview, hasActiveAccess, loading: paymentLoading } =
+  const { isPendingReview, hasPurchased, loading: paymentLoading } =
     usePaymentApplicationStatus(true);
   const windowStart = resolveScholarshipWindowStart(status);
   const decayTimer = useScholarshipDecayTimer(windowStart);
@@ -29,7 +29,7 @@ export function ScholarshipUrgencyBanner() {
   }
 
   const hasPaidAccess =
-    hasActiveAccess || subscription?.status === "ACTIVE";
+    hasPurchased || subscription?.status === "ACTIVE";
   if (!paymentLoading && !sessionLoading && (isPendingReview || hasPaidAccess)) {
     return null;
   }

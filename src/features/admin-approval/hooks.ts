@@ -5,6 +5,12 @@ import {
   rejectInstructorRequest,
 } from "./api";
 import type { PendingInstructorRequest } from "./types";
+import {
+  approveSubscriptionRequest,
+  listSubscriptionRequests,
+  rejectSubscriptionRequest,
+  type SubscriptionRequestItem,
+} from "@/src/lib/api/admin";
 
 export function useAdminInstructorRequests() {
   const [requests, setRequests] = useState<PendingInstructorRequest[]>([]);
@@ -54,5 +60,65 @@ export function useAdminInstructorRequests() {
     approve,
     reject,
     actionLoadingId,
+  };
+}
+
+export function usePendingSubscriptionRequests() {
+  const [requests, setRequests] = useState<SubscriptionRequestItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await listSubscriptionRequests({ status: "PENDING" });
+      setRequests(data);
+    } catch {
+      setError("Failed to load enrollment requests");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const approve = async (id: string) => {
+    setActionLoadingId(id);
+    setError(null);
+    try {
+      await approveSubscriptionRequest(id);
+      setRequests((prev) => prev.filter((r) => r._id !== id));
+    } catch {
+      setError("Failed to approve enrollment");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const reject = async (id: string) => {
+    setActionLoadingId(id);
+    setError(null);
+    try {
+      await rejectSubscriptionRequest(id);
+      setRequests((prev) => prev.filter((r) => r._id !== id));
+    } catch {
+      setError("Failed to reject enrollment");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  useEffect(() => {
+    void fetchRequests();
+  }, []);
+
+  return {
+    requests,
+    loading,
+    error,
+    approve,
+    reject,
+    actionLoadingId,
+    refresh: fetchRequests,
   };
 }

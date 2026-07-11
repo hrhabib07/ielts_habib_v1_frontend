@@ -1,15 +1,14 @@
 import { Suspense } from "react";
-import { SyncAuthCookie } from "@/src/components/auth/SyncAuthCookie";
 import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard";
 
 /**
  * Suspense fallback while AppShellWithAuth resolves.
- * No Header/Footer and no page children. prevents duplicate shells in the DOM during auth streaming.
+ * Do not mount SyncAuthCookie here — initialUser=null would force a redundant
+ * sync + router.refresh and cause login flicker after tab return.
  */
 export function AppShellFallback() {
   return (
     <>
-      <SyncAuthCookie initialUser={null} />
       <Suspense fallback={null}>
         <DocumentScrollGuard />
       </Suspense>

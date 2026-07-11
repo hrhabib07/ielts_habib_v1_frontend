@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import type { PlayerStageContent, PlayerSubmitResult } from "@/src/lib/api/player";
 import { completePlayerStage, submitPlayerStage } from "@/src/lib/api/player";
 import { EvalQuestionRunner } from "@/src/components/player/EvalQuestionRunner";
+import { WritingReviewForm } from "@/src/components/player/WritingReviewForm";
+import { MissionOpeningStage } from "@/src/components/player/MissionOpeningStage";
 import { PlayerVideoEmbed } from "@/src/components/player/PlayerVideoEmbed";
+import { isMissionOpeningStage } from "@/src/lib/player-stage-utils";
 import {
   PlayerStageResultOverlay,
   type PlayerStageResult,
 } from "@/src/components/player/PlayerStageResultOverlay";
-import { PLAYER_UI } from "@/src/lib/player-ui-copy";
+import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 
 type EvalQuestion = Record<string, unknown>;
 
@@ -55,12 +58,17 @@ function EvaluationForm({
   submitting: boolean;
   retryState: EvalRetryState | null;
 }) {
-  const instruction = stage.instructionBn || PLAYER_UI.evalInstructionBn[stage.type];
+  const PLAYER_UI = usePlayerUiCopy();
+  const instruction = stage.instructionBn || PLAYER_UI.evalInstruction[stage.type];
   const allQuestions = (stage.questions ?? []) as EvalQuestion[];
   const retryMode = Boolean(retryState?.wrongQuestionIds.length);
   const questions = retryMode
     ? allQuestions.filter((question) => retryState!.wrongQuestionIds.includes(String(question.id)))
     : allQuestions;
+
+  if (stage.type === "writing_review") {
+    return null;
+  }
 
   if (stage.type === "story_passage") {
     return (
@@ -103,6 +111,7 @@ function EvaluationForm({
 }
 
 export function MissionStageRunner({ content }: { content: PlayerStageContent }) {
+  const PLAYER_UI = usePlayerUiCopy();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -111,7 +120,8 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
   const [evalFormKey, setEvalFormKey] = useState(0);
   const [evalRetryState, setEvalRetryState] = useState<EvalRetryState | null>(null);
 
-  const { stage, missionSlug, missionTitle, totalStages, stageIndex, submitStageOrder } = content;
+  const { stage, missionSlug, missionTitle, totalStages, stageIndex, submitStageOrder, writingReview } =
+    content;
   const activeStageOrder = submitStageOrder ?? stage.order;
   const progressPct = useMemo(
     () => (totalStages > 0 ? Math.round(((stageIndex + 1) / totalStages) * 100) : 0),
@@ -168,6 +178,20 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
     setSubmitting(true);
     try {
       const result = await submitPlayerStage(missionSlug, activeStageOrder, answers);
+      if (result.pendingReview) {
+        setStageResult({
+          kind: "success",
+          title: "জমা হয়েছে!",
+          message:
+            "তোমার লেখা শিক্ষকের কাছে পাঠানো হয়েছে। রিভিউ হলে এখানে মার্ক দেখতে পারবে। তার আগে পরের ধাপে যেতে পারবে না।",
+          xpEarned: 0,
+          coinsEarned: 0,
+        });
+        setPendingNav(null);
+        setSubmitting(false);
+        router.refresh();
+        return;
+      }
       if (!result.passed) {
         const retryState = buildEvalRetryState(answers, result.perQuestion);
         setEvalRetryState(retryState);
@@ -209,6 +233,8 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
     if (pendingNav) {
       goNext(pendingNav);
       setPendingNav(null);
+    } else {
+      router.refresh();
     }
   };
 
@@ -246,15 +272,26 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
         </div>
         <div className="mx-auto mt-2 h-1 max-w-2xl overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full bg-indigo-600 transition-all duration-300"
+            className="h-full bg-primary/80 transition-all duration-300 dark:bg-primary/70"
             style={{ width: `${progressPct}%` }}
           />
         </div>
       </header>
 
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">
-        {stage.kind === "story" && (
+        {stage.kind === "story" && isMissionOpeningStage(stage) && (
+          <MissionOpeningStage
+            storyHtml={stage.storyHtml}
+            submitting={submitting}
+            onContinue={() => void handleComplete()}
+          />
+        )}
+
+        {stage.kind === "story" && !isMissionOpeningStage(stage) && (
           <div className="space-y-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {PLAYER_UI.stageKind.story}
+            </p>
             <div
               className="prose prose-sm max-w-none dark:prose-invert"
               dangerouslySetInnerHTML={{ __html: stage.storyHtml ?? "" }}
@@ -274,7 +311,20 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
           </div>
         )}
 
-        {stage.kind === "evaluation" && stage.evaluation && (
+        {stage.kind === "evaluation" && stage.evaluation?.type === "writing_review" && (
+          <WritingReviewForm
+            key={evalFormKey}
+            evaluation={stage.evaluation}
+            writingReview={writingReview}
+            submitting={submitting}
+            onSubmit={(answers) => void handleEvalSubmit(answers)}
+            onContinue={() => router.push(`/player/missions/${missionSlug}/stage/10`)}
+          />
+        )}
+
+        {stage.kind === "evaluation" &&
+          stage.evaluation &&
+          stage.evaluation.type !== "writing_review" && (
           <EvaluationForm
             key={evalFormKey}
             stage={stage.evaluation}

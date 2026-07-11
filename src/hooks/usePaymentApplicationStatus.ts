@@ -7,6 +7,11 @@ import {
   type SubscriptionRequest,
 } from "@/src/lib/api/subscription";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import {
+  hasPurchasedSubscription,
+  hasUsablePremiumAccess,
+  isPreorderAwaitingAccess,
+} from "@/src/lib/subscription-access";
 
 export function usePaymentApplicationStatus(enabled: boolean) {
   const { subscription, loading: sessionLoading } = useStudentSession();
@@ -42,9 +47,9 @@ export function usePaymentApplicationStatus(enabled: boolean) {
 
   const loading = enabled && (sessionLoading || requestLoading);
 
-  const hasActiveAccess =
-    activeSubscription?.status === "ACTIVE" &&
-    new Date(activeSubscription.endDate).getTime() > Date.now();
+  const hasActiveAccess = hasUsablePremiumAccess(activeSubscription);
+  const hasPurchased = hasPurchasedSubscription(activeSubscription);
+  const isPreorderPending = isPreorderAwaitingAccess(activeSubscription);
 
   const isPendingReview = latestRequest?.status === "PENDING";
   const isRejected = latestRequest?.status === "REJECTED";
@@ -55,6 +60,8 @@ export function usePaymentApplicationStatus(enabled: boolean) {
     loading,
     refresh,
     hasActiveAccess,
+    hasPurchased,
+    isPreorderPending,
     isPendingReview,
     isRejected,
   };

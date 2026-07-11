@@ -81,15 +81,15 @@ function feedbackMessage(
 function ThinkAgainPrompt() {
   return (
     <div
-      className="flex items-start gap-3 rounded-xl border border-sky-500/40 bg-sky-500/10 px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300"
+      className="flex items-start gap-3 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300"
       role="status"
     >
-      <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-sky-600 dark:text-sky-400" />
+      <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
       <div className="space-y-1 text-left">
-        <p className="font-semibold text-sky-950 dark:text-sky-100">
+        <p className="font-semibold text-foreground">
           আবার ভেবে দেখো
         </p>
-        <p className="font-medium leading-relaxed text-sky-900/90 dark:text-sky-100/90">
+        <p className="font-medium leading-relaxed text-muted-foreground">
           উত্তরটা ঠিক মনে হচ্ছে না। সাবধানে আবার বেছে নাও, তুমি পারবে!
         </p>
       </div>
@@ -109,8 +109,8 @@ function QuestionFeedback({
       className={cn(
         "flex items-start gap-3 rounded-xl border px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300",
         result.correct
-          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300"
-          : "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-200",
+          ? "border-primary/40 bg-primary/10 text-primary"
+          : "border-destructive/40 bg-destructive/10 text-destructive",
       )}
       role="status"
     >
@@ -177,21 +177,21 @@ function McqOptions({
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
                 isCorrectOption &&
-                  "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40",
+                  "border-primary bg-primary/5 dark:bg-primary/10",
                 isWrongPick && "border-red-500 bg-red-50 dark:bg-red-950/40",
                 isThinkAgainPick &&
-                  "border-sky-400 bg-sky-50 dark:bg-sky-950/30",
+                  "border-primary/60 bg-primary/5 dark:bg-primary/10",
                 !locked &&
                   !thinkAgain &&
                   isSelected &&
-                  "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40",
+                  "border-primary bg-primary/10 dark:bg-primary/15",
                 !locked &&
                   !isSelected &&
-                  "border-border hover:border-indigo-300",
+                  "border-border hover:border-primary/40",
                 locked && !isCorrectOption && !isWrongPick && "opacity-60",
               )}
             >
-              <span className="font-semibold text-indigo-600">
+              <span className="font-semibold text-primary">
                 {opt.charAt(0).toUpperCase()}
               </span>
               <span>{opt}</span>
@@ -284,7 +284,7 @@ function EvaluationQuestionBody({
                 className={cn(
                   "flex-1",
                   isCorrectOption &&
-                    "border-emerald-500 bg-emerald-600 hover:bg-emerald-600",
+                    "border-primary bg-primary hover:bg-primary",
                   isWrongPick &&
                     "border-red-500 bg-red-600 hover:bg-red-600 text-white",
                 )}
@@ -333,8 +333,8 @@ function EvaluationQuestionBody({
           onChange={(e) => touchAnswer((prev) => ({ ...prev, [id]: e.target.value }))}
           className={cn(
             "w-full rounded-lg border bg-background px-3 py-2.5 text-sm",
-            locked && checkResult?.correct && "border-emerald-500",
-            locked && !checkResult?.correct && "border-amber-500",
+            locked && checkResult?.correct && "border-primary",
+            locked && !checkResult?.correct && "border-destructive",
           )}
           placeholder="উত্তর লেখো…"
         />
@@ -552,7 +552,7 @@ export function EvalQuestionRunner({
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full bg-indigo-600 transition-all duration-300"
+                className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${progressPct}%` }}
               />
             </div>
@@ -640,7 +640,7 @@ export function EvalQuestionRunner({
   return (
     <div className="space-y-5">
       {retryMode ? (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-relaxed text-amber-950 dark:text-amber-100">
+        <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-foreground">
           তুমি শুধু যে প্রশ্নগুলো ভুল করেছিলে সেগুলো আবার করো। প্রতিটি সঠিক হলে
           পরের ধাপে যেতে পারবে।
         </div>

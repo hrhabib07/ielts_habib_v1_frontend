@@ -5,56 +5,104 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
-import { PLAYER_UI, stageKindLabelBn } from "@/src/lib/player-ui-copy";
+import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
+import { resolveStageKindLabel } from "@/src/lib/player-stage-utils";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
+import { PlayerSubscriptionGate } from "@/src/components/player/PlayerSubscriptionGate";
+import {
+  isPlayerSubscriptionRequiredError,
+  playerApiErrorMessage,
+} from "@/src/lib/player-access-errors";
 
 const STAGE_COLORS = [
-  "bg-emerald-500",
-  "bg-sky-500",
-  "bg-amber-500",
-  "bg-orange-500",
-  "bg-rose-500",
-  "bg-violet-500",
-  "bg-indigo-500",
-  "bg-teal-500",
-  "bg-fuchsia-500",
+  "bg-primary",
+  "bg-primary/90",
+  "bg-primary/80",
+  "bg-primary/70",
+  "bg-primary/60",
+  "bg-primary/85",
+  "bg-primary/75",
+  "bg-primary/65",
+  "bg-primary/55",
 ];
 
+function missionDisplayTitleFromSlug(slug: string): string {
+  return slug
+    .replace(/^mission-\d+-?/i, "")
+    .split("-")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 export function MissionHubView({ slug }: { slug: string }) {
+  const PLAYER_UI = usePlayerUiCopy();
+  const { locale } = useUiLocale();
   const [mission, setMission] = useState<PlayerMissionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [needsSubscription, setNeedsSubscription] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
+    setError(null);
+    setNeedsSubscription(false);
+    setMission(null);
+
     getPlayerMission(slug)
       .then((data) => {
         if (!cancelled) setMission(data);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "মিশন লোড করা যায়নি");
+        if (cancelled) return;
+        if (isPlayerSubscriptionRequiredError(err)) {
+          setNeedsSubscription(true);
+          return;
+        }
+        setError(playerApiErrorMessage(err, PLAYER_UI.couldNotContinue));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, PLAYER_UI.couldNotContinue]);
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-lg animate-pulse px-4 py-16 text-center text-sm text-muted-foreground font-bengali">
+      <div
+        className={cn(
+          "mx-auto max-w-lg animate-pulse px-4 py-16 text-center text-sm text-muted-foreground",
+          locale === "bn" && "font-bengali",
+        )}
+      >
         {PLAYER_UI.loadingMission}
       </div>
     );
   }
 
+  if (needsSubscription) {
+    return (
+      <PlayerSubscriptionGate missionTitle={missionDisplayTitleFromSlug(slug)} />
+    );
+  }
+
   if (error || !mission) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center font-bengali">
-        <p className="text-sm text-destructive">{error ?? "মিশন পাওয়া যায়নি"}</p>
-        <Button asChild variant="outline" className="mt-4">
+      <div
+        className={cn(
+          "mx-auto max-w-lg px-4 py-16 text-center",
+          locale === "bn" && "font-bengali",
+        )}
+      >
+        <p className="text-sm text-destructive">
+          {error ?? PLAYER_UI.couldNotContinue}
+        </p>
+        <Button asChild variant="outline" className="mt-4 rounded-full">
           <Link href="/player">{PLAYER_UI.backToMap}</Link>
         </Button>
       </div>
@@ -69,13 +117,16 @@ export function MissionHubView({ slug }: { slug: string }) {
   const locked = mission.status === "locked";
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8 font-bengali">
-      <Link href="/player" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+    <div className={cn("mx-auto max-w-lg px-4 py-8", locale === "bn" && "font-bengali")}>
+      <Link
+        href="/player"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-4 w-4" /> {PLAYER_UI.backToMap}
       </Link>
 
       <header className="mt-4">
-        <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+        <p className="text-xs font-bold uppercase tracking-wider text-primary/80">
           {mission.isInspection ? PLAYER_UI.inspectionLabel : PLAYER_UI.missionLabel}
         </p>
         <h1 className="mt-1 text-2xl font-bold">{mission.title}</h1>
@@ -85,10 +136,10 @@ export function MissionHubView({ slug }: { slug: string }) {
       </header>
 
       <div className="mt-6 flex items-center gap-4 text-sm">
-        <span className="rounded-full bg-indigo-100 px-2.5 py-1 font-medium text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200">
+        <span className="rounded-full bg-primary/10 px-2.5 py-1 font-medium text-primary dark:bg-primary/15 dark:text-primary-foreground">
           {mission.xpEarned} {PLAYER_UI.xpLabel}
         </span>
-        <span className="rounded-full bg-amber-100 px-2.5 py-1 font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <span className="rounded-full bg-primary/8 px-2.5 py-1 font-medium text-primary dark:bg-primary/12 dark:text-primary-foreground">
           {mission.coinsEarned} {PLAYER_UI.coinsLabel}
         </span>
       </div>
@@ -106,24 +157,38 @@ export function MissionHubView({ slug }: { slug: string }) {
                 }}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl border px-4 py-3 transition-colors",
-                  stage.completed && "border-emerald-300/60 bg-emerald-50/50 dark:border-emerald-900/40",
-                  playable && !stage.completed && "hover:border-indigo-300 hover:bg-indigo-50/40 dark:hover:border-indigo-700",
+                  stage.completed && "border-primary/25 bg-primary/5 dark:border-primary/30",
+                  playable &&
+                    !stage.completed &&
+                    "hover:border-primary/20 hover:bg-primary/5 dark:hover:border-primary/25",
                   !playable && "cursor-not-allowed opacity-50",
                 )}
               >
                 <span
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white",
-                    stage.completed ? "bg-emerald-500" : STAGE_COLORS[idx % STAGE_COLORS.length],
+                    stage.completed
+                      ? "bg-primary"
+                      : STAGE_COLORS[idx % STAGE_COLORS.length],
                   )}
                 >
-                  {stage.completed ? <CheckCircle2 className="h-4 w-4" /> : stage.order}
+                  {stage.completed ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                  ) : (
+                    stage.order
+                  )}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{stage.title ?? `ধাপ ${stage.order}`}</p>
-                  <p className="text-xs text-muted-foreground">{stageKindLabelBn(stage.kind)}</p>
+                  <p className="truncate text-sm font-semibold">
+                    {stage.title ?? `ধাপ ${stage.order}`}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {resolveStageKindLabel(stage, locale)}
+                  </p>
                 </div>
-                {!playable ? <Lock className="h-4 w-4 text-muted-foreground" /> : null}
+                {!playable ? (
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                ) : null}
               </Link>
             </li>
           );
@@ -133,7 +198,9 @@ export function MissionHubView({ slug }: { slug: string }) {
       {!locked && (
         <Button asChild className="mt-8 w-full" size="lg">
           <Link href={`/player/missions/${slug}/stage/${nextStage}`}>
-            {mission.status === "completed" ? PLAYER_UI.reviewMission : PLAYER_UI.continueMission}
+            {mission.status === "completed"
+              ? PLAYER_UI.reviewMission
+              : PLAYER_UI.continueMission}
           </Link>
         </Button>
       )}

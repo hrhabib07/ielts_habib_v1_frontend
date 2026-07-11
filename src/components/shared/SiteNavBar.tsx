@@ -28,7 +28,8 @@ import { readingPathPremium } from "@/src/lib/readingPathPremium";
 import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { cn } from "@/lib/utils";
 import { GuestLandingNavBar } from "@/src/components/home/guest/GuestLandingNavBar";
-import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
+import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
+import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
 import { shouldUseGuestLandingNav } from "@/src/lib/guest-nav-paths";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
@@ -40,19 +41,19 @@ import {
 } from "@/src/lib/platform-config";
 
 const STUDENT_LINKS_READING = [
-  { href: "/profile/reading", label: "Reading" },
-  { href: "/profile", label: "My profile" },
+  { href: "/profile/reading", labelKey: "reading" as const },
+  { href: "/profile", labelKey: "myProfile" as const },
 ] as const;
 
 const STUDENT_LINKS_PLAYER = [
-  { href: "/player", label: "খেলা" },
-  { href: "/squad", label: "স্কোয়াড" },
-  { href: "/profile", label: "আমার প্রোফাইল" },
+  { href: "/player", labelKey: "play" as const },
+  { href: "/squad", labelKey: "squad" as const },
+  { href: "/profile", labelKey: "myProfile" as const },
 ] as const;
 
 const STUDENT_LINKS = ENABLE_READING ? STUDENT_LINKS_READING : STUDENT_LINKS_PLAYER;
 
-const PUBLIC_LINKS = [{ href: "/pricing", label: "Plans & pricing" }] as const;
+const PUBLIC_LINKS = [{ href: "/pricing", labelKey: "publicPlansPricing" as const }] as const;
 
 export function SiteNavBar(props: {
   initialUser?: CurrentUser | null;
@@ -65,6 +66,7 @@ export function SiteNavBar(props: {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isFoundingMember } = useStudentSession();
+  const shell = useSiteShellCopy();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const user = initialUser ?? clientUser;
@@ -179,13 +181,13 @@ export function SiteNavBar(props: {
                 href={link.href}
                 className={navLinkClass(isNavActive(link.href))}
               >
-                {link.label}
+                {shell[link.labelKey]}
               </Link>
             ))}
           {isStudent &&
             STUDENT_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={navLinkClass(isNavActive(link.href))}>
-                {link.label}
+                {shell[link.labelKey]}
               </Link>
             ))}
           {(isInstructor || isAdmin) && (
@@ -193,7 +195,7 @@ export function SiteNavBar(props: {
               href={isAdmin ? "/dashboard/admin" : "/dashboard/instructor"}
               className={navLinkClass(pathname.startsWith("/dashboard"))}
             >
-              Dashboard
+              {shell.dashboard}
             </Link>
           )}
         </nav>
@@ -250,7 +252,7 @@ export function SiteNavBar(props: {
             <FoundingMemberBadge size="sm" compact className="hidden lg:inline-flex" />
           )}
 
-          <GuestLandingLanguageToggle className="hidden sm:inline-flex" />
+          <UiLanguageToggle />
 
           <ThemeToggleButton />
 
@@ -263,7 +265,7 @@ export function SiteNavBar(props: {
                 aria-label="Account menu"
               >
                 <User className="h-4 w-4" />
-                <span className="hidden sm:inline">Account</span>
+                <span className="hidden sm:inline">{shell.account}</span>
                 <ChevronDown className="hidden h-3.5 w-3.5 sm:block" />
               </button>
               {menuOpen && (
@@ -276,7 +278,7 @@ export function SiteNavBar(props: {
                         onClick={() => setMenuOpen(false)}
                       >
                         <User className="h-4 w-4 text-muted-foreground" />
-                        Profile settings
+                        {shell.profileSettings}
                       </Link>
                       <Link
                         href="/pricing"
@@ -284,7 +286,7 @@ export function SiteNavBar(props: {
                         onClick={() => setMenuOpen(false)}
                       >
                         <Sparkles className="h-4 w-4 text-muted-foreground" />
-                        Subscription plans
+                        {shell.subscriptionPlans}
                       </Link>
                     </>
                   )}
@@ -321,7 +323,7 @@ export function SiteNavBar(props: {
                     }}
                   >
                     <LogOut className="h-4 w-4 text-muted-foreground" />
-                    Log out
+                    {shell.logOut}
                   </button>
                 </div>
               )}
@@ -330,11 +332,11 @@ export function SiteNavBar(props: {
             <>
               <Link href="/login" className="hidden sm:block">
                 <Button variant="ghost" size="sm">
-                  Login
+                  {shell.login}
                 </Button>
               </Link>
               <Link href="/register" className="hidden sm:block">
-                <Button size="sm">Get Started</Button>
+                <Button size="sm">{shell.getStarted}</Button>
               </Link>
             </>
           )}
@@ -355,6 +357,7 @@ export function SiteNavBar(props: {
             journeyLabel={journeyLabel}
             navProgressBarStyle={navProgressBarStyle}
             streak={streak}
+            shell={shell}
             trigger={
               <Button
                 type="button"

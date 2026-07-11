@@ -21,7 +21,6 @@ import {
 } from "@/src/components/home/studentJourneyHeroConfig";
 import { getStudentDisplayName } from "@/src/lib/student-display-name";
 import { countryCodeToLabel } from "@/src/lib/countryCodes";
-import { ProfileSearchLeaderboard } from "@/src/components/home/ProfileSearchLeaderboard";
 import {
   journeyProgressBarStyle,
   resolveJourneyProgress,
@@ -406,10 +405,6 @@ function BandHero({
             </Link>
           </div>
         ) : null}
-
-        <div className="mt-5 w-full max-w-2xl px-2 pb-6 sm:mt-6">
-          <ProfileSearchLeaderboard compact />
-        </div>
       </div>
     </section>
   );

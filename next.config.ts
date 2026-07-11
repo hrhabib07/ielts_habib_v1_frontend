@@ -14,17 +14,18 @@ function resolveUpstreamApiBase(): string {
   return PRODUCTION_API;
 }
 
+const apiBase = resolveUpstreamApiBase();
+const apiOrigin = apiBase.replace(/\/api\/?$/, "");
+
 const nextConfig: NextConfig = {
-  /** Local dev only: proxy /api/backend → backend on :5050. Production uses direct Railway + CORS. */
+  /**
+   * Same-origin proxy for browser API calls in all environments.
+   * Avoids cross-origin CORS breakage between Vercel and Railway after login.
+   */
   async rewrites() {
-    if (process.env.NODE_ENV !== "development") {
-      return { beforeFiles: [] };
-    }
-    const apiBase = resolveUpstreamApiBase();
-    const origin = apiBase.replace(/\/api\/?$/, "");
     return {
       beforeFiles: [
-        { source: "/api/backend/health", destination: `${origin}/health` },
+        { source: "/api/backend/health", destination: `${apiOrigin}/health` },
         { source: "/api/backend/:path*", destination: `${apiBase}/:path*` },
       ],
     };

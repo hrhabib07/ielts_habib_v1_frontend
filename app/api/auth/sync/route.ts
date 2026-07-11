@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyJwtToken } from "@/src/lib/jwt-verify";
-
-const TOKEN_COOKIE = "ielts_habib_token";
+import {
+  AUTH_TOKEN_COOKIE,
+  authCookieBaseOptions,
+  cookieMaxAgeFromJwt,
+} from "@/src/lib/auth-cookie";
 
 /**
  * POST /api/auth/sync
- * Called by the client after login/verify-otp with the JWT.
- * Sets an httpOnly cookie so the Next.js server (getCurrentUser, middleware) always sees the session.
+ * Client sends JWT after login; Next sets httpOnly cookie for RSC + middleware.
  */
 export async function POST(request: NextRequest) {
   let body: { token?: string };
@@ -23,18 +25,19 @@ export async function POST(request: NextRequest) {
 
   const verified = await verifyJwtToken(token);
   if (!verified) {
-    return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+    return NextResponse.json(
+      {
+        error: "Invalid or expired token",
+        hint: "Ensure JWT_SECRET on Vercel matches Railway exactly.",
+      },
+      { status: 401 },
+    );
   }
 
-  const res = NextResponse.json({ ok: true });
-  const isProd = process.env.NODE_ENV === "production";
-
-  res.cookies.set(TOKEN_COOKIE, token, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: isProd,
-    maxAge: 60 * 60 * 24 * 30, // 30 days; JWT exp is still enforced by getCurrentUser
+  const res = NextResponse.json({ ok: true, role: verified.role });
+  res.cookies.set(AUTH_TOKEN_COOKIE, token, {
+    ...authCookieBaseOptions(),
+    maxAge: cookieMaxAgeFromJwt(token),
   });
 
   return res;

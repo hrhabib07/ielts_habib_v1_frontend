@@ -7,6 +7,7 @@ import {
   type GuestLandingCopy,
   type GuestLandingLocale,
 } from "@/src/hooks/useGuestLandingLocaleState";
+import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 
 interface GuestLandingLocaleContextValue {
   locale: GuestLandingLocale;
@@ -33,9 +34,9 @@ export function useGuestLandingLocale() {
   return ctx;
 }
 
-/** Compact EN/BN toggle — hidden; Bangladesh audience uses Bangla only. */
-export function GuestLandingLanguageToggle(_props: { className?: string }) {
-  return null;
+/** @deprecated Use UiLanguageToggle from @/src/components/shared/UiLanguageToggle */
+export function GuestLandingLanguageToggle(props: { className?: string }) {
+  return <UiLanguageToggle {...props} />;
 }
 
 export const guestGlassCardClass =

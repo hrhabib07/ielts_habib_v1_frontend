@@ -9,14 +9,11 @@ import {
   useGuestLandingLocale,
 } from "@/src/components/home/guest/GuestLandingLocale";
 import { GuestLandingVideo } from "@/src/components/home/guest/GuestLandingVideo";
-import { LandingPathMockup } from "@/src/components/home/guest/LandingPathMockup";
+import { GuestCampShowcase } from "@/src/components/home/guest/GuestCampShowcase";
 import { LevelPathVisual } from "@/src/components/home/guest/GuestHowItWorksVisuals";
 import type { GuestHowItWorksPillarIcon, GuestHowItWorksSkillIcon } from "@/src/lib/guest-how-it-works-types";
 import {
   GUEST_EASE,
-  guestFadeUpViewport,
-  guestStaggerContainer,
-  guestStaggerItem,
 } from "@/src/components/home/guest/guest-landing-motion";
 import { cn } from "@/lib/utils";
 
@@ -74,23 +71,27 @@ export function GuestHowGamlishWorks() {
           />
         </motion.div>
 
-        {/* Three pillars. icon strip */}
-        <motion.div
-          initial={reduceMotion ? false : "hidden"}
-          whileInView="visible"
-          viewport={guestFadeUpViewport}
-          variants={guestStaggerContainer}
-        >
+        <GuestCampShowcase />
+
+        {/* Three pillars */}
+        <div>
           <p className="text-center text-sm font-medium text-muted-foreground sm:text-base">
             {content.pillarsTitle}
           </p>
           <ul className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
-            {content.examPillars.map((pillar) => {
+            {content.examPillars.map((pillar, i) => {
               const Icon = PILLAR_ICONS[pillar.icon];
               return (
                 <motion.li
                   key={pillar.title}
-                  variants={guestStaggerItem}
+                  initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{
+                    duration: 0.45,
+                    delay: reduceMotion ? 0 : i * 0.08,
+                    ease: GUEST_EASE,
+                  }}
                   className={cn(
                     guestGlassCardClass,
                     "group flex flex-col items-center px-3 py-5 text-center transition-transform duration-300 hover:-translate-y-1 sm:py-6",
@@ -106,54 +107,51 @@ export function GuestHowGamlishWorks() {
               );
             })}
           </ul>
-        </motion.div>
+        </div>
 
-        {/* 21 levels. visual */}
+        {/* 21 missions. path visual only (camp map lives in hero) */}
         <motion.div
-          className="grid items-center gap-8 lg:grid-cols-2 lg:gap-10"
+          className="mx-auto max-w-xl text-center"
           initial={reduceMotion ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.65, ease: GUEST_EASE }}
         >
-          <div className="text-center lg:text-left">
-            <span className="guest-hiw-badge inline-flex rounded-full border border-accent/25 bg-accent/10 px-3.5 py-1 text-[11px] font-bold uppercase tracking-wider text-accent">
-              {content.levelsBadge}
-            </span>
-            <h2 className="mt-4 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-              {content.levelsTitle}
-            </h2>
-            <p className="mt-3 text-muted-foreground sm:text-lg">{content.levelsLine}</p>
-            <div className="mt-6 hidden lg:block">
-              <LevelPathVisual />
-            </div>
-          </div>
-          <div className="relative">
+          <span className="guest-hiw-badge inline-flex rounded-full border border-accent/25 bg-accent/10 px-3.5 py-1 text-[11px] font-bold uppercase tracking-wider text-accent">
+            {content.levelsBadge}
+          </span>
+          <h2 className="mt-4 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            {content.levelsTitle}
+          </h2>
+          <p className="mt-3 text-muted-foreground sm:text-lg">{content.levelsLine}</p>
+          <div className="relative mt-8">
             <div
               className="pointer-events-none absolute -inset-6 rounded-3xl bg-accent/10 blur-3xl"
               aria-hidden
             />
-            <LandingPathMockup className="relative" compact />
+            <LevelPathVisual className="relative mx-auto" />
           </div>
         </motion.div>
 
-        {/* Skills. compact row */}
-        <motion.div
-          initial={reduceMotion ? false : "hidden"}
-          whileInView="visible"
-          viewport={guestFadeUpViewport}
-          variants={guestStaggerContainer}
-        >
+        {/* Skills */}
+        <div>
           <h2 className="text-center text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             {content.skillsTitle}
           </h2>
           <ul className="mt-6 flex flex-wrap justify-center gap-2 sm:gap-3">
-            {content.skills.map((skill) => {
+            {content.skills.map((skill, i) => {
               const SkillIcon = SKILL_ICONS[skill.icon];
               return (
                 <motion.li
                   key={skill.label}
-                  variants={guestStaggerItem}
+                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: reduceMotion ? 0 : i * 0.05,
+                    ease: GUEST_EASE,
+                  }}
                   className="group inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/80 px-3.5 py-2 shadow-sm backdrop-blur-sm transition-colors hover:border-accent/25 hover:bg-accent/5 sm:px-4 sm:py-2.5"
                 >
                   <SkillIcon
@@ -166,7 +164,7 @@ export function GuestHowGamlishWorks() {
               );
             })}
           </ul>
-        </motion.div>
+        </div>
 
         {/* CTA */}
         <motion.div

@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getMySquadDetail } from "@/src/lib/api/squad";
-import { SQUAD_UI } from "@/src/lib/squad-ui-copy";
+import { useSquadUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { SquadDetailView } from "@/src/components/squad/SquadDetailView";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 
 export function SquadHomeClient() {
+  const SQUAD_UI = useSquadUiCopy();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [squad, setSquad] = useState<Awaited<ReturnType<typeof getMySquadDetail>>>(null);
@@ -48,7 +49,7 @@ export function SquadHomeClient() {
   if (!squad) {
     return (
       <div className="mx-auto max-w-lg px-4 py-12 text-center font-bengali sm:py-16">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 text-primary">
           <Users className="h-8 w-8" />
         </div>
         <h1 className="text-2xl font-black text-foreground">{SQUAD_UI.emptyTitle}</h1>

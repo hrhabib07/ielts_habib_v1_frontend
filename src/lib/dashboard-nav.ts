@@ -52,7 +52,7 @@ const READING_ADMIN_NAV: DashboardNavGroup = {
     { label: "Levels", href: "/dashboard/admin/levels", icon: BookOpen },
     { label: "Content", href: "/dashboard/admin/content", icon: FolderKanban },
     { label: "Weakness Tags", href: "/dashboard/admin/weakness-tags", icon: Tag },
-    { label: "Subscription Plans", href: "/dashboard/admin/subscription-plans", icon: Settings },
+    { label: "Pricing & payments", href: "/dashboard/admin/pricing", icon: Settings },
     { label: "Instructor Requests", href: "/admin/instructor-requests", icon: UserCheck },
   ],
 };
@@ -64,7 +64,7 @@ const ENGLISH_ADMIN_NAV: DashboardNavGroup = {
     { label: "Admin Home", href: "/dashboard/admin", icon: LayoutDashboard },
     { label: "Course & Missions", href: "/dashboard/admin/english", icon: Gamepad2 },
     { label: "Students", href: "/dashboard/admin/users", icon: Users },
-    { label: "Subscription Plans", href: "/dashboard/admin/subscription-plans", icon: Settings },
+    { label: "Pricing & payments", href: "/dashboard/admin/pricing", icon: Settings },
     { label: "Instructor Requests", href: "/admin/instructor-requests", icon: UserCheck },
   ],
 };

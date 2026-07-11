@@ -34,7 +34,7 @@ const EMPTY_SESSION: StudentSessionContextValue = {
   profile: null,
   subscription: null,
   isFoundingMember: false,
-  loading: false,
+  loading: true,
   refresh: async () => {},
   invalidate: () => {},
 };
@@ -46,14 +46,20 @@ export function StudentSessionProvider({
   initialUser: CurrentUser | null;
   children: ReactNode;
 }) {
-  const [clientIsStudent, setClientIsStudent] = useState(false);
+  const [clientIsStudent, setClientIsStudent] = useState(() =>
+    initialUser == null ? isActiveStudentSessionClient() : false,
+  );
   const [profileSummary, setProfileSummary] = useState<ProfileSummary | null>(null);
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [subscription, setSubscription] = useState<ActiveSubscription | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const isStudent =
     initialUser?.role === "STUDENT" || (initialUser == null && clientIsStudent);
+
+  const [loading, setLoading] = useState(() =>
+    initialUser?.role === "STUDENT" ||
+    (initialUser == null && isActiveStudentSessionClient()),
+  );
 
   useEffect(() => {
     if (initialUser?.role === "STUDENT") {
@@ -116,6 +122,21 @@ export function StudentSessionProvider({
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    const onAuthChange = () => {
+      if (
+        initialUser?.role === "STUDENT" ||
+        isActiveStudentSessionClient()
+      ) {
+        void refresh();
+      }
+    };
+    window.addEventListener("auth-state-changed", onAuthChange);
+    return () => {
+      window.removeEventListener("auth-state-changed", onAuthChange);
+    };
+  }, [initialUser, refresh]);
 
   const isFoundingMember = useMemo(
     () => isFoundingMemberEligible(subscription),

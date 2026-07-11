@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyJwtToken } from "@/src/lib/jwt-verify";
+import {
+  AUTH_TOKEN_COOKIE,
+  authCookieBaseOptions,
+} from "@/src/lib/auth-cookie";
 
-const TOKEN_COOKIE = "ielts_habib_token";
 const AUTH_ROUTES = [
   "/login",
   "/register",
@@ -23,12 +26,10 @@ function getRedirectPathForRole(role: string): string {
 }
 
 function clearTokenCookie(response: NextResponse): void {
-  response.cookies.set(TOKEN_COOKIE, "", {
-    path: "/",
+  response.cookies.set(AUTH_TOKEN_COOKIE, "", {
+    ...authCookieBaseOptions(),
     maxAge: 0,
     expires: new Date(0),
-    httpOnly: true,
-    sameSite: "lax",
   });
 }
 
@@ -41,7 +42,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get(TOKEN_COOKIE)?.value;
+  const token = request.cookies.get(AUTH_TOKEN_COOKIE)?.value;
   const isAuthRoute = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );

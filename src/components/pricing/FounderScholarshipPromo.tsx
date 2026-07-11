@@ -7,12 +7,14 @@ import {
   FOUNDER_SCHOLARSHIP_PRICE_BDT,
   PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
+import { brandSurfaces } from "@/src/lib/brand-theme";
+import { cn } from "@/lib/utils";
 
 export function FounderScholarshipPromo() {
   return (
-    <div className="rounded-2xl border border-violet-500/25 bg-gradient-to-br from-violet-500/10 via-card to-indigo-500/5 p-5 shadow-sm ring-1 ring-violet-500/10">
+    <div className={cn("rounded-2xl border p-5 shadow-sm ring-1 ring-primary/10", brandSurfaces.premiumBanner)}>
       <div className="flex gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 text-violet-600 dark:text-violet-400">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <Sparkles className="h-5 w-5" />
         </div>
         <div className="min-w-0 space-y-2 text-sm">
@@ -28,7 +30,7 @@ export function FounderScholarshipPromo() {
           </p>
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-violet-600 underline-offset-2 hover:text-violet-500 hover:underline dark:text-violet-400"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline-offset-2 hover:text-primary/80 hover:underline"
           >
             See pricing and pay with bKash
             <ArrowRight className="h-3.5 w-3.5" />

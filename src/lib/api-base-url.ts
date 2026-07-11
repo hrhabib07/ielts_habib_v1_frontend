@@ -1,16 +1,18 @@
 /**
  * Public Railway API (no secrets). Set NEXT_PUBLIC_API_BASE_URL on Vercel Production.
- * Production browsers call Railway directly (CORS via FRONTEND_ORIGIN on the API).
- * Local dev uses /api/backend rewrites → localhost (see next.config.ts).
+ * Browsers always use same-origin /api/backend (Next rewrite → Railway) to avoid CORS.
+ * Server Components / route handlers call Railway directly.
  */
 export const PRODUCTION_API_FALLBACK =
   "https://ieltshabibv1backend-production.up.railway.app/api";
 
-/** Dev-only same-origin proxy (next.config rewrites). */
+/** Same-origin browser proxy (next.config rewrites). */
 export const BROWSER_API_PROXY_BASE = "/api/backend";
 
 export function getServerApiBaseUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  const raw =
+    process.env.API_UPSTREAM_URL?.trim() ||
+    process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
   if (raw) return raw.replace(/\/$/, "");
   if (process.env.NODE_ENV === "development") {
     return "http://localhost:5050/api";
@@ -19,7 +21,7 @@ export function getServerApiBaseUrl(): string {
 }
 
 export function getApiBaseUrl(): string {
-  if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  if (typeof window !== "undefined") {
     return BROWSER_API_PROXY_BASE;
   }
   return getServerApiBaseUrl();

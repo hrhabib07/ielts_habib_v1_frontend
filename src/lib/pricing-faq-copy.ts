@@ -25,27 +25,27 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
     banglaLabel: "বাংলা",
     items: [
       {
-        question: "Is Gamlish just another video course?",
+        question: "Do I get access immediately after payment?",
         answer: {
           kind: "plain",
           text:
-            "No. Gamlish is a gamified English Foundations course. You play through camps and missions with story levels, videos, and evaluations. XP, coins, and camp progress show how far you have come.",
+            "No. This is a pre-order for the August subscription. After we verify your payment, your premium access starts on 1 August for one month. You cannot play paid missions before that date.",
         },
       },
       {
-        question: "What do I get for free?",
+        question: "Why is the price so low right now?",
         answer: {
           kind: "plain",
           text:
-            "Mission 01 is completely free. You can create an account, play the first mission, and see how the Game of English works before you upgrade.",
+            "This is a pre-launch offer. After 1 August, discounts will be limited and the regular price will be much higher. Buying now locks today's special price.",
         },
       },
       {
-        question: "How long does the full course take?",
+        question: "What do I get for free before August?",
         answer: {
           kind: "plain",
           text:
-            "English Foundations has 4 camps and 21 missions. Most students move at their own pace. A dedicated learner can finish a camp in a few weeks, but you keep access for the full subscription period.",
+            "Mission 01 stays free. You can create an account, play the first mission, and learn how Gamlish works while you wait for August access.",
         },
       },
       {
@@ -66,27 +66,27 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
     banglaLabel: "বাংলা",
     items: [
       {
-        question: "Gamlish কি সাধারণ কোনো ভিডিও কোর্স?",
+        question: "পেমেন্টের পর কি সাথে সাথে অ্যাক্সেস পাব?",
         answer: {
           kind: "plain",
           text:
-            "না। Gamlish একটি গ্যামিফাইড English Foundations কোর্স। এখানে ক্যাম্প ও মিশনের মাধ্যমে স্টোরি, ভিডিও ও ইভ্যালুয়েশন লেভেল পার করতে হয়। XP, কয়েন ও ক্যাম্প প্রোগ্রেস দেখায় আপনি কতদূর এগিয়েছেন।",
+            "না। এটি আগস্ট সাবস্ক্রিপশনের প্রি-অর্ডার। পেমেন্ট ভেরিফাই হওয়ার পর ১ আগস্ট থেকে এক মাসের প্রিমিয়াম অ্যাক্সেস শুরু হবে। তার আগে পেইড মিশন খেলা যাবে না।",
         },
       },
       {
-        question: "ফ্রিতে কী পাব?",
+        question: "এখন মূল্য এত কম কেন?",
         answer: {
           kind: "plain",
           text:
-            "Mission 01 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলে Game of English কীভাবে কাজ করে দেখতে পারবেন, আপগ্রেডের আগেই।",
+            "এটি লঞ্চের আগের বিশেষ অফার। ১ আগস্টের পর ছাড় সীমিত হবে এবং রেগুলার মূল্য অনেক বেড়ে যাবে। এখন কিনলে আজকের বিশেষ মূল্য লক হয়ে যায়।",
         },
       },
       {
-        question: "পুরো কোর্স শেষ করতে কতদিন লাগে?",
+        question: "আগস্টের আগে ফ্রিতে কী পাব?",
         answer: {
           kind: "plain",
           text:
-            "English Foundations-এ ৪টি ক্যাম্প ও ২১টি মিশন আছে। নিজের গতিতে এগোবেন। নিয়মিত খেললে একটা ক্যাম্প কয়েক সপ্তাহে শেষ করা যায়; সাবস্ক্রিপশনের পুরো সময় অ্যাক্সেস থাকবে।",
+            "Mission 01 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলতে পারবেন, আর আগস্ট অ্যাক্সেসের জন্য অপেক্ষা করতে করতে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
         },
       },
       {

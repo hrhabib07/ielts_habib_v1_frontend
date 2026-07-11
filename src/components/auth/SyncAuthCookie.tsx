@@ -2,7 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { clearAuth, getDecodedTokenClient, getTokenFromClient } from "@/src/lib/auth";
+import {
+  clearAuth,
+  getDecodedTokenClient,
+  getTokenFromClient,
+  hasUsableClientToken,
+  hydrateAccessTokenFromCookie,
+  syncAuthCookie,
+} from "@/src/lib/auth";
 import type { CurrentUser } from "@/src/lib/auth-server";
 
 function isClientTokenUsable(): boolean {
@@ -12,33 +19,58 @@ function isClientTokenUsable(): boolean {
 }
 
 /**
- * If the server didn't see a user but the client has a token (e.g. old session without httpOnly cookie),
- * sync the token to the server cookie and refresh so layout gets initialUser.
+ * Keeps localStorage Bearer and httpOnly cookie in sync after login / tab return.
+ * 1) Client token, no server user → sync cookie + refresh
+ * 2) Server user, no client token → hydrate Bearer from cookie
+ * 3) Expired client token → clear both stores
  */
 export function SyncAuthCookie({ initialUser }: { initialUser: CurrentUser | null }) {
   const router = useRouter();
-  const synced = useRef(false);
+  const ran = useRef(false);
 
   useEffect(() => {
-    if (initialUser != null || synced.current) return;
-    const token = getTokenFromClient();
-    if (!token) return;
+    if (ran.current) return;
+    ran.current = true;
 
-    if (!isClientTokenUsable()) {
-      clearAuth();
-      void fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
-      return;
+    let cancelled = false;
+
+    async function alignSession() {
+      const clientToken = getTokenFromClient();
+
+      if (clientToken && !isClientTokenUsable()) {
+        clearAuth();
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "same-origin",
+        }).catch(() => undefined);
+        return;
+      }
+
+      if (initialUser == null && hasUsableClientToken() && clientToken) {
+        const ok = await syncAuthCookie(clientToken);
+        if (!cancelled && ok) {
+          router.refresh();
+        }
+        return;
+      }
+
+      if (initialUser != null && !hasUsableClientToken()) {
+        const token = await hydrateAccessTokenFromCookie();
+        if (!cancelled && !token) {
+          // Server thought we were logged in but cookie is invalid
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "same-origin",
+          }).catch(() => undefined);
+          router.refresh();
+        }
+      }
     }
 
-    synced.current = true;
-    fetch("/api/auth/sync", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-      credentials: "same-origin",
-    }).then(() => {
-      router.refresh();
-    });
+    void alignSession();
+    return () => {
+      cancelled = true;
+    };
   }, [initialUser, router]);
 
   return null;

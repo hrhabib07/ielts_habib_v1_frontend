@@ -27,7 +27,7 @@ export async function fetchStudentProfileServer(
     if (res.status === 401 || res.status === 403) {
       return { status: "ok", profile: null };
     }
-    if (!res.ok) return { status: "ok", profile: null };
+    if (!res.ok) return { status: "unavailable" };
 
     const json = (await res.json()) as {
       success?: boolean;

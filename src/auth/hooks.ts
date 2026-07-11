@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { login, register, verifyOtp } from "./api";
-import { setAccessToken } from "../lib/auth";
+import { setAccessToken, syncAuthCookie } from "../lib/auth";
 
 export function useLogin() {
   const [loading, setLoading] = useState(false);
@@ -17,12 +17,13 @@ export function useLogin() {
 
       setAccessToken(token);
 
-      await fetch("/api/auth/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-        credentials: "same-origin",
-      });
+      const synced = await syncAuthCookie(token);
+      if (!synced) {
+        setError(
+          "Signed in, but session cookie could not be saved. Check that JWT_SECRET on Vercel matches Railway, then try again.",
+        );
+        return;
+      }
 
       if (role === "ADMIN") {
         window.location.href = "/dashboard/admin";
@@ -87,9 +88,15 @@ export function useRegister() {
       await register({ email });
       window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
     } catch (err: unknown) {
-      const ax = err && typeof err === "object" && "response" in err
-        ? (err as { response?: { data?: { message?: string; errorSources?: { message?: string }[] }; status?: number } })
-        : null;
+      const ax =
+        err && typeof err === "object" && "response" in err
+          ? (err as {
+              response?: {
+                data?: { message?: string; errorSources?: { message?: string }[] };
+                status?: number;
+              };
+            })
+          : null;
       const msg =
         ax?.response?.data?.message ??
         ax?.response?.data?.errorSources?.[0]?.message ??
@@ -139,12 +146,13 @@ export function useVerifyOtp() {
 
       if (token) {
         setAccessToken(token);
-        await fetch("/api/auth/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
-          credentials: "same-origin",
-        });
+        const synced = await syncAuthCookie(token);
+        if (!synced) {
+          setError(
+            "Account created, but session cookie could not be saved. Check JWT_SECRET on Vercel matches Railway, then sign in.",
+          );
+          return;
+        }
       }
 
       if (role === "ADMIN") {
@@ -157,7 +165,8 @@ export function useVerifyOtp() {
     } catch (err: unknown) {
       const msg =
         err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          ? (err as { response?: { data?: { message?: string } } }).response?.data
+              ?.message
           : null;
       setError(msg ?? "Invalid or expired OTP. Please try again.");
     } finally {

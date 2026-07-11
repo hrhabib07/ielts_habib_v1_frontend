@@ -59,11 +59,11 @@ function WordChip({
         "rounded-xl border-2 px-4 py-2.5 text-sm font-semibold shadow-sm transition-all",
         "cursor-grab select-none touch-manipulation active:cursor-grabbing",
         zone === "bank" &&
-          "border-slate-200 bg-white text-slate-800 hover:border-indigo-300 hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-indigo-500 dark:hover:bg-indigo-950/40",
+          "border-border bg-background text-foreground hover:border-primary/40 hover:bg-primary/5 dark:border-border dark:bg-card dark:text-foreground dark:hover:border-primary/50 dark:hover:bg-primary/10",
         zone === "answer" &&
-          "border-indigo-300 bg-indigo-50 text-indigo-950 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-100",
-        lockedCorrect && "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40",
-        lockedWrong && "border-red-500 bg-red-50 dark:bg-red-950/40",
+          "border-primary/40 bg-primary/5 text-primary dark:border-primary/50 dark:bg-primary/10 dark:text-primary-foreground",
+        lockedCorrect && "border-primary bg-primary/5 dark:bg-primary/10",
+        lockedWrong && "border-destructive bg-destructive/5 dark:bg-destructive/10",
         isDragging && "scale-95 opacity-60",
         disabled && "cursor-default opacity-70",
       )}
@@ -174,10 +174,10 @@ export function RearrangeWordTiles({
         className={cn(
           "min-h-[88px] rounded-2xl border-2 border-dashed px-3 py-4 transition-colors",
           dropTarget === "answer"
-            ? "border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/30"
-            : "border-indigo-200 bg-indigo-50/40 dark:border-indigo-800 dark:bg-indigo-950/20",
-          locked && isCorrect && "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20",
-          locked && isCorrect === false && "border-amber-500 bg-amber-50/40 dark:bg-amber-950/20",
+            ? "border-primary bg-primary/5 dark:bg-primary/10"
+            : "border-primary/20 bg-primary/[0.03] dark:border-primary/30 dark:bg-primary/5",
+          locked && isCorrect && "border-primary bg-primary/5 dark:bg-primary/10",
+          locked && isCorrect === false && "border-destructive bg-destructive/5 dark:bg-destructive/10",
         )}
         onDragOver={(event) => {
           event.preventDefault();

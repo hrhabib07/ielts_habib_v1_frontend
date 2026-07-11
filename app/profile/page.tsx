@@ -44,9 +44,8 @@ import { formatSubscriptionDuration } from "@/src/lib/formatSubscriptionDuration
 import { isFoundingMemberEligible } from "@/src/lib/foundingMember";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { ENABLE_READING, PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
-import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
-import { PROFILE_PAGE_COPY } from "@/src/lib/profile-page-copy";
-import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
+import { useProfilePageCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 
 function formatSubscriptionDate(iso: string): string {
   try {
@@ -74,8 +73,8 @@ function subscriptionStatusLabel(status: ActiveSubscription["status"]): string {
 }
 
 export default function ProfilePage() {
-  const { locale } = useGuestLandingLocaleState();
-  const copy = PROFILE_PAGE_COPY[locale];
+  const { locale } = useUiLocale();
+  const copy = useProfilePageCopy();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -213,21 +212,18 @@ export default function ProfilePage() {
     <div className="relative min-h-[calc(100dvh-4rem)] overflow-x-hidden">
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-primary/8 blur-3xl" />
-        <div className="absolute -right-24 top-32 h-80 w-80 rounded-full bg-violet-500/8 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-500/6 blur-3xl" />
+        <div className="absolute -right-24 top-32 h-80 w-80 rounded-full bg-primary/6 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-primary/4 blur-3xl" />
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:space-y-10 md:px-6 md:py-10">
-        <div className="flex justify-end sm:hidden">
-          <GuestLandingLanguageToggle />
-        </div>
         <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-lg shadow-black/[0.03] dark:shadow-black/20">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-emerald-500/[0.05]" aria-hidden />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-primary/[0.04]" aria-hidden />
           <div className="relative p-6 md:p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-start gap-5">
                 <div className="relative shrink-0">
-                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/40 to-emerald-500/30 blur-sm" aria-hidden />
+                  <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/40 to-primary/25 blur-sm" aria-hidden />
                   <div
                     className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-2xl font-bold text-primary-foreground shadow-lg"
                     aria-hidden
@@ -259,11 +255,11 @@ export default function ProfilePage() {
                   <div className="mt-4 flex flex-wrap gap-2">
                     {!ENABLE_READING ? (
                       <>
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/25 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                           <Gamepad2 className="h-3 w-3" />
                           {copy.englishPlayer}
                         </span>
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-xs font-semibold text-primary">
                           {copy.mission01Free}
                         </span>
                       </>
@@ -278,7 +274,7 @@ export default function ProfilePage() {
                       Goal: {countryCodeToLabel(dreamCountry) ?? dreamCountry}
                     </span>
                     {readingTarget != null && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-xs font-semibold text-primary">
                         Target · Band {readingTarget}
                       </span>
                     )}
@@ -330,14 +326,14 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <Card className="overflow-hidden border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.07] via-card to-card shadow-sm transition-shadow hover:shadow-md">
+        <Card className="overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-card shadow-sm transition-shadow hover:shadow-md">
           <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between md:p-7">
             <div className="flex gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <MessageCircle className="h-6 w-6" />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-800 dark:text-emerald-400">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
                   {copy.supportTitle}
                 </p>
                 <p className="mt-1 font-semibold text-foreground">{copy.supportHeadline}</p>
@@ -349,7 +345,7 @@ export default function ProfilePage() {
             <Button
               asChild
               size="lg"
-              className="w-full shrink-0 bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
+              className="w-full shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
             >
               <a href={SUPPORT_WHATSAPP_HREF} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="h-4 w-4" />
@@ -409,7 +405,7 @@ export default function ProfilePage() {
                     {subscription.planId?.name?.replace(/\(\s*1\s*month\s*\)/gi, "(6 Months)") ??
                       (ENABLE_READING ? "Gamlish Reading Mastery (6 Months)" : "English Foundations")}
                   </p>
-                  <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
                     {subscriptionStatusLabel(subscription.status)}
                   </span>
                 </div>
@@ -473,7 +469,7 @@ export default function ProfilePage() {
           </div>
 
           {!editingPersonalDetails && success ? (
-            <p className="mb-4 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+            <p className="mb-4 text-sm font-medium text-primary">
               {success}
             </p>
           ) : null}

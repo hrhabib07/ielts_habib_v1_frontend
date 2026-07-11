@@ -13,7 +13,8 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SQUAD_BADGE_LABELS, SQUAD_UI } from "@/src/lib/squad-ui-copy";
+import { SQUAD_BADGE_LABELS } from "@/src/lib/squad-ui-copy";
+import { useSquadUiCopy } from "@/src/hooks/useLocalizedCopy";
 import type { SquadDetail } from "@/src/lib/api/squad";
 import {
   deleteSquad,
@@ -21,6 +22,7 @@ import {
   removeSquadMember,
   transferSquadLeadership,
 } from "@/src/lib/api/squad";
+import { brandSurfaces } from "@/src/lib/brand-theme";
 import { cn } from "@/lib/utils";
 
 function StatCard({
@@ -34,7 +36,7 @@ function StatCard({
 }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card/80 p-3 text-center shadow-sm">
-      <div className="mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+      <div className="mx-auto mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
         {icon}
       </div>
       <p className="text-lg font-black tabular-nums text-foreground">{value}</p>
@@ -54,14 +56,15 @@ function MemberCard({
   onRemove?: () => void;
   onTransfer?: () => void;
 }) {
+  const SQUAD_UI = useSquadUiCopy();
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-border/60 bg-card/70 p-3">
       <div
         className={cn(
           "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white",
           member.isWeeklyChampion
-            ? "bg-gradient-to-br from-amber-400 to-orange-500"
-            : "bg-gradient-to-br from-indigo-500 to-violet-600",
+            ? "bg-primary"
+            : "bg-primary/80",
         )}
       >
         {member.avatarLetter}
@@ -70,12 +73,12 @@ function MemberCard({
         <div className="flex flex-wrap items-center gap-1.5">
           <p className="font-semibold text-foreground">{member.displayName}</p>
           {member.isLeader ? (
-            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+            <span className="rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
               Leader
             </span>
           ) : null}
           {member.isWeeklyChampion ? (
-            <span className="text-[10px] font-bold text-amber-600">{SQUAD_UI.weeklyChampion}</span>
+            <span className="text-[10px] font-bold text-primary">{SQUAD_UI.weeklyChampion}</span>
           ) : null}
         </div>
         <p className="mt-0.5 text-xs text-muted-foreground">
@@ -108,6 +111,7 @@ export function SquadDetailView({
   showManage?: boolean;
   onRefresh?: () => void;
 }) {
+  const SQUAD_UI = useSquadUiCopy();
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -145,7 +149,7 @@ export function SquadDetailView({
 
   return (
     <div className="space-y-6 font-bengali">
-      <div className="overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-br from-indigo-600/90 to-violet-700/90 p-5 text-white shadow-lg">
+      <div className={cn("overflow-hidden rounded-3xl border p-5 shadow-lg", brandSurfaces.midnightCard)}>
         <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/75">{SQUAD_UI.title}</p>
         <h1 className="mt-1 text-2xl font-black">{squad.name}</h1>
         <div className="mt-3 flex flex-wrap gap-2 text-sm">
@@ -182,7 +186,7 @@ export function SquadDetailView({
         <StatCard label={SQUAD_UI.lifetimeXp} value={squad.lifetimeXp} icon={<Trophy className="h-4 w-4" />} />
         <StatCard
           label={SQUAD_UI.weeklyRank}
-          value={squad.weeklyRank ?? "—"}
+          value={squad.weeklyRank ?? "–"}
           icon={<Crown className="h-4 w-4" />}
         />
         <StatCard label={SQUAD_UI.members} value={squad.memberCount} icon={<Users className="h-4 w-4" />} />
@@ -191,14 +195,14 @@ export function SquadDetailView({
       {squad.badges.length > 0 ? (
         <section className="rounded-2xl border border-border/60 bg-card/60 p-4">
           <h2 className="mb-3 flex items-center gap-2 text-sm font-bold">
-            <Shield className="h-4 w-4 text-indigo-500" />
+            <Shield className="h-4 w-4 text-primary" />
             {SQUAD_UI.badges}
           </h2>
           <div className="flex flex-wrap gap-2">
             {squad.badges.map((id) => (
               <span
                 key={id}
-                className="rounded-full border border-indigo-300/40 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300"
+                className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
               >
                 {SQUAD_BADGE_LABELS[id] ?? id}
               </span>
@@ -240,7 +244,7 @@ export function SquadDetailView({
 
       <section className="rounded-2xl border border-border/60 bg-card/60 p-4">
         <h2 className="mb-3 flex items-center gap-2 text-sm font-bold">
-          <Sparkles className="h-4 w-4 text-violet-500" />
+          <Sparkles className="h-4 w-4 text-primary" />
           {SQUAD_UI.activity}
         </h2>
         {squad.activities.length === 0 ? (

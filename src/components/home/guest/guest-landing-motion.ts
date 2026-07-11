@@ -7,8 +7,7 @@ export const guestFadeUp = {
 
 export const guestFadeUpViewport = {
   once: true,
-  margin: "-8% 0px -6% 0px" as const,
-  amount: 0.35 as const,
+  amount: 0.2 as const,
 };
 
 export const guestStaggerContainer = {

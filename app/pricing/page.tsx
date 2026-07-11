@@ -1,19 +1,8 @@
 import { getCurrentUser } from "@/src/lib/auth-server";
 import { PricingContent } from "./PricingContent";
 
-export default async function PricingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ checkout?: string }>;
-}) {
+export default async function PricingPage() {
   const initialUser = await getCurrentUser();
-  const params = await searchParams;
-  const autoOpenCheckout = params.checkout === "1";
 
-  return (
-    <PricingContent
-      initialUser={initialUser}
-      autoOpenCheckout={autoOpenCheckout}
-    />
-  );
+  return <PricingContent initialUser={initialUser} />;
 }

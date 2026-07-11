@@ -4,6 +4,7 @@ import "./globals.css";
 import { getAppOrigin } from "@/src/lib/api-base-url";
 import { GAMLISH_BRAND } from "@/src/lib/gamlish-brand";
 import { ThemeProvider } from "@/src/components/shared/ThemeProvider";
+import { UiLocaleProvider } from "@/src/contexts/UiLocaleContext";
 import { AppShellFallback } from "@/src/components/shared/AppShellFallback";
 import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
 
@@ -12,7 +13,7 @@ import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
  * which fails in offline CI and restricted networks.
  */
 const RUNTIME_FONT_STYLESHEET =
-  "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap";
+  "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppOrigin()),
@@ -46,9 +47,11 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <ThemeProvider>
-          <Suspense fallback={<AppShellFallback />}>
-            <AppShellWithAuth>{children}</AppShellWithAuth>
-          </Suspense>
+          <UiLocaleProvider>
+            <Suspense fallback={<AppShellFallback />}>
+              <AppShellWithAuth>{children}</AppShellWithAuth>
+            </Suspense>
+          </UiLocaleProvider>
         </ThemeProvider>
       </body>
     </html>

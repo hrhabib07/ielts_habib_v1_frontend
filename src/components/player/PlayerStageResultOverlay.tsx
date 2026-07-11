@@ -3,7 +3,7 @@
 import { CheckCircle2, Coins, RotateCcw, Sparkles, Star, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PLAYER_UI } from "@/src/lib/player-ui-copy";
+import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 
 export interface PlayerStageResult {
   kind: "success" | "fail";
@@ -30,6 +30,7 @@ export function PlayerStageResultOverlay({
   onContinue,
   onRetry,
 }: PlayerStageResultOverlayProps) {
+  const PLAYER_UI = usePlayerUiCopy();
   const passed = result.kind === "success";
 
   return (
@@ -37,7 +38,7 @@ export function PlayerStageResultOverlay({
       <div
         className={cn(
           "w-full max-w-md animate-in fade-in slide-in-from-bottom-4 rounded-3xl border bg-card p-6 shadow-2xl duration-300 sm:slide-in-from-bottom-0",
-          passed ? "border-emerald-500/30" : "border-amber-500/30",
+          passed ? "border-primary/30" : "border-destructive/30",
         )}
         role="dialog"
         aria-labelledby="stage-result-title"
@@ -47,7 +48,7 @@ export function PlayerStageResultOverlay({
           <div
             className={cn(
               "mb-4 flex h-16 w-16 items-center justify-center rounded-full",
-              passed ? "bg-emerald-500/15 text-emerald-600" : "bg-amber-500/15 text-amber-600",
+              passed ? "bg-primary/15 text-primary" : "bg-destructive/15 text-destructive",
             )}
           >
             {passed ? <CheckCircle2 className="h-9 w-9" /> : <XCircle className="h-9 w-9" />}
@@ -71,7 +72,7 @@ export function PlayerStageResultOverlay({
                 <div
                   className={cn(
                     "h-full transition-all duration-500",
-                    passed ? "bg-emerald-500" : "bg-amber-500",
+                    passed ? "bg-primary" : "bg-destructive/70",
                   )}
                   style={{
                     width: `${result.scorePercent ?? Math.round((result.correctCount / result.totalCount) * 100)}%`,
@@ -84,10 +85,10 @@ export function PlayerStageResultOverlay({
           {passed && (result.xpEarned != null || result.coinsEarned != null) ? (
             <div className="mt-5 flex w-full gap-3">
               {result.xpEarned != null ? (
-                <div className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-indigo-500/20 bg-indigo-500/10 px-3 py-3">
-                  <Sparkles className="h-5 w-5 text-indigo-600" />
+                <div className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-primary/10 px-3 py-3">
+                  <Sparkles className="h-5 w-5 text-primary" />
                   <div className="text-left">
-                    <p className="text-lg font-bold text-indigo-700 dark:text-indigo-300">
+                    <p className="text-lg font-bold text-primary">
                       +{result.xpEarned}
                     </p>
                     <p className="text-xs text-muted-foreground">{PLAYER_UI.xpLabel}</p>
@@ -95,10 +96,10 @@ export function PlayerStageResultOverlay({
                 </div>
               ) : null}
               {result.coinsEarned != null ? (
-                <div className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-3 py-3">
-                  <Coins className="h-5 w-5 text-amber-600" />
+                <div className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-primary/15 bg-primary/8 px-3 py-3">
+                  <Coins className="h-5 w-5 text-primary" />
                   <div className="text-left">
-                    <p className="text-lg font-bold text-amber-800 dark:text-amber-300">
+                    <p className="text-lg font-bold text-primary">
                       +{result.coinsEarned}
                     </p>
                     <p className="text-xs text-muted-foreground">{PLAYER_UI.coinsLabel}</p>
@@ -109,7 +110,7 @@ export function PlayerStageResultOverlay({
           ) : null}
 
           {passed && result.missionComplete ? (
-            <p className="mt-4 flex items-center gap-1.5 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+            <p className="mt-4 flex items-center gap-1.5 text-sm font-medium text-primary">
               <Star className="h-4 w-4 fill-current" />
               {PLAYER_UI.missionCompleteBanner}
             </p>

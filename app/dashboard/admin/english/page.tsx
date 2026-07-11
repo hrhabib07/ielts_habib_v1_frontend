@@ -129,6 +129,18 @@ export default function AdminEnglishContentPage() {
         </Card>
       ) : null}
 
+      <Card className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">M21 writing reviews</h2>
+          <p className="text-sm text-muted-foreground">
+            Review Final Pitch paragraphs and mark students out of 10.
+          </p>
+        </div>
+        <Link href="/dashboard/admin/english/writing-reviews">
+          <Button>Open review queue</Button>
+        </Link>
+      </Card>
+
       <Card className="space-y-4 p-6">
         <h2 className="text-lg font-semibold text-foreground">Course</h2>
         <div className="grid gap-4 sm:grid-cols-2">

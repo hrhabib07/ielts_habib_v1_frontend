@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-
-const TOKEN_COOKIE = "ielts_habib_token";
+import {
+  AUTH_TOKEN_COOKIE,
+  authCookieBaseOptions,
+} from "@/src/lib/auth-cookie";
 
 /**
  * POST /api/auth/logout
- * Clears the httpOnly auth cookie so the server no longer sees the session.
+ * Clears the httpOnly auth cookie (must match set attributes including secure).
  */
 export async function POST() {
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(TOKEN_COOKIE, "", {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
+  res.cookies.set(AUTH_TOKEN_COOKIE, "", {
+    ...authCookieBaseOptions(),
     maxAge: 0,
     expires: new Date(0),
   });

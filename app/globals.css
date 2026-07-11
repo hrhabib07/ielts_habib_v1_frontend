@@ -43,6 +43,9 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-steel: var(--steel);
+  --color-steel-deep: var(--steel-deep);
+  --color-steel-foreground: var(--steel-foreground);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -71,7 +74,7 @@
   --border-muted: #e2e8f0;
   --accent: #1e3a8a;
   --danger: #dc2626;
-  --success: #22c55e;
+  --success: #1e3a8a;
   --background: #ffffff;
   --foreground: #1e293b;
   --card: #ffffff;
@@ -89,11 +92,11 @@
   --border: #e2e8f0;
   --input: #e2e8f0;
   --ring: #1e3a8a;
-  --chart-1: oklch(0.45 0.1 260);
-  --chart-2: oklch(0.42 0.08 250);
-  --chart-3: oklch(0.5 0.1 260);
-  --chart-4: oklch(0.65 0.14 160);
-  --chart-5: oklch(0.7 0.14 85);
+  --chart-1: oklch(0.42 0.09 260);
+  --chart-2: oklch(0.48 0.1 255);
+  --chart-3: oklch(0.54 0.11 250);
+  --chart-4: oklch(0.46 0.09 265);
+  --chart-5: oklch(0.4 0.08 258);
   --sidebar: #f8fafc;
   --sidebar-foreground: #1e293b;
   --sidebar-primary: #1e3a8a;
@@ -103,51 +106,58 @@
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #1e3a8a;
   --band-fill: #1e3a8a;
+  /* Logo steel blue — pale cool blue from the Gamlish mark */
+  --steel: #b4cce8;
+  --steel-deep: #8faed4;
+  --steel-foreground: #0c1929;
   /* Hero liquid: stronger in light mode for contrast on pale surfaces */
   --hero-water-fill-opacity: 0.94;
 }
 
 .dark {
-  /* Gamlish dark — soft slate, low glare */
-  --bg-primary: #1e293b;
-  --bg-secondary: #334155;
+  /* Gamlish dark — midnight navy family only (no sky/cyan accent) */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
-  --border-muted: #475569;
-  --accent: #38bdf8;
+  --border-muted: #334155;
+  --accent: #5b7ec7;
   --danger: #f87171;
-  --success: #4ade80;
-  --background: #1e293b;
+  --success: #6b8fc7;
+  --background: #0f172a;
   --foreground: #e2e8f0;
-  --card: #334155;
+  --card: #1e293b;
   --card-foreground: #e2e8f0;
-  --popover: #334155;
+  --popover: #1e293b;
   --popover-foreground: #e2e8f0;
-  --primary: #7dd3fc;
-  --primary-foreground: #0f172a;
-  --secondary: #334155;
+  --primary: #1e3a8a;
+  --primary-foreground: #f8fafc;
+  --secondary: #1e293b;
   --secondary-foreground: #e2e8f0;
-  --muted: #334155;
+  --muted: #1e293b;
   --muted-foreground: #94a3b8;
-  --accent-foreground: #0f172a;
+  --accent-foreground: #f8fafc;
   --destructive: #f87171;
-  --border: #475569;
-  --input: #475569;
-  --ring: #38bdf8;
-  --chart-1: oklch(0.7 0.12 220);
-  --chart-2: oklch(0.65 0.1 200);
-  --chart-3: oklch(0.6 0.1 260);
-  --chart-4: oklch(0.68 0.14 160);
-  --chart-5: oklch(0.75 0.15 85);
-  --sidebar: #334155;
+  --border: #334155;
+  --input: #334155;
+  --ring: #3b5998;
+  --chart-1: oklch(0.45 0.08 260);
+  --chart-2: oklch(0.5 0.09 255);
+  --chart-3: oklch(0.55 0.1 250);
+  --chart-4: oklch(0.48 0.08 265);
+  --chart-5: oklch(0.42 0.07 258);
+  --sidebar: #1e293b;
   --sidebar-foreground: #e2e8f0;
-  --sidebar-primary: #38bdf8;
-  --sidebar-primary-foreground: #0f172a;
-  --sidebar-accent: #475569;
+  --sidebar-primary: #1e3a8a;
+  --sidebar-primary-foreground: #f8fafc;
+  --sidebar-accent: #334155;
   --sidebar-accent-foreground: #e2e8f0;
-  --sidebar-border: #475569;
-  --sidebar-ring: #38bdf8;
-  --band-fill: #38bdf8;
+  --sidebar-border: #334155;
+  --sidebar-ring: #3b5998;
+  --band-fill: #5b7ec7;
+  --steel: #9ebde0;
+  --steel-deep: #7a9ec4;
+  --steel-foreground: #0c1929;
   --hero-water-fill-opacity: 0.82;
 }
 
@@ -321,7 +331,7 @@
     to top,
     var(--band-fill) 0%,
     color-mix(in srgb, var(--band-fill) 94%, white) calc(max(0%, var(--fill-pct, 0%) - 4%)),
-    color-mix(in srgb, var(--band-fill) 82%, #7dd3fc) calc(var(--fill-pct, 0%) + var(--wave-offset)),
+    color-mix(in srgb, var(--band-fill) 82%, var(--accent-foreground)),
     transparent calc(var(--fill-pct, 0%) + var(--wave-offset))
   );
 }
@@ -495,10 +505,10 @@
 
 @keyframes soft-pulse-dark {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.28);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 28%, transparent);
   }
   50% {
-    box-shadow: 0 0 0 5px rgba(56, 189, 248, 0);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 0%, transparent);
   }
 }
 
@@ -528,7 +538,164 @@
 .camp-mission-pulse {
   animation: camp-mission-glow 2.2s ease-in-out infinite;
   border-radius: 9999px;
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 35%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--steel) 45%, transparent);
+}
+
+/* Premium camp map */
+.camp-map-page {
+  background:
+    radial-gradient(
+      ellipse 90% 50% at 50% -10%,
+      color-mix(in srgb, var(--steel) 18%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--muted) 40%, transparent) 0%,
+      transparent 28%
+    );
+}
+
+.camp-map-hero-glow {
+  background:
+    radial-gradient(
+      ellipse 70% 60% at 50% 0%,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 70%
+    );
+}
+
+.camp-map-title {
+  font-family: "Syne", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.camp-continue-cta {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow:
+    0 12px 32px -12px color-mix(in srgb, var(--accent) 55%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.camp-continue-cta:hover {
+  background: color-mix(in srgb, var(--accent) 92%, black);
+  box-shadow:
+    0 16px 40px -12px color-mix(in srgb, var(--accent) 60%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 22%, transparent);
+  transform: translateY(-1px);
+}
+
+.camp-zone {
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  box-shadow:
+    0 24px 60px -36px rgba(15, 23, 42, 0.35),
+    0 1px 0 color-mix(in srgb, white 40%, transparent);
+  background: var(--card);
+}
+
+.dark .camp-zone {
+  box-shadow:
+    0 24px 60px -36px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 color-mix(in srgb, white 6%, transparent);
+}
+
+.camp-zone-active {
+  border-color: color-mix(in srgb, var(--steel) 45%, var(--border));
+  box-shadow:
+    0 28px 70px -34px color-mix(in srgb, var(--accent) 35%, transparent),
+    0 1px 0 color-mix(in srgb, white 50%, transparent);
+}
+
+.camp-zone-header {
+  background: linear-gradient(
+    145deg,
+    #0f172a 0%,
+    #1e3a8a 55%,
+    #152544 100%
+  );
+}
+
+.camp-zone-header-mesh {
+  background-image:
+    radial-gradient(circle at 12% 20%, rgba(180, 204, 232, 0.18), transparent 42%),
+    radial-gradient(circle at 88% 10%, rgba(248, 250, 252, 0.1), transparent 38%),
+    linear-gradient(
+      120deg,
+      transparent 40%,
+      rgba(180, 204, 232, 0.08) 50%,
+      transparent 60%
+    );
+  background-size: 100% 100%, 100% 100%, 220% 220%;
+  animation: guest-world-mesh-drift 20s ease-in-out infinite;
+}
+
+.camp-zone-badge {
+  background: color-mix(in srgb, var(--steel) 22%, transparent);
+  color: #f8fafc;
+  border: 1px solid rgba(180, 204, 232, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.camp-node {
+  border: 3px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: var(--card);
+  box-shadow:
+    0 10px 24px -12px rgba(15, 23, 42, 0.35),
+    inset 0 1px 0 color-mix(in srgb, white 55%, transparent);
+}
+
+.camp-node-done {
+  border-color: color-mix(in srgb, var(--steel-deep) 70%, transparent);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--steel) 35%, white),
+    color-mix(in srgb, var(--steel) 12%, var(--card))
+  );
+  color: var(--primary);
+}
+
+.camp-node-live {
+  border-color: var(--accent);
+  background: linear-gradient(160deg, var(--accent), color-mix(in srgb, var(--primary) 80%, var(--accent)));
+  color: var(--accent-foreground);
+  box-shadow:
+    0 14px 32px -10px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--steel) 28%, transparent);
+}
+
+.camp-node-ready {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--accent) 8%, var(--card)),
+    var(--card)
+  );
+  color: var(--accent);
+}
+
+.camp-node-locked {
+  border-color: color-mix(in srgb, var(--border) 90%, transparent);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  box-shadow: none;
+}
+
+.camp-node-pay {
+  border-color: color-mix(in srgb, var(--steel-deep) 55%, transparent);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--steel) 22%, var(--card)),
+    var(--card)
+  );
+  color: var(--steel-deep);
+}
+
+.camp-node-inspect {
+  box-shadow:
+    0 10px 24px -12px rgba(15, 23, 42, 0.35),
+    0 0 0 3px color-mix(in srgb, var(--steel) 35%, transparent);
 }
 
 .camp-map-spine {
@@ -610,8 +777,78 @@
   box-shadow: 0 16px 48px -10px color-mix(in oklch, var(--accent) 65%, transparent);
 }
 
+.guest-brand-display {
+  font-family: "Syne", ui-sans-serif, system-ui, sans-serif;
+}
+
+.guest-hero-world {
+  isolation: isolate;
+}
+
+.guest-hero-world-mesh {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(180, 204, 232, 0.14), transparent 42%),
+    radial-gradient(circle at 80% 20%, rgba(248, 250, 252, 0.08), transparent 35%),
+    linear-gradient(
+      125deg,
+      transparent 40%,
+      rgba(180, 204, 232, 0.06) 50%,
+      transparent 60%
+    );
+  background-size: 100% 100%, 100% 100%, 200% 200%;
+  animation: guest-world-mesh-drift 18s ease-in-out infinite;
+}
+
+.guest-float-chip {
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.35);
+}
+
+.guest-camp-art-dots {
+  background-image: radial-gradient(rgba(248, 250, 252, 0.22) 1px, transparent 1px);
+  background-size: 14px 14px;
+  mask-image: linear-gradient(180deg, #000 20%, transparent 85%);
+}
+
+@keyframes guest-world-mesh-drift {
+  0%,
+  100% {
+    background-position: 0% 0%, 0% 0%, 0% 50%;
+  }
+  50% {
+    background-position: 0% 0%, 0% 0%, 100% 50%;
+  }
+}
+
 .guest-bottom-cta {
   animation: guest-bottom-cta-breathe 10s ease-in-out infinite;
+}
+
+.guest-try-win {
+  animation: guest-try-win-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes guest-try-win-pop {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.7;
+  }
+  60% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guest-try-win {
+    animation: none;
+  }
+
+  .guest-hero-world-mesh {
+    animation: none;
+  }
 }
 
 /* Guest how-it-works — editorial typography */
@@ -789,6 +1026,7 @@
   .guest-journey-shimmer,
   .camp-mission-pulse,
   .camp-path-flow,
+  .camp-zone-header-mesh,
   .guest-eyebrow-shimmer::after,
   .guest-bottom-cta {
     animation: none !important;

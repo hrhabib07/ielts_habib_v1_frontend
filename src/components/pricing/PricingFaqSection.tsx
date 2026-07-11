@@ -1,43 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  PRICING_FAQ_COPY,
-  PRICING_FAQ_LOCALE_STORAGE_KEY,
-  type PricingFaqLocale,
-} from "@/src/lib/pricing-faq-copy";
-
-function readStoredLocale(): PricingFaqLocale | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(PRICING_FAQ_LOCALE_STORAGE_KEY);
-    return raw === "bn" || raw === "en" ? raw : null;
-  } catch {
-    return null;
-  }
-}
+import { usePricingFaqCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 
 export function PricingFaqSection() {
-  const [locale, setLocale] = useState<PricingFaqLocale>("en");
+  const copy = usePricingFaqCopy();
+  const { locale } = useUiLocale();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-
-  useEffect(() => {
-    const stored = readStoredLocale();
-    if (stored) setLocale(stored);
-  }, []);
-
-  const persistLocale = useCallback((next: PricingFaqLocale) => {
-    setLocale(next);
-    try {
-      window.localStorage.setItem(PRICING_FAQ_LOCALE_STORAGE_KEY, next);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  const copy = PRICING_FAQ_COPY[locale];
 
   return (
     <section
@@ -46,43 +19,7 @@ export function PricingFaqSection() {
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <h2 className="text-xl font-semibold text-foreground">{copy.sectionTitle}</h2>
-        <div
-          className="flex flex-col gap-2 sm:items-end"
-          role="group"
-          aria-label={copy.languageToggleAria}
-        >
-          <span className="text-[0.65rem] font-medium uppercase tracking-wider text-muted-foreground sm:text-right">
-            {copy.languageToggleHint}
-          </span>
-          <div className="inline-flex rounded-full border border-border/80 bg-muted/40 p-1 shadow-inner backdrop-blur-sm dark:bg-muted/25">
-            <button
-              type="button"
-              onClick={() => persistLocale("en")}
-              className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition-colors",
-                locale === "en"
-                  ? "bg-background text-foreground shadow-sm dark:bg-card"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              aria-pressed={locale === "en"}
-            >
-              {copy.englishLabel}
-            </button>
-            <button
-              type="button"
-              onClick={() => persistLocale("bn")}
-              className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition-colors",
-                locale === "bn"
-                  ? "bg-background text-foreground shadow-sm dark:bg-card"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              aria-pressed={locale === "bn"}
-            >
-              {copy.banglaLabel}
-            </button>
-          </div>
-        </div>
+        <UiLanguageToggle />
       </div>
 
       <div className="divide-y rounded-xl border">

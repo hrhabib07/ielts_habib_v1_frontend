@@ -18,24 +18,24 @@ import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { logout } from "@/src/lib/auth";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import type { UserRole } from "@/src/lib/constants";
-import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
+import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
+import { ENABLE_READING } from "@/src/lib/platform-config";
+import type { SiteShellCopy } from "@/src/lib/site-shell-copy";
 import { cn } from "@/lib/utils";
 
 type NavUser = CurrentUser | { role: UserRole; userId: string } | null;
 
-import { ENABLE_READING } from "@/src/lib/platform-config";
-
-const PUBLIC_LINKS = [{ href: "/pricing", label: "Plans & pricing" }] as const;
+const PUBLIC_LINKS = [{ href: "/pricing", labelKey: "publicPlansPricing" as const }] as const;
 
 const STUDENT_LINKS = ENABLE_READING
   ? ([
-      { href: "/profile/reading", label: "Reading" },
-      { href: "/profile", label: "My profile" },
+      { href: "/profile/reading", labelKey: "reading" as const },
+      { href: "/profile", labelKey: "myProfile" as const },
     ] as const)
   : ([
-      { href: "/player", label: "Play" },
-      { href: "/squad", label: "Squad" },
-      { href: "/profile", label: "My profile" },
+      { href: "/player", labelKey: "play" as const },
+      { href: "/squad", labelKey: "squad" as const },
+      { href: "/profile", labelKey: "myProfile" as const },
     ] as const);
 
 function mobileLinkClass(active: boolean) {
@@ -63,6 +63,7 @@ export function SiteMobileNav(props: {
   journeyLabel: string;
   navProgressBarStyle: { width: string; minWidth?: string };
   streak?: { consecutivePassCount: number; requiredStreak: number } | null;
+  shell: SiteShellCopy;
   trigger: React.ReactNode;
 }) {
   const {
@@ -77,10 +78,10 @@ export function SiteMobileNav(props: {
     progressLoading,
     progressLabel,
     levelsCompletedCount,
-    overallProgressPct,
     journeyLabel,
     navProgressBarStyle,
     streak,
+    shell,
     trigger,
   } = props;
 
@@ -96,7 +97,7 @@ export function SiteMobileNav(props: {
         <SheetTitle className="sr-only">Navigation menu</SheetTitle>
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain px-5 pb-8 pt-14 [-webkit-overflow-scrolling:touch]">
           <div className="mb-5">
-            <GuestLandingLanguageToggle className="w-full max-w-[11rem]" />
+            <UiLanguageToggle />
           </div>
           {isStudent && ENABLE_READING && (
             <div className="mb-6">
@@ -140,7 +141,7 @@ export function SiteMobileNav(props: {
                   onClick={close}
                   className={mobileLinkClass(isNavActive(link.href))}
                 >
-                  {link.label}
+                  {shell[link.labelKey]}
                 </Link>
               ))}
 
@@ -152,7 +153,7 @@ export function SiteMobileNav(props: {
                   onClick={close}
                   className={mobileLinkClass(isNavActive(link.href))}
                 >
-                  {link.label}
+                  {shell[link.labelKey]}
                 </Link>
               ))}
 
@@ -162,7 +163,7 @@ export function SiteMobileNav(props: {
                 onClick={close}
                 className={mobileLinkClass(pathname.startsWith("/dashboard"))}
               >
-                Dashboard
+                {shell.dashboard}
               </Link>
             )}
 
@@ -176,7 +177,7 @@ export function SiteMobileNav(props: {
                       className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted/60"
                     >
                       <User className="h-4 w-4 text-muted-foreground" />
-                      Profile settings
+                      {shell.profileSettings}
                     </Link>
                     <Link
                       href="/pricing"
@@ -184,7 +185,7 @@ export function SiteMobileNav(props: {
                       className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted/60"
                     >
                       <Sparkles className="h-4 w-4 text-muted-foreground" />
-                      Subscription plans
+                      {shell.subscriptionPlans}
                     </Link>
                   </>
                 )}
@@ -236,7 +237,7 @@ export function SiteMobileNav(props: {
                   }}
                 >
                   <LogOut className="h-4 w-4 text-muted-foreground" />
-                  Log out
+                  {shell.logOut}
                 </button>
               </div>
             )}
@@ -245,11 +246,11 @@ export function SiteMobileNav(props: {
               <div className="mt-6 space-y-3 border-t border-border/60 pt-6">
                 <Link href="/login" onClick={close} className="block">
                   <Button variant="outline" className="h-11 w-full">
-                    Login
+                    {shell.login}
                   </Button>
                 </Link>
                 <Link href="/register" onClick={close} className="block">
-                  <Button className="h-11 w-full">Get Started</Button>
+                  <Button className="h-11 w-full">{shell.getStarted}</Button>
                 </Link>
               </div>
             )}

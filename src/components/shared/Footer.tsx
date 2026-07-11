@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { GamlishLogo } from "./GamlishLogo";
-import { GAMLISH_BRAND } from "@/src/lib/gamlish-brand";
-import { BD_UI } from "@/src/lib/bangladesh-ui-copy";
 import { isReadingExamFocusPath, isReadingDashboardPath } from "@/src/lib/examFocusPaths";
 import {
   SUPPORT_WHATSAPP_DISPLAY,
@@ -14,6 +12,9 @@ import {
 import { MessageCircle } from "lucide-react";
 import { isImmersiveAuthPath } from "@/src/lib/immersive-auth-paths";
 import { ENABLE_READING } from "@/src/lib/platform-config";
+import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { cn } from "@/lib/utils";
 
 interface FooterProps {
   initialUser?: CurrentUser | null;
@@ -21,6 +22,8 @@ interface FooterProps {
 
 export function Footer({ initialUser = null }: FooterProps) {
   const pathname = usePathname();
+  const shell = useSiteShellCopy();
+  const { locale } = useUiLocale();
 
   if (isReadingExamFocusPath(pathname) || isReadingDashboardPath(pathname)) {
     return null;
@@ -35,7 +38,12 @@ export function Footer({ initialUser = null }: FooterProps) {
   }
 
   return (
-    <footer className="border-t border-border/80 bg-muted/30 font-bengali dark:bg-muted/20">
+    <footer
+      className={cn(
+        "border-t border-border/80 bg-muted/30 dark:bg-muted/20",
+        locale === "bn" && "font-bengali",
+      )}
+    >
       <div className="container mx-auto max-w-6xl px-4 py-14 md:py-16">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-10">
           <div className="md:col-span-4 space-y-4">
@@ -43,26 +51,23 @@ export function Footer({ initialUser = null }: FooterProps) {
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               {ENABLE_READING
                 ? "Performance-driven IELTS Reading preparation. Structured levels and readiness you can measure."
-                : GAMLISH_BRAND.footerBlurb}
+                : shell.footerBlurb}
             </p>
             {!ENABLE_READING ? (
-              <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
-                {GAMLISH_BRAND.taglineLine2}
+              <p className="text-sm font-semibold text-primary">
+                {shell.footerTagline}
               </p>
             ) : null}
           </div>
 
           <div className="md:col-span-3">
             <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-foreground">
-              {ENABLE_READING ? "Product" : BD_UI.product}
+              {shell.product}
             </h4>
             <ul className="space-y-3 text-sm">
               <li>
-                <Link
-                  href="/"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {ENABLE_READING ? "Home" : BD_UI.home}
+                <Link href="/" className="text-muted-foreground transition-colors hover:text-foreground">
+                  {shell.home}
                 </Link>
               </li>
               <li>
@@ -70,7 +75,7 @@ export function Footer({ initialUser = null }: FooterProps) {
                   href="/#how-gamlish-works"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  {ENABLE_READING ? "How it works" : BD_UI.howItWorks}
+                  {shell.howItWorks}
                 </Link>
               </li>
               <li>
@@ -78,7 +83,7 @@ export function Footer({ initialUser = null }: FooterProps) {
                   href="/pricing"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  {ENABLE_READING ? "Plans & pricing" : BD_UI.plansPricing}
+                  {shell.plansPricing}
                 </Link>
               </li>
               <li>
@@ -86,7 +91,7 @@ export function Footer({ initialUser = null }: FooterProps) {
                   href="/founding-members"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Founders&apos; Wall
+                  {shell.foundersWall}
                 </Link>
               </li>
               <li>
@@ -94,7 +99,7 @@ export function Footer({ initialUser = null }: FooterProps) {
                   href="/terms"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Terms &amp; policies
+                  {shell.termsPolicies}
                 </Link>
               </li>
             </ul>
@@ -102,7 +107,7 @@ export function Footer({ initialUser = null }: FooterProps) {
 
           <div className="md:col-span-2">
             <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-foreground">
-              {ENABLE_READING ? "Account" : BD_UI.account}
+              {shell.account}
             </h4>
             <ul className="space-y-3 text-sm">
               {initialUser ? (
@@ -112,18 +117,18 @@ export function Footer({ initialUser = null }: FooterProps) {
                       href="/profile"
                       className="text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {ENABLE_READING ? "My profile" : BD_UI.myProfile}
+                      {shell.myProfile}
                     </Link>
                   </li>
                   {ENABLE_READING ? (
-                  <li>
-                    <Link
-                      href="/profile/reading"
-                      className="text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      Reading
-                    </Link>
-                  </li>
+                    <li>
+                      <Link
+                        href="/profile/reading"
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {shell.reading}
+                      </Link>
+                    </li>
                   ) : null}
                 </>
               ) : (
@@ -133,7 +138,7 @@ export function Footer({ initialUser = null }: FooterProps) {
                       href="/login"
                       className="text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {ENABLE_READING ? "Log in" : BD_UI.login}
+                      {shell.login}
                     </Link>
                   </li>
                   <li>
@@ -141,7 +146,7 @@ export function Footer({ initialUser = null }: FooterProps) {
                       href="/register"
                       className="text-muted-foreground transition-colors hover:text-foreground"
                     >
-                      {ENABLE_READING ? "Get started" : BD_UI.register}
+                      {shell.register}
                     </Link>
                   </li>
                 </>
@@ -151,26 +156,16 @@ export function Footer({ initialUser = null }: FooterProps) {
 
           <div className="md:col-span-3">
             <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-foreground">
-              {ENABLE_READING ? "Support" : BD_UI.support}
+              {shell.support}
             </h4>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              {ENABLE_READING ? (
-                <>
-                  Need help with access, billing, or how Gamlish works? Message us on{" "}
-                  <strong className="font-medium text-foreground">WhatsApp only</strong>. we reply to
-                  chats on this number.{" "}
-                  <span className="text-foreground">Please do not call;</span> we do not provide phone
-                  support on this line.
-                </>
-              ) : (
-                BD_UI.footerSupport
-              )}
+              {ENABLE_READING ? shell.footerSupportReading : shell.footerSupport}
             </p>
             <a
               href={SUPPORT_WHATSAPP_HREF}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-800 transition-colors hover:bg-emerald-500/15 dark:text-emerald-300"
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
             >
               <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
               WhatsApp {SUPPORT_WHATSAPP_DISPLAY}
@@ -179,7 +174,7 @@ export function Footer({ initialUser = null }: FooterProps) {
         </div>
 
         <div className="mt-12 border-t border-border/60 pt-8 text-center text-xs text-muted-foreground md:text-sm">
-          <p>{ENABLE_READING ? `© ${new Date().getFullYear()} Gamlish. All rights reserved.` : BD_UI.footerRights(new Date().getFullYear())}</p>
+          <p>{shell.footerRights(new Date().getFullYear())}</p>
         </div>
       </div>
     </footer>

@@ -18,6 +18,8 @@ import {
   PREMIUM_BASE_PRICE_BDT,
   PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
+import { brandSurfaces } from "@/src/lib/brand-theme";
+import { cn } from "@/lib/utils";
 import type { ScholarshipStatus } from "@/src/lib/api/scholarship";
 import { isFoundingMemberWindowOpen } from "@/src/lib/foundingMember";
 import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
@@ -62,15 +64,23 @@ export function PremiumPricingHero({
       : PREMIUM_LIST_PRICE_BDT;
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-indigo-500/15 bg-gradient-to-b from-slate-950 via-indigo-950/95 to-slate-950 p-8 text-white shadow-2xl shadow-indigo-950/20 sm:p-10 md:p-12">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(99,102,241,0.28),transparent_55%)]"
-        aria-hidden
-      />
+    <section
+      className={cn(
+        "relative overflow-hidden rounded-3xl border p-8 shadow-xl sm:p-10 md:p-12",
+        brandSurfaces.pricingCard,
+        "text-foreground",
+      )}
+    >
+      <div className={cn("pointer-events-none absolute inset-0", brandSurfaces.heroGlow)} aria-hidden />
 
       <div className="relative mx-auto max-w-2xl space-y-8 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/25 bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200">
-          <Crown className="h-3.5 w-3.5 text-amber-300" />
+        <div
+          className={cn(
+            "inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em]",
+            brandSurfaces.eyebrowBadge,
+          )}
+        >
+          <Crown className="h-3.5 w-3.5 text-primary" />
           English Foundations
         </div>
 
@@ -78,33 +88,39 @@ export function PremiumPricingHero({
           <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Unlock the full Game of English
           </h1>
-          <p className="mx-auto max-w-lg text-sm leading-relaxed text-indigo-100/80 sm:text-base">
+          <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
             Mission 01 is free. Upgrade once to open every camp, mission, and evaluation for the
             full course period.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-8 backdrop-blur-sm">
+        <div
+          className={cn(
+            "rounded-2xl border px-6 py-8 backdrop-blur-sm",
+            "border-border/70 bg-card/80",
+            "dark:border-primary/15 dark:bg-card/60",
+          )}
+        >
           {scholarshipActive && (
-            <p className="mb-1 text-lg font-medium text-indigo-300/70 line-through">
+            <p className="mb-1 text-lg font-medium text-muted-foreground line-through">
               {basePrice.toLocaleString()} BDT
             </p>
           )}
-          <p className="text-6xl font-extrabold tracking-tight sm:text-7xl">
+          <p className="text-6xl font-extrabold tracking-tight text-foreground sm:text-7xl">
             {displayPrice.toLocaleString()}
-            <span className="ml-2 text-2xl font-semibold text-indigo-300">BDT</span>
+            <span className="ml-2 text-2xl font-semibold text-muted-foreground">BDT</span>
           </p>
           {scholarshipActive ? (
-            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-sm font-semibold text-amber-100">
-              <Sparkles className="h-4 w-4 text-amber-300" />
+            <p className={cn("mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold", brandSurfaces.eyebrowBadge)}>
+              <Sparkles className="h-4 w-4 text-primary" />
               {FOUNDER_SCHOLARSHIP_PERCENT}% founder price in your first 24 hours
             </p>
           ) : (
-            <p className="mt-3 text-sm text-indigo-200/75">One payment · full course access</p>
+            <p className="mt-3 text-sm text-muted-foreground">One payment · full course access</p>
           )}
           {foundingWindowOpen && (
-            <p className="mt-4 text-sm text-indigo-200/80">
-              <BadgeCheck className="mr-1 inline h-4 w-4 text-emerald-400" />
+            <p className="mt-4 text-sm text-muted-foreground">
+              <BadgeCheck className="mr-1 inline h-4 w-4 text-primary" />
               Founder bundle before 1 August 2026 (regular {PREMIUM_LIST_PRICE_BDT} BDT)
             </p>
           )}
@@ -114,9 +130,19 @@ export function PremiumPricingHero({
           {ENGLISH_FEATURES.map(({ icon: Icon, label }) => (
             <li
               key={label}
-              className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 px-4 py-3 text-sm text-indigo-100"
+              className={cn(
+                "flex items-center gap-3 rounded-xl border px-4 py-3 text-sm",
+                "border-border/70 bg-card/70 text-foreground",
+                "dark:border-primary/15 dark:bg-card/50",
+              )}
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-200">
+              <span
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                  "bg-primary/10 text-primary",
+                  "dark:bg-primary/15 dark:text-primary-foreground",
+                )}
+              >
                 <Icon className="h-4 w-4" />
               </span>
               {label}
@@ -127,13 +153,19 @@ export function PremiumPricingHero({
         <div className="flex flex-col items-center gap-3">
           {isLoggedIn ? (
             purchaseDisabled ? (
-              <p className="max-w-md rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+              <p
+                className={cn(
+                  "max-w-md rounded-xl border px-4 py-3 text-sm",
+                  "border-primary/20 bg-primary/5 text-foreground",
+                  "dark:border-primary/30 dark:bg-primary/10",
+                )}
+              >
                 {purchaseDisabledReason ?? "Checkout is unavailable right now."}
               </p>
             ) : (
               <Button
                 size="lg"
-                className="h-14 min-w-[280px] rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 px-8 text-base font-bold shadow-lg shadow-indigo-600/30"
+                className={cn("h-14 min-w-[280px] rounded-full px-8 text-base font-bold", brandSurfaces.ctaButton)}
                 onClick={onPurchase}
               >
                 <Zap className="mr-2 h-4 w-4" />
@@ -144,20 +176,20 @@ export function PremiumPricingHero({
             <>
               <Button
                 size="lg"
-                className="h-14 min-w-[280px] rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 px-8 text-base font-bold shadow-lg shadow-indigo-600/30"
+                className={cn("h-14 min-w-[280px] rounded-full px-8 text-base font-bold", brandSurfaces.ctaButton)}
                 asChild
               >
                 <a href="/register">Create account · Mission 01 free</a>
               </Button>
               <a
                 href="/login"
-                className="text-sm font-medium text-indigo-300/80 underline-offset-4 hover:text-white hover:underline"
+                className="text-sm font-medium text-primary underline-offset-4 hover:text-primary/80 hover:underline"
               >
                 I already have an account
               </a>
             </>
           )}
-          <p className="text-xs text-indigo-300/60">
+          <p className="text-xs text-muted-foreground">
             <Shield className="mr-1 inline h-3.5 w-3.5" />
             Manual bKash verification · access within 24 to 48 hours
           </p>

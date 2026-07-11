@@ -8,31 +8,35 @@ import {
   PREMIUM_BASE_PRICE_BDT,
   PREMIUM_LIST_PRICE_BDT,
 } from "@/src/lib/pricingOffer";
+import { brandSurfaces } from "@/src/lib/brand-theme";
+import { cn } from "@/lib/utils";
 
 export function FoundingMemberPricingAlert() {
   const windowOpen = isFoundingMemberWindowOpen();
 
   return (
     <div
-      className={
+      className={cn(
+        "relative overflow-hidden rounded-2xl border p-6",
         windowOpen
-          ? "relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-card to-violet-500/5 p-6 shadow-md ring-1 ring-amber-500/15"
-          : "relative overflow-hidden rounded-2xl border border-border/80 bg-muted/30 p-6"
-      }
+          ? cn("shadow-md ring-1 ring-primary/15", brandSurfaces.premiumBanner)
+          : "border-border/80 bg-muted/30",
+      )}
     >
       {windowOpen && (
         <div
-          className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-amber-400/15 blur-2xl"
+          className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl"
           aria-hidden
         />
       )}
       <div className="relative flex gap-4">
         <div
-          className={
+          className={cn(
+            "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl",
             windowOpen
-              ? "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400/20 to-orange-500/20 text-amber-600 dark:text-amber-400"
-              : "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"
-          }
+              ? "bg-primary/10 text-primary"
+              : "bg-muted text-muted-foreground",
+          )}
         >
           {windowOpen ? (
             <CalendarClock className="h-6 w-6" />
@@ -47,8 +51,8 @@ export function FoundingMemberPricingAlert() {
                 Before 1 August 2026 · Founder pricing
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
-                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-primary">
                     Regular Founder price
                   </p>
                   <p className="mt-1 text-lg font-bold text-foreground">
@@ -58,8 +62,8 @@ export function FoundingMemberPricingAlert() {
                     6 months access · priced like 1 month · permanent badge
                   </p>
                 </div>
-                <div className="rounded-xl border border-violet-500/25 bg-violet-500/5 p-3">
-                  <p className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-400">
+                <div className="rounded-xl border border-primary/25 bg-primary/8 p-3">
+                  <p className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-primary">
                     <Sparkles className="h-3 w-3" />
                     First 24 hours only
                   </p>
@@ -74,7 +78,7 @@ export function FoundingMemberPricingAlert() {
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-amber-900/90 dark:text-amber-100/80">
+              <p className="text-xs text-muted-foreground">
                 Create your account to start the 24-hour countdown. After 1 August 2026, pricing
                 becomes {PREMIUM_BASE_PRICE_BDT} BDT/month with no bundle or badge.
               </p>

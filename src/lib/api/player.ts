@@ -56,7 +56,21 @@ export type PlayerEvalType =
   | "rearrange"
   | "translation"
   | "story_passage"
-  | "story_mcq";
+  | "story_mcq"
+  | "writing_review";
+
+export interface PlayerWritingReviewState {
+  id: string;
+  topicOption: "A" | "B" | "C";
+  content: string;
+  wordCount: number;
+  status: "pending" | "graded";
+  score: number | null;
+  feedback: string | null;
+  passed: boolean | null;
+  submittedAt: string;
+  reviewedAt: string | null;
+}
 
 export interface PlayerStageContent {
   missionSlug: string;
@@ -73,6 +87,9 @@ export interface PlayerStageContent {
       instructionBn?: string;
       instructionEn?: string;
       passRule: string;
+      passValue?: number;
+      maxScore?: number;
+      promptHtml?: string;
       questions?: Array<Record<string, unknown>>;
       passage?: string;
     };
@@ -82,10 +99,14 @@ export interface PlayerStageContent {
   currentStageOrder: number;
   /** Use this order when submitting evaluations (story pairs submit on primary order). */
   submitStageOrder?: number;
+  isReview?: boolean;
+  writingReview?: PlayerWritingReviewState | null;
 }
 
 export interface PlayerSubmitResult {
   passed: boolean;
+  pendingReview?: boolean;
+  writingReview?: PlayerWritingReviewState | null;
   scorePercent?: number;
   correctCount?: number;
   totalCount?: number;
@@ -103,10 +124,13 @@ function unwrap<T>(res: { data?: { data?: T } }): T {
   return d;
 }
 
-export async function getPlayerCourseMap(): Promise<PlayerCourseMap> {
+export async function getPlayerCourseMap(options?: {
+  signal?: AbortSignal;
+}): Promise<PlayerCourseMap> {
   const { default: apiClient } = await import("@/src/lib/api-client");
   const res = await apiClient.get<{ data: PlayerCourseMap }>(
     "/player/courses/english-foundations/map",
+    { signal: options?.signal },
   );
   return unwrap(res);
 }

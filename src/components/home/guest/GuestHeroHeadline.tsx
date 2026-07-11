@@ -26,7 +26,7 @@ export function GuestHeroHeadline({
   return (
     <motion.h1
       className={cn(
-        "overflow-visible text-balance text-[clamp(2rem,6.5vw,3.75rem)] font-semibold tracking-[-0.035em]",
+        "overflow-visible text-balance text-[clamp(1.65rem,4.8vw,2.75rem)] font-semibold tracking-[-0.03em]",
         className,
       )}
       initial={reduceMotion ? false : { opacity: 0, y: 14 }}

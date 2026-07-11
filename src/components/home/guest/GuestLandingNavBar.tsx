@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
-import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
+import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +57,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
               {copy.navRegister}
             </Button>
           </Link>
-          <GuestLandingLanguageToggle />
+          <UiLanguageToggle />
           <ThemeToggleButton />
         </div>
 
@@ -73,7 +73,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
               {copy.navRegister}
             </Button>
           </Link>
-          <GuestLandingLanguageToggle className="scale-[0.92] origin-right sm:scale-100" />
+          <UiLanguageToggle className="scale-[0.92] origin-right sm:scale-100" />
           <ThemeToggleButton />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -94,7 +94,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     Language
                   </p>
-                  <GuestLandingLanguageToggle className="w-full max-w-[11rem]" />
+                  <UiLanguageToggle className="w-full max-w-[11rem]" />
                 </div>
 
                 <nav className="flex flex-col gap-1" aria-label="Guest menu">

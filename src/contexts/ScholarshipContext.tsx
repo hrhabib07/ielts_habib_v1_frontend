@@ -32,11 +32,19 @@ export function ScholarshipProvider({
   children: ReactNode;
 }) {
   const [status, setStatus] = useState<ScholarshipStatus | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [clientIsStudent, setClientIsStudent] = useState(false);
+  const [clientIsStudent, setClientIsStudent] = useState(() =>
+    initialUser == null ? isActiveStudentSessionClient() : false,
+  );
 
   const isStudent =
     initialUser?.role === "STUDENT" || (initialUser == null && clientIsStudent);
+
+  const [loading, setLoading] = useState(() =>
+    Boolean(
+      initialUser?.role === "STUDENT" ||
+        (initialUser == null && isActiveStudentSessionClient()),
+    ),
+  );
 
   useEffect(() => {
     if (initialUser?.role === "STUDENT") {
@@ -58,6 +66,7 @@ export function ScholarshipProvider({
   const refresh = useCallback(async () => {
     if (!isStudent) {
       setStatus(null);
+      setLoading(false);
       return;
     }
     setLoading(true);
@@ -103,7 +112,7 @@ export function useScholarship(): ScholarshipContextValue {
   if (!ctx) {
     return {
       status: null,
-      loading: false,
+      loading: true,
       refresh: async () => {},
     };
   }
