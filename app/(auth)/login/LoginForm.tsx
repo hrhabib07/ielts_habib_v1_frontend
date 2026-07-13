@@ -7,10 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "@/src/auth/hooks";
-import { Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
-import { brandSurfaces } from "@/src/lib/brand-theme";
-import { useFounderLaunchCopy } from "@/src/hooks/useLocalizedCopy";
-import { cn } from "@/lib/utils";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 
 const DevQuickLogin =
   process.env.NODE_ENV === "development"
@@ -21,7 +18,6 @@ const DevQuickLogin =
     : () => null;
 
 export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) {
-  const founderCopy = useFounderLaunchCopy();
   const { handleLogin, loading, error } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,18 +31,6 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
             Sign in to your GAMLISH account
           </p>
         </div>
-
-        <Link
-          href="/pricing"
-          className={cn("block rounded-2xl border p-4 text-center font-bengali text-sm shadow-sm transition hover:border-primary/40", brandSurfaces.midnightCard)}
-        >
-          <p className="font-semibold text-primary-foreground/90">{founderCopy.eyebrow}</p>
-          <p className="mt-1 text-primary-foreground/75">{founderCopy.trust}</p>
-          <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary-foreground">
-            <Sparkles className="h-3.5 w-3.5" />
-            Founder Launch দেখুন
-          </span>
-        </Link>
 
         <div className="rounded-lg border bg-card p-8 shadow-sm">
           {resetSuccess ? (

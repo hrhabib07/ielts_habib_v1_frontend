@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { usePendingSubscriptionRequests } from "../hooks";
@@ -12,6 +13,10 @@ import {
   XCircle,
 } from "lucide-react";
 import type { SubscriptionRequestItem } from "@/src/lib/api/admin";
+import {
+  RejectSubscriptionDialog,
+  type RejectSubscriptionPayload,
+} from "./RejectSubscriptionDialog";
 
 function userDisplay(request: SubscriptionRequestItem): string {
   if (typeof request.userId === "object" && request.userId && "_id" in request.userId) {
@@ -31,6 +36,17 @@ function planName(request: SubscriptionRequestItem): string {
 export function PendingSubscriptionRequests() {
   const { requests, loading, error, approve, reject, actionLoadingId } =
     usePendingSubscriptionRequests();
+  const [rejectTarget, setRejectTarget] = useState<SubscriptionRequestItem | null>(null);
+
+  const handleRejectConfirm = async (payload: RejectSubscriptionPayload) => {
+    if (!rejectTarget) return;
+    try {
+      await reject(rejectTarget._id, payload);
+      setRejectTarget(null);
+    } catch {
+      // error surfaced via hook
+    }
+  };
 
   if (loading) {
     return (
@@ -57,80 +73,92 @@ export function PendingSubscriptionRequests() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
-          {requests.length} student{requests.length === 1 ? "" : "s"} waiting for access
-        </p>
-        <Link
-          href="/dashboard/admin/pricing"
-          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-        >
-          View all payment requests
-        </Link>
-      </div>
-
-      {error ? (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-      ) : null}
-
-      <div className="space-y-3">
-        {requests.map((request) => (
-          <div
-            key={request._id}
-            className="flex flex-col gap-4 rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50 sm:flex-row sm:items-center sm:justify-between"
+    <>
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm text-muted-foreground">
+            {requests.length} student{requests.length === 1 ? "" : "s"} waiting for access
+          </p>
+          <Link
+            href="/dashboard/admin/pricing"
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
-            <div className="flex min-w-0 flex-1 items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                <User className="h-5 w-5 text-primary" />
-              </div>
-              <div className="min-w-0 flex-1 space-y-1">
-                <p className="truncate font-medium">{userDisplay(request)}</p>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
-                    <CreditCard className="h-3.5 w-3.5" />
-                    {planName(request)} · {request.paidAmount} BDT · {request.paymentMethod}
-                  </span>
-                  <span className="font-mono text-xs">{request.transactionId}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {new Date(request.createdAt).toLocaleString("en-GB", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </div>
-              </div>
-            </div>
+            View all payment requests
+          </Link>
+        </div>
 
-            <div className="flex shrink-0 gap-2 sm:justify-end">
-              <Button
-                size="sm"
-                disabled={actionLoadingId === request._id}
-                onClick={() => approve(request._id)}
-                className="gap-2"
-              >
-                {actionLoadingId === request._id ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4" />
-                )}
-                Approve
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={actionLoadingId === request._id}
-                onClick={() => reject(request._id)}
-                className="gap-2"
-              >
-                <XCircle className="h-4 w-4" />
-                Reject
-              </Button>
+        {error ? (
+          <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+        ) : null}
+
+        <div className="space-y-3">
+          {requests.map((request) => (
+            <div
+              key={request._id}
+              className="flex flex-col gap-4 rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex min-w-0 flex-1 items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="truncate font-medium">{userDisplay(request)}</p>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <CreditCard className="h-3.5 w-3.5" />
+                      {planName(request)} · {request.paidAmount} BDT · {request.paymentMethod}
+                    </span>
+                    <span className="font-mono text-xs">{request.transactionId}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    {new Date(request.createdAt).toLocaleString("en-GB", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 gap-2 sm:justify-end">
+                <Button
+                  size="sm"
+                  disabled={actionLoadingId === request._id}
+                  onClick={() => void approve(request._id)}
+                  className="gap-2"
+                >
+                  {actionLoadingId === request._id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-4 w-4" />
+                  )}
+                  Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={actionLoadingId === request._id}
+                  onClick={() => setRejectTarget(request)}
+                  className="gap-2"
+                >
+                  <XCircle className="h-4 w-4" />
+                  Reject
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+
+      <RejectSubscriptionDialog
+        open={Boolean(rejectTarget)}
+        userLabel={rejectTarget ? userDisplay(rejectTarget) : ""}
+        busy={Boolean(rejectTarget && actionLoadingId === rejectTarget._id)}
+        onClose={() => {
+          if (!actionLoadingId) setRejectTarget(null);
+        }}
+        onConfirm={handleRejectConfirm}
+      />
+    </>
   );
 }

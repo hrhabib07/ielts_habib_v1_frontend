@@ -654,8 +654,8 @@ export function HeroAnimation() {
     const svgR = svg.getBoundingClientRect();
     const g = glyph.getBoundingClientRect();
     const s = spout.getBoundingClientRect();
-    let mouthX = s.left + s.width / 2 - svgR.left + PIPE_MOUTH_NUDGE_X_PX;
-    let mouthY = s.top + s.height / 2 - svgR.top + PIPE_MOUTH_NUDGE_Y_PX;
+    const mouthX = s.left + s.width / 2 - svgR.left + PIPE_MOUTH_NUDGE_X_PX;
+    const mouthY = s.top + s.height / 2 - svgR.top + PIPE_MOUTH_NUDGE_Y_PX;
 
     const ink = bandInkTopCenterInViewport(glyph, svgR);
     const textEl = glyph.querySelector("text");

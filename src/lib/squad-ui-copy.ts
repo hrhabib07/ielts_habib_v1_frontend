@@ -45,6 +45,10 @@ export interface SquadUiCopy {
   readonly confirmLeave: string;
   readonly confirmDelete: string;
   readonly back: string;
+  readonly joinFailed: string;
+  readonly squadNotFound: string;
+  readonly squadFull: string;
+  readonly alreadyInSquad: string;
 }
 
 export const SQUAD_UI_COPY: Record<UiLocale, SquadUiCopy> = {
@@ -94,6 +98,10 @@ export const SQUAD_UI_COPY: Record<UiLocale, SquadUiCopy> = {
     confirmLeave: "তুমি কি নিশ্চিত যে Squad ছেড়ে যেতে চাও?",
     confirmDelete: "সব সদস্য সরিয়ে Squad মুছে ফেলবে। নিশ্চিত?",
     back: "ফিরে যাও",
+    joinFailed: "Squad-এ যোগ দেওয়া যায়নি। আবার চেষ্টা করো।",
+    squadNotFound: "এই invite code-এ কোনো Squad পাওয়া যায়নি।",
+    squadFull: "এই Squad এখন পূর্ণ। অন্য কোড চেষ্টা করো।",
+    alreadyInSquad: "তুমি ইতিমধ্যে একটি Squad-এ আছো। আগে সেটি ছেড়ে যাও।",
   },
   en: {
     navLabel: "Squad",
@@ -141,6 +149,10 @@ export const SQUAD_UI_COPY: Record<UiLocale, SquadUiCopy> = {
     confirmLeave: "Are you sure you want to leave this Squad?",
     confirmDelete: "This will remove all members and delete the Squad. Are you sure?",
     back: "Back",
+    joinFailed: "Could not join the Squad. Please try again.",
+    squadNotFound: "Squad not found. Check the invite code and try again.",
+    squadFull: "This Squad is full. Try a different code.",
+    alreadyInSquad: "You are already in a Squad. Leave it before joining another.",
   },
 } as const;
 

@@ -53,8 +53,6 @@ const STUDENT_LINKS_PLAYER = [
 
 const STUDENT_LINKS = ENABLE_READING ? STUDENT_LINKS_READING : STUDENT_LINKS_PLAYER;
 
-const PUBLIC_LINKS = [{ href: "/pricing", labelKey: "publicPlansPricing" as const }] as const;
-
 export function SiteNavBar(props: {
   initialUser?: CurrentUser | null;
   className?: string;
@@ -174,16 +172,6 @@ export function SiteNavBar(props: {
         </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex">
-          {!user &&
-            PUBLIC_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={navLinkClass(isNavActive(link.href))}
-              >
-                {shell[link.labelKey]}
-              </Link>
-            ))}
           {isStudent &&
             STUDENT_LINKS.map((link) => (
               <Link key={link.href} href={link.href} className={navLinkClass(isNavActive(link.href))}>

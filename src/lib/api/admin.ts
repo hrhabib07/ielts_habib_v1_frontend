@@ -122,11 +122,14 @@ export async function approveSubscriptionRequest(id: string): Promise<unknown> {
 
 export async function rejectSubscriptionRequest(
   id: string,
-  body?: { rejectionReason?: string },
+  body: {
+    rejectionReasonCode: string;
+    customRejectionReason?: string;
+  },
 ): Promise<unknown> {
   const res = await apiClient.patch<{ success: boolean; data: unknown }>(
     `${BASE}/subscription-requests/${id}/reject`,
-    body ?? {},
+    body,
   );
   return res.data?.data;
 }

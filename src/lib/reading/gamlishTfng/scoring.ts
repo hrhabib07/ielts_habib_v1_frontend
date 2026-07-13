@@ -52,7 +52,7 @@ export function calculateGamlishTfngScore(input: {
   const { questions, elapsedSeconds, anchorUnlocked, anchorAttemptNumber, tfngAnswers } =
     input;
 
-  let correctAnswers = 0;
+  const correctAnswers = 0;
   for (const question of questions) {
     const student = (tfngAnswers[question.id] ?? "").trim().toUpperCase();
     // Preview / mock only — live scoring is server-side

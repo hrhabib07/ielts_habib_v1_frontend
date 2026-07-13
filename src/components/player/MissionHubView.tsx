@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Lock } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, CheckCircle2, Lock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
@@ -39,10 +40,13 @@ function missionDisplayTitleFromSlug(slug: string): string {
 export function MissionHubView({ slug }: { slug: string }) {
   const PLAYER_UI = usePlayerUiCopy();
   const { locale } = useUiLocale();
+  const searchParams = useSearchParams();
+  const justCompleted = searchParams.get("complete") === "1";
   const [mission, setMission] = useState<PlayerMissionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [needsSubscription, setNeedsSubscription] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showCompleteBanner, setShowCompleteBanner] = useState(justCompleted);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,6 +139,25 @@ export function MissionHubView({ slug }: { slug: string }) {
         ) : null}
       </header>
 
+      {showCompleteBanner ? (
+        <div className="mt-5 animate-in fade-in slide-in-from-bottom-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 duration-500">
+          <p className="flex items-center gap-2 text-base font-bold text-primary">
+            <Star className="h-5 w-5 fill-current" />
+            {PLAYER_UI.missionCompleteHubTitle}
+          </p>
+          <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
+            {PLAYER_UI.missionCompleteHubBody}
+          </p>
+          <button
+            type="button"
+            className="mt-3 text-xs font-medium text-muted-foreground underline-offset-2 hover:underline"
+            onClick={() => setShowCompleteBanner(false)}
+          >
+            {PLAYER_UI.continue}
+          </button>
+        </div>
+      ) : null}
+
       <div className="mt-6 flex items-center gap-4 text-sm">
         <span className="rounded-full bg-primary/10 px-2.5 py-1 font-medium text-primary dark:bg-primary/15 dark:text-primary-foreground">
           {mission.xpEarned} {PLAYER_UI.xpLabel}
@@ -180,7 +203,7 @@ export function MissionHubView({ slug }: { slug: string }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">
-                    {stage.title ?? `ধাপ ${stage.order}`}
+                    {stage.title ?? PLAYER_UI.stageFallbackTitle(stage.order)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {resolveStageKindLabel(stage, locale)}

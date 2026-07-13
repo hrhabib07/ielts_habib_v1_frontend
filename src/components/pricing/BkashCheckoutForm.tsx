@@ -96,7 +96,7 @@ export function BkashCheckoutForm({
     <div className="font-bengali rounded-3xl border border-border/70 bg-card p-6 shadow-lg md:p-8">
       <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-xl font-bold text-foreground">bKash পেমেন্ট</h3>
+          <h3 className="text-xl font-bold text-foreground">bKash Send Money</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             পরিমাণ: <strong>{formatBdt(payableAmount)}</strong>
             {pricing.preOrderEnabled ? (

@@ -95,14 +95,18 @@ export function usePendingSubscriptionRequests() {
     }
   };
 
-  const reject = async (id: string) => {
+  const reject = async (
+    id: string,
+    body: { rejectionReasonCode: string; customRejectionReason?: string },
+  ) => {
     setActionLoadingId(id);
     setError(null);
     try {
-      await rejectSubscriptionRequest(id);
+      await rejectSubscriptionRequest(id, body);
       setRequests((prev) => prev.filter((r) => r._id !== id));
     } catch {
       setError("Failed to reject enrollment");
+      throw new Error("Failed to reject enrollment");
     } finally {
       setActionLoadingId(null);
     }

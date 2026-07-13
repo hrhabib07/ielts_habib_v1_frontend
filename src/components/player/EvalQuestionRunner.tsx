@@ -22,6 +22,9 @@ import {
 } from "@/src/lib/player-eval-sfx";
 import { cn } from "@/lib/utils";
 import { RearrangeWordTiles } from "@/src/components/player/RearrangeWordTiles";
+import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import type { PlayerUiCopy } from "@/src/lib/player-ui-copy";
 
 type EvalQuestion = Record<string, unknown>;
 
@@ -64,21 +67,20 @@ function isQuestionAnswered(
 function feedbackMessage(
   result: PlayerAnswerCheckResult,
   stageType: string,
+  copy: PlayerUiCopy["eval"],
 ): string {
-  if (result.correct) return "সঠিক! দারুণ কাজ!";
+  if (result.correct) return copy.correctGreat;
 
   if (stageType === "correct_incorrect") {
-    return result.correctAnswer === "correct"
-      ? "ভুল। বাক্যটি সঠিক ছিল।"
-      : "ভুল। বাক্যটি ঠিক ছিল না।";
+    return result.correctAnswer === "correct" ? copy.ciWasCorrect : copy.ciWasIncorrect;
   }
 
   const expected = result.correctAnswer ?? result.correctAnswers?.[0];
-  if (expected) return `এই প্রশ্নে ভুল হয়েছে। সঠিক উত্তর দেখো: ${expected}`;
-  return "এই প্রশ্নে ভুল হয়েছে। পরের বার আরও সাবধানে চেষ্টা করো।";
+  if (expected) return copy.wrongWithAnswer(expected);
+  return copy.wrongGeneric;
 }
 
-function ThinkAgainPrompt() {
+function ThinkAgainPrompt({ copy }: { copy: PlayerUiCopy["eval"] }) {
   return (
     <div
       className="flex items-start gap-3 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300"
@@ -86,12 +88,8 @@ function ThinkAgainPrompt() {
     >
       <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
       <div className="space-y-1 text-left">
-        <p className="font-semibold text-foreground">
-          আবার ভেবে দেখো
-        </p>
-        <p className="font-medium leading-relaxed text-muted-foreground">
-          উত্তরটা ঠিক মনে হচ্ছে না। সাবধানে আবার বেছে নাও, তুমি পারবে!
-        </p>
+        <p className="font-semibold text-foreground">{copy.thinkAgainTitle}</p>
+        <p className="font-medium leading-relaxed text-muted-foreground">{copy.thinkAgainBody}</p>
       </div>
     </div>
   );
@@ -100,9 +98,11 @@ function ThinkAgainPrompt() {
 function QuestionFeedback({
   result,
   stageType,
+  copy,
 }: {
   result: PlayerAnswerCheckResult;
   stageType: string;
+  copy: PlayerUiCopy["eval"];
 }) {
   return (
     <div
@@ -119,9 +119,7 @@ function QuestionFeedback({
       ) : (
         <XCircle className="mt-0.5 h-5 w-5 shrink-0" />
       )}
-      <p className="font-medium leading-relaxed">
-        {feedbackMessage(result, stageType)}
-      </p>
+      <p className="font-medium leading-relaxed">{feedbackMessage(result, stageType, copy)}</p>
     </div>
   );
 }
@@ -143,8 +141,9 @@ function McqOptions({
   retryMode?: boolean;
   thinkAgain?: boolean;
 }) {
+  const { locale } = useUiLocale();
   const options = (question.options as string[] | undefined) ?? [];
-  const promptBn = localizeEvalPrompt(String(question.prompt ?? ""));
+  const promptText = localizeEvalPrompt(String(question.prompt ?? ""), locale);
   const locked =
     Boolean(checkResult) &&
     !thinkAgain &&
@@ -154,18 +153,14 @@ function McqOptions({
   return (
     <div className="space-y-3">
       {question.sentence ? (
-        <p className="text-base font-semibold text-foreground">
-          {String(question.sentence)}
-        </p>
+        <p className="text-base font-semibold text-foreground">{String(question.sentence)}</p>
       ) : null}
-      <p className="text-sm font-medium text-foreground">{promptBn}</p>
+      <p className="text-sm font-medium text-foreground">{promptText}</p>
       <div className="space-y-2">
         {options.map((opt) => {
           const isSelected = value === opt;
-          const isCorrectOption =
-            locked && !thinkAgain && correctOption === opt;
-          const isWrongPick =
-            locked && !thinkAgain && isSelected && !checkResult?.correct;
+          const isCorrectOption = locked && !thinkAgain && correctOption === opt;
+          const isWrongPick = locked && !thinkAgain && isSelected && !checkResult?.correct;
           const isThinkAgainPick = thinkAgain && isSelected;
 
           return (
@@ -176,24 +171,15 @@ function McqOptions({
               onClick={() => onChange(opt)}
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
-                isCorrectOption &&
-                  "border-primary bg-primary/5 dark:bg-primary/10",
+                isCorrectOption && "border-primary bg-primary/5 dark:bg-primary/10",
                 isWrongPick && "border-red-500 bg-red-50 dark:bg-red-950/40",
-                isThinkAgainPick &&
-                  "border-primary/60 bg-primary/5 dark:bg-primary/10",
-                !locked &&
-                  !thinkAgain &&
-                  isSelected &&
-                  "border-primary bg-primary/10 dark:bg-primary/15",
-                !locked &&
-                  !isSelected &&
-                  "border-border hover:border-primary/40",
+                isThinkAgainPick && "border-primary/60 bg-primary/5 dark:bg-primary/10",
+                !locked && !thinkAgain && isSelected && "border-primary bg-primary/10 dark:bg-primary/15",
+                !locked && !isSelected && "border-border hover:border-primary/40",
                 locked && !isCorrectOption && !isWrongPick && "opacity-60",
               )}
             >
-              <span className="font-semibold text-primary">
-                {opt.charAt(0).toUpperCase()}
-              </span>
+              <span className="font-semibold text-primary">{opt.charAt(0).toUpperCase()}</span>
               <span>{opt}</span>
             </button>
           );
@@ -213,6 +199,7 @@ function EvaluationQuestionBody({
   retryMode,
   onAnswerChange,
   thinkAgain,
+  copy,
 }: {
   question: EvalQuestion;
   stageType: string;
@@ -223,7 +210,9 @@ function EvaluationQuestionBody({
   retryMode?: boolean;
   onAnswerChange?: (questionId: string) => void;
   thinkAgain?: boolean;
+  copy: PlayerUiCopy["eval"];
 }) {
+  const { locale } = useUiLocale();
   const id = String(question.id);
   const locked =
     Boolean(checkResult) &&
@@ -257,14 +246,12 @@ function EvaluationQuestionBody({
     return (
       <div className="space-y-3">
         <p className="text-base font-semibold">{String(question.sentence)}</p>
-        <p className="text-sm font-medium text-foreground">
-          বাক্যটি সঠিক নাকি ভুল?
-        </p>
+        <p className="text-sm font-medium text-foreground">{copy.correctIncorrectPrompt}</p>
         <div className="flex gap-2">
           {(
             [
-              { value: "correct", label: "সঠিক" },
-              { value: "incorrect", label: "ভুল" },
+              { value: "correct", label: copy.correct },
+              { value: "incorrect", label: copy.incorrect },
             ] as const
           ).map(({ value, label }) => {
             const isSelected = answers[id] === value;
@@ -278,15 +265,11 @@ function EvaluationQuestionBody({
                 type="button"
                 variant={isSelected && !locked ? "default" : "outline"}
                 disabled={disabled || locked}
-                onClick={() =>
-                  touchAnswer((prev) => ({ ...prev, [id]: value }))
-                }
+                onClick={() => touchAnswer((prev) => ({ ...prev, [id]: value }))}
                 className={cn(
                   "flex-1",
-                  isCorrectOption &&
-                    "border-primary bg-primary hover:bg-primary",
-                  isWrongPick &&
-                    "border-red-500 bg-red-600 hover:bg-red-600 text-white",
+                  isCorrectOption && "border-primary bg-primary hover:bg-primary",
+                  isWrongPick && "border-red-500 bg-red-600 hover:bg-red-600 text-white",
                 )}
               >
                 {label}
@@ -318,7 +301,7 @@ function EvaluationQuestionBody({
         {question.sourceText ? (
           <p className="text-base font-semibold">{String(question.sourceText)}</p>
         ) : null}
-        <p className="text-sm font-medium text-foreground">ইংরেজিতে অনুবাদ করো</p>
+        <p className="text-sm font-medium text-foreground">{copy.translatePrompt}</p>
         {Array.isArray(question.hints) ? (
           <ul className="list-inside list-disc text-xs text-muted-foreground">
             {(question.hints as string[]).map((h) => (
@@ -336,7 +319,7 @@ function EvaluationQuestionBody({
             locked && checkResult?.correct && "border-primary",
             locked && !checkResult?.correct && "border-destructive",
           )}
-          placeholder="উত্তর লেখো…"
+          placeholder={copy.answerPlaceholder}
         />
       </div>
     );
@@ -353,12 +336,11 @@ function EvaluationQuestionBody({
         {parts.map((part, idx) => (
           <div key={`${id}-${idx}`}>
             <p className="mb-2 text-sm font-medium text-foreground">
-              {localizeEvalPrompt(part.prompt)}
+              {localizeEvalPrompt(part.prompt, locale)}
             </p>
             <div className="flex flex-wrap gap-2">
               {part.options.map((opt) => {
-                const current =
-                  (answers[id] as Record<string, string> | undefined) ?? {};
+                const current = (answers[id] as Record<string, string> | undefined) ?? {};
                 const selected = current[String(idx)] === opt;
                 return (
                   <Button
@@ -411,11 +393,11 @@ export function EvalQuestionRunner({
   onComplete: (answers: Record<string, unknown>) => void;
   submitting: boolean;
   aside?: ReactNode;
-  /** When true, only wrong questions are shown and each must be answered correctly before continuing. */
   retryMode?: boolean;
-  /** Correct answers from a previous attempt — merged into the final submit payload. */
   preservedAnswers?: Record<string, unknown>;
 }) {
+  const PLAYER_UI = usePlayerUiCopy();
+  const copy = PLAYER_UI.eval;
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
@@ -467,7 +449,7 @@ export function EvalQuestionRunner({
 
   const handleCheck = async () => {
     if (!currentQuestion || !currentAnswered) {
-      setStepError("আগে একটি উত্তর বেছে নাও।");
+      setStepError(copy.pickAnswerFirst);
       return;
     }
     setStepError(null);
@@ -506,7 +488,7 @@ export function EvalQuestionRunner({
 
       void playThinkAgainEvalSfx();
     } catch {
-      setStepError("উত্তর যাচাই করা যায়নি। আবার চেষ্টা করো।");
+      setStepError(copy.checkFailed);
     } finally {
       setChecking(false);
     }
@@ -515,7 +497,7 @@ export function EvalQuestionRunner({
   const handleContinue = () => {
     if (!isChecked) return;
     if (retryMode && currentCheck && !currentCheck.correct) {
-      setStepError("সঠিক উত্তর দাও, তারপর এগিয়ে যাও।");
+      setStepError(copy.needCorrectToContinue);
       return;
     }
     if (isLast) {
@@ -547,7 +529,7 @@ export function EvalQuestionRunner({
         <>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-              <span>প্রশ্ন</span>
+              <span>{copy.questionLabel}</span>
               <span>{Math.round(progressPct)}%</span>
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-muted">
@@ -569,12 +551,13 @@ export function EvalQuestionRunner({
               retryMode={retryMode}
               onAnswerChange={handleAnswerChange}
               thinkAgain={isThinkAgain}
+              copy={copy}
             />
           </div>
 
-          {isThinkAgain ? <ThinkAgainPrompt /> : null}
+          {isThinkAgain ? <ThinkAgainPrompt copy={copy} /> : null}
           {currentCheck ? (
-            <QuestionFeedback result={currentCheck} stageType={stageType} />
+            <QuestionFeedback result={currentCheck} stageType={stageType} copy={copy} />
           ) : null}
 
           {stepError ? (
@@ -594,12 +577,12 @@ export function EvalQuestionRunner({
                 {checking ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    যাচাই হচ্ছে…
+                    {copy.checking}
                   </>
                 ) : isThinkAgain ? (
-                  "আবার যাচাই করো"
+                  copy.checkAgain
                 ) : (
-                  "উত্তর যাচাই করো"
+                  copy.checkAnswer
                 )}
               </Button>
             ) : (
@@ -615,17 +598,17 @@ export function EvalQuestionRunner({
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    জমা হচ্ছে…
+                    {copy.submitting}
                   </>
                 ) : isLast ? (
                   retryMode ? (
-                    "সব ঠিক করো ও জমা দিন"
+                    copy.submitFixed
                   ) : (
-                    "জমা দিন"
+                    copy.submit
                   )
                 ) : (
                   <>
-                    পরের প্রশ্ন
+                    {copy.nextQuestion}
                     <ChevronRight className="h-4 w-4" />
                   </>
                 )}
@@ -641,15 +624,12 @@ export function EvalQuestionRunner({
     <div className="space-y-5">
       {retryMode ? (
         <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-foreground">
-          তুমি শুধু যে প্রশ্নগুলো ভুল করেছিলে সেগুলো আবার করো। প্রতিটি সঠিক হলে
-          পরের ধাপে যেতে পারবে।
+          {copy.retryBanner}
         </div>
       ) : null}
 
       {instruction && !retryMode ? (
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {instruction}
-        </p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{instruction}</p>
       ) : null}
 
       {aside ? (

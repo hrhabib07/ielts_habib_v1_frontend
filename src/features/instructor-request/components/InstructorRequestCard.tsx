@@ -42,7 +42,7 @@ export function InstructorRequestCard() {
                 Application Pending
               </p>
               <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                Your request is under admin review. We'll notify you once a decision is made.
+                Your request is under admin review. We&apos;ll notify you once a decision is made.
               </p>
             </div>
           </div>

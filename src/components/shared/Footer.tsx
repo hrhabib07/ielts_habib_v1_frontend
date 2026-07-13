@@ -78,30 +78,16 @@ export function Footer({ initialUser = null }: FooterProps) {
                   {shell.howItWorks}
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/pricing"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {shell.plansPricing}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/founding-members"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {shell.foundersWall}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/terms"
-                  className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {shell.termsPolicies}
-                </Link>
-              </li>
+              {initialUser ? (
+                <li>
+                  <Link
+                    href="/pricing"
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {shell.plansPricing}
+                  </Link>
+                </li>
+              ) : null}
             </ul>
           </div>
 

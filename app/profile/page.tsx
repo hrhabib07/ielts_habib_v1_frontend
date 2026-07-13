@@ -14,8 +14,6 @@ import { ProfileChangePassword } from "@/src/components/profile/ProfileChangePas
 import { ProfileSummarySection } from "@/src/components/profile/ProfileSummarySection";
 import { ProfileEnglishSummarySection } from "@/src/components/profile/ProfileEnglishSummarySection";
 import { ProfileSquadSection } from "@/src/components/squad/ProfileSquadSection";
-import { ProfilePrivacySettings } from "@/src/components/profile/ProfilePrivacySettings";
-import { ProfileFollowingSection } from "@/src/components/profile/ProfileFollowingSection";
 import { ProfilePageSkeleton } from "@/src/components/profile/ProfilePageSkeleton";
 import {
   countryCodeToLabel,
@@ -27,7 +25,6 @@ import {
   Gamepad2,
   Globe2,
   Link2,
-  Lock,
   MessageCircle,
   Pencil,
   Phone,
@@ -88,7 +85,6 @@ export default function ProfilePage() {
   const [currentCountry, setCurrentCountry] = useState("BD");
   const [dreamCountry, setDreamCountry] = useState("UK");
   const [phone, setPhone] = useState("");
-  const [isPrivate, setIsPrivate] = useState(false);
   const [editingPersonalDetails, setEditingPersonalDetails] = useState(false);
   const {
     profile: sessionProfile,
@@ -103,7 +99,6 @@ export default function ProfilePage() {
     setCurrentCountry(record.currentCountry ?? "BD");
     setDreamCountry(record.dreamCountry ?? "UK");
     setPhone(record.profile?.phone ?? "");
-    setIsPrivate(record.isPrivate ?? false);
   };
 
   useEffect(() => {
@@ -280,12 +275,6 @@ export default function ProfilePage() {
                     )}
                       </>
                     )}
-                    {isPrivate && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-muted-foreground/20 bg-muted/50 px-3 py-1 text-xs font-medium">
-                        <Lock className="h-3 w-3" />
-                        Private
-                      </span>
-                    )}
                   </div>
                   {publicProfileUrl && ENABLE_READING && (
                     <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
@@ -446,7 +435,7 @@ export default function ProfilePage() {
               </h2>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 {ENABLE_READING
-                  ? "Display name, countries, and phone. Username is permanent and cannot be changed. Profile visibility is managed below."
+                  ? "Display name, countries, and phone. Username is permanent and cannot be changed."
                   : copy.profileSettingsHint}
               </p>
             </div>
@@ -597,16 +586,6 @@ export default function ProfilePage() {
             </form>
           )}
         </Card>
-
-        <ProfileFollowingSection />
-
-        <ProfilePrivacySettings
-          isPrivate={isPrivate}
-          onPrivacyChange={(next) => {
-            setIsPrivate(next);
-            setProfileRecord((prev) => (prev ? { ...prev, isPrivate: next } : prev));
-          }}
-        />
       </div>
     </div>
   );

@@ -108,13 +108,6 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                     </Link>
                   )}
                   <Link
-                    href="/pricing"
-                    onClick={() => setMenuOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-base font-medium text-foreground hover:bg-muted/60"
-                  >
-                    {copy.navPricing}
-                  </Link>
-                  <Link
                     href="/login"
                     onClick={() => setMenuOpen(false)}
                     className="rounded-lg px-3 py-2.5 text-base font-medium text-foreground hover:bg-muted/60"

@@ -103,7 +103,10 @@ export function ProfileEnglishSummarySection() {
                 {stats.nextMission ? copy.resume : copy.start}
               </Link>
             </Button>
-            <Button asChild variant="outline" className="rounded-full border-white/20 text-white hover:bg-white/10">
+            <Button
+              asChild
+              className="rounded-full border border-white/40 bg-white/10 font-semibold text-white shadow-none hover:bg-white/20 hover:text-white"
+            >
               <Link href="/player">
                 <Map className="mr-2 h-4 w-4" />
                 {copy.openMap}

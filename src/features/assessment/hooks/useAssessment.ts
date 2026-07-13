@@ -59,9 +59,9 @@ export function useModule(id: string | null) {
     setLoading(true);
     setError(null);
     try {
-      const module = await getModuleById(id);
-      setData(module);
-      return module;
+      const assessmentModule = await getModuleById(id);
+      setData(assessmentModule);
+      return assessmentModule;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to load module";
       setError(msg);

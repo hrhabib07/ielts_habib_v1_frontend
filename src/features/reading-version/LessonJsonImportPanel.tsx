@@ -139,7 +139,7 @@ export function LessonJsonImportPanel({
       </div>
 
       <p className="text-[11px] text-muted-foreground rounded-md border border-dashed border-border/80 bg-background/60 px-2 py-1.5">
-        Tip for AI: use single quotes inside sentences ('Open Book Exam', 'Aha!') — never raw
+        Tip for AI: use single quotes inside sentences (&apos;Open Book Exam&apos;, &apos;Aha!&apos;) — never raw
         &quot; inside JSON strings. File:{" "}
         <code className="text-[10px]">content/examples/level-00-structured.paste.json</code>
       </p>

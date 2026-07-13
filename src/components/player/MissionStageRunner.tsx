@@ -14,9 +14,13 @@ import { PlayerVideoEmbed } from "@/src/components/player/PlayerVideoEmbed";
 import { isMissionOpeningStage } from "@/src/lib/player-stage-utils";
 import {
   PlayerStageResultOverlay,
+  StageTransitionBridge,
   type PlayerStageResult,
 } from "@/src/components/player/PlayerStageResultOverlay";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { pickStageInstruction } from "@/src/lib/player-ui-copy";
+import { cn } from "@/lib/utils";
 
 type EvalQuestion = Record<string, unknown>;
 
@@ -59,7 +63,8 @@ function EvaluationForm({
   retryState: EvalRetryState | null;
 }) {
   const PLAYER_UI = usePlayerUiCopy();
-  const instruction = stage.instructionBn || PLAYER_UI.evalInstruction[stage.type];
+  const { locale } = useUiLocale();
+  const instruction = pickStageInstruction(stage, locale, PLAYER_UI);
   const allQuestions = (stage.questions ?? []) as EvalQuestion[];
   const retryMode = Boolean(retryState?.wrongQuestionIds.length);
   const questions = retryMode
@@ -78,7 +83,7 @@ function EvaluationForm({
           {stage.passage}
         </div>
         <Button className="w-full" size="lg" disabled={submitting} onClick={() => onSubmit({})}>
-          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "এগিয়ে যাও"}
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : PLAYER_UI.continue}
         </Button>
       </div>
     );
@@ -87,7 +92,9 @@ function EvaluationForm({
   const storyAside =
     stage.type === "story_mcq" && stage.passage?.trim() ? (
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">গল্প</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {PLAYER_UI.storyLabel}
+        </p>
         <div className="rounded-2xl border border-border/60 bg-muted/30 p-5 text-[15px] leading-relaxed text-foreground">
           {stage.passage}
         </div>
@@ -112,11 +119,13 @@ function EvaluationForm({
 
 export function MissionStageRunner({ content }: { content: PlayerStageContent }) {
   const PLAYER_UI = usePlayerUiCopy();
+  const { locale } = useUiLocale();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stageResult, setStageResult] = useState<PlayerStageResult | null>(null);
   const [pendingNav, setPendingNav] = useState<PlayerSubmitResult | null>(null);
+  const [bridge, setBridge] = useState<{ title: string; subtitle: string } | null>(null);
   const [evalFormKey, setEvalFormKey] = useState(0);
   const [evalRetryState, setEvalRetryState] = useState<EvalRetryState | null>(null);
 
@@ -126,6 +135,15 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
   const progressPct = useMemo(
     () => (totalStages > 0 ? Math.round(((stageIndex + 1) / totalStages) * 100) : 0),
     [stageIndex, totalStages],
+  );
+
+  const nextStageLabel = useCallback(
+    (result: PlayerSubmitResult) => {
+      if (result.missionComplete) return PLAYER_UI.missionCompleteBanner;
+      if (result.nextStageOrder == null) return PLAYER_UI.backToMission;
+      return PLAYER_UI.stageFallbackTitle(result.nextStageOrder);
+    },
+    [PLAYER_UI],
   );
 
   const goNext = useCallback(
@@ -147,16 +165,19 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
     setPendingNav(result);
     setStageResult({
       kind: "success",
-      title: evalStage ? "অসাধারণ!" : "ধাপ সম্পন্ন!",
+      title: evalStage ? PLAYER_UI.result.successEvalTitle : PLAYER_UI.result.successStageTitle,
       message: evalStage
-        ? "তুমি এই মূল্যায়নে উত্তীর্ণ হয়েছো। XP আর Coins যোগ হয়েছে।"
-        : "দারুণ! তুমি এই ধাপ শেষ করেছো। XP আর Coins যোগ হয়েছে।",
+        ? PLAYER_UI.result.successEvalMessage
+        : PLAYER_UI.result.successStageMessage,
       xpEarned: result.xpEarnedThisStage ?? (evalStage ? 10 : 5),
       coinsEarned: result.coinsEarnedThisStage ?? 5,
       scorePercent: result.scorePercent,
       correctCount: result.correctCount,
       totalCount: result.totalCount,
       missionComplete: result.missionComplete,
+      clearedStageNumber: stageIndex + 1,
+      totalStages,
+      nextLabel: nextStageLabel(result),
     });
   };
 
@@ -181,9 +202,8 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
       if (result.pendingReview) {
         setStageResult({
           kind: "success",
-          title: "জমা হয়েছে!",
-          message:
-            "তোমার লেখা শিক্ষকের কাছে পাঠানো হয়েছে। রিভিউ হলে এখানে মার্ক দেখতে পারবে। তার আগে পরের ধাপে যেতে পারবে না।",
+          title: PLAYER_UI.result.writingSubmittedTitle,
+          message: PLAYER_UI.result.writingSubmittedMessage,
           xpEarned: 0,
           coinsEarned: 0,
         });
@@ -204,11 +224,11 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
 
         setStageResult({
           kind: "fail",
-          title: wrongCount === 1 ? "১টি প্রশ্ন ভুল হয়েছে" : "কিছু প্রশ্ন ভুল হয়েছে",
+          title: wrongCount === 1 ? PLAYER_UI.result.failOneTitle : PLAYER_UI.result.failSomeTitle,
           message:
             wrongCount != null && wrongCount > 0
-              ? `${wrongCount}টি প্রশ্ন ভুল হয়েছে। শুধু সেই প্রশ্নগুলো আবার করো। বাকিগুলো ঠিক আছে! সব ঠিক হলে পরের ধাপে যেতে পারবে।`
-              : "সব উত্তর সঠিক করতে হবে। ভুলগুলো আবার করো। তুমি পারবে!",
+              ? PLAYER_UI.result.failPartialMessage(wrongCount)
+              : PLAYER_UI.result.failGenericMessage,
           scorePercent: result.scorePercent,
           correctCount: result.correctCount,
           totalCount: result.totalCount,
@@ -222,20 +242,33 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
       setEvalRetryState(null);
       showSuccessResult(result, true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "জমা দেওয়া যায়নি");
+      setError(err instanceof Error ? err.message : PLAYER_UI.couldNotSubmit);
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleResultContinue = () => {
+    const nav = pendingNav;
     setStageResult(null);
-    if (pendingNav) {
-      goNext(pendingNav);
-      setPendingNav(null);
-    } else {
+    setPendingNav(null);
+    if (!nav) {
       router.refresh();
+      return;
     }
+
+    const subtitle = nav.missionComplete
+      ? PLAYER_UI.result.bridgeMissionDone
+      : PLAYER_UI.result.headingNext(nextStageLabel(nav));
+
+    setBridge({
+      title: PLAYER_UI.result.bridgeTitle,
+      subtitle,
+    });
+
+    window.setTimeout(() => {
+      goNext(nav);
+    }, 1100);
   };
 
   const handleEvalRetry = () => {
@@ -252,7 +285,12 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-gradient-to-b from-slate-50 to-white font-bengali dark:from-slate-950 dark:to-slate-900">
+    <div
+      className={cn(
+        "flex min-h-[100dvh] flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900",
+        locale === "bn" && "font-bengali",
+      )}
+    >
       <header className="border-b border-border/50 bg-background/80 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <Link
@@ -297,16 +335,46 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
               dangerouslySetInnerHTML={{ __html: stage.storyHtml ?? "" }}
             />
             <Button className="w-full gap-2" size="lg" disabled={submitting} onClick={() => void handleComplete()}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{PLAYER_UI.continue} <ChevronRight className="h-4 w-4" /></>}
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  {PLAYER_UI.continue} <ChevronRight className="h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
         )}
 
         {stage.kind === "video" && (
-          <div className="space-y-6">
-            <PlayerVideoEmbed videoUrl={stage.videoUrl} title={stage.title ?? PLAYER_UI.learningVideo} />
+          <div className="space-y-5">
+            <PlayerVideoEmbed
+              videoUrl={stage.videoUrl}
+              title={stage.title ?? PLAYER_UI.learningVideo}
+              emptyMessage={PLAYER_UI.videoEmpty}
+              invalidMessage={PLAYER_UI.videoInvalid}
+            />
+            <div className="rounded-2xl border border-border/60 bg-muted/25 px-4 py-3.5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {PLAYER_UI.videoBenefitsTitle}
+              </p>
+              <ul className="mt-2 space-y-1.5 text-sm leading-snug text-foreground">
+                {PLAYER_UI.videoBenefits.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <Button className="w-full gap-2" size="lg" disabled={submitting} onClick={() => void handleComplete()}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{PLAYER_UI.continue} <ChevronRight className="h-4 w-4" /></>}
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  {PLAYER_UI.continue} <ChevronRight className="h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
         )}
@@ -325,16 +393,16 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
         {stage.kind === "evaluation" &&
           stage.evaluation &&
           stage.evaluation.type !== "writing_review" && (
-          <EvaluationForm
-            key={evalFormKey}
-            stage={stage.evaluation}
-            missionSlug={missionSlug}
-            stageOrder={activeStageOrder}
-            submitting={submitting}
-            retryState={evalRetryState}
-            onSubmit={(answers) => void handleEvalSubmit(answers)}
-          />
-        )}
+            <EvaluationForm
+              key={evalFormKey}
+              stage={stage.evaluation}
+              missionSlug={missionSlug}
+              stageOrder={activeStageOrder}
+              submitting={submitting}
+              retryState={evalRetryState}
+              onSubmit={(answers) => void handleEvalSubmit(answers)}
+            />
+          )}
 
         {error ? (
           <p className="mt-4 text-center text-sm text-destructive" role="alert">
@@ -354,6 +422,8 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
           onRetry={stageResult.kind === "fail" ? handleEvalRetry : undefined}
         />
       ) : null}
+
+      {bridge ? <StageTransitionBridge title={bridge.title} subtitle={bridge.subtitle} /> : null}
     </div>
   );
 }

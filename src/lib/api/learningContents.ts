@@ -26,10 +26,10 @@ export interface LearningContent {
 }
 
 /** Shape returned by content preview API (no createdBy/updatedBy). */
-export interface LearningContentPreview extends Pick<
+export type LearningContentPreview = Pick<
   LearningContent,
   "_id" | "contentCode" | "title" | "type" | "body" | "videoUrl" | "isPublished" | "createdAt" | "updatedAt"
-> {}
+>;
 
 export interface CreateLearningContentPayload {
   /** Level and content number e.g. L1C1 (unique, required). */

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 
 const DRAG_TYPE = "application/x-gamlish-rearrange-token";
 
@@ -160,14 +161,14 @@ export function RearrangeWordTiles({
   };
 
   const interactionDisabled = Boolean(disabled || locked);
+  const PLAYER_UI = usePlayerUiCopy();
+  const copy = PLAYER_UI.eval;
 
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-2 text-sm font-medium text-foreground">শব্দগুলো সাজিয়ে সঠিক বাক্য তৈরি করো</p>
-        <p className="text-xs text-muted-foreground">
-          শব্দ টেনে এনে উপরে সাজাও, অথবা ট্যাপ করে বেছে নাও।
-        </p>
+        <p className="mb-2 text-sm font-medium text-foreground">{copy.rearrangeTitle}</p>
+        <p className="text-xs text-muted-foreground">{copy.rearrangeHint}</p>
       </div>
 
       <div
@@ -194,7 +195,7 @@ export function RearrangeWordTiles({
         }}
       >
         {sentence.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground">শব্দ এখানে সাজাও…</p>
+          <p className="text-center text-sm text-muted-foreground">{copy.rearrangeDrop}</p>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
             {sentence.map((token, index) => (
@@ -234,7 +235,9 @@ export function RearrangeWordTiles({
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">শব্দ ব্যাংক</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {copy.rearrangeBank}
+        </p>
         <div className="flex flex-wrap gap-2">
           {pool.map((token) => (
             <WordChip
@@ -256,7 +259,8 @@ export function RearrangeWordTiles({
 
       {value ? (
         <p className="text-xs text-muted-foreground">
-          তোমার বাক্য: <span className="font-medium text-foreground">{value}</span>
+          {copy.rearrangeYourSentence}{" "}
+          <span className="font-medium text-foreground">{value}</span>
         </p>
       ) : null}
     </div>

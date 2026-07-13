@@ -25,8 +25,6 @@ import { cn } from "@/lib/utils";
 
 type NavUser = CurrentUser | { role: UserRole; userId: string } | null;
 
-const PUBLIC_LINKS = [{ href: "/pricing", labelKey: "publicPlansPricing" as const }] as const;
-
 const STUDENT_LINKS = ENABLE_READING
   ? ([
       { href: "/profile/reading", labelKey: "reading" as const },
@@ -133,18 +131,6 @@ export function SiteMobileNav(props: {
           )}
 
           <nav className="flex flex-col gap-0.5" aria-label="Mobile navigation">
-            {!user &&
-              PUBLIC_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={close}
-                  className={mobileLinkClass(isNavActive(link.href))}
-                >
-                  {shell[link.labelKey]}
-                </Link>
-              ))}
-
             {isStudent &&
               STUDENT_LINKS.map((link) => (
                 <Link

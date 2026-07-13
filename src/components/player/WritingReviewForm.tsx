@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { PlayerStageContent, PlayerWritingReviewState } from "@/src/lib/api/player";
 import { countWords } from "@/src/lib/player-writing-utils";
+import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { pickStageInstruction } from "@/src/lib/player-ui-copy";
 
 const TOPICS = [
   { id: "A" as const, label: "Option A: Tell us about yourself" },
@@ -28,6 +31,8 @@ export function WritingReviewForm({
   onSubmit: (answers: Record<string, unknown>) => void;
   onContinue: () => void;
 }) {
+  const PLAYER_UI = usePlayerUiCopy();
+  const { locale } = useUiLocale();
   const [topicOption, setTopicOption] = useState<"A" | "B" | "C">(
     writingReview?.topicOption ?? "A",
   );
@@ -39,6 +44,7 @@ export function WritingReviewForm({
   const isGraded = writingReview?.status === "graded";
   const passed = writingReview?.passed === true;
   const failed = isGraded && writingReview?.passed === false;
+  const instruction = pickStageInstruction(evaluation, locale, PLAYER_UI);
 
   if (isPending) {
     return (
@@ -47,11 +53,10 @@ export function WritingReviewForm({
           <Clock className="mt-0.5 h-6 w-6 shrink-0 text-amber-600 dark:text-amber-400" />
           <div className="space-y-2">
             <p className="font-semibold text-amber-950 dark:text-amber-100">
-              জমা হয়েছে. শিক্ষক রিভিউ করছেন
+              {PLAYER_UI.writing.pendingTitle}
             </p>
             <p className="text-sm leading-relaxed text-amber-900/90 dark:text-amber-100/90">
-              তোমার লেখা জমা হয়েছে। একজন শিক্ষক বা অ্যাডমিন এটি দেখে ১০ এর মধ্যে মার্ক দেবেন।
-              রিভিউ হওয়ার আগ পর্যন্ত পরের ধাপে যেতে পারবে না।
+              {PLAYER_UI.writing.pendingBody}
             </p>
           </div>
         </div>
@@ -72,19 +77,21 @@ export function WritingReviewForm({
     return (
       <div className="space-y-4 rounded-2xl border border-emerald-300/50 bg-emerald-50/80 p-6 dark:border-emerald-800/40 dark:bg-emerald-950/30">
         <p className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
-          অভিনন্দন! তোমার লেখা অনুমোদিত হয়েছে।
+          {PLAYER_UI.writing.passedTitle}
         </p>
         <p className="text-2xl font-bold text-emerald-800 dark:text-emerald-200">
           Score: {writingReview?.score}/10
         </p>
         {writingReview?.feedback ? (
           <div className="rounded-xl border border-border/60 bg-background/80 p-4 text-sm">
-            <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">Teacher feedback</p>
+            <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+              Teacher feedback
+            </p>
             <p className="leading-relaxed">{writingReview.feedback}</p>
           </div>
         ) : null}
         <Button className="w-full gap-2" size="lg" onClick={onContinue}>
-          গ্র্যাজুয়েশন ধাপে যাও <PenLine className="h-4 w-4" />
+          {PLAYER_UI.writing.goGraduation} <PenLine className="h-4 w-4" />
         </Button>
       </div>
     );
@@ -92,9 +99,7 @@ export function WritingReviewForm({
 
   return (
     <div className="space-y-5">
-      {evaluation.instructionBn ? (
-        <p className="text-sm text-muted-foreground">{evaluation.instructionBn}</p>
-      ) : null}
+      {instruction ? <p className="text-sm text-muted-foreground">{instruction}</p> : null}
       {evaluation.promptHtml ? (
         <div
           className="prose prose-sm max-w-none rounded-xl border border-border/60 bg-muted/30 p-4 dark:prose-invert"
@@ -105,7 +110,7 @@ export function WritingReviewForm({
       {failed ? (
         <div className="rounded-xl border border-amber-400/50 bg-amber-50/70 px-4 py-3 text-sm dark:bg-amber-950/25">
           <p className="font-semibold text-amber-950 dark:text-amber-100">
-            Score: {writingReview?.score}/10. আবার লিখে জমা দাও (পাস মার্ক: ৬/১০)
+            {PLAYER_UI.writing.failedHint(writingReview?.score ?? 0)}
           </p>
           {writingReview?.feedback ? (
             <p className="mt-2 leading-relaxed text-amber-900/90 dark:text-amber-100/90">
@@ -116,11 +121,11 @@ export function WritingReviewForm({
       ) : null}
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-semibold">বিষয় বেছে নাও</legend>
+        <legend className="text-sm font-semibold">{PLAYER_UI.writing.pickTopic}</legend>
         {TOPICS.map((topic) => (
           <label
             key={topic.id}
-            className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 p-3 has-[:checked]:border-violet-400 has-[:checked]:bg-violet-50/50 dark:has-[:checked]:bg-violet-950/20"
+            className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/60 p-3 has-[:checked]:border-primary/40 has-[:checked]:bg-primary/5"
           >
             <input
               type="radio"
@@ -136,13 +141,13 @@ export function WritingReviewForm({
       </fieldset>
 
       <div className="space-y-2">
-        <Label htmlFor="writing-content">তোমার অনুচ্ছেদ (ইংরেজিতে)</Label>
+        <Label htmlFor="writing-content">{PLAYER_UI.writing.yourParagraph}</Label>
         <textarea
           id="writing-content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={12}
-          className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm leading-relaxed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+          className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm leading-relaxed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           placeholder="Write your paragraph here (120–150 words)..."
         />
         <p className={`text-xs ${wordCount < minWords ? "text-amber-600" : "text-muted-foreground"}`}>
@@ -156,7 +161,11 @@ export function WritingReviewForm({
         disabled={submitting || wordCount < minWords || !content.trim()}
         onClick={() => onSubmit({ topicOption, content })}
       >
-        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "শিক্ষকের কাছে জমা দাও"}
+        {submitting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          PLAYER_UI.writing.submitToTeacher
+        )}
       </Button>
     </div>
   );

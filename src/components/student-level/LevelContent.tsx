@@ -418,6 +418,19 @@ export function LevelContent({
     }
   }, [allSteps, step?._id, stepIndex, isLocked, isPreview, levelId, router]);
 
+  const warmStep = useCallback(
+    (target: LevelDetailStep | null | undefined) => {
+      if (!target || isPreview || !levelId) return;
+      prefetchReadingStep(router, levelId, target);
+    },
+    [isPreview, levelId, router],
+  );
+
+  const handleIntroContinue = useCallback(() => {
+    markLevelIntroDismissed(levelId);
+    setIntroDismissed(true);
+  }, [levelId]);
+
   if (!step) {
     return <LevelContentEmpty />;
   }
@@ -431,14 +444,6 @@ export function LevelContent({
   const hasNext = allSteps && stepIndex < totalSteps;
   const prevStep = hasPrev && allSteps ? allSteps[stepIndex - 2] : null;
   const nextStep = hasNext && allSteps ? allSteps[stepIndex] : null;
-
-  const warmStep = useCallback(
-    (target: LevelDetailStep | null | undefined) => {
-      if (!target || isPreview || !levelId) return;
-      prefetchReadingStep(router, levelId, target);
-    },
-    [isPreview, levelId, router],
-  );
 
   const isPracticeTestStep = step.stepType === "PRACTICE_TEST";
   const isFinalEvaluationStep = step.stepType === "FINAL_EVALUATION";
@@ -470,11 +475,6 @@ export function LevelContent({
     isFinalEvaluationStep && !isPreview && !isLocked && !showSubscriptionPrompt && !contentError;
   const showPremiumStepLauncher =
     showLevelIntroVideo || showPracticeTestLauncher || showFinalEvaluationLauncher;
-
-  const handleIntroContinue = useCallback(() => {
-    markLevelIntroDismissed(levelId);
-    setIntroDismissed(true);
-  }, [levelId]);
 
   return (
     <div>

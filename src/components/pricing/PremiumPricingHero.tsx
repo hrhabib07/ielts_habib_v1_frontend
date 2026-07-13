@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   BadgeCheck,
   Crown,
@@ -179,14 +180,14 @@ export function PremiumPricingHero({
                 className={cn("h-14 min-w-[280px] rounded-full px-8 text-base font-bold", brandSurfaces.ctaButton)}
                 asChild
               >
-                <a href="/register">Create account · Mission 01 free</a>
+                <Link href="/register">Create account · Mission 01 free</Link>
               </Button>
-              <a
+              <Link
                 href="/login"
                 className="text-sm font-medium text-primary underline-offset-4 hover:text-primary/80 hover:underline"
               >
                 I already have an account
-              </a>
+              </Link>
             </>
           )}
           <p className="text-xs text-muted-foreground">
