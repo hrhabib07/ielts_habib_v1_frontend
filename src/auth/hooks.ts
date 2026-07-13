@@ -152,12 +152,33 @@ export function useVerifyOtp() {
         window.location.href = "/";
       }
     } catch (err: unknown) {
-      const msg =
+      const ax =
         err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { message?: string } } }).response?.data
-              ?.message
+          ? (err as {
+              response?: {
+                data?: {
+                  message?: string;
+                  errorSources?: { message?: string }[];
+                };
+                status?: number;
+              };
+            })
           : null;
-      setError(msg ?? "Invalid or expired OTP. Please try again.");
+      const apiMessage =
+        ax?.response?.data?.message ??
+        ax?.response?.data?.errorSources?.[0]?.message ??
+        null;
+      if (apiMessage && apiMessage !== "Invalid ID") {
+        setError(apiMessage);
+      } else if (ax?.response?.status === 409) {
+        setError("An account with this email already exists. Please sign in.");
+      } else if (apiMessage === "Invalid ID") {
+        setError(
+          "Account setup failed. Please request a new code from Register and try again.",
+        );
+      } else {
+        setError(apiMessage ?? "Invalid or expired OTP. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
