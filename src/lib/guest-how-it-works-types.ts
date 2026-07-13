@@ -1,40 +1,33 @@
-export type GuestHowItWorksSkillIcon =
-  | "zap"
-  | "clock"
-  | "wind"
-  | "book"
-  | "trending";
-
-export type GuestHowItWorksPillarIcon = "clock" | "focus" | "brain";
+export type GuestHowItWorksStepIcon =
+  | "gamepad"
+  | "userPlus"
+  | "shieldCheck"
+  | "play"
+  | "unlock";
 
 export interface GuestLandingZoneMockCopy {
   readonly zoneLabel: string;
   readonly title: string;
 }
 
-export interface GuestHowItWorksPillar {
+export interface GuestHowItWorksStep {
+  readonly icon: GuestHowItWorksStepIcon;
   readonly title: string;
-  readonly icon: GuestHowItWorksPillarIcon;
+  readonly description: string;
 }
 
-export interface GuestHowItWorksSkill {
-  readonly label: string;
-  readonly icon: GuestHowItWorksSkillIcon;
+export interface GuestHowItWorksSquadTeaser {
+  readonly title: string;
+  readonly description: string;
+  readonly badge: string;
 }
 
 export interface GuestHowGamlishWorksCopy {
-  readonly videoEyebrow: string;
-  readonly videoTitle: string;
-  readonly videoSubtitle: string;
-  readonly videoPlaceholderTitle: string;
-  readonly videoPlaceholderBody: string;
-  readonly pillarsTitle: string;
-  readonly examPillars: readonly GuestHowItWorksPillar[];
-  readonly levelsTitle: string;
-  readonly levelsLine: string;
-  readonly levelsBadge: string;
-  readonly skillsTitle: string;
-  readonly skills: readonly GuestHowItWorksSkill[];
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly subtitle: string;
+  readonly steps: readonly GuestHowItWorksStep[];
+  readonly squad: GuestHowItWorksSquadTeaser;
   readonly bottomCtaTitle: string;
   readonly bottomCtaSub: string;
 }

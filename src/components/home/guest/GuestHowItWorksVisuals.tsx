@@ -1,12 +1,10 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { BookOpen, TrendingUp, Wind, Zap, Clock3 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { GuestHowItWorksSkillIcon } from "@/src/lib/guest-how-it-works-types";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 
-/** Ascending level path with animated progress dot. */
+/** Ascending level path with animated progress dots. Kept for optional reuse. */
 export function LevelPathVisual({ className }: { className?: string }) {
   const reduceMotion = useReducedMotion();
 
@@ -45,15 +43,5 @@ export function LevelPathVisual({ className }: { className?: string }) {
         ))}
       </svg>
     </div>
-  );
-}
-
-export function SkillIconBadge({ icon }: { icon: GuestHowItWorksSkillIcon }) {
-  const icons = { zap: Zap, clock: Clock3, wind: Wind, book: BookOpen, trending: TrendingUp };
-  const Icon = icons[icon];
-  return (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-accent/15 bg-accent/10 text-accent">
-      <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-    </span>
   );
 }

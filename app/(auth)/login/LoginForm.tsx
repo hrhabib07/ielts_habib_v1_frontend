@@ -27,7 +27,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
   const [password, setPassword] = useState("");
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+    <div className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-4 py-10 sm:py-12">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>

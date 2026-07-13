@@ -2,33 +2,29 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, BookOpen, Brain, Crosshair, Clock3, TrendingUp, Wind, Zap, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Gamepad2,
+  LockOpen,
+  Play,
+  ShieldCheck,
+  UserPlus,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  guestGlassCardClass,
-  useGuestLandingLocale,
-} from "@/src/components/home/guest/GuestLandingLocale";
-import { GuestLandingVideo } from "@/src/components/home/guest/GuestLandingVideo";
+import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { GuestCampShowcase } from "@/src/components/home/guest/GuestCampShowcase";
-import { LevelPathVisual } from "@/src/components/home/guest/GuestHowItWorksVisuals";
-import type { GuestHowItWorksPillarIcon, GuestHowItWorksSkillIcon } from "@/src/lib/guest-how-it-works-types";
-import {
-  GUEST_EASE,
-} from "@/src/components/home/guest/guest-landing-motion";
+import type { GuestHowItWorksStepIcon } from "@/src/lib/guest-how-it-works-types";
+import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import { cn } from "@/lib/utils";
 
-const PILLAR_ICONS: Record<GuestHowItWorksPillarIcon, LucideIcon> = {
-  clock: Clock3,
-  focus: Crosshair,
-  brain: Brain,
-};
-
-const SKILL_ICONS: Record<GuestHowItWorksSkillIcon, LucideIcon> = {
-  zap: Zap,
-  clock: Clock3,
-  wind: Wind,
-  book: BookOpen,
-  trending: TrendingUp,
+const STEP_ICONS: Record<GuestHowItWorksStepIcon, LucideIcon> = {
+  gamepad: Gamepad2,
+  userPlus: UserPlus,
+  shieldCheck: ShieldCheck,
+  play: Play,
+  unlock: LockOpen,
 };
 
 export function GuestHowGamlishWorks() {
@@ -39,154 +35,121 @@ export function GuestHowGamlishWorks() {
   return (
     <section
       id="how-gamlish-works"
-      className="scroll-mt-24 border-t border-border/30 px-4 pb-20 pt-4 sm:px-6 sm:pb-24"
-      aria-labelledby="how-gamlish-video-heading"
+      className="scroll-mt-24 border-t border-border/30 px-4 pb-20 pt-10 sm:px-6 sm:pb-24 sm:pt-14"
+      aria-labelledby="how-gamlish-heading"
     >
-      <div className="mx-auto max-w-5xl space-y-16 sm:space-y-20">
-        {/* Video. primary focus */}
+      <div className="mx-auto max-w-5xl space-y-14 sm:space-y-16">
         <motion.div
           className="text-center"
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.65, ease: GUEST_EASE }}
+          viewport={{ once: true, amount: 0.35 }}
+          transition={{ duration: 0.55, ease: GUEST_EASE }}
         >
           <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-accent">
-            {content.videoEyebrow}
+            {content.eyebrow}
           </p>
           <h2
-            id="how-gamlish-video-heading"
+            id="how-gamlish-heading"
             className="mt-3 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
           >
-            {content.videoTitle}
+            {content.title}
           </h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground sm:text-base">
-            {content.videoSubtitle}
+          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
+            {content.subtitle}
           </p>
-          <GuestLandingVideo
-            className="mx-auto mt-6 max-w-4xl shadow-2xl shadow-accent/10 ring-1 ring-border/40"
-            title={content.videoTitle}
-            placeholderTitle={content.videoPlaceholderTitle}
-            placeholderBody={content.videoPlaceholderBody}
-          />
         </motion.div>
+
+        <ol className="relative grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+          {content.steps.map((step, i) => {
+            const Icon = STEP_ICONS[step.icon];
+            const isLast = i === content.steps.length - 1;
+            return (
+              <motion.li
+                key={step.title}
+                initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{
+                  duration: 0.45,
+                  delay: reduceMotion ? 0 : i * 0.06,
+                  ease: GUEST_EASE,
+                }}
+                className="relative"
+              >
+                {!isLast ? (
+                  <span
+                    className="absolute left-8 top-full z-0 hidden h-3 w-px -translate-x-1/2 bg-border/70 sm:hidden"
+                    aria-hidden
+                  />
+                ) : null}
+                <article
+                  className={cn(
+                    "relative h-full rounded-2xl border border-border/60 bg-card px-5 py-5",
+                    "transition-colors duration-300 hover:border-accent/25 hover:bg-accent/[0.03]",
+                  )}
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full border border-accent/20 bg-accent/10 text-accent">
+                    <Icon className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold tracking-tight text-foreground">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    {step.description}
+                  </p>
+                </article>
+              </motion.li>
+            );
+          })}
+        </ol>
+
+        <motion.aside
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.5, ease: GUEST_EASE }}
+          className={cn(
+            "flex flex-col gap-4 rounded-2xl border border-border/60 bg-card px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-6",
+          )}
+          aria-label={content.squad.title}
+        >
+          <div className="flex min-w-0 items-start gap-4 sm:items-center">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+              <Users className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-base font-semibold tracking-tight text-foreground">
+                {content.squad.title}
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                {content.squad.description}
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex w-fit shrink-0 items-center rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-800 dark:text-amber-200">
+            {content.squad.badge}
+          </span>
+        </motion.aside>
 
         <GuestCampShowcase />
 
-        {/* Three pillars */}
-        <div>
-          <p className="text-center text-sm font-medium text-muted-foreground sm:text-base">
-            {content.pillarsTitle}
-          </p>
-          <ul className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
-            {content.examPillars.map((pillar, i) => {
-              const Icon = PILLAR_ICONS[pillar.icon];
-              return (
-                <motion.li
-                  key={pillar.title}
-                  initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{
-                    duration: 0.45,
-                    delay: reduceMotion ? 0 : i * 0.08,
-                    ease: GUEST_EASE,
-                  }}
-                  className={cn(
-                    guestGlassCardClass,
-                    "group flex flex-col items-center px-3 py-5 text-center transition-transform duration-300 hover:-translate-y-1 sm:py-6",
-                  )}
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-accent/15 bg-accent/10 text-accent transition-colors group-hover:border-accent/30 group-hover:bg-accent/15">
-                    <Icon className="h-6 w-6" strokeWidth={1.5} aria-hidden />
-                  </div>
-                  <p className="mt-3 text-sm font-semibold text-foreground sm:text-base">
-                    {pillar.title}
-                  </p>
-                </motion.li>
-              );
-            })}
-          </ul>
-        </div>
-
-        {/* 21 missions. path visual only (camp map lives in hero) */}
         <motion.div
-          className="mx-auto max-w-xl text-center"
-          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.65, ease: GUEST_EASE }}
-        >
-          <span className="guest-hiw-badge inline-flex rounded-full border border-accent/25 bg-accent/10 px-3.5 py-1 text-[11px] font-bold uppercase tracking-wider text-accent">
-            {content.levelsBadge}
-          </span>
-          <h2 className="mt-4 text-balance text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            {content.levelsTitle}
-          </h2>
-          <p className="mt-3 text-muted-foreground sm:text-lg">{content.levelsLine}</p>
-          <div className="relative mt-8">
-            <div
-              className="pointer-events-none absolute -inset-6 rounded-3xl bg-accent/10 blur-3xl"
-              aria-hidden
-            />
-            <LevelPathVisual className="relative mx-auto" />
-          </div>
-        </motion.div>
-
-        {/* Skills */}
-        <div>
-          <h2 className="text-center text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-            {content.skillsTitle}
-          </h2>
-          <ul className="mt-6 flex flex-wrap justify-center gap-2 sm:gap-3">
-            {content.skills.map((skill, i) => {
-              const SkillIcon = SKILL_ICONS[skill.icon];
-              return (
-                <motion.li
-                  key={skill.label}
-                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{
-                    duration: 0.4,
-                    delay: reduceMotion ? 0 : i * 0.05,
-                    ease: GUEST_EASE,
-                  }}
-                  className="group inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/80 px-3.5 py-2 shadow-sm backdrop-blur-sm transition-colors hover:border-accent/25 hover:bg-accent/5 sm:px-4 sm:py-2.5"
-                >
-                  <SkillIcon
-                    className="h-4 w-4 shrink-0 text-accent"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                  <span className="text-sm font-medium text-foreground">{skill.label}</span>
-                </motion.li>
-              );
-            })}
-          </ul>
-        </div>
-
-        {/* CTA */}
-        <motion.div
-          className="guest-bottom-cta relative overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-br from-accent/10 via-card to-muted/15 px-6 py-10 text-center sm:px-12 sm:py-12"
-          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          className="relative overflow-hidden rounded-3xl border border-border/50 bg-card px-6 py-10 text-center sm:px-12 sm:py-12"
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: GUEST_EASE }}
+          transition={{ duration: 0.55, ease: GUEST_EASE }}
         >
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,color-mix(in_oklch,var(--accent)_18%,transparent),transparent_65%)]"
-            aria-hidden
-          />
-          <p className="relative text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+          <p className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
             {content.bottomCtaTitle}
           </p>
-          <p className="relative mt-2 text-sm text-muted-foreground sm:text-base">
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
             {content.bottomCtaSub}
           </p>
           <Button
             size="lg"
-            className="guest-cta-glow relative mt-7 h-12 rounded-full bg-accent px-10 font-semibold text-accent-foreground hover:bg-accent/92"
+            className="guest-cta-glow mt-7 h-12 rounded-full bg-accent px-10 font-semibold text-accent-foreground hover:bg-accent/92"
             asChild
           >
             <Link href="/register" className="inline-flex items-center gap-2">

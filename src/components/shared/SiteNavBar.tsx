@@ -252,7 +252,7 @@ export function SiteNavBar(props: {
             <FoundingMemberBadge size="sm" compact className="hidden lg:inline-flex" />
           )}
 
-          <UiLanguageToggle />
+          <UiLanguageToggle variant="auto" />
 
           <ThemeToggleButton />
 

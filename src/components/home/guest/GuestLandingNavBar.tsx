@@ -35,17 +35,17 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="mx-auto flex h-14 max-w-6xl flex-nowrap items-center justify-between gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6">
         <Link
           href="/"
           data-nav-brand="single"
-          className="flex h-9 shrink-0 flex-nowrap items-center pr-2 transition-opacity hover:opacity-85"
+          className="flex h-9 min-w-0 shrink items-center transition-opacity hover:opacity-85"
           aria-label="Gamlish home"
         >
           <GamlishNavBrand showTagline={false} />
         </Link>
 
-        <div className="hidden shrink-0 items-center gap-2 sm:gap-2.5 lg:flex">
+        <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
           <Link
             href="/login"
             className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
@@ -57,23 +57,12 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
               {copy.navRegister}
             </Button>
           </Link>
-          <UiLanguageToggle />
+          <UiLanguageToggle variant="segmented" />
           <ThemeToggleButton />
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
-          <Link
-            href="/login"
-            className="rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground sm:px-3 sm:text-sm"
-          >
-            {copy.navLogin}
-          </Link>
-          <Link href="/register">
-            <Button className="h-8 rounded-full px-3 text-xs font-semibold sm:h-9 sm:px-4 sm:text-sm">
-              {copy.navRegister}
-            </Button>
-          </Link>
-          <UiLanguageToggle className="scale-[0.92] origin-right sm:scale-100" />
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5 lg:hidden">
+          <UiLanguageToggle variant="icon" />
           <ThemeToggleButton />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -87,19 +76,26 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                 <Menu className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="flex w-[min(100vw,20rem)] flex-col gap-0 p-0 sm:max-w-xs">
+            <SheetContent
+              side="right"
+              className="flex w-[min(100vw,20rem)] flex-col gap-0 p-0 sm:max-w-xs"
+            >
               <SheetTitle className="sr-only">Menu</SheetTitle>
               <div className="flex flex-col gap-6 px-5 pb-8 pt-14">
-                <div className="space-y-1 border-b border-border/60 pb-5">
+                <div className="space-y-2 border-b border-border/60 pb-5">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     Language
                   </p>
-                  <UiLanguageToggle className="w-full max-w-[11rem]" />
+                  <UiLanguageToggle variant="segmented" className="w-full max-w-[12rem]" />
                 </div>
 
                 <nav className="flex flex-col gap-1" aria-label="Guest menu">
                   {isHome ? (
-                    <button type="button" onClick={scrollToHowItWorks} className={howToPlayClassName}>
+                    <button
+                      type="button"
+                      onClick={scrollToHowItWorks}
+                      className={howToPlayClassName}
+                    >
                       {copy.ctaSecondary}
                     </button>
                   ) : (
@@ -127,8 +123,14 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                   </Link>
                 </nav>
 
-                <Link href="/register" onClick={() => setMenuOpen(false)} className="mt-auto block">
-                  <Button className="h-11 w-full rounded-full font-semibold">{copy.navRegister}</Button>
+                <Link
+                  href="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="mt-auto block"
+                >
+                  <Button className="h-11 w-full rounded-full font-semibold">
+                    {copy.navRegister}
+                  </Button>
                 </Link>
               </div>
             </SheetContent>

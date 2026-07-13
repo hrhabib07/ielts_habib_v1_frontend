@@ -5,10 +5,9 @@ import type {
 
 export type {
   GuestHowGamlishWorksCopy,
-  GuestHowItWorksPillar,
-  GuestHowItWorksPillarIcon,
-  GuestHowItWorksSkill,
-  GuestHowItWorksSkillIcon,
+  GuestHowItWorksStep,
+  GuestHowItWorksStepIcon,
+  GuestHowItWorksSquadTeaser,
   GuestLandingZoneMockCopy,
 } from "@/src/lib/guest-how-it-works-types";
 
@@ -98,32 +97,44 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       tryAgain: "Try again",
     },
     howItWorks: {
-      videoEyebrow: "See it in action",
-      videoTitle: "How Gamlish works",
-      videoSubtitle:
-        "Play a mission: short story, learning video, quick checks, then unlock the next one.",
-      videoPlaceholderTitle: "Video walkthrough",
-      videoPlaceholderBody:
-        "Video not configured yet. An admin can set it in Dashboard, Subscription Plans, YouTube videos.",
-      pillarsTitle: "English should feel like a game",
-      examPillars: [
-        { title: "Missions", icon: "brain" },
-        { title: "Rewards", icon: "clock" },
-        { title: "Progress", icon: "focus" },
+      eyebrow: "Get started",
+      title: "How Gamlish works",
+      subtitle: "Five clear steps. Scroll once and you will know exactly what to do.",
+      steps: [
+        {
+          icon: "gamepad",
+          title: "1. What is Gamlish?",
+          description: "A game where you learn English by playing missions.",
+        },
+        {
+          icon: "userPlus",
+          title: "2. Create your account",
+          description: "Enter your email and sign up in about one minute.",
+        },
+        {
+          icon: "shieldCheck",
+          title: "3. OTP and profile",
+          description: "Verify OTP, then set your password and nickname.",
+        },
+        {
+          icon: "play",
+          title: "4. Play the first level",
+          description: "Start Mission 01 free right after signup. No payment needed.",
+        },
+        {
+          icon: "unlock",
+          title: "5. Pre-order full access",
+          description: "Pre-order while you play. Full access unlocks from 1 August.",
+        },
       ],
-      levelsTitle: "21 missions across 4 camps",
-      levelsLine: "Mission 01 is free. Unlock the full course when you’re ready.",
-      levelsBadge: "21 missions",
-      skillsTitle: "Skills you actually use",
-      skills: [
-        { label: "Word order & grammar", icon: "book" },
-        { label: "Translation practice", icon: "zap" },
-        { label: "Story challenges", icon: "wind" },
-        { label: "Inspection rounds", icon: "clock" },
-        { label: "XP & unlocks", icon: "trending" },
-      ],
+      squad: {
+        title: "Squad feature",
+        description:
+          "Build a squad of 5 friends and compete with other squads on score.",
+        badge: "Coming soon",
+      },
       bottomCtaTitle: "Ready for Mission 01?",
-      bottomCtaSub: "Camp 1 Mission 1 is free. No credit card required.",
+      bottomCtaSub: "Camp 1 Mission 1 is free. No card required.",
     },
   },
   bn: {
@@ -167,30 +178,42 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       tryAgain: "আবার চেষ্টা করো",
     },
     howItWorks: {
-      videoEyebrow: "দেখুন কীভাবে",
-      videoTitle: "Gamlish কীভাবে কাজ করে",
-      videoSubtitle:
-        "একটা মিশন খেলো: ছোট গল্প, শেখার ভিডিও, দ্রুত চেক, তারপর পরের মিশন আনলক।",
-      videoPlaceholderTitle: "ভিডিও ওয়াকথ্রু",
-      videoPlaceholderBody:
-        "ভিডিও এখনো সেট করা হয়নি। অ্যাডমিন Dashboard থেকে Subscription Plans, YouTube videos-এ সেট করতে পারবেন।",
-      pillarsTitle: "ইংরেজি শেখা যেন গেমের মতো লাগে",
-      examPillars: [
-        { title: "মিশন", icon: "brain" },
-        { title: "রিওয়ার্ড", icon: "clock" },
-        { title: "অগ্রগতি", icon: "focus" },
+      eyebrow: "শুরু করো",
+      title: "Gamlish কীভাবে কাজ করে",
+      subtitle: "পাঁচটা স্পষ্ট ধাপ। একবার স্ক্রল করলেই পুরো পথটা বোঝা যাবে।",
+      steps: [
+        {
+          icon: "gamepad",
+          title: "১. Gamlish কী?",
+          description: "গেম খেলে খেলে English শেখার প্ল্যাটফর্ম",
+        },
+        {
+          icon: "userPlus",
+          title: "২. রেজিস্টার করো",
+          description: "ইমেইল দাও, ১ মিনিটে সাইন আপ",
+        },
+        {
+          icon: "shieldCheck",
+          title: "৩. OTP আর প্রোফাইল",
+          description: "OTP বসাও, পাসওয়ার্ড আর নিকনেম সেট করো",
+        },
+        {
+          icon: "play",
+          title: "৪. প্রথম লেভেল খেলো",
+          description: "ফ্রিতে এখনই খেলা শুরু করো",
+        },
+        {
+          icon: "unlock",
+          title: "৫. প্রি-অর্ডার করো",
+          description: "১লা আগস্ট থেকে ফুল এক্সেস",
+        },
       ],
-      levelsTitle: "৪টি ক্যাম্পে ২১টি মিশন",
-      levelsLine: "Mission 01 ফ্রি। প্রস্তুত হলে পুরো কোর্স আনলক করো।",
-      levelsBadge: "২১ মিশন",
-      skillsTitle: "যে দক্ষতা কাজে লাগে",
-      skills: [
-        { label: "ওয়ার্ড অর্ডার ও গ্রামার", icon: "book" },
-        { label: "অনুবাদ অনুশীলন", icon: "zap" },
-        { label: "স্টোরি চ্যালেঞ্জ", icon: "wind" },
-        { label: "ইনস্পেকশন রাউন্ড", icon: "clock" },
-        { label: "XP ও আনলক", icon: "trending" },
-      ],
+      squad: {
+        title: "স্কোয়াড ফিচার",
+        description:
+          "৫ জন বন্ধু নিয়ে স্কোয়াড বানাও, অন্য স্কোয়াডের সাথে স্কোর দিয়ে কম্পিট করো",
+        badge: "শীঘ্রই আসছে",
+      },
       bottomCtaTitle: "Mission 01 দিয়ে শুরু করবেন?",
       bottomCtaSub: "ক্যাম্প ১ এর Mission 01 ফ্রি। কোনো কার্ড লাগবে না।",
     },
