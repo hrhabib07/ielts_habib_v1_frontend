@@ -14,9 +14,9 @@
   --color-accent: var(--accent);
   --color-danger: var(--danger);
   --color-success: var(--success);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-outfit), "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-family-bengali: var(--font-hind-siliguri), ui-sans-serif, system-ui, sans-serif;
+  --font-bengali: var(--font-hind-siliguri), "Outfit", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -61,11 +61,13 @@
 
 :root {
   --radius: 0.75rem; /* 12px */
-  --font-geist-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+  --font-outfit: "Outfit", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Legacy alias — prefer --font-outfit / font-sans */
+  --font-geist-sans: var(--font-outfit);
   --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
-  --font-hind-siliguri: "Hind Siliguri", "Noto Sans Bengali", var(--font-geist-sans);
+  --font-hind-siliguri: "Hind Siliguri", "Noto Sans Bengali", var(--font-outfit);
   /* Gamlish light — navy/midnight blue (matches “The Game of English” text), no bright blue */
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
@@ -538,15 +540,15 @@
 .camp-mission-pulse {
   animation: camp-mission-glow 2.2s ease-in-out infinite;
   border-radius: 9999px;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--steel) 45%, transparent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
 }
 
-/* Premium camp map */
+/* Premium camp map — sky/blue brand (matches guest landing CTAs) */
 .camp-map-page {
   background:
     radial-gradient(
       ellipse 90% 50% at 50% -10%,
-      color-mix(in srgb, var(--steel) 18%, transparent),
+      rgba(56, 189, 248, 0.14),
       transparent 55%
     ),
     linear-gradient(
@@ -560,37 +562,37 @@
   background:
     radial-gradient(
       ellipse 70% 60% at 50% 0%,
-      color-mix(in srgb, var(--accent) 12%, transparent),
+      rgba(56, 189, 248, 0.16),
       transparent 70%
     );
 }
 
 .camp-map-title {
-  font-family: "Syne", ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.03em;
 }
 
 .camp-continue-cta {
-  background: var(--accent);
-  color: var(--accent-foreground);
+  background: linear-gradient(90deg, #38bdf8 0%, #2563eb 100%);
+  color: #fff;
   box-shadow:
-    0 12px 32px -12px color-mix(in srgb, var(--accent) 55%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 18%, transparent);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+    0 14px 40px -14px rgba(56, 189, 248, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
 }
 
 .camp-continue-cta:hover {
-  background: color-mix(in srgb, var(--accent) 92%, black);
+  background: linear-gradient(90deg, #7dd3fc 0%, #3b82f6 100%);
   box-shadow:
-    0 16px 40px -12px color-mix(in srgb, var(--accent) 60%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 22%, transparent);
+    0 16px 44px -12px rgba(56, 189, 248, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
   transform: translateY(-1px);
+  filter: brightness(1.02);
 }
 
 .camp-zone {
   border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   box-shadow:
-    0 24px 60px -36px rgba(15, 23, 42, 0.35),
+    0 24px 60px -36px rgba(37, 99, 235, 0.22),
     0 1px 0 color-mix(in srgb, white 40%, transparent);
   background: var(--card);
 }
@@ -602,29 +604,29 @@
 }
 
 .camp-zone-active {
-  border-color: color-mix(in srgb, var(--steel) 45%, var(--border));
+  border-color: rgba(56, 189, 248, 0.4);
   box-shadow:
-    0 28px 70px -34px color-mix(in srgb, var(--accent) 35%, transparent),
+    0 28px 70px -34px rgba(37, 99, 235, 0.35),
     0 1px 0 color-mix(in srgb, white 50%, transparent);
 }
 
 .camp-zone-header {
   background: linear-gradient(
     145deg,
-    #0f172a 0%,
-    #1e3a8a 55%,
-    #152544 100%
+    #0ea5e9 0%,
+    #2563eb 52%,
+    #1d4ed8 100%
   );
 }
 
 .camp-zone-header-mesh {
   background-image:
-    radial-gradient(circle at 12% 20%, rgba(180, 204, 232, 0.18), transparent 42%),
-    radial-gradient(circle at 88% 10%, rgba(248, 250, 252, 0.1), transparent 38%),
+    radial-gradient(circle at 12% 20%, rgba(186, 230, 253, 0.28), transparent 42%),
+    radial-gradient(circle at 88% 10%, rgba(248, 250, 252, 0.14), transparent 38%),
     linear-gradient(
       120deg,
       transparent 40%,
-      rgba(180, 204, 232, 0.08) 50%,
+      rgba(125, 211, 252, 0.14) 50%,
       transparent 60%
     );
   background-size: 100% 100%, 100% 100%, 220% 220%;
@@ -632,47 +634,62 @@
 }
 
 .camp-zone-badge {
-  background: color-mix(in srgb, var(--steel) 22%, transparent);
+  background: rgba(255, 255, 255, 0.16);
   color: #f8fafc;
-  border: 1px solid rgba(180, 204, 232, 0.35);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(186, 230, 253, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .camp-node {
   border: 3px solid color-mix(in srgb, var(--border) 80%, transparent);
   background: var(--card);
   box-shadow:
-    0 10px 24px -12px rgba(15, 23, 42, 0.35),
+    0 10px 24px -12px rgba(37, 99, 235, 0.22),
     inset 0 1px 0 color-mix(in srgb, white 55%, transparent);
 }
 
 .camp-node-done {
-  border-color: color-mix(in srgb, var(--steel-deep) 70%, transparent);
+  border-color: rgba(14, 165, 233, 0.55);
   background: linear-gradient(
     160deg,
-    color-mix(in srgb, var(--steel) 35%, white),
-    color-mix(in srgb, var(--steel) 12%, var(--card))
+    rgba(186, 230, 253, 0.85),
+    rgba(224, 242, 254, 0.95)
   );
-  color: var(--primary);
+  color: #0369a1;
+}
+
+.dark .camp-node-done {
+  border-color: rgba(56, 189, 248, 0.45);
+  background: linear-gradient(
+    160deg,
+    rgba(14, 165, 233, 0.35),
+    rgba(37, 99, 235, 0.25)
+  );
+  color: #e0f2fe;
 }
 
 .camp-node-live {
-  border-color: var(--accent);
-  background: linear-gradient(160deg, var(--accent), color-mix(in srgb, var(--primary) 80%, var(--accent)));
-  color: var(--accent-foreground);
+  border-color: #38bdf8;
+  background: linear-gradient(160deg, #38bdf8 0%, #2563eb 100%);
+  color: #fff;
   box-shadow:
-    0 14px 32px -10px color-mix(in srgb, var(--accent) 55%, transparent),
-    0 0 0 4px color-mix(in srgb, var(--steel) 28%, transparent);
+    0 14px 32px -10px rgba(56, 189, 248, 0.55),
+    0 0 0 4px rgba(56, 189, 248, 0.22);
 }
 
 .camp-node-ready {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-color: rgba(37, 99, 235, 0.4);
   background: linear-gradient(
     165deg,
-    color-mix(in srgb, var(--accent) 8%, var(--card)),
+    rgba(56, 189, 248, 0.1),
     var(--card)
   );
-  color: var(--accent);
+  color: #1d4ed8;
+}
+
+.dark .camp-node-ready {
+  color: #7dd3fc;
+  border-color: rgba(56, 189, 248, 0.35);
 }
 
 .camp-node-locked {
@@ -683,26 +700,30 @@
 }
 
 .camp-node-pay {
-  border-color: color-mix(in srgb, var(--steel-deep) 55%, transparent);
+  border-color: rgba(37, 99, 235, 0.4);
   background: linear-gradient(
     165deg,
-    color-mix(in srgb, var(--steel) 22%, var(--card)),
+    rgba(56, 189, 248, 0.14),
     var(--card)
   );
-  color: var(--steel-deep);
+  color: #1d4ed8;
+}
+
+.dark .camp-node-pay {
+  color: #7dd3fc;
 }
 
 .camp-node-inspect {
   box-shadow:
-    0 10px 24px -12px rgba(15, 23, 42, 0.35),
-    0 0 0 3px color-mix(in srgb, var(--steel) 35%, transparent);
+    0 10px 24px -12px rgba(37, 99, 235, 0.28),
+    0 0 0 3px rgba(56, 189, 248, 0.28);
 }
 
 .camp-map-spine {
   background: linear-gradient(
     to bottom,
-    color-mix(in oklch, var(--accent) 55%, transparent),
-    color-mix(in oklch, var(--primary) 35%, transparent)
+    rgba(56, 189, 248, 0.55),
+    rgba(37, 99, 235, 0.35)
   );
 }
 
@@ -778,7 +799,8 @@
 }
 
 .guest-brand-display {
-  font-family: "Syne", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .guest-hero-world {

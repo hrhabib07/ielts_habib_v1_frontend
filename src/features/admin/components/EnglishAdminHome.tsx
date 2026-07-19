@@ -10,6 +10,7 @@ import {
   ChevronRight,
   CreditCard,
   Gamepad2,
+  MessageSquareHeart,
   PackageCheck,
   Users,
 } from "lucide-react";
@@ -68,7 +69,26 @@ export function EnglishAdminHome() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-foreground">Students</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">Search and view any learner profile</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  View all learners, emails, and English mission progress
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/admin/demo-feedback">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                <MessageSquareHeart className="h-5 w-5 text-amber-700 dark:text-amber-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">Demo feedback</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Guest demo ratings, comments, and completion stats
+                </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
             </div>

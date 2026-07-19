@@ -7,8 +7,10 @@ import {
 } from "@/src/components/home/guest/GuestLandingLocale";
 import { GuestLandingAmbient } from "@/src/components/home/guest/GuestLandingAmbient";
 import { GuestLandingHero } from "@/src/components/home/guest/GuestLandingHero";
+import { GuestComparisonSection } from "@/src/components/home/guest/GuestComparisonSection";
 import { GuestPlayMoment } from "@/src/components/home/guest/GuestPlayMoment";
 import { GuestHowGamlishWorks } from "@/src/components/home/guest/GuestHowGamlishWorks";
+import { GuestStickyDemoCta } from "@/src/components/home/guest/GuestStickyDemoCta";
 
 function GuestLandingSurface() {
   const { locale } = useGuestLandingLocale();
@@ -27,8 +29,10 @@ function GuestLandingSurface() {
       <div className="relative">
         <GuestLandingHero />
         <GuestPlayMoment />
+        <GuestComparisonSection />
         <GuestHowGamlishWorks />
       </div>
+      <GuestStickyDemoCta />
     </div>
   );
 }

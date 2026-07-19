@@ -43,6 +43,10 @@ import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { ENABLE_READING, PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
 import { useProfilePageCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
+import { MyGamlishHub } from "@/src/components/profile/MyGamlishHub";
+import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
+import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
 
 function formatSubscriptionDate(iso: string): string {
   try {
@@ -180,7 +184,6 @@ export default function ProfilePage() {
 
   const readingTarget =
     profileRecord?.desiredBandScore ?? profileRecord?.targetBands?.reading;
-  const publicProfileUrl = username ? `/u/${username}` : null;
 
   if (loading) {
     return <ProfilePageSkeleton />;
@@ -201,7 +204,17 @@ export default function ProfilePage() {
     return <ProfilePageSkeleton />;
   }
 
-  const showFoundingBadge = isFoundingMemberEligible(subscription);
+  const publicHandle =
+    profileRecord.publicHandle ??
+    profileRecord.username ??
+    profileRecord.publicId ??
+    null;
+  const publicProfileUrl = publicHandle ? `/u/${publicHandle}` : null;
+
+  const showFoundingBadge = isFoundingMemberEligible(
+    subscription,
+    profileRecord,
+  );
 
   return (
     <div className="relative min-h-[calc(100dvh-4rem)] overflow-x-hidden">
@@ -212,6 +225,12 @@ export default function ProfilePage() {
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:space-y-10 md:px-6 md:py-10">
+        {!ENABLE_READING ? (
+          <div className="-mx-4 md:-mx-6">
+            <PlayerXpHud className="rounded-none border-x-0 sm:mx-4 sm:rounded-2xl sm:border md:mx-6" />
+          </div>
+        ) : null}
+
         <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-lg shadow-black/[0.03] dark:shadow-black/20">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-primary/[0.04]" aria-hidden />
           <div className="relative p-6 md:p-8">
@@ -234,13 +253,34 @@ export default function ProfilePage() {
                     {displayName.trim() || "Student"}
                   </h1>
                   {showFoundingBadge && (
-                    <div className="mt-2">
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
                       <FoundingMemberBadge size="md" />
+                      {profileRecord.founderNumber ? (
+                        <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300">
+                          #{String(profileRecord.founderNumber).padStart(3, "0")}
+                          {profileRecord.founderTier
+                            ? ` · ${profileRecord.founderTier}`
+                            : ""}
+                        </span>
+                      ) : null}
                     </div>
                   )}
-                  {username && ENABLE_READING && (
-                    <p className="mt-1 text-sm text-muted-foreground">@{username}</p>
-                  )}
+                  {publicHandle ? (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {profileRecord.username
+                        ? `@${profileRecord.username}`
+                        : `ID · ${publicHandle}`}
+                    </p>
+                  ) : null}
+                  <div className="mt-2">
+                    <JoinedDateBadge
+                      joinedAt={
+                        typeof profileRecord.joinedAt === "string"
+                          ? profileRecord.joinedAt
+                          : null
+                      }
+                    />
+                  </div>
                   {phone?.trim() ? (
                     <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                       <Phone className="h-4 w-4 shrink-0" />
@@ -276,15 +316,15 @@ export default function ProfilePage() {
                       </>
                     )}
                   </div>
-                  {publicProfileUrl && ENABLE_READING && (
+                  {publicProfileUrl ? (
                     <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
                       <Link2 className="h-3.5 w-3.5" />
-                      Public link:{" "}
+                      Public profile:{" "}
                       <Link href={publicProfileUrl} className="font-medium text-primary hover:underline">
-                        /u/{username}
+                        /u/{publicHandle}
                       </Link>
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
@@ -304,6 +344,14 @@ export default function ProfilePage() {
                   </Link>
                 </Button>
                 )}
+                {publicProfileUrl ? (
+                  <Button asChild variant="outline" size="lg" className="gap-2">
+                    <Link href={publicProfileUrl}>
+                      <Link2 className="h-4 w-4" />
+                      Public profile
+                    </Link>
+                  </Button>
+                ) : null}
                 <Button asChild variant="secondary" size="lg" className="gap-2">
                   <Link href="/pricing?course=english-foundations">
                     <CreditCard className="h-4 w-4" />
@@ -314,6 +362,14 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        <UsernameClaimBanner />
+
+        {!ENABLE_READING ? (
+          <Card className="border border-border/60 bg-card/80 p-5 shadow-sm md:p-7">
+            <MyGamlishHub />
+          </Card>
+        ) : null}
 
         <Card className="overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-card shadow-sm transition-shadow hover:shadow-md">
           <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between md:p-7">
@@ -369,7 +425,12 @@ export default function ProfilePage() {
             <h2 className="mb-4 text-lg font-semibold tracking-tight text-foreground md:text-xl">
               {copy.accountSecurity}
             </h2>
-            <ProfileChangePassword />
+            <ProfileChangePassword
+              hasPassword={profileRecord?.hasPassword !== false}
+              onPasswordSet={() => {
+                void refreshSession();
+              }}
+            />
           </Card>
 
           <Card className="border-border/80 p-6 shadow-sm md:p-8">

@@ -6,7 +6,7 @@ export const FOUNDING_MEMBER_CUTOFF_ISO = "2026-07-31T23:59:59.999Z";
 export const FOUNDING_MEMBER_CUTOFF = new Date(FOUNDING_MEMBER_CUTOFF_ISO);
 
 export const FOUNDING_MEMBER_TOOLTIP =
-  "Founding Member: Granted for supporting Gamlish with premium access before 1 August 2026. This badge will never be obtainable again.";
+  "Founding Member: One of the first 100 approved buyers before launch. Your Founder Number, Tier, and Badge are permanent.";
 
 export function isFoundingMemberWindowOpen(now: Date = new Date()): boolean {
   return now.getTime() <= FOUNDING_MEMBER_CUTOFF.getTime();
@@ -30,15 +30,12 @@ export function formatFoundingCountdown(ms: number): {
 
 export function isFoundingMemberEligible(
   subscription: ActiveSubscription | null | undefined,
+  profile?: { isFoundingMember?: boolean } | null,
 ): boolean {
+  // Permanent founder flag on the user wins (count-based Founding Member program).
+  if (profile?.isFoundingMember === true) return true;
   if (subscription?.isFoundingMember === true) return true;
   if (!subscription || subscription.status !== "ACTIVE") return false;
   if (new Date(subscription.endDate).getTime() <= Date.now()) return false;
-
-  if (subscription.isFounderUser) return true;
-
-  const paidAt = new Date(subscription.startDate ?? subscription.createdAt);
-  if (Number.isNaN(paidAt.getTime())) return false;
-
-  return paidAt.getTime() <= FOUNDING_MEMBER_CUTOFF.getTime();
+  return subscription.isFounderUser === true;
 }

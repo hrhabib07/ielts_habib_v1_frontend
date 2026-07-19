@@ -33,6 +33,7 @@ export interface VerifyOtpRequest {
   email: string;
   otp: string;
   password: string;
+  demoSessionId?: string | null;
 }
 
 export interface VerifyOtpResponse {
@@ -40,6 +41,7 @@ export interface VerifyOtpResponse {
   message: string;
   data: {
     token: string;
+    continuePath?: string | null;
     user: { id: string; email: string; role: "STUDENT" | "INSTRUCTOR" | "ADMIN" };
   };
 }

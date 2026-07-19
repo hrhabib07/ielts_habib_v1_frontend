@@ -3,49 +3,47 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
+import { LANDING_HIGHLIGHT_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
 
-type AccentMode = "easy" | "reading" | "game";
-
-/** Bold hero headline with gradient accent on the payoff word. */
-export function GuestHeroHeadline({
-  className,
-  accentMode = "reading",
-}: {
-  className?: string;
-  accentMode?: AccentMode;
-}) {
+/** One intentional brand-blue highlight word inside an otherwise solid headline. */
+export function GuestHeroHeadline({ className }: { className?: string }) {
   const reduceMotion = useReducedMotion();
   const { copy } = useGuestLandingLocale();
 
   const line1 = copy.heroHeadlineLine1;
   const line2 = copy.heroHeadlineLine2;
+  const accent = copy.heroAccentWord;
 
-  const accentOnLine2 = accentMode === "easy" || accentMode === "game";
+  const renderLine2 = () => {
+    if (!line2) return null;
+    if (!accent || !line2.includes(accent)) {
+      return <span className="text-foreground">{line2}</span>;
+    }
+    const [before, ...rest] = line2.split(accent);
+    const after = rest.join(accent);
+    return (
+      <>
+        {before}
+        <span className={LANDING_HIGHLIGHT_CLASS}>{accent}</span>
+        {after}
+      </>
+    );
+  };
 
   return (
     <motion.h1
       className={cn(
-        "overflow-visible text-balance text-[clamp(1.65rem,4.8vw,2.75rem)] font-semibold tracking-[-0.03em]",
+        "overflow-visible text-balance text-[clamp(1.85rem,6.2vw,2.85rem)] font-bold tracking-[-0.03em] text-foreground",
         className,
       )}
-      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.04, ease: GUEST_EASE }}
+      transition={{ duration: 0.55, delay: 0.04, ease: GUEST_EASE }}
     >
-      <span className="block leading-[1.2] text-foreground">{line1}</span>
+      <span className="block leading-[1.15]">{line1}</span>
       {line2 ? (
-        <span className="mt-3 block overflow-visible leading-[1.25] sm:mt-4">
-          <span
-            className={cn(
-              accentOnLine2
-                ? "guest-hero-accent-word guest-hero-accent-gradient inline-block bg-gradient-to-r from-primary via-accent to-accent bg-clip-text pb-1 pt-0.5 text-transparent"
-                : "text-foreground",
-            )}
-          >
-            {line2}
-          </span>
-        </span>
+        <span className="mt-1.5 block leading-[1.2]">{renderLine2()}</span>
       ) : null}
     </motion.h1>
   );

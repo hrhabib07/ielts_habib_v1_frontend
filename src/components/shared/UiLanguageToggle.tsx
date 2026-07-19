@@ -78,7 +78,7 @@ function SegmentedToggle({
         className={buttonClass("bn", locale === "bn")}
         aria-pressed={locale === "bn"}
       >
-        Bn
+        বাংলা
       </button>
       <span className="select-none px-0.5 text-[10px] text-muted-foreground/45" aria-hidden>
         |
@@ -89,7 +89,7 @@ function SegmentedToggle({
         className={buttonClass("en", locale === "en")}
         aria-pressed={locale === "en"}
       >
-        En
+        EN
       </button>
     </div>
   );

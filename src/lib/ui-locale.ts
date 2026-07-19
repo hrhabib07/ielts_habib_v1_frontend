@@ -4,16 +4,9 @@ export const UI_LOCALE_STORAGE_KEY = "gamlish-ui-locale";
 
 const BN_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"] as const;
 
-/** First visit: Bengali browser → bn; otherwise en. SSR fallback: bn (product default). */
+/** Product default is always Bengali. Browser language is ignored. */
 export function detectBrowserUiLocale(): UiLocale {
-  if (typeof navigator === "undefined") return "bn";
-  const langs =
-    navigator.languages?.length > 0 ? navigator.languages : [navigator.language];
-  for (const lang of langs) {
-    const code = lang.toLowerCase().split("-")[0];
-    if (code === "bn") return "bn";
-  }
-  return "en";
+  return "bn";
 }
 
 export function readStoredUiLocale(): UiLocale | null {
@@ -35,13 +28,17 @@ export function writeStoredUiLocale(locale: UiLocale): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(UI_LOCALE_STORAGE_KEY, locale);
+    // Keep legacy keys in sync so older toggles stay consistent.
+    window.localStorage.setItem("gamlish-guest-landing-locale", locale);
+    window.localStorage.setItem("gamlish-pricing-faq-locale", locale);
   } catch {
     /* ignore */
   }
 }
 
+/** Explicit choice wins; otherwise Bengali. */
 export function resolveInitialUiLocale(): UiLocale {
-  return readStoredUiLocale() ?? detectBrowserUiLocale();
+  return readStoredUiLocale() ?? "bn";
 }
 
 export function localizeDigits(value: string | number, locale: UiLocale): string {

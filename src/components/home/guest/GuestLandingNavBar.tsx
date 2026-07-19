@@ -10,6 +10,10 @@ import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
+import {
+  LANDING_CTA_CLASS,
+  LANDING_LINK_CLASS,
+} from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
 
 export function GuestLandingNavBar({ className }: { className?: string }) {
@@ -25,7 +29,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const howToPlayClassName =
+  const linkClass =
     "rounded-lg px-3 py-2.5 text-left text-base font-medium text-foreground hover:bg-muted/60";
 
   return (
@@ -42,6 +46,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
           className="flex h-9 min-w-0 shrink items-center transition-opacity hover:opacity-85"
           aria-label="Gamlish home"
         >
+          {/* Brand lives in nav only — hero leads with the headline. */}
           <GamlishNavBrand showTagline={false} />
         </Link>
 
@@ -52,17 +57,21 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
           >
             {copy.navLogin}
           </Link>
-          <Link href="/register">
-            <Button className="h-9 rounded-full px-4 text-sm font-semibold">
-              {copy.navRegister}
-            </Button>
+          <Link
+            href="/demo"
+            className={cn(
+              "rounded-lg px-3 py-2 text-sm",
+              LANDING_LINK_CLASS,
+            )}
+          >
+            {copy.ctaPrimary}
           </Link>
           <UiLanguageToggle variant="segmented" />
           <ThemeToggleButton />
         </div>
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5 lg:hidden">
-          <UiLanguageToggle variant="icon" />
+          <UiLanguageToggle variant="segmented" />
           <ThemeToggleButton />
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -71,7 +80,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                 variant="outline"
                 size="icon"
                 className="h-9 w-9 shrink-0 rounded-full border-border/60"
-                aria-label="Open menu"
+                aria-label={copy.navMenu}
               >
                 <Menu className="h-4 w-4" />
               </Button>
@@ -80,21 +89,31 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
               side="right"
               className="flex w-[min(100vw,20rem)] flex-col gap-0 p-0 sm:max-w-xs"
             >
-              <SheetTitle className="sr-only">Menu</SheetTitle>
+              <SheetTitle className="sr-only">{copy.navMenu}</SheetTitle>
               <div className="flex flex-col gap-6 px-5 pb-8 pt-14">
                 <div className="space-y-2 border-b border-border/60 pb-5">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                    Language
+                    ভাষা · Language
                   </p>
-                  <UiLanguageToggle variant="segmented" className="w-full max-w-[12rem]" />
+                  <UiLanguageToggle
+                    variant="segmented"
+                    className="w-full max-w-none justify-center"
+                  />
                 </div>
 
-                <nav className="flex flex-col gap-1" aria-label="Guest menu">
+                <nav className="flex flex-col gap-1" aria-label={copy.navMenu}>
+                  <Link
+                    href="/demo"
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(linkClass, LANDING_LINK_CLASS)}
+                  >
+                    {copy.ctaPrimary}
+                  </Link>
                   {isHome ? (
                     <button
                       type="button"
                       onClick={scrollToHowItWorks}
-                      className={howToPlayClassName}
+                      className={linkClass}
                     >
                       {copy.ctaSecondary}
                     </button>
@@ -102,29 +121,26 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                     <Link
                       href="/#how-gamlish-works"
                       onClick={() => setMenuOpen(false)}
-                      className={howToPlayClassName}
+                      className={linkClass}
                     >
                       {copy.ctaSecondary}
                     </Link>
                   )}
                   <Link
+                    href="/pricing"
+                    onClick={() => setMenuOpen(false)}
+                    className={linkClass}
+                  >
+                    {copy.navPricing}
+                  </Link>
+                  <Link
                     href="/login"
                     onClick={() => setMenuOpen(false)}
-                    className="rounded-lg px-3 py-2.5 text-base font-medium text-foreground hover:bg-muted/60"
+                    className={linkClass}
                   >
                     {copy.navLogin}
                   </Link>
                 </nav>
-
-                <Link
-                  href="/register"
-                  onClick={() => setMenuOpen(false)}
-                  className="mt-auto block"
-                >
-                  <Button className="h-11 w-full rounded-full font-semibold">
-                    {copy.navRegister}
-                  </Button>
-                </Link>
               </div>
             </SheetContent>
           </Sheet>

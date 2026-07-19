@@ -325,7 +325,7 @@ function BandScoreGlyph({
     y: 104,
     fontSize,
     fontWeight: 700,
-    fontFamily: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
+    fontFamily: 'var(--font-outfit), "Hind Siliguri", ui-sans-serif, system-ui, sans-serif',
     textAnchor: "middle" as const,
     dominantBaseline: "alphabetic" as const,
   };

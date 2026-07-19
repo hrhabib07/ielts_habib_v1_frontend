@@ -21,6 +21,9 @@ import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { pickStageInstruction } from "@/src/lib/player-ui-copy";
 import { cn } from "@/lib/utils";
+import { emitXpGain, emitXpRefresh } from "@/src/lib/xp-events";
+import { XpGainToaster } from "@/src/components/player/XpGainToaster";
+import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
 
 type EvalQuestion = Record<string, unknown>;
 
@@ -162,6 +165,7 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
   );
 
   const showSuccessResult = (result: PlayerSubmitResult, evalStage: boolean) => {
+    const xp = result.xpEarnedThisStage ?? (evalStage ? 10 : 5);
     setPendingNav(result);
     setStageResult({
       kind: "success",
@@ -169,7 +173,7 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
       message: evalStage
         ? PLAYER_UI.result.successEvalMessage
         : PLAYER_UI.result.successStageMessage,
-      xpEarned: result.xpEarnedThisStage ?? (evalStage ? 10 : 5),
+      xpEarned: xp,
       coinsEarned: result.coinsEarnedThisStage ?? 5,
       scorePercent: result.scorePercent,
       correctCount: result.correctCount,
@@ -179,6 +183,9 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
       totalStages,
       nextLabel: nextStageLabel(result),
     });
+    // Bowling-style score after the stage — bump HUD + floating toast.
+    emitXpGain(xp, "stage");
+    window.setTimeout(() => emitXpRefresh(), 800);
   };
 
   const handleComplete = async () => {
@@ -291,6 +298,8 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
         locale === "bn" && "font-bengali",
       )}
     >
+      <PlayerXpHud />
+      <XpGainToaster />
       <header className="border-b border-border/50 bg-background/80 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-2xl items-center gap-3">
           <Link

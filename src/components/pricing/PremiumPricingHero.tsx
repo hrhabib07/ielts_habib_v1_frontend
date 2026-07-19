@@ -25,6 +25,7 @@ import type { ScholarshipStatus } from "@/src/lib/api/scholarship";
 import { isFoundingMemberWindowOpen } from "@/src/lib/foundingMember";
 import { resolveScholarshipWindowStart } from "@/src/lib/scholarshipWindow";
 import { useScholarshipDecayTimer } from "@/src/hooks/useScholarshipTimer";
+import { FounderCounterBanner } from "./FounderCounterBanner";
 
 const ENGLISH_FEATURES = [
   { icon: Map, label: "All 4 camps & 21 missions" },
@@ -126,6 +127,8 @@ export function PremiumPricingHero({
             </p>
           )}
         </div>
+
+        <FounderCounterBanner />
 
         <ul className="grid gap-3 text-left sm:grid-cols-2">
           {ENGLISH_FEATURES.map(({ icon: Icon, label }) => (

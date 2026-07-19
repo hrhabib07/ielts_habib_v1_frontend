@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { AUTH_REGISTER_COPY } from "@/src/lib/auth-register-copy";
+import { FOUNDER_BENEFITS_COPY } from "@/src/lib/founder-benefits-copy";
 import { FOUNDER_LAUNCH_COPY } from "@/src/lib/founder-launch-copy";
 import { GUEST_LANDING_COPY } from "@/src/lib/guest-landing-copy";
 import { PLAYER_UI_COPY } from "@/src/lib/player-ui-copy";
@@ -50,6 +51,11 @@ export function useAuthRegisterCopy() {
 export function useFounderLaunchCopy() {
   const { locale } = useUiLocale();
   return useMemo(() => FOUNDER_LAUNCH_COPY[locale], [locale]);
+}
+
+export function useFounderBenefitsCopy() {
+  const { locale } = useUiLocale();
+  return useMemo(() => FOUNDER_BENEFITS_COPY[locale], [locale]);
 }
 
 export function usePricingFaqCopy() {

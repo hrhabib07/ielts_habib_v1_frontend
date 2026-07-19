@@ -124,6 +124,25 @@ function unwrap<T>(res: { data?: { data?: T } }): T {
   return d;
 }
 
+export interface MyPlayerProfile {
+  totalXp: number;
+  totalCoins: number;
+  missionsCompleted: number;
+  hasEnglishAccess: boolean;
+  level: number;
+  currentMissionOrder: number;
+  streakCurrent: number;
+  streakLongest: number;
+  displayName: string | null;
+  publicHandle: string | null;
+}
+
+export async function getMyPlayerProfile(): Promise<MyPlayerProfile> {
+  const { default: apiClient } = await import("@/src/lib/api-client");
+  const res = await apiClient.get<{ data: MyPlayerProfile }>("/player/me/profile");
+  return unwrap(res);
+}
+
 export async function getPlayerCourseMap(options?: {
   signal?: AbortSignal;
 }): Promise<PlayerCourseMap> {

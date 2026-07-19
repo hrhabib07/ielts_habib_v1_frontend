@@ -21,6 +21,7 @@ import {
   type PlayerMapMission,
 } from "@/src/lib/api/player";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
+import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
 import { cn } from "@/lib/utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { useStudentHomeCopy } from "@/src/hooks/useLocalizedCopy";
@@ -31,6 +32,12 @@ import {
   localizeDigits,
 } from "@/src/lib/ui-locale";
 import { brandSurfaces } from "@/src/lib/brand-theme";
+import {
+  PLAYER_ACTIVE_CAMP_CLASS,
+  PLAYER_CTA_CLASS,
+  PLAYER_CTA_OUTLINE_CLASS,
+  PLAYER_EYEBROW_CLASS,
+} from "@/src/lib/player-brand-theme";
 import { getStudentDisplayName } from "@/src/lib/student-display-name";
 
 function resolveCurrentMission(
@@ -139,7 +146,7 @@ export function StudentEnglishHome() {
 
   const ringPct = Math.max(stats.progressPct, stats.completed > 0 ? stats.progressPct : 4);
   const ringStyle = {
-    background: `conic-gradient(var(--steel) ${ringPct * 3.6}deg, color-mix(in srgb, var(--muted) 80%, transparent) 0deg)`,
+    background: `conic-gradient(#38bdf8 ${ringPct * 3.6}deg, color-mix(in srgb, var(--muted) 80%, transparent) 0deg)`,
   };
 
   return (
@@ -156,16 +163,17 @@ export function StudentEnglishHome() {
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-24 top-24 h-72 w-72 rounded-full bg-steel/15 blur-3xl dark:bg-steel/10"
+        className="pointer-events-none absolute -right-24 top-24 h-72 w-72 rounded-full bg-sky-400/15 blur-3xl dark:bg-sky-400/10"
         aria-hidden
       />
 
       <div className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+        <UsernameClaimBanner className="mb-6" />
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={cn(
               "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold tracking-wide",
-              brandSurfaces.eyebrowBadge,
+              PLAYER_EYEBROW_CLASS,
             )}
           >
             <Sparkles className="h-3.5 w-3.5" />
@@ -194,7 +202,7 @@ export function StudentEnglishHome() {
                 size="lg"
                 className={cn(
                   "h-12 rounded-full px-8 text-base",
-                  brandSurfaces.ctaButton,
+                  PLAYER_CTA_CLASS,
                 )}
                 asChild
               >
@@ -208,7 +216,7 @@ export function StudentEnglishHome() {
                 variant="outline"
                 className={cn(
                   "h-12 rounded-full px-8 text-base",
-                  brandSurfaces.ctaButtonOutline,
+                  PLAYER_CTA_OUTLINE_CLASS,
                 )}
                 asChild
               >
@@ -260,7 +268,7 @@ export function StudentEnglishHome() {
               )}
             >
               <div
-                className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-steel/20 blur-2xl"
+                className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sky-400/20 blur-2xl"
                 aria-hidden
               />
               <div
@@ -269,7 +277,7 @@ export function StudentEnglishHome() {
               />
 
               <div className="relative flex flex-col items-center text-center">
-                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-steel-deep dark:text-steel">
+                <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-sky-700 dark:text-sky-300">
                   {copy.progressLabel}
                 </p>
                 <p className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -279,7 +287,7 @@ export function StudentEnglishHome() {
 
                 <Link
                   href={missionHref}
-                  className="group relative mt-7 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steel focus-visible:ring-offset-2"
+                  className="group relative mt-7 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2"
                   aria-label={progressButtonLabel}
                 >
                   <motion.div
@@ -290,7 +298,7 @@ export function StudentEnglishHome() {
                     transition={{ type: "spring", stiffness: 320, damping: 18 }}
                   >
                     <div className="flex h-[7.25rem] w-[7.25rem] flex-col items-center justify-center rounded-full bg-card shadow-inner sm:h-[8rem] sm:w-[8rem]">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-steel text-steel-foreground shadow-lg shadow-steel-deep/30 transition-transform group-hover:scale-105">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-lg shadow-sky-500/30 transition-transform group-hover:scale-105">
                         <Play className="h-5 w-5 fill-current" />
                       </span>
                       <span className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
@@ -310,9 +318,9 @@ export function StudentEnglishHome() {
                       {localizeDigits(stats.progressPct, locale)}%
                     </span>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-muted dark:bg-primary/25">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-muted dark:bg-sky-950/40">
                     <motion.div
-                      className="h-full rounded-full bg-steel"
+                      className="h-full rounded-full bg-gradient-to-r from-sky-400 to-blue-600"
                       initial={false}
                       animate={{
                         width: `${Math.max(stats.progressPct, stats.completed > 0 ? stats.progressPct : 4)}%`,
@@ -323,7 +331,7 @@ export function StudentEnglishHome() {
                 </div>
 
                 <Button
-                  className={cn("mt-5 w-full max-w-xs rounded-full", brandSurfaces.ctaButton)}
+                  className={cn("mt-5 w-full max-w-xs rounded-full", PLAYER_CTA_CLASS)}
                   asChild
                 >
                   <Link href={missionHref}>
@@ -355,10 +363,9 @@ export function StudentEnglishHome() {
                   className={cn(
                     "group relative overflow-hidden rounded-2xl p-4 transition-all duration-300",
                     "ring-1 hover:-translate-y-1 hover:shadow-lg",
-                    state === "active" &&
-                      "bg-[#0f172a] text-white ring-steel/40 shadow-md shadow-steel-deep/20",
+                    state === "active" && PLAYER_ACTIVE_CAMP_CLASS,
                     state === "open" &&
-                      "bg-card text-foreground ring-border/60 hover:ring-steel/40",
+                      "bg-card text-foreground ring-border/60 hover:ring-sky-400/40",
                     state === "locked" &&
                       "bg-muted/50 text-muted-foreground ring-border/40",
                   )}
@@ -367,7 +374,7 @@ export function StudentEnglishHome() {
                     <span
                       className={cn(
                         "text-[10px] font-bold uppercase tracking-[0.16em]",
-                        state === "active" ? "text-steel" : "text-steel-deep dark:text-steel",
+                        state === "active" ? "text-sky-100" : "text-sky-700 dark:text-sky-300",
                       )}
                     >
                       {camp.title}
@@ -375,7 +382,7 @@ export function StudentEnglishHome() {
                     {state === "locked" ? (
                       <Lock className="h-3.5 w-3.5 opacity-70" />
                     ) : state === "active" ? (
-                      <span className="rounded-full bg-steel/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-steel">
+                      <span className="rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-sky-50">
                         {copy.campActiveLabel}
                       </span>
                     ) : null}
@@ -403,7 +410,7 @@ export function StudentEnglishHome() {
                   <div
                     className={cn(
                       "mt-4 h-0.5 w-10 rounded-full transition-all group-hover:w-16",
-                      state === "locked" ? "bg-border" : "bg-steel",
+                      state === "locked" ? "bg-border" : "bg-sky-400",
                     )}
                   />
                 </Link>
@@ -419,7 +426,7 @@ export function StudentEnglishHome() {
           )}
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-steel/15 text-steel-deep dark:bg-steel/20 dark:text-steel">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/15 text-sky-700 dark:bg-sky-400/20 dark:text-sky-300">
               <Crown className="h-5 w-5" />
             </div>
             <div>
@@ -429,7 +436,7 @@ export function StudentEnglishHome() {
           </div>
           <Button
             variant="outline"
-            className={cn("shrink-0", brandSurfaces.ctaButtonOutline)}
+            className={cn("shrink-0", PLAYER_CTA_OUTLINE_CLASS)}
             asChild
           >
             <Link href="/pricing?course=english-foundations">
@@ -452,8 +459,8 @@ function StatChip({
   value: string;
 }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/90 px-3 py-1.5 shadow-sm dark:border-steel-deep/25">
-      <Icon className="h-3.5 w-3.5 text-steel-deep dark:text-steel" />
+    <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/90 px-3 py-1.5 shadow-sm dark:border-sky-500/20">
+      <Icon className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
       <span className="text-[11px] text-muted-foreground">{label}</span>
       <span className="text-sm font-bold tabular-nums text-foreground">{value}</span>
     </div>

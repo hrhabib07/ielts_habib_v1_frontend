@@ -68,11 +68,19 @@ export function PaymentApplicationStatusCard({
                 <strong>{formatDateTime(activeSubscription!.endDate)}</strong>.
               </p>
             </div>
-            <Button asChild className={brandStatus.success.button}>
-              <Link href={ENABLE_READING ? "/profile/reading" : PRIMARY_STUDENT_HREF}>
-                {ENABLE_READING ? "Go to Reading" : "Go to camp map"}
-              </Link>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild className={brandStatus.success.button}>
+                <Link href={ENABLE_READING ? "/profile/reading" : PRIMARY_STUDENT_HREF}>
+                  {ENABLE_READING ? "Go to Reading" : "Go to camp map"}
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link href="/username">Claim your username</Link>
+              </Button>
+              <Button asChild variant="ghost" className="rounded-xl">
+                <Link href="/profile">View Gamlish profile</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -101,9 +109,17 @@ export function PaymentApplicationStatusCard({
                 Until then you can still play free Mission 01.
               </p>
             </div>
-            <Button asChild variant="outline" className="rounded-xl">
-              <Link href={PRIMARY_STUDENT_HREF}>Go to camp map</Link>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" className="rounded-xl">
+                <Link href={PRIMARY_STUDENT_HREF}>Go to camp map</Link>
+              </Button>
+              <Button asChild className="rounded-xl">
+                <Link href="/username">Claim your username</Link>
+              </Button>
+              <Button asChild variant="ghost" className="rounded-xl">
+                <Link href="/profile">View Gamlish profile</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

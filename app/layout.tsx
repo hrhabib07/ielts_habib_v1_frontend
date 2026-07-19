@@ -13,7 +13,7 @@ import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
  * which fails in offline CI and restricted networks.
  */
 const RUNTIME_FONT_STYLESHEET =
-  "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap";
+  "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppOrigin()),
@@ -45,7 +45,7 @@ export default function RootLayout({
         />
         <link href={RUNTIME_FONT_STYLESHEET} rel="stylesheet" />
       </head>
-      <body className="antialiased">
+      <body className="antialiased font-bengali">
         <ThemeProvider>
           <UiLocaleProvider>
             <Suspense fallback={<AppShellFallback />}>

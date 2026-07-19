@@ -87,3 +87,7 @@ export async function updatePasswordRequest(
     newPassword,
   });
 }
+
+export async function setPasswordRequest(newPassword: string): Promise<void> {
+  await apiClient.post("/auth/set-password", { newPassword });
+}

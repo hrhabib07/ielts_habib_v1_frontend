@@ -60,6 +60,7 @@ export function UiLocaleProvider({ children }: { children: ReactNode }) {
     if (!hydrated) return;
     document.documentElement.lang = locale === "bn" ? "bn" : "en";
     document.body.classList.toggle("font-bengali", locale === "bn");
+    document.body.classList.toggle("font-sans", locale === "en");
   }, [locale, hydrated]);
 
   const setLocale = useCallback((next: UiLocale) => {

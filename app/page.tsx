@@ -7,12 +7,14 @@ import {
 import { getRedirectPathForRole } from "@/src/lib/auth-redirects";
 import { fetchStudentProfileServer } from "@/src/lib/api/server-profile";
 import { isStudentLearningReady, needsProfileMigration } from "@/src/lib/student-learning-gate";
-import { PRIMARY_STUDENT_HREF, PRIMARY_STUDENT_LABEL } from "@/src/lib/platform-config";
+import { PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const initialUser = await getCurrentUser();
+
+  // Logged-in students go straight to the mission roadmap (Duolingo-style home).
   if (initialUser?.role === "STUDENT") {
     const token = await getBearerTokenFromCookie();
     if (token) {
@@ -32,21 +34,16 @@ export default async function HomePage() {
         redirect("/onboarding");
       }
     }
+    redirect(PRIMARY_STUDENT_HREF);
   }
-  /** Logged-in students land on home; hero CTA points to primary product. */
-  const roleCtaHref = initialUser
-    ? initialUser.role === "STUDENT"
-      ? PRIMARY_STUDENT_HREF
-      : getRedirectPathForRole(initialUser.role)
-    : null;
+
+  const roleCtaHref = initialUser ? getRedirectPathForRole(initialUser.role) : null;
   const roleCtaLabel =
-    initialUser?.role === "STUDENT"
-      ? `Continue to ${PRIMARY_STUDENT_LABEL}`
-      : initialUser?.role === "ADMIN"
-        ? "Go to Admin Panel"
-        : initialUser?.role === "INSTRUCTOR"
-          ? "Go to Dashboard"
-          : null;
+    initialUser?.role === "ADMIN"
+      ? "Go to Admin Panel"
+      : initialUser?.role === "INSTRUCTOR"
+        ? "Go to Dashboard"
+        : null;
 
   return (
     <HomeHero

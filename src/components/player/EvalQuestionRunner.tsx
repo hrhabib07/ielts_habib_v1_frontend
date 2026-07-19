@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   CheckCircle2,
   ChevronRight,
@@ -25,8 +25,12 @@ import { RearrangeWordTiles } from "@/src/components/player/RearrangeWordTiles";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { PlayerUiCopy } from "@/src/lib/player-ui-copy";
+import { emitXpGain } from "@/src/lib/xp-events";
 
 type EvalQuestion = Record<string, unknown>;
+
+/** Duolingo-style pause so feedback is readable, then auto-advance. */
+const AUTO_ADVANCE_MS = 1500;
 
 function isQuestionAnswered(
   question: EvalQuestion,
@@ -384,6 +388,7 @@ export function EvalQuestionRunner({
   aside,
   retryMode = false,
   preservedAnswers = {},
+  checkAnswer,
 }: {
   missionSlug: string;
   stageOrder: number;
@@ -395,6 +400,11 @@ export function EvalQuestionRunner({
   aside?: ReactNode;
   retryMode?: boolean;
   preservedAnswers?: Record<string, unknown>;
+  /** Override live check (e.g. free demo without student auth). */
+  checkAnswer?: (
+    questionId: string,
+    answer: unknown,
+  ) => Promise<PlayerAnswerCheckResult>;
 }) {
   const PLAYER_UI = usePlayerUiCopy();
   const copy = PLAYER_UI.eval;
@@ -408,6 +418,7 @@ export function EvalQuestionRunner({
   const [wrongAttemptCounts, setWrongAttemptCounts] = useState<
     Record<string, number>
   >({});
+  const handleContinueRef = useRef<() => void>(() => undefined);
 
   const handleAnswerChange = (questionId: string) => {
     const attempts = wrongAttemptCounts[questionId] ?? 0;
@@ -456,12 +467,14 @@ export function EvalQuestionRunner({
     setChecking(true);
     void primeEvalSfx();
     try {
-      const result = await checkPlayerAnswer(
-        missionSlug,
-        stageOrder,
-        questionId,
-        answers[questionId],
-      );
+      const result = checkAnswer
+        ? await checkAnswer(questionId, answers[questionId])
+        : await checkPlayerAnswer(
+            missionSlug,
+            stageOrder,
+            questionId,
+            answers[questionId],
+          );
 
       if (result.correct) {
         setWrongAttemptCounts((prev) => {
@@ -471,6 +484,8 @@ export function EvalQuestionRunner({
         });
         setCheckResults((prev) => ({ ...prev, [questionId]: result }));
         void playCorrectEvalSfx();
+        // Instant dopamine — micro XP burst on every correct answer.
+        emitXpGain(1, "answer");
         return;
       }
 
@@ -507,6 +522,19 @@ export function EvalQuestionRunner({
     setStepError(null);
     setCurrentIndex((i) => i + 1);
   };
+  handleContinueRef.current = handleContinue;
+
+  // After feedback (correct or confirmed wrong), auto-advance like Duolingo.
+  useEffect(() => {
+    if (!isChecked || checking) return;
+    if (retryMode && currentCheck && !currentCheck.correct) return;
+
+    const timer = window.setTimeout(() => {
+      handleContinueRef.current();
+    }, AUTO_ADVANCE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [isChecked, checking, questionId, retryMode, currentCheck]);
 
   const handlePrimaryAction = (event?: FormEvent) => {
     event?.preventDefault();

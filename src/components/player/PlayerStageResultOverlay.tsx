@@ -7,6 +7,25 @@ import { cn } from "@/lib/utils";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 
+function XpCountUp({ amount }: { amount: number }) {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    let frame = 0;
+    const steps = 12;
+    const tick = () => {
+      frame += 1;
+      setDisplay(Math.round((amount * frame) / steps));
+      if (frame < steps) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [amount]);
+  return (
+    <p className="text-2xl font-black tabular-nums text-amber-700 dark:text-amber-300">
+      +{display}
+    </p>
+  );
+}
+
 export interface PlayerStageResult {
   kind: "success" | "fail";
   title: string;
@@ -130,11 +149,13 @@ export function PlayerStageResultOverlay({
           {passed && (result.xpEarned != null || result.coinsEarned != null) ? (
             <div className="mt-5 flex w-full gap-3">
               {result.xpEarned != null ? (
-                <div className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-primary/20 bg-primary/10 px-3 py-3">
-                  <Sparkles className="h-5 w-5 text-primary" />
+                <div className="flex flex-1 animate-in zoom-in-50 duration-500 items-center justify-center gap-2 rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-400/25 to-orange-500/10 px-3 py-4 shadow-sm">
+                  <Sparkles className="h-6 w-6 text-amber-600" />
                   <div className="text-left">
-                    <p className="text-lg font-bold text-primary">+{result.xpEarned}</p>
-                    <p className="text-xs text-muted-foreground">{PLAYER_UI.xpLabel}</p>
+                    <XpCountUp amount={result.xpEarned} />
+                    <p className="text-xs font-semibold uppercase tracking-wide text-amber-800/80 dark:text-amber-300">
+                      {PLAYER_UI.xpLabel}
+                    </p>
                   </div>
                 </div>
               ) : null}

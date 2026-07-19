@@ -83,17 +83,24 @@ export function isActiveStudentSessionClient(): boolean {
 }
 
 /** Sync JWT into the Next.js httpOnly cookie. Returns false if sync failed. */
-export async function syncAuthCookie(token: string): Promise<{
+export async function syncAuthCookie(
+  token: string,
+  options?: { timeoutMs?: number },
+): Promise<{
   ok: boolean;
   code?: string;
   hint?: string;
 }> {
+  const timeoutMs = options?.timeoutMs ?? 2500;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const res = await fetch("/api/auth/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
       credentials: "same-origin",
+      signal: controller.signal,
     });
     if (res.ok) return { ok: true };
     const body = (await res.json().catch(() => null)) as {
@@ -108,6 +115,8 @@ export async function syncAuthCookie(token: string): Promise<{
     };
   } catch {
     return { ok: false, code: "NETWORK", hint: "Could not reach /api/auth/sync." };
+  } finally {
+    clearTimeout(timer);
   }
 }
 

@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
 import { FounderLaunchPricingCard } from "@/src/components/pricing/FounderLaunchPricingCard";
+import { FounderBenefitsShowcase } from "@/src/components/pricing/FounderBenefitsShowcase";
 import { BkashCheckoutForm } from "@/src/components/pricing/BkashCheckoutForm";
 import {
   hasBlockingPaymentStatus,
@@ -102,17 +103,23 @@ export function PricingContent({ initialUser }: { initialUser: CurrentUser | nul
       ) : null}
 
       {checkoutOpen && isLoggedIn && !hasPurchased && !blocked ? (
-        <BkashCheckoutForm
-          pricing={pricing}
-          onClose={() => setCheckoutOpen(false)}
-          onSubmitted={() => payment.refresh()}
-        />
+        <>
+          <FounderBenefitsShowcase />
+          <BkashCheckoutForm
+            pricing={pricing}
+            onClose={() => setCheckoutOpen(false)}
+            onSubmitted={() => payment.refresh()}
+          />
+        </>
       ) : !hasPurchased && !blocked ? (
-        <FounderLaunchPricingCard
-          pricing={pricing}
-          onUpgrade={handleUpgrade}
-          disabled={blocked}
-        />
+        <>
+          <FounderBenefitsShowcase />
+          <FounderLaunchPricingCard
+            pricing={pricing}
+            onUpgrade={handleUpgrade}
+            disabled={blocked}
+          />
+        </>
       ) : hasActiveAccess ? (
         <div className={cn("rounded-3xl border p-8 text-center", brandStatus.success.card)}>
           <h2 className="text-xl font-bold text-foreground">আপনার প্রিমিয়াম অ্যাক্সেস সক্রিয়</h2>

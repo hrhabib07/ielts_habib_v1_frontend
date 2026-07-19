@@ -1,13 +1,9 @@
-export type GuestHowItWorksStepIcon =
-  | "gamepad"
-  | "userPlus"
-  | "shieldCheck"
-  | "play"
-  | "unlock";
+export type GuestHowItWorksStepIcon = "play" | "badge" | "save";
 
 export interface GuestLandingZoneMockCopy {
   readonly zoneLabel: string;
   readonly title: string;
+  readonly freeStart?: boolean;
 }
 
 export interface GuestHowItWorksStep {
@@ -16,18 +12,11 @@ export interface GuestHowItWorksStep {
   readonly description: string;
 }
 
-export interface GuestHowItWorksSquadTeaser {
-  readonly title: string;
-  readonly description: string;
-  readonly badge: string;
-}
-
 export interface GuestHowGamlishWorksCopy {
   readonly eyebrow: string;
   readonly title: string;
-  readonly subtitle: string;
+  readonly subtitle?: string;
   readonly steps: readonly GuestHowItWorksStep[];
-  readonly squad: GuestHowItWorksSquadTeaser;
   readonly bottomCtaTitle: string;
   readonly bottomCtaSub: string;
 }

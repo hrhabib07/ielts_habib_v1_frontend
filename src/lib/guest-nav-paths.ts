@@ -13,6 +13,9 @@ const GUEST_NAV_PATHS = new Set([
   "/onboarding",
   "/terms",
   "/instructor-request",
+  "/demo",
+  "/demo/play",
+  "/demo/complete",
 ]);
 
 export function shouldUseGuestLandingNav(
@@ -20,5 +23,6 @@ export function shouldUseGuestLandingNav(
   hasUser: boolean,
 ): boolean {
   if (hasUser) return false;
+  if (pathname === "/demo" || pathname.startsWith("/demo/")) return true;
   return GUEST_NAV_PATHS.has(pathname);
 }

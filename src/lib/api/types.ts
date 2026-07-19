@@ -88,12 +88,34 @@ export interface StudentProfile {
   _id?: string;
   userId?: string;
   username?: string | null;
+  publicId?: string | null;
+  /** username ?? publicId — use for /u/{handle} links */
+  publicHandle?: string | null;
   displayName?: string | null;
+  avatarUrl?: string | null;
   email?: string | null;
   currentCountry?: string;
   dreamCountry?: string;
   desiredBandScore?: number | null;
   isPrivate?: boolean;
+  hasPurchased?: boolean;
+  /** True when purchase is approved but permanent username not chosen yet. */
+  needsUsername?: boolean;
+  /** False for Google-only accounts until they set a password. */
+  hasPassword?: boolean;
+  hasGoogle?: boolean;
+  authProviders?: Array<"password" | "google">;
+  isFoundingMember?: boolean;
+  founderNumber?: number | null;
+  founderTier?: "GOLD" | "SILVER" | "BRONZE" | null;
+  founderApprovedAt?: string | null;
+  streak?: {
+    current: number;
+    longest: number;
+    lastActiveDate: string | null;
+  };
+  /** ISO join date — always visible on profile / public profile. */
+  joinedAt?: string | null;
   profileCompletion?: ProfileCompletionStatus;
   targetBands?: {
     overall?: number | null;

@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { login, register, verifyOtp } from "./api";
 import { setAccessToken, syncAuthCookie } from "../lib/auth";
+import {
+  clearDemoSessionId,
+  readDemoSessionId,
+} from "@/src/lib/demo-session";
 
 export function useLogin() {
   const [loading, setLoading] = useState(false);
@@ -135,13 +139,23 @@ export function useVerifyOtp() {
     setError(null);
 
     try {
-      const res = await verifyOtp({ email, otp, password });
+      const res = await verifyOtp({
+        email,
+        otp,
+        password,
+        demoSessionId: readDemoSessionId(),
+      });
       const token = res?.data?.token;
       const role = res?.data?.user?.role;
+      const continuePath = res?.data?.continuePath;
 
       if (token) {
         setAccessToken(token);
         await syncAuthCookie(token);
+      }
+
+      if (continuePath) {
+        clearDemoSessionId();
       }
 
       if (role === "ADMIN") {
@@ -149,7 +163,7 @@ export function useVerifyOtp() {
       } else if (role === "INSTRUCTOR") {
         window.location.href = "/dashboard/instructor";
       } else {
-        window.location.href = "/";
+        window.location.href = continuePath || "/player";
       }
     } catch (err: unknown) {
       const ax =

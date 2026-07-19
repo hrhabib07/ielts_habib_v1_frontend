@@ -60,9 +60,12 @@ export async function verifyJwtToken(token: string): Promise<VerifiedJwtUser | n
 /**
  * Ask the Railway API whether this Bearer token is accepted.
  * 401 = invalid. 403 = valid token, wrong role for that route (still OK).
+ * Hard timeout so OAuth / cookie sync never hangs.
  */
 export async function validateTokenWithApi(token: string): Promise<boolean> {
   const base = getServerApiBaseUrl();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 1500);
   try {
     const res = await fetch(`${base}/students/me`, {
       method: "GET",
@@ -71,12 +74,15 @@ export async function validateTokenWithApi(token: string): Promise<boolean> {
         Accept: "application/json",
       },
       cache: "no-store",
+      signal: controller.signal,
     });
     if (res.status === 401) return false;
     if (res.ok || res.status === 403) return true;
     return false;
   } catch {
     return false;
+  } finally {
+    clearTimeout(timer);
   }
 }
 

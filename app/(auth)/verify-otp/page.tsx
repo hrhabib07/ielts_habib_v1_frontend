@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/src/lib/auth-server";
 import { getRedirectPathForRole } from "@/src/lib/auth-redirects";
+import { AuthSimpleChrome } from "@/src/components/auth/AuthSimpleChrome";
 import { VerifyOtpForm } from "./VerifyOtpForm";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,6 @@ interface VerifyOtpPageProps {
 export default async function VerifyOtpPage({
   searchParams,
 }: VerifyOtpPageProps) {
-  // Redirect authenticated users
   const user = await getCurrentUser();
   if (user) {
     redirect(getRedirectPathForRole(user.role));
@@ -22,5 +22,10 @@ export default async function VerifyOtpPage({
   const emailParam = params.email;
   const email = emailParam ? decodeURIComponent(emailParam) : "";
 
-  return <VerifyOtpForm email={email} />;
+  return (
+    <>
+      <AuthSimpleChrome />
+      <VerifyOtpForm email={email} />
+    </>
+  );
 }

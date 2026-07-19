@@ -10,16 +10,14 @@ import {
   Play,
   Shield,
   Sparkles,
-  Star,
   Trophy,
-  Zap,
 } from "lucide-react";
 import type { PlayerCampMap, PlayerCourseMap, PlayerMapMission } from "@/src/lib/api/player";
-import { GAMLISH_BRAND } from "@/src/lib/gamlish-brand";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
-import { SquadPlayerPromo } from "@/src/components/squad/SquadPlayerPromo";
 import { PlayerSubscribeModal } from "@/src/components/player/PlayerSubscribeModal";
+import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
+import { XpGainToaster } from "@/src/components/player/XpGainToaster";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -85,10 +83,10 @@ function segmentTrailStyle(
 ): { stroke: string; glow: string; dashed: boolean; animate: boolean } {
   const state = getMissionState(fromMission, hasEnglishAccess);
   if (state.completed) {
-    return { stroke: "#8faed4", glow: "#b4cce8", dashed: false, animate: false };
+    return { stroke: "#7dd3fc", glow: "#38bdf8", dashed: false, animate: false };
   }
   if (state.inProgress || (!state.locked && !state.needsPay)) {
-    return { stroke: "#1e3a8a", glow: "#b4cce8", dashed: false, animate: true };
+    return { stroke: "#2563eb", glow: "#38bdf8", dashed: false, animate: true };
   }
   return { stroke: "#cbd5e1", glow: "#94a3b8", dashed: true, animate: false };
 }
@@ -137,7 +135,7 @@ function MissionNodeCard({
           )}
         >
           {state.completed ? (
-            <Check className="h-7 w-7 stroke-[2.75] text-primary" />
+            <Check className="h-7 w-7 stroke-[2.75] text-sky-700 dark:text-sky-200" />
           ) : state.locked ? (
             <Lock className="h-5 w-5 opacity-70" />
           ) : state.needsPay ? (
@@ -152,13 +150,13 @@ function MissionNodeCard({
         </div>
 
         {state.completed ? (
-          <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-steel text-steel-foreground shadow-md ring-2 ring-background">
+          <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-sky-400 text-sky-950 shadow-md ring-2 ring-background">
             <Trophy className="h-3.5 w-3.5" />
           </span>
         ) : null}
 
         {mission.accessTier === "FREE" && !state.locked ? (
-          <span className="absolute -left-1 -top-1 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary-foreground shadow-sm">
+          <span className="absolute -left-1 -top-1 rounded-full bg-sky-500 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white shadow-sm">
             {PLAYER_UI.freeBadge}
           </span>
         ) : null}
@@ -182,7 +180,7 @@ function MissionNodeCard({
           <p className="text-[10px] text-muted-foreground/75">{PLAYER_UI.lockedHint}</p>
         ) : null}
         {state.needsPay ? (
-          <p className="text-[10px] font-semibold text-accent">{PLAYER_UI.subscribeHint}</p>
+          <p className="text-[10px] font-semibold text-sky-700 dark:text-sky-300">{PLAYER_UI.subscribeHint}</p>
         ) : null}
       </div>
     </>
@@ -245,8 +243,8 @@ function CampMissionTrail({
         >
           <defs>
             <linearGradient id="camp-trail-glow" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#b4cce8" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0.25" />
+              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#2563eb" stopOpacity="0.28" />
             </linearGradient>
           </defs>
           {missions.map((mission, index) => {
@@ -347,7 +345,7 @@ function CampZonePath({
             {camp.order}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-steel">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-sky-100/90">
               {PLAYER_UI.campLabel(camp.order)}
             </p>
             <h2 className="mt-1 text-lg font-bold leading-tight tracking-tight text-white sm:text-xl">
@@ -360,7 +358,7 @@ function CampZonePath({
             ) : null}
           </div>
           <div className="shrink-0 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-center backdrop-blur-sm">
-            <p className="text-[9px] font-semibold uppercase tracking-wider text-steel">
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-sky-100/80">
               {PLAYER_UI.missionLabel}
             </p>
             <p className="text-sm font-black tabular-nums text-white">
@@ -370,7 +368,7 @@ function CampZonePath({
         </div>
         <div className="relative mt-5 h-2 overflow-hidden rounded-full bg-white/15">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-steel via-steel to-white/90"
+            className="h-full rounded-full bg-gradient-to-r from-sky-300 via-sky-200 to-white/90"
             initial={false}
             animate={{ width: `${barPct}%` }}
             transition={{ duration: 0.85, ease: EASE }}
@@ -441,10 +439,6 @@ export function CampMapView({
 
   if (!map) return null;
 
-  const allMissions = map.camps.flatMap((c) => c.missions);
-  const completedCount = allMissions.filter((m) => m.status === "completed").length;
-  const totalCount = allMissions.length;
-  const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
   const hasContinue = Boolean(map.currentMissionSlug);
 
   return (
@@ -452,7 +446,7 @@ export function CampMapView({
       className={cn(
         "camp-map-page relative",
         locale === "bn" && "font-bengali",
-        hasContinue && "pb-24 sm:pb-28",
+        hasContinue && "pb-24",
       )}
     >
       <PlayerSubscribeModal
@@ -460,66 +454,11 @@ export function CampMapView({
         onClose={() => setPaywallMission(null)}
       />
 
-      <div className="camp-map-hero relative overflow-hidden border-b border-border/30">
-        <div className="camp-map-hero-glow pointer-events-none absolute inset-0" aria-hidden />
-        <header className="relative mx-auto max-w-lg px-4 pb-8 pt-7 text-center sm:max-w-2xl sm:pt-10">
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: EASE }}
-          >
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
-              {PLAYER_UI.campMapEyebrow}
-            </p>
-            <p className="mt-1.5 text-sm italic text-muted-foreground">
-              {GAMLISH_BRAND.taglineLine2}
-            </p>
-            <h1 className="camp-map-title mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              {formatDisplayTitle(map.course.title)}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{PLAYER_UI.yourJourney}</p>
+      <PlayerXpHud />
+      <XpGainToaster />
 
-            <div className="mx-auto mt-6 flex max-w-sm items-center justify-center gap-2">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/90 px-3.5 py-1.5 text-xs font-semibold shadow-sm backdrop-blur-sm">
-                <Star className="h-3.5 w-3.5 text-accent" />
-                {PLAYER_UI.mapProgress(completedCount, totalCount)}
-              </div>
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/90 px-3.5 py-1.5 text-xs font-semibold shadow-sm backdrop-blur-sm">
-                <Zap className="h-3.5 w-3.5 text-steel-deep dark:text-steel" />
-                {progressPct}%
-              </div>
-            </div>
-
-            <div className="mx-auto mt-4 max-w-sm">
-              <div className="h-2.5 overflow-hidden rounded-full bg-muted/90 shadow-inner">
-                <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-steel"
-                  initial={false}
-                  animate={{ width: `${Math.max(progressPct, completedCount > 0 ? progressPct : 3)}%` }}
-                  transition={{ duration: 0.9, ease: EASE }}
-                />
-              </div>
-            </div>
-
-            {hasContinue ? (
-              <Button
-                asChild
-                className="camp-continue-cta mt-6 hidden h-12 rounded-full px-8 text-base font-semibold sm:inline-flex"
-              >
-                <Link href={`/player/missions/${map.currentMissionSlug}`}>
-                  <Play className="mr-2 h-4 w-4 fill-current" />
-                  {PLAYER_UI.continueMission}
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
-            ) : null}
-          </motion.div>
-        </header>
-      </div>
-
-      <div className="relative mx-auto max-w-lg space-y-7 px-4 py-7 sm:max-w-2xl sm:space-y-9 sm:py-9">
-        <SquadPlayerPromo />
-
+      {/* Roadmap first — no top CTAs */}
+      <div className="relative mx-auto max-w-lg space-y-7 px-4 pt-4 pb-6 sm:max-w-2xl sm:space-y-9 sm:pt-5 sm:pb-8">
         {map.camps.map((camp, index) => (
           <CampZonePath
             key={camp.id}
@@ -532,11 +471,11 @@ export function CampMapView({
 
         {!map.hasEnglishAccess ? (
           <div className={cn("overflow-hidden rounded-[1.5rem] p-6 text-center", brandSurfaces.premiumBanner)}>
-            <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-steel/20 text-steel-deep dark:text-steel">
+            <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-700 dark:text-sky-300">
               <Crown className="h-5 w-5" />
             </div>
             <p className="text-sm font-semibold text-foreground">{PLAYER_UI.mission01Free}</p>
-            <Button asChild variant="outline" className="mt-4 rounded-full border-accent/30">
+            <Button asChild variant="outline" className="mt-4 rounded-full border-sky-500/30">
               <Link href="/pricing?course=english-foundations">{PLAYER_UI.unlockCta}</Link>
             </Button>
           </div>
@@ -544,8 +483,8 @@ export function CampMapView({
       </div>
 
       {hasContinue ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/90 px-4 py-3 shadow-[0_-12px_40px_rgba(15,23,42,0.1)] backdrop-blur-xl sm:hidden pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <Button asChild className="camp-continue-cta h-12 w-full rounded-full text-base font-semibold">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/90 px-4 py-3 shadow-[0_-12px_40px_rgba(15,23,42,0.1)] backdrop-blur-xl pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <Button asChild className="camp-continue-cta mx-auto flex h-12 w-full max-w-lg rounded-full text-base font-semibold sm:max-w-2xl">
             <Link href={`/player/missions/${map.currentMissionSlug}`}>
               <Play className="mr-2 h-4 w-4 fill-current" />
               {PLAYER_UI.continueMission}

@@ -136,8 +136,8 @@ export function StudentSessionProvider({
   }, [initialUser, refresh]);
 
   const isFoundingMember = useMemo(
-    () => isFoundingMemberEligible(subscription),
-    [subscription],
+    () => isFoundingMemberEligible(subscription, profile),
+    [subscription, profile],
   );
 
   const value = useMemo(

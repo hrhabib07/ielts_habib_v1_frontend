@@ -40,6 +40,12 @@ npm ci
 npm run build
 ```
 
+Build must succeed with exit code 0. TypeScript runs as part of `next build`.
+
+## Google sign-in
+
+Configured on Railway only (`GOOGLE_*` vars). Frontend just needs `NEXT_PUBLIC_API_BASE_URL` ending in `/api` so the button can hit `{API}/auth/google`.
+
 ## After frontend domain changes
 
 Update Railway `FRONTEND_ORIGIN` to match (comma-separated, no trailing slash), e.g.:

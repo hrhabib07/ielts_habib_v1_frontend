@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -19,10 +19,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister } from "@/src/auth/hooks";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
+import {
+  AuthMethodDivider,
+  ContinueWithGoogleButton,
+} from "@/src/components/auth/ContinueWithGoogleButton";
 import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_REGISTER_COPY } from "@/src/lib/auth-register-copy";
+import { writeDemoSessionId } from "@/src/lib/demo-session";
 import { cn } from "@/lib/utils";
 
 function RegisterHeroPanel({ locale }: { locale: "en" | "bn" }) {
@@ -131,6 +136,12 @@ export function RegisterForm() {
   const copy = AUTH_REGISTER_COPY[locale];
   const reduceMotion = useReducedMotion();
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sid = new URLSearchParams(window.location.search).get("sid");
+    if (sid) writeDemoSessionId(sid);
+  }, []);
+
   return (
     <div
       className={cn(
@@ -162,6 +173,13 @@ export function RegisterForm() {
 
             <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_16px_48px_rgba(15,23,42,0.07)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.28)]">
               <div className="p-5 sm:p-6">
+                <div className="mb-4 space-y-3">
+                  <ContinueWithGoogleButton />
+                  <AuthMethodDivider
+                    label={locale === "bn" ? "অথবা ইমেইল" : "or email"}
+                  />
+                </div>
+
                 <form
                   className="space-y-4"
                   onSubmit={(e) => {

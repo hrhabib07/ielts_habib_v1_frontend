@@ -6,9 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   BarChart2,
   ChevronDown,
+  Crown,
   FileQuestion,
   Flame,
   Layers,
+  Link2,
   LogOut,
   Menu,
   Sparkles,
@@ -63,7 +65,9 @@ export function SiteNavBar(props: {
   const [clientUser, setClientUser] = useState<{ role: UserRole; userId: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isFoundingMember } = useStudentSession();
+  const { isFoundingMember, profile } = useStudentSession();
+  const publicHandle =
+    profile?.publicHandle ?? profile?.username ?? profile?.publicId ?? null;
   const shell = useSiteShellCopy();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -138,7 +142,7 @@ export function SiteNavBar(props: {
     cn(
       "rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200",
       active
-        ? "bg-accent/12 text-accent shadow-sm ring-1 ring-accent/10"
+        ? "bg-sky-500/12 text-sky-800 shadow-sm ring-1 ring-sky-500/15 dark:bg-sky-400/15 dark:text-sky-300 dark:ring-sky-400/20"
         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
     );
 
@@ -203,7 +207,7 @@ export function SiteNavBar(props: {
                   <span className="truncate text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {progressLabel}
                   </span>
-                  <span className="shrink-0 text-[10px] font-bold tabular-nums text-accent">
+                  <span className="shrink-0 text-[10px] font-bold tabular-nums text-sky-700 dark:text-sky-300">
                     {levelsCompletedCount}/{TOTAL_READING_PATH_LEVELS} · {journeyLabel}
                   </span>
                 </div>
@@ -228,7 +232,7 @@ export function SiteNavBar(props: {
         >
           {isStudent && streak && (
             <div
-              className="hidden items-center gap-1 rounded-full bg-accent/10 px-2 py-1 text-xs font-semibold text-accent ring-1 ring-accent/10 lg:flex"
+              className="hidden items-center gap-1 rounded-full bg-sky-500/10 px-2 py-1 text-xs font-semibold text-sky-800 ring-1 ring-sky-500/15 dark:bg-sky-400/10 dark:text-sky-300 dark:ring-sky-400/20 lg:flex"
               title="Stability streak"
             >
               <Flame className="h-3.5 w-3.5" />
@@ -240,7 +244,7 @@ export function SiteNavBar(props: {
             <FoundingMemberBadge size="sm" compact className="hidden lg:inline-flex" />
           )}
 
-          <UiLanguageToggle variant="auto" />
+          <UiLanguageToggle variant="segmented" />
 
           <ThemeToggleButton />
 
@@ -249,7 +253,7 @@ export function SiteNavBar(props: {
               <button
                 type="button"
                 onClick={() => setMenuOpen((o) => !o)}
-                className="flex h-9 items-center gap-1.5 rounded-full border border-border/50 bg-card px-2 py-1.5 text-sm font-medium text-muted-foreground shadow-sm transition-all hover:border-accent/25 hover:text-accent sm:px-3"
+                className="flex h-9 items-center gap-1.5 rounded-full border border-border/50 bg-card px-2 py-1.5 text-sm font-medium text-muted-foreground shadow-sm transition-all hover:border-sky-500/30 hover:text-sky-700 dark:hover:text-sky-300 sm:px-3"
                 aria-label="Account menu"
               >
                 <User className="h-4 w-4" />
@@ -267,6 +271,34 @@ export function SiteNavBar(props: {
                       >
                         <User className="h-4 w-4 text-muted-foreground" />
                         {shell.profileSettings}
+                      </Link>
+                      {publicHandle ? (
+                        <Link
+                          href={`/u/${publicHandle}`}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent/[0.05]"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <Link2 className="h-4 w-4 text-muted-foreground" />
+                          Public profile
+                        </Link>
+                      ) : null}
+                      {profile?.needsUsername ? (
+                        <Link
+                          href="/username"
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-400/10 dark:text-amber-300"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <Sparkles className="h-4 w-4" />
+                          Claim username
+                        </Link>
+                      ) : null}
+                      <Link
+                        href="/founding-members"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent/[0.05]"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Crown className="h-4 w-4 text-muted-foreground" />
+                        Founders&apos; Wall
                       </Link>
                       <Link
                         href="/pricing"
