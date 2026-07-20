@@ -27,6 +27,7 @@ import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLan
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_REGISTER_COPY } from "@/src/lib/auth-register-copy";
+import { readAuthReturnPathFromSearch } from "@/src/lib/auth-redirects";
 import { writeDemoSessionId } from "@/src/lib/demo-session";
 import { cn } from "@/lib/utils";
 
@@ -53,7 +54,7 @@ function RegisterHeroPanel({ locale }: { locale: "en" | "bn" }) {
       >
         <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/85">
           <Sparkles className="h-3.5 w-3.5 text-white/90" aria-hidden />
-          {locale === "bn" ? "৪ ক্যাম্প · ২১ মিশন" : "4 camps · 21 missions"}
+          {locale === "bn" ? "4 ক্যাম্প · 21 মিশন" : "4 camps · 21 missions"}
         </p>
 
         <div className="space-y-3">
@@ -132,15 +133,22 @@ function RegisterToolbar({ copy }: { copy: (typeof AUTH_REGISTER_COPY)["en"] }) 
 export function RegisterForm() {
   const { handleRegister, loading, error } = useRegister();
   const [email, setEmail] = useState("");
+  const [returnTo, setReturnTo] = useState<string | null>(null);
   const { locale } = useGuestLandingLocaleState();
   const copy = AUTH_REGISTER_COPY[locale];
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const sid = new URLSearchParams(window.location.search).get("sid");
+    const params = new URLSearchParams(window.location.search);
+    const sid = params.get("sid");
     if (sid) writeDemoSessionId(sid);
+    setReturnTo(readAuthReturnPathFromSearch(params));
   }, []);
+
+  const loginHref = returnTo
+    ? `/login?redirect=${encodeURIComponent(returnTo)}`
+    : "/login";
 
   return (
     <div
@@ -174,7 +182,7 @@ export function RegisterForm() {
             <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_16px_48px_rgba(15,23,42,0.07)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.28)]">
               <div className="p-5 sm:p-6">
                 <div className="mb-4 space-y-3">
-                  <ContinueWithGoogleButton />
+                  <ContinueWithGoogleButton returnTo={returnTo} />
                   <AuthMethodDivider
                     label={locale === "bn" ? "অথবা ইমেইল" : "or email"}
                   />
@@ -249,7 +257,7 @@ export function RegisterForm() {
 
                 <p className="mt-4 text-center text-sm">
                   <span className="text-muted-foreground">{copy.hasAccount} </span>
-                  <Link href="/login" className="font-semibold text-primary hover:underline">
+                  <Link href={loginHref} className="font-semibold text-primary hover:underline">
                     {copy.signIn}
                   </Link>
                 </p>

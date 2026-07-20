@@ -58,6 +58,11 @@ export function DemoNameGate() {
         <p className="mt-2 text-center text-sm text-muted-foreground">
           {copy.nameSub}
         </p>
+        <p className="mt-3 rounded-xl border border-sky-400/30 bg-sky-400/10 px-3 py-2 text-center text-xs font-semibold text-sky-900 dark:text-sky-100">
+          {locale === "bn"
+            ? "শুরু করলেই আসল গেম ম্যাপ দেখবে — লগইন করা প্লেয়ারদের মতো।"
+            : "After you start, you'll see the real game map — same as logged-in players."}
+        </p>
 
         <form
           className="mt-6 space-y-3"
@@ -78,7 +83,7 @@ export function DemoNameGate() {
           <Button
             type="submit"
             size="lg"
-            className="h-12 w-full rounded-xl text-base font-bold"
+            className="h-14 w-full rounded-xl text-base font-bold"
             disabled={loading}
           >
             {loading ? (
@@ -91,8 +96,8 @@ export function DemoNameGate() {
 
         <Button
           type="button"
-          variant="ghost"
-          className="mt-2 w-full"
+          variant="outline"
+          className="mt-3 h-12 w-full rounded-xl font-semibold"
           disabled={loading}
           onClick={() => void begin(null)}
         >

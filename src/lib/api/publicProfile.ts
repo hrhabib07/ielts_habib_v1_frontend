@@ -75,19 +75,44 @@ export async function getMyFollowing(): Promise<
 
 export const PROFILE_VIEWER_STORAGE_KEY = "gamlish_profile_viewer_key";
 
+/**
+ * Stable anonymous visitor id (localStorage, sessionStorage fallback).
+ * Returns "" if we cannot persist — skip recording to avoid reload inflation.
+ */
 export function getOrCreateProfileViewerKey(): string {
   if (typeof window === "undefined") return "";
+
+  const read = (store: Storage): string | null => {
+    try {
+      const value = store.getItem(PROFILE_VIEWER_STORAGE_KEY);
+      return value && value.length >= 8 ? value : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const write = (store: Storage, value: string): boolean => {
+    try {
+      store.setItem(PROFILE_VIEWER_STORAGE_KEY, value);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   try {
-    let key = localStorage.getItem(PROFILE_VIEWER_STORAGE_KEY);
-    if (!key || key.length < 8) {
+    let key = read(localStorage) ?? read(sessionStorage);
+    if (!key) {
       key =
         typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
           : `v_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
-      localStorage.setItem(PROFILE_VIEWER_STORAGE_KEY, key);
+      if (!write(localStorage, key) && !write(sessionStorage, key)) {
+        return "";
+      }
     }
     return key;
   } catch {
-    return `v_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
+    return "";
   }
 }

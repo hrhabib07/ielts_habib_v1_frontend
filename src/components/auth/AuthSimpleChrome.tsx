@@ -1,11 +1,23 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { cn } from "@/lib/utils";
 
 /** Minimal top bar for auth flows that are not the full login/register shells. */
-export function AuthSimpleChrome({ homeLabel = "Home" }: { homeLabel?: string }) {
+export function AuthSimpleChrome() {
+  const { locale } = useUiLocale();
+  const homeLabel = locale === "bn" ? "হোম" : "Home";
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/90 backdrop-blur-md">
+    <header
+      className={cn(
+        "sticky top-0 z-40 border-b border-border/50 bg-background/90 backdrop-blur-md",
+        locale === "bn" && "font-bengali",
+      )}
+    >
       <div className="mx-auto flex h-14 max-w-lg items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
         <Link
           href="/"

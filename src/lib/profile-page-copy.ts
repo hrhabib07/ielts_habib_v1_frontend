@@ -71,7 +71,7 @@ export const PROFILE_PAGE_COPY: Record<GuestLandingLocale, ProfilePageCopy> = {
     profileSettings: "প্রোফাইল সেটিংস",
     profileSettingsHint: "nickname ও ফোন আপডেট করুন। nickname যেকোনো সময় বদলাতে পারবেন।",
     edit: "এডিট",
-    nickname: "Nickname",
+    nickname: "ডাকনাম",
     phone: "ফোন",
     save: "সেভ করুন",
     saving: "সেভ হচ্ছে…",

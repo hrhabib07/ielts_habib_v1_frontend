@@ -2,7 +2,8 @@ export type UiLocale = "en" | "bn";
 
 export const UI_LOCALE_STORAGE_KEY = "gamlish-ui-locale";
 
-const BN_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"] as const;
+const BN_DIGIT_CHARS = "০১২৩৪৫৬৭৮৯";
+const LATIN_DIGIT_CHARS = "0123456789";
 
 /** Product default is always Bengali. Browser language is ignored. */
 export function detectBrowserUiLocale(): UiLocale {
@@ -41,10 +42,26 @@ export function resolveInitialUiLocale(): UiLocale {
   return readStoredUiLocale() ?? "bn";
 }
 
-export function localizeDigits(value: string | number, locale: UiLocale): string {
+/**
+ * Force Western (Latin) digits — Hind Siliguri’s Bengali ১ is a hairline
+ * stroke that nearly disappears on muted/dark UI.
+ */
+export function toLatinDigits(value: string | number): string {
   const text = String(value);
-  if (locale === "en") return text;
-  return text.replace(/\d/g, (digit) => BN_DIGITS[Number(digit)] ?? digit);
+  let out = "";
+  for (const ch of text) {
+    const idx = BN_DIGIT_CHARS.indexOf(ch);
+    out += idx >= 0 ? LATIN_DIGIT_CHARS[idx]! : ch;
+  }
+  return out;
+}
+
+/**
+ * Format numbers for UI. Bangla locale keeps Latin digits for legibility
+ * (same practice as most BD SaaS / fintech apps).
+ */
+export function localizeDigits(value: string | number, _locale: UiLocale): string {
+  return toLatinDigits(value);
 }
 
 export function formatMissionProgress(

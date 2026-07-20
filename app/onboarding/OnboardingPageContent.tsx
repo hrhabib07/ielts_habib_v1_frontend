@@ -18,11 +18,11 @@ import {
   DEFAULT_CURRENT_COUNTRY,
   DEFAULT_DREAM_COUNTRY,
   DEFAULT_DESIRED_BAND,
-  SAME_COUNTRY_WARNING,
 } from "@/src/lib/countryCodes";
 import {
-  getMigrationReasons,
+  getMigrationReasonKeys,
   isStudentLearningReady,
+  type MigrationReasonKey,
 } from "@/src/lib/student-learning-gate";
 import {
   User,
@@ -36,6 +36,8 @@ import {
   Gamepad2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useOnboardingCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 
 const BAND_OPTIONS = [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9];
 const USERNAME_PATTERN = /^[a-z0-9_]{3,30}$/;
@@ -44,6 +46,8 @@ export default function OnboardingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isMigration = searchParams.get("migrate") === "1";
+  const copy = useOnboardingCopy();
+  const { locale } = useUiLocale();
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -52,7 +56,9 @@ export default function OnboardingPageContent() {
   const [usernameStatus, setUsernameStatus] = useState<
     "idle" | "checking" | "available" | "taken" | "invalid"
   >("idle");
-  const [migrationReasons, setMigrationReasons] = useState<string[]>([]);
+  const [migrationReasonKeys, setMigrationReasonKeys] = useState<
+    MigrationReasonKey[]
+  >([]);
   const [hasExistingUsername, setHasExistingUsername] = useState(false);
 
   const [username, setUsername] = useState("");
@@ -90,10 +96,10 @@ export default function OnboardingPageContent() {
         const band =
           p?.desiredBandScore ?? p?.targetBands?.reading ?? DEFAULT_DESIRED_BAND;
         setDesiredBand(band);
-        setMigrationReasons(getMigrationReasons(p ?? null));
+        setMigrationReasonKeys(getMigrationReasonKeys(p ?? null));
       })
       .catch(() => {
-        if (!cancelled) setError("Failed to load your account.");
+        if (!cancelled) setError(copy.errLoad);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -101,16 +107,16 @@ export default function OnboardingPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [router, isMigration]);
+  }, [router, isMigration, copy.errLoad]);
 
   useEffect(() => {
     if (!ENABLE_READING) return;
     if (currentCountry === dreamCountry) {
-      setCountryWarning(SAME_COUNTRY_WARNING);
+      setCountryWarning(copy.sameCountryWarning);
     } else {
       setCountryWarning(null);
     }
-  }, [currentCountry, dreamCountry]);
+  }, [currentCountry, dreamCountry, copy.sameCountryWarning]);
 
   const checkUsername = async (value: string) => {
     const normalized = value.trim().toLowerCase();
@@ -160,14 +166,14 @@ export default function OnboardingPageContent() {
 
     if (!ENABLE_READING) {
       if (!nickname.trim()) {
-        setError("Please enter a nickname.");
+        setError(copy.errNicknameRequired);
         return;
       }
       setSubmitting(true);
       try {
         const updated = await completeEnglishProfile(nickname.trim());
         if (!isStudentLearningReady(updated)) {
-          setError("Could not save your nickname. Please try again.");
+          setError(copy.errNicknameSave);
           return;
         }
         window.location.assign("/");
@@ -177,7 +183,7 @@ export default function OnboardingPageContent() {
             ? (err as { response?: { data?: { message?: string } } }).response?.data
                 ?.message
             : null;
-        setError(msg ?? "Something went wrong. Please try again.");
+        setError(msg ?? copy.errGeneric);
       } finally {
         setSubmitting(false);
       }
@@ -185,28 +191,28 @@ export default function OnboardingPageContent() {
     }
 
     if (currentCountry === dreamCountry) {
-      setCountryWarning(SAME_COUNTRY_WARNING);
+      setCountryWarning(copy.sameCountryWarning);
       return;
     }
 
     const normalizedUsername = username.trim().toLowerCase();
     if (!normalizedUsername || !USERNAME_PATTERN.test(normalizedUsername)) {
-      setError("Choose a username (3–30 characters: letters, numbers, underscores).");
+      setError(copy.errUsernameFormat);
       return;
     }
 
     if (!displayName.trim()) {
-      setError("Display name is required.");
+      setError(copy.errDisplayName);
       return;
     }
 
     if (!hasExistingUsername) {
       if (usernameStatus === "taken") {
-        setError("This username is already taken. Please choose another.");
+        setError(copy.errUsernameTaken);
         return;
       }
       if (usernameStatus === "checking") {
-        setError("Still checking username availability. Try again in a moment.");
+        setError(copy.errUsernameChecking);
         return;
       }
       if (usernameStatus !== "available") {
@@ -214,19 +220,19 @@ export default function OnboardingPageContent() {
           const result = await checkUsernameAvailable(normalizedUsername);
           if (!result.available) {
             setUsernameStatus("taken");
-            setError("This username is already taken. Please choose another.");
+            setError(copy.errUsernameTaken);
             return;
           }
           setUsernameStatus("available");
         } catch {
-          setError("Could not verify username. Please try again.");
+          setError(copy.errUsernameVerify);
           return;
         }
       }
     }
 
     if (!formValid) {
-      setError("Please complete every field.");
+      setError(copy.errCompleteFields);
       return;
     }
 
@@ -241,9 +247,7 @@ export default function OnboardingPageContent() {
       });
 
       if (!isStudentLearningReady(updated)) {
-        setError(
-          "Profile saved but something is still missing. Refresh the page or contact support if this continues.",
-        );
+        setError(copy.errProfileIncomplete);
         return;
       }
 
@@ -253,7 +257,7 @@ export default function OnboardingPageContent() {
         err && typeof err === "object" && "response" in err
           ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : null;
-      setError(msg ?? "Something went wrong. Please try again.");
+      setError(msg ?? copy.errGeneric);
     } finally {
       setSubmitting(false);
     }
@@ -262,13 +266,32 @@ export default function OnboardingPageContent() {
   if (loading) {
     return (
       <div className="flex min-h-[calc(100dvh-8rem)] items-center justify-center px-4">
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p
+          className={cn(
+            "text-sm text-muted-foreground",
+            locale === "bn" && "font-bengali",
+          )}
+        >
+          {copy.loading}
+        </p>
       </div>
     );
   }
 
+  const subtitle = isMigration
+    ? copy.migrateSub
+    : ENABLE_READING
+      ? copy.welcomeSubReading
+      : copy.welcomeSubEnglish;
+
   return (
-    <div className="relative mx-auto w-full max-w-xl px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-8 sm:pt-12">
+    <div
+      className={cn(
+        "relative mx-auto w-full max-w-xl px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-8 sm:pt-12",
+        locale === "bn" && "font-bengali",
+      )}
+      lang={locale === "bn" ? "bn" : "en"}
+    >
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(ellipse_70%_60%_at_50%_-10%,var(--primary)_0%,transparent_70%)] opacity-[0.12]"
         aria-hidden
@@ -285,23 +308,31 @@ export default function OnboardingPageContent() {
           )}
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {isMigration ? "Update your profile" : "Welcome to Gamlish"}
+          {isMigration ? copy.migrateTitle : copy.welcomeTitle}
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
-          {isMigration
-            ? "We need a few details before you can continue."
-            : ENABLE_READING
-              ? "Set up your profile, then you're straight into Reading."
-              : "Pick a nickname and jump into Mission 01. No username needed."}
+          {subtitle}
         </p>
+        {!isMigration && copy.welcomeTips.length > 0 ? (
+          <ul className="mx-auto mt-4 max-w-md space-y-2 text-left text-xs leading-relaxed text-muted-foreground sm:text-[13px]">
+            {copy.welcomeTips.map((tip) => (
+              <li
+                key={tip}
+                className="rounded-xl border border-border/60 bg-muted/30 px-3 py-2.5"
+              >
+                {tip}
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
-      {isMigration && migrationReasons.length > 0 && (
+      {isMigration && migrationReasonKeys.length > 0 && (
         <Card className="relative mb-6 border-amber-500/30 bg-amber-500/5 p-4">
-          <p className="text-sm font-semibold text-foreground">Why we&apos;re asking</p>
+          <p className="text-sm font-semibold text-foreground">{copy.migrateWhyTitle}</p>
           <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
-            {migrationReasons.map((reason) => (
-              <li key={reason}>{reason}</li>
+            {migrationReasonKeys.map((key) => (
+              <li key={key}>{copy.migrationReasons[key]}</li>
             ))}
           </ul>
         </Card>
@@ -313,7 +344,7 @@ export default function OnboardingPageContent() {
             <>
               <div className="space-y-2">
                 <Label htmlFor="nickname" className="text-sm font-medium">
-                  Nickname
+                  {copy.nicknameLabel}
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -321,22 +352,19 @@ export default function OnboardingPageContent() {
                     id="nickname"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
-                    placeholder="What should we call you?"
+                    placeholder={copy.nicknamePlaceholder}
                     autoComplete="nickname"
                     className="min-h-11 pl-10"
                     required
                     maxLength={80}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Shown on your home screen and in the game. You can change it later in profile
-                  settings.
-                </p>
+                <p className="text-xs text-muted-foreground">{copy.nicknameHelp}</p>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email
+                  {copy.emailLabel}
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -350,13 +378,14 @@ export default function OnboardingPageContent() {
                     aria-readonly
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">{copy.emailReadonlyHint}</p>
               </div>
             </>
           ) : (
             <>
               <div className="space-y-2">
                 <Label htmlFor="username" className="text-sm font-medium">
-                  Username
+                  {copy.usernameLabel}
                 </Label>
                 <div className="relative">
                   <AtSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -366,7 +395,7 @@ export default function OnboardingPageContent() {
                     onChange={(e) =>
                       setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))
                     }
-                    placeholder="your_handle"
+                    placeholder={copy.usernamePlaceholder}
                     autoComplete="username"
                     className="min-h-11 pl-10"
                     required
@@ -378,7 +407,7 @@ export default function OnboardingPageContent() {
 
               <div className="space-y-2">
                 <Label htmlFor="displayName" className="text-sm font-medium">
-                  Display name
+                  {copy.displayNameLabel}
                 </Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -386,7 +415,7 @@ export default function OnboardingPageContent() {
                     id="displayName"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="How others see you"
+                    placeholder={copy.displayNamePlaceholder}
                     autoComplete="nickname"
                     className="min-h-11 pl-10"
                     required
@@ -396,7 +425,7 @@ export default function OnboardingPageContent() {
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email
+                  {copy.emailLabel}
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -410,29 +439,30 @@ export default function OnboardingPageContent() {
                     aria-readonly
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">{copy.emailReadonlyHint}</p>
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="currentCountry" className="text-sm font-medium">
-                    Current country
+                    {copy.currentCountryLabel}
                   </Label>
                   <CountryCodeSelect
                     id="currentCountry"
                     value={currentCountry}
                     onValueChange={setCurrentCountry}
-                    placeholder="Where you live now"
+                    placeholder={copy.currentCountryPlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="dreamCountry" className="text-sm font-medium">
-                    Dream country
+                    {copy.dreamCountryLabel}
                   </Label>
                   <CountryCodeSelect
                     id="dreamCountry"
                     value={dreamCountry}
                     onValueChange={setDreamCountry}
-                    placeholder="Where you want to study"
+                    placeholder={copy.dreamCountryPlaceholder}
                   />
                 </div>
               </div>
@@ -450,17 +480,17 @@ export default function OnboardingPageContent() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-foreground">
-                      Desired IELTS band score
+                      {copy.bandTitle}
                     </p>
                     <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                      Pick the band you&apos;re aiming for. Default is 6.5.
+                      {copy.bandHelp}
                     </p>
                   </div>
                 </div>
                 <div
                   className="grid grid-cols-4 gap-2 sm:grid-cols-6"
                   role="group"
-                  aria-label="Band score options"
+                  aria-label={copy.bandAria}
                 >
                   {BAND_OPTIONS.map((band) => (
                     <button
@@ -495,15 +525,15 @@ export default function OnboardingPageContent() {
             size="lg"
           >
             {submitting ? (
-              "Saving…"
+              copy.submitting
             ) : (
               <>
                 <Target className="h-4 w-4" />
                 {isMigration
-                  ? "Save and continue"
+                  ? copy.submitMigrate
                   : ENABLE_READING
-                    ? "Start my Reading journey"
-                    : "Start playing"}
+                    ? copy.submitReading
+                    : copy.submitPlaying}
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

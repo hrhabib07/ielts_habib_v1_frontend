@@ -284,7 +284,7 @@ export function SiteNavBar(props: {
                       ) : null}
                       {profile?.needsUsername ? (
                         <Link
-                          href="/username"
+                          href="/username?next=/player"
                           className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-400/10 dark:text-amber-300"
                           onClick={() => setMenuOpen(false)}
                         >
@@ -378,6 +378,7 @@ export function SiteNavBar(props: {
             navProgressBarStyle={navProgressBarStyle}
             streak={streak}
             shell={shell}
+            needsUsername={profile?.needsUsername === true}
             trigger={
               <Button
                 type="button"

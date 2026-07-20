@@ -34,6 +34,8 @@ export interface StudentHomeCopy {
   readonly premiumBannerLine: string;
   readonly premiumBannerButton: string;
   readonly playLabel: string;
+  /** Short line above the roadmap explaining tap-to-play. */
+  readonly roadmapHint: string;
   readonly camps: readonly StudentHomeCampCopy[];
 }
 
@@ -65,11 +67,12 @@ export const STUDENT_HOME_COPY: Record<StudentHomeLocale, StudentHomeCopy> = {
     premiumBannerLine: "সব ক্যাম্প, মিশন আর রিওয়ার্ড একসাথে।",
     premiumBannerButton: "প্ল্যান দেখো",
     playLabel: "PLAY",
+    roadmapHint: "নিচের রোডম্যাপে মিশনে ট্যাপ করে শুরু করো।",
     camps: [
-      { title: "Camp 01", subtitle: "The Foundation" },
-      { title: "Camp 02", subtitle: "Action Kingdom" },
-      { title: "Camp 03", subtitle: "Time Travel" },
-      { title: "Camp 04", subtitle: "Real English" },
+      { title: "Camp 01", subtitle: "ভিত্তি" },
+      { title: "Camp 02", subtitle: "অ্যাকশন কিংডম" },
+      { title: "Camp 03", subtitle: "সময়ের যাত্রা" },
+      { title: "Camp 04", subtitle: "আসল ইংরেজি" },
     ],
   },
   en: {
@@ -99,6 +102,7 @@ export const STUDENT_HOME_COPY: Record<StudentHomeLocale, StudentHomeCopy> = {
     premiumBannerLine: "All camps, missions, and rewards.",
     premiumBannerButton: "View plans",
     playLabel: "PLAY",
+    roadmapHint: "Tap any open mission on the roadmap below to start.",
     camps: [
       { title: "Camp 01", subtitle: "The Foundation" },
       { title: "Camp 02", subtitle: "Action Kingdom" },

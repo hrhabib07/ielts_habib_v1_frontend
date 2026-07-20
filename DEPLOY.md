@@ -33,14 +33,24 @@ git push origin main
 
 Vercel rebuilds Production from `main`. No manual upload needed after the project is linked.
 
-## Local verify before push
+## Local verify before push (Windows)
 
-```bash
-npm ci
-npm run build
+Stop `npm run dev` first (locked native binaries break installs).
+
+```powershell
+# From ielts-habib-frontend/
+npm install
+npm run deploy:check
 ```
 
-Build must succeed with exit code 0. TypeScript runs as part of `next build`.
+Avoid `npm ci` on Windows while the app or antivirus is locking files — it can leave `node_modules` broken (`next` not found). Use `npm install` locally; Vercel Linux still uses `npm ci`.
+
+If install fails with `EPERM` / `unlink …lightningcss…` / `next-swc…`:
+
+1. Close Cursor terminals running `next dev`
+2. Close any other Node processes using this folder
+3. Run `npm install` again
+4. Then `npm run build`
 
 ## Google sign-in
 

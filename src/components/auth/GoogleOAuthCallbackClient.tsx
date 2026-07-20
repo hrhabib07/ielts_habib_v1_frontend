@@ -8,6 +8,9 @@ import {
   readDemoSessionId,
 } from "@/src/lib/demo-session";
 import { decodeJwtUser } from "@/src/lib/jwt-verify";
+import { GOOGLE_CALLBACK_COPY } from "@/src/lib/auth-recovery-copy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { cn } from "@/lib/utils";
 
 function sanitizeInternalPath(raw: string | null): string | null {
   if (!raw) return null;
@@ -37,7 +40,9 @@ function resolveDestination(
  */
 export function GoogleOAuthCallbackClient() {
   const searchParams = useSearchParams();
-  const [message, setMessage] = useState("Signing you in…");
+  const { locale } = useUiLocale();
+  const copy = GOOGLE_CALLBACK_COPY[locale];
+  const [message, setMessage] = useState(copy.signingIn);
   const [phase, setPhase] = useState<"working" | "error">("working");
   const started = useRef(false);
 
@@ -65,10 +70,7 @@ export function GoogleOAuthCallbackClient() {
 
       const token = searchParams.get("token")?.trim();
       if (!token) {
-        fail(
-          "Google sign-in did not return a session. Try again.",
-          "google_missing_token",
-        );
+        fail(copy.missingToken, "google_missing_token");
         return;
       }
 
@@ -105,16 +107,22 @@ export function GoogleOAuthCallbackClient() {
     };
 
     void run().catch(() => {
-      fail("Could not finish Google sign-in. Try again.", "google_sync_failed");
+      fail(copy.syncFailed, "google_sync_failed");
     });
 
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, [searchParams, copy.missingToken, copy.syncFailed]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
+    <div
+      className={cn(
+        "flex min-h-dvh items-center justify-center bg-background px-4",
+        locale === "bn" && "font-bengali",
+      )}
+      lang={locale === "bn" ? "bn" : "en"}
+    >
       <div className="w-full max-w-sm rounded-2xl border border-border/70 bg-card p-8 text-center shadow-sm">
         {phase === "working" ? (
           <div
@@ -124,7 +132,7 @@ export function GoogleOAuthCallbackClient() {
         ) : null}
         <p className="text-sm font-semibold text-foreground">{message}</p>
         <p className="mt-2 text-xs text-muted-foreground">
-          {phase === "working" ? "Almost there…" : "Redirecting to login…"}
+          {phase === "working" ? copy.almostThere : copy.redirectLogin}
         </p>
       </div>
     </div>

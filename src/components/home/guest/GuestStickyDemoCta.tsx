@@ -7,14 +7,14 @@ import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingL
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
 
-/** Sticky mobile CTA after scrolling past the hero Play button. */
+/** Sticky mobile CTAs after scrolling past the hero — demo + clear pre-order. */
 export function GuestStickyDemoCta() {
   const { copy } = useGuestLandingLocale();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
-      setVisible(window.scrollY > window.innerHeight * 0.72);
+      setVisible(window.scrollY > window.innerHeight * 0.55);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -28,16 +28,26 @@ export function GuestStickyDemoCta() {
         visible ? "translate-y-0" : "translate-y-full",
       )}
     >
-      <Button
-        size="lg"
-        className={cn(
-          "h-12 w-full rounded-2xl text-base font-bold",
-          LANDING_CTA_CLASS,
-        )}
-        asChild
-      >
-        <Link href="/demo">{copy.stickyCta}</Link>
-      </Button>
+      <div className="mx-auto flex max-w-lg gap-2">
+        <Button
+          size="lg"
+          className={cn(
+            "h-12 flex-1 rounded-2xl text-sm font-bold",
+            LANDING_CTA_CLASS,
+          )}
+          asChild
+        >
+          <Link href="/demo">{copy.stickyCta}</Link>
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          className="h-12 flex-1 rounded-2xl border-2 border-amber-500/50 bg-amber-400/10 text-sm font-bold text-amber-950 hover:bg-amber-400/20 dark:border-amber-400/45 dark:text-amber-100"
+          asChild
+        >
+          <Link href="/pricing#pay-now">{copy.stickyPreOrder}</Link>
+        </Button>
+      </div>
     </div>
   );
 }

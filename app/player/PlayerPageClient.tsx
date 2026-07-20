@@ -4,7 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPlayerCourseMap, type PlayerCourseMap } from "@/src/lib/api/player";
 import { CampMapView } from "@/src/components/player/CampMapView";
+import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
 import { getDecodedTokenClient } from "@/src/lib/auth";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { USERNAME_CLAIM_HREF } from "@/src/lib/auth-redirects";
 import { Button } from "@/components/ui/button";
 import { isAxiosError } from "axios";
 
@@ -32,10 +35,18 @@ function mapLoadErrorMessage(err: unknown): string {
 
 export default function PlayerPageClient() {
   const router = useRouter();
+  const { profile, loading: profileLoading } = useStudentSession();
   const [map, setMap] = useState<PlayerCourseMap | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+
+  useEffect(() => {
+    if (profileLoading) return;
+    if (profile?.needsUsername === true) {
+      router.replace(USERNAME_CLAIM_HREF);
+    }
+  }, [profileLoading, profile?.needsUsername, router]);
 
   const loadMap = useCallback(async (signal: AbortSignal) => {
     const token = getDecodedTokenClient();
@@ -62,10 +73,22 @@ export default function PlayerPageClient() {
   }, [router]);
 
   useEffect(() => {
+    if (profile?.needsUsername) return;
     const controller = new AbortController();
     void loadMap(controller.signal);
     return () => controller.abort();
-  }, [loadMap, retryKey]);
+  }, [loadMap, retryKey, profile?.needsUsername]);
+
+  if (profileLoading || profile?.needsUsername) {
+    return (
+      <div className="mx-auto max-w-lg space-y-4 px-4 py-10">
+        <UsernameClaimBanner />
+        <div className="flex justify-center py-8 text-sm text-muted-foreground">
+          ইউজারনেম বাছাই পেজে নিয়ে যাওয়া হচ্ছে…
+        </div>
+      </div>
+    );
+  }
 
   if (!loading && error) {
     return (
@@ -86,5 +109,12 @@ export default function PlayerPageClient() {
     );
   }
 
-  return <CampMapView map={map} loading={loading} error={null} />;
+  return (
+    <div>
+      <div className="mx-auto max-w-lg px-4 pt-4 sm:max-w-2xl">
+        <UsernameClaimBanner />
+      </div>
+      <CampMapView map={map} loading={loading} error={null} />
+    </div>
+  );
 }

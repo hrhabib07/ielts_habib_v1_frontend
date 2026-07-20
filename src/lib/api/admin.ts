@@ -60,7 +60,7 @@ export interface SubscriptionRequestItem {
     price?: number;
   } | string;
   paymentMethod: string;
-  transactionId: string;
+  transactionId?: string;
   senderNumber?: string;
   paidAmount: number;
   screenshotUrl?: string;

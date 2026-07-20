@@ -56,17 +56,17 @@ function SegmentedToggle({
 }) {
   const buttonClass = (code: UiLocale, active: boolean) =>
     cn(
-      "rounded-md px-2 py-1 transition-colors",
+      "rounded-md px-2.5 py-1 transition-colors",
       active
         ? "bg-foreground text-background shadow-sm"
-        : "text-muted-foreground hover:text-foreground",
+        : "text-foreground/70 hover:text-foreground",
       code === "bn" && "font-bengali",
     );
 
   return (
     <div
       className={cn(
-        "inline-flex h-9 shrink-0 items-center rounded-full border border-border/50 bg-muted/40 p-0.5 text-[11px] font-semibold leading-none",
+        "inline-flex h-9 shrink-0 items-center rounded-full border border-border/50 bg-muted/40 p-0.5 text-xs font-semibold leading-none",
         className,
       )}
       role="group"
@@ -80,7 +80,7 @@ function SegmentedToggle({
       >
         বাংলা
       </button>
-      <span className="select-none px-0.5 text-[10px] text-muted-foreground/45" aria-hidden>
+      <span className="select-none px-0.5 text-xs text-muted-foreground" aria-hidden>
         |
       </span>
       <button

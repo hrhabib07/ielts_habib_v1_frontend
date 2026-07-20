@@ -11,8 +11,6 @@ import {
   hasUsableClientToken,
   isActiveStudentSessionClient,
 } from "@/src/lib/auth";
-import { GuestLandingPage } from "@/src/components/home/guest/GuestLandingPage";
-import { StudentEnglishHome } from "@/src/components/home/StudentEnglishHome";
 import { ENABLE_READING } from "@/src/lib/platform-config";
 import { BandScoreWaterDisplay } from "@/src/components/home/BandScoreWaterDisplay";
 import {
@@ -30,6 +28,33 @@ import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMe
 import { EarlyAdopterCountdown } from "@/src/components/founding-member/EarlyAdopterCountdown";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 
+const GuestLandingPage = dynamic(
+  () =>
+    import("@/src/components/home/guest/GuestLandingPage").then(
+      (m) => m.GuestLandingPage,
+    ),
+  {
+    loading: () => (
+      <div className="flex min-h-[70dvh] items-center justify-center">
+        <div className="h-10 w-48 animate-pulse rounded-xl bg-muted/40" />
+      </div>
+    ),
+  },
+);
+
+const StudentEnglishHome = dynamic(
+  () =>
+    import("@/src/components/home/StudentEnglishHome").then(
+      (m) => m.StudentEnglishHome,
+    ),
+  {
+    loading: () => (
+      <div className="flex min-h-[70dvh] items-center justify-center">
+        <div className="h-32 w-full max-w-lg animate-pulse rounded-2xl bg-muted/40" />
+      </div>
+    ),
+  },
+);
 const StudentBandJourneyFlightVisual = dynamic(
   () =>
     import("@/src/components/home/StudentBandJourneyFlightVisual").then(

@@ -1,6 +1,20 @@
 import apiClient from "../api-client";
 import type { ApiResponse } from "./types";
 
+export type AdminPaymentLabel = "unpaid" | "pending" | "paid";
+export type AdminPremiumLabel = "live" | "preorder" | "free";
+
+export interface AdminStudentAccessSummary {
+  hasPurchased: boolean;
+  subscriptionPaymentStatus: string | null;
+  hasLiveEnglishAccess: boolean;
+  isPreorderAwaitingAccess: boolean;
+  accessStartsAt: string | null;
+  accessEndsAt: string | null;
+  paymentLabel: AdminPaymentLabel;
+  premiumLabel: AdminPremiumLabel;
+}
+
 export interface AdminStudentListItem {
   _id: string;
   email: string;
@@ -8,6 +22,8 @@ export interface AdminStudentListItem {
   displayName: string | null;
   signupIp: string | null;
   marketingPaymentStatus: string;
+  paymentLabel?: AdminPaymentLabel;
+  premiumLabel?: AdminPremiumLabel;
   createdAt: string;
   progress: {
     completedMissions: number;
@@ -35,9 +51,9 @@ export interface AdminMissionState {
   isInspection: boolean;
   accessTier: string;
   stageCount: number;
-  status: "locked" | "available" | "in_progress" | "completed";
   currentStageOrder: number | null;
   completedStageOrders: number[];
+  status: "locked" | "available" | "in_progress" | "completed";
 }
 
 export interface AdminStudentEnglishProgress {
@@ -48,9 +64,11 @@ export interface AdminStudentEnglishProgress {
     displayName: string | null;
     signupIp: string | null;
     marketingPaymentStatus: string;
+    hasPurchased?: boolean;
     phone: string | null;
     createdAt: string;
   };
+  access?: AdminStudentAccessSummary;
   map: {
     course: { slug: string; title: string; subtitle?: string };
     hasEnglishAccess: boolean;
@@ -98,6 +116,15 @@ export async function getAdminStudentEnglishProgress(
 ): Promise<AdminStudentEnglishProgress | null> {
   const res = await apiClient.get<ApiResponse<AdminStudentEnglishProgress>>(
     `/admin/users/${userId}/english-progress`,
+  );
+  return res.data?.data ?? null;
+}
+
+export async function unlockAdminStudentEnglishAccess(
+  userId: string,
+): Promise<AdminStudentEnglishProgress | null> {
+  const res = await apiClient.post<ApiResponse<AdminStudentEnglishProgress>>(
+    `/admin/users/${userId}/unlock-english-access`,
   );
   return res.data?.data ?? null;
 }

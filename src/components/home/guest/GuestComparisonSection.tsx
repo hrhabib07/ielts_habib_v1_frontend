@@ -73,7 +73,7 @@ export function GuestComparisonSection() {
               {copy.comparisonOldTitle}
             </p>
             <p className="mt-5 font-serif text-xl font-medium leading-snug tracking-tight text-stone-500 dark:text-stone-400 sm:text-2xl">
-              {isBn ? "থেমে থাকা শেখা" : "Learning that stalls"}
+              {isBn ? "পুরোনো পদ্ধতিতে ইংরেজি শেখা" : "Learning that stalls"}
             </p>
 
             <ol className="mt-8 flex flex-1 flex-col justify-center space-y-0">

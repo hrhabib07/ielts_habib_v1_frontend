@@ -10,10 +10,11 @@ import { cn } from "@/lib/utils";
 /**
  * Dominant hero visual: mission-card mock.
  * Structure = brand blue. Gold only on reward pops (+XP, streak).
+ * Colors tuned for WCAG contrast on dark card surfaces.
  */
 export function GuestHeroMissionVisual({ className }: { className?: string }) {
   const reduceMotion = useReducedMotion();
-  const { copy, locale } = useGuestLandingLocale();
+  const { copy } = useGuestLandingLocale();
   const camp1 = copy.mockupZones[0];
 
   return (
@@ -30,39 +31,41 @@ export function GuestHeroMissionVisual({ className }: { className?: string }) {
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       >
         <span className={LANDING_REWARD_PILL_CLASS}>
-          <Sparkles className="h-3 w-3" />
+          <Sparkles className="h-3.5 w-3.5" aria-hidden />
           +10 XP
         </span>
       </motion.div>
 
-      <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-4 shadow-[0_28px_60px_-28px_rgba(15,23,42,0.75)] ring-1 ring-sky-400/25">
+      <div className="relative overflow-hidden rounded-[1.5rem] border border-sky-300/30 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-4 shadow-[0_28px_60px_-28px_rgba(15,23,42,0.75)] ring-1 ring-sky-400/30">
         <div
-          className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-sky-400/15 blur-3xl"
+          className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-sky-400/20 blur-3xl"
           aria-hidden
         />
 
         <div className="relative flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-sky-300/90">
-              {locale === "bn" ? "ক্যাম্প ১" : "Camp 1"} · Mission 01
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-sky-200">
+              {copy.mockupMissionLabel}
             </p>
-            <p className="mt-1 text-base font-bold text-white">
+            <p className="mt-1.5 text-lg font-bold leading-snug text-white">
               {camp1?.title ?? "The Foundation"}
             </p>
           </div>
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-400/20 text-sky-300 ring-1 ring-sky-400/35">
-            <Crown className="h-5 w-5" />
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-400/25 text-sky-200 ring-1 ring-sky-300/40">
+            <Crown className="h-5 w-5" aria-hidden />
           </span>
         </div>
 
-        <div className="relative mt-4 rounded-xl border border-white/10 bg-white/5 p-3">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-white/70">
-            <span>{locale === "bn" ? "অগ্রগতি" : "Progress"}</span>
-            <span className="tabular-nums text-sky-300">2 / 4 stages</span>
+        <div className="relative mt-4 rounded-xl border border-white/15 bg-white/10 p-3">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-100">
+            <span>{copy.mockupReadinessLabel}</span>
+            <span className="tabular-nums text-sky-200">
+              {copy.mockupStagesProgress}
+            </span>
           </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+          <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-950/60">
             <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-sky-400 to-blue-500"
+              className="h-full rounded-full bg-gradient-to-r from-sky-300 to-blue-400"
               initial={{ width: "0%" }}
               animate={{ width: "50%" }}
               transition={{ duration: 1.1, delay: 0.35, ease: GUEST_EASE }}
@@ -71,12 +74,12 @@ export function GuestHeroMissionVisual({ className }: { className?: string }) {
         </div>
 
         <div className="relative mt-3 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-lg bg-white/8 px-2 py-1 text-[11px] font-bold text-white/85">
-            <Flame className="h-3 w-3 text-amber-400" />
-            {locale === "bn" ? "৩ দিনের স্ট্রিক" : "3-day streak"}
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-950/50 px-2.5 py-1.5 text-xs font-bold text-slate-100 ring-1 ring-white/15">
+            <Flame className="h-3.5 w-3.5 text-amber-300" aria-hidden />
+            {copy.mockupStreakLabel}
           </span>
-          <span className="inline-flex items-center rounded-lg bg-sky-400/15 px-2 py-1 text-[11px] font-bold text-sky-300">
-            {locale === "bn" ? "ফ্রি শুরু" : "Free start"}
+          <span className="inline-flex items-center rounded-lg bg-sky-400/20 px-2.5 py-1.5 text-xs font-bold text-sky-100 ring-1 ring-sky-300/35">
+            {copy.campFreeStart}
           </span>
         </div>
       </div>

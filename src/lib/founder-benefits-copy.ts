@@ -101,10 +101,10 @@ export const FOUNDER_BENEFITS_COPY: Record<UiLocale, FounderBenefitsCopy> = {
     ],
   },
   bn: {
-    eyebrow: "১ আগস্টের আগে · শুধু প্রথম ১০০ জন",
+    eyebrow: "1 আগস্টের আগে · শুধু প্রথম 100 জন",
     headline: "প্রথম হোন।",
     subhead:
-      "মাত্র ১০০ জন চিরকাল Founding Member স্ট্যাটাস ধরে রাখবেন। এখনই যোগ দিন। স্থায়ী ব্যাজ, নম্বর ও Wall-এ জায়গা লক করুন।",
+      "মাত্র 100 জন চিরকাল Founding Member স্ট্যাটাস ধরে রাখবেন। এখনই যোগ দিন। স্থায়ী ব্যাজ, নম্বর ও Wall-এ জায়গা লক করুন।",
     revealCta: "এখন যোগ দিলে কী কী সুবিধা পাব?",
     hideCta: "সুবিধা লুকান",
     yourBadgeTitle: "আপনার Founding Member ব্যাজ",
@@ -115,12 +115,12 @@ export const FOUNDER_BENEFITS_COPY: Record<UiLocale, FounderBenefitsCopy> = {
       "এটি ইতিমধ্যে আপনার পাবলিক প্রোফাইল ও Founders' Wall-এ আছে।",
     benefitsTitle: "আপনি যা আনলক করবেন",
     afterCloseNote:
-      "১০০ জন Founder পূর্ণ হলে বা ১ আগস্টের পর নতুন ক্রেতারা গেম পাবেন, কিন্তু Founder Number, ব্যাজ বা Wall পাবেন না।",
+      "100 জন Founder পূর্ণ হলে বা 1 আগস্টের পর নতুন ক্রেতারা গেম পাবেন, কিন্তু Founder Number, ব্যাজ বা Wall পাবেন না।",
     wallLink: "দেখুন কে কে ইতিমধ্যে Founders' Wall-এ আছেন",
     spotsLeft: (remainingLabel, maxLabel) =>
       `Founding Member স্পট বাকি ${remainingLabel} / ${maxLabel}`,
     soldOut:
-      "১০০টি Founding Member স্পট শেষ। Regular Member হিসেবে প্রি-লঞ্চ মূল্য এখনও লক করতে পারবেন।",
+      "100টি Founding Member স্পট শেষ। Regular Member হিসেবে প্রি-লঞ্চ মূল্য এখনও লক করতে পারবেন।",
     locked: "লকড",
     soldOutTier: "শেষ",
     counterHint: "স্থায়ী ব্যাজ, টিয়ার, নম্বর ও Founders' Wall।",
@@ -131,12 +131,12 @@ export const FOUNDER_BENEFITS_COPY: Record<UiLocale, FounderBenefitsCopy> = {
       {
         id: "badge",
         title: "Founding Member ব্যাজ",
-        body: "পাবলিক প্রোফাইলে স্থায়ী ব্যাজ। প্রথম ১০০ বা লঞ্চের পর আর পাওয়া যাবে না।",
+        body: "পাবলিক প্রোফাইলে স্থায়ী ব্যাজ। প্রথম 100 বা লঞ্চের পর আর পাওয়া যাবে না।",
       },
       {
         id: "number",
         title: "Founder Number ও টিয়ার",
-        body: "গোল্ড #০০১ থেকে #০২৫। সিলভার #০২৬ থেকে #০৫০। ব্রোঞ্জ #০৫১ থেকে #১০০। নম্বর চিরকাল লক।",
+        body: "গোল্ড #001 থেকে #025। সিলভার #026 থেকে #050। ব্রোঞ্জ #051 থেকে #100। নম্বর চিরকাল লক।",
       },
       {
         id: "wall",
@@ -146,7 +146,7 @@ export const FOUNDER_BENEFITS_COPY: Record<UiLocale, FounderBenefitsCopy> = {
       {
         id: "game",
         title: "পূর্ণ Game of English",
-        body: "৪টি ক্যাম্প, ২১টি মিশন, XP, কয়েন, স্ট্রিক, মিশন কার্ড ও অ্যাচিভমেন্ট।",
+        body: "4টি ক্যাম্প, 21টি মিশন, XP, কয়েন, স্ট্রিক, মিশন কার্ড ও অ্যাচিভমেন্ট।",
       },
       {
         id: "profile",
@@ -156,7 +156,7 @@ export const FOUNDER_BENEFITS_COPY: Record<UiLocale, FounderBenefitsCopy> = {
       {
         id: "squad",
         title: "স্কোয়াড ও সাপ্তাহিক র‍্যাঙ্ক",
-        body: "স্কোয়াড তৈরি বা জয়েন করুন (সর্বোচ্চ ৫ জন), একসাথে সাপ্তাহিক XP অর্জন করুন।",
+        body: "স্কোয়াড তৈরি বা জয়েন করুন (সর্বোচ্চ 5 জন), একসাথে সাপ্তাহিক XP অর্জন করুন।",
       },
     ],
   },

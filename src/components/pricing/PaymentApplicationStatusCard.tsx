@@ -69,13 +69,13 @@ export function PaymentApplicationStatusCard({
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button asChild className={brandStatus.success.button}>
+              <Button asChild className="rounded-xl bg-amber-500 font-bold text-amber-950 hover:bg-amber-400">
+                <Link href="/username?next=/player">ইউজারনেম বাছুন · Claim username</Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-xl">
                 <Link href={ENABLE_READING ? "/profile/reading" : PRIMARY_STUDENT_HREF}>
                   {ENABLE_READING ? "Go to Reading" : "Go to camp map"}
                 </Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-xl">
-                <Link href="/username">Claim your username</Link>
               </Button>
               <Button asChild variant="ghost" className="rounded-xl">
                 <Link href="/profile">View Gamlish profile</Link>
@@ -110,11 +110,11 @@ export function PaymentApplicationStatusCard({
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Button asChild className="rounded-xl bg-amber-500 font-bold text-amber-950 hover:bg-amber-400">
+                <Link href="/username?next=/player">ইউজারনেম বাছুন · Claim username</Link>
+              </Button>
               <Button asChild variant="outline" className="rounded-xl">
                 <Link href={PRIMARY_STUDENT_HREF}>Go to camp map</Link>
-              </Button>
-              <Button asChild className="rounded-xl">
-                <Link href="/username">Claim your username</Link>
               </Button>
               <Button asChild variant="ghost" className="rounded-xl">
                 <Link href="/profile">View Gamlish profile</Link>
@@ -140,7 +140,7 @@ export function PaymentApplicationStatusCard({
               </p>
               <p className={cn("mt-1 text-sm leading-relaxed", brandStatus.pending.body)}>
                 আমরা আপনার bKash পেমেন্ট প্রুফ পেয়েছি। অ্যাডমিন ভেরিফাই করলে প্রি-অর্ডার কনফার্ম হবে।
-                প্রিমিয়াম অ্যাক্সেস সাথে সাথে চালু হবে না। অ্যাক্সেস শুরু হবে ১ আগস্ট থেকে।
+                প্রিমিয়াম অ্যাক্সেস সাথে সাথে চালু হবে না। অ্যাক্সেস শুরু হবে 1 আগস্ট থেকে।
               </p>
             </div>
             <dl className={cn("grid gap-2 rounded-xl border p-4 text-sm sm:grid-cols-2", brandStatus.pending.detail)}>
@@ -153,9 +153,21 @@ export function PaymentApplicationStatusCard({
                 <dd className="font-medium">{latestRequest.paidAmount.toLocaleString()} BDT</dd>
               </div>
               <div>
-                <dt className={cn("text-xs uppercase tracking-wide", brandStatus.pending.label)}>Transaction ID</dt>
-                <dd className="font-mono font-medium">{latestRequest.transactionId}</dd>
+                <dt className={cn("text-xs uppercase tracking-wide", brandStatus.pending.label)}>
+                  আপনার bKash
+                </dt>
+                <dd className="font-mono font-medium">
+                  {latestRequest.senderNumber || "—"}
+                </dd>
               </div>
+              {latestRequest.transactionId ? (
+                <div>
+                  <dt className={cn("text-xs uppercase tracking-wide", brandStatus.pending.label)}>
+                    Transaction ID
+                  </dt>
+                  <dd className="font-mono font-medium">{latestRequest.transactionId}</dd>
+                </div>
+              ) : null}
               <div>
                 <dt className={cn("text-xs uppercase tracking-wide", brandStatus.pending.label)}>Submitted</dt>
                 <dd className="font-medium">{formatDateTime(latestRequest.createdAt)}</dd>
@@ -216,9 +228,19 @@ export function PaymentApplicationStatusCard({
             </div>
             <dl className="grid gap-2 text-sm text-red-900/80 dark:text-red-100/80 sm:grid-cols-2">
               <div>
-                <dt className="text-xs uppercase tracking-wide text-red-700/70 dark:text-red-200/60">Transaction ID</dt>
-                <dd className="font-mono">{latestRequest.transactionId}</dd>
+                <dt className="text-xs uppercase tracking-wide text-red-700/70 dark:text-red-200/60">
+                  আপনার bKash
+                </dt>
+                <dd className="font-mono">{latestRequest.senderNumber || "—"}</dd>
               </div>
+              {latestRequest.transactionId ? (
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-red-700/70 dark:text-red-200/60">
+                    Transaction ID
+                  </dt>
+                  <dd className="font-mono">{latestRequest.transactionId}</dd>
+                </div>
+              ) : null}
               {latestRequest.reviewedAt && (
                 <div>
                   <dt className="text-xs uppercase tracking-wide text-red-700/70 dark:text-red-200/60">Reviewed</dt>

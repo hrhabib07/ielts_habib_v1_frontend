@@ -32,33 +32,48 @@ export function FounderLaunchPricingCard({
   );
 
   return (
-    <div className={cn(locale === "bn" && "font-bengali", className)} lang={locale}>
+    <div
+      id="pay-now"
+      className={cn(
+        "scroll-mt-24",
+        locale === "bn" && "font-bengali",
+        className,
+      )}
+      lang={locale}
+    >
       <div
         className={cn(
-          "relative overflow-hidden rounded-3xl border p-6 shadow-xl md:p-8",
+          "relative overflow-hidden rounded-3xl border-2 border-amber-500/45 p-6 shadow-xl ring-4 ring-amber-400/15 md:p-8",
           brandSurfaces.pricingCard,
         )}
       >
-        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-amber-400/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-primary/8 blur-3xl" />
 
         <div className="relative space-y-6">
           <div className="space-y-3 text-center">
-            <p className="text-sm font-semibold text-primary">{copy.eyebrow}</p>
+            <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+              {copy.eyebrow}
+            </p>
             <h2 className="text-2xl font-black leading-tight text-foreground md:text-3xl">
               {copy.headline}
             </h2>
-            <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground">
+            <p className="mx-auto max-w-xl text-sm leading-relaxed text-foreground/75 dark:text-slate-200/90">
               {copy.intro}
             </p>
-            <p className="text-sm font-medium text-primary/90">{copy.scarcity}</p>
+            <p className="rounded-xl bg-amber-400/15 px-3 py-2 text-sm font-semibold text-amber-950 dark:text-amber-100">
+              {copy.payHereHint}
+            </p>
+            <p className="text-sm font-semibold leading-relaxed text-foreground/85 dark:text-slate-100">
+              {copy.scarcity}
+            </p>
           </div>
 
           <div
             className={cn(
-              "mx-auto max-w-md rounded-2xl border p-5 backdrop-blur-sm",
-              "border-border/70 bg-card/90 shadow-sm",
-              "dark:border-primary/15 dark:bg-card/80",
+              "mx-auto max-w-md rounded-2xl border-2 border-amber-500/35 p-5 backdrop-blur-sm",
+              "border-border/70 bg-card/95 shadow-sm",
+              "dark:border-amber-400/30 dark:bg-card/90",
             )}
           >
             <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
@@ -107,7 +122,7 @@ export function FounderLaunchPricingCard({
                   {copy.perMonth}
                 </p>
               ) : null}
-              <p className="text-4xl font-black tracking-tight text-foreground">
+              <p className="text-4xl font-black tracking-tight text-foreground sm:text-5xl">
                 {formatBdt(pricing.finalPriceBdt)}
                 <span className="text-lg font-semibold text-muted-foreground">
                   {copy.perMonth}
@@ -144,17 +159,18 @@ export function FounderLaunchPricingCard({
               disabled={disabled}
               onClick={onUpgrade}
               className={cn(
-                "mt-6 h-12 w-full rounded-2xl text-base font-bold",
-                brandSurfaces.ctaButton,
+                "mt-6 h-14 w-full rounded-2xl text-base font-black shadow-lg shadow-amber-500/30 sm:text-lg",
+                "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 hover:from-amber-300 hover:to-amber-400",
+                "ring-4 ring-amber-400/40",
               )}
             >
-              <Sparkles className="mr-2 h-4 w-4" />
+              <Sparkles className="mr-2 h-5 w-5" />
               {copy.upgrade}
             </Button>
           </div>
 
           <div className="space-y-2 text-center text-sm leading-relaxed text-muted-foreground">
-            <p>{copy.cta}</p>
+            <p className="font-semibold text-foreground">{copy.cta}</p>
             <p className="font-medium text-primary/90">{copy.trust}</p>
           </div>
         </div>

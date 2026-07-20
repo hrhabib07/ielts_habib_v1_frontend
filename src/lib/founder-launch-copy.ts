@@ -16,20 +16,23 @@ export interface FounderLaunchCopy {
   readonly perMonth: string;
   readonly premiumLabel: string;
   readonly upgrade: string;
+  /** Short sticky / mobile pay label */
+  readonly upgradeShort: string;
+  readonly payHereHint: string;
   readonly featuresTitle: string;
 }
 
 export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
   bn: {
-    eyebrow: "Founding Member প্রি-অর্ডার · ১ আগস্টের আগে",
+    eyebrow: "Founding Member প্রি-অর্ডার · 1 আগস্টের আগে",
     headline: "Founder স্ট্যাটাস + পূর্ণ Game of English লক করুন।",
     intro:
-      "এখন প্রি-অর্ডার করুন। অ্যাডমিন ভেরিফাই করলে (স্পট থাকলে) আপনি Founding Member হবেন: স্থায়ী ব্যাজ, Founder Number, Founders' Wall, আর ১ আগস্ট থেকে পূর্ণ প্রিমিয়াম অ্যাক্সেস।",
+      "এখন প্রি-অর্ডার করুন। অ্যাডমিন ভেরিফাই করলে (স্পট থাকলে) আপনি Founding Member হবেন: স্থায়ী ব্যাজ, Founder Number, Founders' Wall, আর 1 আগস্ট থেকে পূর্ণ প্রিমিয়াম অ্যাক্সেস।",
     scarcity:
-      "প্রথম ১০০ জন অনুমোদিত ক্রেতাই Founder Number ও ব্যাজ পাবেন। ১০০ পূর্ণ হলে বা ১ আগস্ট এলে (যা আগে আসে) Founder অফার বন্ধ। তারপরও ছাড় থাকতে পারে, কিন্তু Founder স্ট্যাটাস নয়।",
-    accessNote: "এখন কিনলে মূল্য লক হয়। অ্যাক্সেস ১ আগস্ট থেকেই শুরু হবে।",
+      "প্রথম 100 জন অনুমোদিত ক্রেতাই Founder Number ও ব্যাজ পাবেন। 100 পূর্ণ হলে বা 1 আগস্ট এলে (যা আগে আসে) Founder অফার বন্ধ। তারপরও ছাড় থাকতে পারে, কিন্তু Founder স্ট্যাটাস নয়।",
+    accessNote: "এখন কিনলে মূল্য লক হয়। অ্যাক্সেস 1 আগস্ট থেকেই শুরু হবে।",
     accessStartsLabel: (dateLabel) => `অ্যাক্সেস শুরু: ${dateLabel}`,
-    durationLabel: (days) => `${days} দিনের প্রিমিয়াম অ্যাক্সেস (১ আগস্ট থেকে)`,
+    durationLabel: (days) => `${days} দিনের প্রিমিয়াম অ্যাক্সেস (1 আগস্ট থেকে)`,
     cta: "আজই প্রি-অর্ডার করুন। Founder ব্যাজ স্পট থাকতেই নিন।",
     trust: "আপনার বিশ্বাসই Gamlish-এর যাত্রার শুরু।",
     founderBadge: "Founding Member",
@@ -37,7 +40,9 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     offBadge: (percent) => `${percent}% ছাড়`,
     perMonth: "/মাস",
     premiumLabel: "Gamlish Premium · Founder অফার",
-    upgrade: "Founding Member হোন",
+    upgrade: "এখনই প্রি-অর্ডার করুন — পেমেন্ট করুন",
+    upgradeShort: "এখনই পেমেন্ট করুন",
+    payHereHint: "↓ নিচের বোতামে ট্যাপ করে bKash পেমেন্ট শুরু করুন",
     featuresTitle: "Founding Member যা পাবেন",
   },
   en: {
@@ -57,7 +62,9 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     offBadge: (percent) => `${percent}% OFF`,
     perMonth: "/month",
     premiumLabel: "Gamlish Premium · Founder offer",
-    upgrade: "Become a Founding Member",
+    upgrade: "Pre-order Now — Pay with bKash",
+    upgradeShort: "Pay now",
+    payHereHint: "↓ Tap the button below to start bKash payment",
     featuresTitle: "What Founding Members unlock",
   },
 } as const;

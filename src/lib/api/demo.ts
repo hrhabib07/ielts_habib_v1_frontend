@@ -25,6 +25,7 @@ export interface DemoHome {
     level: number;
   };
   course: { slug: string; title: string; subtitle?: string };
+  hasEnglishAccess: boolean;
   camps: Array<{
     id: string;
     slug: string;
@@ -33,11 +34,16 @@ export interface DemoHome {
     subtitle?: string;
     locked: boolean;
     missions: Array<{
+      id: string;
       slug: string;
+      campId: string;
       order: number;
       title: string;
-      status: "available" | "in_progress" | "completed";
-      currentStageOrder: number;
+      isInspection: boolean;
+      accessTier: "FREE" | "PAID";
+      stageCount: number;
+      status: "locked" | "available" | "in_progress" | "completed";
+      currentStageOrder: number | null;
       completedStageOrders: number[];
       isDemo: boolean;
     }>;
@@ -51,6 +57,7 @@ export interface DemoHome {
     completed: boolean;
   }>;
   nextStageOrder: number;
+  currentMissionSlug: string;
 }
 
 export interface DemoStageContent {

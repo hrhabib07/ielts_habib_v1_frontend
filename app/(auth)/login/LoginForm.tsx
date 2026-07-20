@@ -33,6 +33,7 @@ import {
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_LOGIN_COPY } from "@/src/lib/auth-login-copy";
+import { readAuthReturnPathFromSearch } from "@/src/lib/auth-redirects";
 import { cn } from "@/lib/utils";
 
 const DevQuickLogin =
@@ -138,6 +139,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [returnTo, setReturnTo] = useState<string | null>(null);
   const { locale } = useGuestLandingLocaleState();
   const copy = AUTH_LOGIN_COPY[locale];
   const reduceMotion = useReducedMotion();
@@ -149,7 +151,12 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
     if (err) {
       setOauthError(decodeURIComponent(err));
     }
+    setReturnTo(readAuthReturnPathFromSearch(params));
   }, []);
+
+  const registerHref = returnTo
+    ? `/register?redirect=${encodeURIComponent(returnTo)}`
+    : "/register";
 
   return (
     <div
@@ -191,7 +198,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
 
             {/* Loud register path — above the form so new users cannot miss it */}
             <Link
-              href="/register"
+              href={registerHref}
               className="group flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-3.5 transition-colors hover:border-sky-500/45 hover:bg-sky-500/15 dark:border-sky-400/25 dark:bg-sky-400/10 dark:hover:bg-sky-400/15"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/20 text-sky-700 dark:text-sky-300">
@@ -234,7 +241,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
                 <DevQuickLogin setEmail={setEmail} setPassword={setPassword} />
 
                 <div className="mb-4 space-y-3">
-                  <ContinueWithGoogleButton />
+                  <ContinueWithGoogleButton returnTo={returnTo} />
                   <AuthMethodDivider
                     label={locale === "bn" ? "অথবা ইমেইল" : "or email"}
                   />
@@ -324,7 +331,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
 
                 <div className="mt-5 border-t border-border/50 pt-4 sm:hidden">
                   <Button asChild variant="outline" className="h-11 w-full rounded-xl font-semibold">
-                    <Link href="/register">{copy.newPlayerCta}</Link>
+                    <Link href={registerHref}>{copy.newPlayerCta}</Link>
                   </Button>
                 </div>
               </div>

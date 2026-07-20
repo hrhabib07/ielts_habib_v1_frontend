@@ -9,11 +9,12 @@ import { AppShellFallback } from "@/src/components/shared/AppShellFallback";
 import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
 
 /**
- * Runtime font loading (browser only). avoids next/font/google network fetch at build time,
- * which fails in offline CI and restricted networks.
+ * Runtime font loading (browser only). Avoids next/font/google at build time.
+ * Keep weight count low — each family×weight is a blocking download on first paint.
+ * Latin digits are used in Bangla UI, so Hind Siliguri alone is enough (no Noto).
  */
 const RUNTIME_FONT_STYLESHEET =
-  "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap";
+  "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getAppOrigin()),
@@ -42,6 +43,11 @@ export default function RootLayout({
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="style"
+          href={RUNTIME_FONT_STYLESHEET}
         />
         <link href={RUNTIME_FONT_STYLESHEET} rel="stylesheet" />
       </head>

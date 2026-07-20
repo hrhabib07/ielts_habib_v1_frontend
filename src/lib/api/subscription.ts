@@ -43,8 +43,10 @@ export interface ActiveSubscription {
 export interface SubmitRequestPayload {
   planId: string;
   paymentMethod: "BKASH";
+  /** Required — unique bKash TrxID used to verify & prevent double-claims. */
   transactionId: string;
-  senderNumber?: string;
+  /** Required — student bKash wallet that sent the money. */
+  senderNumber: string;
   paidAmount: number;
   couponCode?: string;
   screenshotUrl?: string;
@@ -57,7 +59,7 @@ export interface SubscriptionRequest {
   userId: string;
   planId: SubscriptionPlan | string;
   paymentMethod: "BKASH";
-  transactionId: string;
+  transactionId?: string;
   senderNumber?: string;
   paidAmount: number;
   scholarshipDiscountPercent?: number;

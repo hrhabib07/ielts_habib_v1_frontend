@@ -8,11 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { resetPasswordWithToken } from "@/src/auth/api";
 import { Lock, ArrowLeft } from "lucide-react";
+import { useAuthRecoveryCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { cn } from "@/lib/utils";
 
 const RESET_TOKEN_KEY = "gamlish_password_reset_token";
 
 export function ResetPasswordForm() {
   const router = useRouter();
+  const copy = useAuthRecoveryCopy();
+  const { locale } = useUiLocale();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,16 +32,16 @@ export function ResetPasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 8) {
-      setError("Use at least 8 characters for your new password.");
+      setError(copy.minLength);
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError(copy.mismatch);
       return;
     }
     const t = sessionStorage.getItem(RESET_TOKEN_KEY);
     if (!t) {
-      setError("Your reset session expired. Start again from forgot password.");
+      setError(copy.sessionExpired);
       return;
     }
     setLoading(true);
@@ -47,7 +52,7 @@ export function ResetPasswordForm() {
       router.replace("/login?reset=1");
     } catch (err) {
       const msg =
-        err instanceof Error ? err.message : "Could not reset password. Try again.";
+        err instanceof Error ? err.message : copy.resetFailed;
       setError(msg);
     } finally {
       setLoading(false);
@@ -57,21 +62,24 @@ export function ResetPasswordForm() {
   if (token === null) {
     return (
       <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4">
-        <p className="text-muted-foreground">Loading…</p>
+        <p className="text-muted-foreground">{copy.loading}</p>
       </div>
     );
   }
 
   if (!token) {
     return (
-      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4">
+      <div
+        className={cn(
+          "flex min-h-[calc(100vh-8rem)] items-center justify-center px-4",
+          locale === "bn" && "font-bengali",
+        )}
+        lang={locale === "bn" ? "bn" : "en"}
+      >
         <div className="max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
-          <p className="text-muted-foreground">
-            This page is used after you verify your email with a code. If you closed the tab, start
-            again from forgot password.
-          </p>
+          <p className="text-muted-foreground">{copy.noSessionBody}</p>
           <Button asChild className="mt-6">
-            <Link href="/forgot-password">Forgot password</Link>
+            <Link href="/forgot-password">{copy.forgotLink}</Link>
           </Button>
         </div>
       </div>
@@ -79,19 +87,23 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+    <div
+      className={cn(
+        "flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12",
+        locale === "bn" && "font-bengali",
+      )}
+      lang={locale === "bn" ? "bn" : "en"}
+    >
       <div className="w-full max-w-md space-y-8">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Choose a new password</h1>
-          <p className="text-muted-foreground">
-            Use a strong password you do not reuse on other sites. Minimum 8 characters.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{copy.resetTitle}</h1>
+          <p className="text-muted-foreground">{copy.resetSub}</p>
         </div>
 
         <div className="rounded-lg border bg-card p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="new-pass">New password</Label>
+              <Label htmlFor="new-pass">{copy.newPassword}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -107,7 +119,7 @@ export function ResetPasswordForm() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-pass">Confirm new password</Label>
+              <Label htmlFor="confirm-pass">{copy.confirmPassword}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -128,7 +140,7 @@ export function ResetPasswordForm() {
               </div>
             )}
             <Button type="submit" disabled={loading} className="w-full" size="lg">
-              {loading ? "Updating…" : "Update password"}
+              {loading ? copy.updating : copy.updatePassword}
             </Button>
           </form>
 
@@ -138,7 +150,7 @@ export function ResetPasswordForm() {
               className="inline-flex items-center font-medium text-primary hover:underline"
             >
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to sign in
+              {copy.backSignIn}
             </Link>
           </div>
         </div>

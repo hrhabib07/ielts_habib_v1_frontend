@@ -9,7 +9,10 @@ import { Label } from "@/components/ui/label";
 import {
   getAdminStudentEnglishProgress,
   listAdminEnglishStudents,
+  unlockAdminStudentEnglishAccess,
   type AdminMissionState,
+  type AdminPaymentLabel,
+  type AdminPremiumLabel,
   type AdminStudentEnglishProgress,
   type AdminStudentListItem,
 } from "@/src/lib/api/adminUsers";
@@ -23,6 +26,35 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function paymentDisplay(label: AdminPaymentLabel | string | undefined) {
+  switch (label) {
+    case "paid":
+    case "verified":
+      return "Paid";
+    case "pending":
+      return "Pending review";
+    default:
+      return "Unpaid";
+  }
+}
+
+function premiumDisplay(
+  label: AdminPremiumLabel | undefined,
+  accessStartsAt: string | null | undefined,
+  hasEnglishAccess: boolean,
+) {
+  if (label === "live" || (!label && hasEnglishAccess)) {
+    return "Yes — live";
+  }
+  if (label === "preorder") {
+    const when = accessStartsAt
+      ? new Date(accessStartsAt).toLocaleDateString()
+      : "launch date";
+    return `Paid — access starts ${when}`;
+  }
+  return "No (free path)";
+}
 
 function statusStyles(status: AdminMissionState["status"]) {
   switch (status) {
@@ -61,6 +93,7 @@ export default function AdminUsersPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<AdminStudentEnglishProgress | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   const loadList = useCallback(
     async (nextPage = page, nextQuery = query) => {
@@ -102,6 +135,20 @@ export default function AdminUsersPage() {
       setDetail(null);
     } finally {
       setLoadingDetail(false);
+    }
+  };
+
+  const unlockLiveAccess = async () => {
+    if (!selectedId || unlocking) return;
+    setUnlocking(true);
+    setError(null);
+    try {
+      const data = await unlockAdminStudentEnglishAccess(selectedId);
+      setDetail(data);
+    } catch {
+      setError("Could not unlock premium access. Try again.");
+    } finally {
+      setUnlocking(false);
     }
   };
 
@@ -157,16 +204,52 @@ export default function AdminUsersPage() {
                       Joined{" "}
                       {new Date(detail.user.createdAt).toLocaleDateString()}
                     </span>
-                    <span className="capitalize">
-                      Payment: {detail.user.marketingPaymentStatus}
+                    <span>
+                      Payment:{" "}
+                      {paymentDisplay(
+                        detail.access?.paymentLabel ??
+                          detail.user.marketingPaymentStatus,
+                      )}
                     </span>
                     <span>
                       Premium access:{" "}
-                      {detail.map.hasEnglishAccess ? "Yes" : "No (free path)"}
+                      {premiumDisplay(
+                        detail.access?.premiumLabel,
+                        detail.access?.accessStartsAt,
+                        detail.map.hasEnglishAccess,
+                      )}
                     </span>
                   </div>
                 </div>
               </div>
+
+              {detail.access?.isPreorderAwaitingAccess ? (
+                <div className="flex flex-col gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-amber-900 dark:text-amber-100">
+                    Payment is approved, but live access is scheduled for{" "}
+                    {detail.access.accessStartsAt
+                      ? new Date(
+                          detail.access.accessStartsAt,
+                        ).toLocaleDateString()
+                      : "launch"}
+                    . Paid missions stay locked until then (pre-order).
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="shrink-0 gap-2"
+                    disabled={unlocking}
+                    onClick={() => void unlockLiveAccess()}
+                  >
+                    <Unlock className="h-4 w-4" />
+                    {unlocking ? "Unlocking…" : "Unlock access now"}
+                  </Button>
+                </div>
+              ) : null}
+
+              {error ? (
+                <p className="text-sm text-destructive">{error}</p>
+              ) : null}
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 {[
@@ -329,6 +412,15 @@ export default function AdminUsersPage() {
                   <p className="font-semibold tabular-nums text-foreground">
                     {user.progress.completedMissions}/{user.progress.totalMissions} ·{" "}
                     {user.progress.percent}%
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {paymentDisplay(user.paymentLabel ?? user.marketingPaymentStatus)}
+                    {" · "}
+                    {user.premiumLabel === "live"
+                      ? "Premium live"
+                      : user.premiumLabel === "preorder"
+                        ? "Paid (pre-order)"
+                        : "Free path"}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {user.progress.currentMissionTitle

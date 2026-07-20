@@ -20,7 +20,6 @@ export function GamlishNavBrand({
         "inline-flex h-9 shrink-0 flex-nowrap items-center gap-2 sm:gap-2.5",
         className,
       )}
-      aria-label="Gamlish"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -31,6 +30,7 @@ export function GamlishNavBrand({
         className="h-8 w-8 shrink-0 object-contain"
         decoding="async"
         fetchPriority="high"
+        role="presentation"
       />
       <span className="whitespace-nowrap text-lg font-semibold leading-none tracking-tight text-foreground">
         Gamlish

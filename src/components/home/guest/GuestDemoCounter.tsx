@@ -10,9 +10,37 @@ export function GuestDemoCounter({ className }: { className?: string }) {
   const [completions, setCompletions] = useState<number | null>(null);
 
   useEffect(() => {
-    getDemoStats()
-      .then((s) => setCompletions(s.completions))
-      .catch(() => setCompletions(null));
+    let cancelled = false;
+    const load = () => {
+      getDemoStats()
+        .then((s) => {
+          if (!cancelled) setCompletions(s.completions);
+        })
+        .catch(() => {
+          if (!cancelled) setCompletions(null);
+        });
+    };
+
+    const ric = (
+      window as Window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      }
+    ).requestIdleCallback;
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (typeof ric === "function") {
+      idleId = ric(load, { timeout: 2000 });
+    } else {
+      timeoutId = setTimeout(load, 800);
+    }
+
+    return () => {
+      cancelled = true;
+      if (idleId != null && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId != null) clearTimeout(timeoutId);
+    };
   }, []);
 
   const line =

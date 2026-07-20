@@ -4,10 +4,10 @@ import {
   getCurrentUser,
   getBearerTokenFromCookie,
 } from "@/src/lib/auth-server";
-import { getRedirectPathForRole } from "@/src/lib/auth-redirects";
+import { getRedirectPathForRole, getStudentHomeHref } from "@/src/lib/auth-redirects";
 import { fetchStudentProfileServer } from "@/src/lib/api/server-profile";
 import { isStudentLearningReady, needsProfileMigration } from "@/src/lib/student-learning-gate";
-import { PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
+import { ENABLE_READING, PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +16,12 @@ export default async function HomePage() {
 
   // Logged-in students go straight to the mission roadmap (Duolingo-style home).
   if (initialUser?.role === "STUDENT") {
+    // English-first mode: skip /students/me on `/` — /player already gates
+    // username claim and learning readiness on the client.
+    if (!ENABLE_READING) {
+      redirect(PRIMARY_STUDENT_HREF);
+    }
+
     const token = await getBearerTokenFromCookie();
     if (token) {
       const result = await fetchStudentProfileServer(token);
@@ -30,11 +36,12 @@ export default async function HomePage() {
               : "/onboarding",
           );
         }
+        redirect(getStudentHomeHref(result.profile.needsUsername === true));
       } else if (result.status === "ok" && !result.profile) {
         redirect("/onboarding");
       }
     }
-    redirect(PRIMARY_STUDENT_HREF);
+    redirect(getStudentHomeHref(false));
   }
 
   const roleCtaHref = initialUser ? getRedirectPathForRole(initialUser.role) : null;

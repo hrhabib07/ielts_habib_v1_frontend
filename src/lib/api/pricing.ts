@@ -17,22 +17,31 @@ export interface AdminPricing extends PublicPricing {
   updatedAt?: string;
 }
 
-function unwrap<T>(res: { data?: { data?: T } }): T {
-  const d = res.data?.data;
-  if (d === undefined) throw new Error("No pricing data");
-  return d;
+function unwrapPricing<T>(payload: unknown): T {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("No pricing data");
+  }
+  const body = payload as { data?: T; success?: boolean };
+  if (body.data !== undefined && body.data !== null) {
+    return body.data;
+  }
+  // Some callers may already pass the inner data object
+  if ("finalPriceBdt" in body && "planId" in body) {
+    return body as T;
+  }
+  throw new Error("No pricing data");
 }
 
 export async function getPublicPricing(): Promise<PublicPricing> {
   const { default: apiClient } = await import("@/src/lib/api-client");
-  const res = await apiClient.get<{ data: PublicPricing }>("/pricing");
-  return unwrap(res);
+  const res = await apiClient.get("/pricing");
+  return unwrapPricing<PublicPricing>(res.data);
 }
 
 export async function getAdminPricing(): Promise<AdminPricing> {
   const { default: apiClient } = await import("@/src/lib/api-client");
-  const res = await apiClient.get<{ data: AdminPricing }>("/admin/pricing");
-  return unwrap(res);
+  const res = await apiClient.get("/admin/pricing");
+  return unwrapPricing<AdminPricing>(res.data);
 }
 
 export async function updateAdminPricing(
@@ -52,8 +61,8 @@ export async function updateAdminPricing(
   >,
 ): Promise<AdminPricing> {
   const { default: apiClient } = await import("@/src/lib/api-client");
-  const res = await apiClient.patch<{ data: AdminPricing }>("/admin/pricing", payload);
-  return unwrap(res);
+  const res = await apiClient.patch("/admin/pricing", payload);
+  return unwrapPricing<AdminPricing>(res.data);
 }
 
 export function formatBdt(amount: number): string {

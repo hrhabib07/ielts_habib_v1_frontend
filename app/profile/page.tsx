@@ -17,7 +17,6 @@ import { ProfileSquadSection } from "@/src/components/squad/ProfileSquadSection"
 import { ProfilePageSkeleton } from "@/src/components/profile/ProfilePageSkeleton";
 import {
   countryCodeToLabel,
-  SAME_COUNTRY_WARNING,
 } from "@/src/lib/countryCodes";
 import {
   BookOpen,
@@ -41,7 +40,7 @@ import { formatSubscriptionDuration } from "@/src/lib/formatSubscriptionDuration
 import { isFoundingMemberEligible } from "@/src/lib/foundingMember";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { ENABLE_READING, PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
-import { useProfilePageCopy } from "@/src/hooks/useLocalizedCopy";
+import { useOnboardingCopy, useProfilePageCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
 import { MyGamlishHub } from "@/src/components/profile/MyGamlishHub";
@@ -76,6 +75,7 @@ function subscriptionStatusLabel(status: ActiveSubscription["status"]): string {
 export default function ProfilePage() {
   const { locale } = useUiLocale();
   const copy = useProfilePageCopy();
+  const onboardingCopy = useOnboardingCopy();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,28 +114,37 @@ export default function ProfilePage() {
       resetPersonalFormFromRecord(sessionProfile);
       setError(null);
     } else {
-      setError("Could not load your profile.");
+      setError(
+        locale === "bn"
+          ? "প্রোফাইল লোড করা যায়নি।"
+          : "Could not load your profile.",
+      );
     }
 
     setLoading(false);
-  }, [sessionProfile, sessionSubscription, sessionLoading]);
+  }, [sessionProfile, sessionSubscription, sessionLoading, locale]);
 
   useEffect(() => {
     if (editingPersonalDetails && currentCountry === dreamCountry) {
-      setCountryWarning(SAME_COUNTRY_WARNING);
+      setCountryWarning(onboardingCopy.sameCountryWarning);
     } else {
       setCountryWarning(null);
     }
-  }, [currentCountry, dreamCountry, editingPersonalDetails]);
+  }, [
+    currentCountry,
+    dreamCountry,
+    editingPersonalDetails,
+    onboardingCopy.sameCountryWarning,
+  ]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!displayName.trim()) {
-      setError("Display name is required.");
+      setError(onboardingCopy.errDisplayName);
       return;
     }
     if (ENABLE_READING && currentCountry === dreamCountry) {
-      setCountryWarning(SAME_COUNTRY_WARNING);
+      setCountryWarning(onboardingCopy.sameCountryWarning);
       return;
     }
     setSaving(true);

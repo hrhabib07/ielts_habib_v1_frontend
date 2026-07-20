@@ -27,6 +27,10 @@ import {
   type MissionCard,
 } from "@/src/lib/api/gamlish";
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
+import {
+  getOrCreateProfileViewerKey,
+  recordPublicProfileView,
+} from "@/src/lib/api/publicProfile";
 
 const TIER_STYLE: Record<
   FounderTier,
@@ -135,6 +139,33 @@ export function GamlishProfileContent({
     }
     return `https://gamlish.com/u/${profile.canonicalHandle}`;
   }, [profile.canonicalHandle]);
+
+  // Record unique profile view (guests + logged-in). Backend dedupes reloads.
+  useEffect(() => {
+    if (social.isOwnProfile) return;
+    let cancelled = false;
+    const viewerKey = getOrCreateProfileViewerKey();
+    if (!viewerKey) return;
+
+    void recordPublicProfileView(profile.canonicalHandle || handle, viewerKey)
+      .then((result) => {
+        if (cancelled) return;
+        setProfile((prev) => ({
+          ...prev,
+          social: {
+            ...prev.social,
+            totalViews: result.totalViews,
+          },
+        }));
+      })
+      .catch(() => {
+        /* best-effort — never block profile render */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [handle, profile.canonicalHandle, social.isOwnProfile]);
 
   const shareText = `Check out ${identity.displayName}'s Gamlish progress! 🎮📚`;
 

@@ -10,6 +10,8 @@ import {
 } from "@/src/auth/api";
 import { ChevronDown, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProfilePasswordCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 
 export function ProfileChangePassword({
   hasPassword = true,
@@ -19,6 +21,8 @@ export function ProfileChangePassword({
   hasPassword?: boolean;
   onPasswordSet?: () => void;
 }) {
+  const copy = useProfilePasswordCopy();
+  const { locale } = useUiLocale();
   const [modeHasPassword, setModeHasPassword] = useState(hasPassword);
   const [open, setOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -32,34 +36,30 @@ export function ProfileChangePassword({
     setModeHasPassword(hasPassword);
   }, [hasPassword]);
 
-  const title = modeHasPassword ? "Change password" : "Set a password";
-  const submitLabel = modeHasPassword ? "Update password" : "Set password";
-  const help = modeHasPassword
-    ? "For your security this section stays collapsed until you open it. A strong password is at least 8 characters and unique to this site."
-    : "Add a password so you can also sign in with email. Google sign-in will keep working.";
+  const title = modeHasPassword ? copy.changeTitle : copy.setTitle;
+  const submitLabel = modeHasPassword ? copy.updateCta : copy.setCta;
+  const help = modeHasPassword ? copy.changeHelp : copy.setHelp;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
     if (newPassword.length < 8) {
-      setError("New password must be at least 8 characters.");
+      setError(copy.minLength);
       return;
     }
     if (newPassword !== confirm) {
-      setError("New password and confirmation do not match.");
+      setError(copy.mismatch);
       return;
     }
     setLoading(true);
     try {
       if (modeHasPassword) {
         await updatePasswordRequest(currentPassword, newPassword);
-        setSuccess("Password updated. Use your new password next time you sign in.");
+        setSuccess(copy.updateSuccess);
       } else {
         await setPasswordRequest(newPassword);
-        setSuccess(
-          "Password set. You can now sign in with email or Google.",
-        );
+        setSuccess(copy.setSuccess);
         setModeHasPassword(true);
         onPasswordSet?.();
       }
@@ -74,10 +74,7 @@ export function ProfileChangePassword({
               ?.message
           : null;
       setError(
-        msg ??
-          (modeHasPassword
-            ? "Could not update password. Check your current password."
-            : "Could not set password. Please try again."),
+        msg ?? (modeHasPassword ? copy.updateFail : copy.setFail),
       );
     } finally {
       setLoading(false);
@@ -85,7 +82,13 @@ export function ProfileChangePassword({
   };
 
   return (
-    <div className="rounded-xl border border-border/80 bg-muted/[0.15]">
+    <div
+      className={cn(
+        "rounded-xl border border-border/80 bg-muted/[0.15]",
+        locale === "bn" && "font-bengali",
+      )}
+      lang={locale === "bn" ? "bn" : "en"}
+    >
       <button
         type="button"
         onClick={() => {
@@ -98,7 +101,6 @@ export function ProfileChangePassword({
         <span className="flex items-center gap-2">
           <Lock className="h-4 w-4 text-muted-foreground" aria-hidden />
           <span>{title}</span>
-          <span className="sr-only">Reveal or hide password form</span>
         </span>
         <ChevronDown
           className={cn(
@@ -117,7 +119,7 @@ export function ProfileChangePassword({
           <p className="text-xs text-muted-foreground">{help}</p>
           {modeHasPassword ? (
             <div className="space-y-2">
-              <Label htmlFor="current-password-profile">Current password</Label>
+              <Label htmlFor="current-password-profile">{copy.current}</Label>
               <Input
                 id="current-password-profile"
                 type="password"
@@ -130,7 +132,7 @@ export function ProfileChangePassword({
           ) : null}
           <div className="space-y-2">
             <Label htmlFor="new-password-profile">
-              {modeHasPassword ? "New password" : "Password"}
+              {modeHasPassword ? copy.newPassword : copy.password}
             </Label>
             <Input
               id="new-password-profile"
@@ -143,7 +145,7 @@ export function ProfileChangePassword({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-password-profile">Confirm password</Label>
+            <Label htmlFor="confirm-password-profile">{copy.confirm}</Label>
             <Input
               id="confirm-password-profile"
               type="password"
@@ -165,7 +167,7 @@ export function ProfileChangePassword({
             </p>
           ) : null}
           <Button type="submit" disabled={loading} size="sm">
-            {loading ? "Saving…" : submitLabel}
+            {loading ? copy.saving : submitLabel}
           </Button>
         </form>
       ) : null}

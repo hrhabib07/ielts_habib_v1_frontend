@@ -14,6 +14,7 @@ import { isImmersiveAuthPath } from "@/src/lib/immersive-auth-paths";
 import { ENABLE_READING } from "@/src/lib/platform-config";
 import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { SocialLinks } from "@/src/components/shared/SocialLinks";
 import { cn } from "@/lib/utils";
 
 interface FooterProps {
@@ -58,6 +59,7 @@ export function Footer({ initialUser = null }: FooterProps) {
                 {shell.footerTagline}
               </p>
             ) : null}
+            <SocialLinks label={shell.followGamlish} className="pt-2" />
           </div>
 
           <div className="md:col-span-3">

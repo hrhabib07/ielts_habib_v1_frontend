@@ -62,6 +62,7 @@ export function SiteMobileNav(props: {
   navProgressBarStyle: { width: string; minWidth?: string };
   streak?: { consecutivePassCount: number; requiredStreak: number } | null;
   shell: SiteShellCopy;
+  needsUsername?: boolean;
   trigger: React.ReactNode;
 }) {
   const {
@@ -80,6 +81,7 @@ export function SiteMobileNav(props: {
     navProgressBarStyle,
     streak,
     shell,
+    needsUsername,
     trigger,
   } = props;
 
@@ -160,6 +162,16 @@ export function SiteMobileNav(props: {
               <div className="mt-4 space-y-0.5 border-t border-border/60 pt-4">
                 {isStudent && (
                   <>
+                    {needsUsername ? (
+                      <Link
+                        href="/username?next=/player"
+                        onClick={close}
+                        className="flex items-center gap-2 rounded-xl border-2 border-amber-500/50 bg-amber-400/15 px-3 py-3 text-sm font-bold text-amber-950 dark:text-amber-100"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        ইউজারনেম বাছুন
+                      </Link>
+                    ) : null}
                     <Link
                       href="/profile"
                       onClick={close}

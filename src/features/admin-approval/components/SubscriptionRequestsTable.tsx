@@ -126,7 +126,7 @@ export function SubscriptionRequestsTable() {
                 <th className="p-4 font-medium">User</th>
                 <th className="p-4 font-medium">Plan</th>
                 <th className="p-4 font-medium">Amount</th>
-                <th className="p-4 font-medium">Method</th>
+                <th className="p-4 font-medium">TrxID / bKash</th>
                 <th className="p-4 font-medium">Status</th>
                 <th className="p-4 font-medium">Date</th>
                 {(filter === "PENDING" || !filter) && (
@@ -149,7 +149,14 @@ export function SubscriptionRequestsTable() {
                     </td>
                     <td className="p-4 text-muted-foreground">{planName(r)}</td>
                     <td className="p-4">{r.paidAmount} BDT</td>
-                    <td className="p-4">{r.paymentMethod}</td>
+                    <td className="p-4">
+                      <div className="font-mono text-xs font-semibold text-foreground">
+                        {r.transactionId?.trim() || "—"}
+                      </div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        {r.senderNumber ? `bKash ${r.senderNumber}` : "—"}
+                      </div>
+                    </td>
                     <td className="p-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${

@@ -121,7 +121,7 @@
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
+  --text-secondary: #c8d4e4;
   --border-muted: #334155;
   --accent: #5b7ec7;
   --danger: #f87171;
@@ -137,7 +137,7 @@
   --secondary: #1e293b;
   --secondary-foreground: #e2e8f0;
   --muted: #1e293b;
-  --muted-foreground: #94a3b8;
+  --muted-foreground: #c8d4e4;
   --accent-foreground: #f8fafc;
   --destructive: #f87171;
   --border: #334155;
@@ -176,6 +176,16 @@
     overflow-x: hidden;
     min-height: 100dvh;
     -webkit-overflow-scrolling: touch;
+  }
+  /*
+   * Hind Siliguri at medium weight keeps Bangla readable without loading
+   * an extra Noto family (large download that slowed homepage first paint).
+   */
+  .font-bengali {
+    font-family: var(--font-bengali);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   /* Fixed reading level runner only — exam pages use their own full-bleed shells */
   html[data-scroll-lock="true"],

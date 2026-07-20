@@ -21,17 +21,39 @@ export function PlatformVideosProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    getPublicPlatformVideos()
-      .then((remote) => {
-        if (!cancelled) {
-          setVideos(mergePlatformVideos(remote));
-        }
-      })
-      .catch(() => {
-        /* keep env defaults */
-      });
+    const load = () => {
+      getPublicPlatformVideos()
+        .then((remote) => {
+          if (!cancelled) {
+            setVideos(mergePlatformVideos(remote));
+          }
+        })
+        .catch(() => {
+          /* keep env defaults */
+        });
+    };
+
+    // Defer so homepage LCP/hydration isn't competing with this request.
+    const ric = (
+      window as Window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      }
+    ).requestIdleCallback;
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (typeof ric === "function") {
+      idleId = ric(load, { timeout: 2500 });
+    } else {
+      timeoutId = setTimeout(load, 1200);
+    }
+
     return () => {
       cancelled = true;
+      if (idleId != null && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId != null) clearTimeout(timeoutId);
     };
   }, []);
 

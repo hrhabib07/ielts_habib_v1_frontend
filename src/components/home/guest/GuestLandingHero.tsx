@@ -39,7 +39,7 @@ export function GuestLandingHero() {
           <GuestHeroHeadline className="mx-auto mt-4 max-w-xl lg:mx-0" />
 
           <motion.p
-            className="mx-auto mt-3 max-w-md text-pretty text-base leading-relaxed text-muted-foreground lg:mx-0"
+            className="mx-auto mt-3 max-w-md text-pretty text-lg leading-relaxed text-foreground/80 lg:mx-0"
             initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.06, ease: GUEST_EASE }}
@@ -48,7 +48,7 @@ export function GuestLandingHero() {
           </motion.p>
 
           <motion.div
-            className="mt-6 flex flex-col items-center gap-2 lg:items-start"
+            className="mt-6 flex w-full flex-col items-center gap-3 lg:items-start"
             initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.1, ease: GUEST_EASE }}
@@ -63,10 +63,22 @@ export function GuestLandingHero() {
             >
               <Link href="/demo">{copy.ctaPrimary}</Link>
             </Button>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-foreground/75">
               {copy.ctaPrimarySub}
               <span className="mx-1.5 text-border">·</span>
-              <GuestDemoCounter className="inline text-sm text-muted-foreground" />
+              <GuestDemoCounter className="inline text-sm text-foreground/75" />
+            </p>
+
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-12 w-full max-w-sm rounded-2xl border-2 border-amber-500/50 bg-amber-400/10 text-base font-bold text-amber-950 hover:bg-amber-400/20 dark:border-amber-400/45 dark:text-amber-100 lg:w-auto lg:min-w-[15rem]"
+              asChild
+            >
+              <Link href="/pricing#pay-now">{copy.ctaPreOrder}</Link>
+            </Button>
+            <p className="text-xs font-medium text-foreground/65">
+              {copy.ctaPreOrderSub}
             </p>
           </motion.div>
         </div>

@@ -101,6 +101,15 @@ export function GuestHowGamlishWorks() {
               <Link href="/demo">{copy.ctaPrimary}</Link>
             </Button>
             <p className="mt-2 text-xs text-muted-foreground">{copy.ctaPrimarySub}</p>
+            <Button
+              size="lg"
+              variant="outline"
+              className="mt-3 h-12 w-full rounded-2xl border-2 border-amber-500/50 bg-amber-400/10 text-base font-bold text-amber-950 hover:bg-amber-400/20 dark:border-amber-400/45 dark:text-amber-100"
+              asChild
+            >
+              <Link href="/pricing#pay-now">{copy.ctaPreOrder}</Link>
+            </Button>
+            <p className="mt-2 text-xs text-muted-foreground">{copy.ctaPreOrderSub}</p>
           </div>
         </div>
       </section>

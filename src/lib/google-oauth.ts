@@ -12,7 +12,7 @@ export function getGoogleOAuthStartUrl(options?: {
     fromEnv ||
     (typeof window !== "undefined"
       ? `${window.location.origin}/api/backend`
-      : "http://localhost:5050/api");
+      : "http://localhost:5000/api");
 
   const params = new URLSearchParams();
   if (options?.demoSessionId) {

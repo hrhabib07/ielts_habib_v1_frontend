@@ -10,7 +10,7 @@ function resolveUpstreamApiBase(): string {
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
   if (raw) return raw.replace(/\/$/, "");
   if (process.env.NODE_ENV === "development") {
-    return "http://localhost:5050/api";
+    return "http://localhost:5000/api";
   }
   return PRODUCTION_API;
 }
@@ -56,6 +56,26 @@ const nextConfig: NextConfig = {
         source: "/how-it-works",
         destination: "/#how-gamlish-works",
         permanent: true,
+      },
+      {
+        source: "/nickname",
+        destination: "/username",
+        permanent: false,
+      },
+      {
+        source: "/claim-username",
+        destination: "/username",
+        permanent: false,
+      },
+      {
+        source: "/choose-username",
+        destination: "/username",
+        permanent: false,
+      },
+      {
+        source: "/set-username",
+        destination: "/username",
+        permanent: false,
       },
     ];
   },

@@ -30,9 +30,12 @@ export function isPreorderAwaitingAccess(
 }
 
 export function formatAccessDate(iso: string, locale: string = "en-GB"): string {
-  return new Intl.DateTimeFormat(locale, {
+  const isBn = locale.toLowerCase().startsWith("bn");
+  return new Intl.DateTimeFormat(isBn ? "bn-BD" : locale, {
     day: "numeric",
     month: "long",
     year: "numeric",
+    // Latin digits — Bengali ১ is too thin on dark UI (Hind Siliguri).
+    numberingSystem: "latn",
   }).format(new Date(iso));
 }

@@ -8,12 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { verifyResetOtpRequest } from "@/src/auth/api";
 import { KeyRound, ArrowLeft } from "lucide-react";
+import { useAuthRecoveryCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { cn } from "@/lib/utils";
 
 const RESET_TOKEN_KEY = "gamlish_password_reset_token";
 
 function VerifyResetOtpInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const copy = useAuthRecoveryCopy();
+  const { locale } = useUiLocale();
   const emailParam = searchParams.get("email") ?? "";
   const [email, setEmail] = useState(emailParam);
   const [otp, setOtp] = useState("");
@@ -29,26 +34,30 @@ function VerifyResetOtpInner() {
       sessionStorage.setItem(RESET_TOKEN_KEY, resetToken);
       router.push("/reset-password");
     } catch {
-      setError("Invalid or expired code. Request a new one from the forgot password page.");
+      setError(copy.invalidCode);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+    <div
+      className={cn(
+        "flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12",
+        locale === "bn" && "font-bengali",
+      )}
+      lang={locale === "bn" ? "bn" : "en"}
+    >
       <div className="w-full max-w-md space-y-8">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Verify your email</h1>
-          <p className="text-muted-foreground">
-            Enter the one-time code from your inbox. This proves you control this email address.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{copy.verifyResetTitle}</h1>
+          <p className="text-muted-foreground">{copy.verifyResetSub}</p>
         </div>
 
         <div className="rounded-lg border bg-card p-8 shadow-sm">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="reset-email">Email</Label>
+              <Label htmlFor="reset-email">{copy.emailLabel}</Label>
               <Input
                 id="reset-email"
                 type="email"
@@ -59,7 +68,7 @@ function VerifyResetOtpInner() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reset-otp">Verification code</Label>
+              <Label htmlFor="reset-otp">{copy.otpLabel}</Label>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -70,7 +79,7 @@ function VerifyResetOtpInner() {
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   className="pl-10"
-                  placeholder="Code from email"
+                  placeholder={copy.otpPlaceholder}
                 />
               </div>
             </div>
@@ -80,20 +89,20 @@ function VerifyResetOtpInner() {
               </div>
             )}
             <Button type="submit" disabled={loading} className="w-full" size="lg">
-              {loading ? "Checking…" : "Continue"}
+              {loading ? copy.checking : copy.continue}
             </Button>
           </form>
 
           <div className="mt-6 flex flex-col gap-2 text-center text-sm">
             <Link href="/forgot-password" className="font-medium text-primary hover:underline">
-              Request a new code
+              {copy.requestNewCode}
             </Link>
             <Link
               href="/login"
               className="inline-flex items-center justify-center font-medium text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="mr-1 h-4 w-4" />
-              Back to sign in
+              {copy.backSignIn}
             </Link>
           </div>
         </div>
@@ -103,11 +112,12 @@ function VerifyResetOtpInner() {
 }
 
 export function VerifyResetOtpForm() {
+  const copy = useAuthRecoveryCopy();
   return (
     <Suspense
       fallback={
         <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center">
-          <p className="text-muted-foreground">Loading…</p>
+          <p className="text-muted-foreground">{copy.loading}</p>
         </div>
       }
     >

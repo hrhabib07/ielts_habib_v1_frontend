@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { useVerifyOtp } from "@/src/auth/hooks";
 import { register } from "@/src/auth/api";
 import { Shield, ArrowRight, Mail, Lock, CheckCircle2 } from "lucide-react";
+import { useAuthRecoveryCopy } from "@/src/hooks/useLocalizedCopy";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { cn } from "@/lib/utils";
 
 interface VerifyOtpFormProps {
   email: string;
@@ -15,6 +18,8 @@ interface VerifyOtpFormProps {
 
 export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
   const { handleVerifyOtp, loading, error } = useVerifyOtp();
+  const copy = useAuthRecoveryCopy();
+  const { locale } = useUiLocale();
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,17 +47,20 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
 
   if (!email) {
     return (
-      <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4">
-        <div className="w-full max-w-md text-center space-y-4">
+      <div
+        className={cn(
+          "flex min-h-[calc(100vh-8rem)] items-center justify-center px-4",
+          locale === "bn" && "font-bengali",
+        )}
+        lang={locale === "bn" ? "bn" : "en"}
+      >
+        <div className="w-full max-w-md space-y-4 text-center">
           <div className="rounded-lg border bg-destructive/10 p-6">
-            <p className="text-destructive font-medium">Missing email</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Please start from the registration page and enter your email
-              first.
-            </p>
+            <p className="font-medium text-destructive">{copy.missingEmailTitle}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{copy.missingEmailBody}</p>
           </div>
           <Link href="/register">
-            <Button variant="outline">Back to registration</Button>
+            <Button variant="outline">{copy.backRegister}</Button>
           </Link>
         </div>
       </div>
@@ -60,17 +68,21 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
+    <div
+      className={cn(
+        "flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12",
+        locale === "bn" && "font-bengali",
+      )}
+      lang={locale === "bn" ? "bn" : "en"}
+    >
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+        <div className="space-y-2 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <Shield className="h-6 w-6 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Verify & set password
-          </h1>
-          <p className="text-muted-foreground">Enter the code we sent to</p>
-          <p className="font-medium flex items-center justify-center gap-2">
+          <h1 className="text-3xl font-bold tracking-tight">{copy.verifyRegTitle}</h1>
+          <p className="text-muted-foreground">{copy.verifyRegSub}</p>
+          <p className="flex items-center justify-center gap-2 font-medium">
             <Mail className="h-4 w-4" />
             {email}
           </p>
@@ -86,7 +98,7 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
             }}
           >
             <div className="space-y-2">
-              <Label htmlFor="otp">Verification code</Label>
+              <Label htmlFor="otp">{copy.otpLabel}</Label>
               <Input
                 id="otp"
                 type="text"
@@ -98,13 +110,13 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
                   setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
                 }
                 placeholder="000000"
-                className="text-center text-2xl tracking-widest font-mono"
+                className="text-center font-mono text-2xl tracking-widest"
                 maxLength={6}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{copy.passwordLabel}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -115,17 +127,15 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
                   autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
+                  placeholder={copy.passwordHint}
                   className="pl-10"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Minimum 6 characters
-              </p>
+              <p className="text-xs text-muted-foreground">{copy.passwordHint}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">{copy.confirmLabel}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -136,14 +146,12 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repeat password"
+                  placeholder={copy.confirmPlaceholder}
                   className="pl-10"
                 />
               </div>
               {confirmPassword && !passwordMatch && (
-                <p className="text-xs text-destructive">
-                  Passwords do not match
-                </p>
+                <p className="text-xs text-destructive">{copy.passwordMismatch}</p>
               )}
             </div>
 
@@ -153,18 +161,13 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
               </div>
             )}
 
-            <Button
-              type="submit"
-              disabled={!canSubmit}
-              className="w-full"
-              size="lg"
-            >
+            <Button type="submit" disabled={!canSubmit} className="w-full" size="lg">
               {loading ? (
-                "Creating account..."
+                copy.creating
               ) : (
                 <>
                   <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Create account
+                  {copy.createAccount}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
@@ -173,20 +176,18 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
 
           <div className="mt-6 text-center text-sm">
             <p className="text-muted-foreground">
-              Didn&apos;t receive the code?{" "}
+              {copy.didntReceive}{" "}
               <button
                 type="button"
                 className="font-medium text-primary hover:underline disabled:opacity-50"
                 onClick={handleResend}
                 disabled={resendLoading}
               >
-                {resendLoading ? "Sending..." : "Resend code"}
+                {resendLoading ? copy.resending : copy.resend}
               </button>
             </p>
             {resendSuccess && (
-              <p className="mt-2 text-success text-sm">
-                A new code has been sent to your email.
-              </p>
+              <p className="text-success mt-2 text-sm">{copy.resent}</p>
             )}
           </div>
         </div>

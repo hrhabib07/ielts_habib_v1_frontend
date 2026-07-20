@@ -25,6 +25,7 @@ export interface SiteShellCopy {
   readonly footerRights: (year: number) => string;
   readonly footerSupport: string;
   readonly footerSupportReading: string;
+  readonly followGamlish: string;
   readonly whatsappOnlyNote: string;
   readonly reading: string;
   readonly publicPlansPricing: string;
@@ -59,6 +60,7 @@ export const SITE_SHELL_COPY: Record<UiLocale, SiteShellCopy> = {
       "অ্যাক্সেস, পেমেন্ট বা Gamlish নিয়ে প্রশ্ন? WhatsApp এ লিখুন।",
     footerSupportReading:
       "অ্যাক্সেস, বিলিং বা Gamlish কীভাবে কাজ করে: WhatsApp এ মেসেজ করুন। আমরা শুধু চ্যাটে রিপ্লাই দিই; এই নম্বরে কল করবেন না।",
+    followGamlish: "Follow Gamlish",
     whatsappOnlyNote: "শুধু WhatsApp · আমরা মেসেজে রিপ্লাই দিই",
     reading: "Reading",
     publicPlansPricing: "প্ল্যান ও মূল্য",
@@ -91,6 +93,7 @@ export const SITE_SHELL_COPY: Record<UiLocale, SiteShellCopy> = {
       "Questions about access, payments, or Gamlish? Message us on WhatsApp.",
     footerSupportReading:
       "Need help with access, billing, or how Gamlish works? Message us on WhatsApp only. We reply in chat; please do not call this number.",
+    followGamlish: "Follow Gamlish",
     whatsappOnlyNote: "WhatsApp only · we reply to messages",
     reading: "Reading",
     publicPlansPricing: "Plans & pricing",

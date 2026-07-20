@@ -10,10 +10,7 @@ import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
-import {
-  LANDING_CTA_CLASS,
-  LANDING_LINK_CLASS,
-} from "@/src/components/home/guest/guest-landing-theme";
+import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
 
 export function GuestLandingNavBar({ className }: { className?: string }) {
@@ -53,15 +50,21 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
         <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
           <Link
             href="/login"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:bg-muted/50 hover:text-foreground"
           >
             {copy.navLogin}
           </Link>
           <Link
+            href="/pricing#pay-now"
+            className="rounded-lg border border-amber-500/40 bg-amber-400/10 px-3 py-2 text-sm font-bold text-amber-950 transition-colors hover:bg-amber-400/20 dark:border-amber-400/40 dark:text-amber-100"
+          >
+            {copy.navPricing}
+          </Link>
+          <Link
             href="/demo"
             className={cn(
-              "rounded-lg px-3 py-2 text-sm",
-              LANDING_LINK_CLASS,
+              "rounded-lg px-3.5 py-2 text-sm font-bold text-white",
+              LANDING_CTA_CLASS,
             )}
           >
             {copy.ctaPrimary}
@@ -92,7 +95,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
               <SheetTitle className="sr-only">{copy.navMenu}</SheetTitle>
               <div className="flex flex-col gap-6 px-5 pb-8 pt-14">
                 <div className="space-y-2 border-b border-border/60 pb-5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground/70">
                     ভাষা · Language
                   </p>
                   <UiLanguageToggle
@@ -101,13 +104,23 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                   />
                 </div>
 
-                <nav className="flex flex-col gap-1" aria-label={copy.navMenu}>
+                <nav className="flex flex-col gap-2" aria-label={copy.navMenu}>
                   <Link
                     href="/demo"
                     onClick={() => setMenuOpen(false)}
-                    className={cn(linkClass, LANDING_LINK_CLASS)}
+                    className={cn(
+                      "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
+                      LANDING_CTA_CLASS,
+                    )}
                   >
                     {copy.ctaPrimary}
+                  </Link>
+                  <Link
+                    href="/pricing#pay-now"
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-xl border-2 border-amber-500/50 bg-amber-400/10 px-4 py-3.5 text-center text-base font-bold text-amber-950 dark:border-amber-400/45 dark:text-amber-100"
+                  >
+                    {copy.ctaPreOrder}
                   </Link>
                   {isHome ? (
                     <button
@@ -126,13 +139,6 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                       {copy.ctaSecondary}
                     </Link>
                   )}
-                  <Link
-                    href="/pricing"
-                    onClick={() => setMenuOpen(false)}
-                    className={linkClass}
-                  >
-                    {copy.navPricing}
-                  </Link>
                   <Link
                     href="/login"
                     onClick={() => setMenuOpen(false)}

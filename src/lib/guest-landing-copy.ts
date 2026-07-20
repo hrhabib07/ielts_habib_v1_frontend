@@ -45,7 +45,11 @@ export interface GuestLandingCopy {
   readonly ctaPrimary: string;
   readonly ctaPrimarySub: string;
   readonly ctaSecondary: string;
+  /** Clear purchase path — Bangladesh users often miss footer-only pricing. */
+  readonly ctaPreOrder: string;
+  readonly ctaPreOrderSub: string;
   readonly stickyCta: string;
+  readonly stickyPreOrder: string;
   readonly socialProofFallback: string;
   readonly socialProofLine: (n: string) => string;
   readonly comparisonEyebrow: string;
@@ -60,6 +64,9 @@ export interface GuestLandingCopy {
   readonly navMenu: string;
   readonly mockupJourneyTitle: string;
   readonly mockupReadinessLabel: string;
+  readonly mockupMissionLabel: string;
+  readonly mockupStagesProgress: string;
+  readonly mockupStreakLabel: string;
   readonly mockupZones: readonly GuestLandingZoneMockCopy[];
   readonly playMomentTitle: string;
   readonly playMomentSub: string;
@@ -72,6 +79,19 @@ export interface GuestLandingCopy {
   readonly finalCtaSub: string;
   readonly tryOne: GuestTryOneQuestionCopy;
   readonly howItWorks: GuestHowGamlishWorksCopy;
+  readonly foundersWall: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly sub: string;
+    readonly youCanBeHere: string;
+    readonly youCanBeNumber: (n: string) => string;
+    readonly urgency: string;
+    readonly slotsLine: (filled: string, max: string) => string;
+    readonly emptyBody: string;
+    readonly viewWall: string;
+    readonly claimSpot: string;
+    readonly closedNote: string;
+  };
 }
 
 export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = {
@@ -90,7 +110,10 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     ctaPrimary: "Play Free Demo",
     ctaPrimarySub: "60 seconds. No account needed.",
     ctaSecondary: "How it works",
+    ctaPreOrder: "Pre-order Now",
+    ctaPreOrderSub: "Founding Member · pay with bKash",
     stickyCta: "Play Free Demo",
+    stickyPreOrder: "Pre-order",
     socialProofFallback:
       "Join players already on their first mission.",
     socialProofLine: (n) =>
@@ -103,12 +126,15 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     comparisonNewTitle: "Gamlish",
     comparisonNewBody:
       "Play missions. Earn XP. Unlock levels. Learn by doing.",
-    navPricing: "Plans & pricing",
+    navPricing: "Pre-order",
     navLogin: "Log in",
     navRegister: "Create account",
     navMenu: "Menu",
     mockupJourneyTitle: "Your journey",
     mockupReadinessLabel: "Progress",
+    mockupMissionLabel: "Camp 1 · Mission 01",
+    mockupStagesProgress: "2 / 4 stages",
+    mockupStreakLabel: "3-day streak",
     mockupZones: [
       { zoneLabel: "Camp 1", title: "The Foundation", freeStart: true },
       { zoneLabel: "Camp 2", title: "Action Kingdom" },
@@ -162,6 +188,19 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       bottomCtaTitle: "Ready to start your adventure?",
       bottomCtaSub: "Jump right into Mission 01.",
     },
+    foundersWall: {
+      eyebrow: "Founding Members",
+      title: "You can be on this wall.",
+      sub: "History remembers those who believe before everyone else.",
+      youCanBeHere: "Your name here",
+      youCanBeNumber: (n) => `You can be Founder #${n}`,
+      urgency: "Pre-order now — spots close at 100 or on 1 August.",
+      slotsLine: (filled, max) => `${filled} of ${max} Founder spots claimed`,
+      emptyBody: "The wall is empty. Be the first name here.",
+      viewWall: "View full wall",
+      claimSpot: "Pre-order · claim your spot",
+      closedNote: "Founder spots are full — you can still join premium.",
+    },
   },
   bn: {
     languageToggleAria: "ল্যান্ডিং পেজের ভাষা বেছে নিন",
@@ -169,7 +208,7 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     banglaLabel: "BN",
     brandTaglineName: "Gamlish",
     brandTaglineSuffix: "খেলার ছলেই ইংরেজি শিখি!",
-    heroEyebrow: "৪টি ক্যাম্প · ২১টি মিশন",
+    heroEyebrow: "4টি ক্যাম্প · 21টি মিশন",
     heroHeadlineLine1: "খেলুন, জিতুন, আর",
     heroHeadlineLine2: "ইংরেজিতে ফ্লুয়েন্ট হোন।",
     heroAccentWord: "ফ্লুয়েন্ট",
@@ -178,7 +217,10 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     ctaPrimary: "ফ্রি ডেমো খেলুন",
     ctaPrimarySub: "৬০ সেকেন্ড। কোনো অ্যাকাউন্ট লাগবে না।",
     ctaSecondary: "কীভাবে কাজ করে",
+    ctaPreOrder: "এখনই প্রি-অর্ডার করুন",
+    ctaPreOrderSub: "Founding Member · bKash দিয়ে পেমেন্ট",
     stickyCta: "ফ্রি ডেমো খেলুন",
+    stickyPreOrder: "প্রি-অর্ডার",
     socialProofFallback: "প্লেয়াররা ইতিমধ্যে প্রথম মিশনে যোগ দিয়েছেন।",
     socialProofLine: (n) =>
       `${n}-এর বেশি প্লেয়ার ইতিমধ্যে প্রথম মিশনে যোগ দিয়েছেন।`,
@@ -190,17 +232,20 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     comparisonNewTitle: "Gamlish",
     comparisonNewBody:
       "মিশন খেলা। XP অর্জন। লেভেল আনলক। করে করে শেখা।",
-    navPricing: "প্ল্যান ও মূল্য",
+    navPricing: "প্রি-অর্ডার",
     navLogin: "লগইন",
     navRegister: "অ্যাকাউন্ট খুলুন",
     navMenu: "মেন্যু",
     mockupJourneyTitle: "তোমার যাত্রা",
     mockupReadinessLabel: "অগ্রগতি",
+    mockupMissionLabel: "ক্যাম্প 1 · মিশন 01",
+    mockupStagesProgress: "2 / 4 স্টেজ",
+    mockupStreakLabel: "3 দিনের স্ট্রিক",
     mockupZones: [
-      { zoneLabel: "ক্যাম্প ১", title: "The Foundation", freeStart: true },
-      { zoneLabel: "ক্যাম্প ২", title: "Action Kingdom" },
-      { zoneLabel: "ক্যাম্প ৩", title: "Time Travel" },
-      { zoneLabel: "ক্যাম্প ৪", title: "Real English" },
+      { zoneLabel: "ক্যাম্প 1", title: "ভিত্তি", freeStart: true },
+      { zoneLabel: "ক্যাম্প 2", title: "অ্যাকশন কিংডম" },
+      { zoneLabel: "ক্যাম্প 3", title: "সময়ের যাত্রা" },
+      { zoneLabel: "ক্যাম্প 4", title: "আসল ইংরেজি" },
     ],
     playMomentTitle: "সঠিক উত্তরে ট্যাপ করুন",
     playMomentSub:
@@ -208,7 +253,7 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     campShowcaseEyebrow: "গেম ম্যাপ",
     campShowcaseTitle: "চারটি ক্যাম্প। একটাই পথ।",
     campShowcaseSub:
-      "প্রতিটি ক্যাম্প আপনার ইংরেজির নতুন লেভেল আনলক করবে। ক্যাম্প ১ থেকে ফ্রি শুরু করুন।",
+      "প্রতিটি ক্যাম্প আপনার ইংরেজির নতুন লেভেল আনলক করবে। ক্যাম্প 1 থেকে ফ্রি শুরু করুন।",
     campLocked: "লকড",
     campFreeStart: "ফ্রি শুরু",
     finalCtaTitle: "অ্যাডভেঞ্চার শুরু করতে প্রস্তুত?",
@@ -229,28 +274,41 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     },
     howItWorks: {
       eyebrow: "শুরু করুন",
-      title: "ফ্লুয়েন্সির ৩টি ধাপ",
+      title: "ফ্লুয়েন্সির 3টি ধাপ",
       steps: [
         {
           icon: "play",
-          title: "১. ডেমো খেলুন",
-          description: "সম্পূর্ণ ফ্রিতে ৬০ সেকেন্ডের একটি মিশন ট্রাই করুন।",
+          title: "1. ডেমো খেলুন",
+          description: "সম্পূর্ণ ফ্রিতে 60 সেকেন্ডের একটি মিশন ট্রাই করুন।",
         },
         {
           icon: "badge",
-          title: "২. প্রথম ব্যাজ অর্জন করুন",
+          title: "2. প্রথম ব্যাজ অর্জন করুন",
           description:
-            "প্রতি স্টেজ ক্লিয়ারে +১০ XP। আসল গেম লুপ অনুভব করুন।",
+            "প্রতি স্টেজ ক্লিয়ারে +10 XP। আসল গেম লুপ অনুভব করুন।",
         },
         {
           icon: "save",
-          title: "৩. প্রগ্রেস সেভ করুন",
+          title: "3. প্রগ্রেস সেভ করুন",
           description:
             "স্কোর ধরে রাখতে আর স্কোয়াড বানাতে একটি ফ্রি প্রোফাইল তৈরি করুন।",
         },
       ],
       bottomCtaTitle: "অ্যাডভেঞ্চার শুরু করতে প্রস্তুত?",
       bottomCtaSub: "সরাসরি Mission 01-এ ঢুকে পড়ুন।",
+    },
+    foundersWall: {
+      eyebrow: "Founding Members",
+      title: "আপনিও এই ওয়ালে থাকতে পারেন।",
+      sub: "যারা শুরুতে বিশ্বাস করে, ইতিহাস তাদেরই মনে রাখে।",
+      youCanBeHere: "এখানে আপনার নাম",
+      youCanBeNumber: (n) => `আপনি হতে পারেন Founder #${n}`,
+      urgency: "এখনই প্রি-অর্ডার করুন — ১০০ পূর্ণ হলে বা ১ আগস্টে স্পট বন্ধ।",
+      slotsLine: (filled, max) => `${filled} / ${max} Founder স্পট নেওয়া হয়েছে`,
+      emptyBody: "ওয়াল এখনো খালি। প্রথম নামটি আপনার হতে পারে।",
+      viewWall: "পুরো ওয়াল দেখুন",
+      claimSpot: "প্রি-অর্ডার · আপনার স্পট নিন",
+      closedNote: "Founder স্পট পূর্ণ — তবুও প্রিমিয়ামে যোগ দিতে পারবেন।",
     },
   },
 } as const;

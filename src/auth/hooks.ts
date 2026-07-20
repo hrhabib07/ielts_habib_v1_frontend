@@ -5,6 +5,7 @@ import {
   clearDemoSessionId,
   readDemoSessionId,
 } from "@/src/lib/demo-session";
+import { getStudentPostAuthHref } from "@/src/lib/auth-redirects";
 
 export function useLogin() {
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,8 @@ export function useLogin() {
       } else if (role === "INSTRUCTOR") {
         window.location.href = "/dashboard/instructor";
       } else {
-        window.location.href = "/";
+        // Home gate sends paid users without @username to /username first.
+        window.location.href = getStudentPostAuthHref("/");
       }
     } catch (err: unknown) {
       const ax =
@@ -85,7 +87,12 @@ export function useRegister() {
 
     try {
       await register({ email });
-      window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
+      const returnPath = getStudentPostAuthHref("");
+      const redirectQuery =
+        returnPath && returnPath.length > 0
+          ? `&redirect=${encodeURIComponent(returnPath)}`
+          : "";
+      window.location.href = `/verify-otp?email=${encodeURIComponent(email)}${redirectQuery}`;
     } catch (err: unknown) {
       const ax =
         err && typeof err === "object" && "response" in err
@@ -163,7 +170,8 @@ export function useVerifyOtp() {
       } else if (role === "INSTRUCTOR") {
         window.location.href = "/dashboard/instructor";
       } else {
-        window.location.href = continuePath || "/player";
+        window.location.href =
+          continuePath || getStudentPostAuthHref("/player");
       }
     } catch (err: unknown) {
       const ax =

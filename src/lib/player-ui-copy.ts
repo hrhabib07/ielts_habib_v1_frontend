@@ -7,6 +7,7 @@ export interface PlayerUiCopy {
   readonly backToMap: string;
   readonly backToMission: string;
   readonly campMapEyebrow: string;
+  readonly roadmapTapHint: string;
   readonly campLabel: (order: number) => string;
   readonly yourJourney: string;
   readonly continueMission: string;
@@ -149,6 +150,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     backToMap: "ক্যাম্প ম্যাপে ফিরে যাও",
     backToMission: "মিশনে ফিরে যাও",
     campMapEyebrow: "Gamlish · ইংরেজি শেখার গেইম",
+    roadmapTapHint: "খোলা মিশনে ট্যাপ করো — সঙ্গে সঙ্গে খেলা শুরু।",
     campLabel: (order) => `ক্যাম্প ${order}`,
     yourJourney: "তোমার যাত্রা",
     continueMission: "মিশন চালিয়ে যাও",
@@ -280,6 +282,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     backToMap: "Back to camp map",
     backToMission: "Back to mission",
     campMapEyebrow: "Gamlish · The game of English",
+    roadmapTapHint: "Tap an open mission to start playing right away.",
     campLabel: (order) => `Camp ${order}`,
     yourJourney: "Your journey",
     continueMission: "Continue mission",

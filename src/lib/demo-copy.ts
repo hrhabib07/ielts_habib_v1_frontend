@@ -14,6 +14,15 @@ export interface DemoCopy {
   readonly homeEyebrow: string;
   readonly homeTitle: (name: string) => string;
   readonly homeSub: string;
+  readonly roadmapTapHint: string;
+  readonly campLabel: (order: number) => string;
+  readonly missionLabel: string;
+  readonly stages: string;
+  readonly freeBadge: string;
+  readonly lockedHint: string;
+  readonly subscribeHint: string;
+  readonly continueMission: string;
+  readonly guestBanner: string;
   readonly missionUnlocked: string;
   readonly otherCampsHint: string;
   readonly playMission: string;
@@ -25,10 +34,20 @@ export interface DemoCopy {
   readonly xpStageHint: string;
   readonly badgeUnlocked: string;
   readonly feedbackTitle: string;
+  readonly feedbackTitleBn: string;
+  readonly feedbackPrompt: string;
+  readonly feedbackTapHint: string;
   readonly feedbackLiked: string;
   readonly feedbackPlaceholder: string;
   readonly feedbackSubmit: string;
   readonly feedbackSkip: string;
+  readonly feedbackThanks: string;
+  /** Form-style radio options: 5 → 1, bilingual labels. */
+  readonly feedbackOptions: readonly {
+    readonly rating: number;
+    readonly en: string;
+    readonly bn: string;
+  }[];
   readonly continueTitle: string;
   readonly continueSub: string;
   readonly continueBullets: readonly string[];
@@ -55,9 +74,18 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     namePlaceholder: "Your name",
     continueAsGuest: "Continue as Guest",
     startPlaying: "Start Playing",
-    homeEyebrow: "Free demo · 60 seconds",
+    homeEyebrow: "Free demo · real game home",
     homeTitle: (name) => `Welcome, ${name}`,
-    homeSub: "This is your Gamlish home. Tap Mission 01 to play.",
+    homeSub: "Same map logged-in players see. Tap Mission 01 to play.",
+    roadmapTapHint: "Tap the glowing Mission 01 — this is the real Gamlish map.",
+    campLabel: (order) => `Camp ${order}`,
+    missionLabel: "Mission",
+    stages: "stages",
+    freeBadge: "Free",
+    lockedHint: "Unlocks after you finish the previous mission",
+    subscribeHint: "Unlocks with full access",
+    continueMission: "Play Mission 01",
+    guestBanner: "You're in guest demo mode — no login required.",
     missionUnlocked: "Mission 01 unlocked",
     otherCampsHint: "Other camps unlock as you play",
     playMission: "Play Mission 01",
@@ -68,11 +96,22 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     xpEarned: (xp) => `+${xp} XP earned`,
     xpStageHint: "+10 XP per stage cleared",
     badgeUnlocked: "Starter Player badge unlocked",
-    feedbackTitle: "How was your experience?",
-    feedbackLiked: "What did you like most? (optional)",
+    feedbackTitle: "How would you rate your journey with Gamlish so far?",
+    feedbackTitleBn: "Gamlish-এর সাথে আপনার অভিজ্ঞতা কেমন ছিল?",
+    feedbackPrompt: "Pick one option below",
+    feedbackTapHint: "Required — tap an option to continue",
+    feedbackLiked: "Want to say more? (optional)",
     feedbackPlaceholder: "The video, the questions, the XP...",
-    feedbackSubmit: "Send feedback",
-    feedbackSkip: "Skip",
+    feedbackSubmit: "Send & continue",
+    feedbackSkip: "Skip for now",
+    feedbackThanks: "Thanks! That helps a lot.",
+    feedbackOptions: [
+      { rating: 5, en: "Excellent", bn: "চমৎকার" },
+      { rating: 4, en: "Good", bn: "ভালো" },
+      { rating: 3, en: "Average", bn: "মোটামুটি" },
+      { rating: 2, en: "Below Average", bn: "সন্তোষজনক নয়" },
+      { rating: 1, en: "Poor", bn: "খুবই খারাপ" },
+    ],
     continueTitle: "Want to continue your adventure?",
     continueSub: "Create free account to:",
     continueBullets: [
@@ -109,9 +148,18 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     namePlaceholder: "তোমার নাম",
     continueAsGuest: "Guest হিসেবে চালিয়ে যাও",
     startPlaying: "খেলা শুরু করো",
-    homeEyebrow: "ফ্রি ডেমো · ৬০ সেকেন্ড",
+    homeEyebrow: "ফ্রি ডেমো · আসল গেম হোম",
     homeTitle: (name) => `স্বাগতম, ${name}`,
-    homeSub: "এটাই তোমার Gamlish হোম। Mission 01-এ ট্যাপ করে খেলো।",
+    homeSub: "লগইন করা প্লেয়ারদের মতোই ম্যাপ। Mission 01-এ ট্যাপ করে খেলো।",
+    roadmapTapHint: "জ্বলজ্বলে Mission 01-এ ট্যাপ করো — এটাই আসল Gamlish ম্যাপ।",
+    campLabel: (order) => `ক্যাম্প ${order}`,
+    missionLabel: "মিশন",
+    stages: "স্টেজ",
+    freeBadge: "ফ্রি",
+    lockedHint: "আগের মিশন শেষ করলে আনলক হবে",
+    subscribeHint: "পূর্ণ অ্যাক্সেসে আনলক",
+    continueMission: "Mission 01 খেলো",
+    guestBanner: "তুমি গেস্ট ডেমো মোডে আছো — লগইন লাগবে না।",
     missionUnlocked: "Mission 01 আনলক হয়েছে",
     otherCampsHint: "খেলতে থাকলেই বাকি ক্যাম্পগুলো আনলক হবে",
     playMission: "Mission 01 খেলো",
@@ -123,11 +171,22 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     xpEarned: (xp) => `+${xp} XP অর্জিত হলো`,
     xpStageHint: "প্রতি স্টেজ ক্লিয়ারে +১০ XP",
     badgeUnlocked: "Starter Player ব্যাজ আনলক হলো",
-    feedbackTitle: "অভিজ্ঞতা কেমন ছিল?",
-    feedbackLiked: "সবচেয়ে বেশি কী ভালো লাগলো? (ঐচ্ছিক)",
+    feedbackTitle: "How would you rate your journey with Gamlish so far?",
+    feedbackTitleBn: "Gamlish-এর সাথে আপনার অভিজ্ঞতা কেমন ছিল?",
+    feedbackPrompt: "নিচ থেকে একটা অপশন বাছুন",
+    feedbackTapHint: "আবশ্যক — চালিয়ে যেতে একটি অপশনে ট্যাপ করুন",
+    feedbackLiked: "আরও কিছু বলতে চাও? (ঐচ্ছিক)",
     feedbackPlaceholder: "ভিডিও, প্রশ্ন, XP...",
-    feedbackSubmit: "ফিডব্যাক পাঠাও",
-    feedbackSkip: "এড়িয়ে যাও",
+    feedbackSubmit: "পাঠাও ও চালিয়ে যাও",
+    feedbackSkip: "এখন এড়িয়ে যাও",
+    feedbackThanks: "ধন্যবাদ! এটা খুব কাজে লাগে।",
+    feedbackOptions: [
+      { rating: 5, en: "Excellent", bn: "চমৎকার" },
+      { rating: 4, en: "Good", bn: "ভালো" },
+      { rating: 3, en: "Average", bn: "মোটামুটি" },
+      { rating: 2, en: "Below Average", bn: "সন্তোষজনক নয়" },
+      { rating: 1, en: "Poor", bn: "খুবই খারাপ" },
+    ],
     continueTitle: "অ্যাডভেঞ্চার চালিয়ে যেতে চাও?",
     continueSub: "ফ্রি অ্যাকাউন্ট তৈরি করো এর জন্য:",
     continueBullets: [

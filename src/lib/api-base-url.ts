@@ -15,7 +15,7 @@ export function getServerApiBaseUrl(): string {
     process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
   if (raw) return raw.replace(/\/$/, "");
   if (process.env.NODE_ENV === "development") {
-    return "http://localhost:5050/api";
+    return "http://localhost:5000/api";
   }
   return PRODUCTION_API_FALLBACK;
 }
