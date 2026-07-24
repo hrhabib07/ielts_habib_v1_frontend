@@ -56,6 +56,11 @@ export default function TermsPage() {
             and process subscriptions. We do not sell your personal data. For data
             requests or account issues, contact us via the WhatsApp number in the site footer.
           </p>
+          <p className="mt-3 text-sm">
+            <Link href="/privacy" className="font-semibold text-primary hover:underline">
+              Read the full Privacy Policy →
+            </Link>
+          </p>
         </Card>
 
         <Card className="border border-dashed border-border bg-muted/20 p-6 md:p-8">

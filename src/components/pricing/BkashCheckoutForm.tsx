@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Check, Copy, Loader2, Smartphone } from "lucide-react";
+import { ArrowLeft, Copy, Loader2, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { submitSubscriptionRequest } from "@/src/lib/api/subscription";
 import { formatBdt, type PublicPricing } from "@/src/lib/api/pricing";
-import { brandStatus } from "@/src/lib/brand-theme";
-import { cn } from "@/lib/utils";
 
 const BKASH_SENDER_RE = /^01[3-9]\d{8}$/;
 /** bKash TrxID is alphanumeric; length varies slightly by app version. */
@@ -34,7 +32,6 @@ export function BkashCheckoutForm({
   const [senderNumber, setSenderNumber] = useState("");
   const [transactionId, setTransactionId] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -82,7 +79,6 @@ export function BkashCheckoutForm({
         transactionId: normalizedTrx,
         paidAmount: payableAmount,
       });
-      setSuccess(true);
       onSubmitted();
     } catch (err: unknown) {
       const message =
@@ -91,38 +87,9 @@ export function BkashCheckoutForm({
               ?.message
           : null;
       setError(message ?? "সাবমিট করা যায়নি। আবার চেষ্টা করুন।");
-    } finally {
       setSubmitting(false);
     }
   };
-
-  if (success) {
-    return (
-      <div
-        className={cn(
-          "font-bengali rounded-3xl border p-8 text-center",
-          brandStatus.success.card,
-        )}
-      >
-        <div
-          className={cn(
-            "mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full",
-            brandStatus.success.icon,
-          )}
-        >
-          <Check className="h-7 w-7" />
-        </div>
-        <h3 className="text-xl font-bold text-foreground">পেমেন্ট সাবমিট হয়েছে</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          স্ট্যাটাস: <strong>Pending Verification</strong>. ভেরিফিকেশনের পর
-          প্রি-অর্ডার কনফার্ম হবে। প্রিমিয়াম অ্যাক্সেস সাথে সাথে চালু হবে না
-          {pricing.preOrderEnabled && pricing.accessStartsAt
-            ? `. অ্যাক্সেস শুরু হবে ${new Date(pricing.accessStartsAt).toLocaleDateString("bn-BD", { day: "numeric", month: "long", year: "numeric", numberingSystem: "latn" })} থেকে।`
-            : "।"}
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="font-bengali rounded-3xl border border-border/70 bg-card p-6 shadow-lg md:p-8">

@@ -54,7 +54,7 @@ export interface GamlishProfileSocial {
   isFollowing: boolean;
   isOwnProfile: boolean;
   totalViews: number;
-  followingCount: number;
+  followerCount?: number;
 }
 
 export interface GamlishPublicProfile {

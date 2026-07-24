@@ -7,6 +7,10 @@ import { ThemeProvider } from "@/src/components/shared/ThemeProvider";
 import { UiLocaleProvider } from "@/src/contexts/UiLocaleContext";
 import { AppShellFallback } from "@/src/components/shared/AppShellFallback";
 import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
+import {
+  GoogleTagManagerBody,
+  GoogleTagManagerHead,
+} from "@/src/components/analytics/GoogleTagManager";
 
 /**
  * Runtime font loading (browser only). Avoids next/font/google at build time.
@@ -38,6 +42,7 @@ export default function RootLayout({
   return (
     <html lang="bn" suppressHydrationWarning>
       <head>
+        <GoogleTagManagerHead />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -52,6 +57,7 @@ export default function RootLayout({
         <link href={RUNTIME_FONT_STYLESHEET} rel="stylesheet" />
       </head>
       <body className="antialiased font-bengali">
+        <GoogleTagManagerBody />
         <ThemeProvider>
           <UiLocaleProvider>
             <Suspense fallback={<AppShellFallback />}>

@@ -44,7 +44,7 @@ export function ScholarshipUrgencyBanner() {
 
   return (
     <Link
-      href="/pricing?checkout=founder"
+      href="/checkout"
       className="group relative block overflow-hidden border-b border-violet-400/40 bg-gradient-to-r from-violet-950 via-indigo-950 to-violet-950 px-4 py-3 shadow-lg shadow-violet-950/50 transition-all hover:from-violet-900 hover:via-indigo-900"
       role="status"
       aria-live="polite"

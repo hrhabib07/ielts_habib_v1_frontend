@@ -90,6 +90,14 @@ export function Footer({ initialUser = null }: FooterProps) {
                   </Link>
                 </li>
               ) : null}
+              <li>
+                <Link
+                  href="/about"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {shell.about}
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -139,6 +147,22 @@ export function Footer({ initialUser = null }: FooterProps) {
                   </li>
                 </>
               )}
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {shell.terms}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {shell.privacy}
+                </Link>
+              </li>
             </ul>
           </div>
 

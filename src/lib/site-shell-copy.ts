@@ -8,6 +8,8 @@ export interface SiteShellCopy {
   readonly home: string;
   readonly howItWorks: string;
   readonly terms: string;
+  readonly about: string;
+  readonly privacy: string;
   readonly support: string;
   readonly product: string;
   readonly account: string;
@@ -40,6 +42,8 @@ export const SITE_SHELL_COPY: Record<UiLocale, SiteShellCopy> = {
     home: "হোম",
     howItWorks: "কীভাবে কাজ করে",
     terms: "শর্তাবলি",
+    about: "আমাদের সম্পর্কে",
+    privacy: "গোপনীয়তা",
     support: "সহায়তা",
     product: "প্রোডাক্ট",
     account: "অ্যাকাউন্ট",
@@ -73,6 +77,8 @@ export const SITE_SHELL_COPY: Record<UiLocale, SiteShellCopy> = {
     home: "Home",
     howItWorks: "How it works",
     terms: "Terms",
+    about: "About",
+    privacy: "Privacy",
     support: "Support",
     product: "Product",
     account: "Account",

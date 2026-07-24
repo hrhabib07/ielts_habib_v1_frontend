@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Loader2, Smartphone } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
 import { FounderLaunchPricingCard } from "@/src/components/pricing/FounderLaunchPricingCard";
 import { FounderBenefitsShowcase } from "@/src/components/pricing/FounderBenefitsShowcase";
-import { BkashCheckoutForm } from "@/src/components/pricing/BkashCheckoutForm";
 import {
   hasBlockingPaymentStatus,
   PaymentApplicationStatusCard,
@@ -29,10 +29,10 @@ export function PricingContent({
   initialUser: CurrentUser | null;
   initialPricing?: PublicPricing | null;
 }) {
+  const router = useRouter();
   const [pricing, setPricing] = useState<PublicPricing | null>(initialPricing);
   const [pricingError, setPricingError] = useState<string | null>(null);
   const [pricingLoading, setPricingLoading] = useState(!initialPricing);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const copy = useFounderLaunchCopy();
 
   const isLoggedIn = Boolean(initialUser);
@@ -41,7 +41,7 @@ export function PricingContent({
   const hasActiveAccess = payment.hasActiveAccess;
   const hasPurchased = payment.hasPurchased;
   const blocked = hasBlockingPaymentStatus(payment.activeSubscription, payment.latestRequest);
-  const showPayCta = !hasPurchased && !blocked && !checkoutOpen;
+  const showPayCta = !hasPurchased && !blocked;
 
   const loadPricing = useCallback(async (silent = false) => {
     if (!silent) {
@@ -53,7 +53,6 @@ export function PricingContent({
       setPricing(data);
       setPricingError(null);
     } catch {
-      // Keep any existing pricing on soft refresh; only hard-fail when empty.
       if (!silent) {
         setPricingError(
           "মূল্য লোড করা যায়নি। ব্যাকএন্ড চালু আছে কিনা দেখুন (localhost:5000), তারপর আবার চেষ্টা করুন।",
@@ -72,18 +71,15 @@ export function PricingContent({
     void loadPricing(false);
   }, [initialPricing, loadPricing]);
 
+  /** Legacy links: /pricing?checkout=1|founder → /checkout */
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("checkout") === "1" && isLoggedIn && !blocked && !hasPurchased) {
-      setCheckoutOpen(true);
-      requestAnimationFrame(() => {
-        document
-          .getElementById("bkash-checkout")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+    const checkout = params.get("checkout");
+    if (checkout === "1" || checkout === "founder") {
+      router.replace("/checkout");
     }
-  }, [isLoggedIn, blocked, hasPurchased]);
+  }, [router]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -92,21 +88,15 @@ export function PricingContent({
         document.getElementById("pay-now")?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
-  }, [pricingLoading, checkoutOpen]);
+  }, [pricingLoading]);
 
   const handleUpgrade = () => {
     if (!isLoggedIn) {
-      window.location.href = `/login?redirect=${encodeURIComponent("/pricing?checkout=1")}`;
+      window.location.href = `/login?redirect=${encodeURIComponent("/checkout")}`;
       return;
     }
     if (blocked || hasPurchased) return;
-    setCheckoutOpen(true);
-    requestAnimationFrame(() => {
-      document.getElementById("bkash-checkout")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    });
+    router.push("/checkout");
   };
 
   if (pricingLoading) {
@@ -154,22 +144,11 @@ export function PricingContent({
         <PaymentApplicationStatusCard
           activeSubscription={payment.activeSubscription}
           latestRequest={payment.latestRequest}
-          onApplyAgain={() => setCheckoutOpen(true)}
+          onApplyAgain={() => router.push("/checkout")}
         />
       ) : null}
 
-      {checkoutOpen && isLoggedIn && !hasPurchased && !blocked ? (
-        <>
-          <div id="bkash-checkout" className="scroll-mt-24">
-            <BkashCheckoutForm
-              pricing={pricing}
-              onClose={() => setCheckoutOpen(false)}
-              onSubmitted={() => payment.refresh()}
-            />
-          </div>
-          <FounderBenefitsShowcase />
-        </>
-      ) : !hasPurchased && !blocked ? (
+      {!hasPurchased && !blocked ? (
         <>
           <FounderLaunchPricingCard
             pricing={pricing}

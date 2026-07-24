@@ -78,6 +78,12 @@ export function GuestLandingFooter() {
               {shell.plansPricing}
             </Link>
             <Link
+              href="/about"
+              className="transition-colors hover:text-foreground"
+            >
+              {shell.about}
+            </Link>
+            <Link
               href="/login"
               className="transition-colors hover:text-foreground"
             >
@@ -88,6 +94,12 @@ export function GuestLandingFooter() {
               className="transition-colors hover:text-foreground"
             >
               {shell.terms}
+            </Link>
+            <Link
+              href="/privacy"
+              className="transition-colors hover:text-foreground"
+            >
+              {shell.privacy}
             </Link>
           </div>
         </div>

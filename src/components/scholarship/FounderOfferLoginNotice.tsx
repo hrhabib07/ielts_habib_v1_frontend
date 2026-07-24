@@ -67,7 +67,7 @@ export function FounderOfferLoginNotice() {
             </p>
           )}
           <Link
-            href="/pricing?checkout=founder"
+            href="/checkout"
             className="inline-flex text-xs font-semibold text-emerald-300 underline underline-offset-2 hover:text-white"
           >
             Go to pricing &amp; pay with bKash →

@@ -139,7 +139,7 @@ export function FounderWelcomeModal() {
               size="lg"
               className="h-12 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-base font-bold shadow-lg shadow-violet-600/30 hover:from-violet-500 hover:to-indigo-500"
             >
-              <Link href="/pricing?checkout=founder" onClick={() => setOpen(false)}>
+              <Link href="/checkout" onClick={() => setOpen(false)}>
                 {scholarshipLive
                   ? `Pay ${FOUNDER_SCHOLARSHIP_PRICE_BDT} BDT with bKash`
                   : "Go to pricing"}

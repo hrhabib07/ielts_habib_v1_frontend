@@ -221,10 +221,26 @@ export function GamlishProfileContent({
     if (social.isOwnProfile || followBusy) return;
     setFollowBusy(true);
     const wasFollowing = social.isFollowing;
-    setProfile((p) => ({ ...p, social: { ...p.social, isFollowing: !wasFollowing } }));
+    setProfile((p) => ({
+      ...p,
+      social: {
+        ...p.social,
+        isFollowing: !wasFollowing,
+        followerCount: Math.max(
+          0,
+          (p.social.followerCount ?? 0) + (wasFollowing ? -1 : 1),
+        ),
+      },
+    }));
     try {
       const res = await toggleProfileFollow(handle);
-      setProfile((p) => ({ ...p, social: { ...p.social, isFollowing: res.isFollowing } }));
+      setProfile((p) => ({
+        ...p,
+        social: {
+          ...p.social,
+          isFollowing: res.isFollowing,
+        },
+      }));
     } catch {
       setProfile(initialProfile);
       setNotice("Could not update follow.");
@@ -392,7 +408,11 @@ export function GamlishProfileContent({
           )}
 
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <span>{social.followingCount} following</span>
+            <span className="inline-flex items-center gap-1 font-medium text-foreground">
+              <Users className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+              <span className="tabular-nums">{(social.followerCount ?? 0).toLocaleString()}</span>{" "}
+              {(social.followerCount ?? 0) === 1 ? "follower" : "followers"}
+            </span>
             <span>{social.totalViews.toLocaleString()} profile views</span>
           </div>
 
