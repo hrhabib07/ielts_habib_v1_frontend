@@ -80,7 +80,7 @@ export function GuestLandingHero() {
               className="h-12 w-full max-w-sm rounded-2xl border-2 border-amber-500/50 bg-amber-400/10 text-base font-bold text-amber-950 hover:bg-amber-400/20 dark:border-amber-400/45 dark:text-amber-100 lg:w-auto lg:min-w-[15rem]"
               asChild
             >
-              <Link href="/pricing#pay-now">{copy.ctaPreOrder}</Link>
+              <Link href="/pricing">{copy.ctaPreOrder}</Link>
             </Button>
             <p className="text-xs font-medium text-foreground/65">
               {copy.ctaPreOrderSub}

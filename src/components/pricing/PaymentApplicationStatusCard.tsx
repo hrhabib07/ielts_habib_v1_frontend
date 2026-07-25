@@ -271,6 +271,8 @@ export function hasBlockingPaymentStatus(
   latestRequest: SubscriptionRequest | null,
 ): boolean {
   if (hasPurchasedSubscription(activeSubscription)) return true;
-  if (latestRequest?.status === "PENDING") return true;
+  // Test checkout allowlist may keep a PENDING row for Meta confirmation,
+  // but must not permanently lock the form for QA resubmits.
+  if (latestRequest?.status === "PENDING" && !latestRequest.isTest) return true;
   return false;
 }

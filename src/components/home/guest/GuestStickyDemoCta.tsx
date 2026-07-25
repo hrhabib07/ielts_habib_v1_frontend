@@ -45,7 +45,7 @@ export function GuestStickyDemoCta() {
           className="h-12 flex-1 rounded-2xl border-2 border-amber-500/50 bg-amber-400/10 text-sm font-bold text-amber-950 hover:bg-amber-400/20 dark:border-amber-400/45 dark:text-amber-100"
           asChild
         >
-          <Link href="/pricing#pay-now">{copy.stickyPreOrder}</Link>
+          <Link href="/pricing">{copy.stickyPreOrder}</Link>
         </Button>
       </div>
     </div>

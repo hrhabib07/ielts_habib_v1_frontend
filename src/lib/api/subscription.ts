@@ -68,6 +68,8 @@ export interface SubscriptionRequest {
   status: SubscriptionRequestStatus;
   rejectionReason?: string | null;
   reviewedAt?: string | null;
+  /** QA / Meta ads allowlist — never a real Founder purchase. */
+  isTest?: boolean;
   createdAt: string;
   updatedAt: string;
 }

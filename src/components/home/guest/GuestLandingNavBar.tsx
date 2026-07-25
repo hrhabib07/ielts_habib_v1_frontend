@@ -55,7 +55,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
             {copy.navLogin}
           </Link>
           <Link
-            href="/pricing#pay-now"
+            href="/pricing"
             className="rounded-lg border border-amber-500/40 bg-amber-400/10 px-3 py-2 text-sm font-bold text-amber-950 transition-colors hover:bg-amber-400/20 dark:border-amber-400/40 dark:text-amber-100"
           >
             {copy.navPricing}
@@ -116,7 +116,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                     {copy.ctaPrimary}
                   </Link>
                   <Link
-                    href="/pricing#pay-now"
+                    href="/pricing"
                     onClick={() => setMenuOpen(false)}
                     className="rounded-xl border-2 border-amber-500/50 bg-amber-400/10 px-4 py-3.5 text-center text-base font-bold text-amber-950 dark:border-amber-400/45 dark:text-amber-100"
                   >

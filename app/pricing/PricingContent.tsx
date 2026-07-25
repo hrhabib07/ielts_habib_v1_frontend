@@ -83,16 +83,11 @@ export function PricingContent({
     if (checkout === "1" || checkout === "founder") {
       router.replace("/checkout");
     }
-  }, [router]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+    // Clean legacy /pricing#pay-now bookmarks to plain /pricing
     if (window.location.hash === "#pay-now") {
-      requestAnimationFrame(() => {
-        document.getElementById("pay-now")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      router.replace("/pricing");
     }
-  }, [pricingLoading]);
+  }, [router]);
 
   const handleUpgrade = () => {
     if (!isLoggedIn) {

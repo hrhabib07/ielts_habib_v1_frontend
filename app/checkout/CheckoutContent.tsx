@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
 import { BkashCheckoutForm } from "@/src/components/pricing/BkashCheckoutForm";
@@ -22,6 +22,8 @@ export function CheckoutContent({
   initialPricing?: PublicPricing | null;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const forceCheckoutForm = searchParams.get("again") === "1";
   const [pricing, setPricing] = useState<PublicPricing | null>(initialPricing);
   const [pricingError, setPricingError] = useState<string | null>(null);
   const [pricingLoading, setPricingLoading] = useState(!initialPricing);
@@ -34,6 +36,8 @@ export function CheckoutContent({
   const hasPurchased = payment.hasPurchased;
   const hasActiveAccess = payment.hasActiveAccess;
   const isPendingReview = payment.latestRequest?.status === "PENDING";
+  const isTestPending =
+    isPendingReview && Boolean(payment.latestRequest?.isTest);
 
   const loadPricing = useCallback(async (silent = false) => {
     if (!silent) {
@@ -63,13 +67,21 @@ export function CheckoutContent({
     void loadPricing(false);
   }, [initialPricing, loadPricing]);
 
-  /** Pending submission already done — confirmation URL for ad tracking. */
+  /** Pending real submission — confirmation URL for ad tracking.
+   *  Test QA can force the form with ?again=1 to resubmit. */
   useEffect(() => {
     if (payment.loading) return;
+    if (forceCheckoutForm && isTestPending) return;
     if (isPendingReview) {
       router.replace("/payment/confirmation");
     }
-  }, [payment.loading, isPendingReview, router]);
+  }, [
+    payment.loading,
+    isPendingReview,
+    isTestPending,
+    forceCheckoutForm,
+    router,
+  ]);
 
   if (pricingLoading || payment.loading) {
     return (
@@ -109,7 +121,7 @@ export function CheckoutContent({
     );
   }
 
-  if (blocked || isPendingReview) {
+  if ((blocked || isPendingReview) && !(forceCheckoutForm && isTestPending)) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -129,6 +141,11 @@ export function CheckoutContent({
         <p className="text-sm text-muted-foreground">
           Send Money করুন, তারপর TrxID সাবমিট করুন
         </p>
+        {forceCheckoutForm && isTestPending ? (
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">
+            QA test mode: you can submit again. This will not create a real Founder purchase.
+          </p>
+        ) : null}
       </div>
 
       {payment.latestRequest?.status === "REJECTED" ? (

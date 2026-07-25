@@ -349,7 +349,7 @@ export function ChooseUsernameForm() {
           <div className="mt-6 space-y-3 rounded-2xl border border-dashed border-amber-500/40 bg-amber-400/10 p-4 text-center text-sm">
             <p className="font-semibold text-foreground">{copy.waitPurchase}</p>
             <Button asChild variant="outline" className="rounded-full">
-              <Link href="/pricing#pay-now">{copy.goToPricing}</Link>
+              <Link href="/pricing">{copy.goToPricing}</Link>
             </Button>
           </div>
         ) : null}

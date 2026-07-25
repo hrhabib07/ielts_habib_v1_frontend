@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { Loader2 } from "lucide-react";
 import { getCurrentUser } from "@/src/lib/auth-server";
 import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
 import { CheckoutContent } from "./CheckoutContent";
@@ -26,6 +28,14 @@ export default async function CheckoutPage() {
   }
 
   return (
-    <CheckoutContent initialPricing={initialPricing} />
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <CheckoutContent initialPricing={initialPricing} />
+    </Suspense>
   );
 }

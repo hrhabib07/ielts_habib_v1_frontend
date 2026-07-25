@@ -32,7 +32,9 @@ export function PaymentConfirmationContent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const key = "gamlish_payment_submitted_tracked";
+    if (payment.loading) return;
+    const requestId = payment.latestRequest?._id ?? "unknown";
+    const key = `gamlish_payment_submitted_tracked_${requestId}`;
     if (sessionStorage.getItem(key) === "1") return;
     sessionStorage.setItem(key, "1");
 
@@ -45,10 +47,14 @@ export function PaymentConfirmationContent() {
         items: [{ item_name: "Gamlish Founder Pre-order" }],
       },
       payment_status: "PENDING",
+      is_test: Boolean(payment.latestRequest?.isTest),
     });
     window.dispatchEvent(
       new CustomEvent("gamlish:payment_submitted", {
-        detail: { status: "PENDING" },
+        detail: {
+          status: "PENDING",
+          isTest: Boolean(payment.latestRequest?.isTest),
+        },
       }),
     );
     if (typeof window.fbq === "function") {
@@ -57,7 +63,7 @@ export function PaymentConfirmationContent() {
         currency: "BDT",
       });
     }
-  }, []);
+  }, [payment.loading, payment.latestRequest?._id, payment.latestRequest?.isTest]);
 
   if (payment.loading) {
     return (
@@ -130,6 +136,11 @@ export function PaymentConfirmationContent() {
         <Button asChild variant="outline" className="rounded-xl">
           <Link href="/pricing">Pricing এ ফিরুন</Link>
         </Button>
+        {payment.latestRequest?.isTest ? (
+          <Button asChild variant="outline" className="rounded-xl border-amber-500/40">
+            <Link href="/checkout?again=1">QA: submit another test</Link>
+          </Button>
+        ) : null}
         <a
           href={SUPPORT_WHATSAPP_HREF}
           target="_blank"

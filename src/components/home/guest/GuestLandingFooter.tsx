@@ -61,7 +61,7 @@ export function GuestLandingFooter() {
               : "Want the full course? Pre-order here"}
           </p>
           <Link
-            href="/pricing#pay-now"
+            href="/pricing"
             className="mt-3 inline-flex h-12 w-full max-w-xs items-center justify-center rounded-2xl bg-amber-500 px-6 text-base font-bold text-amber-950 shadow-lg shadow-amber-500/25 transition-colors hover:bg-amber-400"
           >
             {locale === "bn" ? "এখনই প্রি-অর্ডার করুন" : "Pre-order Now"}
@@ -72,7 +72,7 @@ export function GuestLandingFooter() {
           <p>{shell.footerRights(year)}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             <Link
-              href="/pricing#pay-now"
+              href="/pricing"
               className="font-semibold text-amber-800 transition-colors hover:text-foreground dark:text-amber-300"
             >
               {shell.plansPricing}

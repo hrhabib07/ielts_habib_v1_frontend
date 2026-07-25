@@ -277,7 +277,7 @@ export function GuestFoundersWallSection() {
                   <YouCanBeHereBanner
                     founderNumber={slot.founderNumber}
                     title={content.youCanBeHere}
-                    href="/pricing#pay-now"
+                    href="/pricing"
                     numberLabel={content.youCanBeNumber(
                       String(slot.founderNumber).padStart(3, "0"),
                     )}
@@ -305,7 +305,7 @@ export function GuestFoundersWallSection() {
             <Link href="/founding-members">{content.viewWall}</Link>
           </Button>
           <Button asChild className={cn("h-11 rounded-xl font-bold", LANDING_CTA_CLASS)}>
-            <Link href="/pricing#pay-now">
+            <Link href="/pricing">
               {isOpen ? content.claimSpot : copy.ctaPreOrder}
             </Link>
           </Button>
