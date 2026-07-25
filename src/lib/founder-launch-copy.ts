@@ -18,53 +18,54 @@ export interface FounderLaunchCopy {
   readonly upgrade: string;
   /** Short sticky / mobile pay label */
   readonly upgradeShort: string;
-  readonly payHereHint: string;
-  readonly featuresTitle: string;
+  readonly featuresMore: string;
+  readonly featuresLess: string;
+  readonly stickyPriceHint: string;
 }
 
 export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
   bn: {
     eyebrow: "Founding Member প্রি-অর্ডার · 1 আগস্টের আগে",
-    headline: "Founder স্ট্যাটাস + পূর্ণ Game of English লক করুন।",
+    headline: "Founder স্ট্যাটাস + পূর্ণ গেম লক করুন",
     intro:
-      "এখন প্রি-অর্ডার করুন। অ্যাডমিন ভেরিফাই করলে (স্পট থাকলে) আপনি Founding Member হবেন: স্থায়ী ব্যাজ, Founder Number, Founders' Wall, আর 1 আগস্ট থেকে পূর্ণ প্রিমিয়াম অ্যাক্সেস।",
-    scarcity:
-      "প্রথম 100 জন অনুমোদিত ক্রেতাই Founder Number ও ব্যাজ পাবেন। 100 পূর্ণ হলে বা 1 আগস্ট এলে (যা আগে আসে) Founder অফার বন্ধ। তারপরও ছাড় থাকতে পারে, কিন্তু Founder স্ট্যাটাস নয়।",
-    accessNote: "এখন কিনলে মূল্য লক হয়। অ্যাক্সেস 1 আগস্ট থেকেই শুরু হবে।",
-    accessStartsLabel: (dateLabel) => `অ্যাক্সেস শুরু: ${dateLabel}`,
-    durationLabel: (days) => `${days} দিনের প্রিমিয়াম অ্যাক্সেস (1 আগস্ট থেকে)`,
-    cta: "আজই প্রি-অর্ডার করুন। Founder ব্যাজ স্পট থাকতেই নিন।",
-    trust: "আপনার বিশ্বাসই Gamlish-এর যাত্রার শুরু।",
+      "পেমেন্ট ভেরিফাই হলে (স্পট থাকলে) পাবেন: স্থায়ী ব্যাজ, Founder Number, Wall, আর 1 আগস্ট থেকে প্রিমিয়াম অ্যাক্সেস।",
+    scarcity: "প্রথম 100 জন: Founder Number ও ব্যাজ। 100 পূর্ণ বা 1 আগস্টে অফার বন্ধ।",
+    accessNote: "মূল্য এখনই লক। অ্যাক্সেস 1 আগস্ট থেকে।",
+    accessStartsLabel: (dateLabel) => `শুরু: ${dateLabel}`,
+    durationLabel: (days) => `${days} দিন (1 আগস্ট থেকে)`,
+    cta: "স্পট থাকতেই Founder ব্যাজ লক করুন।",
+    trust: "bKash · ম্যানুয়াল ভেরিফিকেশন · নিরাপদ",
     founderBadge: "Founding Member",
     preOrderBadge: "August Pre-Order",
     offBadge: (percent) => `${percent}% ছাড়`,
     perMonth: "/মাস",
-    premiumLabel: "Gamlish Premium · Founder অফার",
-    upgrade: "এখনই প্রি-অর্ডার করুন — পেমেন্ট করুন",
+    premiumLabel: "Gamlish Premium · Founder",
+    upgrade: "এখনই পেমেন্ট করুন",
     upgradeShort: "এখনই পেমেন্ট করুন",
-    payHereHint: "↓ নিচের বোতামে ট্যাপ করে bKash পেমেন্ট শুরু করুন",
-    featuresTitle: "Founding Member যা পাবেন",
+    featuresMore: "আরও সুবিধা দেখুন",
+    featuresLess: "কম দেখুন",
+    stickyPriceHint: "bKash দিয়ে পেমেন্ট",
   },
   en: {
     eyebrow: "Founding Member pre-order · before 1 August",
-    headline: "Lock Founder status + the full Game of English.",
+    headline: "Lock Founder status + the full game",
     intro:
-      "Pre-order now. After admin verifies payment you become a Founding Member (if spots remain): permanent badge, Founder Number, Founders' Wall, plus full premium access from 1 August.",
-    scarcity:
-      "Only the first 100 approved buyers get Founder Number and badge. Spots close at 100 or on 1 August, whichever comes first. Discount can still apply after that, but without Founder status.",
-    accessNote: "Buying now locks the price. Premium access still begins on 1 August.",
-    accessStartsLabel: (dateLabel) => `Access starts: ${dateLabel}`,
-    durationLabel: (days) => `${days} days of premium access (from 1 August)`,
-    cta: "Pre-order today. Claim your Founder badge while spots last.",
-    trust: "Your trust is where the Gamlish journey begins.",
+      "After payment is verified (if spots remain): permanent badge, Founder Number, Wall, plus premium access from 1 August.",
+    scarcity: "First 100 buyers get Founder Number and badge. Closes at 100 or on 1 August.",
+    accessNote: "Price locks now. Access starts 1 August.",
+    accessStartsLabel: (dateLabel) => `Starts: ${dateLabel}`,
+    durationLabel: (days) => `${days} days (from 1 August)`,
+    cta: "Lock your Founder badge while spots last.",
+    trust: "bKash · manual verify · secure",
     founderBadge: "Founding Member",
     preOrderBadge: "August Pre-Order",
     offBadge: (percent) => `${percent}% OFF`,
     perMonth: "/month",
-    premiumLabel: "Gamlish Premium · Founder offer",
-    upgrade: "Pre-order Now — Pay with bKash",
+    premiumLabel: "Gamlish Premium · Founder",
+    upgrade: "Pay now",
     upgradeShort: "Pay now",
-    payHereHint: "↓ Tap the button below to start bKash payment",
-    featuresTitle: "What Founding Members unlock",
+    featuresMore: "Show more benefits",
+    featuresLess: "Show less",
+    stickyPriceHint: "Pay with bKash",
   },
 } as const;

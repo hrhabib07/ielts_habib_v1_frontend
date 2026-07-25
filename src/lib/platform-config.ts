@@ -10,3 +10,10 @@ export const PRIMARY_STUDENT_HREF = ENABLE_READING ? "/profile/reading" : "/play
 export const PRIMARY_STUDENT_LABEL = ENABLE_READING ? "Reading" : "খেলা";
 
 export const ENGLISH_COURSE_SLUG = "english-foundations";
+
+/**
+ * Guest landing social proof under the primary CTA
+ * ("X+ players already on their first mission").
+ * Hidden while counts are low. Flip to true to show again.
+ */
+export const SHOW_GUEST_DEMO_SOCIAL_PROOF = false;

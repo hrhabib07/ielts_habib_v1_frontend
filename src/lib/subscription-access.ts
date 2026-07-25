@@ -35,7 +35,7 @@ export function formatAccessDate(iso: string, locale: string = "en-GB"): string 
     day: "numeric",
     month: "long",
     year: "numeric",
-    // Latin digits — Bengali ১ is too thin on dark UI (Hind Siliguri).
+    // Latin digits — Bengali 1 is too thin on dark UI (Hind Siliguri).
     numberingSystem: "latn",
   }).format(new Date(iso));
 }

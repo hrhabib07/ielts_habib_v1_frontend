@@ -91,7 +91,7 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "INTRO",
-      levelLabel: "Gamlish লেভেল নোট: লেভেল ০ - শুরুর কথা (The Mastery Foundation)",
+      levelLabel: "Gamlish লেভেল নোট: লেভেল 0 - শুরুর কথা (The Mastery Foundation)",
       instructorNote:
         "আমাদের টিউটোরিয়াল লেভেলে স্বাগতম! এটা তোমার গ্যামলিশ প্লেবুকের একদম প্রথম পাতা। বস লেভেলের যুদ্ধগুলোতে (মানে আসল IELTS প্রশ্নগুলোতে) নামার আগে তোমাকে কিছু চিট কোড (cheat codes) শিখতে হবে। চলো, এই পরীক্ষাটা নিয়ে তোমার চিন্তাধারাই আজকে বদলে দিই।",
       content:
@@ -117,13 +117,13 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "MODULE_META",
-      heading: "১. এই মডিউলের খুঁটিনাটি",
+      heading: "1. এই মডিউলের খুঁটিনাটি",
       metaRows: [
-        { label: "টার্গেট লেভেল", value: "লেভেল ০ (টিউটোরিয়াল)" },
+        { label: "টার্গেট লেভেল", value: "লেভেল 0 (টিউটোরিয়াল)" },
         { label: "প্রশ্নের ধরন", value: "গেমের নিয়মকানুন" },
-        { label: "আসার সম্ভাবনা", value: "একদম বেসিক (পরীক্ষার ১০০% সময়ে কাজে লাগবে)" },
+        { label: "আসার সম্ভাবনা", value: "একদম বেসিক (পরীক্ষার 100% সময়ে কাজে লাগবে)" },
         { label: "কোথায় থাকে", value: "মূল টেস্টের আগের প্রস্তুতি" },
-        { label: "টার্গেট সময়", value: "১০ মিনিট" },
+        { label: "টার্গেট সময়", value: "10 মিনিট" },
         { label: "প্রতি প্রশ্নের জন্য সময়", value: "প্রযোজ্য নয়" },
       ],
       content: "",
@@ -141,7 +141,7 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "CORE_OBJECTIVE",
-      heading: "২. আমাদের মূল লক্ষ্য কী এবং কেন?",
+      heading: "2. আমাদের মূল লক্ষ্য কী এবং কেন?",
       content:
         "তোমার মিশন: Reading টেস্ট আসলে কোনো রিডিং পরীক্ষাই না! এটা ইংরেজি পরীক্ষার ছদ্মবেশে একটা ট্রেজার হান্ট। বেশিরভাগ স্টুডেন্ট ফেইল করে কারণ তারা বোরিং আর্টিকেলকে গল্পের বইয়ের মতো পড়তে যায়। তোমার মিশন: ওই বদভ্যাস ভুলে সিস্টেম হ্যাক করা শেখা।\n\nকী স্কিল যাচাই করা হচ্ছে: তুমি কি অপ্রয়োজনীয় তথ্য এড়িয়ে, প্রশ্ন যা চাইছে তা খুঁজে, সময় শেষ হওয়ার আগেই উত্তর ধরতে পারো?",
     },
@@ -163,11 +163,11 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "MECHANICS",
-      heading: "৩. এই টেস্টের নিয়মকানুন",
+      heading: "3. এই টেস্টের নিয়মকানুন",
       bullets: [
-        "সময়ের সাথে যুদ্ধ: ৬০ মিনিট, ৪০ প্রশ্ন, ৩ প্যাসেজ — প্রতি প্রশ্নে দেড় মিনিট।",
+        "সময়ের সাথে যুদ্ধ: 60 মিনিট, 40 প্রশ্ন, 3 প্যাসেজ — প্রতি প্রশ্নে দেড় মিনিট।",
         "গোল্ডেন রুল: পুরো প্যাসেজ পড়ার মতো সময় কখনোই পাবে না।",
-        "সবচেয়ে বড় ভুল: যেখানে উত্তর নেই সেখানে ৫–১০ মিনিট পড়া।",
+        "সবচেয়ে বড় ভুল: যেখানে উত্তর নেই সেখানে 5–10 মিনিট পড়া।",
       ],
       content: "গাড়ির চাবি ফ্রিজে খুঁজলে পাবে না — ঠিক কোথায় খুঁজতে হবে শিখবে।",
     },
@@ -184,9 +184,9 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "PARAPHRASE",
-      heading: "৪. প্যারাফ্রেজ করার ধরণ",
+      heading: "4. প্যারাফ্রেজ করার ধরণ",
       content:
-        "ক্যামব্রিজ উত্তর ভিন্ন শব্দে লুকায়। প্রশ্নে \"happy\" থাকলে প্যাসেজে \"ecstatic\" হতে পারে।\n\nঅ্যাঙ্কর বুলেটপ্রুফ — সাল, নাম, সংখ্যা যা বদলানো যায় না।\n\nপ্রশ্ন: \"In the year 1999, John Smith...\"\nপ্যাসেজ: \"...specifically 1999, researcher John Smith...\"\nকৌশল: ১৯৯৯ আর John Smith খুঁজো।",
+        "ক্যামব্রিজ উত্তর ভিন্ন শব্দে লুকায়। প্রশ্নে \"happy\" থাকলে প্যাসেজে \"ecstatic\" হতে পারে।\n\nঅ্যাঙ্কর বুলেটপ্রুফ — সাল, নাম, সংখ্যা যা বদলানো যায় না।\n\nপ্রশ্ন: \"In the year 1999, John Smith...\"\nপ্যাসেজ: \"...specifically 1999, researcher John Smith...\"\nকৌশল: 1999 আর John Smith খুঁজো।",
     },
   },
   {
@@ -206,12 +206,12 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "EXECUTION",
-      heading: "৫. কীভাবে উত্তর করবে (Triple-Weapon)",
+      heading: "5. কীভাবে উত্তর করবে (Triple-Weapon)",
       bullets: [
-        "ধাপ ১ — স্নাইপার: আগে প্রশ্ন থেকে Anchor খুঁজো।",
-        "ধাপ ২ — রাডার: ৫ সেকেন্ডে Anchor-এর আকার খুঁজো — এখন পড়বে না।",
-        "ধাপ ৩ — টার্গেট লক: Anchor-এর আগে-পরের লাইন স্কিম করো।",
-        "ধাপ ৪ — গ্যামলিশ লুপ: নোট → ১০০% কুইজ → ল্যাব → ফাইনাল টেস্ট।",
+        "ধাপ 1 — স্নাইপার: আগে প্রশ্ন থেকে Anchor খুঁজো।",
+        "ধাপ 2 — রাডার: 5 সেকেন্ডে Anchor-এর আকার খুঁজো — এখন পড়বে না।",
+        "ধাপ 3 — টার্গেট লক: Anchor-এর আগে-পরের লাইন স্কিম করো।",
+        "ধাপ 4 — গ্যামলিশ লুপ: নোট → 100% কুইজ → ল্যাব → ফাইনাল টেস্ট।",
       ],
       content: "",
     },
@@ -228,7 +228,7 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "MINEFIELD",
-      heading: "৬. যেসব ফাঁদ",
+      heading: "6. যেসব ফাঁদ",
       content:
         "'ভালো ছাত্র' ফাঁদ: প্রতিটি শব্দ মন দিয়ে পড়লে ফেইল। অলস কিন্তু চালাক গোয়েন্দা হও।\n\n'ডিকশনারি' ফাঁদ: প্রশ্ন না চাইলে বড় শব্দ পাত্তা দিও না।",
     },
@@ -249,11 +249,11 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "ARSENAL",
-      heading: "৭. গ্যামলিশ প্রো টিপস",
+      heading: "7. গ্যামলিশ প্রো টিপস",
       bullets: [
-        "প্রো টিপ ১ — ৯০ সেকেন্ড: ৯০+ সেকেন্ড আটকে? আন্দাজে দাগাও, এগিয়ে যাও।",
-        "প্রো টিপ ২ — আগে মিশন: Anchor না জেনে প্যাসেজে ঢুকবে না।",
-        "প্রো টিপ ৩ — ১০০% মানসিকতা: ফুল মার্কস মাসল মেমোরি গড়ে।",
+        "প্রো টিপ 1 — 90 সেকেন্ড: 90+ সেকেন্ড আটকে? আন্দাজে দাগাও, এগিয়ে যাও।",
+        "প্রো টিপ 2 — আগে মিশন: Anchor না জেনে প্যাসেজে ঢুকবে না।",
+        "প্রো টিপ 3 — 100% মানসিকতা: ফুল মার্কস মাসল মেমোরি গড়ে।",
       ],
       content: "",
     },
@@ -270,9 +270,9 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
     },
     bn: {
       sectionKind: "WRAP_UP",
-      heading: "৮. শেষ কথা",
+      heading: "8. শেষ কথা",
       content:
-        "মূল কথা: Reading হলো গুপ্তধন খোঁজা — অ্যাঙ্কর আর রাডার দিয়ে অপ্রয়োজনীয় লেখা স্কিপ করো।\n\nএখন তোমার কাজ: লেভেল ০ ফাইনাল টেস্ট দিয়ে লেভেল ১ আনলক করো। খেলা শুরু!",
+        "মূল কথা: Reading হলো গুপ্তধন খোঁজা — অ্যাঙ্কর আর রাডার দিয়ে অপ্রয়োজনীয় লেখা স্কিপ করো।\n\nএখন তোমার কাজ: লেভেল 0 ফাইনাল টেস্ট দিয়ে লেভেল 1 আনলক করো। খেলা শুরু!",
     },
   },
 ];
@@ -301,7 +301,7 @@ export function createEmptyMicroQuizBlock(order: number): IntegratedLessonBlock 
   return microQuizBlock(order, [
     mcq(
       "Example question 1?",
-      "উদাহরণ প্রশ্ন ১?",
+      "উদাহরণ প্রশ্ন 1?",
       ["Option A", "Option B", "Option C", "Option D"],
       ["অপশন A", "অপশন B", "অপশন C", "অপশন D"],
       "B",
@@ -310,7 +310,7 @@ export function createEmptyMicroQuizBlock(order: number): IntegratedLessonBlock 
     ),
     mcq(
       "Example question 2?",
-      "উদাহরণ প্রশ্ন ২?",
+      "উদাহরণ প্রশ্ন 2?",
       ["Option A", "Option B", "Option C", "Option D"],
       ["অপশন A", "অপশন B", "অপশন C", "অপশন D"],
       "C",
@@ -386,7 +386,7 @@ export function buildLevel0PlaybookBlocks(): IntegratedLessonBlock[] {
       "What is the Golden Rule?",
       "গোল্ডেন রুল কী?",
       ["Read every word", "You will never have time to read everything", "Two minutes per question", "Only first and last paragraph"],
-      ["সব পড়া", "পুরো পড়ার সময় পাবে না", "২ মিনিট", "শুধু প্রথম-শেষ"],
+      ["সব পড়া", "পুরো পড়ার সময় পাবে না", "2 মিনিট", "শুধু প্রথম-শেষ"],
       "B",
       "You will never have time to read the entire text.",
       "পুরো পড়ার সময় পাবে না।",
@@ -395,10 +395,10 @@ export function buildLevel0PlaybookBlocks(): IntegratedLessonBlock[] {
       "What is a Fatal Mistake?",
       "সবচেয়ে বড় ভুল কী?",
       ["Guessing", "Too much highlighting", "Reading the wrong part 5–10 minutes", "Skipping"],
-      ["অনুমান", "হাইলাইট", "ভুল জায়গায় ৫–১০ মিনিট", "স্কিপ"],
+      ["অনুমান", "হাইলাইট", "ভুল জায়গায় 5–10 মিনিট", "স্কিপ"],
       "C",
       "Spending 5–10 minutes where the answer is not hiding.",
-      "যেখানে উত্তর নেই সেখানে ৫–১০ মিনিট।",
+      "যেখানে উত্তর নেই সেখানে 5–10 মিনিট।",
     ),
   ]);
 
@@ -431,7 +431,7 @@ export function buildLevel0PlaybookBlocks(): IntegratedLessonBlock[] {
       ["ধীরে পড়া", "Anchor-এর আকার খুঁজা", "সারাংশ", "অনুবাদ"],
       "B",
       "Scan for the Anchor in under 5 seconds without reading.",
-      "৫ সেকেন্ডে Anchor খুঁজো।",
+      "5 সেকেন্ডে Anchor খুঁজো।",
     ),
     mcq(
       "After Target Lock, what do you do?",
@@ -458,7 +458,7 @@ export function buildLevel0PlaybookBlocks(): IntegratedLessonBlock[] {
       "What should you do with a huge unknown word?",
       "বড় অজানা শব্দ দেখলে?",
       ["Translate 5 minutes", "Panic", "Ignore if question did not ask", "Write on hand"],
-      ["৫ মিনিট অনুবাদ", "প্যানিক", "প্রশ্ন না চাইলে উপেক্ষা", "হাতে লেখা"],
+      ["5 মিনিট অনুবাদ", "প্যানিক", "প্রশ্ন না চাইলে উপেক্ষা", "হাতে লেখা"],
       "C",
       "Ignore it if the question did not ask about it.",
       "প্রশ্ন না চাইলে পাত্তা দিও না।",
@@ -468,16 +468,16 @@ export function buildLevel0PlaybookBlocks(): IntegratedLessonBlock[] {
   addSection("ARSENAL", [
     mcq(
       "What does the 90-Second Rule say?",
-      "৯০-সেকেন্ড নিয়ম কী বলে?",
+      "90-সেকেন্ড নিয়ম কী বলে?",
       ["Read 90s then break", "Stare until answer appears", "Guess and move on after 90s", "Ask examiner"],
-      ["৯০s পড়া", "তাকিয়ে থাকা", "আন্দাজে দাগিয়ে এগো", "পরীক্ষককে জিজ্ঞেস"],
+      ["90s পড়া", "তাকিয়ে থাকা", "আন্দাজে দাগিয়ে এগো", "পরীক্ষককে জিজ্ঞেস"],
       "C",
       "Guess and move on if stuck over 90 seconds.",
-      "৯০ সেকেন্ডের বেশি আটকে থাকলে এগিয়ে যাও।",
+      "90 সেকেন্ডের বেশি আটকে থাকলে এগিয়ে যাও।",
     ),
     mcq(
       "Why require 100% on Gamlish quizzes?",
-      "১০০% কেন?",
+      "100% কেন?",
       ["To punish", "To build muscle memory", "Longer course", "More money"],
       ["শাস্তি", "মাসল মেমোরি", "লম্বা কোর্স", "টাকা"],
       "B",

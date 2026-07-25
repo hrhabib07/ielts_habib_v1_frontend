@@ -1,5 +1,5 @@
-import { DemoNameGate } from "@/src/components/demo/DemoNameGate";
+import { MissionZeroDemo } from "@/src/components/demo/MissionZeroDemo";
 
 export default function DemoPage() {
-  return <DemoNameGate />;
+  return <MissionZeroDemo mode="guest" />;
 }

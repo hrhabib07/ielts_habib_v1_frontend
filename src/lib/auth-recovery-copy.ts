@@ -82,12 +82,12 @@ function buildAuthRecoveryCopy(locale: UiLocale): AuthRecoveryCopy {
       requestNewCode: "নতুন কোড চান",
       resetTitle: "নতুন পাসওয়ার্ড বাছুন",
       resetSub:
-        "অন্য সাইটে ব্যবহার করেন না এমন শক্তিশালী পাসওয়ার্ড দিন। কমপক্ষে ৮ অক্ষর।",
+        "অন্য সাইটে ব্যবহার করেন না এমন শক্তিশালী পাসওয়ার্ড দিন। কমপক্ষে 8 অক্ষর।",
       newPassword: "নতুন পাসওয়ার্ড",
       confirmPassword: "পাসওয়ার্ড নিশ্চিত করুন",
       savePassword: "পাসওয়ার্ড সেভ করুন",
       saving: "সেভ হচ্ছে…",
-      minLength: "নতুন পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।",
+      minLength: "নতুন পাসওয়ার্ড কমপক্ষে 8 অক্ষরের হতে হবে।",
       mismatch: "পাসওয়ার্ড মিলছে না।",
       sessionExpired:
         "রিসেট সেশন শেষ। Forgot password থেকে আবার শুরু করুন।",
@@ -109,7 +109,7 @@ function buildAuthRecoveryCopy(locale: UiLocale): AuthRecoveryCopy {
       resend: "কোড আবার পাঠান",
       resending: "পাঠানো হচ্ছে…",
       resent: "নতুন কোড পাঠানো হয়েছে।",
-      passwordHint: "কমপক্ষে ৬ অক্ষর",
+      passwordHint: "কমপক্ষে 6 অক্ষর",
       passwordMismatch: "পাসওয়ার্ড মিলছে না",
       didntReceive: "কোড পাননি?",
       confirmPlaceholder: "পাসওয়ার্ড আবার লিখুন",
@@ -213,7 +213,7 @@ function buildProfilePasswordCopy(locale: UiLocale): ProfilePasswordCopy {
       updateCta: "পাসওয়ার্ড আপডেট",
       setCta: "পাসওয়ার্ড সেট করুন",
       changeHelp:
-        "নিরাপত্তার জন্য এই অংশ খোলা পর্যন্ত বন্ধ থাকে। শক্তিশালী পাসওয়ার্ড কমপক্ষে ৮ অক্ষর ও এই সাইটের জন্য ইউনিক হোক।",
+        "নিরাপত্তার জন্য এই অংশ খোলা পর্যন্ত বন্ধ থাকে। শক্তিশালী পাসওয়ার্ড কমপক্ষে 8 অক্ষর ও এই সাইটের জন্য ইউনিক হোক।",
       setHelp:
         "ইমেইল দিয়েও লগইন করতে পাসওয়ার্ড যোগ করুন। Google সাইন-ইন আগের মতোই কাজ করবে।",
       current: "বর্তমান পাসওয়ার্ড",
@@ -221,7 +221,7 @@ function buildProfilePasswordCopy(locale: UiLocale): ProfilePasswordCopy {
       password: "পাসওয়ার্ড",
       confirm: "পাসওয়ার্ড নিশ্চিত করুন",
       saving: "সেভ হচ্ছে…",
-      minLength: "নতুন পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।",
+      minLength: "নতুন পাসওয়ার্ড কমপক্ষে 8 অক্ষরের হতে হবে।",
       mismatch: "নতুন পাসওয়ার্ড ও নিশ্চিতকরণ মিলছে না।",
       updateSuccess:
         "পাসওয়ার্ড আপডেট হয়েছে। পরেরবার নতুন পাসওয়ার্ড দিয়ে সাইন ইন করুন।",

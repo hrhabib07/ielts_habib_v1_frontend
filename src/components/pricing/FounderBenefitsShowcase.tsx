@@ -150,7 +150,7 @@ export function FounderBenefitsShowcase({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-[1.75rem] border border-border/60 bg-[radial-gradient(120%_80%_at_50%_-10%,rgba(251,191,36,0.22),transparent_55%),linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--background))_100%)] p-5 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.45)] sm:p-8",
+        "relative overflow-hidden rounded-[1.5rem] border border-border/60 bg-[radial-gradient(120%_80%_at_50%_-10%,rgba(251,191,36,0.18),transparent_55%),linear-gradient(180deg,hsl(var(--card))_0%,hsl(var(--background))_100%)] p-4 shadow-[0_16px_48px_-36px_rgba(15,23,42,0.4)] sm:p-6",
         locale === "bn" && "font-bengali",
         className,
       )}
@@ -160,26 +160,20 @@ export function FounderBenefitsShowcase({ className }: { className?: string }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/70 to-transparent"
         aria-hidden
       />
-      <div
-        className="pointer-events-none absolute -left-24 top-24 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute -right-20 bottom-0 h-56 w-56 rounded-full bg-primary/10 blur-3xl"
-        aria-hidden
-      />
 
-      <div className="relative space-y-6">
+      <div className="relative space-y-4">
         <div className="mx-auto max-w-xl text-center">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">
             {copy.eyebrow}
           </p>
-          <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground sm:text-4xl">
+          <h2 className="mt-2 text-xl font-black tracking-tight text-foreground sm:text-2xl">
             {copy.headline}
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
-            {copy.subhead}
-          </p>
+          {!open ? (
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
+              {copy.subhead}
+            </p>
+          ) : null}
         </div>
 
         <div className="flex justify-center">
@@ -189,9 +183,9 @@ export function FounderBenefitsShowcase({ className }: { className?: string }) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             className={cn(
-              "h-12 rounded-2xl px-6 text-sm font-bold shadow-lg transition-all",
+              "h-11 rounded-2xl px-5 text-sm font-bold shadow-md transition-all",
               "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-amber-950",
-              "hover:brightness-105 hover:shadow-[0_12px_40px_-12px_rgba(245,158,11,0.65)]",
+              "hover:brightness-105",
               "dark:from-amber-400 dark:via-yellow-300 dark:to-amber-500",
             )}
           >

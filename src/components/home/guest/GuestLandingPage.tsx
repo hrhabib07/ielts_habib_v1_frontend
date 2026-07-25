@@ -7,6 +7,12 @@ import {
   useGuestLandingLocale,
 } from "@/src/components/home/guest/GuestLandingLocale";
 import { GuestLandingHero } from "@/src/components/home/guest/GuestLandingHero";
+import { GuestProblemHook } from "@/src/components/home/guest/GuestProblemHook";
+import { GuestTransformGrid } from "@/src/components/home/guest/GuestTransformGrid";
+import { GuestCampsRoadmap } from "@/src/components/home/guest/GuestCampsRoadmap";
+import { GuestGameEngine } from "@/src/components/home/guest/GuestGameEngine";
+import { GuestCompareFounder } from "@/src/components/home/guest/GuestCompareFounder";
+import { GuestLandingFaq } from "@/src/components/home/guest/GuestLandingFaq";
 
 const GuestLandingAmbient = dynamic(
   () =>
@@ -14,36 +20,6 @@ const GuestLandingAmbient = dynamic(
       (m) => m.GuestLandingAmbient,
     ),
   { ssr: false },
-);
-
-const GuestPlayMoment = dynamic(
-  () =>
-    import("@/src/components/home/guest/GuestPlayMoment").then(
-      (m) => m.GuestPlayMoment,
-    ),
-  {
-    loading: () => <div className="min-h-[28rem]" aria-hidden />,
-  },
-);
-
-const GuestComparisonSection = dynamic(
-  () =>
-    import("@/src/components/home/guest/GuestComparisonSection").then(
-      (m) => m.GuestComparisonSection,
-    ),
-  {
-    loading: () => <div className="min-h-[24rem]" aria-hidden />,
-  },
-);
-
-const GuestHowGamlishWorks = dynamic(
-  () =>
-    import("@/src/components/home/guest/GuestHowGamlishWorks").then(
-      (m) => m.GuestHowGamlishWorks,
-    ),
-  {
-    loading: () => <div className="min-h-[32rem]" aria-hidden />,
-  },
 );
 
 const GuestFoundersWallSection = dynamic(
@@ -87,10 +63,15 @@ function GuestLandingSurface() {
       </div>
       <div className="relative">
         <GuestLandingHero />
-        <GuestFoundersWallSection />
-        <GuestPlayMoment />
-        <GuestComparisonSection />
-        <GuestHowGamlishWorks />
+        <GuestProblemHook />
+        <GuestTransformGrid />
+        <GuestCampsRoadmap />
+        <GuestGameEngine />
+        <GuestCompareFounder />
+        <GuestLandingFaq />
+        <div id="founding-members">
+          <GuestFoundersWallSection />
+        </div>
         <GuestLandingFooter />
       </div>
       <GuestStickyDemoCta />

@@ -100,18 +100,26 @@ function missionShortTitle(title: string): string {
   return match?.[1]?.trim() ?? title;
 }
 
+const FREE_MISSION_SLUG = "mission-01-word-order";
+
 function MissionNodeCard({
   mission,
   hasEnglishAccess,
+  missionZeroCompleted,
   onNeedsPayClick,
 }: {
   mission: PlayerMapMission;
   hasEnglishAccess: boolean;
+  missionZeroCompleted: boolean;
   onNeedsPayClick: (mission: PlayerMapMission) => void;
 }) {
   const PLAYER_UI = usePlayerUiCopy();
   const state = getMissionState(mission, hasEnglishAccess);
   const shortTitle = missionShortTitle(mission.title);
+  const needsMissionZero =
+    mission.slug === FREE_MISSION_SLUG &&
+    state.playable &&
+    !missionZeroCompleted;
 
   const nodeInner = (
     <>
@@ -198,7 +206,11 @@ function MissionNodeCard({
     );
   }
 
-  const href = state.playable ? `/player/missions/${mission.slug}` : "#";
+  const href = needsMissionZero
+    ? "/player/mission-zero"
+    : state.playable
+      ? `/player/missions/${mission.slug}`
+      : "#";
 
   return (
     <Link
@@ -220,10 +232,12 @@ function MissionNodeCard({
 function CampMissionTrail({
   missions,
   hasEnglishAccess,
+  missionZeroCompleted,
   onNeedsPayClick,
 }: {
   missions: PlayerMapMission[];
   hasEnglishAccess: boolean;
+  missionZeroCompleted: boolean;
   onNeedsPayClick: (mission: PlayerMapMission) => void;
 }) {
   const height = trailCanvasHeight(missions.length);
@@ -296,6 +310,7 @@ function CampMissionTrail({
             <MissionNodeCard
               mission={mission}
               hasEnglishAccess={hasEnglishAccess}
+              missionZeroCompleted={missionZeroCompleted}
               onNeedsPayClick={onNeedsPayClick}
             />
           </div>
@@ -309,11 +324,13 @@ function CampZonePath({
   camp,
   campIndex,
   hasEnglishAccess,
+  missionZeroCompleted,
   onNeedsPayClick,
 }: {
   camp: PlayerCampMap;
   campIndex: number;
   hasEnglishAccess: boolean;
+  missionZeroCompleted: boolean;
   onNeedsPayClick: (mission: PlayerMapMission) => void;
 }) {
   const PLAYER_UI = usePlayerUiCopy();
@@ -384,6 +401,7 @@ function CampZonePath({
         <CampMissionTrail
           missions={camp.missions}
           hasEnglishAccess={hasEnglishAccess}
+          missionZeroCompleted={missionZeroCompleted}
           onNeedsPayClick={onNeedsPayClick}
         />
       </div>
@@ -468,6 +486,7 @@ export function CampMapView({
             camp={camp}
             campIndex={index}
             hasEnglishAccess={map.hasEnglishAccess}
+            missionZeroCompleted={Boolean(map.missionZeroCompleted)}
             onNeedsPayClick={setPaywallMission}
           />
         ))}
@@ -488,7 +507,14 @@ export function CampMapView({
       {hasContinue ? (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/90 px-4 py-3 shadow-[0_-12px_40px_rgba(15,23,42,0.1)] backdrop-blur-xl pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <Button asChild className="camp-continue-cta mx-auto flex h-12 w-full max-w-lg rounded-full text-base font-semibold sm:max-w-2xl">
-            <Link href={`/player/missions/${map.currentMissionSlug}`}>
+            <Link
+              href={
+                map.currentMissionSlug === FREE_MISSION_SLUG &&
+                map.missionZeroCompleted === false
+                  ? "/player/mission-zero"
+                  : `/player/missions/${map.currentMissionSlug}`
+              }
+            >
               <Play className="mr-2 h-4 w-4 fill-current" />
               {PLAYER_UI.continueMission}
               <ChevronRight className="ml-1 h-5 w-5" />

@@ -1,12 +1,6 @@
-import type { Metadata } from "next";
-import { PrivacyContent } from "./PrivacyContent";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy · Gamlish",
-  description:
-    "How Gamlish collects, uses, and protects account and usage data.",
-};
-
-export default function PrivacyPolicyPage() {
-  return <PrivacyContent />;
+/** Short alias: /privacy -> /privacy-policy */
+export default function PrivacyAliasPage() {
+  redirect("/privacy-policy");
 }

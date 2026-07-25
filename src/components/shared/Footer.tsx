@@ -157,7 +157,7 @@ export function Footer({ initialUser = null }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="/privacy"
+                  href="/privacy-policy"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {shell.privacy}

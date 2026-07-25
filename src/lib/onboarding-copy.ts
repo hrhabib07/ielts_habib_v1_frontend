@@ -87,7 +87,7 @@ function buildOnboardingCopy(locale: UiLocale): OnboardingCopy {
       sameCountryWarning:
         "সেরা অভিজ্ঞতার জন্য দুটো আলাদা দেশ বেছে নিন।",
       bandTitle: "কাঙ্ক্ষিত IELTS ব্যান্ড স্কোর",
-      bandHelp: "যে ব্যান্ড টার্গেট করছেন সেটা বাছুন। ডিফল্ট ৬.৫।",
+      bandHelp: "যে ব্যান্ড টার্গেট করছেন সেটা বাছুন। ডিফল্ট 6.5।",
       bandAria: "ব্যান্ড স্কোর অপশন",
       submitPlaying: "খেলা শুরু করুন",
       submitReading: "Reading যাত্রা শুরু করুন",
@@ -98,7 +98,7 @@ function buildOnboardingCopy(locale: UiLocale): OnboardingCopy {
       errNicknameSave: "ডাকনাম সেভ হয়নি। আবার চেষ্টা করুন।",
       errGeneric: "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।",
       errUsernameFormat:
-        "ইউজারনেম বাছুন (৩–৩০ অক্ষর: ইংরেজি অক্ষর, সংখ্যা, আন্ডারস্কোর)।",
+        "ইউজারনেম বাছুন (3–30 অক্ষর: ইংরেজি অক্ষর, সংখ্যা, আন্ডারস্কোর)।",
       errDisplayName: "ডিসপ্লে নাম আবশ্যক।",
       errUsernameTaken: "এই ইউজারনেম ইতিমধ্যে নেওয়া। অন্যটা বাছুন।",
       errUsernameChecking: "ইউজারনেম চেক হচ্ছে। একটু পর আবার চেষ্টা করুন।",

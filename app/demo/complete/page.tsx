@@ -1,5 +1,6 @@
-import { DemoCompleteFlow } from "@/src/components/demo/DemoCompleteFlow";
+import { redirect } from "next/navigation";
 
-export default function DemoCompletePage() {
-  return <DemoCompleteFlow />;
+/** Legacy demo complete → short Mission Zero (includes signup screen). */
+export default function DemoCompleteRedirectPage() {
+  redirect("/demo");
 }

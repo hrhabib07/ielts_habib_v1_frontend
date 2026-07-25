@@ -26,6 +26,8 @@ export interface PlayerCampMap {
 export interface PlayerCourseMap {
   course: { slug: string; title: string; subtitle?: string };
   hasEnglishAccess: boolean;
+  /** False until guest or in-app Mission Zero is finished. */
+  missionZeroCompleted?: boolean;
   camps: PlayerCampMap[];
   currentMissionSlug: string | null;
 }

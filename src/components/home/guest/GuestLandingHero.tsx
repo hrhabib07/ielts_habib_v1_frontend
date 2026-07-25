@@ -5,7 +5,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GuestHeroHeadline } from "@/src/components/home/guest/GuestHeroHeadline";
 import { GuestHeroMissionVisual } from "@/src/components/home/guest/GuestHeroMissionVisual";
-import { GuestDemoCounter } from "@/src/components/home/guest/GuestDemoCounter";
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import {
@@ -13,6 +12,8 @@ import {
   LANDING_EYEBROW_CLASS,
 } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
+import { SHOW_GUEST_DEMO_SOCIAL_PROOF } from "@/src/lib/platform-config";
+import { GuestDemoCounter } from "@/src/components/home/guest/GuestDemoCounter";
 
 export function GuestLandingHero() {
   const reduceMotion = useReducedMotion();
@@ -65,8 +66,12 @@ export function GuestLandingHero() {
             </Button>
             <p className="text-sm text-foreground/75">
               {copy.ctaPrimarySub}
-              <span className="mx-1.5 text-border">·</span>
-              <GuestDemoCounter className="inline text-sm text-foreground/75" />
+              {SHOW_GUEST_DEMO_SOCIAL_PROOF ? (
+                <>
+                  <span className="mx-1.5 text-border">·</span>
+                  <GuestDemoCounter className="inline text-sm text-foreground/75" />
+                </>
+              ) : null}
             </p>
 
             <Button

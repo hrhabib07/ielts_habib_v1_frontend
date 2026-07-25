@@ -57,7 +57,7 @@ export default function TermsPage() {
             requests or account issues, contact us via the WhatsApp number in the site footer.
           </p>
           <p className="mt-3 text-sm">
-            <Link href="/privacy" className="font-semibold text-primary hover:underline">
+            <Link href="/privacy-policy" className="font-semibold text-primary hover:underline">
               Read the full Privacy Policy →
             </Link>
           </p>

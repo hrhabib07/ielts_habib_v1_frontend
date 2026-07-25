@@ -1,5 +1,6 @@
-import { DemoHomeView } from "@/src/components/demo/DemoHomeView";
+import { redirect } from "next/navigation";
 
-export default function DemoPlayPage() {
-  return <DemoHomeView />;
+/** Legacy multi-stage demo map → short Mission Zero. */
+export default function DemoPlayRedirectPage() {
+  redirect("/demo");
 }

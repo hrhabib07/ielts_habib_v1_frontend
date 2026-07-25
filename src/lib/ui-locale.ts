@@ -2,7 +2,8 @@ export type UiLocale = "en" | "bn";
 
 export const UI_LOCALE_STORAGE_KEY = "gamlish-ui-locale";
 
-const BN_DIGIT_CHARS = "০১২৩৪৫৬৭৮৯";
+/** Bengali numeral code points (U+09E6..U+09EF). Do not Latinize this string. */
+const BN_DIGIT_CHARS = "\u09E6\u09E7\u09E8\u09E9\u09EA\u09EB\u09EC\u09ED\u09EE\u09EF";
 const LATIN_DIGIT_CHARS = "0123456789";
 
 /** Product default is always Bengali. Browser language is ignored. */
@@ -43,8 +44,8 @@ export function resolveInitialUiLocale(): UiLocale {
 }
 
 /**
- * Force Western (Latin) digits — Hind Siliguri’s Bengali ১ is a hairline
- * stroke that nearly disappears on muted/dark UI.
+ * Force Western (Latin) digits. Hind Siliguri Bengali "1" (U+09E7) is a
+ * hairline stroke that is hard to read in UI chrome.
  */
 export function toLatinDigits(value: string | number): string {
   const text = String(value);

@@ -101,3 +101,28 @@ export async function playWrongEvalSfx(): Promise<void> {
   oscillator.start(now);
   oscillator.stop(now + 0.32);
 }
+
+/** Soft UI click for option taps. */
+export async function playUiClickSfx(): Promise<void> {
+  const ctx = await getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  playTone(ctx, 880, now, 0.05, { type: "sine", volume: 0.05 });
+}
+
+/** Soft notification for "trying" (near-miss). */
+export async function playSoftNotifySfx(): Promise<void> {
+  await playThinkAgainEvalSfx();
+}
+
+/** Celebration arpeggio for mastery / paywall. */
+export async function playCelebrateSfx(): Promise<void> {
+  const ctx = await getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  playTone(ctx, 523.25, now, 0.12, { type: "sine", volume: 0.09 });
+  playTone(ctx, 659.25, now + 0.1, 0.12, { type: "sine", volume: 0.1 });
+  playTone(ctx, 783.99, now + 0.2, 0.14, { type: "triangle", volume: 0.1 });
+  playTone(ctx, 1046.5, now + 0.32, 0.22, { type: "sine", volume: 0.08 });
+}
+

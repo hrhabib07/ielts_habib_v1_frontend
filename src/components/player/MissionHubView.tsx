@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Lock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
@@ -16,6 +16,7 @@ import {
   playerApiErrorMessage,
 } from "@/src/lib/player-access-errors";
 
+const FREE_MISSION_SLUG = "mission-01-word-order";
 const STAGE_COLORS = [
   "bg-primary",
   "bg-primary/90",
@@ -40,6 +41,7 @@ function missionDisplayTitleFromSlug(slug: string): string {
 export function MissionHubView({ slug }: { slug: string }) {
   const PLAYER_UI = usePlayerUiCopy();
   const { locale } = useUiLocale();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const justCompleted = searchParams.get("complete") === "1";
   const [mission, setMission] = useState<PlayerMissionDetail | null>(null);
@@ -65,7 +67,15 @@ export function MissionHubView({ slug }: { slug: string }) {
           setNeedsSubscription(true);
           return;
         }
-        setError(playerApiErrorMessage(err, PLAYER_UI.couldNotContinue));
+        const message = playerApiErrorMessage(err, PLAYER_UI.couldNotContinue);
+        if (
+          slug === FREE_MISSION_SLUG &&
+          /short demo|Mission 01/i.test(message)
+        ) {
+          router.replace("/player/mission-zero");
+          return;
+        }
+        setError(message);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -74,7 +84,7 @@ export function MissionHubView({ slug }: { slug: string }) {
     return () => {
       cancelled = true;
     };
-  }, [slug, PLAYER_UI.couldNotContinue]);
+  }, [slug, PLAYER_UI.couldNotContinue, router]);
 
   if (loading) {
     return (

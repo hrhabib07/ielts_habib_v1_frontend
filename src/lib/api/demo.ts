@@ -183,3 +183,28 @@ export async function submitDemoFeedback(
   );
   return res.data.data;
 }
+
+export async function completeMissionZeroSession(
+  sessionId: string,
+): Promise<DemoSession> {
+  const res = await apiClient.post<ApiResponse<DemoSession>>(
+    `/demo/${sessionId}/complete-mission-zero`,
+    {},
+  );
+  return res.data.data;
+}
+
+export async function completeMissionZeroAuth(): Promise<{
+  missionZeroCompleted: boolean;
+  xpAwarded: number;
+  continuePath: string;
+}> {
+  const res = await apiClient.post<
+    ApiResponse<{
+      missionZeroCompleted: boolean;
+      xpAwarded: number;
+      continuePath: string;
+    }>
+  >("/demo/complete-mission-zero", {});
+  return res.data.data;
+}

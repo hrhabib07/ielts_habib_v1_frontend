@@ -40,7 +40,8 @@ export interface GuestLandingCopy {
   readonly heroEyebrow: string;
   readonly heroHeadlineLine1: string;
   readonly heroHeadlineLine2: string;
-  readonly heroAccentWord: string;
+  /** Words highlighted in brand blue (e.g. games + English). */
+  readonly heroAccentWords: readonly string[];
   readonly heroSubheadline: string;
   readonly ctaPrimary: string;
   readonly ctaPrimarySub: string;
@@ -102,13 +103,13 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     brandTaglineName: "Gamlish",
     brandTaglineSuffix: "The game of English",
     heroEyebrow: "4 Camps · 21 Missions",
-    heroHeadlineLine1: "Play your way to",
-    heroHeadlineLine2: "fluent English.",
-    heroAccentWord: "fluent",
+    heroHeadlineLine1: "Play games,",
+    heroHeadlineLine2: "learn English",
+    heroAccentWords: ["games", "English"],
     heroSubheadline:
-      "Short missions. Clear wins. Real English without the textbook boredom.",
+      "Bangladesh's first homegrown, game-based English learning platform, designed to strengthen your English foundation step by step",
     ctaPrimary: "Play Free Demo",
-    ctaPrimarySub: "60 seconds. No account needed.",
+    ctaPrimarySub: "60 seconds · No account needed",
     ctaSecondary: "How it works",
     ctaPreOrder: "Pre-order Now",
     ctaPreOrderSub: "Founding Member · pay with bKash",
@@ -194,12 +195,12 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       sub: "History remembers those who believe before everyone else.",
       youCanBeHere: "Your name here",
       youCanBeNumber: (n) => `You can be Founder #${n}`,
-      urgency: "Pre-order now — spots close at 100 or on 1 August.",
+      urgency: "Pre-order now: spots close at 100 or on 1 August.",
       slotsLine: (filled, max) => `${filled} of ${max} Founder spots claimed`,
       emptyBody: "The wall is empty. Be the first name here.",
       viewWall: "View full wall",
       claimSpot: "Pre-order · claim your spot",
-      closedNote: "Founder spots are full — you can still join premium.",
+      closedNote: "Founder spots are full. You can still join premium.",
     },
   },
   bn: {
@@ -209,13 +210,13 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     brandTaglineName: "Gamlish",
     brandTaglineSuffix: "খেলার ছলেই ইংরেজি শিখি!",
     heroEyebrow: "4টি ক্যাম্প · 21টি মিশন",
-    heroHeadlineLine1: "খেলুন, জিতুন, আর",
-    heroHeadlineLine2: "ইংরেজিতে ফ্লুয়েন্ট হোন।",
-    heroAccentWord: "ফ্লুয়েন্ট",
+    heroHeadlineLine1: "গেম খেলুন,",
+    heroHeadlineLine2: "ইংরেজি শিখুন",
+    heroAccentWords: ["গেম", "ইংরেজি"],
     heroSubheadline:
-      "ছোট মিশন। স্পষ্ট জয়। বোরিং বইয়ের কোনো কারবার নেই।",
+      "দেশে তৈরি প্রথম গেমভিত্তিক ইংরেজি শেখার প্ল্যাটফর্ম, যা ধাপে ধাপে মজবুত করবে আপনার ইংরেজির ভিত্তি",
     ctaPrimary: "ফ্রি ডেমো খেলুন",
-    ctaPrimarySub: "৬০ সেকেন্ড। কোনো অ্যাকাউন্ট লাগবে না।",
+    ctaPrimarySub: "60 সেকেন্ড · কোনো অ্যাকাউন্ট লাগবে না",
     ctaSecondary: "কীভাবে কাজ করে",
     ctaPreOrder: "এখনই প্রি-অর্ডার করুন",
     ctaPreOrderSub: "Founding Member · bKash দিয়ে পেমেন্ট",
@@ -303,12 +304,12 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       sub: "যারা শুরুতে বিশ্বাস করে, ইতিহাস তাদেরই মনে রাখে।",
       youCanBeHere: "এখানে আপনার নাম",
       youCanBeNumber: (n) => `আপনি হতে পারেন Founder #${n}`,
-      urgency: "এখনই প্রি-অর্ডার করুন — ১০০ পূর্ণ হলে বা ১ আগস্টে স্পট বন্ধ।",
+      urgency: "এখনই প্রি-অর্ডার করুন: 100 পূর্ণ হলে বা 1 আগস্টে স্পট বন্ধ।",
       slotsLine: (filled, max) => `${filled} / ${max} Founder স্পট নেওয়া হয়েছে`,
       emptyBody: "ওয়াল এখনো খালি। প্রথম নামটি আপনার হতে পারে।",
       viewWall: "পুরো ওয়াল দেখুন",
       claimSpot: "প্রি-অর্ডার · আপনার স্পট নিন",
-      closedNote: "Founder স্পট পূর্ণ — তবুও প্রিমিয়ামে যোগ দিতে পারবেন।",
+      closedNote: "Founder স্পট পূর্ণ। তবুও প্রিমিয়ামে যোগ দিতে পারবেন।",
     },
   },
 } as const;

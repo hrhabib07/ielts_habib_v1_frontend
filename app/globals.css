@@ -178,14 +178,25 @@
     -webkit-overflow-scrolling: touch;
   }
   /*
-   * Hind Siliguri at medium weight keeps Bangla readable without loading
-   * an extra Noto family (large download that slowed homepage first paint).
+   * Hind Siliguri keeps Bangla readable. Digits in UI copy must be Latin
+   * (0-9): Bengali U+09E7 ("1") is a hairline glyph and fails at small sizes.
+   * Dynamic numbers already use localizeDigits(); static copy uses Latin too.
    */
   .font-bengali {
     font-family: var(--font-bengali);
     font-weight: 500;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  /* Numbers inside Bangla UI always render with the Latin/Outfit face. */
+  .font-bengali .num,
+  .font-bengali .tabular-nums {
+    font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+    font-variant-numeric: lining-nums tabular-nums;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
   /* Fixed reading level runner only — exam pages use their own full-bleed shells */
   html[data-scroll-lock="true"],

@@ -14,6 +14,7 @@ import {
   type FoundersWall,
   type FounderWallMember,
 } from "@/src/lib/api/gamlish";
+import { localizeDigits } from "@/src/lib/ui-locale";
 import { cn } from "@/lib/utils";
 
 /** Home teaser: up to 4 real founders + 1 long “you” invite. Full wall is /founding-members. */
@@ -203,8 +204,8 @@ export function GuestFoundersWallSection() {
   const filled = wall.counter.slotsFilled;
   const max = wall.counter.maxSlots;
   const isOpen = wall.counter.isOpen;
-  const filledLabel = filled.toLocaleString(locale === "bn" ? "bn-BD" : "en-US");
-  const maxLabel = max.toLocaleString(locale === "bn" ? "bn-BD" : "en-US");
+  const filledLabel = localizeDigits(filled, locale);
+  const maxLabel = localizeDigits(max, locale);
 
   return (
     <section

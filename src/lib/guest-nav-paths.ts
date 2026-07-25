@@ -15,6 +15,7 @@ const GUEST_NAV_PATHS = new Set([
   "/onboarding",
   "/terms",
   "/privacy",
+  "/privacy-policy",
   "/instructor-request",
   "/demo",
   "/demo/play",

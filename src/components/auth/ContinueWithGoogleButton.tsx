@@ -45,14 +45,17 @@ export function ContinueWithGoogleButton({
   variant = "continue",
   demoSessionId,
   returnTo,
+  label: labelOverride,
 }: {
   className?: string;
   variant?: "continue" | "save";
   demoSessionId?: string | null;
   returnTo?: string | null;
+  /** Optional override for bilingual CTAs (e.g. Mission Zero). */
+  label?: string;
 }) {
   const { locale } = useUiLocale();
-  const label = COPY[locale][variant];
+  const label = labelOverride ?? COPY[locale][variant];
 
   const href = useMemo(() => {
     const sid = demoSessionId ?? readDemoSessionId();

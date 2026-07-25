@@ -167,9 +167,9 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     demoBadge: "ডেমো",
     rewardTitle: "ডেমো সম্পন্ন!",
     rewardSub:
-      "ভিডিও আর প্রথম ৩টি ইভ্যালুয়েশন ক্লিয়ার করেছো। প্রগ্রেস আসল।",
+      "ভিডিও আর প্রথম 3টি ইভ্যালুয়েশন ক্লিয়ার করেছো। প্রগ্রেস আসল।",
     xpEarned: (xp) => `+${xp} XP অর্জিত হলো`,
-    xpStageHint: "প্রতি স্টেজ ক্লিয়ারে +১০ XP",
+    xpStageHint: "প্রতি স্টেজ ক্লিয়ারে +10 XP",
     badgeUnlocked: "Starter Player ব্যাজ আনলক হলো",
     feedbackTitle: "How would you rate your journey with Gamlish so far?",
     feedbackTitleBn: "Gamlish-এর সাথে আপনার অভিজ্ঞতা কেমন ছিল?",
@@ -191,7 +191,7 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     continueSub: "ফ্রি অ্যাকাউন্ট তৈরি করো এর জন্য:",
     continueBullets: [
       "প্রগ্রেস সেভ করো",
-      "ক্যাম্প ১ চালিয়ে যাও",
+      "ক্যাম্প 1 চালিয়ে যাও",
       "আরও মিশন আনলক করো",
       "স্থায়ী XP অর্জন করো",
     ],

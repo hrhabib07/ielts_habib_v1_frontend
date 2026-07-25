@@ -11,6 +11,10 @@ export const LANDING_EYEBROW_CLASS =
 export const LANDING_HIGHLIGHT_CLASS =
   "font-extrabold text-sky-700 dark:text-sky-300";
 
+/** Hero accent word: static brand blue (game / English). */
+export const LANDING_ACCENT_WORD_CLASS =
+  "font-extrabold text-sky-600 dark:text-sky-300";
+
 export const LANDING_LINK_CLASS =
   "font-semibold text-sky-800 transition-colors hover:bg-sky-500/10 dark:text-sky-200";
 

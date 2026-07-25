@@ -26,7 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
-      url: `${base}/privacy`,
+      url: `${base}/privacy-policy`,
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.4,

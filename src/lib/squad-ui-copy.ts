@@ -88,7 +88,7 @@ export const SQUAD_UI_COPY: Record<UiLocale, SquadUiCopy> = {
     joinHint: "বন্ধুর দেওয়া ছোট invite code লিখো (যেমন GAM4X2)।",
     joinSubmit: "যোগ দাও",
     leaderboardTitle: "সাপ্তাহিক Squad Leaderboard",
-    leaderboardHint: "প্রতি শুক্রবার রাত ১২টায় (বাংলাদেশ সময়) Weekly XP রিসেট হয়।",
+    leaderboardHint: "প্রতি শুক্রবার রাত 12টায় (বাংলাদেশ সময়) Weekly XP রিসেট হয়।",
     playerPromoTitle: "English Squad-এ যোগ দাও",
     playerPromoBody: "বন্ধুদের নিয়ে XP জমা করো আর leaderboard-এ উঠো!",
     profileSquad: "তোমার Squad",

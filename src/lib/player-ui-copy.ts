@@ -178,7 +178,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     subscribeModalEyebrow: "পরবর্তী মিশন আনলক করো",
     subscribeModalTitle: (missionTitle) => `«${missionTitle}» তোমার জন্য অপেক্ষা করছে!`,
     subscribeModalBody:
-      "তুমি ইতিমধ্যে প্রথম মিশন পার করেছ। দারুণ শুরু! পুরো Gamlish কোর্স আনলক করলে ২০টি মিশন, ৪টি ক্যাম্প আর গ্র্যাজুয়েশন পর্যন্ত একসাথে খেলতে পারবে।",
+      "তুমি ইতিমধ্যে প্রথম মিশন পার করেছ। দারুণ শুরু! পুরো Gamlish কোর্স আনলক করলে 20টি মিশন, 4টি ক্যাম্প আর গ্র্যাজুয়েশন পর্যন্ত একসাথে খেলতে পারবে।",
     subscribeModalPerk:
       "প্রতিদিনের ছোট মিশন + ইনস্পেকশন = আত্মবিশ্বাসের সাথে ইংরেজি বলা ও লেখা।",
     subscribeModalCta: "কোর্স আনলক করো",
@@ -215,7 +215,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       writingSubmittedTitle: "জমা হয়েছে!",
       writingSubmittedMessage:
         "তোমার লেখা শিক্ষকের কাছে পাঠানো হয়েছে। রিভিউ হলে এখানে মার্ক দেখতে পারবে। তার আগে পরের ধাপে যেতে পারবে না।",
-      failOneTitle: "১টি প্রশ্ন ভুল হয়েছে",
+      failOneTitle: "1টি প্রশ্ন ভুল হয়েছে",
       failSomeTitle: "কিছু প্রশ্ন ভুল হয়েছে",
       failPartialMessage: (wrongCount) =>
         `${wrongCount}টি প্রশ্ন ভুল হয়েছে। শুধু সেই প্রশ্নগুলো আবার করো। বাকিগুলো ঠিক আছে! সব ঠিক হলে পরের ধাপে যেতে পারবে।`,
@@ -266,10 +266,10 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     writing: {
       pendingTitle: "জমা হয়েছে. শিক্ষক রিভিউ করছেন",
       pendingBody:
-        "তোমার লেখা জমা হয়েছে। একজন শিক্ষক বা অ্যাডমিন এটি দেখে ১০ এর মধ্যে মার্ক দেবেন। রিভিউ হওয়ার আগ পর্যন্ত পরের ধাপে যেতে পারবে না।",
+        "তোমার লেখা জমা হয়েছে। একজন শিক্ষক বা অ্যাডমিন এটি দেখে 10 এর মধ্যে মার্ক দেবেন। রিভিউ হওয়ার আগ পর্যন্ত পরের ধাপে যেতে পারবে না।",
       passedTitle: "অভিনন্দন! তোমার লেখা অনুমোদিত হয়েছে।",
       goGraduation: "গ্র্যাজুয়েশন ধাপে যাও",
-      failedHint: (score) => `Score: ${score}/10. আবার লিখে জমা দাও (পাস মার্ক: ৬/১০)`,
+      failedHint: (score) => `Score: ${score}/10. আবার লিখে জমা দাও (পাস মার্ক: 6/10)`,
       pickTopic: "বিষয় বেছে নাও",
       yourParagraph: "তোমার অনুচ্ছেদ (ইংরেজিতে)",
       submitToTeacher: "শিক্ষকের কাছে জমা দাও",

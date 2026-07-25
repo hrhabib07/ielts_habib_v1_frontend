@@ -96,7 +96,7 @@ export function GuestLandingFooter() {
               {shell.terms}
             </Link>
             <Link
-              href="/privacy"
+              href="/privacy-policy"
               className="transition-colors hover:text-foreground"
             >
               {shell.privacy}

@@ -1,13 +1,17 @@
 "use client";
 
-import { CalendarClock, Check, Crown, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { CalendarClock, Check, ChevronDown, Crown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatBdt, type PublicPricing } from "@/src/lib/api/pricing";
 import { useFounderLaunchCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { brandSurfaces } from "@/src/lib/brand-theme";
 import { formatAccessDate } from "@/src/lib/subscription-access";
+import { toLatinDigits } from "@/src/lib/ui-locale";
 import { cn } from "@/lib/utils";
+
+const FEATURES_PREVIEW = 3;
 
 export function FounderLaunchPricingCard({
   pricing,
@@ -22,6 +26,7 @@ export function FounderLaunchPricingCard({
 }) {
   const copy = useFounderLaunchCopy();
   const { locale } = useUiLocale();
+  const [showAllFeatures, setShowAllFeatures] = useState(false);
   const showDiscount = pricing.discountEnabled && pricing.discountPercent > 0;
   const isPreOrder = pricing.preOrderEnabled !== false;
   const accessStartsAt =
@@ -30,6 +35,12 @@ export function FounderLaunchPricingCard({
     accessStartsAt,
     locale === "bn" ? "bn-BD" : "en-GB",
   );
+
+  const features = pricing.features.map((f) => toLatinDigits(f));
+  const visibleFeatures = showAllFeatures
+    ? features
+    : features.slice(0, FEATURES_PREVIEW);
+  const hasMoreFeatures = features.length > FEATURES_PREVIEW;
 
   return (
     <div
@@ -43,66 +54,59 @@ export function FounderLaunchPricingCard({
     >
       <div
         className={cn(
-          "relative overflow-hidden rounded-3xl border-2 border-amber-500/45 p-6 shadow-xl ring-4 ring-amber-400/15 md:p-8",
-          brandSurfaces.pricingCard,
+          "relative overflow-hidden rounded-[1.75rem] border-2 border-amber-500/40",
+          "bg-gradient-to-b from-amber-400/[0.12] via-card to-card",
+          "shadow-[0_20px_50px_-28px_rgba(245,158,11,0.55)]",
+          "dark:from-amber-400/[0.08] dark:via-card dark:to-card",
         )}
       >
-        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-amber-400/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-primary/8 blur-3xl" />
+        <div
+          className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500"
+          aria-hidden
+        />
 
-        <div className="relative space-y-6">
-          <div className="space-y-3 text-center">
-            <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+        <div className="relative space-y-5 p-5 sm:space-y-6 sm:p-7">
+          {/* Hero: title + price first so CTA is near the fold */}
+          <div className="space-y-2 text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-800 dark:text-amber-300">
               {copy.eyebrow}
             </p>
-            <h2 className="text-2xl font-black leading-tight text-foreground md:text-3xl">
+            <h1 className="text-balance text-xl font-black leading-snug tracking-tight text-foreground sm:text-2xl md:text-3xl">
               {copy.headline}
-            </h2>
-            <p className="mx-auto max-w-xl text-sm leading-relaxed text-foreground/75 dark:text-slate-200/90">
+            </h1>
+            <p className="mx-auto max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
               {copy.intro}
-            </p>
-            <p className="rounded-xl bg-amber-400/15 px-3 py-2 text-sm font-semibold text-amber-950 dark:text-amber-100">
-              {copy.payHereHint}
-            </p>
-            <p className="text-sm font-semibold leading-relaxed text-foreground/85 dark:text-slate-100">
-              {copy.scarcity}
             </p>
           </div>
 
-          <div
-            className={cn(
-              "mx-auto max-w-md rounded-2xl border-2 border-amber-500/35 p-5 backdrop-blur-sm",
-              "border-border/70 bg-card/95 shadow-sm",
-              "dark:border-amber-400/30 dark:bg-card/90",
-            )}
-          >
-            <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
+          <div className="rounded-2xl border border-amber-500/30 bg-background/90 p-4 shadow-sm dark:bg-card/80 sm:p-5">
+            <div className="mb-3 flex flex-wrap items-center justify-center gap-1.5">
               {isPreOrder ? (
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ring-1",
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1",
                     brandSurfaces.eyebrowBadge,
                   )}
                 >
-                  <CalendarClock className="h-3.5 w-3.5" />
+                  <CalendarClock className="h-3 w-3" aria-hidden />
                   {copy.preOrderBadge}
                 </span>
               ) : null}
               {showDiscount ? (
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ring-1",
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1",
                     brandSurfaces.eyebrowBadge,
                   )}
                 >
-                  <Crown className="h-3.5 w-3.5" />
+                  <Crown className="h-3 w-3" aria-hidden />
                   {copy.founderBadge}
                 </span>
               ) : null}
               {showDiscount ? (
                 <span
                   className={cn(
-                    "rounded-full px-3 py-1 text-xs font-bold ring-1",
+                    "num rounded-full px-2.5 py-1 text-[11px] font-black ring-1",
                     brandSurfaces.eyebrowBadge,
                   )}
                 >
@@ -111,68 +115,93 @@ export function FounderLaunchPricingCard({
               ) : null}
             </div>
 
-            <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-center text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               {copy.premiumLabel}
             </p>
 
-            <div className="mt-3 flex flex-col items-center gap-1">
+            <div className="mt-2 flex flex-col items-center gap-0.5">
               {showDiscount ? (
-                <p className="text-sm text-muted-foreground line-through">
+                <p className="num text-sm text-muted-foreground line-through">
                   {formatBdt(pricing.regularPriceBdt)}
                   {copy.perMonth}
                 </p>
               ) : null}
-              <p className="text-4xl font-black tracking-tight text-foreground sm:text-5xl">
+              <p className="num text-4xl font-black tracking-tight text-foreground sm:text-5xl">
                 {formatBdt(pricing.finalPriceBdt)}
-                <span className="text-lg font-semibold text-muted-foreground">
+                <span className="text-base font-semibold text-muted-foreground">
                   {copy.perMonth}
                 </span>
               </p>
-              <p className="mt-1 text-center text-sm font-semibold text-primary">
-                {copy.accessStartsLabel(accessDateLabel)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {copy.durationLabel(pricing.durationDays)}
+              <p className="mt-1 text-center text-sm font-semibold text-foreground/85">
+                <span className="num">{copy.accessStartsLabel(accessDateLabel)}</span>
+                <span className="text-muted-foreground"> · </span>
+                <span className="num">{copy.durationLabel(pricing.durationDays)}</span>
               </p>
               {isPreOrder ? (
-                <p className="mt-2 max-w-sm text-center text-xs font-medium leading-relaxed text-amber-700 dark:text-amber-400">
+                <p className="mt-1 text-center text-xs font-medium text-amber-800 dark:text-amber-300">
                   {copy.accessNote}
                 </p>
               ) : null}
             </div>
 
-            <ul className="mt-5 space-y-2.5 border-t border-border/60 pt-5 dark:border-primary/15">
-              {pricing.features.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-2 text-sm text-foreground/90"
-                >
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-
+            {/* Primary CTA high on the card for mobile */}
             <Button
               type="button"
               size="lg"
               disabled={disabled}
               onClick={onUpgrade}
               className={cn(
-                "mt-6 h-14 w-full rounded-2xl text-base font-black shadow-lg shadow-amber-500/30 sm:text-lg",
+                "mt-5 h-12 w-full rounded-2xl text-base font-black shadow-lg shadow-amber-500/35 sm:h-14 sm:text-lg",
                 "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 hover:from-amber-300 hover:to-amber-400",
-                "ring-4 ring-amber-400/40",
+                "ring-4 ring-amber-400/35",
               )}
             >
-              <Sparkles className="mr-2 h-5 w-5" />
+              <Sparkles className="mr-2 h-5 w-5" aria-hidden />
               {copy.upgrade}
             </Button>
+            <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
+              {copy.trust}
+            </p>
           </div>
 
-          <div className="space-y-2 text-center text-sm leading-relaxed text-muted-foreground">
-            <p className="font-semibold text-foreground">{copy.cta}</p>
-            <p className="font-medium text-primary/90">{copy.trust}</p>
+          <p className="text-center text-sm font-semibold leading-snug text-amber-900 dark:text-amber-200">
+            {copy.scarcity}
+          </p>
+
+          {/* Features collapsed by default to keep height short */}
+          <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+            <ul className="space-y-2.5">
+              {visibleFeatures.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-start gap-2 text-sm text-foreground/90"
+                >
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+            {hasMoreFeatures ? (
+              <button
+                type="button"
+                onClick={() => setShowAllFeatures((v) => !v)}
+                className="mt-3 inline-flex w-full items-center justify-center gap-1 text-sm font-semibold text-sky-700 dark:text-sky-300"
+              >
+                {showAllFeatures ? copy.featuresLess : copy.featuresMore}
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    showAllFeatures && "rotate-180",
+                  )}
+                  aria-hidden
+                />
+              </button>
+            ) : null}
           </div>
+
+          <p className="text-center text-sm font-medium text-muted-foreground">
+            {copy.cta}
+          </p>
         </div>
       </div>
     </div>
