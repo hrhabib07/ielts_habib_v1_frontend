@@ -137,3 +137,15 @@ export async function getMyLatestSubscriptionRequest(): Promise<SubscriptionRequ
   );
   return res.data?.data ?? null;
 }
+
+/** QA allowlist only: delete own isTest payment requests. */
+export async function cancelMyTestCheckoutRequests(): Promise<{
+  deletedCount: number;
+  cleared: boolean;
+}> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: { deletedCount: number; cleared: boolean };
+  }>("/subscription-requests/me/cancel-test", {});
+  return res.data.data;
+}

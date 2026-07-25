@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Check, Loader2, MessageCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Check, Loader2, MessageCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   hasBlockingPaymentStatus,
   PaymentApplicationStatusCard,
 } from "@/src/components/pricing/PaymentApplicationStatusCard";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
+import { cancelMyTestCheckoutRequests } from "@/src/lib/api/subscription";
 import { brandStatus } from "@/src/lib/brand-theme";
 import {
   SUPPORT_WHATSAPP_DISPLAY,
@@ -22,6 +24,7 @@ import { cn } from "@/lib/utils";
  * Fires after bKash TrxID submit (PENDING verification).
  */
 export function PaymentConfirmationContent() {
+  const router = useRouter();
   const payment = usePaymentApplicationStatus(true);
   const blocked = hasBlockingPaymentStatus(
     payment.activeSubscription,
@@ -29,6 +32,9 @@ export function PaymentConfirmationContent() {
   );
   const isPending = payment.latestRequest?.status === "PENDING";
   const hasPurchased = payment.hasPurchased;
+  const isTest = Boolean(payment.latestRequest?.isTest);
+  const [clearing, setClearing] = useState(false);
+  const [clearError, setClearError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -38,7 +44,6 @@ export function PaymentConfirmationContent() {
     if (sessionStorage.getItem(key) === "1") return;
     sessionStorage.setItem(key, "1");
 
-    // GTM dataLayer + Meta Pixel / custom hooks for conversion matching
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "purchase",
@@ -47,13 +52,13 @@ export function PaymentConfirmationContent() {
         items: [{ item_name: "Gamlish Founder Pre-order" }],
       },
       payment_status: "PENDING",
-      is_test: Boolean(payment.latestRequest?.isTest),
+      is_test: isTest,
     });
     window.dispatchEvent(
       new CustomEvent("gamlish:payment_submitted", {
         detail: {
           status: "PENDING",
-          isTest: Boolean(payment.latestRequest?.isTest),
+          isTest,
         },
       }),
     );
@@ -63,7 +68,20 @@ export function PaymentConfirmationContent() {
         currency: "BDT",
       });
     }
-  }, [payment.loading, payment.latestRequest?._id, payment.latestRequest?.isTest]);
+  }, [payment.loading, payment.latestRequest?._id, isTest]);
+
+  const handleClearTestAndRetry = async () => {
+    setClearError(null);
+    setClearing(true);
+    try {
+      await cancelMyTestCheckoutRequests();
+      await payment.refresh();
+      router.push("/checkout");
+    } catch {
+      setClearError("Could not clear test request. Try again.");
+      setClearing(false);
+    }
+  };
 
   if (payment.loading) {
     return (
@@ -110,6 +128,35 @@ export function PaymentConfirmationContent() {
         </p>
       </div>
 
+      {isTest ? (
+        <div className="rounded-3xl border-2 border-amber-500/50 bg-amber-400/10 p-6 text-center dark:bg-amber-400/10">
+          <p className="text-xs font-black uppercase tracking-wider text-amber-800 dark:text-amber-200">
+            QA / Meta test mode
+          </p>
+          <p className="mt-2 text-sm font-semibold text-foreground">
+            This request is flagged as a test. It will not become a real Founder
+            purchase. Delete it anytime, then submit again for more Meta checks.
+          </p>
+          <Button
+            type="button"
+            size="lg"
+            disabled={clearing}
+            onClick={() => void handleClearTestAndRetry()}
+            className="mt-5 h-12 w-full max-w-md rounded-2xl bg-amber-500 text-base font-black text-amber-950 hover:bg-amber-400"
+          >
+            {clearing ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden />
+            ) : (
+              <Trash2 className="mr-2 h-5 w-5" aria-hidden />
+            )}
+            Delete test request & try again
+          </Button>
+          {clearError ? (
+            <p className="mt-3 text-sm text-destructive">{clearError}</p>
+          ) : null}
+        </div>
+      ) : null}
+
       {blocked || hasPurchased || isPending ? (
         <PaymentApplicationStatusCard
           activeSubscription={payment.activeSubscription}
@@ -136,11 +183,6 @@ export function PaymentConfirmationContent() {
         <Button asChild variant="outline" className="rounded-xl">
           <Link href="/pricing">Pricing এ ফিরুন</Link>
         </Button>
-        {payment.latestRequest?.isTest ? (
-          <Button asChild variant="outline" className="rounded-xl border-amber-500/40">
-            <Link href="/checkout?again=1">QA: submit another test</Link>
-          </Button>
-        ) : null}
         <a
           href={SUPPORT_WHATSAPP_HREF}
           target="_blank"
