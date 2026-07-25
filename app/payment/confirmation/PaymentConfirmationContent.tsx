@@ -44,6 +44,8 @@ export function PaymentConfirmationContent() {
     if (sessionStorage.getItem(key) === "1") return;
     sessionStorage.setItem(key, "1");
 
+    // Single source for Meta Purchase: GTM listens to this dataLayer event.
+    // Do NOT also call fbq('track','Purchase') here — that double-counts in Events Manager.
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "purchase",
@@ -62,12 +64,6 @@ export function PaymentConfirmationContent() {
         },
       }),
     );
-    if (typeof window.fbq === "function") {
-      window.fbq("track", "Purchase", {
-        content_name: "Gamlish Founder Pre-order",
-        currency: "BDT",
-      });
-    }
   }, [payment.loading, payment.latestRequest?._id, isTest]);
 
   const handleClearTestAndRetry = async () => {
@@ -200,6 +196,5 @@ export function PaymentConfirmationContent() {
 declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
-    fbq?: (...args: unknown[]) => void;
   }
 }
