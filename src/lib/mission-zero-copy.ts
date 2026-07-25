@@ -13,7 +13,11 @@ export interface MissionZeroCopy {
   readonly optionAHint: string;
   readonly optionBHint: string;
   readonly feedbackCorrect: string;
-  readonly feedbackClose: string;
+  readonly feedbackIncorrect: string;
+  readonly correctBadge: string;
+  readonly incorrectBadge: string;
+  readonly insightCorrectLead: string;
+  readonly insightIncorrectLead: string;
   readonly insight: string;
   readonly continueBtn: string;
   readonly challengeLead: string;
@@ -52,7 +56,12 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
     optionAHint: "Wrong pattern",
     optionBHint: "Correct pattern",
     feedbackCorrect: "Excellent! You got it right!",
-    feedbackClose: "Close! The correct answer is Option B.",
+    feedbackIncorrect:
+      "Incorrect. That was a mistake. The right answer is Option B: Did I call you?",
+    correctBadge: "Correct",
+    incorrectBadge: "Incorrect",
+    insightCorrectLead: "Why Option B is right:",
+    insightIncorrectLead: "Why your answer was wrong:",
     insight:
       'In Bengali, we say "called" (past tense). But in English, the word DID is already in the past tense! You cannot use two past tense words in the same simple question. Therefore, whenever you use DID, the main verb must stay in its base form (call).',
     continueBtn: "Try One More! (+5 XP)",
@@ -79,7 +88,8 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
     xpCorrect: "+5 XP",
     loading: "Loading…",
     pickOne: "Tap your answer",
-    tryAgainBlank: "Not this one. After DID, use the base verb. Try again!",
+    tryAgainBlank:
+      "Incorrect. After DID, use the base verb (go), not went. Try again!",
     playAgain: "Play demo again",
   },
   bn: {
@@ -93,7 +103,12 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
     optionAHint: "ভুল প্যাটার্ন",
     optionBHint: "সঠিক প্যাটার্ন",
     feedbackCorrect: "চমৎকার! আপনি সঠিক উত্তর দিয়েছেন!",
-    feedbackClose: "কাছাকাছি গিয়েছিলেন! কিন্তু সঠিক উত্তর হবে Option B।",
+    feedbackIncorrect:
+      "ভুল উত্তর। এটি একটি ভুল ছিল। সঠিক উত্তর Option B: Did I call you?",
+    correctBadge: "সঠিক",
+    incorrectBadge: "ভুল",
+    insightCorrectLead: "কেন Option B সঠিক:",
+    insightIncorrectLead: "কেন আপনার উত্তর ভুল ছিল:",
     insight:
       "বাংলায় আমরা বলি 'কল করেছিলাম'। কিন্তু ইংরেজিতে Did শব্দটি নিজেই Past Tense! একটি বাক্যে দু'বার Past Tense বসে না। তাই Did বসলে মূল Verb সব সময় তার মূল রূপে (call) থাকে।",
     continueBtn: "এবার নিজে চেষ্টা করুন! (+5 XP)",
@@ -120,7 +135,8 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
     xpCorrect: "+5 XP",
     loading: "লোড হচ্ছে…",
     pickOne: "উত্তর বেছে নিন",
-    tryAgainBlank: "এটা নয়। DID এর পর base verb বসে। আবার চেষ্টা করুন!",
+    tryAgainBlank:
+      "ভুল উত্তর। DID এর পর base verb (go) বসে, went নয়। আবার চেষ্টা করুন!",
     playAgain: "আবার ডেমো খেলুন",
   },
 };

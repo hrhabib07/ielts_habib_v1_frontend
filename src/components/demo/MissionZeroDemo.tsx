@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Crown, Sparkles, Zap } from "lucide-react";
+import { CheckCircle2, Crown, Sparkles, XCircle, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ContinueWithGoogleButton } from "@/src/components/auth/ContinueWithGoogleButton";
 import {
@@ -93,13 +93,24 @@ function ProgressBar({
   );
 }
 
-function OptionLetter({ letter }: { letter: string }) {
+function OptionLetter({
+  letter,
+  tone = "default",
+}: {
+  letter: string;
+  tone?: "default" | "correct" | "incorrect";
+}) {
   return (
     <span
       className={cn(
         EN_FACE,
-        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-        "bg-sky-500/15 text-sm font-black text-sky-800 dark:text-sky-200",
+        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black",
+        tone === "correct" &&
+          "bg-emerald-500/20 text-emerald-800 dark:text-emerald-200",
+        tone === "incorrect" &&
+          "bg-rose-500/20 text-rose-800 dark:text-rose-200",
+        tone === "default" &&
+          "bg-sky-500/15 text-sky-800 dark:text-sky-200",
       )}
     >
       {letter}
@@ -425,15 +436,19 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                       type="button"
                       onClick={() => void onPickQ1("a")}
                       disabled={Boolean(selectedQ1)}
+                      aria-invalid={selectedQ1 === "a" ? true : undefined}
                       className={cn(
                         "flex w-full items-center gap-3 rounded-2xl border-2 px-3.5 py-4 text-left transition-all sm:px-4 sm:py-5",
                         "active:scale-[0.99]",
                         selectedQ1 === "a"
-                          ? "border-amber-400 bg-amber-400/15 shadow-md"
+                          ? "border-rose-500 bg-rose-500/15 shadow-[0_0_0_1px_rgba(244,63,94,0.35),0_12px_28px_-12px_rgba(244,63,94,0.45)]"
                           : "border-border/80 bg-background hover:border-sky-400/60 hover:bg-sky-500/[0.06] hover:shadow-md",
                       )}
                     >
-                      <OptionLetter letter="A" />
+                      <OptionLetter
+                        letter="A"
+                        tone={selectedQ1 === "a" ? "incorrect" : "default"}
+                      />
                       <span className="min-w-0 flex-1">
                         <HighlightVerb
                           before="Did I "
@@ -441,6 +456,12 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                           after=" you?"
                         />
                       </span>
+                      {selectedQ1 === "a" ? (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-rose-500 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-white">
+                          <XCircle className="h-3.5 w-3.5" aria-hidden />
+                          {copy.incorrectBadge}
+                        </span>
+                      ) : null}
                     </button>
 
                     <button
@@ -450,12 +471,19 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                       className={cn(
                         "flex w-full items-center gap-3 rounded-2xl border-2 px-3.5 py-4 text-left transition-all sm:px-4 sm:py-5",
                         "active:scale-[0.99]",
-                        selectedQ1 === "b"
+                        selectedQ1 === "b" || selectedQ1 === "a"
                           ? "border-emerald-500 bg-emerald-500/15 shadow-[0_0_0_1px_rgba(16,185,129,0.35),0_12px_28px_-12px_rgba(16,185,129,0.55)]"
                           : "border-border/80 bg-background hover:border-sky-400/60 hover:bg-sky-500/[0.06] hover:shadow-md",
                       )}
                     >
-                      <OptionLetter letter="B" />
+                      <OptionLetter
+                        letter="B"
+                        tone={
+                          selectedQ1 === "b" || selectedQ1 === "a"
+                            ? "correct"
+                            : "default"
+                        }
+                      />
                       <span className="min-w-0 flex-1">
                         <HighlightVerb
                           before="Did I "
@@ -463,6 +491,12 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                           after=" you?"
                         />
                       </span>
+                      {selectedQ1 === "b" || selectedQ1 === "a" ? (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-white">
+                          <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                          {copy.correctBadge}
+                        </span>
+                      ) : null}
                     </button>
                   </div>
                 </motion.div>
@@ -477,14 +511,83 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                   transition={{ duration: 0.35, ease: EASE }}
                   className="space-y-5"
                 >
-                  <p className="text-xl font-bold leading-snug text-foreground sm:text-2xl">
-                    {q1Correct ? copy.feedbackCorrect : copy.feedbackClose}
-                  </p>
-                  <div className="rounded-2xl border border-sky-500/30 bg-gradient-to-br from-sky-500/12 to-transparent p-4 text-[15px] font-medium leading-relaxed text-foreground/90 sm:p-5 sm:text-base">
-                    {copy.insight}
+                  <div
+                    className={cn(
+                      "rounded-2xl border-2 px-4 py-4 sm:px-5 sm:py-5",
+                      q1Correct
+                        ? "border-emerald-500/45 bg-emerald-500/10"
+                        : "border-rose-500/50 bg-rose-500/10",
+                    )}
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <div className="flex items-start gap-3">
+                      {q1Correct ? (
+                        <CheckCircle2
+                          className="mt-0.5 h-7 w-7 shrink-0 text-emerald-600 dark:text-emerald-400"
+                          aria-hidden
+                        />
+                      ) : (
+                        <XCircle
+                          className="mt-0.5 h-7 w-7 shrink-0 text-rose-600 dark:text-rose-400"
+                          aria-hidden
+                        />
+                      )}
+                      <div className="min-w-0 space-y-2">
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wide text-white",
+                            q1Correct ? "bg-emerald-600" : "bg-rose-600",
+                          )}
+                        >
+                          {q1Correct ? copy.correctBadge : copy.incorrectBadge}
+                        </span>
+                        <p
+                          className={cn(
+                            "text-lg font-bold leading-snug sm:text-xl",
+                            q1Correct
+                              ? "text-emerald-950 dark:text-emerald-100"
+                              : "text-rose-950 dark:text-rose-100",
+                          )}
+                        >
+                          {q1Correct
+                            ? copy.feedbackCorrect
+                            : copy.feedbackIncorrect}
+                        </p>
+                      </div>
+                    </div>
                   </div>
+
+                  <div
+                    className={cn(
+                      "rounded-2xl border p-4 text-[15px] font-medium leading-relaxed sm:p-5 sm:text-base",
+                      q1Correct
+                        ? "border-emerald-500/30 bg-gradient-to-br from-emerald-500/12 to-transparent text-foreground/90"
+                        : "border-rose-500/30 bg-gradient-to-br from-rose-500/12 to-transparent text-foreground/90",
+                    )}
+                  >
+                    <p
+                      className={cn(
+                        "mb-2 text-xs font-black uppercase tracking-[0.12em]",
+                        q1Correct
+                          ? "text-emerald-800 dark:text-emerald-300"
+                          : "text-rose-800 dark:text-rose-300",
+                      )}
+                    >
+                      {q1Correct
+                        ? copy.insightCorrectLead
+                        : copy.insightIncorrectLead}
+                    </p>
+                    <p>{copy.insight}</p>
+                  </div>
+
                   <Button
-                    className="h-12 w-full rounded-2xl bg-sky-600 text-base font-bold text-white shadow-lg shadow-sky-500/25 hover:bg-sky-500"
+                    className={cn(
+                      "h-12 w-full rounded-2xl text-base font-bold text-white shadow-lg",
+                      q1Correct
+                        ? "bg-sky-600 shadow-sky-500/25 hover:bg-sky-500"
+                        : "bg-rose-600 shadow-rose-500/25 hover:bg-rose-500",
+                    )}
                     onClick={() => void onContinueInsight()}
                   >
                     {copy.continueBtn}
@@ -510,7 +613,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                         EN_FACE,
                         "rounded-2xl border px-4 py-4 text-center text-lg font-bold text-foreground sm:text-xl",
                         blankWrong
-                          ? "border-amber-400/60 bg-amber-400/10"
+                          ? "border-rose-400/70 bg-rose-500/10"
                           : mastery
                             ? "border-emerald-500/50 bg-emerald-500/10"
                             : "border-border/70 bg-muted/40",
@@ -530,7 +633,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                             ? cn(
                                 "rounded-md border-b-2 border-solid px-2 py-0.5",
                                 blankWrong
-                                  ? "border-amber-500 bg-amber-400/20 text-amber-950 dark:text-amber-100"
+                                  ? "border-rose-500 bg-rose-500/20 text-rose-950 dark:text-rose-100"
                                   : "border-emerald-500 bg-emerald-500/15 text-emerald-800 dark:text-emerald-200",
                               )
                             : "border-b-2 border-dashed border-sky-500 text-sky-700 dark:text-sky-300",
@@ -541,7 +644,8 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                       {copy.challengeSentenceAfter}
                     </motion.p>
                     {blankWrong ? (
-                      <p className="text-center text-sm font-semibold text-amber-800 dark:text-amber-200">
+                      <p className="flex items-center justify-center gap-1.5 text-center text-sm font-bold text-rose-700 dark:text-rose-300">
+                        <XCircle className="h-4 w-4 shrink-0" aria-hidden />
                         {copy.tryAgainBlank}
                       </p>
                     ) : null}
@@ -556,7 +660,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                         EN_FACE,
                         "rounded-2xl border-2 px-3 py-6 text-xl font-black transition-all active:scale-[0.98] disabled:opacity-60 sm:text-2xl",
                         blankChoice === "went" && blankWrong
-                          ? "border-amber-400 bg-amber-400/15"
+                          ? "border-rose-500 bg-rose-500/15 text-rose-900 dark:text-rose-100"
                           : "border-border/80 bg-background hover:border-sky-400/60 hover:shadow-md",
                       )}
                     >
