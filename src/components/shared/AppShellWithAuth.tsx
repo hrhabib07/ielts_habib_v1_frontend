@@ -5,6 +5,7 @@ import { Footer } from "@/src/components/shared/Footer";
 import { StickySiteChrome } from "@/src/components/shared/StickySiteChrome";
 import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard";
 import { ScholarshipAppShell } from "@/src/components/scholarship/ScholarshipAppShell";
+import { FunnelPageTracker } from "@/src/components/analytics/FunnelPageTracker";
 
 /**
  * Async server shell: reads auth cookie. Wrap in a root-level React Suspense boundary
@@ -27,6 +28,9 @@ export async function AppShellWithAuth({
           <Footer initialUser={initialUser} />
         </div>
       </ScholarshipAppShell>
+      <Suspense fallback={null}>
+        <FunnelPageTracker />
+      </Suspense>
     </>
   );
 }

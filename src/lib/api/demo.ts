@@ -112,9 +112,26 @@ export async function startDemo(payload: {
   displayName?: string | null;
   deviceType?: string | null;
   browser?: string | null;
+  visitorId?: string | null;
+  referrer?: string | null;
 }): Promise<DemoSession> {
   const res = await apiClient.post<ApiResponse<DemoSession>>(
     "/demo/start",
+    payload,
+  );
+  return res.data.data;
+}
+
+export async function updateMissionZeroProgress(
+  sessionId: string,
+  payload: {
+    step: number;
+    screen?: string | null;
+    q1Correct?: boolean | null;
+  },
+): Promise<DemoSession> {
+  const res = await apiClient.post<ApiResponse<DemoSession>>(
+    `/demo/${sessionId}/progress`,
     payload,
   );
   return res.data.data;

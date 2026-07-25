@@ -38,6 +38,14 @@ export function Footer({ initialUser = null }: FooterProps) {
     return null;
   }
 
+  if (
+    pathname === "/demo" ||
+    pathname.startsWith("/demo/") ||
+    pathname === "/player/mission-zero"
+  ) {
+    return null;
+  }
+
   return (
     <footer
       className={cn(

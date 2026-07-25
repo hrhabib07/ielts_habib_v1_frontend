@@ -16,7 +16,13 @@ import {
   completeMissionZeroAuth,
   completeMissionZeroSession,
   startDemo,
+  updateMissionZeroProgress,
 } from "@/src/lib/api/demo";
+import {
+  trackFunnelEvent,
+  trackFunnelEventBeacon,
+} from "@/src/lib/api/analytics";
+import { getOrCreateVisitorId } from "@/src/lib/analytics-visitor";
 import {
   clearMissionZeroLocalState,
   detectDemoClientMeta,
@@ -54,6 +60,13 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 /** English UI text must not inherit Bangla display font (call vs called looked identical). */
 const EN_FACE = "font-sans tracking-tight";
+
+function screenForStep(step: MissionZeroStep): string {
+  if (step === 1) return "demo_step_1_question";
+  if (step === 2) return "demo_step_2_feedback";
+  if (step === 3) return "demo_step_3_blank";
+  return "demo_step_4_signup";
+}
 
 function ProgressBar({
   stage,
@@ -183,11 +196,20 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
       displayName: "Guest",
       deviceType: meta.deviceType,
       browser: meta.browser,
+      visitorId: getOrCreateVisitorId(),
+      referrer: typeof document !== "undefined" ? document.referrer || null : null,
     })
       .then((session) => {
         if (cancelled) return;
         writeDemoSessionId(session.sessionId);
         setSessionId(session.sessionId);
+        void trackFunnelEvent({
+          event: "demo_start",
+          path: "/demo",
+          demoSessionId: session.sessionId,
+          step: 1,
+          screen: "demo_step_1_question",
+        });
       })
       .catch(() => {
         if (!cancelled) setBootError(true);
@@ -198,10 +220,67 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     };
   }, [ready, mode, sessionId]);
 
-  const goStep = useCallback((next: MissionZeroStep) => {
-    setStep(next);
-    writeMissionZeroStep(next);
-  }, []);
+  const syncProgress = useCallback(
+    (
+      nextStep: MissionZeroStep,
+      extras?: { q1Correct?: boolean | null; event?: "demo_step" | "demo_complete" },
+    ) => {
+      const screen = screenForStep(nextStep);
+      if (mode === "guest" && sessionId) {
+        void updateMissionZeroProgress(sessionId, {
+          step: nextStep,
+          screen,
+          q1Correct: extras?.q1Correct ?? undefined,
+        }).catch(() => undefined);
+        void trackFunnelEvent({
+          event: extras?.event ?? "demo_step",
+          path: "/demo",
+          demoSessionId: sessionId,
+          step: nextStep,
+          screen,
+          metadata:
+            extras?.q1Correct != null ? { q1Correct: extras.q1Correct } : null,
+        });
+      }
+    },
+    [mode, sessionId],
+  );
+
+  useEffect(() => {
+    if (!ready || mode !== "guest" || !sessionId) return;
+    void updateMissionZeroProgress(sessionId, {
+      step,
+      screen: screenForStep(step),
+      q1Correct: q1Correct ?? undefined,
+    }).catch(() => undefined);
+    // Only on session hydrate / step change already tracked via goStep;
+    // this covers restored localStorage sessions once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-shot when session becomes available
+  }, [ready, mode, sessionId]);
+
+  useEffect(() => {
+    if (!ready || mode !== "guest" || !sessionId) return;
+    const onLeave = () => {
+      trackFunnelEventBeacon({
+        event: "demo_exit",
+        path: "/demo",
+        demoSessionId: sessionId,
+        step,
+        screen: screenForStep(step),
+      });
+    };
+    window.addEventListener("pagehide", onLeave);
+    return () => window.removeEventListener("pagehide", onLeave);
+  }, [ready, mode, sessionId, step]);
+
+  const goStep = useCallback(
+    (next: MissionZeroStep, extras?: { q1Correct?: boolean | null }) => {
+      setStep(next);
+      writeMissionZeroStep(next);
+      syncProgress(next, extras);
+    },
+    [syncProgress],
+  );
 
   const flashXp = useCallback((text: string) => {
     setXpFlash(text);
@@ -227,7 +306,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
       flashXp(copy.xpTrying);
     }
 
-    window.setTimeout(() => goStep(2), 700);
+    window.setTimeout(() => goStep(2, { q1Correct: correct }), 700);
   };
 
   const onContinueInsight = async () => {
@@ -272,6 +351,13 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
 
       if (mode === "guest" && sessionId) {
         void completeMissionZeroSession(sessionId).catch(() => undefined);
+        void trackFunnelEvent({
+          event: "demo_complete",
+          path: "/demo",
+          demoSessionId: sessionId,
+          step: 4,
+          screen: "demo_step_4_signup",
+        });
       }
 
       window.setTimeout(() => {
@@ -321,6 +407,15 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
   };
 
   const onSkip = () => {
+    if (mode === "guest" && sessionId) {
+      void trackFunnelEvent({
+        event: "demo_skip",
+        path: "/demo",
+        demoSessionId: sessionId,
+        step,
+        screen: screenForStep(step),
+      });
+    }
     clearMissionZeroLocalState();
     router.push("/");
   };
@@ -342,7 +437,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
   return (
     <div
       className={cn(
-        "relative isolate min-h-[100dvh] overflow-x-hidden",
+        "relative isolate overflow-x-hidden",
         locale === "bn" && "font-bengali",
       )}
       lang={locale}
@@ -356,11 +451,11 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
         aria-hidden
       />
 
-      <div className="mx-auto flex min-h-[100dvh] max-w-2xl flex-col justify-center px-4 py-6 sm:px-6 sm:py-10">
+      <div className="mx-auto flex w-full max-w-2xl flex-col justify-start px-3 pb-8 pt-2 sm:px-6 sm:pb-10 sm:pt-3">
         <div
           className={cn(
-            "relative overflow-hidden rounded-[1.75rem]",
-            "border border-sky-500/20 bg-card/95 shadow-[0_24px_60px_-24px_rgba(14,165,233,0.45)]",
+            "relative overflow-hidden rounded-[1.5rem] sm:rounded-[1.75rem]",
+            "border border-sky-500/20 bg-card/95 shadow-[0_16px_40px_-20px_rgba(14,165,233,0.4)]",
             "backdrop-blur-sm dark:bg-card/90",
           )}
         >
@@ -369,12 +464,12 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
             aria-hidden
           />
 
-          <div className="relative p-5 sm:p-8">
+          <div className="relative p-4 sm:p-7">
             <FloatingXpBadge text={xpFlash ?? ""} show={Boolean(xpFlash)} />
             <MissionZeroConfetti active={confetti} />
 
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/35 bg-sky-500/12 px-3 py-1.5 text-xs font-bold text-sky-900 dark:text-sky-100">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 sm:mb-4 sm:gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/35 bg-sky-500/12 px-2.5 py-1 text-[11px] font-bold text-sky-900 dark:text-sky-100 sm:px-3 sm:py-1.5 sm:text-xs">
                 <Zap className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-300" aria-hidden />
                 {copy.badge}
               </span>
@@ -392,7 +487,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
             </div>
 
             {step < 4 ? (
-              <div className="mb-7">
+              <div className="mb-4 sm:mb-5">
                 <ProgressBar stage={progressStage} label={copy.progressLabel} />
               </div>
             ) : null}
@@ -724,6 +819,16 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                     returnTo="/player"
                     className="h-12 rounded-2xl border-sky-500/40 bg-sky-600 text-white hover:bg-sky-500 hover:text-white"
                     label={copy.googleCta}
+                    onNavigate={() => {
+                      void trackFunnelEvent({
+                        event: "demo_signup_click",
+                        path: "/demo",
+                        demoSessionId: sessionId,
+                        step: 4,
+                        screen: "demo_step_4_signup",
+                        metadata: { method: "google" },
+                      });
+                    }}
                   />
 
                   <Button
@@ -737,6 +842,16 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                           ? `/register?from=demo&sid=${encodeURIComponent(sessionId)}`
                           : "/register?from=demo"
                       }
+                      onClick={() => {
+                        void trackFunnelEvent({
+                          event: "demo_signup_click",
+                          path: "/demo",
+                          demoSessionId: sessionId,
+                          step: 4,
+                          screen: "demo_step_4_signup",
+                          metadata: { method: "email" },
+                        });
+                      }}
                     >
                       {copy.createAccount}
                     </Link>

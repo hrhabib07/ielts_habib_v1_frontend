@@ -85,9 +85,9 @@ export function EnglishAdminHome() {
                 <MessageSquareHeart className="h-5 w-5 text-amber-700 dark:text-amber-300" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-foreground">Demo feedback</p>
+                <p className="font-semibold text-foreground">Demo funnel</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  Guest demo ratings, comments, and completion stats
+                  Visits, drop-offs, signup conversion, and ratings
                 </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />

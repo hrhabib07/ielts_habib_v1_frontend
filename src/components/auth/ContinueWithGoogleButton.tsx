@@ -46,6 +46,7 @@ export function ContinueWithGoogleButton({
   demoSessionId,
   returnTo,
   label: labelOverride,
+  onNavigate,
 }: {
   className?: string;
   variant?: "continue" | "save";
@@ -53,6 +54,7 @@ export function ContinueWithGoogleButton({
   returnTo?: string | null;
   /** Optional override for bilingual CTAs (e.g. Mission Zero). */
   label?: string;
+  onNavigate?: () => void;
 }) {
   const { locale } = useUiLocale();
   const label = labelOverride ?? COPY[locale][variant];
@@ -68,6 +70,7 @@ export function ContinueWithGoogleButton({
   return (
     <a
       href={href}
+      onClick={() => onNavigate?.()}
       className={cn(
         "inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-border/80 bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted/50",
         className,
