@@ -114,6 +114,11 @@ export async function startDemo(payload: {
   browser?: string | null;
   visitorId?: string | null;
   referrer?: string | null;
+  uiLanguage?: "bn" | "en" | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  trafficSource?: string | null;
 }): Promise<DemoSession> {
   const res = await apiClient.post<ApiResponse<DemoSession>>(
     "/demo/start",

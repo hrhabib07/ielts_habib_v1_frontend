@@ -1,4 +1,4 @@
-/** Public routes that share the marketing guest header (home, auth, pricing). */
+/** Public routes that share the marketing guest header (home, auth entry, pricing). */
 const GUEST_NAV_PATHS = new Set([
   "/",
   "/login",
@@ -8,10 +8,6 @@ const GUEST_NAV_PATHS = new Set([
   "/payment/confirmation",
   "/about",
   "/courses",
-  "/forgot-password",
-  "/verify-otp",
-  "/verify-reset-otp",
-  "/reset-password",
   "/onboarding",
   "/terms",
   "/privacy",

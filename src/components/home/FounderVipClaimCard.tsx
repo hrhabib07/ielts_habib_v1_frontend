@@ -33,6 +33,7 @@ export function FounderVipClaimCard({
 
   return (
     <motion.div
+      data-telemetry="founder-card"
       initial={reduceMotion ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
@@ -124,7 +125,13 @@ export function FounderVipClaimCard({
             !reduceMotion && "animate-[founderCtaGlow_2.4s_ease-in-out_infinite]",
           )}
         >
-          <Link href={href}>{copy.cta}</Link>
+          <Link
+            href={href}
+            data-telemetry="founder-cta"
+            data-telemetry-cta="true"
+          >
+            {copy.cta}
+          </Link>
         </Button>
 
         <ul className="grid gap-2 sm:grid-cols-3">

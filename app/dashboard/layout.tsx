@@ -1,58 +1,21 @@
-"use client";
+import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
+import { getCurrentUser } from "@/src/lib/auth-server";
+import { DashboardShell } from "@/src/components/dashboard/DashboardShell";
 
-import { ReactNode, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { getDecodedTokenClient } from "@/src/lib/auth";
-import type { UserRole } from "@/src/lib/constants";
-import { DashboardSidebar } from "@/src/components/dashboard/DashboardSidebar";
-import { DashboardTopbar } from "@/src/components/dashboard/DashboardTopbar";
-
-export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const [role, setRole] = useState<UserRole | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    const decoded = getDecodedTokenClient();
-    setRole(decoded?.role ?? null);
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    if (!role) {
-      router.replace("/login");
-    }
-  }, [mounted, role, router]);
-
-  if (!mounted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      </div>
-    );
+/**
+ * Server layout: auth from httpOnly cookie. Avoids client `mounted` gates that
+ * caused hydration mismatches (loading div vs app shell main).
+ */
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
   }
 
-  if (!role) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-muted-foreground">Redirecting to login…</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-background text-foreground">
-      <DashboardSidebar
-        role={role}
-        isMobileOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
-      <div className="lg:pl-64">
-        <DashboardTopbar onOpenSidebar={() => setSidebarOpen(true)} />
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">{children}</div>
-      </div>
-    </div>
-  );
+  return <DashboardShell role={user.role}>{children}</DashboardShell>;
 }

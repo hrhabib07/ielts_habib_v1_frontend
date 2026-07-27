@@ -3,8 +3,7 @@ import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard
 
 /**
  * Suspense fallback while AppShellWithAuth resolves.
- * Do not mount SyncAuthCookie here — initialUser=null would force a redundant
- * sync + router.refresh and cause login flicker after tab return.
+ * Mirror the resolved shell tag structure so streaming/hydration stay aligned.
  */
 export function AppShellFallback() {
   return (
@@ -13,11 +12,18 @@ export function AppShellFallback() {
         <DocumentScrollGuard />
       </Suspense>
       <div className="flex min-h-dvh flex-col overflow-x-hidden">
+        <div className="sticky top-0 z-50 w-full shrink-0">
+          <div
+            className="h-14 border-b border-border/50 bg-background/95 sm:h-16"
+            aria-hidden
+          />
+        </div>
         <div
-          className="h-14 shrink-0 border-b border-border/50 bg-background/95 sm:h-16"
-          aria-hidden
+          className="site-scroll-document w-full min-w-0 flex-1"
+          role="main"
+          aria-busy="true"
         />
-        <main className="site-scroll-document w-full min-w-0 flex-1" aria-busy="true" />
+        <div className="h-12 shrink-0" aria-hidden />
       </div>
     </>
   );

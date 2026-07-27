@@ -6,6 +6,7 @@ import { StickySiteChrome } from "@/src/components/shared/StickySiteChrome";
 import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard";
 import { ScholarshipAppShell } from "@/src/components/scholarship/ScholarshipAppShell";
 import { FunnelPageTracker } from "@/src/components/analytics/FunnelPageTracker";
+import { MicroTelemetryBoot } from "@/src/components/analytics/MicroTelemetryBoot";
 
 /**
  * Async server shell: reads auth cookie. Wrap in a root-level React Suspense boundary
@@ -24,12 +25,20 @@ export async function AppShellWithAuth({
       <ScholarshipAppShell initialUser={initialUser}>
         <div className="flex min-h-dvh flex-col overflow-x-hidden">
           <StickySiteChrome initialUser={initialUser} />
-          <main className="site-scroll-document w-full min-w-0 flex-1">{children}</main>
+          <div
+            className="site-scroll-document w-full min-w-0 flex-1"
+            role="main"
+          >
+            {children}
+          </div>
           <Footer initialUser={initialUser} />
         </div>
       </ScholarshipAppShell>
       <Suspense fallback={null}>
         <FunnelPageTracker />
+      </Suspense>
+      <Suspense fallback={null}>
+        <MicroTelemetryBoot />
       </Suspense>
     </>
   );

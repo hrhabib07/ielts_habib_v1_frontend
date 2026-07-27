@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckCircle2, Crown, Sparkles, XCircle, Zap } from "lucide-react";
@@ -22,6 +22,10 @@ import {
   trackFunnelEventBeacon,
 } from "@/src/lib/api/analytics";
 import { getOrCreateVisitorId } from "@/src/lib/analytics-visitor";
+import {
+  captureAndReadUtmAttribution,
+  readUiLocaleForAnalytics,
+} from "@/src/lib/funnel-attribution";
 import {
   clearMissionZeroLocalState,
   detectDemoClientMeta,
@@ -170,6 +174,12 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
   const [mastery, setMastery] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
+  const step4EnteredAtRef = useRef<number | null>(null);
+  const exitSentRef = useRef(false);
+  const stepRef = useRef(step);
+  const q1Ref = useRef(q1Correct);
+  stepRef.current = step;
+  q1Ref.current = q1Correct;
 
   useEffect(() => {
     expireMissionZeroIfStale();
@@ -185,17 +195,33 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
   }, []);
 
   useEffect(() => {
+    if (step === 4) {
+      if (step4EnteredAtRef.current == null) {
+        step4EnteredAtRef.current = Date.now();
+      }
+    } else {
+      step4EnteredAtRef.current = null;
+    }
+  }, [step]);
+
+  useEffect(() => {
     if (!ready || mode !== "guest") return;
     if (sessionId) return;
 
     let cancelled = false;
     const meta = detectDemoClientMeta();
+    const utm = captureAndReadUtmAttribution();
     startDemo({
       displayName: "Guest",
       deviceType: meta.deviceType,
       browser: meta.browser,
       visitorId: getOrCreateVisitorId(),
       referrer: typeof document !== "undefined" ? document.referrer || null : null,
+      uiLanguage: readUiLocaleForAnalytics(),
+      utmSource: utm.utmSource,
+      utmMedium: utm.utmMedium,
+      utmCampaign: utm.utmCampaign,
+      trafficSource: utm.trafficSource,
     })
       .then((session) => {
         if (cancelled) return;
@@ -237,7 +263,12 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
           step: nextStep,
           screen,
           metadata:
-            extras?.q1Correct != null ? { q1Correct: extras.q1Correct } : null,
+            extras?.q1Correct != null
+              ? {
+                  q1Correct: extras.q1Correct,
+                  q1_result: extras.q1Correct ? "correct" : "wrong",
+                }
+              : null,
         });
       }
     },
@@ -258,18 +289,53 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
 
   useEffect(() => {
     if (!ready || mode !== "guest" || !sessionId) return;
-    const onLeave = () => {
+    exitSentRef.current = false;
+
+    const sendExit = () => {
+      if (exitSentRef.current) return;
+      exitSentRef.current = true;
+      const currentStep = stepRef.current;
+      const screen = screenForStep(currentStep);
+      const q1 = q1Ref.current;
+      const dwell =
+        currentStep === 4 && step4EnteredAtRef.current != null
+          ? Math.max(
+              0,
+              Math.round((Date.now() - step4EnteredAtRef.current) / 1000),
+            )
+          : null;
       trackFunnelEventBeacon({
         event: "demo_exit",
         path: "/demo",
         demoSessionId: sessionId,
-        step,
-        screen: screenForStep(step),
+        step: currentStep,
+        screen,
+        metadata: {
+          last_screen_before_leave: screen,
+          signup_dwell_seconds: dwell,
+          q1_result:
+            q1 === true ? "correct" : q1 === false ? "wrong" : null,
+          clicked_google_save: false,
+        },
       });
     };
-    window.addEventListener("pagehide", onLeave);
-    return () => window.removeEventListener("pagehide", onLeave);
-  }, [ready, mode, sessionId, step]);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        sendExit();
+      } else if (document.visibilityState === "visible") {
+        exitSentRef.current = false;
+      }
+    };
+    const onPageHide = () => sendExit();
+
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", onPageHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", onPageHide);
+    };
+  }, [ready, mode, sessionId]);
 
   const goStep = useCallback(
     (next: MissionZeroStep, extras?: { q1Correct?: boolean | null }) => {
@@ -425,8 +491,16 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
 
   if (!ready) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
-        {copy.loading}
+      <div
+        className={cn(
+          "relative isolate overflow-x-hidden",
+          locale === "bn" && "font-bengali",
+        )}
+        lang={locale}
+      >
+        <div className="flex min-h-[50vh] items-center justify-center px-3 text-sm text-muted-foreground">
+          {copy.loading}
+        </div>
       </div>
     );
   }
@@ -797,6 +871,14 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                   totalXp={earnedXp + 40}
                   sessionId={sessionId}
                   onGoogleNavigate={() => {
+                    void trackFunnelEvent({
+                      event: "clicked_google_save_button",
+                      path: "/demo",
+                      demoSessionId: sessionId,
+                      step: 4,
+                      screen: "demo_step_4_signup",
+                      metadata: { method: "google" },
+                    });
                     void trackFunnelEvent({
                       event: "demo_signup_click",
                       path: "/demo",

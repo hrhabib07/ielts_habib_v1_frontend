@@ -15,6 +15,7 @@ import {
   writeStoredUiLocale,
   type UiLocale,
 } from "@/src/lib/ui-locale";
+import { logLanguageSwitch } from "@/src/lib/micro-telemetry";
 
 export const UI_LOCALE_CHANGE_EVENT = "gamlish-ui-locale-change";
 
@@ -64,7 +65,16 @@ export function UiLocaleProvider({ children }: { children: ReactNode }) {
   }, [locale, hydrated]);
 
   const setLocale = useCallback((next: UiLocale) => {
-    setLocaleState(next);
+    setLocaleState((prev) => {
+      if (prev !== next) {
+        try {
+          logLanguageSwitch(prev, next);
+        } catch {
+          /* never block locale UX */
+        }
+      }
+      return next;
+    });
     writeStoredUiLocale(next);
     window.dispatchEvent(new CustomEvent(UI_LOCALE_CHANGE_EVENT, { detail: next }));
   }, []);

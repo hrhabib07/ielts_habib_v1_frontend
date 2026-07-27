@@ -204,6 +204,7 @@ export function RegisterForm() {
                       <Input
                         id="email"
                         type="email"
+                        data-telemetry-field="email"
                         required
                         autoComplete="email"
                         value={email}

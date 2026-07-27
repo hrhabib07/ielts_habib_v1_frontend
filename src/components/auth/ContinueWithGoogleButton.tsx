@@ -71,6 +71,8 @@ export function ContinueWithGoogleButton({
     <a
       href={href}
       onClick={() => onNavigate?.()}
+      data-telemetry={variant === "save" ? "save-btn" : "google-auth-btn"}
+      data-telemetry-cta="true"
       className={cn(
         "inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-border/80 bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted/50",
         className,
