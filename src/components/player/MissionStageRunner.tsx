@@ -248,9 +248,9 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
       }
       setEvalRetryState(null);
       showSuccessResult(result, true);
+      // Keep submitting locked under the success overlay to block double stage submit.
     } catch (err) {
       setError(err instanceof Error ? err.message : PLAYER_UI.couldNotSubmit);
-    } finally {
       setSubmitting(false);
     }
   };
@@ -274,6 +274,7 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
     });
 
     window.setTimeout(() => {
+      setBridge(null);
       goNext(nav);
     }, 1100);
   };
@@ -403,7 +404,7 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
           stage.evaluation &&
           stage.evaluation.type !== "writing_review" && (
             <EvaluationForm
-              key={evalFormKey}
+              key={`${evalFormKey}-${activeStageOrder}`}
               stage={stage.evaluation}
               missionSlug={missionSlug}
               stageOrder={activeStageOrder}

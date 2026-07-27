@@ -197,11 +197,11 @@ export function RearrangeWordTiles({
         {sentence.length === 0 ? (
           <p className="text-center text-sm text-muted-foreground">{copy.rearrangeDrop}</p>
         ) : (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center justify-start gap-1.5">
             {sentence.map((token, index) => (
               <div
                 key={token.id}
-                className="relative"
+                className="relative shrink-0"
                 onDragOver={(event) => {
                   event.preventDefault();
                   if (!interactionDisabled) setDropTarget(index);

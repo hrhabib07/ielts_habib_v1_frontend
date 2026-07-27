@@ -12,6 +12,7 @@ export interface PlayerUiCopy {
   readonly yourJourney: string;
   readonly continueMission: string;
   readonly reviewMission: string;
+  readonly goToNextMission: string;
   readonly missionLabel: string;
   readonly inspectionLabel: string;
   readonly stages: string;
@@ -90,6 +91,8 @@ export interface PlayerUiCopy {
     readonly correct: string;
     readonly incorrect: string;
     readonly translatePrompt: string;
+    readonly gapFillPrompt: string;
+    readonly gapPlaceholder: string;
     readonly answerPlaceholder: string;
     readonly pickAnswerFirst: string;
     readonly checkFailed: string;
@@ -155,6 +158,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     yourJourney: "তোমার যাত্রা",
     continueMission: "মিশন চালিয়ে যাও",
     reviewMission: "মিশন আবার করো",
+    goToNextMission: "পরের মিশনে যাও",
     missionLabel: "মিশন",
     inspectionLabel: "ইনস্পেকশন",
     stages: "টি ধাপ",
@@ -244,6 +248,8 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       correct: "সঠিক",
       incorrect: "ভুল",
       translatePrompt: "ইংরেজিতে অনুবাদ করো",
+      gapFillPrompt: "খালি ঘরে শব্দটি লেখো",
+      gapPlaceholder: "…",
       answerPlaceholder: "উত্তর লেখো…",
       pickAnswerFirst: "আগে একটি উত্তর বেছে নাও।",
       checkFailed: "উত্তর যাচাই করা যায়নি। আবার চেষ্টা করো।",
@@ -287,6 +293,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     yourJourney: "Your journey",
     continueMission: "Continue mission",
     reviewMission: "Replay mission",
+    goToNextMission: "Go to next mission",
     missionLabel: "Mission",
     inspectionLabel: "Inspection",
     stages: "stages",
@@ -376,6 +383,8 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       correct: "Correct",
       incorrect: "Incorrect",
       translatePrompt: "Translate into English",
+      gapFillPrompt: "Type the missing word in the blank",
+      gapPlaceholder: "…",
       answerPlaceholder: "Type your answer…",
       pickAnswerFirst: "Choose an answer first.",
       checkFailed: "Could not check the answer. Please try again.",

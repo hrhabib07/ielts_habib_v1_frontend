@@ -1,0 +1,132 @@
+import type { UiLocale } from "@/src/lib/ui-locale";
+
+export interface CheckoutCopy {
+  readonly statusLock: string;
+  readonly statusNext: string;
+  readonly urgencyEyebrow: string;
+  readonly urgencyTitle: string;
+  readonly urgencyBody: string;
+  readonly amountLabel: string;
+  readonly regularPriceLabel: string;
+  readonly founderPriceLabel: string;
+  readonly youSaveLabel: string;
+  readonly stepsTitle: string;
+  readonly step1: string;
+  readonly step2: string;
+  readonly step3: string;
+  readonly bkashNumberLabel: string;
+  readonly copy: string;
+  readonly copied: string;
+  readonly copyFailed: string;
+  readonly numberSoon: string;
+  readonly senderLabel: string;
+  readonly senderHint: string;
+  readonly trxLabel: string;
+  readonly trxHint: string;
+  readonly trxPlaceholder: string;
+  readonly submit: string;
+  readonly submitting: string;
+  readonly stickySubmit: string;
+  readonly back: string;
+  readonly perkSecure: string;
+  readonly perkManual: string;
+  readonly perkFounder: string;
+  readonly trustBadge: string;
+  readonly preOrderNote: string;
+  readonly invalidSender: string;
+  readonly invalidTrx: string;
+  readonly missingBkash: string;
+  readonly submitFailed: string;
+  readonly pageEyebrow: string;
+  readonly pageTitle: string;
+  readonly pageSub: string;
+}
+
+export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
+  bn: {
+    statusLock: "Founder মূল্য এখনো লক করা যায়",
+    statusNext: "bKash Send Money → TrxID সাবমিট",
+    urgencyEyebrow: "শেষ ধাপ",
+    urgencyTitle: "পেমেন্ট সম্পন্ন না হলে আপনার স্পট যাবে না!",
+    urgencyBody:
+      "মূল্য এখনই লক করতে bKash এ Send Money করুন। প্রথম 100 জনের Founder নম্বর ও ব্যাজ সীমিত। পেমেন্ট ভেরিফাই হলে আপনার জায়গা নিশ্চিত।",
+    amountLabel: "পাঠাতে হবে",
+    regularPriceLabel: "রেগুলার মূল্য",
+    founderPriceLabel: "Founder মূল্য আজ",
+    youSaveLabel: "আজ বাঁচবে",
+    stepsTitle: "৩ ধাপে শেষ করুন",
+    step1: "ধাপ 1: bKash অ্যাপে Send Money খুলুন",
+    step2: "ধাপ 2: নিচের নম্বরে ঠিক এই পরিমাণ পাঠান",
+    step3: "ধাপ 3: আপনার নম্বর + TrxID দিয়ে সাবমিট করুন",
+    bkashNumberLabel: "আমাদের bKash নম্বর",
+    copy: "কপি",
+    copied: "কপি হয়েছে",
+    copyFailed: "নম্বর কপি করা যায়নি",
+    numberSoon: "শীঘ্রই আপডেট করা হবে",
+    senderLabel: "আপনার bKash নম্বর",
+    senderHint: "যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি দিন।",
+    trxLabel: "Transaction ID (TrxID)",
+    trxHint: "bKash SMS বা অ্যাপে পাওয়া TrxID দিন। একই ID দুবার ব্যবহার করা যাবে না।",
+    trxPlaceholder: "যেমন: 8N7A2B1C3D",
+    submit: "পেমেন্ট সাবমিট করুন",
+    submitting: "সাবমিট হচ্ছে…",
+    stickySubmit: "সাবমিট করুন",
+    back: "প্রাইসিং এ ফিরে যান",
+    perkSecure: "নিরাপদ ম্যানুয়াল ভেরিফিকেশন",
+    perkManual: "ভুল TrxID হলে সাপোর্ট সাহায্য করবে",
+    perkFounder: "Founder স্পট ভেরিফাইয়ের পর লক",
+    trustBadge:
+      "Gamlish: বাংলাদেশের প্রথম ও একমাত্র গ্যামিফাইড ইংলিশ লার্নিং প্ল্যাটফর্ম",
+    preOrderNote: "এটি আগস্ট প্রি-অর্ডার। অ্যাক্সেস 1 আগস্ট থেকে শুরু হবে।",
+    invalidSender: "সঠিক bKash নম্বর দিন (01XXXXXXXXX)",
+    invalidTrx: "সঠিক Transaction ID (TrxID) দিন। bKash SMS বা অ্যাপে পাবেন।",
+    missingBkash: "bKash নম্বর এখনো সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।",
+    submitFailed: "সাবমিট করা যায়নি। আবার চেষ্টা করুন।",
+    pageEyebrow: "Checkout",
+    pageTitle: "আপনার Founder স্পট লক করুন",
+    pageSub: "bKash Send Money করুন, তারপর TrxID সাবমিট করুন",
+  },
+  en: {
+    statusLock: "Founder price can still be locked",
+    statusNext: "bKash Send Money → submit TrxID",
+    urgencyEyebrow: "Final step",
+    urgencyTitle: "Your spot is not secured until payment is submitted!",
+    urgencyBody:
+      "Send Money on bKash now to lock this price. Founder numbers and badges are limited to the first 100. Your seat is confirmed after verification.",
+    amountLabel: "Amount to send",
+    regularPriceLabel: "Regular price",
+    founderPriceLabel: "Founder price today",
+    youSaveLabel: "You save today",
+    stepsTitle: "Finish in 3 steps",
+    step1: "Step 1: Open Send Money in the bKash app",
+    step2: "Step 2: Send exactly this amount to the number below",
+    step3: "Step 3: Submit your number + TrxID",
+    bkashNumberLabel: "Our bKash number",
+    copy: "Copy",
+    copied: "Copied",
+    copyFailed: "Could not copy the number",
+    numberSoon: "Will be updated soon",
+    senderLabel: "Your bKash number",
+    senderHint: "Use the number you sent money from.",
+    trxLabel: "Transaction ID (TrxID)",
+    trxHint: "Find TrxID in your bKash SMS or app. The same ID cannot be claimed twice.",
+    trxPlaceholder: "e.g. 8N7A2B1C3D",
+    submit: "Submit payment",
+    submitting: "Submitting…",
+    stickySubmit: "Submit payment",
+    back: "Back to pricing",
+    perkSecure: "Secure manual verification",
+    perkManual: "Support can help if TrxID is wrong",
+    perkFounder: "Founder spot locks after verify",
+    trustBadge:
+      "Gamlish: Bangladesh's first and only gamified English learning platform",
+    preOrderNote: "This is an August pre-order. Access starts on 1 August.",
+    invalidSender: "Enter a valid bKash number (01XXXXXXXXX)",
+    invalidTrx: "Enter a valid Transaction ID (TrxID) from your bKash SMS or app.",
+    missingBkash: "bKash number is not set yet. Please contact admin.",
+    submitFailed: "Could not submit. Please try again.",
+    pageEyebrow: "Checkout",
+    pageTitle: "Lock your Founder spot",
+    pageSub: "Send Money on bKash, then submit your TrxID",
+  },
+};

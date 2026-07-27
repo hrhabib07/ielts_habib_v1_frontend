@@ -6,6 +6,8 @@ import { AUTH_RECOVERY_COPY, PROFILE_PASSWORD_COPY } from "@/src/lib/auth-recove
 import { AUTH_REGISTER_COPY } from "@/src/lib/auth-register-copy";
 import { FOUNDER_BENEFITS_COPY } from "@/src/lib/founder-benefits-copy";
 import { FOUNDER_LAUNCH_COPY } from "@/src/lib/founder-launch-copy";
+import { FOUNDER_DASHBOARD_OFFER_COPY } from "@/src/lib/founder-dashboard-offer-copy";
+import { CHECKOUT_COPY } from "@/src/lib/checkout-copy";
 import { GUEST_LANDING_COPY } from "@/src/lib/guest-landing-copy";
 import { ONBOARDING_COPY } from "@/src/lib/onboarding-copy";
 import { PLAYER_UI_COPY } from "@/src/lib/player-ui-copy";
@@ -54,6 +56,16 @@ export function useAuthRegisterCopy() {
 export function useFounderLaunchCopy() {
   const { locale } = useUiLocale();
   return useMemo(() => FOUNDER_LAUNCH_COPY[locale], [locale]);
+}
+
+export function useFounderDashboardOfferCopy() {
+  const { locale } = useUiLocale();
+  return useMemo(() => FOUNDER_DASHBOARD_OFFER_COPY[locale], [locale]);
+}
+
+export function useCheckoutCopy() {
+  const { locale } = useUiLocale();
+  return useMemo(() => CHECKOUT_COPY[locale], [locale]);
 }
 
 export function useFounderBenefitsCopy() {

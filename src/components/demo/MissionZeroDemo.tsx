@@ -1,16 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckCircle2, Crown, Sparkles, XCircle, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ContinueWithGoogleButton } from "@/src/components/auth/ContinueWithGoogleButton";
 import {
   FloatingXpBadge,
   MissionZeroConfetti,
 } from "@/src/components/demo/MissionZeroFx";
+import { MissionZeroSaveProgress } from "@/src/components/demo/MissionZeroSaveProgress";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import {
   completeMissionZeroAuth,
@@ -171,7 +170,6 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
   const [mastery, setMastery] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
-  const [bootError, setBootError] = useState(false);
 
   useEffect(() => {
     expireMissionZeroIfStale();
@@ -212,7 +210,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
         });
       })
       .catch(() => {
-        if (!cancelled) setBootError(true);
+        /* Guest can still finish the demo without a session id. */
       });
 
     return () => {
@@ -388,7 +386,6 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     setMastery(false);
     setSessionId(null);
     setFinishing(false);
-    setBootError(false);
     writeMissionZeroStep(1);
   };
 
@@ -468,35 +465,38 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
             <FloatingXpBadge text={xpFlash ?? ""} show={Boolean(xpFlash)} />
             <MissionZeroConfetti active={confetti} />
 
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 sm:mb-4 sm:gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/35 bg-sky-500/12 px-2.5 py-1 text-[11px] font-bold text-sky-900 dark:text-sky-100 sm:px-3 sm:py-1.5 sm:text-xs">
-                <Zap className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-300" aria-hidden />
-                {copy.badge}
-              </span>
-              {earnedXp > 0 && step < 4 ? (
-                <span
-                  className={cn(
-                    EN_FACE,
-                    "inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-200",
-                  )}
-                >
-                  <Sparkles className="h-3.5 w-3.5" aria-hidden />
-                  {earnedXp} XP
-                </span>
-              ) : null}
-            </div>
+            {/* Guest save checkpoint: skip redundant status chips (hero below already shows XP). */}
+            {!(step === 4 && mode === "guest") ? (
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2 sm:mb-4 sm:gap-3">
+                {step < 4 ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/35 bg-sky-500/12 px-2.5 py-1 text-[11px] font-bold text-sky-900 dark:text-sky-100 sm:px-3 sm:py-1.5 sm:text-xs">
+                    <Zap className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-300" aria-hidden />
+                    {copy.badge}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/12 px-2.5 py-1 text-[11px] font-bold text-emerald-900 dark:text-emerald-100 sm:px-3 sm:py-1.5 sm:text-xs">
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-300" aria-hidden />
+                    {copy.save.statusDone}
+                  </span>
+                )}
+                {earnedXp > 0 && step < 4 ? (
+                  <span
+                    className={cn(
+                      EN_FACE,
+                      "inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-200",
+                    )}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                    {earnedXp} XP
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
 
             {step < 4 ? (
               <div className="mb-4 sm:mb-5">
                 <ProgressBar stage={progressStage} label={copy.progressLabel} />
               </div>
-            ) : null}
-
-            {bootError && mode === "guest" ? (
-              <p className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-900 dark:text-amber-100">
-                Demo session could not start. You can still play; signup may need a
-                retry.
-              </p>
             ) : null}
 
             <AnimatePresence mode="wait">
@@ -791,92 +791,34 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
               ) : null}
 
               {step === 4 && mode === "guest" ? (
-                <motion.div
+                <MissionZeroSaveProgress
                   key="s4-guest"
-                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, ease: EASE }}
-                  className="space-y-5"
-                >
-                  <div className="flex flex-col items-center text-center">
-                    <span className="relative mb-3 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-400/25 text-amber-700 shadow-[0_0_30px_rgba(251,191,36,0.5)] dark:text-amber-200">
-                      <Crown className="h-8 w-8" aria-hidden />
-                    </span>
-                    <p className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-200">
-                      {copy.welcomeBonus}
-                    </p>
-                    <h2 className="mt-2 text-balance text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
-                      {copy.congratsTitle}
-                    </h2>
-                    <p className="mt-3 max-w-md text-pretty text-[15px] font-medium leading-relaxed text-muted-foreground">
-                      {copy.congratsSub}
-                    </p>
-                  </div>
-
-                  <ContinueWithGoogleButton
-                    variant="save"
-                    demoSessionId={sessionId}
-                    returnTo="/player"
-                    className="h-12 rounded-2xl border-sky-500/40 bg-sky-600 text-white hover:bg-sky-500 hover:text-white"
-                    label={copy.googleCta}
-                    onNavigate={() => {
-                      void trackFunnelEvent({
-                        event: "demo_signup_click",
-                        path: "/demo",
-                        demoSessionId: sessionId,
-                        step: 4,
-                        screen: "demo_step_4_signup",
-                        metadata: { method: "google" },
-                      });
-                    }}
-                  />
-
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full rounded-2xl text-sm font-semibold"
-                    asChild
-                  >
-                    <Link
-                      href={
-                        sessionId
-                          ? `/register?from=demo&sid=${encodeURIComponent(sessionId)}`
-                          : "/register?from=demo"
-                      }
-                      onClick={() => {
-                        void trackFunnelEvent({
-                          event: "demo_signup_click",
-                          path: "/demo",
-                          demoSessionId: sessionId,
-                          step: 4,
-                          screen: "demo_step_4_signup",
-                          metadata: { method: "email" },
-                        });
-                      }}
-                    >
-                      {copy.createAccount}
-                    </Link>
-                  </Button>
-
-                  <p className="text-center text-xs leading-relaxed text-muted-foreground">
-                    {copy.trust}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={onPlayAgain}
-                    className="mx-auto block text-center text-sm font-semibold text-sky-700 underline-offset-2 hover:underline dark:text-sky-300"
-                  >
-                    {copy.playAgain}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={onSkip}
-                    className="mx-auto block text-center text-xs text-muted-foreground/80 underline-offset-2 hover:underline"
-                  >
-                    {copy.skip}
-                  </button>
-                </motion.div>
+                  copy={copy}
+                  totalXp={earnedXp + 40}
+                  sessionId={sessionId}
+                  onGoogleNavigate={() => {
+                    void trackFunnelEvent({
+                      event: "demo_signup_click",
+                      path: "/demo",
+                      demoSessionId: sessionId,
+                      step: 4,
+                      screen: "demo_step_4_signup",
+                      metadata: { method: "google" },
+                    });
+                  }}
+                  onEmailNavigate={() => {
+                    void trackFunnelEvent({
+                      event: "demo_signup_click",
+                      path: "/demo",
+                      demoSessionId: sessionId,
+                      step: 4,
+                      screen: "demo_step_4_signup",
+                      metadata: { method: "email" },
+                    });
+                  }}
+                  onPlayAgain={onPlayAgain}
+                  onSkip={onSkip}
+                />
               ) : null}
 
               {step === 4 && mode === "authenticated" ? (

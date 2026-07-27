@@ -42,6 +42,28 @@ export interface MissionZeroCopy {
   readonly pickOne: string;
   readonly tryAgainBlank: string;
   readonly playAgain: string;
+  /** Step 4 conversion screen (guest signup). */
+  readonly save: {
+    readonly statusDone: string;
+    readonly statusNext: string;
+    readonly unsavedEyebrow: string;
+    readonly unsavedTitle: string;
+    readonly unsavedBody: (totalXp: number) => string;
+    readonly googleCta: string;
+    readonly stickyCta: string;
+    readonly perkFree: string;
+    readonly perkNoPassword: string;
+    readonly perkFast: string;
+    readonly saveOther: string;
+    readonly roadmapTitle: string;
+    readonly roadmapStep1: (totalXp: number) => string;
+    readonly roadmapStep2: string;
+    readonly roadmapStep2Here: string;
+    readonly roadmapStep3: string;
+    readonly trustBadge: string;
+    readonly xpChip: (totalXp: number) => string;
+    readonly levelChip: string;
+  };
 }
 
 export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
@@ -91,6 +113,31 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
     tryAgainBlank:
       "Incorrect. After DID, use the base verb (go), not went. Try again!",
     playAgain: "Play demo again",
+    save: {
+      statusDone: "Demo completed! You did great!",
+      statusNext: "Mission 1 is waiting for you",
+      unsavedEyebrow: "Not saved yet",
+      unsavedTitle: "Your progress from today is not saved yet!",
+      unsavedBody: (totalXp) =>
+        `Warning! Your hard earned ${totalXp} XP and Level 2 could be lost at any second. Save in 1 click and start Mission 1 of the real game.`,
+      googleCta: "Save my progress (1 click Google)",
+      stickyCta: "Save my progress",
+      perkFree: "100% free",
+      perkNoPassword: "No password to\u00A0remember",
+      perkFast: "Takes only 3 seconds",
+      saveOther: "Save with email or mobile number instead",
+      roadmapTitle: "What is waiting for you next?",
+      roadmapStep1: (totalXp) =>
+        `Step 1: Demo completed! You earned ${totalXp} XP and Level 2.`,
+      roadmapStep2: "Step 2: Save your progress. Secure your XP and badges.",
+      roadmapStep2Here: "You are here",
+      roadmapStep3:
+        "Step 3: Unlock Mission 1 and secret rewards. Start your real journey!",
+      trustBadge:
+        "Gamlish: Bangladesh's first and only gamified English learning platform",
+      xpChip: (totalXp) => `${totalXp} XP`,
+      levelChip: "Level 2",
+    },
   },
   bn: {
     badge: "60 সেকেন্ডের কুইক মিশন",
@@ -138,6 +185,30 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
     tryAgainBlank:
       "ভুল উত্তর। DID এর পর base verb (go) বসে, went নয়। আবার চেষ্টা করুন!",
     playAgain: "আবার ডেমো খেলুন",
+    save: {
+      statusDone: "ডেমো সম্পন্ন! আপনি দারুণ করেছেন!",
+      statusNext: "মিশন 1 আপনার জন্য অপেক্ষা করছে",
+      unsavedEyebrow: "এখনো সেভ হয়নি",
+      unsavedTitle: "আপনার আজকের অগ্রগতি এখনো সেভ করা হয়নি!",
+      unsavedBody: (totalXp) =>
+        `সাবধান! ডেমোতে অর্জিত আপনার ${totalXp} XP এবং Level 2 যেকোনো সময় মুছে যেতে পারে। মাত্র 1 ক্লিকে অগ্রগতি সেভ করুন এবং মূল গেমের মিশন 1 শুরু করুন।`,
+      googleCta: "আমার অগ্রগতি সেভ করুন (Google দিয়ে 1 ক্লিকে)",
+      stickyCta: "অগ্রগতি সেভ করুন",
+      perkFree: "সম্পূর্ণ ফ্রি",
+      perkNoPassword: "পাসওয়ার্ড মনে রাখার\u00A0ঝামেলা\u00A0নেই",
+      perkFast: "সময় লাগবে মাত্র 3 সেকেন্ড",
+      saveOther: "ইমেইল বা মোবাইল নম্বর দিয়ে সেভ করতে চাই",
+      roadmapTitle: "এরপর আপনার জন্য কী অপেক্ষা করছে?",
+      roadmapStep1: (totalXp) =>
+        `ধাপ 1: ডেমো সম্পন্ন! আপনি পেয়েছেন ${totalXp} XP ও Level 2।`,
+      roadmapStep2: "ধাপ 2: অগ্রগতি সেভ করুন। আপনার XP ও ব্যাজ সুরক্ষিত করুন।",
+      roadmapStep2Here: "বর্তমান অবস্থান",
+      roadmapStep3:
+        "ধাপ 3: মিশন 1 ও সিক্রেট রিওয়ার্ড আনলক। এখনই আসল যাত্রা শুরু করুন!",
+      trustBadge:
+        "Gamlish: বাংলাদেশের প্রথম ও একমাত্র গ্যামিফাইড ইংলিশ লার্নিং প্ল্যাটফর্ম",
+      xpChip: (totalXp) => `${totalXp} XP`,
+      levelChip: "Level 2",
+    },
   },
 };
-

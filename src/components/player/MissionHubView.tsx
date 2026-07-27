@@ -230,11 +230,17 @@ export function MissionHubView({ slug }: { slug: string }) {
 
       {!locked && (
         <Button asChild className="mt-8 w-full" size="lg">
-          <Link href={`/player/missions/${slug}/stage/${nextStage}`}>
-            {mission.status === "completed"
-              ? PLAYER_UI.reviewMission
-              : PLAYER_UI.continueMission}
-          </Link>
+          {mission.status === "completed" && mission.nextMissionSlug ? (
+            <Link href={`/player/missions/${mission.nextMissionSlug}`}>
+              {PLAYER_UI.goToNextMission}
+            </Link>
+          ) : mission.status === "completed" ? (
+            <Link href="/player">{PLAYER_UI.backToMap}</Link>
+          ) : (
+            <Link href={`/player/missions/${slug}/stage/${nextStage}`}>
+              {PLAYER_UI.continueMission}
+            </Link>
+          )}
         </Button>
       )}
     </div>

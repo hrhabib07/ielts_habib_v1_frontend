@@ -3,10 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPlayerCourseMap, type PlayerCourseMap } from "@/src/lib/api/player";
+import { getFounderCounter } from "@/src/lib/api/gamlish";
 import { CampMapView } from "@/src/components/player/CampMapView";
 import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
+import { FounderUrgentAlertBar } from "@/src/components/home/FounderUrgentAlertBar";
+import { FounderVipClaimCard } from "@/src/components/home/FounderVipClaimCard";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
 import { USERNAME_CLAIM_HREF } from "@/src/lib/auth-redirects";
 import { Button } from "@/components/ui/button";
 import { isAxiosError } from "axios";
@@ -35,11 +39,16 @@ function mapLoadErrorMessage(err: unknown): string {
 
 export default function PlayerPageClient() {
   const router = useRouter();
-  const { profile, loading: profileLoading } = useStudentSession();
+  const { profile, loading: profileLoading, isFoundingMember } =
+    useStudentSession();
+  const payment = usePaymentApplicationStatus(true);
   const [map, setMap] = useState<PlayerCourseMap | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [remainingSeats, setRemainingSeats] = useState<number | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (profileLoading) return;
@@ -79,6 +88,31 @@ export default function PlayerPageClient() {
     return () => controller.abort();
   }, [loadMap, retryKey, profile?.needsUsername]);
 
+  useEffect(() => {
+    let cancelled = false;
+    getFounderCounter()
+      .then((counter) => {
+        if (cancelled) return;
+        if (typeof counter.slotsRemaining === "number") {
+          setRemainingSeats(Math.max(0, counter.slotsRemaining));
+        }
+      })
+      .catch(() => {
+        /* components fall back to default seats */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const paymentBusy = profileLoading || payment.loading;
+  const hasPaidOrPending =
+    payment.hasPurchased ||
+    isFoundingMember ||
+    payment.latestRequest?.status === "PENDING" ||
+    payment.latestRequest?.status === "APPROVED";
+  const showFounderOffer = !paymentBusy && !hasPaidOrPending;
+
   if (profileLoading || profile?.needsUsername) {
     return (
       <div className="mx-auto max-w-lg space-y-4 px-4 py-10">
@@ -111,9 +145,22 @@ export default function PlayerPageClient() {
 
   return (
     <div>
+      {showFounderOffer ? (
+        <FounderUrgentAlertBar remainingSeats={remainingSeats} />
+      ) : null}
+
       <div className="mx-auto max-w-lg px-4 pt-4 sm:max-w-2xl">
-        <UsernameClaimBanner />
+        {showFounderOffer ? (
+          <FounderVipClaimCard
+            remainingSeats={remainingSeats}
+            className="mb-2"
+            href="/checkout"
+          />
+        ) : (
+          <UsernameClaimBanner />
+        )}
       </div>
+
       <CampMapView map={map} loading={loading} error={null} />
     </div>
   );

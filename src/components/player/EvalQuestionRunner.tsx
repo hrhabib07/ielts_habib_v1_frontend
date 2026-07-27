@@ -26,11 +26,37 @@ import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { PlayerUiCopy } from "@/src/lib/player-ui-copy";
 import { emitXpGain } from "@/src/lib/xp-events";
+import {
+  buildGapFillAnswer,
+  parseGapSourceText,
+} from "@/src/lib/player-gap-fill";
 
 type EvalQuestion = Record<string, unknown>;
 
 /** Duolingo-style pause so feedback is readable, then auto-advance. */
 const AUTO_ADVANCE_MS = 1500;
+
+/**
+ * True when every rearrange tile is present in the answer string (order = student order).
+ * Handles multi-word tiles like "The garden" that must not be counted as two words.
+ */
+function isRearrangeAnswerComplete(words: string[], answer: string): boolean {
+  let rest = answer.trim().replace(/[.!?]+$/, "").trim();
+  if (!rest) return false;
+
+  const remaining = [...words];
+  while (remaining.length > 0) {
+    const matches = remaining
+      .map((word, index) => ({ word, index }))
+      .filter(({ word }) => rest === word || rest.startsWith(`${word} `))
+      .sort((a, b) => b.word.length - a.word.length);
+    const best = matches[0];
+    if (!best) return false;
+    remaining.splice(best.index, 1);
+    rest = rest.slice(best.word.length).trimStart();
+  }
+  return rest.length === 0;
+}
 
 function isQuestionAnswered(
   question: EvalQuestion,
@@ -48,16 +74,21 @@ function isQuestionAnswered(
     return typeof answer === "string" && answer.trim() !== "";
   }
   if (stageType === "rearrange" && Array.isArray(question.words)) {
-    if (typeof answer !== "string" || !answer.trim()) return false;
-    const expectedCount = (question.words as string[]).length;
-    const placedCount = answer
-      .trim()
-      .replace(/[.!?]+$/, "")
-      .split(/\s+/)
-      .filter(Boolean).length;
-    return placedCount === expectedCount;
+    if (typeof answer !== "string") return false;
+    return isRearrangeAnswerComplete(question.words as string[], answer);
   }
   if (stageType === "translation") {
+    const source = String(question.sourceText ?? "");
+    const parsed = parseGapSourceText(source);
+    if (parsed) {
+      const draftGaps = answers[`${id}__gaps`];
+      if (!Array.isArray(draftGaps) || draftGaps.length < parsed.gapCount) {
+        return false;
+      }
+      return draftGaps
+        .slice(0, parsed.gapCount)
+        .every((v) => String(v ?? "").trim() !== "");
+    }
     return typeof answer === "string" && answer.trim() !== "";
   }
   if (stageType === "compound_mcq" && Array.isArray(question.parts)) {
@@ -300,6 +331,95 @@ function EvaluationQuestionBody({
   }
 
   if (stageType === "translation") {
+    const sourceText = String(question.sourceText ?? "");
+    const gapParts = parseGapSourceText(sourceText);
+
+    if (gapParts) {
+      const gapValues: string[] = Array.from({ length: gapParts.gapCount }, () => "");
+      // Prefer dedicated gap state key when rebuilding from full answer is ambiguous;
+      // we keep gap drafts in answers[`${id}__gaps`] as string[].
+      const draftGaps = answers[`${id}__gaps`];
+      if (Array.isArray(draftGaps)) {
+        draftGaps.forEach((v, i) => {
+          if (i < gapValues.length) gapValues[i] = String(v ?? "");
+        });
+      }
+
+      const segments = gapParts.englishTemplate.split(/_{3,}/);
+
+      const setGapAt = (index: number, value: string) => {
+        touchAnswer((prev) => {
+          const prevGaps = (prev[`${id}__gaps`] as string[] | undefined) ?? gapValues;
+          const nextGaps = Array.from({ length: gapParts.gapCount }, (_, i) =>
+            i === index ? value : String(prevGaps[i] ?? ""),
+          );
+          return {
+            ...prev,
+            [`${id}__gaps`]: nextGaps,
+            [id]: buildGapFillAnswer(sourceText, nextGaps),
+          };
+        });
+      };
+
+      return (
+        <div className="space-y-4">
+          {gapParts.banglaHint ? (
+            <p className="rounded-xl border border-border/60 bg-muted/30 px-3 py-2.5 text-base font-semibold leading-relaxed text-foreground">
+              {gapParts.banglaHint}
+            </p>
+          ) : null}
+          <p className="text-sm font-medium text-foreground">{copy.gapFillPrompt}</p>
+          {Array.isArray(question.hints) && (question.hints as string[]).length > 0 ? (
+            <ul className="list-inside list-disc text-xs text-muted-foreground">
+              {(question.hints as string[]).map((h) => (
+                <li key={h}>{h}</li>
+              ))}
+            </ul>
+          ) : null}
+          <p
+            className={cn(
+              "rounded-xl border bg-background px-3 py-3 text-base font-semibold leading-relaxed text-foreground",
+              locked && checkResult?.correct && "border-primary",
+              locked && !checkResult?.correct && "border-destructive",
+            )}
+          >
+            {segments.map((segment, idx) => {
+              const gapValue = gapValues[idx] ?? "";
+              const gapSize = Math.min(
+                18,
+                Math.max(3, gapValue.length || copy.gapPlaceholder.length || 3),
+              );
+              return (
+                <span key={`seg-${idx}`}>
+                  {segment}
+                  {idx < gapParts.gapCount ? (
+                    <input
+                      type="text"
+                      disabled={disabled || locked}
+                      value={gapValue}
+                      onChange={(e) => setGapAt(idx, e.target.value)}
+                      autoCapitalize="off"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      aria-label={`Gap ${idx + 1}`}
+                      placeholder={copy.gapPlaceholder}
+                      size={gapSize}
+                      className={cn(
+                        "mx-0.5 inline-block h-8 max-w-[12rem] rounded-md border border-sky-500/50 bg-sky-500/10 px-1.5 py-0.5 align-baseline text-center text-base font-bold text-foreground outline-none",
+                        "field-sizing-content focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30",
+                        locked && checkResult?.correct && "border-primary bg-primary/10",
+                        locked && !checkResult?.correct && "border-destructive bg-destructive/10",
+                      )}
+                    />
+                  ) : null}
+                </span>
+              );
+            })}
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-3">
         {question.sourceText ? (
@@ -419,6 +539,18 @@ export function EvalQuestionRunner({
     Record<string, number>
   >({});
   const handleContinueRef = useRef<() => void>(() => undefined);
+  /** Prevents auto-advance + manual Continue from skipping a question (blank UI / no button). */
+  const continueLockRef = useRef<string | null>(null);
+  const [advanceLockedForId, setAdvanceLockedForId] = useState<string | null>(null);
+
+  const buildSubmitAnswers = () => {
+    const cleaned: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries({ ...preservedAnswers, ...answers })) {
+      if (key.endsWith("__gaps")) continue;
+      cleaned[key] = value;
+    }
+    return cleaned;
+  };
 
   const handleAnswerChange = (questionId: string) => {
     const attempts = wrongAttemptCounts[questionId] ?? 0;
@@ -510,24 +642,31 @@ export function EvalQuestionRunner({
   };
 
   const handleContinue = () => {
-    if (!isChecked) return;
+    if (!isChecked || !questionId) return;
     if (retryMode && currentCheck && !currentCheck.correct) {
       setStepError(copy.needCorrectToContinue);
       return;
     }
-    if (isLast) {
-      onComplete({ ...preservedAnswers, ...answers });
+    // Sync lock: auto-advance timer + Continue click must not both run.
+    if (continueLockRef.current === questionId) return;
+    continueLockRef.current = questionId;
+    setAdvanceLockedForId(questionId);
+
+    if (isLast || currentIndex >= total - 1) {
+      if (submitting) return;
+      onComplete(buildSubmitAnswers());
       return;
     }
     setStepError(null);
-    setCurrentIndex((i) => i + 1);
+    setCurrentIndex((i) => Math.min(i + 1, Math.max(total - 1, 0)));
   };
   handleContinueRef.current = handleContinue;
 
   // After feedback (correct or confirmed wrong), auto-advance like Duolingo.
   useEffect(() => {
-    if (!isChecked || checking) return;
+    if (!isChecked || checking || !questionId) return;
     if (retryMode && currentCheck && !currentCheck.correct) return;
+    if (continueLockRef.current === questionId) return;
 
     const timer = window.setTimeout(() => {
       handleContinueRef.current();
@@ -535,6 +674,25 @@ export function EvalQuestionRunner({
 
     return () => window.clearTimeout(timer);
   }, [isChecked, checking, questionId, retryMode, currentCheck]);
+
+  // Recover if index overshoots (legacy double-advance) so the CTA never vanishes.
+  useEffect(() => {
+    if (total === 0 || currentIndex < total) return;
+    setCurrentIndex(total - 1);
+  }, [currentIndex, total]);
+
+  const prevSubmittingRef = useRef(false);
+
+  // After a failed stage submit (submitting true → false), unlock last-question Submit.
+  useEffect(() => {
+    const wasSubmitting = prevSubmittingRef.current;
+    prevSubmittingRef.current = submitting;
+    if (submitting || !wasSubmitting) return;
+    if (!isLast || !questionId) return;
+    if (advanceLockedForId !== questionId) return;
+    continueLockRef.current = null;
+    setAdvanceLockedForId(null);
+  }, [submitting, isLast, questionId, advanceLockedForId]);
 
   const handlePrimaryAction = (event?: FormEvent) => {
     event?.preventDefault();
@@ -619,6 +777,7 @@ export function EvalQuestionRunner({
                 size="lg"
                 disabled={
                   submitting ||
+                  advanceLockedForId === questionId ||
                   (retryMode && currentCheck != null && !currentCheck.correct)
                 }
                 className="min-w-[160px] gap-2"
@@ -644,6 +803,30 @@ export function EvalQuestionRunner({
             )}
           </div>
         </>
+      ) : total > 0 ? (
+        <div className="flex justify-end pt-1">
+          <Button
+            type="button"
+            size="lg"
+            disabled={submitting}
+            className="min-w-[160px] gap-2"
+            onClick={() => {
+              if (submitting) return;
+              onComplete(buildSubmitAnswers());
+            }}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {copy.submitting}
+              </>
+            ) : retryMode ? (
+              copy.submitFixed
+            ) : (
+              copy.submit
+            )}
+          </Button>
+        </div>
       ) : null}
     </form>
   );

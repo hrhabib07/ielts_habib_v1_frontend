@@ -49,6 +49,7 @@ export interface PlayerMissionDetail {
   status: PlayerMissionStatus;
   xpEarned: number;
   coinsEarned: number;
+  nextMissionSlug?: string | null;
 }
 
 export type PlayerEvalType =
