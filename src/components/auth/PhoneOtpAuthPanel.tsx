@@ -72,13 +72,13 @@ const COPY = {
     nameLabel: "নাম / nickname",
     namePlaceholder: "যেমন: রাফি, সুমাইয়া",
     passwordLabel: "পাসওয়ার্ড",
-    passwordPlaceholder: "কমপক্ষে 8 অক্ষর",
+    passwordPlaceholder: "কমপক্ষে 6 অক্ষর",
     confirmLabel: "পাসওয়ার্ড নিশ্চিত করুন",
     confirmPlaceholder: "আবার পাসওয়ার্ড লিখুন",
     setupSubmit: "সেভ করে চালিয়ে যান",
     setupSaving: "সেভ হচ্ছে…",
     errName: "আপনার নাম লিখুন।",
-    errPasswordShort: "পাসওয়ার্ড কমপক্ষে 8 অক্ষর হতে হবে।",
+    errPasswordShort: "পাসওয়ার্ড কমপক্ষে 6 অক্ষর হতে হবে।",
     errPasswordMismatch: "পাসওয়ার্ড দুইবার একই হতে হবে।",
   },
   en: {
@@ -101,13 +101,13 @@ const COPY = {
     nameLabel: "Name / nickname",
     namePlaceholder: "e.g. Rafi, Sumaiya",
     passwordLabel: "Password",
-    passwordPlaceholder: "At least 8 characters",
+    passwordPlaceholder: "At least 6 characters",
     confirmLabel: "Confirm password",
     confirmPlaceholder: "Type password again",
     setupSubmit: "Save and continue",
     setupSaving: "Saving…",
     errName: "Please enter your name.",
-    errPasswordShort: "Password must be at least 8 characters.",
+    errPasswordShort: "Password must be at least 6 characters.",
     errPasswordMismatch: "Passwords must match.",
   },
 } as const;
@@ -233,7 +233,7 @@ export function PhoneOtpAuthPanel({
       return;
     }
     if (needsPassword) {
-      if (password.length < 8) {
+      if (password.length < 6) {
         setError(copy.errPasswordShort);
         return;
       }
@@ -463,7 +463,7 @@ export function PhoneOtpAuthPanel({
                     type="password"
                     autoComplete="new-password"
                     required
-                    minLength={8}
+                    minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={copy.passwordPlaceholder}
@@ -486,7 +486,7 @@ export function PhoneOtpAuthPanel({
                     type="password"
                     autoComplete="new-password"
                     required
-                    minLength={8}
+                    minLength={6}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder={copy.confirmPlaceholder}
@@ -512,7 +512,7 @@ export function PhoneOtpAuthPanel({
               loading ||
               displayName.trim().length < 1 ||
               (needsPassword &&
-                (password.length < 8 || confirmPassword.length < 8))
+                (password.length < 6 || confirmPassword.length < 6))
             }
             className="h-11 w-full rounded-xl text-[15px] font-semibold"
             size="lg"

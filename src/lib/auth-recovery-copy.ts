@@ -82,12 +82,12 @@ function buildAuthRecoveryCopy(locale: UiLocale): AuthRecoveryCopy {
       requestNewCode: "নতুন কোড চান",
       resetTitle: "নতুন পাসওয়ার্ড বাছুন",
       resetSub:
-        "অন্য সাইটে ব্যবহার করেন না এমন শক্তিশালী পাসওয়ার্ড দিন। কমপক্ষে 8 অক্ষর।",
+        "অন্য সাইটে ব্যবহার করেন না এমন শক্তিশালী পাসওয়ার্ড দিন। কমপক্ষে 6 অক্ষর।",
       newPassword: "নতুন পাসওয়ার্ড",
       confirmPassword: "পাসওয়ার্ড নিশ্চিত করুন",
       savePassword: "পাসওয়ার্ড সেভ করুন",
       saving: "সেভ হচ্ছে…",
-      minLength: "নতুন পাসওয়ার্ড কমপক্ষে 8 অক্ষরের হতে হবে।",
+      minLength: "নতুন পাসওয়ার্ড কমপক্ষে 6 অক্ষরের হতে হবে।",
       mismatch: "পাসওয়ার্ড মিলছে না।",
       sessionExpired:
         "রিসেট সেশন শেষ। Forgot password থেকে আবার শুরু করুন।",
@@ -150,7 +150,7 @@ function buildAuthRecoveryCopy(locale: UiLocale): AuthRecoveryCopy {
     confirmPassword: "Confirm password",
     savePassword: "Save password",
     saving: "Saving…",
-    minLength: "Use at least 8 characters for your new password.",
+    minLength: "Use at least 6 characters for your new password.",
     mismatch: "Passwords do not match.",
     sessionExpired: "Your reset session expired. Start again from forgot password.",
     resetFailed: "Could not reset password. Try again.",
@@ -213,7 +213,7 @@ function buildProfilePasswordCopy(locale: UiLocale): ProfilePasswordCopy {
       updateCta: "পাসওয়ার্ড আপডেট",
       setCta: "পাসওয়ার্ড সেট করুন",
       changeHelp:
-        "নিরাপত্তার জন্য এই অংশ খোলা পর্যন্ত বন্ধ থাকে। শক্তিশালী পাসওয়ার্ড কমপক্ষে 8 অক্ষর ও এই সাইটের জন্য ইউনিক হোক।",
+        "নিরাপত্তার জন্য এই অংশ খোলা পর্যন্ত বন্ধ থাকে। শক্তিশালী পাসওয়ার্ড কমপক্ষে 6 অক্ষর ও এই সাইটের জন্য ইউনিক হোক।",
       setHelp:
         "ইমেইল দিয়েও লগইন করতে পাসওয়ার্ড যোগ করুন। Google সাইন-ইন আগের মতোই কাজ করবে।",
       current: "বর্তমান পাসওয়ার্ড",
@@ -221,7 +221,7 @@ function buildProfilePasswordCopy(locale: UiLocale): ProfilePasswordCopy {
       password: "পাসওয়ার্ড",
       confirm: "পাসওয়ার্ড নিশ্চিত করুন",
       saving: "সেভ হচ্ছে…",
-      minLength: "নতুন পাসওয়ার্ড কমপক্ষে 8 অক্ষরের হতে হবে।",
+      minLength: "নতুন পাসওয়ার্ড কমপক্ষে 6 অক্ষরের হতে হবে।",
       mismatch: "নতুন পাসওয়ার্ড ও নিশ্চিতকরণ মিলছে না।",
       updateSuccess:
         "পাসওয়ার্ড আপডেট হয়েছে। পরেরবার নতুন পাসওয়ার্ড দিয়ে সাইন ইন করুন।",
@@ -237,7 +237,7 @@ function buildProfilePasswordCopy(locale: UiLocale): ProfilePasswordCopy {
     updateCta: "Update password",
     setCta: "Set password",
     changeHelp:
-      "For your security this section stays collapsed until you open it. A strong password is at least 8 characters and unique to this site.",
+      "For your security this section stays collapsed until you open it. A strong password is at least 6 characters and unique to this site.",
     setHelp:
       "Add a password so you can also sign in with email. Google sign-in will keep working.",
     current: "Current password",
@@ -245,7 +245,7 @@ function buildProfilePasswordCopy(locale: UiLocale): ProfilePasswordCopy {
     password: "Password",
     confirm: "Confirm password",
     saving: "Saving…",
-    minLength: "New password must be at least 8 characters.",
+    minLength: "New password must be at least 6 characters.",
     mismatch: "New password and confirmation do not match.",
     updateSuccess:
       "Password updated. Use your new password next time you sign in.",

@@ -44,7 +44,7 @@ export function ProfileChangePassword({
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    if (newPassword.length < 8) {
+    if (newPassword.length < 6) {
       setError(copy.minLength);
       return;
     }
@@ -141,7 +141,7 @@ export function ProfileChangePassword({
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              minLength={8}
+              minLength={6}
             />
           </div>
           <div className="space-y-2">
@@ -153,7 +153,7 @@ export function ProfileChangePassword({
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               required
-              minLength={8}
+              minLength={6}
             />
           </div>
           {error ? (
