@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   AlertTriangle,
@@ -18,6 +19,7 @@ import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { MissionZeroCopy } from "@/src/lib/mission-zero-copy";
 import { cn } from "@/lib/utils";
+import { trackFunnelEvent, trackFunnelEventBeacon } from "@/src/lib/api/analytics";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const EN_FACE = "font-sans tabular-nums";
@@ -43,6 +45,31 @@ export function MissionZeroSaveProgress({
   const reduceMotion = useReducedMotion();
   const { locale } = useUiLocale();
   const s = copy.save;
+
+  const mountedAtRef = useRef(Date.now());
+
+  useEffect(() => {
+    void trackFunnelEvent({
+      event: "phone_otp_method_selected",
+      demoSessionId: sessionId,
+      screen: "demo_step_4_signup",
+      step: 4,
+      metadata: { xpEarned: totalXp },
+    });
+    const mountedAt = mountedAtRef.current;
+    return () => {
+      const timeSpentSeconds = Math.round((Date.now() - mountedAt) / 1000);
+      if (timeSpentSeconds >= 10) {
+        trackFunnelEventBeacon({
+          event: "save_screen_abandoned",
+          demoSessionId: sessionId,
+          screen: "demo_step_4_signup",
+          step: 4,
+          metadata: { timeSpentSeconds, signup_dwell_seconds: timeSpentSeconds },
+        });
+      }
+    };
+  }, [sessionId, totalXp]);
 
   const registerHref = sessionId
     ? `/register?from=demo&sid=${encodeURIComponent(sessionId)}`
@@ -162,7 +189,15 @@ export function MissionZeroSaveProgress({
             "hover:bg-muted/50 hover:text-foreground sm:text-[15px]",
           )}
           label={googleCtaLabel}
-          onNavigate={onGoogleNavigate}
+          onNavigate={() => {
+            void trackFunnelEvent({
+              event: "clicked_google_save_button",
+              demoSessionId: sessionId,
+              screen: "demo_step_4_signup",
+              step: 4,
+            });
+            onGoogleNavigate();
+          }}
         />
 
         <p className="mt-3 text-center">

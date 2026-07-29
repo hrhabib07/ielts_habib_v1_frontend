@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Lock, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import {
 } from "@/src/lib/demo-session";
 import { getStudentPostAuthHref } from "@/src/lib/auth-redirects";
 import { cn } from "@/lib/utils";
+import { trackFunnelEvent } from "@/src/lib/api/analytics";
 
 type Locale = "en" | "bn";
 type Step = "phone" | "otp" | "setup";
@@ -134,6 +135,24 @@ export function PhoneOtpAuthPanel({
   const [pendingHref, setPendingHref] = useState("/player");
   const [needsPassword, setNeedsPassword] = useState(true);
 
+  const otpSentAtRef = useRef<number | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (attachDemoSession) {
+      sessionIdRef.current = readDemoSessionId();
+    }
+  }, [attachDemoSession]);
+
+  function track(event: Parameters<typeof trackFunnelEvent>[0]["event"], meta?: Record<string, unknown>) {
+    void trackFunnelEvent({
+      event,
+      demoSessionId: sessionIdRef.current,
+      screen: "demo_step_4_signup",
+      step: 4,
+      metadata: meta,
+    });
+  }
+
   useEffect(() => {
     if (resendIn <= 0) return;
     const t = window.setTimeout(() => setResendIn((s) => s - 1), 1000);
@@ -151,22 +170,29 @@ export function PhoneOtpAuthPanel({
   const sendOtp = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const isResend = step === "otp";
+    track(isResend ? "phone_otp_resend_clicked" : "phone_otp_send_clicked");
     try {
       const res = await requestPhoneOtp(phone.trim());
+      otpSentAtRef.current = Date.now();
+      track("phone_otp_sent_success");
       setPhoneMasked(res.data.phoneMasked || res.data.phoneDisplay);
       setStep("otp");
       setResendIn(res.data.resendAfterSeconds || 60);
       setOtp("");
     } catch (err) {
-      setError(extractApiError(err) ?? "Could not send OTP. Try again.");
+      const errMsg = extractApiError(err) ?? "Could not send OTP. Try again.";
+      track("phone_otp_sent_error", { error: errMsg });
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
-  }, [phone]);
+  }, [phone, step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const verify = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const deliveryMs = otpSentAtRef.current ? Date.now() - otpSentAtRef.current : null;
     try {
       const res = await verifyPhoneOtp({
         phone: phone.trim(),
@@ -179,6 +205,11 @@ export function PhoneOtpAuthPanel({
       const isNewUser = Boolean(res.data.isNewUser);
       const hasPassword = Boolean(res.data.hasPassword);
       const currentName = res.data.user.displayName ?? null;
+
+      track("phone_otp_verified_success", {
+        deliveryMs: deliveryMs ?? undefined,
+        isNewUser,
+      });
 
       if (token) {
         setAccessToken(token);
@@ -214,7 +245,9 @@ export function PhoneOtpAuthPanel({
 
       finishNavigate(href);
     } catch (err) {
-      setError(extractApiError(err) ?? "Invalid or expired OTP.");
+      const errMsg = extractApiError(err) ?? "Invalid or expired OTP.";
+      track("phone_otp_verified_error", { error: errMsg });
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -250,6 +283,7 @@ export function PhoneOtpAuthPanel({
       if (needsPassword) {
         await setPasswordRequest(password);
       }
+      track("phone_setup_completed");
       finishNavigate(pendingHref);
     } catch (err) {
       setError(
@@ -365,6 +399,10 @@ export function PhoneOtpAuthPanel({
               onChange={(e) =>
                 setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
               }
+              onFocus={() => {
+                const deliveryMs = otpSentAtRef.current ? Date.now() - otpSentAtRef.current : null;
+                track("phone_otp_field_focused", { deliveryMs: deliveryMs ?? undefined });
+              }}
               placeholder={copy.otpPlaceholder}
               className="h-11 rounded-xl border-border/80 bg-background text-center font-sans text-lg tracking-[0.35em] tabular-nums"
             />

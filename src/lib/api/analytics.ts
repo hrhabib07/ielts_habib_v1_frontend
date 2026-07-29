@@ -20,7 +20,17 @@ export type FunnelEventName =
   | "rage_click"
   | "input_hesitation"
   | "language_switched"
-  | "page_exit";
+  | "page_exit"
+  | "phone_otp_method_selected"
+  | "phone_otp_send_clicked"
+  | "phone_otp_sent_success"
+  | "phone_otp_sent_error"
+  | "phone_otp_field_focused"
+  | "phone_otp_verified_success"
+  | "phone_otp_verified_error"
+  | "phone_otp_resend_clicked"
+  | "phone_setup_completed"
+  | "save_screen_abandoned";
 
 function apiBase(): string {
   return process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";
