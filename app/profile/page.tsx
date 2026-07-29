@@ -46,6 +46,7 @@ import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanne
 import { MyGamlishHub } from "@/src/components/profile/MyGamlishHub";
 import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
+import { cn } from "@/lib/utils";
 
 function formatSubscriptionDate(iso: string): string {
   try {
@@ -290,10 +291,15 @@ export default function ProfilePage() {
                       }
                     />
                   </div>
-                  {phone?.trim() ? (
+                  {profileRecord.phoneVerified && profileRecord.phoneMasked ? (
                     <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
                       <Phone className="h-4 w-4 shrink-0" />
-                      {phone.trim()}
+                      <span className="font-sans tabular-nums">
+                        {profileRecord.phoneMasked}
+                      </span>
+                      <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                        {locale === "bn" ? "ভেরিফাইড" : "Verified"}
+                      </span>
                     </p>
                   ) : null}
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -496,6 +502,96 @@ export default function ProfilePage() {
             )}
           </Card>
         </div>
+
+        <Card className="border-border/70 p-6 shadow-sm md:p-8">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground md:text-xl">
+            {locale === "bn" ? "সাইন ইন মেথড" : "Sign-in methods"}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {locale === "bn"
+              ? "শুধু আপনি দেখতে পারবেন। পাবলিক প্রোফাইলে ফোন নম্বর দেখানো হয় না।"
+              : "Only you can see this. Phone numbers are never shown on your public profile."}
+          </p>
+          <ul className="mt-4 space-y-2.5">
+            <li className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3.5 py-3">
+              <span className="text-sm font-medium text-foreground">Google</span>
+              <span
+                className={cn(
+                  "rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+                  profileRecord.hasGoogle ||
+                    profileRecord.authProviders?.includes("google")
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
+                {profileRecord.hasGoogle ||
+                profileRecord.authProviders?.includes("google")
+                  ? locale === "bn"
+                    ? "কানেক্টেড"
+                    : "Connected"
+                  : locale === "bn"
+                    ? "নেই"
+                    : "Not connected"}
+              </span>
+            </li>
+            <li className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3.5 py-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  {locale === "bn" ? "মোবাইল" : "Mobile"}
+                </p>
+                {profileRecord.phoneVerified && profileRecord.phoneMasked ? (
+                  <p className="mt-0.5 font-sans text-xs tabular-nums text-muted-foreground">
+                    {profileRecord.phoneMasked}
+                  </p>
+                ) : null}
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+                  profileRecord.phoneVerified
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
+                {profileRecord.phoneVerified
+                  ? locale === "bn"
+                    ? "ভেরিফাইড"
+                    : "Verified"
+                  : locale === "bn"
+                    ? "নেই"
+                    : "Not verified"}
+              </span>
+            </li>
+            <li className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3.5 py-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  {locale === "bn" ? "ইমেইল" : "Email"}
+                </p>
+                {profileRecord.email ? (
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {profileRecord.email}
+                  </p>
+                ) : null}
+              </div>
+              <span
+                className={cn(
+                  "shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+                  profileRecord.email
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
+                {profileRecord.email
+                  ? locale === "bn"
+                    ? "কানেক্টেড"
+                    : "Connected"
+                  : locale === "bn"
+                    ? "ঐচ্ছিক"
+                    : "Optional"}
+              </span>
+            </li>
+          </ul>
+        </Card>
 
         <Card className="border-border/70 p-6 shadow-sm md:p-8">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

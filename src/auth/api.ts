@@ -5,8 +5,11 @@ import type {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
+  RequestPhoneOtpResponse,
   VerifyOtpRequest,
   VerifyOtpResponse,
+  VerifyPhoneOtpRequest,
+  VerifyPhoneOtpResponse,
 } from "./types";
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
@@ -90,4 +93,24 @@ export async function updatePasswordRequest(
 
 export async function setPasswordRequest(newPassword: string): Promise<void> {
   await apiClient.post("/auth/set-password", { newPassword });
+}
+
+export async function requestPhoneOtp(
+  phone: string,
+): Promise<RequestPhoneOtpResponse> {
+  const { data } = await apiClient.post<RequestPhoneOtpResponse>(
+    "/auth/phone/request-otp",
+    { phone },
+  );
+  return data;
+}
+
+export async function verifyPhoneOtp(
+  payload: VerifyPhoneOtpRequest,
+): Promise<VerifyPhoneOtpResponse> {
+  const { data } = await apiClient.post<VerifyPhoneOtpResponse>(
+    "/auth/phone/verify-otp",
+    payload,
+  );
+  return data;
 }

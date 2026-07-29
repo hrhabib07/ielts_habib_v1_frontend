@@ -96,6 +96,34 @@ function MemberRow({ member }: { member: FounderWallMember }) {
   );
 }
 
+/** Last wall slot — open until the first 100 founders are filled. */
+function JoinHereSlot({ nextNumber }: { nextNumber: number }) {
+  const padded = String(nextNumber).padStart(3, "0");
+  return (
+    <section className="mt-10" aria-label="Join the Founders' Wall">
+      <Link
+        href="/pricing"
+        className="flex w-full flex-col gap-3 rounded-2xl border border-dashed border-amber-500/55 bg-gradient-to-r from-amber-400/15 via-amber-400/10 to-transparent p-4 transition-colors hover:from-amber-400/25 sm:flex-row sm:items-center sm:gap-4 sm:p-5"
+      >
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-sm font-black tabular-nums text-amber-950 shadow-sm">
+          #{padded}
+        </span>
+        <span className="min-w-0 flex-1 text-left">
+          <span className="block text-base font-bold tracking-tight text-amber-950 dark:text-amber-100 sm:text-lg">
+            You can be Founder #{padded}
+          </span>
+          <span className="mt-0.5 block text-sm text-amber-900/80 dark:text-amber-200/80">
+            Your name can be added here — join before the first 100 fill up.
+          </span>
+        </span>
+        <span className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 px-4 text-sm font-bold text-amber-950 shadow-sm transition-colors hover:bg-amber-400">
+          Join here now
+        </span>
+      </Link>
+    </section>
+  );
+}
+
 export function FoundingMembersWallContent() {
   const [wall, setWall] = useState<FoundersWall | null>(null);
   const [loading, setLoading] = useState(true);
@@ -110,6 +138,10 @@ export function FoundingMembersWallContent() {
 
   const membersByTier = (tier: FounderTier): FounderWallMember[] =>
     (wall?.members ?? []).filter((m) => m.founderTier === tier);
+
+  const filled = wall?.counter.slotsFilled ?? 0;
+  const max = wall?.counter.maxSlots ?? 100;
+  const showJoinSlot = wall?.counter.isOpen === true && filled < max;
 
   return (
     <div className="relative mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
@@ -145,8 +177,7 @@ export function FoundingMembersWallContent() {
           ) : null}
 
           <p className="mt-4 text-center text-xs text-muted-foreground">
-            {wall?.counter.slotsFilled ?? 0} / {wall?.counter.maxSlots ?? 100} founding
-            members claimed
+            {filled} / {max} founding members claimed
           </p>
 
           {wall && wall.members.length > 0 ? (
@@ -185,6 +216,8 @@ export function FoundingMembersWallContent() {
               .
             </p>
           )}
+
+          {showJoinSlot ? <JoinHereSlot nextNumber={filled + 1} /> : null}
         </>
       )}
     </div>

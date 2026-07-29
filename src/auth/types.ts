@@ -10,7 +10,7 @@ export interface LoginResponse {
     token: string;
     user: {
       id: string;
-      email: string;
+      email: string | null;
       role: "STUDENT" | "INSTRUCTOR" | "ADMIN";
       isVIP: boolean;
     };
@@ -42,6 +42,46 @@ export interface VerifyOtpResponse {
   data: {
     token: string;
     continuePath?: string | null;
-    user: { id: string; email: string; role: "STUDENT" | "INSTRUCTOR" | "ADMIN" };
+    user: {
+      id: string;
+      email: string | null;
+      role: "STUDENT" | "INSTRUCTOR" | "ADMIN";
+    };
+  };
+}
+
+export interface RequestPhoneOtpResponse {
+  success: boolean;
+  message: string;
+  data: {
+    phone: string;
+    phoneDisplay: string;
+    phoneMasked: string;
+    expiresInSeconds: number;
+    resendAfterSeconds: number;
+  };
+}
+
+export interface VerifyPhoneOtpRequest {
+  phone: string;
+  otp: string;
+  demoSessionId?: string | null;
+}
+
+export interface VerifyPhoneOtpResponse {
+  success: boolean;
+  message: string;
+  data: {
+    token: string;
+    continuePath?: string | null;
+    isNewUser?: boolean;
+    hasPassword?: boolean;
+    user: {
+      id: string;
+      email: string | null;
+      phone: string | null;
+      displayName?: string | null;
+      role: "STUDENT" | "INSTRUCTOR" | "ADMIN";
+    };
   };
 }

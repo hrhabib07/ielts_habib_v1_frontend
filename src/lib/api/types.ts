@@ -104,7 +104,11 @@ export interface StudentProfile {
   /** False for Google-only accounts until they set a password. */
   hasPassword?: boolean;
   hasGoogle?: boolean;
-  authProviders?: Array<"password" | "google">;
+  /** True when account phone OTP was verified. */
+  phoneVerified?: boolean;
+  /** Masked verified auth phone for private settings (e.g. 016****84). */
+  phoneMasked?: string | null;
+  authProviders?: Array<"password" | "google" | "phone">;
   isFoundingMember?: boolean;
   founderNumber?: number | null;
   founderTier?: "GOLD" | "SILVER" | "BRONZE" | null;

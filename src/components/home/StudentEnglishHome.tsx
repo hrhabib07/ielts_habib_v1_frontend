@@ -10,10 +10,12 @@ import {
   getPlayerCourseMap,
   type PlayerCourseMap,
 } from "@/src/lib/api/player";
-import { getFounderCounter } from "@/src/lib/api/gamlish";
+import {
+  getFounderCounter,
+  type FounderTierLiveStat,
+} from "@/src/lib/api/gamlish";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
-import { FounderUrgentAlertBar } from "@/src/components/home/FounderUrgentAlertBar";
 import { FounderVipClaimCard } from "@/src/components/home/FounderVipClaimCard";
 import { CampMapView } from "@/src/components/player/CampMapView";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
@@ -42,9 +44,10 @@ export function StudentEnglishHome() {
   const reduceMotion = useReducedMotion();
   const [map, setMap] = useState<PlayerCourseMap | null>(null);
   const [loading, setLoading] = useState(true);
-  const [remainingSeats, setRemainingSeats] = useState<number | undefined>(
-    undefined,
-  );
+  const [founderTiers, setFounderTiers] = useState<
+    FounderTierLiveStat[] | undefined
+  >(undefined);
+  const [founderDeadline, setFounderDeadline] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,12 +71,13 @@ export function StudentEnglishHome() {
     getFounderCounter()
       .then((counter) => {
         if (cancelled) return;
-        if (typeof counter.slotsRemaining === "number") {
-          setRemainingSeats(Math.max(0, counter.slotsRemaining));
+        if (Array.isArray(counter.tiers) && counter.tiers.length > 0) {
+          setFounderTiers(counter.tiers);
         }
+        if (counter.launchDateIso) setFounderDeadline(counter.launchDateIso);
       })
       .catch(() => {
-        /* default seats used in components */
+        /* card falls back to default Gold progress */
       });
     return () => {
       cancelled = true;
@@ -115,10 +119,6 @@ export function StudentEnglishHome() {
       )}
       lang={locale === "bn" ? "bn" : "en"}
     >
-      {showFounderOffer ? (
-        <FounderUrgentAlertBar remainingSeats={remainingSeats} />
-      ) : null}
-
       <div
         className={cn(
           "pointer-events-none absolute inset-x-0 top-0 h-64",
@@ -130,7 +130,8 @@ export function StudentEnglishHome() {
       <div className="relative mx-auto max-w-2xl px-4 pt-5 sm:px-6 sm:pt-6">
         {showFounderOffer ? (
           <FounderVipClaimCard
-            remainingSeats={remainingSeats}
+            tiers={founderTiers}
+            deadlineIso={founderDeadline}
             className="mb-5"
             href="/checkout"
           />

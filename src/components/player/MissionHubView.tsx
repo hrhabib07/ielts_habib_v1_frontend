@@ -6,11 +6,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Lock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
+import { getMyMissionOneFeedback } from "@/src/lib/api/missionOneFeedback";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { resolveStageKindLabel } from "@/src/lib/player-stage-utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
 import { PlayerSubscriptionGate } from "@/src/components/player/PlayerSubscriptionGate";
+import {
+  MissionOneFeedbackModal,
+  MISSION_ONE_CHECKOUT_HREF,
+} from "@/src/components/player/MissionOneFeedbackModal";
+import { MISSION_ONE_FEEDBACK_STORAGE_KEY } from "@/src/lib/mission-one-feedback";
 import {
   isPlayerSubscriptionRequiredError,
   playerApiErrorMessage,
@@ -49,6 +55,32 @@ export function MissionHubView({ slug }: { slug: string }) {
   const [needsSubscription, setNeedsSubscription] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showCompleteBanner, setShowCompleteBanner] = useState(justCompleted);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+
+  useEffect(() => {
+    if (slug !== FREE_MISSION_SLUG || !justCompleted) return;
+
+    let cancelled = false;
+    try {
+      const local = localStorage.getItem(MISSION_ONE_FEEDBACK_STORAGE_KEY);
+      if (local === "completed" || local === "skipped") return;
+    } catch {
+      /* continue */
+    }
+
+    getMyMissionOneFeedback()
+      .then((existing) => {
+        if (cancelled || existing) return;
+        setFeedbackOpen(true);
+      })
+      .catch(() => {
+        if (!cancelled) setFeedbackOpen(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, justCompleted]);
 
   useEffect(() => {
     let cancelled = false;
@@ -132,6 +164,17 @@ export function MissionHubView({ slug }: { slug: string }) {
 
   return (
     <div className={cn("mx-auto max-w-lg px-4 py-8", locale === "bn" && "font-bengali")}>
+      <MissionOneFeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        onComplete={() => {
+          /* persistence handled inside modal; keep open for thanks state */
+        }}
+        onBuyNow={() => {
+          router.push(MISSION_ONE_CHECKOUT_HREF);
+        }}
+      />
+
       <Link
         href="/player"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

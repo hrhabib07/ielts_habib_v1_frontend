@@ -16,6 +16,7 @@ import {
   UserCheck,
   Users,
   MessageSquareHeart,
+  MessagesSquare,
 } from "lucide-react";
 import type { UserRole } from "@/src/lib/constants";
 import type { DashboardNavGroup } from "@/src/components/dashboard/DashboardSidebar";
@@ -54,6 +55,7 @@ const READING_ADMIN_NAV: DashboardNavGroup = {
     { label: "Content", href: "/dashboard/admin/content", icon: FolderKanban },
     { label: "Weakness Tags", href: "/dashboard/admin/weakness-tags", icon: Tag },
     { label: "Demo funnel", href: "/dashboard/admin/demo-feedback", icon: MessageSquareHeart },
+    { label: "Mission 1 feedback", href: "/dashboard/admin/mission-feedback", icon: MessagesSquare },
     { label: "Pricing & payments", href: "/dashboard/admin/pricing", icon: Settings },
     { label: "Instructor Requests", href: "/admin/instructor-requests", icon: UserCheck },
   ],
@@ -67,6 +69,7 @@ const ENGLISH_ADMIN_NAV: DashboardNavGroup = {
     { label: "Course & Missions", href: "/dashboard/admin/english", icon: Gamepad2 },
     { label: "Students", href: "/dashboard/admin/users", icon: Users },
     { label: "Demo funnel", href: "/dashboard/admin/demo-feedback", icon: MessageSquareHeart },
+    { label: "Mission 1 feedback", href: "/dashboard/admin/mission-feedback", icon: MessagesSquare },
     { label: "Pricing & payments", href: "/dashboard/admin/pricing", icon: Settings },
     { label: "Instructor Requests", href: "/admin/instructor-requests", icon: UserCheck },
   ],

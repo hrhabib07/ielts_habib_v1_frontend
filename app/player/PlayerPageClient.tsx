@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPlayerCourseMap, type PlayerCourseMap } from "@/src/lib/api/player";
-import { getFounderCounter } from "@/src/lib/api/gamlish";
+import {
+  getFounderCounter,
+  type FounderTierLiveStat,
+} from "@/src/lib/api/gamlish";
 import { CampMapView } from "@/src/components/player/CampMapView";
 import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
-import { FounderUrgentAlertBar } from "@/src/components/home/FounderUrgentAlertBar";
 import { FounderVipClaimCard } from "@/src/components/home/FounderVipClaimCard";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
@@ -46,9 +48,10 @@ export default function PlayerPageClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
-  const [remainingSeats, setRemainingSeats] = useState<number | undefined>(
-    undefined,
-  );
+  const [founderTiers, setFounderTiers] = useState<
+    FounderTierLiveStat[] | undefined
+  >(undefined);
+  const [founderDeadline, setFounderDeadline] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (profileLoading) return;
@@ -93,12 +96,13 @@ export default function PlayerPageClient() {
     getFounderCounter()
       .then((counter) => {
         if (cancelled) return;
-        if (typeof counter.slotsRemaining === "number") {
-          setRemainingSeats(Math.max(0, counter.slotsRemaining));
+        if (Array.isArray(counter.tiers) && counter.tiers.length > 0) {
+          setFounderTiers(counter.tiers);
         }
+        if (counter.launchDateIso) setFounderDeadline(counter.launchDateIso);
       })
       .catch(() => {
-        /* components fall back to default seats */
+        /* card falls back to default Gold progress */
       });
     return () => {
       cancelled = true;
@@ -145,14 +149,11 @@ export default function PlayerPageClient() {
 
   return (
     <div>
-      {showFounderOffer ? (
-        <FounderUrgentAlertBar remainingSeats={remainingSeats} />
-      ) : null}
-
       <div className="mx-auto max-w-lg px-4 pt-4 sm:max-w-2xl">
         {showFounderOffer ? (
           <FounderVipClaimCard
-            remainingSeats={remainingSeats}
+            tiers={founderTiers}
+            deadlineIso={founderDeadline}
             className="mb-2"
             href="/checkout"
           />

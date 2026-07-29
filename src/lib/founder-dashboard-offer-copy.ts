@@ -3,17 +3,20 @@ import type { UiLocale } from "@/src/lib/ui-locale";
 /** Dashboard Founder offer: user facing copy must not include -, –, or —. */
 export interface FounderDashboardOfferCopy {
   readonly alert: (remainingSeats: number) => string;
-  readonly tag: string;
   readonly headline: string;
-  readonly body: string;
-  readonly warning: (remainingSeats: number) => string;
+  readonly priceHint: string;
+  readonly seatsLeft: (left: number, capacity: number, tierLabel: string) => string;
+  readonly seatsFilled: (filled: string, capacity: string) => string;
   readonly cta: string;
-  readonly trustPayOnce: string;
-  readonly trustPayFast: string;
-  readonly trustLifetime: string;
-  readonly regularLabel: string;
-  readonly founderLabel: string;
+  readonly trust: string;
   readonly saveLabel: string;
+  readonly tierOpen: (tierLabel: string) => string;
+  /** Urgency line above the timer: "price will rise to X after this" */
+  readonly countdownLabel: (nextPrice: number) => string;
+  /** Sub-hour critical variant */
+  readonly countdownCritical: (nextPrice: number) => string;
+  /** Shown once the window has expired */
+  readonly countdownExpired: string;
 }
 
 export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
@@ -22,34 +25,48 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
 > = {
   bn: {
     alert: (remainingSeats) =>
-      `সাবধান! 1590 টাকার বদলে মাত্র 159 টাকায় আজীবন অ্যাক্সেস পাওয়ার সুযোগ শেষ হতে আর মাত্র ${remainingSeats} টি সিট বাকি আছে!`,
-    tag: "স্পেশাল ওয়ান টাইম অফার",
-    headline: "মিশন 1 শুরু করার আগেই আনলক করুন আপনার আজীবন ফ্রি অ্যাক্সেস!",
-    body: "আমাদের প্রথম 100 জন Founder Member কোটা প্রায় শেষ। 100 জন পূর্ণ হওয়ার সাথে সাথেই প্ল্যাটফর্মের মূল্য হয়ে যাবে 1590 টাকা। এখনই মাত্র 159 টাকা দিয়ে নিশ্চিত করুন আপনার সিট এবং বাঁচান 1431 টাকা! সাথে পাচ্ছেন আজীবন ফ্রি অ্যাক্সেস এবং এক্সক্লুসিভ Founder Badge।",
-    warning: (remainingSeats) =>
-      `সতর্কতা: আর মাত্র ${remainingSeats} টি সিট বাকি আছে! 100 জন পূর্ণ হলে আপনাকে 1590 টাকা পরিশোধ করতে হবে।`,
-    cta: "1590 টাকার বদলে মাত্র 159 টাকায় আজীবন অ্যাক্সেস নিন",
-    trustPayOnce: "একবারই পেমেন্ট করতে হবে",
-    trustPayFast: "বিকাশ বা নগদের মাধ্যমে মাত্র 2 মিনিটে পেমেন্ট সম্ভব",
-    trustLifetime: "আজীবন সকল প্রিমিয়াম মিশন ও ক্যাম্প সম্পূর্ণ ফ্রি",
-    regularLabel: "রেগুলার",
-    founderLabel: "Founder আজ",
+      `আজীবন অ্যাক্সেস 159 টাকায়। আর ${remainingSeats} টি সিট বাকি।`,
+    headline: "এখনই আজীবন অ্যাক্সেস লক করুন",
+    priceHint: "প্রথম 100 জন Founder এর জন্য",
+    seatsLeft: (left, _capacity, tierLabel) =>
+      `আর ${left} টি ${tierLabel} সিট বাকি`,
+    seatsFilled: (filled, capacity) => `${filled} / ${capacity}`,
+    cta: "159 টাকায় আজীবন অ্যাক্সেস নিন",
+    trust: "bKash · একবার পেমেন্ট · আজীবন",
     saveLabel: "বাঁচবে",
+    tierOpen: (tierLabel) => `${tierLabel} খোলা`,
+    countdownLabel: (nextPrice) =>
+      `এই অফার শেষ হলে মূল্য হবে ${nextPrice} টাকা`,
+    countdownCritical: (nextPrice) =>
+      `মাত্র কয়েক মিনিট বাকি! এরপর ${nextPrice} টাকা হবে`,
+    countdownExpired: "অফারের সময় শেষ হয়েছে",
   },
   en: {
     alert: (remainingSeats) =>
-      `Warning! Only ${remainingSeats} seats left to get lifetime access for only 159 BDT instead of the regular 1590 BDT price!`,
-    tag: "Special One Time Offer",
-    headline: "Unlock Your Lifetime Free Access Before You Even Start Mission 1!",
-    body: "Our first 100 Founder Member seats are almost completely sold out. As soon as 100 seats fill up, the price will instantly jump to 1590 BDT. Pay only 159 BDT right now to secure your seat and save 1431 BDT today! You will get lifetime platform access plus your exclusive Founder Badge forever.",
-    warning: (remainingSeats) =>
-      `Warning: Only ${remainingSeats} seats remaining! Once they are gone, you will have to pay the full 1590 BDT price.`,
-    cta: "Get Lifetime Access For Only 159 BDT Instead Of 1590 BDT",
-    trustPayOnce: "Pay only one time ever",
-    trustPayFast: "Pay in just 2 minutes using bKash or Nagad",
-    trustLifetime: "All future premium missions and camps unlocked forever",
-    regularLabel: "Regular",
-    founderLabel: "Founder today",
-    saveLabel: "You save",
+      `Lifetime access for 159 BDT. Only ${remainingSeats} seats left.`,
+    headline: "Lock lifetime access today",
+    priceHint: "For the first 100 Founders",
+    seatsLeft: (left, _capacity, tierLabel) =>
+      `${left} ${tierLabel} seats left`,
+    seatsFilled: (filled, capacity) => `${filled} / ${capacity}`,
+    cta: "Get lifetime for 159 BDT",
+    trust: "bKash · Pay once · Lifetime",
+    saveLabel: "Save",
+    tierOpen: (tierLabel) => `${tierLabel} open`,
+    countdownLabel: (nextPrice) =>
+      `Price rises to ${nextPrice} BDT when this ends`,
+    countdownCritical: (nextPrice) =>
+      `Last few minutes! Jumps to ${nextPrice} BDT`,
+    countdownExpired: "Offer window has closed",
   },
 };
+
+/**
+ * Next price after the Founder window closes.
+ * We deliberately keep this as a stepped test value — not the final 1590 —
+ * so you can A/B the urgency anchor.
+ *
+ * Update this constant to control what the timer shows as the "after" price.
+ * Phase 1 test: 490 BDT → Phase 2: 790 BDT → Phase 3: 1590 BDT
+ */
+export const COUNTDOWN_NEXT_PRICE_BDT = 490;

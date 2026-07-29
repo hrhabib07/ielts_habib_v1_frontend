@@ -8,11 +8,13 @@ import {
   Clock3,
   Gift,
   Lock,
+  Phone,
   Shield,
   Sparkles,
   Zap,
 } from "lucide-react";
 import { ContinueWithGoogleButton } from "@/src/components/auth/ContinueWithGoogleButton";
+import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { MissionZeroCopy } from "@/src/lib/mission-zero-copy";
 import { cn } from "@/lib/utils";
@@ -41,15 +43,27 @@ export function MissionZeroSaveProgress({
   const reduceMotion = useReducedMotion();
   const { locale } = useUiLocale();
   const s = copy.save;
+
   const registerHref = sessionId
     ? `/register?from=demo&sid=${encodeURIComponent(sessionId)}`
     : "/register?from=demo";
-  const emailCtaLabel =
-    locale === "bn" ? "📧 ইমেইল দিয়ে সেভ করুন" : "Save with email";
+
+  const phoneTitle =
+    locale === "bn"
+      ? "মোবাইল দিয়ে 50 XP সেভ করুন"
+      : "Save 50 XP with mobile";
   const googleCtaLabel =
     locale === "bn"
       ? "Google দিয়ে 50 XP সেভ করুন"
-      : "Save My 50 XP with Google";
+      : "Save 50 XP with Google";
+  const emailLinkLabel =
+    locale === "bn"
+      ? "অথবা ইমেইল দিয়ে সেভ করুন"
+      : "or save with email instead";
+  const trustLine =
+    locale === "bn"
+      ? "ফ্রি · OTP দিয়ে ভেরিফাই · পাসওয়ার্ড সেট করুন"
+      : "Free · Verify with OTP · Then set a password";
 
   return (
     <motion.div
@@ -58,7 +72,7 @@ export function MissionZeroSaveProgress({
       transition={{ duration: 0.35, ease: EASE }}
       className="space-y-3 pb-2 sm:space-y-4"
     >
-      {/* Compact loss aversion: keeps CTA high on mobile */}
+      {/* Compact loss aversion */}
       <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-b from-amber-400/15 to-amber-400/[0.04] px-3 py-3 sm:px-4 sm:py-3.5">
         <p className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950 dark:text-amber-100">
           <AlertTriangle className="h-3 w-3" aria-hidden />
@@ -93,43 +107,73 @@ export function MissionZeroSaveProgress({
         </div>
       </div>
 
-      {/* Primary saver: Google + email above the fold */}
-      <div className="rounded-2xl border border-sky-500/30 bg-sky-500/[0.06] p-3.5 sm:p-4">
+      {/* CTA hierarchy: Phone (primary) → Google (secondary) → Email (quiet) */}
+      <div className="rounded-2xl border border-sky-500/35 bg-sky-500/[0.07] p-3.5 sm:p-4">
+        <div className="mb-2.5 flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-600 text-white shadow-sm">
+            <Phone className="h-4 w-4" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[15px] font-black leading-snug text-foreground sm:text-base">
+              {phoneTitle}
+            </p>
+            <p className="text-[11px] font-medium text-muted-foreground">
+              {trustLine}
+            </p>
+          </div>
+        </div>
+
+        <PhoneOtpAuthPanel
+          locale={locale}
+          forceReturnTo="/player"
+          compact
+        />
+
+        <ul className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-4 sm:gap-y-1.5">
+          <li className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground/80">
+            <Shield className="h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
+            <span>{s.perkFree}</span>
+          </li>
+          <li className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground/80">
+            <Lock className="h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
+            <span>{s.perkNoPassword}</span>
+          </li>
+          <li className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground/80">
+            <Clock3 className="h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
+            <span>{s.perkFast}</span>
+          </li>
+        </ul>
+
+        <div className="my-3.5 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border/70" />
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {locale === "bn" ? "অথবা" : "or"}
+          </span>
+          <div className="h-px flex-1 bg-border/70" />
+        </div>
+
         <ContinueWithGoogleButton
           variant="save"
           demoSessionId={sessionId}
           returnTo="/player"
-          className="h-12 min-h-12 rounded-2xl border-sky-600/30 bg-sky-600 px-3 text-[14px] font-bold text-white shadow-lg shadow-sky-600/25 hover:bg-sky-500 hover:text-white sm:text-[15px]"
+          className={cn(
+            "h-12 min-h-12 rounded-2xl border border-border/80 bg-background px-3",
+            "text-[14px] font-bold text-foreground shadow-sm",
+            "hover:bg-muted/50 hover:text-foreground sm:text-[15px]",
+          )}
           label={googleCtaLabel}
           onNavigate={onGoogleNavigate}
         />
 
-        <Link
-          href={registerHref}
-          onClick={onEmailNavigate}
-          className={cn(
-            "mt-2.5 inline-flex h-12 min-h-12 w-full items-center justify-center rounded-2xl",
-            "border border-border/80 bg-background px-4 text-center text-[15px] font-bold text-foreground",
-            "shadow-sm transition-colors hover:bg-muted/50",
-          )}
-        >
-          {emailCtaLabel}
-        </Link>
-
-        <ul className="mt-3 flex flex-col gap-2 sm:gap-2.5 lg:grid lg:grid-cols-3 lg:gap-3">
-          <li className="flex items-start gap-2 text-[13px] font-semibold leading-snug text-pretty text-foreground/85">
-            <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
-            <span>{s.perkFree}</span>
-          </li>
-          <li className="flex items-start gap-2 text-[13px] font-semibold leading-snug text-pretty text-foreground/85">
-            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
-            <span>{s.perkNoPassword}</span>
-          </li>
-          <li className="flex items-start gap-2 text-[13px] font-semibold leading-snug text-pretty text-foreground/85">
-            <Clock3 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
-            <span>{s.perkFast}</span>
-          </li>
-        </ul>
+        <p className="mt-3 text-center">
+          <Link
+            href={registerHref}
+            onClick={onEmailNavigate}
+            className="text-[12px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            {emailLinkLabel}
+          </Link>
+        </p>
       </div>
 
       {/* Curiosity roadmap */}

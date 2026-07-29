@@ -123,8 +123,8 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
       googleCta: "Save my progress (1 click Google)",
       stickyCta: "Save my progress",
       perkFree: "100% free",
-      perkNoPassword: "No password to\u00A0remember",
-      perkFast: "Takes only 3 seconds",
+      perkNoPassword: "OTP now · password for next login",
+      perkFast: "Name + password in one step",
       saveOther: "Save with email or mobile number instead",
       roadmapTitle: "What is waiting for you next?",
       roadmapStep1: (totalXp) =>
@@ -195,8 +195,8 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
       googleCta: "আমার অগ্রগতি সেভ করুন (Google দিয়ে 1 ক্লিকে)",
       stickyCta: "অগ্রগতি সেভ করুন",
       perkFree: "সম্পূর্ণ ফ্রি",
-      perkNoPassword: "পাসওয়ার্ড মনে রাখার\u00A0ঝামেলা\u00A0নেই",
-      perkFast: "সময় লাগবে মাত্র 3 সেকেন্ড",
+      perkNoPassword: "এখন OTP · পরে পাসওয়ার্ড দিয়ে লগইন",
+      perkFast: "নাম ও পাসওয়ার্ড একসাথে সেট",
       saveOther: "ইমেইল বা মোবাইল নম্বর দিয়ে সেভ করতে চাই",
       roadmapTitle: "এরপর আপনার জন্য কী অপেক্ষা করছে?",
       roadmapStep1: (totalXp) =>

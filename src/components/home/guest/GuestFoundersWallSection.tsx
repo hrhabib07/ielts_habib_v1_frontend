@@ -17,7 +17,7 @@ import {
 import { localizeDigits } from "@/src/lib/ui-locale";
 import { cn } from "@/lib/utils";
 
-/** Home teaser: up to 4 real founders + 1 long “you” invite. Full wall is /founding-members. */
+/** Home teaser: up to 4 real founders + last-slot “join here” invite. Full wall is /founding-members. */
 const MEMBER_PREVIEW_LIMIT = 4;
 
 const TIER_BADGE: Record<FounderTier, string> = {
@@ -83,18 +83,10 @@ function buildPreviewSlots(
 
   if (!isOpen || filled >= 100) return memberSlots;
 
-  const youNumber = filled + 1;
-  const youSlot: PreviewSlot = { kind: "you", founderNumber: youNumber };
-
-  // Put “you” in the middle so it reads as the next open story, not a fake profile.
-  const firstMember = memberSlots[0];
-  if (!firstMember) return [youSlot];
-  if (memberSlots.length === 1) return [firstMember, youSlot];
-  const mid = Math.min(2, memberSlots.length);
+  // Last slot = open seat invite (removed once first 100 are filled).
   return [
-    ...memberSlots.slice(0, mid),
-    youSlot,
-    ...memberSlots.slice(mid),
+    ...memberSlots,
+    { kind: "you", founderNumber: filled + 1 },
   ];
 }
 
@@ -127,22 +119,24 @@ function MemberChip({ member }: { member: FounderWallMember }) {
   );
 }
 
-/** Long invite row — not a fake profile (no @handle / display name to copy). */
+/** Last-slot invite — open founder seat until the first 100 are filled. */
 function YouCanBeHereBanner({
   founderNumber,
   title,
   href,
   numberLabel,
+  ctaLabel,
 }: {
   founderNumber: number;
   title: string;
   href: string;
   numberLabel: string;
+  ctaLabel: string;
 }) {
   return (
     <Link
       href={href}
-      className="flex w-full flex-col gap-2 rounded-2xl border border-dashed border-amber-500/55 bg-gradient-to-r from-amber-400/15 via-amber-400/10 to-transparent px-4 py-4 transition-colors hover:from-amber-400/25 sm:flex-row sm:items-center sm:gap-4 sm:px-5 sm:py-5"
+      className="flex w-full flex-col gap-3 rounded-2xl border border-dashed border-amber-500/55 bg-gradient-to-r from-amber-400/15 via-amber-400/10 to-transparent px-4 py-4 transition-colors hover:from-amber-400/25 sm:flex-row sm:items-center sm:gap-4 sm:px-5 sm:py-5"
     >
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-sm font-black tabular-nums text-amber-950 shadow-sm">
         #{String(founderNumber).padStart(3, "0")}
@@ -155,8 +149,13 @@ function YouCanBeHereBanner({
           {title}
         </span>
       </span>
-      <span className="hidden text-sm font-bold text-amber-800 dark:text-amber-300 sm:inline">
-        →
+      <span
+        className={cn(
+          "inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-4 text-sm font-bold",
+          LANDING_CTA_CLASS,
+        )}
+      >
+        {ctaLabel}
       </span>
     </Link>
   );
@@ -281,6 +280,7 @@ export function GuestFoundersWallSection() {
                     numberLabel={content.youCanBeNumber(
                       String(slot.founderNumber).padStart(3, "0"),
                     )}
+                    ctaLabel={content.joinHereCta}
                   />
                 ) : (
                   <MemberChip member={slot.member} />

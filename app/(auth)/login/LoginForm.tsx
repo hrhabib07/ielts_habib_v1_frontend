@@ -23,6 +23,7 @@ import {
   AuthMethodDivider,
   ContinueWithGoogleButton,
 } from "@/src/components/auth/ContinueWithGoogleButton";
+import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import {
@@ -140,6 +141,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
   const [password, setPassword] = useState("");
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [returnTo, setReturnTo] = useState<string | null>(null);
+  const [showOtpLogin, setShowOtpLogin] = useState(false);
   const { locale } = useGuestLandingLocaleState();
   const copy = AUTH_LOGIN_COPY[locale];
   const reduceMotion = useReducedMotion();
@@ -157,6 +159,14 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
   const registerHref = returnTo
     ? `/register?redirect=${encodeURIComponent(returnTo)}`
     : "/register";
+
+  const otpLoginLabel =
+    locale === "bn"
+      ? "পাসওয়ার্ড ভুলে গেছেন? SMS OTP দিয়ে লগইন করুন"
+      : "Forgot password? Log in with SMS OTP";
+  const otpHideLabel = locale === "bn" ? "পাসওয়ার্ড লগইন দেখান" : "Show password login";
+  const googleDivider =
+    locale === "bn" ? "অথবা Google" : "or Google";
 
   return (
     <div
@@ -240,13 +250,6 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
 
                 <DevQuickLogin setEmail={setEmail} setPassword={setPassword} />
 
-                <div className="mb-4 space-y-3">
-                  <ContinueWithGoogleButton returnTo={returnTo} />
-                  <AuthMethodDivider
-                    label={locale === "bn" ? "অথবা ইমেইল" : "or email"}
-                  />
-                </div>
-
                 <form
                   className="space-y-4"
                   onSubmit={(e) => {
@@ -262,9 +265,9 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
                       <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
                         id="email"
-                        type="email"
+                        type="text"
                         required
-                        autoComplete="email"
+                        autoComplete="username"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={copy.emailPlaceholder}
@@ -328,6 +331,39 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
                     )}
                   </Button>
                 </form>
+
+                <div className="mt-4 space-y-3">
+                  <AuthMethodDivider label={googleDivider} />
+                  <ContinueWithGoogleButton returnTo={returnTo} />
+                </div>
+
+                <div className="mt-4 border-t border-border/50 pt-4">
+                  {!showOtpLogin ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowOtpLogin(true)}
+                      className="w-full text-center text-[12px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                    >
+                      {otpLoginLabel}
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[12px] font-semibold text-foreground">
+                          {locale === "bn" ? "SMS OTP লগইন" : "SMS OTP login"}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setShowOtpLogin(false)}
+                          className="text-[11px] font-medium text-muted-foreground underline-offset-2 hover:underline"
+                        >
+                          {otpHideLabel}
+                        </button>
+                      </div>
+                      <PhoneOtpAuthPanel locale={locale} compact />
+                    </div>
+                  )}
+                </div>
 
                 <div className="mt-5 border-t border-border/50 pt-4 sm:hidden">
                   <Button asChild variant="outline" className="h-11 w-full rounded-xl font-semibold">

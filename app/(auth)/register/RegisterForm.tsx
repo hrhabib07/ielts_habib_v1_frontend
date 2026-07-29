@@ -23,6 +23,7 @@ import {
   AuthMethodDivider,
   ContinueWithGoogleButton,
 } from "@/src/components/auth/ContinueWithGoogleButton";
+import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
@@ -183,6 +184,10 @@ export function RegisterForm() {
               <div className="p-5 sm:p-6">
                 <div className="mb-4 space-y-3">
                   <ContinueWithGoogleButton returnTo={returnTo} />
+                  <AuthMethodDivider
+                    label={locale === "bn" ? "অথবা মোবাইল OTP" : "or mobile OTP"}
+                  />
+                  <PhoneOtpAuthPanel locale={locale} />
                   <AuthMethodDivider
                     label={locale === "bn" ? "অথবা ইমেইল" : "or email"}
                   />

@@ -86,6 +86,7 @@ export interface GuestLandingCopy {
     readonly sub: string;
     readonly youCanBeHere: string;
     readonly youCanBeNumber: (n: string) => string;
+    readonly joinHereCta: string;
     readonly urgency: string;
     readonly slotsLine: (filled: string, max: string) => string;
     readonly emptyBody: string;
@@ -193,8 +194,9 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       eyebrow: "Founding Members",
       title: "You can be on this wall.",
       sub: "History remembers those who believe before everyone else.",
-      youCanBeHere: "Your name here",
+      youCanBeHere: "Your name can be added here",
       youCanBeNumber: (n) => `You can be Founder #${n}`,
+      joinHereCta: "Join here now",
       urgency: "Pre-order now: spots close at 100 or on 1 August.",
       slotsLine: (filled, max) => `${filled} of ${max} Founder spots claimed`,
       emptyBody: "The wall is empty. Be the first name here.",
@@ -302,8 +304,9 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       eyebrow: "Founding Members",
       title: "আপনিও এই ওয়ালে থাকতে পারেন।",
       sub: "যারা শুরুতে বিশ্বাস করে, ইতিহাস তাদেরই মনে রাখে।",
-      youCanBeHere: "এখানে আপনার নাম",
+      youCanBeHere: "এখানে আপনার নাম যোগ হতে পারে",
       youCanBeNumber: (n) => `আপনি হতে পারেন Founder #${n}`,
+      joinHereCta: "এখনই যোগ দিন",
       urgency: "এখনই প্রি-অর্ডার করুন: 100 পূর্ণ হলে বা 1 আগস্টে স্পট বন্ধ।",
       slotsLine: (filled, max) => `${filled} / ${max} Founder স্পট নেওয়া হয়েছে`,
       emptyBody: "ওয়াল এখনো খালি। প্রথম নামটি আপনার হতে পারে।",

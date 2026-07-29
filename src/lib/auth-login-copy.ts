@@ -30,8 +30,8 @@ function buildAuthLoginCopy(locale: UiLocale): AuthLoginCopy {
       title: "ক্যাম্পে ফিরে আসুন",
       subtitle:
         "আপনার মিশন, XP আর স্ট্রিক অপেক্ষা করছে। লগইন করে সেখান থেকেই চালিয়ে যান।",
-      emailLabel: "ইমেইল ঠিকানা",
-      emailPlaceholder: "you@example.com",
+      emailLabel: "ইমেইল বা মোবাইল নম্বর",
+      emailPlaceholder: "you@example.com বা 01XXXXXXXXX",
       passwordLabel: "পাসওয়ার্ড",
       passwordPlaceholder: "আপনার পাসওয়ার্ড লিখুন",
       forgotPassword: "পাসওয়ার্ড ভুলে গেছেন?",
@@ -59,8 +59,8 @@ function buildAuthLoginCopy(locale: UiLocale): AuthLoginCopy {
     title: "Back to camp",
     subtitle:
       "Your missions, XP, and streak are waiting. Sign in and pick up exactly where you left off.",
-    emailLabel: "Email address",
-    emailPlaceholder: "you@example.com",
+    emailLabel: "Email or mobile number",
+    emailPlaceholder: "you@example.com or 01XXXXXXXXX",
     passwordLabel: "Password",
     passwordPlaceholder: "Enter your password",
     forgotPassword: "Forgot password?",
