@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveJwtUser } from "@/src/lib/jwt-verify";
 import {
   AUTH_TOKEN_COOKIE,
+  applyClearedForceLogoutCookie,
   authCookieBaseOptions,
   cookieMaxAgeFromJwt,
 } from "@/src/lib/auth-cookie";
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest) {
   }
 
   const res = NextResponse.json({ ok: true, role: verified.role });
+  applyClearedForceLogoutCookie(res);
   res.cookies.set(AUTH_TOKEN_COOKIE, token, {
     ...authCookieBaseOptions(),
     maxAge: cookieMaxAgeFromJwt(token),

@@ -53,11 +53,11 @@ async function forceClientLogout(): Promise<void> {
     cache: "no-store",
   }).catch(() => undefined);
   const path = window.location.pathname;
-  if (!path.startsWith("/login") && !path.startsWith("/register")) {
-    window.location.replace("/login?loggedOut=1");
-  } else {
+  if (path.startsWith("/login") || path.startsWith("/register")) {
     handlingUnauthorized = false;
+    return;
   }
+  window.location.replace("/login?loggedOut=1");
 }
 
 apiClient.interceptors.response.use(

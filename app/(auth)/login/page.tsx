@@ -22,6 +22,8 @@ export default async function LoginPage({
 }) {
   const sp = await searchParams;
   const user = await getCurrentUser();
+  // Leftover JWT after logout used to bounce login → / → /player forever.
+  // getCurrentUser() is null while gamlish_force_logout is set.
   if (user) {
     const returnPath =
       sanitizeAuthReturnPath(sp.redirect) ??

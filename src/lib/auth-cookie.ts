@@ -6,6 +6,9 @@ import type { NextResponse } from "next/server";
  */
 export const AUTH_TOKEN_COOKIE = "ielts_habib_token";
 
+/** Short-lived flag so middleware/RSC ignore leftover JWT after logout. */
+export const FORCE_LOGOUT_COOKIE = "gamlish_force_logout";
+
 export function authCookieBaseOptions(
   isProd: boolean = process.env.NODE_ENV === "production",
 ) {
@@ -14,64 +17,86 @@ export function authCookieBaseOptions(
     httpOnly: true,
     sameSite: "lax" as const,
     secure: isProd,
-    // Share session across apex + www so payment submit never loses auth.
     ...(isProd ? { domain: ".gamlish.com" as const } : {}),
   };
 }
 
-type ClearCookieOpts = {
-  path: string;
-  httpOnly: boolean;
-  sameSite: "lax";
-  secure: boolean;
-  domain?: string;
-};
+function buildExpireSetCookie(
+  name: string,
+  opts: {
+    secure: boolean;
+    domain?: string;
+  },
+): string {
+  const parts = [
+    `${name}=`,
+    "Path=/",
+    "Max-Age=0",
+    "Expires=Thu, 01 Jan 1970 00:00:00 GMT",
+    "HttpOnly",
+    "SameSite=Lax",
+  ];
+  if (opts.secure) parts.push("Secure");
+  if (opts.domain) parts.push(`Domain=${opts.domain}`);
+  return parts.join("; ");
+}
 
 /**
- * Expire every historical cookie shape.
- * Older clients / proxied API clears left host-only www cookies that
- * Domain=.gamlish.com clears do not remove — that made logout bounce back.
+ * Expire every historical cookie shape via headers.append.
+ * NextResponse.cookies.set() keeps only one cookie per name.
  */
 export function applyClearedAuthCookies(res: NextResponse): void {
-  const variants: ClearCookieOpts[] = [
-    {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: true,
-      domain: ".gamlish.com",
-    },
-    {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: true,
-      domain: "gamlish.com",
-    },
-    {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: true,
-      domain: "www.gamlish.com",
-    },
-    { path: "/", httpOnly: true, sameSite: "lax", secure: true },
-    { path: "/", httpOnly: true, sameSite: "lax", secure: false },
-    {
-      path: "/",
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      domain: ".gamlish.com",
-    },
+  const expires: Array<{ secure: boolean; domain?: string }> = [
+    { secure: true, domain: ".gamlish.com" },
+    { secure: true, domain: "gamlish.com" },
+    { secure: true, domain: "www.gamlish.com" },
+    { secure: true },
+    { secure: false },
+    { secure: false, domain: ".gamlish.com" },
   ];
 
-  for (const opts of variants) {
-    res.cookies.set(AUTH_TOKEN_COOKIE, "", {
-      ...opts,
-      maxAge: 0,
-      expires: new Date(0),
-    });
+  for (const opts of expires) {
+    res.headers.append(
+      "Set-Cookie",
+      buildExpireSetCookie(AUTH_TOKEN_COOKIE, opts),
+    );
+  }
+}
+
+/** Block auth redirects / session restore for 10 minutes after logout. */
+export function applyForceLogoutCookie(res: NextResponse): void {
+  const maxAge = 60 * 10;
+  const isProd = process.env.NODE_ENV === "production";
+  const base = `Path=/; Max-Age=${String(maxAge)}; HttpOnly; SameSite=Lax`;
+  const common = isProd ? `${base}; Secure` : base;
+  if (isProd) {
+    res.headers.append(
+      "Set-Cookie",
+      `${FORCE_LOGOUT_COOKIE}=1; ${common}; Domain=.gamlish.com`,
+    );
+  }
+  res.headers.append("Set-Cookie", `${FORCE_LOGOUT_COOKIE}=1; ${common}`);
+}
+
+export function applyClearedForceLogoutCookie(res: NextResponse): void {
+  for (const domain of [".gamlish.com", undefined] as const) {
+    res.headers.append(
+      "Set-Cookie",
+      buildExpireSetCookie(FORCE_LOGOUT_COOKIE, {
+        secure: true,
+        domain,
+      }),
+    );
+  }
+  // Also clear non-secure variants (local / mixed).
+  for (const domain of [".gamlish.com", undefined] as const) {
+    res.headers.append(
+      "Set-Cookie",
+      buildExpireSetCookie(FORCE_LOGOUT_COOKIE, {
+        secure: false,
+        domain,
+      }),
+    );
   }
 }
 

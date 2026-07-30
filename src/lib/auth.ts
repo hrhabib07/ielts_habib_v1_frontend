@@ -1,7 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 
 const TOKEN_KEY = "ielts_habib_token";
-/** Blocks hydrate/sync while logout is in flight (prevents bounce-back). */
+/** Blocks hydrate/sync while logout is in flight (persists across tabs). */
 const LOGOUT_LOCK_KEY = "ielts_habib_logging_out";
 
 export interface JwtPayload {
@@ -13,6 +13,7 @@ export interface JwtPayload {
 export function beginLogoutLock(): void {
   if (typeof window === "undefined") return;
   try {
+    localStorage.setItem(LOGOUT_LOCK_KEY, String(Date.now()));
     sessionStorage.setItem(LOGOUT_LOCK_KEY, "1");
   } catch {
     /* private mode */
@@ -22,6 +23,7 @@ export function beginLogoutLock(): void {
 export function clearLogoutLock(): void {
   if (typeof window === "undefined") return;
   try {
+    localStorage.removeItem(LOGOUT_LOCK_KEY);
     sessionStorage.removeItem(LOGOUT_LOCK_KEY);
   } catch {
     /* private mode */
@@ -31,7 +33,16 @@ export function clearLogoutLock(): void {
 export function isLogoutLocked(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return sessionStorage.getItem(LOGOUT_LOCK_KEY) === "1";
+    if (sessionStorage.getItem(LOGOUT_LOCK_KEY) === "1") return true;
+    const raw = localStorage.getItem(LOGOUT_LOCK_KEY);
+    if (!raw) return false;
+    const started = Number(raw);
+    // Auto-expire client lock after 10 minutes.
+    if (!Number.isFinite(started) || Date.now() - started > 10 * 60 * 1000) {
+      localStorage.removeItem(LOGOUT_LOCK_KEY);
+      return false;
+    }
+    return true;
   } catch {
     return false;
   }
@@ -72,19 +83,22 @@ export function logout(): void {
   beginLogoutLock();
   clearAuth();
   window.dispatchEvent(new CustomEvent("auth-state-changed"));
-  void (async () => {
-    try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "same-origin",
-        cache: "no-store",
-      });
-    } catch {
-      /* still hard-navigate */
-    }
-    // Middleware sees loggedOut=1 and will not bounce to dashboard.
+  // Navigate immediately so RSC/middleware cannot bounce to / or /player
+  // while the logout request is still in flight.
+  const go = () => {
     window.location.replace("/login?loggedOut=1");
-  })();
+  };
+  const timer = window.setTimeout(go, 800);
+  void fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "same-origin",
+    cache: "no-store",
+  })
+    .catch(() => undefined)
+    .finally(() => {
+      window.clearTimeout(timer);
+      go();
+    });
 }
 
 export function getTokenFromClient(): string | null {
