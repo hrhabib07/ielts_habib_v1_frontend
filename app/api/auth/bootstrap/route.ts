@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { resolveJwtUser } from "@/src/lib/jwt-verify";
 import {
   AUTH_TOKEN_COOKIE,
-  authCookieBaseOptions,
+  applyClearedAuthCookies,
 } from "@/src/lib/auth-cookie";
 
 /**
@@ -21,11 +21,7 @@ export async function GET() {
   const verified = await resolveJwtUser(token);
   if (!verified) {
     const res = NextResponse.json({ token: null });
-    res.cookies.set(AUTH_TOKEN_COOKIE, "", {
-      ...authCookieBaseOptions(),
-      maxAge: 0,
-      expires: new Date(0),
-    });
+    applyClearedAuthCookies(res);
     return res;
   }
 

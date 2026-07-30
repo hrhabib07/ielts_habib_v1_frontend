@@ -1,3 +1,5 @@
+import type { NextResponse } from "next/server";
+
 /**
  * Shared auth cookie options for Next.js route handlers and middleware.
  * Attributes must match on set and clear or browsers keep stale cookies.
@@ -15,6 +17,62 @@ export function authCookieBaseOptions(
     // Share session across apex + www so payment submit never loses auth.
     ...(isProd ? { domain: ".gamlish.com" as const } : {}),
   };
+}
+
+type ClearCookieOpts = {
+  path: string;
+  httpOnly: boolean;
+  sameSite: "lax";
+  secure: boolean;
+  domain?: string;
+};
+
+/**
+ * Expire every historical cookie shape.
+ * Older clients / proxied API clears left host-only www cookies that
+ * Domain=.gamlish.com clears do not remove — that made logout bounce back.
+ */
+export function applyClearedAuthCookies(res: NextResponse): void {
+  const variants: ClearCookieOpts[] = [
+    {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      domain: ".gamlish.com",
+    },
+    {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      domain: "gamlish.com",
+    },
+    {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: true,
+      domain: "www.gamlish.com",
+    },
+    { path: "/", httpOnly: true, sameSite: "lax", secure: true },
+    { path: "/", httpOnly: true, sameSite: "lax", secure: false },
+    {
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      domain: ".gamlish.com",
+    },
+  ];
+
+  for (const opts of variants) {
+    res.cookies.set(AUTH_TOKEN_COOKIE, "", {
+      ...opts,
+      maxAge: 0,
+      expires: new Date(0),
+    });
+  }
 }
 
 /** Remaining JWT lifetime in seconds (min 60). Falls back to 7 days. Edge-safe. */

@@ -1,11 +1,40 @@
 import { jwtDecode } from "jwt-decode";
 
 const TOKEN_KEY = "ielts_habib_token";
+/** Blocks hydrate/sync while logout is in flight (prevents bounce-back). */
+const LOGOUT_LOCK_KEY = "ielts_habib_logging_out";
 
 export interface JwtPayload {
   userId: string;
   role: "STUDENT" | "INSTRUCTOR" | "ADMIN";
   exp: number;
+}
+
+export function beginLogoutLock(): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(LOGOUT_LOCK_KEY, "1");
+  } catch {
+    /* private mode */
+  }
+}
+
+export function clearLogoutLock(): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(LOGOUT_LOCK_KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
+export function isLogoutLocked(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return sessionStorage.getItem(LOGOUT_LOCK_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -15,6 +44,7 @@ export interface JwtPayload {
  */
 export function setAccessToken(token: string): void {
   if (typeof window === "undefined") return;
+  clearLogoutLock();
   localStorage.setItem(TOKEN_KEY, token);
   window.dispatchEvent(new CustomEvent("auth-state-changed"));
 }
@@ -27,19 +57,34 @@ export function getAccessToken(): string | null {
 export function clearAuth(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
-  // Clear legacy non-httpOnly cookie from older clients (same name).
-  document.cookie = `${TOKEN_KEY}=; path=/; Max-Age=0; SameSite=Lax`;
+  // Clear legacy non-httpOnly cookie shapes from older clients (same name).
+  const expire = `${TOKEN_KEY}=; path=/; Max-Age=0; SameSite=Lax`;
+  document.cookie = expire;
+  document.cookie = `${expire}; Secure`;
+  document.cookie = `${expire}; domain=.gamlish.com`;
+  document.cookie = `${expire}; Secure; domain=.gamlish.com`;
+  document.cookie = `${expire}; domain=www.gamlish.com`;
+  document.cookie = `${expire}; Secure; domain=www.gamlish.com`;
 }
 
 export function logout(): void {
-  clearAuth();
   if (typeof window === "undefined") return;
+  beginLogoutLock();
+  clearAuth();
   window.dispatchEvent(new CustomEvent("auth-state-changed"));
-  fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" }).finally(
-    () => {
-      window.location.href = "/login";
-    },
-  );
+  void (async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+    } catch {
+      /* still hard-navigate */
+    }
+    // Middleware sees loggedOut=1 and will not bounce to dashboard.
+    window.location.replace("/login?loggedOut=1");
+  })();
 }
 
 export function getTokenFromClient(): string | null {
@@ -91,6 +136,9 @@ export async function syncAuthCookie(
   code?: string;
   hint?: string;
 }> {
+  if (isLogoutLocked()) {
+    return { ok: false, code: "LOGOUT", hint: "Logout in progress." };
+  }
   const timeoutMs = options?.timeoutMs ?? 2500;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -125,6 +173,7 @@ export async function syncAuthCookie(
  * (e.g. private mode quirks, cleared storage, or older clients).
  */
 export async function hydrateAccessTokenFromCookie(): Promise<string | null> {
+  if (isLogoutLocked()) return null;
   try {
     const res = await fetch("/api/auth/bootstrap", {
       method: "GET",

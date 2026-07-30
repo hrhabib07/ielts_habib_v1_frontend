@@ -8,6 +8,7 @@ import {
   getTokenFromClient,
   hasUsableClientToken,
   hydrateAccessTokenFromCookie,
+  isLogoutLocked,
   syncAuthCookie,
 } from "@/src/lib/auth";
 import type { CurrentUser } from "@/src/lib/auth-server";
@@ -35,6 +36,8 @@ export function SyncAuthCookie({ initialUser }: { initialUser: CurrentUser | nul
     let cancelled = false;
 
     async function alignSession() {
+      if (isLogoutLocked()) return;
+
       const clientToken = getTokenFromClient();
 
       if (clientToken && !isClientTokenUsable()) {
@@ -42,6 +45,7 @@ export function SyncAuthCookie({ initialUser }: { initialUser: CurrentUser | nul
         await fetch("/api/auth/logout", {
           method: "POST",
           credentials: "same-origin",
+          cache: "no-store",
         }).catch(() => undefined);
         return;
       }
@@ -61,6 +65,7 @@ export function SyncAuthCookie({ initialUser }: { initialUser: CurrentUser | nul
           await fetch("/api/auth/logout", {
             method: "POST",
             credentials: "same-origin",
+            cache: "no-store",
           }).catch(() => undefined);
           router.refresh();
         }

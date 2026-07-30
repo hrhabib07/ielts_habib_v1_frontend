@@ -34,6 +34,7 @@ import {
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_LOGIN_COPY } from "@/src/lib/auth-login-copy";
+import { clearLogoutLock } from "@/src/lib/auth";
 import { readAuthReturnPathFromSearch } from "@/src/lib/auth-redirects";
 import { cn } from "@/lib/utils";
 
@@ -148,6 +149,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    clearLogoutLock();
     const params = new URLSearchParams(window.location.search);
     const err = params.get("error");
     if (err) {

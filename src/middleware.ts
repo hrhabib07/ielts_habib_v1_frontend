@@ -6,7 +6,7 @@ import {
 } from "@/src/lib/jwt-verify";
 import {
   AUTH_TOKEN_COOKIE,
-  authCookieBaseOptions,
+  applyClearedAuthCookies,
 } from "@/src/lib/auth-cookie";
 
 const AUTH_ROUTES = [
@@ -29,11 +29,7 @@ function getRedirectPathForRole(role: string): string {
 }
 
 function clearTokenCookie(response: NextResponse): void {
-  response.cookies.set(AUTH_TOKEN_COOKIE, "", {
-    ...authCookieBaseOptions(),
-    maxAge: 0,
-    expires: new Date(0),
-  });
+  applyClearedAuthCookies(response);
 }
 
 async function resolveMiddlewareUser(token: string) {
@@ -57,6 +53,18 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
+
+  // Explicit logout: wipe every cookie shape and never bounce to dashboard.
+  if (
+    pathname === "/login" &&
+    request.nextUrl.searchParams.get("loggedOut") === "1"
+  ) {
+    const clean = request.nextUrl.clone();
+    clean.searchParams.delete("loggedOut");
+    const res = NextResponse.redirect(clean);
+    clearTokenCookie(res);
+    return res;
+  }
 
   const verifiedUser = token ? await resolveMiddlewareUser(token) : null;
 

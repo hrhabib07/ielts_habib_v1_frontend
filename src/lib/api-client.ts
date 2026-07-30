@@ -1,8 +1,10 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import {
+  beginLogoutLock,
   clearAuth,
   getAccessToken,
   hydrateAccessTokenFromCookie,
+  isLogoutLocked,
 } from "./auth";
 import { getApiBaseUrl } from "./api-base-url";
 
@@ -29,6 +31,7 @@ apiClient.interceptors.request.use((config) => {
 
 function shouldForceLogout(error: AxiosError): boolean {
   if (typeof window === "undefined") return false;
+  if (isLogoutLocked()) return false;
   const path = window.location.pathname;
   if (path.startsWith("/login") || path.startsWith("/register")) return false;
   // Never kick buyers off checkout mid-payment  -  show an inline re-login prompt instead.
@@ -42,14 +45,16 @@ function shouldForceLogout(error: AxiosError): boolean {
 }
 
 async function forceClientLogout(): Promise<void> {
+  beginLogoutLock();
   clearAuth();
   await fetch("/api/auth/logout", {
     method: "POST",
     credentials: "same-origin",
+    cache: "no-store",
   }).catch(() => undefined);
   const path = window.location.pathname;
   if (!path.startsWith("/login") && !path.startsWith("/register")) {
-    window.location.href = "/login";
+    window.location.replace("/login?loggedOut=1");
   } else {
     handlingUnauthorized = false;
   }
@@ -59,6 +64,10 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status !== 401 || typeof window === "undefined") {
+      return Promise.reject(error);
+    }
+
+    if (isLogoutLocked()) {
       return Promise.reject(error);
     }
 
