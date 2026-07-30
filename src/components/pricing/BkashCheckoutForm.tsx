@@ -102,12 +102,42 @@ export function BkashCheckoutForm({
       });
       onSubmitted();
     } catch (err: unknown) {
-      const message =
+      const ax =
         err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { message?: string } } }).response?.data
-              ?.message
+          ? (err as {
+              response?: {
+                status?: number;
+                data?: {
+                  message?: string;
+                  errorSources?: { message?: string }[];
+                };
+              };
+            })
           : null;
-      setError(message ?? copy.submitFailed);
+      const apiMessage =
+        ax?.response?.data?.message ??
+        ax?.response?.data?.errorSources?.[0]?.message ??
+        null;
+
+      // Already submitted / under review → treat as success (avoid scary false failure).
+      const alreadySubmitted =
+        ax?.response?.status === 409 &&
+        typeof apiMessage === "string" &&
+        (/under review/i.test(apiMessage) ||
+          /already been used/i.test(apiMessage) ||
+          /already have a payment/i.test(apiMessage));
+
+      if (alreadySubmitted) {
+        onSubmitted();
+        return;
+      }
+
+      setError(
+        apiMessage === "Validation Error"
+          ? ax?.response?.data?.errorSources?.[0]?.message ?? copy.submitFailed
+          : apiMessage ?? copy.submitFailed,
+      );
+    } finally {
       setSubmitting(false);
     }
   };

@@ -51,7 +51,14 @@ export type SubscriptionRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface SubscriptionRequestItem {
   _id: string;
-  userId: { _id: string; email?: string } | string;
+  userId:
+    | {
+        _id: string;
+        email?: string | null;
+        displayName?: string | null;
+        phone?: string | null;
+      }
+    | string;
   planId: {
     _id: string;
     name?: string;

@@ -20,8 +20,22 @@ import {
 
 function userDisplay(request: SubscriptionRequestItem): string {
   if (typeof request.userId === "object" && request.userId && "_id" in request.userId) {
-    const user = request.userId as { email?: string; _id: string };
-    return user.email ?? String(user._id);
+    const user = request.userId as {
+      email?: string | null;
+      displayName?: string | null;
+      phone?: string | null;
+      _id: string;
+    };
+    if (user.email?.trim()) return user.email.trim();
+    if (user.displayName?.trim()) return user.displayName.trim();
+    if (user.phone?.trim()) {
+      const digits = user.phone.replace(/\D/g, "");
+      if (digits.startsWith("880") && digits.length === 13) {
+        return `0${digits.slice(3)}`;
+      }
+      return user.phone.trim();
+    }
+    return String(user._id);
   }
   return String(request.userId);
 }
