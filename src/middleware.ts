@@ -8,7 +8,7 @@ import {
   AUTH_TOKEN_COOKIE,
   FORCE_LOGOUT_COOKIE,
   applyClearedAuthCookies,
-  applyForceLogoutCookie,
+  applyClearedForceLogoutCookie,
 } from "@/src/lib/auth-cookie";
 
 const AUTH_ROUTES = [
@@ -20,7 +20,6 @@ const AUTH_ROUTES = [
   "/reset-password",
 ];
 
-/** Student app home — keep in sync with PRIMARY_STUDENT_HREF (/player). */
 const ROLE_REDIRECT_PATH: Record<string, string> = {
   STUDENT: "/player",
   INSTRUCTOR: "/dashboard/instructor",
@@ -45,96 +44,57 @@ async function resolveMiddlewareUser(token: string) {
 const DISABLE_AUTH_REDIRECT =
   process.env.DISABLE_MIDDLEWARE_AUTH_REDIRECT === "true";
 
-/** After logout: guest home, never trap users on /login. */
-function redirectToGuestHome(request: NextRequest): NextResponse {
-  const res = NextResponse.redirect(new URL("/", request.url));
-  clearTokenCookie(res);
-  return res;
-}
-
-function allowAsGuest(request: NextRequest): NextResponse {
-  const res = NextResponse.next();
-  clearTokenCookie(res);
-  return res;
-}
-
 export async function middleware(request: NextRequest) {
   if (DISABLE_AUTH_REDIRECT) {
     return NextResponse.next();
   }
 
   const { pathname } = request.nextUrl;
-  const forceLogout =
-    request.cookies.get(FORCE_LOGOUT_COOKIE)?.value === "1";
   const token = request.cookies.get(AUTH_TOKEN_COOKIE)?.value;
+  const hasLegacyForceLogout =
+    request.cookies.get(FORCE_LOGOUT_COOKIE)?.value === "1";
   const isAuthRoute = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
-  // Explicit logout from /login or / — wipe JWT, short force flag, guest home.
-  if (request.nextUrl.searchParams.get("loggedOut") === "1") {
-    if (pathname === "/login" || pathname === "/") {
-      const clean = request.nextUrl.clone();
-      clean.searchParams.delete("loggedOut");
-      if (pathname === "/login") {
-        clean.pathname = "/";
-      }
-      const res = NextResponse.redirect(clean);
-      clearTokenCookie(res);
-      applyForceLogoutCookie(res);
-      return res;
-    }
+  // One-shot logout: clear cookies and KEEP ?loggedOut=1 so the login page
+  // does not bounce to /player while the request still carries a stale JWT.
+  if (
+    pathname === "/login" &&
+    request.nextUrl.searchParams.get("loggedOut") === "1"
+  ) {
+    const res = NextResponse.next();
+    clearTokenCookie(res);
+    applyClearedForceLogoutCookie(res);
+    return res;
   }
 
-  /**
-   * Force-logout = ignore leftover JWT (stops login↔player loop).
-   * Must NOT imprison guests on /login — public pages stay public.
-   */
-  if (forceLogout) {
-    if (isAuthRoute) {
-      return allowAsGuest(request);
+  // Heal browsers stuck with the old force-logout cookie (do not gate routes on it).
+  const attachLegacyCleanup = (res: NextResponse): NextResponse => {
+    if (hasLegacyForceLogout) {
+      applyClearedForceLogoutCookie(res);
     }
-    // Marketing / guest surfaces — browse freely as logged-out.
-    if (
-      pathname === "/" ||
-      pathname.startsWith("/pricing") ||
-      pathname.startsWith("/about") ||
-      pathname.startsWith("/founding") ||
-      pathname.startsWith("/demo") ||
-      pathname.startsWith("/checkout") ||
-      pathname.startsWith("/terms") ||
-      pathname.startsWith("/privacy")
-    ) {
-      return allowAsGuest(request);
-    }
-    // Protected app routes — guest home, not login trap.
-    if (
-      pathname.startsWith("/player") ||
-      pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/profile") ||
-      pathname.startsWith("/onboarding") ||
-      pathname.startsWith("/username")
-    ) {
-      return redirectToGuestHome(request);
-    }
-  }
+    return res;
+  };
 
-  const verifiedUser =
-    token && !forceLogout ? await resolveMiddlewareUser(token) : null;
+  const verifiedUser = token ? await resolveMiddlewareUser(token) : null;
 
   if (isAuthRoute) {
-    if (!token || forceLogout) {
-      return NextResponse.next();
+    // Stale JWT may still be on this request; loggedOut handling above already ran.
+    if (!token) {
+      return attachLegacyCleanup(NextResponse.next());
     }
 
     if (verifiedUser) {
       const redirectPath = getRedirectPathForRole(verifiedUser.role);
-      return NextResponse.redirect(new URL(redirectPath, request.url));
+      return attachLegacyCleanup(
+        NextResponse.redirect(new URL(redirectPath, request.url)),
+      );
     }
 
     const res = NextResponse.next();
     clearTokenCookie(res);
-    return res;
+    return attachLegacyCleanup(res);
   }
 
   if (pathname.startsWith("/onboarding")) {
@@ -144,9 +104,9 @@ export async function middleware(request: NextRequest) {
     if (!verifiedUser) {
       const res = NextResponse.redirect(new URL("/login", request.url));
       clearTokenCookie(res);
-      return res;
+      return attachLegacyCleanup(res);
     }
-    return NextResponse.next();
+    return attachLegacyCleanup(NextResponse.next());
   }
 
   if (pathname.startsWith("/profile")) {
@@ -156,9 +116,9 @@ export async function middleware(request: NextRequest) {
     if (!verifiedUser) {
       const res = NextResponse.redirect(new URL("/login", request.url));
       clearTokenCookie(res);
-      return res;
+      return attachLegacyCleanup(res);
     }
-    return NextResponse.next();
+    return attachLegacyCleanup(NextResponse.next());
   }
 
   if (pathname.startsWith("/dashboard")) {
@@ -168,25 +128,36 @@ export async function middleware(request: NextRequest) {
     if (!verifiedUser) {
       const res = NextResponse.redirect(new URL("/login", request.url));
       clearTokenCookie(res);
-      return res;
+      return attachLegacyCleanup(res);
     }
     const path = getRedirectPathForRole(verifiedUser.role);
     if (pathname.startsWith("/dashboard/admin") && verifiedUser.role !== "ADMIN") {
-      return NextResponse.redirect(new URL(path, request.url));
+      return attachLegacyCleanup(
+        NextResponse.redirect(new URL(path, request.url)),
+      );
     }
     if (
       pathname.startsWith("/dashboard/instructor") &&
       verifiedUser.role !== "INSTRUCTOR"
     ) {
-      return NextResponse.redirect(new URL(path, request.url));
+      return attachLegacyCleanup(
+        NextResponse.redirect(new URL(path, request.url)),
+      );
     }
     if (
       pathname.startsWith("/dashboard/student") &&
       verifiedUser.role !== "STUDENT"
     ) {
-      return NextResponse.redirect(new URL(path, request.url));
+      return attachLegacyCleanup(
+        NextResponse.redirect(new URL(path, request.url)),
+      );
     }
-    return NextResponse.next();
+    return attachLegacyCleanup(NextResponse.next());
+  }
+
+  // Public routes (/, /player, /checkout, …): only strip legacy force-logout if present.
+  if (hasLegacyForceLogout) {
+    return attachLegacyCleanup(NextResponse.next());
   }
 
   return NextResponse.next();
@@ -203,18 +174,10 @@ export const config = {
     "/",
     "/player",
     "/player/:path*",
+    "/checkout",
+    "/checkout/:path*",
     "/onboarding/:path*",
     "/profile/:path*",
     "/dashboard/:path*",
-    "/username",
-    "/username/:path*",
-    "/checkout",
-    "/checkout/:path*",
-    "/pricing",
-    "/pricing/:path*",
-    "/demo",
-    "/demo/:path*",
-    "/about",
-    "/founding-members",
   ],
 };

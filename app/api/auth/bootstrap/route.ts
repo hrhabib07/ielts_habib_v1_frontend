@@ -3,37 +3,33 @@ import { NextResponse } from "next/server";
 import { resolveJwtUser } from "@/src/lib/jwt-verify";
 import {
   AUTH_TOKEN_COOKIE,
-  FORCE_LOGOUT_COOKIE,
   applyClearedAuthCookies,
+  applyClearedForceLogoutCookie,
 } from "@/src/lib/auth-cookie";
 
 /**
  * GET /api/auth/bootstrap
  * Returns the JWT from the httpOnly cookie so the client can restore Bearer auth.
- * Honors force-logout so hydrate cannot restart a logout redirect loop.
  */
 export async function GET() {
   const jar = await cookies();
-
-  if (jar.get(FORCE_LOGOUT_COOKIE)?.value === "1") {
-    const res = NextResponse.json({ token: null });
-    // Clear leftover JWT only — do NOT refresh force-logout (that trapped guests).
-    applyClearedAuthCookies(res);
-    return res;
-  }
-
   const token = jar.get(AUTH_TOKEN_COOKIE)?.value?.trim() ?? null;
 
   if (!token) {
-    return NextResponse.json({ token: null });
+    const res = NextResponse.json({ token: null });
+    applyClearedForceLogoutCookie(res);
+    return res;
   }
 
   const verified = await resolveJwtUser(token);
   if (!verified) {
     const res = NextResponse.json({ token: null });
     applyClearedAuthCookies(res);
+    applyClearedForceLogoutCookie(res);
     return res;
   }
 
-  return NextResponse.json({ token, role: verified.role });
+  const res = NextResponse.json({ token, role: verified.role });
+  applyClearedForceLogoutCookie(res);
+  return res;
 }

@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import {
   applyClearedAuthCookies,
-  applyForceLogoutCookie,
+  applyClearedForceLogoutCookie,
 } from "@/src/lib/auth-cookie";
 
 /**
  * POST /api/auth/logout
- * Clears every known httpOnly auth cookie variant + sets a short force-logout flag.
+ * Clears auth cookies and any legacy force-logout cookie.
  */
 export async function POST() {
   const res = NextResponse.json({ ok: true });
   applyClearedAuthCookies(res);
-  applyForceLogoutCookie(res);
+  applyClearedForceLogoutCookie(res);
   return res;
 }

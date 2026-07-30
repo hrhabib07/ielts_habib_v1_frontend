@@ -18,12 +18,17 @@ export default async function LoginPage({
     redirect?: string;
     next?: string;
     returnTo?: string;
+    loggedOut?: string;
   }>;
 }) {
   const sp = await searchParams;
+
+  // After logout middleware clears cookies; never bounce this paint.
+  if (sp.loggedOut === "1") {
+    return <LoginForm resetSuccess={sp.reset === "1"} />;
+  }
+
   const user = await getCurrentUser();
-  // Leftover JWT after logout used to bounce login → / → /player forever.
-  // getCurrentUser() is null while gamlish_force_logout is set.
   if (user) {
     const returnPath =
       sanitizeAuthReturnPath(sp.redirect) ??

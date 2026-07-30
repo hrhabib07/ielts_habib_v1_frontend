@@ -6,7 +6,7 @@ import type { NextResponse } from "next/server";
  */
 export const AUTH_TOKEN_COOKIE = "ielts_habib_token";
 
-/** Short-lived flag so middleware/RSC ignore leftover JWT after logout. */
+/** Legacy flag from an earlier logout fix — always expire; do not gate routes on it. */
 export const FORCE_LOGOUT_COOKIE = "gamlish_force_logout";
 
 export function authCookieBaseOptions(
@@ -42,8 +42,8 @@ function buildExpireSetCookie(
 }
 
 /**
- * Expire every historical cookie shape via headers.append.
- * NextResponse.cookies.set() keeps only one cookie per name.
+ * Expire every historical auth-cookie shape via headers.append.
+ * (cookies.set keeps only one Set-Cookie per name.)
  */
 export function applyClearedAuthCookies(res: NextResponse): void {
   const expires: Array<{ secure: boolean; domain?: string }> = [
@@ -63,40 +63,15 @@ export function applyClearedAuthCookies(res: NextResponse): void {
   }
 }
 
-/** Ignore leftover JWT briefly after logout (loop breaker). Do not refresh on every request. */
-export function applyForceLogoutCookie(res: NextResponse): void {
-  const maxAge = 90;
-  const isProd = process.env.NODE_ENV === "production";
-  const base = `Path=/; Max-Age=${String(maxAge)}; HttpOnly; SameSite=Lax`;
-  const common = isProd ? `${base}; Secure` : base;
-  if (isProd) {
-    res.headers.append(
-      "Set-Cookie",
-      `${FORCE_LOGOUT_COOKIE}=1; ${common}; Domain=.gamlish.com`,
-    );
-  }
-  res.headers.append("Set-Cookie", `${FORCE_LOGOUT_COOKIE}=1; ${common}`);
-}
-
+/** Remove legacy force-logout cookies left in browsers from prior deploys. */
 export function applyClearedForceLogoutCookie(res: NextResponse): void {
-  for (const domain of [".gamlish.com", undefined] as const) {
-    res.headers.append(
-      "Set-Cookie",
-      buildExpireSetCookie(FORCE_LOGOUT_COOKIE, {
-        secure: true,
-        domain,
-      }),
-    );
-  }
-  // Also clear non-secure variants (local / mixed).
-  for (const domain of [".gamlish.com", undefined] as const) {
-    res.headers.append(
-      "Set-Cookie",
-      buildExpireSetCookie(FORCE_LOGOUT_COOKIE, {
-        secure: false,
-        domain,
-      }),
-    );
+  for (const secure of [true, false]) {
+    for (const domain of [".gamlish.com", "www.gamlish.com", undefined] as const) {
+      res.headers.append(
+        "Set-Cookie",
+        buildExpireSetCookie(FORCE_LOGOUT_COOKIE, { secure, domain }),
+      );
+    }
   }
 }
 
