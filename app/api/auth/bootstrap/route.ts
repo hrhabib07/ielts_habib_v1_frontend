@@ -5,7 +5,6 @@ import {
   AUTH_TOKEN_COOKIE,
   FORCE_LOGOUT_COOKIE,
   applyClearedAuthCookies,
-  applyForceLogoutCookie,
 } from "@/src/lib/auth-cookie";
 
 /**
@@ -18,8 +17,8 @@ export async function GET() {
 
   if (jar.get(FORCE_LOGOUT_COOKIE)?.value === "1") {
     const res = NextResponse.json({ token: null });
+    // Clear leftover JWT only — do NOT refresh force-logout (that trapped guests).
     applyClearedAuthCookies(res);
-    applyForceLogoutCookie(res);
     return res;
   }
 

@@ -37,8 +37,8 @@ export function isLogoutLocked(): boolean {
     const raw = localStorage.getItem(LOGOUT_LOCK_KEY);
     if (!raw) return false;
     const started = Number(raw);
-    // Auto-expire client lock after 10 minutes.
-    if (!Number.isFinite(started) || Date.now() - started > 10 * 60 * 1000) {
+    // Auto-expire client lock after 2 minutes.
+    if (!Number.isFinite(started) || Date.now() - started > 2 * 60 * 1000) {
       localStorage.removeItem(LOGOUT_LOCK_KEY);
       return false;
     }
@@ -86,7 +86,8 @@ export function logout(): void {
   // Navigate immediately so RSC/middleware cannot bounce to / or /player
   // while the logout request is still in flight.
   const go = () => {
-    window.location.replace("/login?loggedOut=1");
+    // Guest home — not /login — so users are never trapped on the login screen.
+    window.location.replace("/?loggedOut=1");
   };
   const timer = window.setTimeout(go, 800);
   void fetch("/api/auth/logout", {

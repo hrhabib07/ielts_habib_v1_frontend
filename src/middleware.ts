@@ -45,10 +45,16 @@ async function resolveMiddlewareUser(token: string) {
 const DISABLE_AUTH_REDIRECT =
   process.env.DISABLE_MIDDLEWARE_AUTH_REDIRECT === "true";
 
-function redirectToLogin(request: NextRequest): NextResponse {
-  const res = NextResponse.redirect(new URL("/login", request.url));
+/** After logout: guest home, never trap users on /login. */
+function redirectToGuestHome(request: NextRequest): NextResponse {
+  const res = NextResponse.redirect(new URL("/", request.url));
   clearTokenCookie(res);
-  applyForceLogoutCookie(res);
+  return res;
+}
+
+function allowAsGuest(request: NextRequest): NextResponse {
+  const res = NextResponse.next();
+  clearTokenCookie(res);
   return res;
 }
 
@@ -65,36 +71,51 @@ export async function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
-  // Explicit logout: wipe JWT cookies, set force flag, stay on login (no bounce).
-  if (
-    pathname === "/login" &&
-    request.nextUrl.searchParams.get("loggedOut") === "1"
-  ) {
-    const clean = request.nextUrl.clone();
-    clean.searchParams.delete("loggedOut");
-    const res = NextResponse.redirect(clean);
-    clearTokenCookie(res);
-    applyForceLogoutCookie(res);
-    return res;
-  }
-
-  // After logout: never treat leftover JWT as a session on app surfaces.
-  if (forceLogout) {
-    if (isAuthRoute) {
-      const res = NextResponse.next();
+  // Explicit logout from /login or / — wipe JWT, short force flag, guest home.
+  if (request.nextUrl.searchParams.get("loggedOut") === "1") {
+    if (pathname === "/login" || pathname === "/") {
+      const clean = request.nextUrl.clone();
+      clean.searchParams.delete("loggedOut");
+      if (pathname === "/login") {
+        clean.pathname = "/";
+      }
+      const res = NextResponse.redirect(clean);
       clearTokenCookie(res);
+      applyForceLogoutCookie(res);
       return res;
     }
+  }
+
+  /**
+   * Force-logout = ignore leftover JWT (stops login↔player loop).
+   * Must NOT imprison guests on /login — public pages stay public.
+   */
+  if (forceLogout) {
+    if (isAuthRoute) {
+      return allowAsGuest(request);
+    }
+    // Marketing / guest surfaces — browse freely as logged-out.
     if (
       pathname === "/" ||
+      pathname.startsWith("/pricing") ||
+      pathname.startsWith("/about") ||
+      pathname.startsWith("/founding") ||
+      pathname.startsWith("/demo") ||
+      pathname.startsWith("/checkout") ||
+      pathname.startsWith("/terms") ||
+      pathname.startsWith("/privacy")
+    ) {
+      return allowAsGuest(request);
+    }
+    // Protected app routes — guest home, not login trap.
+    if (
       pathname.startsWith("/player") ||
       pathname.startsWith("/dashboard") ||
       pathname.startsWith("/profile") ||
       pathname.startsWith("/onboarding") ||
-      pathname.startsWith("/username") ||
-      pathname.startsWith("/checkout")
+      pathname.startsWith("/username")
     ) {
-      return redirectToLogin(request);
+      return redirectToGuestHome(request);
     }
   }
 
@@ -117,7 +138,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/onboarding")) {
-    if (!token || forceLogout) {
+    if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     if (!verifiedUser) {
@@ -129,7 +150,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/profile")) {
-    if (!token || forceLogout) {
+    if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     if (!verifiedUser) {
@@ -141,7 +162,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/dashboard")) {
-    if (!token || forceLogout) {
+    if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     if (!verifiedUser) {
@@ -189,5 +210,11 @@ export const config = {
     "/username/:path*",
     "/checkout",
     "/checkout/:path*",
+    "/pricing",
+    "/pricing/:path*",
+    "/demo",
+    "/demo/:path*",
+    "/about",
+    "/founding-members",
   ],
 };

@@ -57,7 +57,7 @@ async function forceClientLogout(): Promise<void> {
     handlingUnauthorized = false;
     return;
   }
-  window.location.replace("/login?loggedOut=1");
+  window.location.replace("/?loggedOut=1");
 }
 
 apiClient.interceptors.response.use(

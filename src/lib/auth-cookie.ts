@@ -63,9 +63,9 @@ export function applyClearedAuthCookies(res: NextResponse): void {
   }
 }
 
-/** Block auth redirects / session restore for 10 minutes after logout. */
+/** Ignore leftover JWT briefly after logout (loop breaker). Do not refresh on every request. */
 export function applyForceLogoutCookie(res: NextResponse): void {
-  const maxAge = 60 * 10;
+  const maxAge = 90;
   const isProd = process.env.NODE_ENV === "production";
   const base = `Path=/; Max-Age=${String(maxAge)}; HttpOnly; SameSite=Lax`;
   const common = isProd ? `${base}; Secure` : base;
