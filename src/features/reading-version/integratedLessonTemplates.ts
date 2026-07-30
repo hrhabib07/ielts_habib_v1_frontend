@@ -154,7 +154,7 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       sectionKind: "MECHANICS",
       heading: "3. The Mechanics (Rules of the Game)",
       bullets: [
-        "The Clock is the Enemy: 60 minutes, 40 questions, 3 passages — about 1.5 minutes per question.",
+        "The Clock is the Enemy: 60 minutes, 40 questions, 3 passages  -  about 1.5 minutes per question.",
         "The Golden Rule: You will NEVER have time to read everything.",
         "The Fatal Mistake: Spending 5–10 minutes reading the wrong part of the passage.",
       ],
@@ -165,11 +165,11 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       sectionKind: "MECHANICS",
       heading: "3. এই টেস্টের নিয়মকানুন",
       bullets: [
-        "সময়ের সাথে যুদ্ধ: 60 মিনিট, 40 প্রশ্ন, 3 প্যাসেজ — প্রতি প্রশ্নে দেড় মিনিট।",
+        "সময়ের সাথে যুদ্ধ: 60 মিনিট, 40 প্রশ্ন, 3 প্যাসেজ  -  প্রতি প্রশ্নে দেড় মিনিট।",
         "গোল্ডেন রুল: পুরো প্যাসেজ পড়ার মতো সময় কখনোই পাবে না।",
         "সবচেয়ে বড় ভুল: যেখানে উত্তর নেই সেখানে 5–10 মিনিট পড়া।",
       ],
-      content: "গাড়ির চাবি ফ্রিজে খুঁজলে পাবে না — ঠিক কোথায় খুঁজতে হবে শিখবে।",
+      content: "গাড়ির চাবি ফ্রিজে খুঁজলে পাবে না  -  ঠিক কোথায় খুঁজতে হবে শিখবে।",
     },
   },
   {
@@ -180,13 +180,13 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       sectionKind: "PARAPHRASE",
       heading: "4. The Paraphrase Engine",
       content:
-        "Cambridge hides answers by paraphrasing. If the question says \"happy,\" the passage may say \"ecstatic.\"\n\nAnchors are bulletproof — dates, names, numbers Cambridge cannot change.\n\nQuestion: \"In the year 1999, John Smith...\"\nPassage: \"...during the late 90s, specifically 1999, researcher John Smith...\"\nStrategy: Hunt for 1999 and John Smith.",
+        "Cambridge hides answers by paraphrasing. If the question says \"happy,\" the passage may say \"ecstatic.\"\n\nAnchors are bulletproof  -  dates, names, numbers Cambridge cannot change.\n\nQuestion: \"In the year 1999, John Smith...\"\nPassage: \"...during the late 90s, specifically 1999, researcher John Smith...\"\nStrategy: Hunt for 1999 and John Smith.",
     },
     bn: {
       sectionKind: "PARAPHRASE",
       heading: "4. প্যারাফ্রেজ করার ধরণ",
       content:
-        "ক্যামব্রিজ উত্তর ভিন্ন শব্দে লুকায়। প্রশ্নে \"happy\" থাকলে প্যাসেজে \"ecstatic\" হতে পারে।\n\nঅ্যাঙ্কর বুলেটপ্রুফ — সাল, নাম, সংখ্যা যা বদলানো যায় না।\n\nপ্রশ্ন: \"In the year 1999, John Smith...\"\nপ্যাসেজ: \"...specifically 1999, researcher John Smith...\"\nকৌশল: 1999 আর John Smith খুঁজো।",
+        "ক্যামব্রিজ উত্তর ভিন্ন শব্দে লুকায়। প্রশ্নে \"happy\" থাকলে প্যাসেজে \"ecstatic\" হতে পারে।\n\nঅ্যাঙ্কর বুলেটপ্রুফ  -  সাল, নাম, সংখ্যা যা বদলানো যায় না।\n\nপ্রশ্ন: \"In the year 1999, John Smith...\"\nপ্যাসেজ: \"...specifically 1999, researcher John Smith...\"\nকৌশল: 1999 আর John Smith খুঁজো।",
     },
   },
   {
@@ -197,10 +197,10 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       sectionKind: "EXECUTION",
       heading: "5. The Execution Strategy (Triple-Weapon)",
       bullets: [
-        "Step 1 — Sniper: Find Anchor words in the question first (dates, names, capitals, numbers).",
-        "Step 2 — Radar: Scan the passage in under 5 seconds for the Anchor shape — do NOT read yet.",
-        "Step 3 — Target lock: Skim the sentence before and after the Anchor.",
-        "Step 4 — Gamlish loop: Read note → 100% quiz → Lab → Final test.",
+        "Step 1  -  Sniper: Find Anchor words in the question first (dates, names, capitals, numbers).",
+        "Step 2  -  Radar: Scan the passage in under 5 seconds for the Anchor shape  -  do NOT read yet.",
+        "Step 3  -  Target lock: Skim the sentence before and after the Anchor.",
+        "Step 4  -  Gamlish loop: Read note → 100% quiz → Lab → Final test.",
       ],
       content: "",
     },
@@ -208,10 +208,10 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       sectionKind: "EXECUTION",
       heading: "5. কীভাবে উত্তর করবে (Triple-Weapon)",
       bullets: [
-        "ধাপ 1 — স্নাইপার: আগে প্রশ্ন থেকে Anchor খুঁজো।",
-        "ধাপ 2 — রাডার: 5 সেকেন্ডে Anchor-এর আকার খুঁজো — এখন পড়বে না।",
-        "ধাপ 3 — টার্গেট লক: Anchor-এর আগে-পরের লাইন স্কিম করো।",
-        "ধাপ 4 — গ্যামলিশ লুপ: নোট → 100% কুইজ → ল্যাব → ফাইনাল টেস্ট।",
+        "ধাপ 1  -  স্নাইপার: আগে প্রশ্ন থেকে Anchor খুঁজো।",
+        "ধাপ 2  -  রাডার: 5 সেকেন্ডে Anchor-এর আকার খুঁজো  -  এখন পড়বে না।",
+        "ধাপ 3  -  টার্গেট লক: Anchor-এর আগে-পরের লাইন স্কিম করো।",
+        "ধাপ 4  -  গ্যামলিশ লুপ: নোট → 100% কুইজ → ল্যাব → ফাইনাল টেস্ট।",
       ],
       content: "",
     },
@@ -241,9 +241,9 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       sectionKind: "ARSENAL",
       heading: "7. The Arsenal (Gamlish Pro Tips)",
       bullets: [
-        "Pro Tip 1 — 90-Second Rule: Stuck 90+ seconds? Guess, move on.",
-        "Pro Tip 2 — Mission First: Never enter a passage without your Anchor mission.",
-        "Pro Tip 3 — 100% Standard: Perfect micro-quizzes build bulletproof muscle memory.",
+        "Pro Tip 1  -  90-Second Rule: Stuck 90+ seconds? Guess, move on.",
+        "Pro Tip 2  -  Mission First: Never enter a passage without your Anchor mission.",
+        "Pro Tip 3  -  100% Standard: Perfect micro-quizzes build bulletproof muscle memory.",
       ],
       content: "",
     },
@@ -251,9 +251,9 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       sectionKind: "ARSENAL",
       heading: "7. গ্যামলিশ প্রো টিপস",
       bullets: [
-        "প্রো টিপ 1 — 90 সেকেন্ড: 90+ সেকেন্ড আটকে? আন্দাজে দাগাও, এগিয়ে যাও।",
-        "প্রো টিপ 2 — আগে মিশন: Anchor না জেনে প্যাসেজে ঢুকবে না।",
-        "প্রো টিপ 3 — 100% মানসিকতা: ফুল মার্কস মাসল মেমোরি গড়ে।",
+        "প্রো টিপ 1  -  90 সেকেন্ড: 90+ সেকেন্ড আটকে? আন্দাজে দাগাও, এগিয়ে যাও।",
+        "প্রো টিপ 2  -  আগে মিশন: Anchor না জেনে প্যাসেজে ঢুকবে না।",
+        "প্রো টিপ 3  -  100% মানসিকতা: ফুল মার্কস মাসল মেমোরি গড়ে।",
       ],
       content: "",
     },
@@ -266,13 +266,13 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       sectionKind: "WRAP_UP",
       heading: "8. The Wrap-Up",
       content:
-        "Final Takeaway: IELTS Reading is a treasure hunt — use Anchors and Radar to skip useless text and jump to the gold.\n\nNext Action: Crush the Level 0 Final Test to unlock Level 1. Let the games begin!",
+        "Final Takeaway: IELTS Reading is a treasure hunt  -  use Anchors and Radar to skip useless text and jump to the gold.\n\nNext Action: Crush the Level 0 Final Test to unlock Level 1. Let the games begin!",
     },
     bn: {
       sectionKind: "WRAP_UP",
       heading: "8. শেষ কথা",
       content:
-        "মূল কথা: Reading হলো গুপ্তধন খোঁজা — অ্যাঙ্কর আর রাডার দিয়ে অপ্রয়োজনীয় লেখা স্কিপ করো।\n\nএখন তোমার কাজ: লেভেল 0 ফাইনাল টেস্ট দিয়ে লেভেল 1 আনলক করো। খেলা শুরু!",
+        "মূল কথা: Reading হলো গুপ্তধন খোঁজা  -  অ্যাঙ্কর আর রাডার দিয়ে অপ্রয়োজনীয় লেখা স্কিপ করো।\n\nএখন তোমার কাজ: লেভেল 0 ফাইনাল টেস্ট দিয়ে লেভেল 1 আনলক করো। খেলা শুরু!",
     },
   },
 ];
@@ -406,7 +406,7 @@ export function buildLevel0PlaybookBlocks(): IntegratedLessonBlock[] {
     mcq(
       "What is an Anchor word?",
       "অ্যাঙ্কর শব্দ কেমন?",
-      ["Changes shape often", "Bulletproof — Cambridge cannot change it", "Means happy", "Vague word"],
+      ["Changes shape often", "Bulletproof  -  Cambridge cannot change it", "Means happy", "Vague word"],
       ["রূপ বদলায়", "বুলেটপ্রুফ", "Grammar", "টাইটেলে"],
       "B",
       "Anchors are bulletproof like dates and names.",

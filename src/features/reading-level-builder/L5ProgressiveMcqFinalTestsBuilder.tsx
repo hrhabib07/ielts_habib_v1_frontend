@@ -68,7 +68,7 @@ function buildSampleBulkPayload(): string {
       __instructions:
         "Paste 3 progressive MCQ finals. Each finalTests[] entry needs progressiveMcq with items[]. See docs/PROGRESSIVE_MCQ_L5_JSON.md.",
       finalTests: SLOT_LABELS.map((label, i) => ({
-        title: `L5 Final ${i + 1} — ${label}`,
+        title: `L5 Final ${i + 1}  -  ${label}`,
         timeLimitMinutes: 20,
         progressiveMcq: {
           instruction: "Read each context, then choose the best answer.",
@@ -209,7 +209,7 @@ export function L5ProgressiveMcqFinalTestsBuilder(props: {
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Bulk create 3 progressive MCQ finals</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Paste JSON with <code className="text-xs">finalTests[3]</code> — each with{" "}
+            Paste JSON with <code className="text-xs">finalTests[3]</code>  -  each with{" "}
             <code className="text-xs">progressiveMcq</code>. See{" "}
             <code className="text-xs">docs/PROGRESSIVE_MCQ_L5_JSON.md</code>.
           </p>
@@ -270,7 +270,7 @@ export function L5ProgressiveMcqFinalTestsBuilder(props: {
                 disabled={disabled}
                 onChange={(e) => void linkSlot(i, e.target.value)}
               >
-                <option value="">— Select —</option>
+                <option value=""> -  Select  - </option>
                 {progressiveTests.map((pt) => (
                   <option key={pt._id} value={pt._id}>
                     {pt.title}

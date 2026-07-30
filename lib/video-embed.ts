@@ -4,7 +4,7 @@ export type VideoEmbed = { type: "iframe" | "video"; src: string };
 
 /**
  * Turn a pasted watch/share link (or direct file URL) into something the player can render.
- * YouTube watch URLs cannot load inside an iframe — they must use /embed/.
+ * YouTube watch URLs cannot load inside an iframe  -  they must use /embed/.
  */
 export function resolveVideoEmbed(url: string | undefined | null): VideoEmbed | null {
   const trimmed = url?.trim() ?? "";

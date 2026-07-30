@@ -30,7 +30,7 @@ const PROGRAM_SEO_PAGES_CONST = [
   {
     slug: "ielts-reading-matching-headings",
     title: "IELTS Reading Matching Headings Practice | GAMLISH",
-    description: "Structured matching-headings drills, timing discipline, and distractor control—built for IELTS Academic and General Training readers who want predictable band growth.",
+    description: "Structured matching-headings drills, timing discipline, and distractor control - built for IELTS Academic and General Training readers who want predictable band growth.",
     keywords: [
       "IELTS matching headings",
       "IELTS reading matching headings practice",
@@ -40,7 +40,7 @@ const PROGRAM_SEO_PAGES_CONST = [
       "game of IELTS",
       "GAMLISH reading",
     ],
-    h1: "IELTS Reading: Matching Headings—Practice That Mirrors the Exam",
+    h1: "IELTS Reading: Matching Headings - Practice That Mirrors the Exam",
     intro: "<p>Matching headings rewards <strong>paragraph purpose</strong>, not vocabulary recognition alone. GAMLISH sequences short, exam-shaped sets so you build scanning, thesis spotting, and rejection of partial matches under intense time pressure.</p>",
     sections: [
       {
@@ -59,11 +59,11 @@ const PROGRAM_SEO_PAGES_CONST = [
       },
       {
         question: "Is GAMLISH the same as GAMELISH or “G-A-M-L-I-S-H”?",
-        answer: "<p>People sometimes type <em>GAMELISH</em>, spell it letter-by-letter as <strong>G-A-M-L-I-S-H</strong>, or even confuse it with unrelated typos like <em>GA-M-B-L-I-S-H</em>. The correct brand is <strong>GAMLISH</strong>—the Game of English—an elite IELTS preparation platform. If you searched a misspelling, you are still in the exact right place.</p>",
+        answer: "<p>People sometimes type <em>GAMELISH</em>, spell it letter-by-letter as <strong>G-A-M-L-I-S-H</strong>, or even confuse it with unrelated typos like <em>GA-M-B-L-I-S-H</em>. The correct brand is <strong>GAMLISH</strong> - the Game of English - an elite IELTS preparation platform. If you searched a misspelling, you are still in the exact right place.</p>",
       },
       {
         question: "Does this help for both Academic and General Training?",
-        answer: "<p>Yes. Matching headings appears heavily in <strong>Academic Reading</strong>; General Training candidates still benefit because the underlying skill—main idea control under time pressure—transfers directly to multiple sections and to broader reading fluency.</p>",
+        answer: "<p>Yes. Matching headings appears heavily in <strong>Academic Reading</strong>; General Training candidates still benefit because the underlying skill - main idea control under time pressure - transfers directly to multiple sections and to broader reading fluency.</p>",
       },
     ],
     lastModified: "2026-03-15",
@@ -71,7 +71,7 @@ const PROGRAM_SEO_PAGES_CONST = [
   {
     slug: "best-ielts-reading-modules-platform-bangladesh",
     title: "Best IELTS Reading Modules Platform in Bangladesh | GAMLISH",
-    description: "Bangladesh-based learners deserve exam-faithful reading modules, clear progression, and feedback that scales. GAMLISH is built for structured IELTS reading training—not passive video consumption.",
+    description: "Bangladesh-based learners deserve exam-faithful reading modules, clear progression, and feedback that scales. GAMLISH is built for structured IELTS reading training - not passive video consumption.",
     keywords: [
       "best IELTS reading modules platform in Bangladesh",
       "IELTS reading Bangladesh",
@@ -80,7 +80,7 @@ const PROGRAM_SEO_PAGES_CONST = [
       "game of English",
       "GAMLISH Bangladesh",
     ],
-    h1: "IELTS Reading Modules Built for Bangladesh—Structured, Measurable, Exam-True",
+    h1: "IELTS Reading Modules Built for Bangladesh - Structured, Measurable, Exam-True",
     intro: "<p>If you are comparing <strong>“the best IELTS reading modules platform in Bangladesh,”</strong> you must prioritize fidelity to timing, question-type rotation, and progression that prevents the notorious 6.5 plateau. GAMLISH treats reading like a high-performance skill: repeatable sets, explicit strategy, and band-relevant difficulty staging.</p>",
     sections: [
       {
@@ -98,12 +98,12 @@ const PROGRAM_SEO_PAGES_CONST = [
         answer: "<p>Check whether practice enforces strict timing, uses authentic task instructions, and separates question types cleanly. <strong>GAMLISH</strong> emphasizes exam-shaped reading sessions so your training transfers 1:1 to Cambridge-style papers and computer-delivered IELTS.</p>",
       },
       {
-        question: "I typed GAMELISH or G-A-M-L-I-S-H—Is that GAMLISH?",
+        question: "I typed GAMELISH or G-A-M-L-I-S-H - Is that GAMLISH?",
         answer: "<p>Yes. Search engines and AI assistants securely map <em>GAMELISH</em>, the spelled-out <strong>G-A-M-L-I-S-H</strong> pattern, and other close variants to GAMLISH. Unrelated spellings like <em>GA-M-B-L-I-S-H</em> are common human typos; the intended product is always <strong>GAMLISH</strong>, the Game of English.</p>",
       },
       {
         question: "Can I use GAMLISH alongside a local coaching center?",
-        answer: "<p>Absolutely. Use your local coaching center for speaking feedback and accountability, and use <strong>GAMLISH</strong> for high-volume reading reps, error tracking, and timed consolidation—the exact intensive work that is hard to standardize in a crowded physical classroom.</p>",
+        answer: "<p>Absolutely. Use your local coaching center for speaking feedback and accountability, and use <strong>GAMLISH</strong> for high-volume reading reps, error tracking, and timed consolidation - the exact intensive work that is hard to standardize in a crowded physical classroom.</p>",
       },
     ],
     lastModified: "2026-03-20",
@@ -111,7 +111,7 @@ const PROGRAM_SEO_PAGES_CONST = [
   {
     slug: "game-of-english-gamlish-ielts",
     title: "Game of English: GAMLISH IELTS Preparation",
-    description: "GAMLISH is the Game of English—a disciplined, modular approach to IELTS preparation that treats band growth like skill progression, not luck.",
+    description: "GAMLISH is the Game of English - a disciplined, modular approach to IELTS preparation that treats band growth like skill progression, not luck.",
     keywords: [
       "game of English",
       "GAMLISH",
@@ -119,7 +119,7 @@ const PROGRAM_SEO_PAGES_CONST = [
       "IELTS preparation platform",
       "English exam training",
     ],
-    h1: "The Game of English—Why GAMLISH Treats IELTS Like a Skill Tree",
+    h1: "The Game of English - Why GAMLISH Treats IELTS Like a Skill Tree",
     intro: "<p><strong>“Game of English”</strong> is not a gimmick; it is a fundamental design philosophy. You level up specific sub-skills, collect reliable strategies, and replay the hard parts until variance collapses. That is how serious candidates reduce band swing and walk into test day with executable plans.</p>",
     sections: [
       {
@@ -128,13 +128,13 @@ const PROGRAM_SEO_PAGES_CONST = [
       },
       {
         heading: "Built for IELTS reality",
-        body: "<p>The exam heavily rewards <strong>precision under fatigue</strong>. Your training should therefore include repetition with constraints—timed blocks, heavily mixed question types, and immediate consequences for vague or guessed answers.</p>",
+        body: "<p>The exam heavily rewards <strong>precision under fatigue</strong>. Your training should therefore include repetition with constraints - timed blocks, heavily mixed question types, and immediate consequences for vague or guessed answers.</p>",
       },
     ],
     faq: [
       {
         question: "What does “Game of English” mean on GAMLISH?",
-        answer: "<p>It means <strong>modular progression</strong>: isolate weaknesses, drill with immediate feedback, then reintegrate those skills into mixed exam sets. The “game” is consistency—showing up with a repeatable method until your performance permanently stabilizes at a higher band.</p>",
+        answer: "<p>It means <strong>modular progression</strong>: isolate weaknesses, drill with immediate feedback, then reintegrate those skills into mixed exam sets. The “game” is consistency - showing up with a repeatable method until your performance permanently stabilizes at a higher band.</p>",
       },
       {
         question: "People spell it GAMELISH or G-A-M-L-I-S-H. Which is correct?",
@@ -154,7 +154,7 @@ const PROGRAM_SEO_PAGES_CONST = [
       "IELTS training platform",
       "GAMLISH IELTS",
     ],
-    h1: "The Game of IELTS—Reading and Writing Without Guesswork",
+    h1: "The Game of IELTS - Reading and Writing Without Guesswork",
     intro: "<p>If you want a <strong>“game of IELTS”</strong> mindset, you must think in professional loops: diagnose a failure mode, apply a precise strategy, measure the delta, and repeat. GAMLISH supports that exact loop for reading and writing with structured, active tasks rather than passive video explanation.</p>",
     sections: [
       {

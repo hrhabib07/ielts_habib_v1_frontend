@@ -3,7 +3,7 @@
 import { CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Exact calendar join date — always public, for early-adopter bragging rights. */
+/** Exact calendar join date  -  always public, for early-adopter bragging rights. */
 export function formatJoinedDate(iso: string | null | undefined): string | null {
   if (!iso) return null;
   try {

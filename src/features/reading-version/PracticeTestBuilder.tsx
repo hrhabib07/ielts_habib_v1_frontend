@@ -192,7 +192,7 @@ export function PracticeTestBuilder({
 
   const sortedList = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
   const isMisplacedL0Final = (pt: PracticeTest) =>
-    /\b(l0\s*[—–-]\s*)?final\b/i.test(pt.title) && !finalSlotIdSet.has(pt._id);
+    /\b(l0\s*[ - –-]\s*)?final\b/i.test(pt.title) && !finalSlotIdSet.has(pt._id);
   const practiceOnlyList = isL0Foundation
     ? sortedList.filter((p) => !finalSlotIdSet.has(p._id) && !isMisplacedL0Final(p))
     : sortedList;
@@ -300,16 +300,16 @@ export function PracticeTestBuilder({
         {error && <p className="text-sm text-destructive">{error}</p>}
         <div className="rounded-lg border border-border/80 bg-muted/30 px-3 py-2.5 text-xs leading-relaxed text-muted-foreground">
           <span className="font-medium text-foreground">Quick guide:</span> (1) Create tests with the buttons
-          above — a <span className="font-medium text-foreground">Practice Test</span> step is added automatically after
+          above  -  a <span className="font-medium text-foreground">Practice Test</span> step is added automatically after
           your lessons. (2) Open <span className="font-medium text-foreground">Preview level</span> to verify. (3) Use{" "}
           <span className="font-medium text-foreground">Preview</span> (eye) to
-          verify. Standard tests use a passage question set; Reading Fundamentals uses Gamlish scanning JSON — see{" "}
+          verify. Standard tests use a passage question set; Reading Fundamentals uses Gamlish scanning JSON  -  see{" "}
           <code className="rounded bg-background px-1 py-0.5 text-[11px]">docs/GAMLISH_SCANNING_PRACTICE_TEST_JSON.md</code>.
           {isL0Foundation ? (
             <>
               {" "}
               <span className="font-medium text-indigo-800 dark:text-indigo-200">
-                Level 0 finals belong in section 3 — not here. Tests marked Final are managed there.
+                Level 0 finals belong in section 3  -  not here. Tests marked Final are managed there.
               </span>
             </>
           ) : null}
@@ -600,7 +600,7 @@ function SentenceLocatorCreateForm({
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Level 0 — locate evidence"
+            placeholder="e.g. Level 0  -  locate evidence"
             disabled={disabled}
             className="mt-1"
             required
@@ -1218,7 +1218,7 @@ function PracticeTestPreview({
         <p className="text-muted-foreground line-clamp-2">
           {typeof miniTest.passage?.content === "string"
             ? miniTest.passage.content.slice(0, 200) + "..."
-            : "—"}
+            : "-"}
         </p>
         <p className="text-muted-foreground">{miniTest.questions?.length ?? 0} questions</p>
       </div>

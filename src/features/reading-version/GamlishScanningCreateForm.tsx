@@ -100,7 +100,7 @@ export function GamlishScanningCreateForm({
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. L0 — Football scanning mission"
+            placeholder="e.g. L0  -  Football scanning mission"
             disabled={disabled}
             className="mt-1"
             required

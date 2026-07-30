@@ -156,7 +156,7 @@ export function LevelMetadataCard({
               className="mt-1.5 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm"
               disabled={savingLevel}
             >
-              <option value="">— Select —</option>
+              <option value=""> -  Select  - </option>
               {DIFFICULTY_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}

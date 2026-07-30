@@ -1,5 +1,5 @@
 /**
- * Journey progress visuals — bars, water fill, and plane position use the true
+ * Journey progress visuals  -  bars, water fill, and plane position use the true
  * passed-level percentage (no perceptual inflation).
  */
 
@@ -29,7 +29,7 @@ export function journeyToVisualProgressPercent(actualPct: number): number {
 }
 
 /**
- * Band-score water fill — slightly eased so low % (e.g. 10%) reads clearly on tall
+ * Band-score water fill  -  slightly eased so low % (e.g. 10%) reads clearly on tall
  * glyphs without inflating bars/plane. 10% actual ≈ 20% water; 100% stays 100%.
  */
 export function journeyToWaterFillPercent(actualPct: number): number {
@@ -52,7 +52,7 @@ export interface JourneyProgressSource {
 export interface ResolvedJourneyProgress {
   /** Passed-level % (0–100). */
   actualPct: number;
-  /** Same as actualPct — kept for callers that expect a separate visual field. */
+  /** Same as actualPct  -  kept for callers that expect a separate visual field. */
   visualPct: number;
   label: string;
   earnedPoints: number | null;

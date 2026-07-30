@@ -1,4 +1,4 @@
-/** Official Gamlish social profiles — single source of truth. */
+/** Official Gamlish social profiles  -  single source of truth. */
 export const GAMLISH_SOCIAL_LINKS = [
   {
     id: "facebook",

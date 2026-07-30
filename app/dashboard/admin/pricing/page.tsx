@@ -271,7 +271,7 @@ export default function AdminPricingPage() {
             ) : null}
             <p className="text-sm text-muted-foreground">
               {discountEnabled ? `${discountPercent}% OFF` : "No discount"} ·{" "}
-              {durationDays || "—"} days access
+              {durationDays || "-"} days access
             </p>
             {preOrderEnabled ? (
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-100">

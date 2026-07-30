@@ -1,5 +1,5 @@
 /**
- * Logged-in player surfaces — sky/blue brand matching guest landing CTAs.
+ * Logged-in player surfaces  -  sky/blue brand matching guest landing CTAs.
  * Do not use on guest landing (guest uses guest-landing-theme.ts).
  */
 export const PLAYER_CTA_CLASS =

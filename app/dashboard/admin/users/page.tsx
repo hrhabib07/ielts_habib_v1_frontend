@@ -45,13 +45,13 @@ function premiumDisplay(
   hasEnglishAccess: boolean,
 ) {
   if (label === "live" || (!label && hasEnglishAccess)) {
-    return "Yes — live";
+    return "Yes  -  live";
   }
   if (label === "preorder") {
     const when = accessStartsAt
       ? new Date(accessStartsAt).toLocaleDateString()
       : "launch date";
-    return `Paid — access starts ${when}`;
+    return `Paid  -  access starts ${when}`;
   }
   return "No (free path)";
 }
@@ -340,7 +340,7 @@ export default function AdminUsersPage() {
             Students
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            All English Foundations learners — email, signup IP, and mission progress.
+            All English Foundations learners  -  email, signup IP, and mission progress.
           </p>
         </div>
         <Link href="/dashboard/admin">

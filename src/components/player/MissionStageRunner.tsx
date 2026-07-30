@@ -183,7 +183,7 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
       totalStages,
       nextLabel: nextStageLabel(result),
     });
-    // Bowling-style score after the stage — bump HUD + floating toast.
+    // Bowling-style score after the stage  -  bump HUD + floating toast.
     emitXpGain(xp, "stage");
     window.setTimeout(() => emitXpRefresh(), 800);
   };

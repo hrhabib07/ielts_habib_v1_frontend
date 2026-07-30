@@ -46,7 +46,7 @@ function MissionMini({ card }: { card: MissionCard }) {
 }
 
 /**
- * Own-account gamified hub on /profile — works for existing users once
+ * Own-account gamified hub on /profile  -  works for existing users once
  * publicId is minted by GET /students/me.
  */
 export function MyGamlishHub() {
@@ -115,7 +115,7 @@ export function MyGamlishHub() {
             Your rewards
           </h2>
           <p className="text-sm text-muted-foreground">
-            Level, XP and streak — the dopamine loop. Keep playing to grow them.
+            Level, XP and streak  -  the dopamine loop. Keep playing to grow them.
           </p>
         </div>
         <Button asChild variant="outline" size="sm" className="rounded-full">
@@ -162,7 +162,7 @@ export function MyGamlishHub() {
               Founder · #{String(profile.founderNumber).padStart(3, "0")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Permanent badge — you appear on the Founders&apos; Wall.
+              Permanent badge  -  you appear on the Founders&apos; Wall.
             </p>
           </div>
           <Button asChild size="sm" variant="secondary" className="rounded-full">

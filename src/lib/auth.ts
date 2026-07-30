@@ -10,7 +10,7 @@ export interface JwtPayload {
 
 /**
  * Persist Bearer token for API calls (localStorage only).
- * Do NOT mirror into document.cookie — that conflicts with the httpOnly
+ * Do NOT mirror into document.cookie  -  that conflicts with the httpOnly
  * cookie set by POST /api/auth/sync and breaks production session recovery.
  */
 export function setAccessToken(token: string): void {

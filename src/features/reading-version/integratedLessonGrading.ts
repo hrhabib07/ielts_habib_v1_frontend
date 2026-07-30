@@ -56,7 +56,7 @@ export function formatCorrectAnswerLabel(
     );
     const idx = letter.charCodeAt(0) - 65;
     const text = options[idx];
-    return text ? `${letter} — ${text}` : letter;
+    return text ? `${letter}  -  ${text}` : letter;
   }
   return String(correct);
 }

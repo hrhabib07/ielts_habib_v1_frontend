@@ -1,5 +1,5 @@
 /**
- * Gamlish brand — midnight navy only. Use these tokens instead of rainbow Tailwind hues.
+ * Gamlish brand  -  midnight navy only. Use these tokens instead of rainbow Tailwind hues.
  * Semantic CSS vars live in app/globals.css (--primary, --accent, etc.).
  */
 
@@ -85,10 +85,10 @@ export const brandSurfaces = {
     "bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,color-mix(in_srgb,var(--steel)_14%,transparent),transparent)] dark:bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,color-mix(in_srgb,var(--steel)_10%,transparent),transparent)]",
   midnightCard:
     "border-primary/20 bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground shadow-xl shadow-primary/15",
-  /** Elevated feature card — midnight base + steel accent (light & dark) */
+  /** Elevated feature card  -  midnight base + steel accent (light & dark) */
   featuredCard:
     "border-border/70 bg-card text-foreground shadow-lg ring-1 ring-steel/15 dark:border-steel-deep/35 dark:bg-gradient-to-br dark:from-card dark:via-card dark:to-[color-mix(in_srgb,var(--card)_72%,var(--steel-deep)_28%)] dark:ring-steel/20 dark:shadow-steel-deep/15",
-  /** Logo steel blue — solid fills (buttons, badges) */
+  /** Logo steel blue  -  solid fills (buttons, badges) */
   steelCard:
     "border-steel-deep/35 bg-gradient-to-br from-steel via-steel/95 to-steel-deep text-steel-foreground shadow-xl shadow-steel-deep/25",
   premiumBanner:
@@ -103,7 +103,7 @@ export const brandSurfaces = {
     "border-2 border-steel-deep/45 bg-transparent text-foreground hover:bg-steel/10 dark:border-steel/40 dark:hover:bg-steel/15",
 } as const;
 
-/** Status surfaces — still midnight navy; destructive only for errors/reject. */
+/** Status surfaces  -  still midnight navy; destructive only for errors/reject. */
 export const brandStatus = {
   success: {
     card:

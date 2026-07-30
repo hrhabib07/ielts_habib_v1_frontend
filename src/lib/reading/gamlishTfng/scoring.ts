@@ -55,7 +55,7 @@ export function calculateGamlishTfngScore(input: {
   const correctAnswers = 0;
   for (const question of questions) {
     const student = (tfngAnswers[question.id] ?? "").trim().toUpperCase();
-    // Preview / mock only — live scoring is server-side
+    // Preview / mock only  -  live scoring is server-side
     void student;
   }
 

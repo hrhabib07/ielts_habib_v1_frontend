@@ -1,6 +1,6 @@
-import type { UiLocale } from "@/src/lib/ui-locale";
+﻿import type { UiLocale } from "@/src/lib/ui-locale";
 
-/** Dashboard Founder offer: user facing copy must not include -, –, or —. */
+/** Dashboard Founder offer: user facing copy must not include -, –, or  - . */
 export interface FounderDashboardOfferCopy {
   readonly alert: (remainingSeats: number) => string;
   readonly headline: string;
@@ -63,7 +63,7 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
 
 /**
  * Next price after the Founder window closes.
- * We deliberately keep this as a stepped test value — not the final 1590 —
+ * We deliberately keep this as a stepped test value  -  not the final 1590  - 
  * so you can A/B the urgency anchor.
  *
  * Update this constant to control what the timer shows as the "after" price.

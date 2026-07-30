@@ -48,7 +48,7 @@ function repeatQuestions(
   return Array.from({ length: count }, (_, j) => factory(startNum + j));
 }
 
-/** Passage 1 — 13 Q: TFNG + gap fill + MCQ (Cambridge-style easier passage). */
+/** Passage 1  -  13 Q: TFNG + gap fill + MCQ (Cambridge-style easier passage). */
 function cambridgePassage1Set(): BulkPassageQuestionSetInput {
   return {
     difficulty: "MEDIUM",
@@ -89,7 +89,7 @@ function cambridgePassage1Set(): BulkPassageQuestionSetInput {
         instruction: "Choose the correct letter, A, B, C or D.",
         meta: { options: ["A", "B", "C", "D"], selectCount: 1 },
         questions: repeatQuestions(4, 10, (n) => ({
-          questionBody: { layout: "TEXT", content: `Question ${n} — choose the best answer.` },
+          questionBody: { layout: "TEXT", content: `Question ${n}  -  choose the best answer.` },
           options: ["A. Option one", "B. Option two", "C. Option three", "D. Option four"],
           correctAnswer: "B",
           explanation: `Explanation for Q${n}.`,
@@ -99,7 +99,7 @@ function cambridgePassage1Set(): BulkPassageQuestionSetInput {
   };
 }
 
-/** Passage 2 — 14 Q: Matching Headings + Summary + TFNG. */
+/** Passage 2  -  14 Q: Matching Headings + Summary + TFNG. */
 function cambridgePassage2Set(): BulkPassageQuestionSetInput {
   return {
     difficulty: "MEDIUM",
@@ -152,7 +152,7 @@ function cambridgePassage2Set(): BulkPassageQuestionSetInput {
   };
 }
 
-/** Passage 3 — 13 Q: YNNG + Matching Features + Note completion. */
+/** Passage 3  -  13 Q: YNNG + Matching Features + Note completion. */
 function cambridgePassage3Set(): BulkPassageQuestionSetInput {
   return {
     difficulty: "HARD",
@@ -212,11 +212,11 @@ function cambridgePassage3Set(): BulkPassageQuestionSetInput {
 
 function placeholderPassage(label: string, questionRange: string): BulkPassageInput {
   return {
-    title: `Sample passage — ${label}`,
+    title: `Sample passage  -  ${label}`,
     subTitle: `You should spend about 20 minutes on Questions ${questionRange}.`,
     contentParagraphs: [
       { paragraphIndex: 1, text: "A. Replace with real academic passage paragraph A (700–900 words total across all paragraphs)." },
-      { paragraphIndex: 2, text: "B. Replace with paragraph B — paraphrase-friendly factual or discursive content." },
+      { paragraphIndex: 2, text: "B. Replace with paragraph B  -  paraphrase-friendly factual or discursive content." },
       { paragraphIndex: 3, text: "C. Replace with paragraph C." },
       { paragraphIndex: 4, text: "D. Replace with paragraph D." },
     ],
@@ -228,7 +228,7 @@ function buildOneMockPracticeTest(
   mockNumber: 1 | 2 | 3,
 ): FullMockPracticeTestInput {
   return {
-    title: `Level ${levelOrder} — Practice Mock ${mockNumber}`,
+    title: `Level ${levelOrder}  -  Practice Mock ${mockNumber}`,
     timeLimitMinutes: 60,
     passages: [
       {
@@ -259,13 +259,13 @@ INPUT (edit before sending):
 - levelOrder: ${levelOrder}
 - mockNumber: ${mockNumber}
 - passageTopics:
-  1) [TOPIC for Passage 1 — factual/descriptive, ~700 words]
-  2) [TOPIC for Passage 2 — explanatory/discursive, ~800 words]
-  3) [TOPIC for Passage 3 — opinion/research, ~900 words]
+  1) [TOPIC for Passage 1  -  factual/descriptive, ~700 words]
+  2) [TOPIC for Passage 2  -  explanatory/discursive, ~800 words]
+  3) [TOPIC for Passage 3  -  opinion/research, ~900 words]
 
 OUTPUT: Return ONLY one object matching this shape (use the Gamlish bulk JSON structure):
 {
-  "title": "Level ${levelOrder} — Practice Mock ${mockNumber}",
+  "title": "Level ${levelOrder}  -  Practice Mock ${mockNumber}",
   "timeLimitMinutes": 60,
   "passages": [
     {
@@ -273,8 +273,8 @@ OUTPUT: Return ONLY one object matching this shape (use the Gamlish bulk JSON st
       "passage": { "title": "...", "subTitle": "You should spend about 20 minutes on Questions 1–13.", "contentParagraphs": [{ "paragraphIndex": 1, "text": "..." }] },
       "passageQuestionSet": { "difficulty": "MEDIUM", "expectedTotalQuestions": 13, "recommendedTimeMinutes": 20, "questionGroups": [ ... ] }
     },
-    { "... Passage 2 — expectedTotalQuestions: 14 ..." },
-    { "... Passage 3 — expectedTotalQuestions: 13 ..." }
+    { "... Passage 2  -  expectedTotalQuestions: 14 ..." },
+    { "... Passage 3  -  expectedTotalQuestions: 13 ..." }
   ]
 }
 
@@ -294,18 +294,18 @@ TECHNICAL:
 Return JSON only.`;
 }
 
-const INSTRUCTIONS = `FULL IELTS READING MOCK — Levels 17–20 Practice Tests
+const INSTRUCTIONS = `FULL IELTS READING MOCK  -  Levels 17–20 Practice Tests
 
 WORKFLOW:
-1) Click "Load template" — get 3 complete mock shells (or 1 if you prefer).
-2) Click "Copy Gemini prompt" — paste into Gemini with your three passage topics.
+1) Click "Load template"  -  get 3 complete mock shells (or 1 if you prefer).
+2) Click "Copy Gemini prompt"  -  paste into Gemini with your three passage topics.
 3) Replace each mock's passages with AI output (keep JSON keys unchanged).
 4) Click "Validate" then "Create practice mocks".
 
 RULES:
 - Each practiceTests[] item = one 60-minute mock with exactly 3 passages.
 - Total ~40 questions (13 + 14 + 13). Question numbers restart at 1 per passage.
-- __questionTypeCatalog is reference only — do not paste it into questionGroups.
+- __questionTypeCatalog is reference only  -  do not paste it into questionGroups.
 - Mandatory in every mock: TFNG/YNNG (≥5 Q), gap filling (≥6 gaps), ≥1 matching group, 6–8 question types total.`;
 
 export function buildFullMockPracticeBulkPayload(levelOrder: number): Record<string, unknown> {
@@ -450,7 +450,7 @@ export function validateFullMockPracticeBulk(params: {
       messages.push({
         level: "warn",
         path: base,
-        message: `Mock ${ti + 1}: only ${types.size} question types — aim for 6–8 for a realistic IELTS mix.`,
+        message: `Mock ${ti + 1}: only ${types.size} question types  -  aim for 6–8 for a realistic IELTS mix.`,
       });
     }
     if (totalQ < 39 || totalQ > 42) {

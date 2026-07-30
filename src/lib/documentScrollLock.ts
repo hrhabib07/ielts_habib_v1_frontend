@@ -1,6 +1,6 @@
 /**
  * Lock document scroll for fixed-viewport reading runners (level steps, practice review).
- * Do NOT use on exam focus pages — those manage their own layout.
+ * Do NOT use on exam focus pages  -  those manage their own layout.
  */
 export function lockDocumentScroll(): () => void {
   if (typeof document === "undefined") return () => {};

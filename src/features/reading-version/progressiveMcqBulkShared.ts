@@ -3,7 +3,7 @@ import type { ProgressiveMcqContentAuthoringPreview } from "@/src/lib/api/adminR
 export const L5_PROGRESSIVE_MCQ_INSTRUCTIONS =
   "Level 5 uses Progressive MCQ (context paragraph + question + options, one at a time). " +
   "Each practiceTests[] entry must include progressiveMcq. " +
-  "Do not put skill labels like (Sentence Flip) in questionText — use logicType internally only.";
+  "Do not put skill labels like (Sentence Flip) in questionText  -  use logicType internally only.";
 
 export type BulkL5ProgressiveMcqItem = {
   title?: string;

@@ -5,7 +5,7 @@ import type { BulkQuestionGroupInput } from "./strictReadingBulkUtils";
  * Paste into __instructions when generating payloads with an LLM.
  */
 export const SUMMARY_COMPLETION_WITH_CLUES_BULK_SPEC = `
-SUMMARY_COMPLETION_WITH_CLUES (IELTS — summary + word bank, drag-and-drop)
+SUMMARY_COMPLETION_WITH_CLUES (IELTS  -  summary + word bank, drag-and-drop)
 
 STRUCTURE
 • One questionGroup with questionType exactly: "SUMMARY_COMPLETION_WITH_CLUES".
@@ -67,7 +67,7 @@ export function allocateSummaryWithCluesGapChunks(totalGaps: number): number[] {
 function buildBlockPlaceholderContent(blockIndex: number, gapIds: number[]): string {
   const n = gapIds.length;
   const head = [
-    `Summary block ${blockIndex + 1} — replace this lead sentence with your own paraphrase of the passage.`,
+    `Summary block ${blockIndex + 1}  -  replace this lead sentence with your own paraphrase of the passage.`,
     `Add one or two more plain sentences that set context (no gaps in these lines if you prefer).`,
   ];
   const body: string[] = [];

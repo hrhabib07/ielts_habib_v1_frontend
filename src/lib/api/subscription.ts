@@ -43,9 +43,9 @@ export interface ActiveSubscription {
 export interface SubmitRequestPayload {
   planId: string;
   paymentMethod: "BKASH";
-  /** Required — unique bKash TrxID used to verify & prevent double-claims. */
+  /** Required  -  unique bKash TrxID used to verify & prevent double-claims. */
   transactionId: string;
-  /** Required — student bKash wallet that sent the money. */
+  /** Required  -  student bKash wallet that sent the money. */
   senderNumber: string;
   paidAmount: number;
   couponCode?: string;
@@ -68,7 +68,7 @@ export interface SubscriptionRequest {
   status: SubscriptionRequestStatus;
   rejectionReason?: string | null;
   reviewedAt?: string | null;
-  /** QA / Meta ads allowlist — never a real Founder purchase. */
+  /** QA / Meta ads allowlist  -  never a real Founder purchase. */
   isTest?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -114,7 +114,7 @@ export async function getFoundingMembersWall(): Promise<FoundingMembersWall> {
     res.data?.data ?? {
       members: [],
       total: 0,
-      cutoffIso: "2026-08-01T23:59:59.999Z",
+      cutoffIso: "2026-07-31T17:59:59.999Z",
     }
   );
 }

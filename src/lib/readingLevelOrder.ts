@@ -6,7 +6,7 @@ export const TOTAL_DISPLAY_LEVELS = 21;
 
 /**
  * Student/instructor-facing level number (1–21).
- * Works whether DB `order` is 0-based (0–20) or 1-based (1–21) — same rule as zone indexing.
+ * Works whether DB `order` is 0-based (0–20) or 1-based (1–21)  -  same rule as zone indexing.
  * Database `order` and content codes (L0C1, etc.) stay unchanged.
  */
 export function displayLevelNumberFromOrder(order: number): number {
@@ -19,7 +19,7 @@ export function formatDisplayLevelLabel(order: number): string {
   return `Level ${displayLevelNumberFromOrder(order)}`;
 }
 
-/** Database content code prefix (L0, L1, …) — instructor authoring only. */
+/** Database content code prefix (L0, L1, …)  -  instructor authoring only. */
 export function readingLevelContentCode(order: number): string {
   return `L${readingLevelIndexFromOrder(order)}`;
 }
@@ -29,12 +29,12 @@ export function formatInstructorLevelSummary(order: number): string {
   return `${formatDisplayLevelLabel(order)} · DB order ${order} · ${readingLevelContentCode(order)}`;
 }
 
-/** Shown on instructor screens — DB codes differ from student-facing 1–21 labels. */
+/** Shown on instructor screens  -  DB codes differ from student-facing 1–21 labels. */
 export const INSTRUCTOR_DB_LEVEL_CODE_HINT =
-  "Students see Levels 1–21. Database order and content codes (e.g. order 0, L0C1) are unchanged — use those when authoring.";
+  "Students see Levels 1–21. Database order and content codes (e.g. order 0, L0C1) are unchanged  -  use those when authoring.";
 
 /**
- * 0-based curriculum index (0 = foundation). Internal progression only — not student labels.
+ * 0-based curriculum index (0 = foundation). Internal progression only  -  not student labels.
  * Stored `order` may be 0 (0-based) or 1+ (1-based) depending on how the level was created.
  */
 export function readingLevelIndexFromOrder(order: number): number {
@@ -52,7 +52,7 @@ export function isReadingFoundationL0(level: {
   );
 }
 
-/** Level 5 — Vocabulary / Paraphrase Engine (progressive context MCQ). */
+/** Level 5  -  Vocabulary / Paraphrase Engine (progressive context MCQ). */
 export function isReadingVocabularyL5(level: {
   levelType?: string | null;
   order?: number | null;

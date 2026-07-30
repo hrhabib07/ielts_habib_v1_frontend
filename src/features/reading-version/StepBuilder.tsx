@@ -265,7 +265,7 @@ export function StepBuilder({
                           FINAL_QUIZ
                         </span>
                       ) : null}
-                      {STEP_TYPE_LABELS[step.stepType] ?? step.stepType} — {step.title}
+                      {STEP_TYPE_LABELS[step.stepType] ?? step.stepType}  -  {step.title}
                     </span>
                     {!disabled && (
                       <div className="flex items-center gap-1 shrink-0">
@@ -357,7 +357,7 @@ function quizSummary(q: ReadingQuizContent): string {
   const code = q.contentCode ? `[${q.contentCode}] ` : "";
   const groups = q.groups?.length ?? 0;
   const questions = q.groups?.reduce((s, g) => s + (g.questions?.length ?? 0), 0) ?? 0;
-  return `${code}${q.title} — ${groups} group(s), ${questions} question(s)`;
+  return `${code}${q.title}  -  ${groups} group(s), ${questions} question(s)`;
 }
 
 interface StepFormProps {
@@ -572,7 +572,7 @@ function StepForm({
             disabled={disabled}
             required
           >
-            <option value="">— Select practice test —</option>
+            <option value=""> -  Select practice test  - </option>
             {practiceTestsToSelect.map((pt) => (
               <option key={pt._id} value={pt._id}>
                 {pt.contentCode ? `[${pt.contentCode}] ` : ""}{pt.title} ({pt.timeLimitMinutes} min · pass {pt.passType === "PERCENTAGE" ? `${pt.passValue}%` : `band ${pt.passValue}`})
@@ -622,7 +622,7 @@ function StepForm({
                 disabled={disabled}
                 required
               >
-                <option value="">— Select quiz —</option>
+                <option value=""> -  Select quiz  - </option>
                 {quizContents.map((q) => (
                   <option key={q._id} value={q._id}>
                     {quizSummary(q)}
@@ -645,7 +645,7 @@ function StepForm({
                     onChange={(e) => setPoolQuizAt(idx, e.target.value)}
                     disabled={disabled}
                   >
-                    <option value="">— Select quiz —</option>
+                    <option value=""> -  Select quiz  - </option>
                     {quizContents.map((q) => (
                       <option key={q._id} value={q._id}>
                         {quizSummary(q)}
@@ -701,7 +701,7 @@ function StepForm({
             onChange={(e) => setContentId(e.target.value)}
             disabled={disabled}
           >
-            <option value="">— None —</option>
+            <option value=""> -  None  - </option>
             {contents.map((c) => (
               <option key={c._id} value={c._id}>
                 {c.contentCode ? `[${c.contentCode}] ` : ""}{c.title}
@@ -957,7 +957,7 @@ function StepEditForm({
             onChange={(e) => setPracticeTestId(e.target.value)}
             disabled={busy}
           >
-            <option value="">— Practice test —</option>
+            <option value=""> -  Practice test  - </option>
             {practiceTestsToSelect.map((pt) => (
               <option key={pt._id} value={pt._id}>
                 {pt.contentCode ? `[${pt.contentCode}] ` : ""}{pt.title}
@@ -994,7 +994,7 @@ function StepEditForm({
               disabled={busy}
               title="Quiz Content (required)"
             >
-              <option value="">— Select quiz —</option>
+              <option value=""> -  Select quiz  - </option>
               {quizContents.map((q) => (
                 <option key={q._id} value={q._id}>
                   {quizSummary(q)}
@@ -1010,7 +1010,7 @@ function StepEditForm({
             onFocus={onLoadContents}
             disabled={busy}
           >
-            <option value="">— None —</option>
+            <option value=""> -  None  - </option>
             {contents.map((c) => (
               <option key={c._id} value={c._id}>
                 {c.contentCode ? `[${c.contentCode}] ` : ""}{c.title}
@@ -1076,7 +1076,7 @@ function StepEditForm({
                 <div key={`${step._id}-${idx}-${id}`} className="flex items-center gap-2">
                   <span className="w-5 text-xs text-muted-foreground">{idx + 1}.</span>
                   <select className="h-8 flex-1 rounded-md border border-input bg-transparent px-2 text-xs" value={id} onChange={(e) => setPoolQuizAtEdit(idx, e.target.value)} disabled={busy}>
-                    <option value="">— Select —</option>
+                    <option value=""> -  Select  - </option>
                     {quizContents.map((q) => (
                       <option key={q._id} value={q._id}>{quizSummary(q)}</option>
                     ))}

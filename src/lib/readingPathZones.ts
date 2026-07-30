@@ -11,7 +11,7 @@ export interface ReadingPathZone {
   levelOrders: number[];
   /** Zone index label, e.g. "Zone 1" */
   zoneLabel: string;
-  /** Radial glow intensity — accent only, varies by zone depth */
+  /** Radial glow intensity  -  accent only, varies by zone depth */
   glowClass: string;
 }
 

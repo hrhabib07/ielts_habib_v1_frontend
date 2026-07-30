@@ -456,7 +456,7 @@ export default function AdminDemoFeedbackPage() {
           <DiagnosticCard
             label="Q1 error rate"
             value={
-              d.q1ErrorRate != null ? `${d.q1ErrorRate}% failed Q1` : "—"
+              d.q1ErrorRate != null ? `${d.q1ErrorRate}% failed Q1` : "-"
             }
             hint={`${d.q1Wrong} wrong / ${d.q1Answered} answered`}
           />
@@ -465,7 +465,7 @@ export default function AdminDemoFeedbackPage() {
             value={
               d.avgSignupDwellSeconds != null
                 ? `${d.avgSignupDwellSeconds}s dwell`
-                : "—"
+                : "-"
             }
             hint={`${d.signupDwellSamples} exit samples`}
           />
@@ -474,7 +474,7 @@ export default function AdminDemoFeedbackPage() {
             value={
               d.oauthCompletionRate != null
                 ? `${d.oauthCompletionRate}% complete auth`
-                : "—"
+                : "-"
             }
             hint={`${d.oauthSuccesses} OAuth / ${d.googleSaveClicks} Google clicks`}
           />

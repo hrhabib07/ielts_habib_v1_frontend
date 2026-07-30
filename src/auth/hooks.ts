@@ -22,7 +22,7 @@ export function useLogin() {
 
       setAccessToken(token);
 
-      // Best-effort cookie sync — never block login if sync fails.
+      // Best-effort cookie sync  -  never block login if sync fails.
       await syncAuthCookie(token);
 
       if (role === "ADMIN") {

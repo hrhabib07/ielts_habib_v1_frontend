@@ -1,4 +1,4 @@
-/** Google Tag Manager container ID (gamlish.com — GTM-5QCTC26K). */
+/** Google Tag Manager container ID (gamlish.com  -  GTM-5QCTC26K). */
 export const GTM_ID = "GTM-5QCTC26K";
 
 const GTM_INLINE_SCRIPT = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -8,7 +8,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','${GTM_ID}');`;
 
 /**
- * GTM head snippet — first child of `<head>` (as high as possible).
+ * GTM head snippet  -  first child of `<head>` (as high as possible).
  */
 export function GoogleTagManagerHead() {
   return (
@@ -20,7 +20,7 @@ export function GoogleTagManagerHead() {
 }
 
 /**
- * GTM noscript fallback — first child of `<body>`.
+ * GTM noscript fallback  -  first child of `<body>`.
  */
 export function GoogleTagManagerBody() {
   return (

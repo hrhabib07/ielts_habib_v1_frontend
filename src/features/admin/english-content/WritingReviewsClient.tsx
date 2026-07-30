@@ -75,7 +75,7 @@ export function WritingReviewsClient({
           <span className="sr-only">{backLabel}</span>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">M21 Final Pitch — Writing Reviews</h1>
+          <h1 className="text-2xl font-bold">M21 Final Pitch  -  Writing Reviews</h1>
           <p className="text-sm text-muted-foreground">
             Mark student paragraphs out of 10. Pass mark: 6/10. Pending students cannot continue until approved.
           </p>

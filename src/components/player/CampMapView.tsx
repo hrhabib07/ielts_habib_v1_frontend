@@ -92,7 +92,7 @@ function segmentTrailStyle(
 }
 
 function formatDisplayTitle(title: string): string {
-  return title.replace(/\s*[—–]\s*/g, " · ");
+  return title.replace(/\s*[ - –]\s*/g, " · ");
 }
 
 function missionShortTitle(title: string): string {
@@ -475,7 +475,7 @@ export function CampMapView({
       <PlayerXpHud />
       <XpGainToaster />
 
-      {/* Roadmap first — tap missions to play */}
+      {/* Roadmap first  -  tap missions to play */}
       <div className="relative mx-auto max-w-lg space-y-7 px-4 pt-4 pb-6 sm:max-w-2xl sm:space-y-9 sm:pt-5 sm:pb-8">
         <p className="rounded-2xl border border-sky-400/30 bg-sky-400/10 px-4 py-3 text-center text-sm font-semibold text-sky-900 dark:text-sky-100">
           {PLAYER_UI.roadmapTapHint}

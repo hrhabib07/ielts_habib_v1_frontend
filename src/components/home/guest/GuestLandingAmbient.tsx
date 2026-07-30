@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-/** Rich midnight atmosphere behind the guest landing — premium, not flat. */
+/** Rich midnight atmosphere behind the guest landing  -  premium, not flat. */
 export function GuestLandingAmbient() {
   const reduceMotion = useReducedMotion();
 

@@ -18,7 +18,7 @@ const VIEW_DWELL_MS = 1000;
 const RAGE_WINDOW_MS = 1500;
 const RAGE_CLICK_THRESHOLD = 3;
 
-/** Segment-safe blacklist — does NOT match `/player` via substring "pay". */
+/** Segment-safe blacklist  -  does NOT match `/player` via substring "pay". */
 const BLACKLIST_SEGMENT_RE =
   /(^|\/)(checkout|payment|pay|confirmation|confirm|order|bkash|verify)([/-]|$)/i;
 
@@ -37,7 +37,7 @@ export function isTelemetryPathBlacklisted(pathname: string): boolean {
   return BLACKLIST_SEGMENT_RE.test(path);
 }
 
-/** Landing, demo, dashboard, player, auth entry — never payment. */
+/** Landing, demo, dashboard, player, auth entry  -  never payment. */
 export function isTelemetryPathAllowed(pathname: string): boolean {
   if (isTelemetryPathBlacklisted(pathname)) return false;
   const p = pathname.toLowerCase();

@@ -64,7 +64,7 @@ export function LessonJsonImportPanel({
     const result = parseIntegratedLessonJson(LEVEL_0_LESSON_JSON_EXAMPLE);
     if (result.ok) {
       setParseOk(
-        `Loaded perfect Level 0 JSON · ${result.blocks.length} blocks — click Apply to lesson`,
+        `Loaded perfect Level 0 JSON · ${result.blocks.length} blocks  -  click Apply to lesson`,
       );
     } else {
       setParseOk(null);
@@ -139,7 +139,7 @@ export function LessonJsonImportPanel({
       </div>
 
       <p className="text-[11px] text-muted-foreground rounded-md border border-dashed border-border/80 bg-background/60 px-2 py-1.5">
-        Tip for AI: use single quotes inside sentences (&apos;Open Book Exam&apos;, &apos;Aha!&apos;) — never raw
+        Tip for AI: use single quotes inside sentences (&apos;Open Book Exam&apos;, &apos;Aha!&apos;)  -  never raw
         &quot; inside JSON strings. File:{" "}
         <code className="text-[10px]">content/examples/level-00-structured.paste.json</code>
       </p>
@@ -159,7 +159,7 @@ export function LessonJsonImportPanel({
           disabled={disabled}
           rows={16}
           spellCheck={false}
-          placeholder='Paste JSON only — starts with { "lessonTitle": "...", "blocks": ['
+          placeholder='Paste JSON only  -  starts with { "lessonTitle": "...", "blocks": ['
           className="mt-1 font-mono text-[11px] leading-relaxed"
         />
       </div>

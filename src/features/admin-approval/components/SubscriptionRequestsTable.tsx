@@ -52,7 +52,7 @@ export function SubscriptionRequestsTable() {
   const planName = (r: SubscriptionRequestItem) =>
     typeof r.planId === "object" && r.planId && "name" in r.planId
       ? (r.planId as { name?: string }).name
-      : "—";
+      : "-";
 
   const handleApprove = async (id: string) => {
     setActionId(id);
@@ -151,10 +151,10 @@ export function SubscriptionRequestsTable() {
                     <td className="p-4">{r.paidAmount} BDT</td>
                     <td className="p-4">
                       <div className="font-mono text-xs font-semibold text-foreground">
-                        {r.transactionId?.trim() || "—"}
+                        {r.transactionId?.trim() || "-"}
                       </div>
                       <div className="mt-0.5 text-xs text-muted-foreground">
-                        {r.senderNumber ? `bKash ${r.senderNumber}` : "—"}
+                        {r.senderNumber ? `bKash ${r.senderNumber}` : "-"}
                       </div>
                     </td>
                     <td className="p-4">

@@ -264,7 +264,7 @@ export default function DemoConversionPage() {
               value={
                 phoneFunnel?.overallPhoneConversionRate != null
                   ? `${phoneFunnel.overallPhoneConversionRate}%`
-                  : "—"
+                  : "-"
               }
               sub={`${phoneFunnel?.setupDone ?? 0} registered via phone`}
               color={
@@ -281,7 +281,7 @@ export default function DemoConversionPage() {
               value={
                 data.googleFunnel.completionRate != null
                   ? `${data.googleFunnel.completionRate}%`
-                  : "—"
+                  : "-"
               }
               sub={`${data.googleFunnel.completed} of ${data.googleFunnel.clicked} clicks`}
               color={
@@ -294,7 +294,7 @@ export default function DemoConversionPage() {
               value={
                 data.delivery.avgDelaySeconds != null
                   ? `${data.delivery.avgDelaySeconds}s`
-                  : "—"
+                  : "-"
               }
               sub={
                 data.delivery.samples > 0
@@ -315,7 +315,7 @@ export default function DemoConversionPage() {
               value={
                 data.abandonment.avgTimeSeconds != null
                   ? `${data.abandonment.avgTimeSeconds}s`
-                  : "—"
+                  : "-"
               }
               sub={`${data.abandonment.total} users abandoned`}
               color="red"
@@ -388,7 +388,7 @@ export default function DemoConversionPage() {
                 )}
                 {(phoneFunnel?.resends ?? 0) > 0 && (
                   <div className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-                    {phoneFunnel?.resends} users resent OTP — SMS may be slow
+                    {phoneFunnel?.resends} users resent OTP  -  SMS may be slow
                   </div>
                 )}
               </div>

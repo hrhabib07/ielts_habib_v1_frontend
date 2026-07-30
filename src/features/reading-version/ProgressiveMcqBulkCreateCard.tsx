@@ -26,7 +26,7 @@ import {
 export function ProgressiveMcqBulkCreateCard(props: {
   versionId: string;
   disabled: boolean;
-  /** Tests already on this draft version — used for next slot + template numbering. */
+  /** Tests already on this draft version  -  used for next slot + template numbering. */
   existingPracticeTestCount?: number;
   onMergeCreatedPracticeTests: (created: PracticeTest[]) => void;
 }) {
@@ -141,7 +141,7 @@ export function ProgressiveMcqBulkCreateCard(props: {
               <Sparkles className="h-4 w-4" />
             </span>
             <CardTitle className="text-base font-semibold text-stone-900 dark:text-stone-100">
-              Level 5 — Paraphrase Engine (Progressive MCQ)
+              Level 5  -  Paraphrase Engine (Progressive MCQ)
             </CardTitle>
             <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-800 dark:bg-violet-900/50 dark:text-violet-200">
               Progressive quiz
@@ -193,7 +193,7 @@ export function ProgressiveMcqBulkCreateCard(props: {
               <ul className="list-disc space-y-1.5 pl-5 text-sm text-amber-900/90 dark:text-amber-100/80">
                 <li>Use <strong>6 items</strong> per test (Word Swap, Grammar Change, Sentence Flip mix).</li>
                 <li>Do <strong>not</strong> put skill labels like <em>(Sentence Flip)</em> in question text.</li>
-                <li>Set <code className="text-xs">logicType</code> for your reference — students never see it.</li>
+                <li>Set <code className="text-xs">logicType</code> for your reference  -  students never see it.</li>
                 <li>Each item needs unique <code className="text-xs">id</code> and <code className="text-xs">order</code>.</li>
               </ul>
             </div>

@@ -30,6 +30,11 @@ export type FunnelEventName =
   | "phone_otp_verified_error"
   | "phone_otp_resend_clicked"
   | "phone_setup_completed"
+  | "phone_session_sync_success"
+  | "phone_session_sync_failed"
+  | "payment_submit_clicked"
+  | "payment_submit_success"
+  | "payment_submit_error"
   | "save_screen_abandoned";
 
 function apiBase(): string {

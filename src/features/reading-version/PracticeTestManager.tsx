@@ -73,7 +73,7 @@ interface PracticeTestManagerProps {
 }
 
 function formatDate(s: string | undefined): string {
-  if (!s) return "—";
+  if (!s) return "-";
   try {
     return new Date(s).toLocaleDateString(undefined, {
       year: "numeric",
@@ -81,7 +81,7 @@ function formatDate(s: string | undefined): string {
       day: "numeric",
     });
   } catch {
-    return "—";
+    return "-";
   }
 }
 
@@ -416,7 +416,7 @@ export function PracticeTestManager({
                         )}
                       </p>
                       <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-                        {pt.contentCode ?? "—"} · {pt.timeLimitMinutes} min ·{" "}
+                        {pt.contentCode ?? "-"} · {pt.timeLimitMinutes} min ·{" "}
                         {pt.passType === "PERCENTAGE"
                           ? `≥ ${pt.passValue}%`
                           : "Band (student chooses)"}{" "}
@@ -478,7 +478,7 @@ export function PracticeTestManager({
                     )}
                     {!disabled && !isCurrentVersion && (
                       <p className="text-xs text-amber-700 dark:text-amber-300">
-                        From another version — edit the matching test in this draft list (same title/order).
+                        From another version  -  edit the matching test in this draft list (same title/order).
                       </p>
                     )}
                   </div>
@@ -569,7 +569,7 @@ export function PracticeTestManager({
                           </div>
                         </td>
                         <td className="p-4 font-mono text-xs text-stone-600 dark:text-stone-400">
-                          {pt.contentCode ?? "—"}
+                          {pt.contentCode ?? "-"}
                         </td>
                         <td className="p-4 font-medium text-stone-900 dark:text-stone-100">
                           {pt.title}
@@ -1334,7 +1334,7 @@ function renderQuestionTextWithGaps(text: string): ReactNode {
 }
 
 function formatCorrectAnswer(correctAnswer: string | string[] | undefined): string {
-  if (correctAnswer == null) return "—";
+  if (correctAnswer == null) return "-";
   if (Array.isArray(correctAnswer)) return correctAnswer.join(", ");
   return String(correctAnswer);
 }

@@ -189,7 +189,7 @@ export function FullMockPracticeBulkPortal(props: {
         <div className="min-w-0 space-y-1">
           <CardTitle className="flex items-center gap-2 text-base font-semibold text-stone-900">
             <Sparkles className="h-4 w-4 text-indigo-600" />
-            Full mock practice tests — Levels 17–20
+            Full mock practice tests  -  Levels 17–20
           </CardTitle>
           <p className="text-sm text-stone-600">
             Bulk-create complete IELTS Reading mocks (3 passages · ~40 questions · 60 minutes each).
@@ -212,10 +212,10 @@ export function FullMockPracticeBulkPortal(props: {
           <div className="rounded-xl border border-indigo-100 bg-white/80 p-4 text-sm text-stone-700">
             <p className="font-medium text-stone-900">Instructor workflow</p>
             <ol className="mt-2 list-decimal space-y-1 pl-5 text-stone-600">
-              <li>Load template — 3 mock shells with realistic question-type mix.</li>
+              <li>Load template  -  3 mock shells with realistic question-type mix.</li>
               <li>Copy Gemini prompt (pick Mock 1, 2, or 3) and add your three passage topics.</li>
               <li>Paste AI output into the matching <code className="text-xs">practiceTests[n]</code> block.</li>
-              <li>Validate → Create — adds up to 3 full mock practice tests to this version.</li>
+              <li>Validate → Create  -  adds up to 3 full mock practice tests to this version.</li>
             </ol>
           </div>
 

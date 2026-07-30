@@ -1,4 +1,4 @@
-/** Public bKash Send Money number — set NEXT_PUBLIC_BKASH_NUMBER in production. */
+/** Public bKash Send Money number  -  set NEXT_PUBLIC_BKASH_NUMBER in production. */
 export const PUBLIC_BKASH_NUMBER =
   process.env.NEXT_PUBLIC_BKASH_NUMBER?.trim() || null;
 

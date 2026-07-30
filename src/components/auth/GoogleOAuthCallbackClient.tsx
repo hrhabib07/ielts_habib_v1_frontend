@@ -36,7 +36,7 @@ function resolveDestination(
 /**
  * Completes Google OAuth after the API redirects here with ?token=…
  * Priority: navigate instantly. Cookie sync runs with a short timeout and
- * continues in the background — /player is not middleware-gated on the cookie.
+ * continues in the background  -  /player is not middleware-gated on the cookie.
  */
 export function GoogleOAuthCallbackClient() {
   const searchParams = useSearchParams();
@@ -84,7 +84,7 @@ export function GoogleOAuthCallbackClient() {
         clearDemoSessionId();
       }
 
-      // Best-effort cookie sync — never block entry more than ~400ms.
+      // Best-effort cookie sync  -  never block entry more than ~400ms.
       await Promise.race([
         syncAuthCookie(token, { timeoutMs: 400 }),
         new Promise<{ ok: false }>((resolve) => {

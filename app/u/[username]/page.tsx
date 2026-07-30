@@ -42,7 +42,7 @@ export async function generateMetadata({
   return {
     title: `${identity.displayName} (@${handle}) · Gamlish`,
     description: identity.isFoundingMember
-      ? `${identity.displayName} is a Gamlish Founding Member — Founder #${identity.founderNumber}.`
+      ? `${identity.displayName} is a Gamlish Founding Member  -  Founder #${identity.founderNumber}.`
       : `${identity.displayName}'s Gamlish learning profile.`,
   };
 }

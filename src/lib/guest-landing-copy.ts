@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   GuestHowGamlishWorksCopy,
   GuestLandingZoneMockCopy,
 } from "@/src/lib/guest-how-it-works-types";
@@ -46,7 +46,7 @@ export interface GuestLandingCopy {
   readonly ctaPrimary: string;
   readonly ctaPrimarySub: string;
   readonly ctaSecondary: string;
-  /** Clear purchase path — Bangladesh users often miss footer-only pricing. */
+  /** Clear purchase path  -  Bangladesh users often miss footer-only pricing. */
   readonly ctaPreOrder: string;
   readonly ctaPreOrderSub: string;
   readonly stickyCta: string;
@@ -194,14 +194,15 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       eyebrow: "Founding Members",
       title: "You can be on this wall.",
       sub: "History remembers those who believe before everyone else.",
-      youCanBeHere: "Your name can be added here",
+      youCanBeHere: "Lock your spot now before it is gone forever.",
       youCanBeNumber: (n) => `You can be Founder #${n}`,
-      joinHereCta: "Join here now",
-      urgency: "Pre-order now: spots close at 100 or on 1 August.",
+      joinHereCta: "Become a proud Founder",
+      urgency:
+        "Pre-order now: spots close at 100 or on 31 July · 11:59 PM BD.",
       slotsLine: (filled, max) => `${filled} of ${max} Founder spots claimed`,
       emptyBody: "The wall is empty. Be the first name here.",
       viewWall: "View full wall",
-      claimSpot: "Pre-order · claim your spot",
+      claimSpot: "Become a proud Founder",
       closedNote: "Founder spots are full. You can still join premium.",
     },
   },
@@ -302,16 +303,17 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     },
     foundersWall: {
       eyebrow: "Founding Members",
-      title: "আপনিও এই ওয়ালে থাকতে পারেন।",
-      sub: "যারা শুরুতে বিশ্বাস করে, ইতিহাস তাদেরই মনে রাখে।",
-      youCanBeHere: "এখানে আপনার নাম যোগ হতে পারে",
+      title: "আপনিও ফাউন্ডারস ওয়ালে থাকতে পারেন।",
+      sub: "গ্যামলিশ যাত্রা শুরুর আগে যারা আস্থা রেখেছেন, ইতিহাস তাদেরই মনে রাখে।",
+      youCanBeHere: "এখনই স্পট লক করুন, পরে আর পাবেন না।",
       youCanBeNumber: (n) => `আপনি হতে পারেন Founder #${n}`,
-      joinHereCta: "এখনই যোগ দিন",
-      urgency: "এখনই প্রি-অর্ডার করুন: 100 পূর্ণ হলে বা 1 আগস্টে স্পট বন্ধ।",
+      joinHereCta: "গর্বিত ফাউন্ডার হোন",
+      urgency:
+        "এখনই প্রি-অর্ডার করুন: 100 পূর্ণ হলে বা 31 July · 11:59 PM (BD)-এ স্পট বন্ধ।",
       slotsLine: (filled, max) => `${filled} / ${max} Founder স্পট নেওয়া হয়েছে`,
       emptyBody: "ওয়াল এখনো খালি। প্রথম নামটি আপনার হতে পারে।",
       viewWall: "পুরো ওয়াল দেখুন",
-      claimSpot: "প্রি-অর্ডার · আপনার স্পট নিন",
+      claimSpot: "গর্বিত ফাউন্ডার হোন",
       closedNote: "Founder স্পট পূর্ণ। তবুও প্রিমিয়ামে যোগ দিতে পারবেন।",
     },
   },

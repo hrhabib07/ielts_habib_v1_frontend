@@ -25,8 +25,8 @@ export interface GamlishLessonJsonNote {
   /** Optional tag: INTRO, MODULE_META, CORE_OBJECTIVE, MECHANICS, PARAPHRASE, EXECUTION, MINEFIELD, ARSENAL, WRAP_UP, CUSTOM */
   section?: string;
   /**
-   * Option A — structured fields (best for AI). Use separate `en` and `bn` objects.
-   * Option B — skip en/bn and set `body: { en, bn }` with HTML strings instead.
+   * Option A  -  structured fields (best for AI). Use separate `en` and `bn` objects.
+   * Option B  -  skip en/bn and set `body: { en, bn }` with HTML strings instead.
    */
   en?: GamlishNoteFields;
   bn?: GamlishNoteFields;
@@ -268,12 +268,12 @@ export function parseIntegratedLessonJson(input: string): ParseLessonJsonResult 
       title: "",
       blocks: [],
       errors: [
-        "Invalid JSON — the file could not be read.",
+        "Invalid JSON  -  the file could not be read.",
         parseError ?? "Unknown syntax error",
         "",
         "Most common cause: straight double quotes (\") inside text without escaping.",
-        'Example — invalid: "content": "He said "hello""',
-        'Example — valid:   "content": "He said \\"hello\\""',
+        'Example  -  invalid: "content": "He said "hello""',
+        'Example  -  valid:   "content": "He said \\"hello\\""',
         "Or ask AI to use single quotes for emphasis (e.g. 'Open Book Exam') instead of double quotes inside strings.",
       ],
       warnings,
@@ -383,14 +383,14 @@ export const AI_LESSON_JSON_INSTRUCTIONS = `You are preparing content for the Ga
 Output ONLY valid JSON (no markdown fences, no commentary) matching this schema:
 
 {
-  "lessonTitle": "Level X — Short title",
+  "lessonTitle": "Level X  -  Short title",
   "blocks": [
     {
       "type": "note",
       "section": "INTRO",
       "en": {
-        "levelLabel": "optional — only for intro",
-        "instructorNote": "optional; UI label only — does NOT count toward required note body",
+        "levelLabel": "optional  -  only for intro",
+        "instructorNote": "optional; UI label only  -  does NOT count toward required note body",
         "heading": "optional section heading",
         "content": "Main paragraphs. Use \\n\\n between paragraphs. Required unless this language uses metaRows or bullets.",
         "bullets": ["optional", "bullet", "lines"],
@@ -424,7 +424,7 @@ Rules:
 - Every "note" with en/bn objects must pass: non-empty trimmed content OR non-empty metaRows OR non-empty bullets in at least one language (en or bn). levelLabel, instructorNote, and heading alone never count. Put INTRO welcome and all teaching prose in "content" (both languages); use instructorNote only as an optional extra line, not the only text.
 - MODULE_META notes often have empty content but filled metaRows (that satisfies the rule).
 
-CRITICAL — valid JSON strings:
+CRITICAL  -  valid JSON strings:
 - Never put unescaped " inside a JSON string value.
 - Bad:  "content": "This is an "open book" exam."
 - Good: "content": "This is an 'open book' exam."

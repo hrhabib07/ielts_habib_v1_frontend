@@ -231,7 +231,7 @@ export async function adminDeleteLevel(id: string): Promise<void> {
 }
 
 /* ─────────────────────────────────────────────
-   Instructor APIs (uses /api/instructor/levels) — use from instructor dashboard
+   Instructor APIs (uses /api/instructor/levels)  -  use from instructor dashboard
 ───────────────────────────────────────────── */
 
 const INSTRUCTOR_LEVELS = "/instructor/levels";

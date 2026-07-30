@@ -68,7 +68,7 @@ export async function playCorrectEvalSfx(): Promise<void> {
   playTone(ctx, 783.99, now + 0.18, 0.22, { type: "triangle", volume: 0.09 });
 }
 
-/** Gentle nudge when the first attempt is wrong — encourages another try. */
+/** Gentle nudge when the first attempt is wrong  -  encourages another try. */
 export async function playThinkAgainEvalSfx(): Promise<void> {
   const ctx = await getAudioContext();
   if (!ctx) return;
@@ -78,7 +78,7 @@ export async function playThinkAgainEvalSfx(): Promise<void> {
   playTone(ctx, 349.23, now + 0.12, 0.12, { type: "sine", volume: 0.05 });
 }
 
-/** Soft low tone for a wrong answer — noticeable but not harsh. */
+/** Soft low tone for a wrong answer  -  noticeable but not harsh. */
 export async function playWrongEvalSfx(): Promise<void> {
   const ctx = await getAudioContext();
   if (!ctx) return;

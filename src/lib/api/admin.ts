@@ -72,7 +72,13 @@ export interface SubscriptionRequestItem {
   paidAmount: number;
   screenshotUrl?: string;
   status: SubscriptionRequestStatus;
-  reviewedBy?: string;
+  reviewedBy?:
+    | {
+        _id: string;
+        email?: string | null;
+        displayName?: string | null;
+      }
+    | string;
   reviewedAt?: string;
   rejectionReason?: string;
   createdAt: string;

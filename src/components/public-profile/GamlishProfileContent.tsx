@@ -159,7 +159,7 @@ export function GamlishProfileContent({
         }));
       })
       .catch(() => {
-        /* best-effort — never block profile render */
+        /* best-effort  -  never block profile render */
       });
 
     return () => {

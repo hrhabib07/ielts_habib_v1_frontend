@@ -42,7 +42,7 @@ export function getFounderTierLabel(tier: FounderTier, locale: UiLocale): string
 
 export const FOUNDER_BENEFITS_COPY: Record<UiLocale, FounderBenefitsCopy> = {
   en: {
-    eyebrow: "Before 1 August · First 100 only",
+    eyebrow: "Before 31 July · 11:59 PM BD · First 100 only",
     headline: "Be the first.",
     subhead:
       "Only 100 people will ever hold Founding Member status. Join now and lock a permanent badge, number, and place on the Wall.",
@@ -101,7 +101,7 @@ export const FOUNDER_BENEFITS_COPY: Record<UiLocale, FounderBenefitsCopy> = {
     ],
   },
   bn: {
-    eyebrow: "1 আগস্টের আগে · শুধু প্রথম 100 জন",
+    eyebrow: "31 July · 11:59 PM (BD)-এর আগে · শুধু প্রথম 100 জন",
     headline: "প্রথম হোন।",
     subhead:
       "মাত্র 100 জন চিরকাল Founding Member স্ট্যাটাস ধরে রাখবেন। এখনই যোগ দিন। স্থায়ী ব্যাজ, নম্বর ও Wall-এ জায়গা লক করুন।",

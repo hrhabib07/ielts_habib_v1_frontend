@@ -14,7 +14,7 @@ export function isReadingExamSimulationPath(pathname: string | null): boolean {
   );
 }
 
-/** Fixed viewport under the site header — lock document scroll. */
+/** Fixed viewport under the site header  -  lock document scroll. */
 export function isReadingFixedViewportShellPath(pathname: string | null): boolean {
   if (!pathname) return false;
   if (isReadingExamSimulationPath(pathname)) return true;
@@ -22,7 +22,7 @@ export function isReadingFixedViewportShellPath(pathname: string | null): boolea
   return false;
 }
 
-/** Level overview roadmap — normal document scroll (not fixed viewport). */
+/** Level overview roadmap  -  normal document scroll (not fixed viewport). */
 export function isReadingLevelRoadmapPath(
   pathname: string | null,
   hasStepParam: boolean,

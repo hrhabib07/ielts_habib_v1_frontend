@@ -14,6 +14,7 @@ import { FounderBenefitsShowcase } from "@/src/components/pricing/FounderBenefit
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
 import { useCheckoutCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { waitForClientAuthReady } from "@/src/lib/auth-session-ready";
 import { Button } from "@/components/ui/button";
 import { brandStatus } from "@/src/lib/brand-theme";
 import { cn } from "@/lib/utils";
@@ -72,6 +73,11 @@ export function CheckoutContent({
     }
     void loadPricing(false);
   }, [initialPricing, loadPricing]);
+
+  /** Warm phone-OTP session before the bKash form mounts (avoids early submit race). */
+  useEffect(() => {
+    void waitForClientAuthReady({ timeoutMs: 12_000 });
+  }, []);
 
   /** Pending real submission: confirmation URL for ad tracking.
    *  Test QA can force the form with ?again=1 to resubmit. */

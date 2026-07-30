@@ -21,7 +21,7 @@ import { FEEDBACK_LABELS } from "@/src/lib/mission-one-feedback";
 import { cn } from "@/lib/utils";
 
 function formatWhen(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Intl.DateTimeFormat("en-GB", {
       day: "numeric",
@@ -445,7 +445,7 @@ export default function MissionFeedbackAdminPage() {
                         {row.user?.name ?? "Learner"}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
-                        {row.user?.email || row.user?.phone || row.user?.username || "—"}
+                        {row.user?.email || row.user?.phone || row.user?.username || "-"}
                       </p>
                     </td>
                     <td className="px-3 py-2.5">

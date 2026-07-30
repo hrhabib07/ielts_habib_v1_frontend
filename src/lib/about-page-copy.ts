@@ -1,4 +1,4 @@
-import type { UiLocale } from "@/src/lib/ui-locale";
+﻿import type { UiLocale } from "@/src/lib/ui-locale";
 
 export interface AboutFaqItem {
   readonly question: string;
@@ -195,8 +195,8 @@ export const ABOUT_PAGE_COPY: Record<UiLocale, AboutPageCopy> = {
     ],
     founderTitle: "A note from the founder",
     founderQuote: [
-      "Since May 2022, I have worked as an IELTS instructor with hundreds of learners. One pattern became impossible to ignore: most students do not struggle because of intelligence or motivation — they struggle because their foundation is weak.",
-      "When someone still hesitates on a basic sentence after years of study, the gap is in the method, not the learner. Gamlish’s 4 Camps and 21 Missions were built from that classroom experience and from C1 Advanced English proficiency — to make English learning easy, practical, and fear-free for Bangla speakers.",
+      "Since May 2022, I have worked as an IELTS instructor with hundreds of learners. One pattern became impossible to ignore: most students do not struggle because of intelligence or motivation  -  they struggle because their foundation is weak.",
+      "When someone still hesitates on a basic sentence after years of study, the gap is in the method, not the learner. Gamlish’s 4 Camps and 21 Missions were built from that classroom experience and from C1 Advanced English proficiency  -  to make English learning easy, practical, and fear-free for Bangla speakers.",
     ],
     founderName: "MD Habibur Rahman",
     founderRole: "Founder & Instructor, Gamlish",
@@ -257,7 +257,7 @@ export const ABOUT_PAGE_COPY: Record<UiLocale, AboutPageCopy> = {
     methodIntro:
       "এলোমেলোভাবে আজ একটু Grammar আর কাল কিছু Vocabulary শেখার দিন শেষ। Gamlish একটি নির্দিষ্ট Learning Roadmap অনুসরণ করে। পুরো Curriculum কে ভাগ করা হয়েছে 4টি Camp এবং 21টি Mission এ:",
     methodExperienceNote:
-      "এই সম্পূর্ণ 21-মিশন কারিকুলাম তৈরি হয়েছে 4 বছরেরও বেশি ব্যবহারিক ক্লাসরুম অভিজ্ঞতা এবং মে 2022 থেকে IELTS ইন্সট্রাকশনের ভিত্তিতে — বাংলাভাষীদের সবচেয়ে সাধারণ বাক্য-গঠনের দ্বিধা দূর করার জন্য।",
+      "এই সম্পূর্ণ 21-মিশন কারিকুলাম তৈরি হয়েছে 4 বছরেরও বেশি ব্যবহারিক ক্লাসরুম অভিজ্ঞতা এবং মে 2022 থেকে IELTS ইন্সট্রাকশনের ভিত্তিতে  -  বাংলাভাষীদের সবচেয়ে সাধারণ বাক্য-গঠনের দ্বিধা দূর করার জন্য।",
     camps: [
       {
         title: "Camp 01: The Foundation",

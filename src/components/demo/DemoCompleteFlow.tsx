@@ -136,7 +136,7 @@ export function DemoCompleteFlow() {
             </div>
           </div>
 
-          {/* Form-style rating — bilingual radio list */}
+          {/* Form-style rating  -  bilingual radio list */}
           <div
             className="relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-md"
             role="radiogroup"

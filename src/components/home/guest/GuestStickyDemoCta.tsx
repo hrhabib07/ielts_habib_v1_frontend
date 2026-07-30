@@ -7,7 +7,7 @@ import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingL
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
 
-/** Sticky mobile CTAs after scrolling past the hero — demo + clear pre-order. */
+/** Sticky mobile CTAs after scrolling past the hero  -  demo + clear pre-order. */
 export function GuestStickyDemoCta() {
   const { copy } = useGuestLandingLocale();
   const [visible, setVisible] = useState(false);

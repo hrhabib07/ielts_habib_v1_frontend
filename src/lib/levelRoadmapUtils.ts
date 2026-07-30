@@ -27,7 +27,7 @@ export function canNavigateToStep(status: LevelStepStatus, isLevelPassed: boolea
   return isLevelPassed || status.completed || status.current;
 }
 
-/** PRACTICE_TEST steps that are sequential finals (L0/L1 — Final 1, etc.). */
+/** PRACTICE_TEST steps that are sequential finals (L0/L1  -  Final 1, etc.). */
 export function isSequentialFinalTitle(title: string): boolean {
   return /\bfinal\b/i.test(title);
 }

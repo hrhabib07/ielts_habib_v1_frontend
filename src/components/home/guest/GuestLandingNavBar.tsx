@@ -46,7 +46,7 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
           className="flex h-9 min-w-0 shrink items-center transition-opacity hover:opacity-85"
           aria-label="Gamlish home"
         >
-          {/* Brand lives in nav only — hero leads with the headline. */}
+          {/* Brand lives in nav only  -  hero leads with the headline. */}
           <GamlishNavBrand showTagline={false} />
         </Link>
 

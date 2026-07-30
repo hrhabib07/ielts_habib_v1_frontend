@@ -8,7 +8,7 @@ export function isReadingExamFocusPath(pathname: string | null): boolean {
   return isReadingExamSimulationPath(pathname);
 }
 
-/** Reading path + level runner — fixed viewport; hide site footer. */
+/** Reading path + level runner  -  fixed viewport; hide site footer. */
 export function isReadingDashboardPath(pathname: string | null): boolean {
   if (!pathname) return false;
   return (

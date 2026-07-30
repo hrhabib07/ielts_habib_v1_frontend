@@ -176,7 +176,7 @@ export function StepsBuilderSection({
               2. Final tests (passage + questions)
             </CardTitle>
             <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
-              Three final tests in sentence locator format — not a quiz step.
+              Three final tests in sentence locator format  -  not a quiz step.
             </p>
           </CardHeader>
           <CardContent className="p-0 pt-6">
@@ -206,7 +206,7 @@ export function StepsBuilderSection({
               2. Final tests (progressive MCQ)
             </CardTitle>
             <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
-              Three paraphrase-engine finals — context + MCQ, one question at a time.
+              Three paraphrase-engine finals  -  context + MCQ, one question at a time.
             </p>
           </CardHeader>
           <CardContent className="p-0 pt-6">
@@ -233,7 +233,7 @@ export function StepsBuilderSection({
           <CardHeader className="p-0 pb-2">
             <CardTitle className="text-lg font-semibold tracking-tight">2. Final tests (3 passages)</CardTitle>
             <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
-              One pool, three passage question sets — same group-test flow as skill levels.
+              One pool, three passage question sets  -  same group-test flow as skill levels.
             </p>
           </CardHeader>
           <CardContent className="p-0 pt-6">

@@ -38,7 +38,7 @@ function exportMicroQuizBlock(block: IntegratedLessonBlock): GamlishLessonJsonMi
   };
 }
 
-/** Human/AI-readable JSON (en/bn fields) — best for Gemini output and paste into Gamlish. */
+/** Human/AI-readable JSON (en/bn fields)  -  best for Gemini output and paste into Gamlish. */
 export function buildLevel0PasteReadyJson(): string {
   const playbook = buildLevel0PlaybookBlocks();
   const jsonBlocks: GamlishLessonJsonBlock[] = playbook.map((block) => {
@@ -63,12 +63,12 @@ export function buildLevel0PasteReadyJson(): string {
   });
 
   const payload: GamlishLessonJson = {
-    lessonTitle: "Level 0 — The Mastery Foundation",
+    lessonTitle: "Level 0  -  The Mastery Foundation",
     blocks: jsonBlocks,
   };
 
   return JSON.stringify(payload, null, 2);
 }
 
-/** Paste into Gamlish lesson editor — validates with parseIntegratedLessonJson. */
+/** Paste into Gamlish lesson editor  -  validates with parseIntegratedLessonJson. */
 export const LEVEL_0_LESSON_JSON_EXAMPLE = buildLevel0PasteReadyJson();

@@ -1,5 +1,5 @@
 /**
- * Level intro videos — IDs from admin platform config (API) with env fallback.
+ * Level intro videos  -  IDs from admin platform config (API) with env fallback.
  * Student display Level 1 = Foundation, Level 2 = TFNG. No Level 3 intro yet.
  */
 

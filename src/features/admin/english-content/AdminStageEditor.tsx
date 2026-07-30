@@ -52,7 +52,7 @@ function StoryStageForm({
             rows={12}
             value={plainText}
             onChange={(e) => onChange({ storyHtml: plainTextToStoryHtml(e.target.value) })}
-            placeholder={"Welcome to Mission 01.\n\nEnglish builds sentences differently from Bangla — **Subject** first, then Verb."}
+            placeholder={"Welcome to Mission 01.\n\nEnglish builds sentences differently from Bangla  -  **Subject** first, then Verb."}
           />
         </FieldGroup>
       </div>

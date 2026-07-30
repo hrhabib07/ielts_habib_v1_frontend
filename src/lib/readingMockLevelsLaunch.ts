@@ -6,7 +6,7 @@ import type {
 } from "@/src/lib/api/readingStrictProgression";
 
 /**
- * Launch flag — set to `false` when Levels 17–20 real content is live on the backend.
+ * Launch flag  -  set to `false` when Levels 17–20 real content is live on the backend.
  * While true, students see placeholder steps + Coming Soon on unlocked mock levels.
  */
 export const READING_MOCK_LEVELS_LAUNCH_PLACEHOLDER = true;

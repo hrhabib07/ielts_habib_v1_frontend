@@ -65,7 +65,7 @@ export async function updatePassageCode(
 
 /* ----- Passages ----- */
 
-/** Shape returned by the API — paragraphLabel is always present (server-generated). */
+/** Shape returned by the API  -  paragraphLabel is always present (server-generated). */
 export interface PassageParagraph {
   paragraphIndex: number;
   paragraphLabel: string;
@@ -73,7 +73,7 @@ export interface PassageParagraph {
 }
 
 /** Shape sent to the API when creating or updating a passage.
- *  paragraphLabel is intentionally omitted — the server generates it. */
+ *  paragraphLabel is intentionally omitted  -  the server generates it. */
 export interface PassageParagraphInput {
   paragraphIndex: number;
   text: string;
@@ -332,7 +332,7 @@ export interface CreateQuestionPayload {
   passageId: string;
   questionSetId: string;
   questionNumber: number;
-  // type is intentionally absent — the backend derives it from the question set
+  // type is intentionally absent  -  the backend derives it from the question set
   questionBody: QuestionBody;
   blanks?: QuestionBlank[];
   options?: string[];

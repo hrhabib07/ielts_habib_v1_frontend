@@ -36,7 +36,7 @@ const EASIER_STATEMENT_PATCH = {
   anchorKeywords: ["Fry", "paste", "shape", "first", "solid", "chocolate", "bar"],
   difficulty: "EASY" as const,
   gamlishHack:
-    "Match the sentence that mentions pressing paste into a shape and the first solid bar — not who invented chocolate in general.",
+    "Match the sentence that mentions pressing paste into a shape and the first solid bar  -  not who invented chocolate in general.",
 };
 
 type TabId = "passage" | "statements" | "feedback";

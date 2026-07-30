@@ -209,7 +209,7 @@ export function IntegratedLessonManager({
   const isL0 = readingLevelIndexFromOrder(levelOrder) === 0;
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState(
-    isL0 ? "Level 0 — The Mastery Foundation" : "",
+    isL0 ? "Level 0  -  The Mastery Foundation" : "",
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -238,7 +238,7 @@ export function IntegratedLessonManager({
       });
       onLessonsChange([...lessons, created].sort((a, b) => a.lessonNumber - b.lessonNumber));
       onStepsSync?.();
-      setNewTitle(isL0 ? "Level 0 — The Mastery Foundation" : "");
+      setNewTitle(isL0 ? "Level 0  -  The Mastery Foundation" : "");
       setCreating(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to create lesson");

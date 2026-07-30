@@ -75,7 +75,7 @@ export function AssessmentForm({
         <CardContent className="space-y-4">
           {typeLocked && (
             <div className="rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-              Activation level — type is set to &quot;activation&quot;.
+              Activation level  -  type is set to &quot;activation&quot;.
             </div>
           )}
 

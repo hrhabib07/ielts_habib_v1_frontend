@@ -2,7 +2,7 @@ import { GAMLISH_BRAND } from "@/src/lib/gamlish-brand";
 
 export type UserRole = "STUDENT" | "INSTRUCTOR" | "ADMIN";
 
-/** Single transparent logo — same asset in light/dark; no wrapper, no alternate dark file. */
+/** Single transparent logo  -  same asset in light/dark; no wrapper, no alternate dark file. */
 const GAMLISH_LOGO_URL = "/brand/gamlish-logo.png";
 
 export const BRAND = {

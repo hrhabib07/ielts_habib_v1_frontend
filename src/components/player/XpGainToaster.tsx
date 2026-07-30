@@ -12,7 +12,7 @@ interface Burst {
 }
 
 /**
- * Floating +XP popups — fires on correct answers and stage clears.
+ * Floating +XP popups  -  fires on correct answers and stage clears.
  */
 export function XpGainToaster() {
   const [bursts, setBursts] = useState<Burst[]>([]);

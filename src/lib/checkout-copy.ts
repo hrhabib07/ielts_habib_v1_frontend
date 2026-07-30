@@ -1,4 +1,4 @@
-import type { UiLocale } from "@/src/lib/ui-locale";
+﻿import type { UiLocale } from "@/src/lib/ui-locale";
 
 export interface CheckoutCopy {
   readonly statusLock: string;
@@ -37,6 +37,9 @@ export interface CheckoutCopy {
   readonly invalidTrx: string;
   readonly missingBkash: string;
   readonly submitFailed: string;
+  readonly sessionExpired: string;
+  readonly networkError: string;
+  readonly sessionPreparing: string;
   readonly pageEyebrow: string;
   readonly pageTitle: string;
   readonly pageSub: string;
@@ -82,6 +85,11 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     invalidTrx: "সঠিক Transaction ID (TrxID) দিন। bKash SMS বা অ্যাপে পাবেন।",
     missingBkash: "bKash নম্বর এখনো সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।",
     submitFailed: "সাবমিট করা যায়নি। আবার চেষ্টা করুন।",
+    sessionExpired:
+      "আপনার সেশন শেষ হয়ে গেছে। আবার লগইন করে TrxID সাবমিট করুন  -  দুবার টাকা কাটা হবে না।",
+    networkError:
+      "নেটওয়ার্ক সমস্যা হয়েছে। আবার সাবমিট করুন  -  একই TrxID দুবার চার্জ হবে না।",
+    sessionPreparing: "সেশন প্রস্তুত হচ্ছে… এক মুহূর্ত অপেক্ষা করুন",
     pageEyebrow: "Checkout",
     pageTitle: "আপনার Founder স্পট লক করুন",
     pageSub: "bKash Send Money করুন, তারপর TrxID সাবমিট করুন",
@@ -125,6 +133,11 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     invalidTrx: "Enter a valid Transaction ID (TrxID) from your bKash SMS or app.",
     missingBkash: "bKash number is not set yet. Please contact admin.",
     submitFailed: "Could not submit. Please try again.",
+    sessionExpired:
+      "Your session expired. Sign in again and resubmit the same TrxID  -  you will not be charged twice.",
+    networkError:
+      "Network error. Please submit again  -  the same TrxID will not charge you twice.",
+    sessionPreparing: "Preparing your session… please wait a moment",
     pageEyebrow: "Checkout",
     pageTitle: "Lock your Founder spot",
     pageSub: "Send Money on bKash, then submit your TrxID",

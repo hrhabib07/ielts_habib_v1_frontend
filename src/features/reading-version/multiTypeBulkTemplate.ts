@@ -28,7 +28,7 @@ const ALL_QUESTION_TYPES: ReadingQuestionType[] = [
 ];
 
 const INSTRUCTIONS_L2 = `L2 FILL IN THE BLANKS: Use exactly 3 question types in order: SENTENCE_COMPLETION, NOTE_COMPLETION, TABLE_COMPLETION.
-expectedTotalQuestions: 13 or 14. Three questionGroups — one per completion type.`;
+expectedTotalQuestions: 13 or 14. Three questionGroups  -  one per completion type.`;
 
 const INSTRUCTIONS_L4 = `L4 PASSAGE 1: Use 2–3 question types from: TRUE_FALSE_NOT_GIVEN, SENTENCE_COMPLETION, SHORT_ANSWER.
 expectedTotalQuestions: 13 or 14. At least 2 questionGroups.`;
@@ -38,12 +38,12 @@ const INSTRUCTIONS_PRACTICE = `MULTI-TYPE LEVELS: L4 = Passage 1 (TFNG + Sentenc
 HOW TO BUILD A VALID passageQuestionSet
 1) Choose ANY number of questionGroups >= 2 (e.g. 2, 3, 4, 5…). There is no fixed mix.
 2) Question numbers must be continuous from 1 to N with no gaps or overlaps across groups.
-3) Sum of all questions = N must equal expectedTotalQuestions (13 or 14). Typical IELTS: 13 for one passage set, 14 for another — pick what matches your content.
+3) Sum of all questions = N must equal expectedTotalQuestions (13 or 14). Typical IELTS: 13 for one passage set, 14 for another  -  pick what matches your content.
 4) Copy meta + question shape from __questionTypeCatalog for each type you use. Replace stems, answers, and meta lists with real data.
-5) API questionType strings are EXACT: use MCQ_SINGLE / MCQ_MULTIPLE — never MULTIPLE_CHOICE.
+5) API questionType strings are EXACT: use MCQ_SINGLE / MCQ_MULTIPLE  -  never MULTIPLE_CHOICE.
 
 REFERENCE CATALOG
-__questionTypeCatalog lists every allowed ReadingQuestionType with one minimal sampleQuestion. It is NOT a real questionGroup block — do not paste it as-is into questionGroups.`;
+__questionTypeCatalog lists every allowed ReadingQuestionType with one minimal sampleQuestion. It is NOT a real questionGroup block  -  do not paste it as-is into questionGroups.`;
 
 const INSTRUCTIONS_GROUP = `MULTI-TYPE LEVELS (L15–L19): Group test = 3 mini tests (passage 1 / 2 / 3).
 
@@ -268,7 +268,7 @@ function passageQuestionSet13(): BulkPassageQuestionSetInput {
         instruction: "Which paragraph contains the following information?",
         meta: { paragraphCount: 4 },
         questions: repeatQuestions(4, 1, (n) => ({
-          questionBody: { layout: "TEXT", content: `Question ${n} — which paragraph (A–D)?` },
+          questionBody: { layout: "TEXT", content: `Question ${n}  -  which paragraph (A–D)?` },
           correctAnswer: "A",
           explanation: `Explanation for Q${n}.`,
         })) as BulkPassageQuestionSetInput["questionGroups"][0]["questions"],
@@ -294,7 +294,7 @@ function passageQuestionSet13(): BulkPassageQuestionSetInput {
         instruction: "Choose the correct letter, A, B, C or D.",
         meta: { options: ["A", "B", "C", "D"], selectCount: 1 },
         questions: repeatQuestions(4, 10, (n) => ({
-          questionBody: { layout: "TEXT", content: `Question ${n} — choose one answer.` },
+          questionBody: { layout: "TEXT", content: `Question ${n}  -  choose one answer.` },
           options: ["A. …", "B. …", "C. …", "D. …"],
           correctAnswer: "B",
           explanation: `Explanation for Q${n}.`,
@@ -348,7 +348,7 @@ function passageQuestionSet14(): BulkPassageQuestionSetInput {
         instruction: "Choose TWO letters for each question.",
         meta: { options: ["A", "B", "C", "D", "E"], selectCount: 2 },
         questions: repeatQuestions(4, 11, (n) => ({
-          questionBody: { layout: "TEXT", content: `Questions ${n} — choose TWO options.` },
+          questionBody: { layout: "TEXT", content: `Questions ${n}  -  choose TWO options.` },
           options: ["A. …", "B. …", "C. …", "D. …", "E. …"],
           correctAnswer: ["A", "C"],
           explanation: `Explanation for Q${n}.`,
@@ -479,10 +479,10 @@ function placeholderPassage(titleSuffix: string): {
     title: `Sample passage ${titleSuffix}`,
     subTitle: "Replace with real subtitle",
     contentParagraphs: [
-      { paragraphIndex: 1, text: "Paragraph A — replace with real passage text." },
-      { paragraphIndex: 2, text: "Paragraph B — replace with real passage text." },
-      { paragraphIndex: 3, text: "Paragraph C — replace with real passage text." },
-      { paragraphIndex: 4, text: "Paragraph D — replace with real passage text." },
+      { paragraphIndex: 1, text: "Paragraph A  -  replace with real passage text." },
+      { paragraphIndex: 2, text: "Paragraph B  -  replace with real passage text." },
+      { paragraphIndex: 3, text: "Paragraph C  -  replace with real passage text." },
+      { paragraphIndex: 4, text: "Paragraph D  -  replace with real passage text." },
     ],
   };
 }
@@ -509,19 +509,19 @@ export function buildMultiTypePracticeSamplePayload(levelOrder: number): Record<
     __questionTypeCatalog: buildQuestionTypeCatalog(),
     practiceTests: [
       {
-        title: `Practice Test 1 · (L${levelOrder}) — ${titleSuffix}`,
+        title: `Practice Test 1 · (L${levelOrder})  -  ${titleSuffix}`,
         passage: placeholderPassage("PT1"),
         passageQuestionSet: passage1Set,
         timeLimitMinutes: 20,
       },
       {
-        title: `Practice Test 2 · (L${levelOrder}) — ${isL2 || isL4 ? (isL2 ? "Fill in the Blanks style" : "Passage 1 style") : "14 questions"}`,
+        title: `Practice Test 2 · (L${levelOrder})  -  ${isL2 || isL4 ? (isL2 ? "Fill in the Blanks style" : "Passage 1 style") : "14 questions"}`,
         passage: placeholderPassage("PT2"),
         passageQuestionSet: passage2Set,
         timeLimitMinutes: 20,
       },
       {
-        title: `Practice Test 3 · (L${levelOrder}) — 13 questions`,
+        title: `Practice Test 3 · (L${levelOrder})  -  13 questions`,
         passage: placeholderPassage("PT3"),
         passageQuestionSet: passage1Set,
         timeLimitMinutes: 20,

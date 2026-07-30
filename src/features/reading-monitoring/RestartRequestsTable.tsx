@@ -67,11 +67,11 @@ export function RestartRequestsTable({
                 <td className="p-3">
                   <div className="font-medium">{row.level?.title ?? row.levelId}</div>
                   <div className="text-xs text-muted-foreground">
-                    {row.level?.slug ? `${row.level.slug} · Level ${displayLevelNumberFromOrder(row.level.order)}` : "—"}
+                    {row.level?.slug ? `${row.level.slug} · Level ${displayLevelNumberFromOrder(row.level.order)}` : "-"}
                   </div>
                 </td>
                 <td className="p-3 max-w-[200px] truncate">
-                  {row.requestReason ?? "—"}
+                  {row.requestReason ?? "-"}
                 </td>
                 <td className="p-3">
                   <span

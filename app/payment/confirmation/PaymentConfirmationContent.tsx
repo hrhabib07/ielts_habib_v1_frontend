@@ -45,7 +45,7 @@ export function PaymentConfirmationContent() {
     sessionStorage.setItem(key, "1");
 
     // Single source for Meta Purchase: GTM listens to this dataLayer event.
-    // Do NOT also call fbq('track','Purchase') here — that double-counts in Events Manager.
+    // Do NOT also call fbq('track','Purchase') here  -  that double-counts in Events Manager.
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
       event: "purchase",

@@ -62,7 +62,7 @@ export function PermanentLocksTable({
                 <td className="p-3">
                   <div className="font-medium">{row.level?.title ?? row.levelId}</div>
                   <div className="text-xs text-muted-foreground">
-                    {row.level?.slug ? `${row.level.slug} · Level ${displayLevelNumberFromOrder(row.level.order)}` : "—"}
+                    {row.level?.slug ? `${row.level.slug} · Level ${displayLevelNumberFromOrder(row.level.order)}` : "-"}
                   </div>
                 </td>
                 <td className="p-3">
@@ -70,7 +70,7 @@ export function PermanentLocksTable({
                     {row.version ? `v${row.version.version}` : row.versionId}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {row.version?.status ?? "—"}
+                    {row.version?.status ?? "-"}
                   </div>
                 </td>
                 <td className="p-3 text-right">{row.attemptCount}</td>

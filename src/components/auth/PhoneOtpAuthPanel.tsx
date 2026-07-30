@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Lock, Phone, ShieldCheck, UserRound } from "lucide-react";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { requestPhoneOtp, verifyPhoneOtp, setPasswordRequest } from "@/src/auth/api";
 import { updateProfile } from "@/src/lib/api/profile";
-import { setAccessToken, syncAuthCookie } from "@/src/lib/auth";
+import { persistSessionToken } from "@/src/lib/auth-session-ready";
 import {
   clearDemoSessionId,
   readDemoSessionId,
@@ -211,10 +211,31 @@ export function PhoneOtpAuthPanel({
         isNewUser,
       });
 
-      if (token) {
-        setAccessToken(token);
-        await syncAuthCookie(token);
+      if (!token) {
+        track("phone_otp_verified_error", { error: "missing_token" });
+        setError(
+          locale === "bn"
+            ? "লগইন টোকেন পাওয়া যায়নি। আবার OTP দিন।"
+            : "Login token missing. Please verify OTP again.",
+        );
+        return;
       }
+
+      const persisted = await persistSessionToken(token);
+      if (!persisted.ok) {
+        track("phone_session_sync_failed", {
+          code: persisted.code,
+          isNewUser,
+        });
+        setError(
+          locale === "bn"
+            ? "সেশন সেভ হয়নি। নেটওয়ার্ক চেক করে আবার ভেরিফাই করুন  -  তারপরই পেমেন্ট সাবমিট করুন।"
+            : "Could not save your session. Check your network and verify OTP again before paying.",
+        );
+        return;
+      }
+      track("phone_session_sync_success", { isNewUser });
+
       if (continuePath) clearDemoSessionId();
 
       if (role === "ADMIN") {
@@ -255,6 +276,7 @@ export function PhoneOtpAuthPanel({
     attachDemoSession,
     finishNavigate,
     forceReturnTo,
+    locale,
     otp,
     phone,
   ]);

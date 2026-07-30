@@ -3,7 +3,7 @@ import { getJwtSecret } from "@/src/lib/jwt-verify";
 import { getAppOrigin, getServerApiBaseUrl } from "@/src/lib/api-base-url";
 
 /**
- * GET /api/health — deploy readiness (no secrets leaked).
+ * GET /api/health  -  deploy readiness (no secrets leaked).
  */
 export async function GET() {
   const jwtConfigured = Boolean(getJwtSecret());

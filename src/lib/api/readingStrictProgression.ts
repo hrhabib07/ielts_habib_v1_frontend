@@ -271,7 +271,7 @@ export interface LearningStepContent {
 }
 
 /**
- * Safe quiz content for student view — same shape as StepQuizContentResponse.
+ * Safe quiz content for student view  -  same shape as StepQuizContentResponse.
  * correctAnswer is NEVER present: stripped server-side by toStudentQuizContent().
  */
 export type QuizStepContent = StepQuizContentResponse;
@@ -306,7 +306,7 @@ export interface PracticeTestMiniTestContent {
   questionGroups?: GroupTestQuestionGroup[];
 }
 
-/** Practice test — standard passage + question bank. */
+/** Practice test  -  standard passage + question bank. */
 export interface PracticeTestStepContentStandard {
   contentFormat?: "STANDARD";
   practiceTestId: string;
@@ -319,7 +319,7 @@ export interface PracticeTestStepContentStandard {
   miniTest: PracticeTestMiniTestContent;
 }
 
-/** Level 0 — target lock: passage sentences + statement list (no miniTest). */
+/** Level 0  -  target lock: passage sentences + statement list (no miniTest). */
 export interface SentenceLocatorParagraphDto {
   paragraphIndex: number;
   sentences: string[];
@@ -452,7 +452,7 @@ export interface PracticeTestStepContentProgressiveMcq {
   progressiveMcq: ProgressiveMcqStudentPayloadDto;
 }
 
-/** Practice test — full IELTS mock (3 passages, ~60 min). */
+/** Practice test  -  full IELTS mock (3 passages, ~60 min). */
 export interface PracticeTestStepContentFullMock {
   contentFormat: "FULL_MOCK";
   practiceTestId: string;
@@ -508,7 +508,7 @@ export function isProgressiveMcqPracticeContent(
 
 /**
  * Normalised step-content envelope returned by GET /levels/:levelId/steps/:stepId/content.
- * Discriminated union — narrow on `type` to get the correct `content` shape.
+ * Discriminated union  -  narrow on `type` to get the correct `content` shape.
  */
 export interface LocalizedTextDto {
   en: string;
@@ -536,7 +536,7 @@ export interface IntegratedLessonStepContent {
   lessonNumber: number;
   lessonCode: string;
   blocks: IntegratedLessonBlockForStudent[];
-  /** Instructor preview only — full blocks with correctAnswer for local grading */
+  /** Instructor preview only  -  full blocks with correctAnswer for local grading */
   instructorGradingBlocks?: IntegratedLessonBlock[];
 }
 

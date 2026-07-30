@@ -95,7 +95,7 @@ export function GuestTryOneQuestion({ className }: { className?: string }) {
               <p className="mt-3 text-sm font-medium text-muted-foreground">
                 {tryOne.prompt}
               </p>
-              {/* Full-width stacked answers — same pattern as in-game MCQ */}
+              {/* Full-width stacked answers  -  same pattern as in-game MCQ */}
               <div className="mt-3 flex flex-col gap-2">
                 {tryOne.options.map((option) => {
                   const isPicked = picked === option;

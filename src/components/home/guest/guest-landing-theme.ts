@@ -18,6 +18,6 @@ export const LANDING_ACCENT_WORD_CLASS =
 export const LANDING_LINK_CLASS =
   "font-semibold text-sky-800 transition-colors hover:bg-sky-500/10 dark:text-sky-200";
 
-/** Reward-only gold — XP, streak, trophy pops. */
+/** Reward-only gold  -  XP, streak, trophy pops. */
 export const LANDING_REWARD_PILL_CLASS =
   "inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-black text-amber-950 shadow-lg shadow-amber-500/30";

@@ -13,7 +13,7 @@ export interface CompleteProfilePayload {
 }
 
 /**
- * GET /api/students/me — my profile (to check onboarding status).
+ * GET /api/students/me  -  my profile (to check onboarding status).
  */
 export async function getMyProfile(): Promise<StudentProfile | null> {
   return dedupeRequest("students/me", async () => {
@@ -33,7 +33,7 @@ export async function completeEnglishProfile(
 }
 
 /**
- * POST /api/students/me/complete — initial profile setup (username set once).
+ * POST /api/students/me/complete  -  initial profile setup (username set once).
  */
 export async function completeProfile(
   payload: CompleteProfilePayload,
@@ -58,7 +58,7 @@ export async function checkUsernameAvailable(
 }
 
 /**
- * PATCH /api/students/me — update isPrivate only (profile visibility).
+ * PATCH /api/students/me  -  update isPrivate only (profile visibility).
  */
 export async function updateProfilePrivacy(
   isPrivate: boolean,
@@ -70,7 +70,7 @@ export async function updateProfilePrivacy(
 }
 
 /**
- * PATCH /api/students/me — update displayName, countries, phone.
+ * PATCH /api/students/me  -  update displayName, countries, phone.
  */
 export async function updateProfile(payload: {
   displayName?: string;
@@ -88,7 +88,7 @@ export async function updateProfile(payload: {
 }
 
 /**
- * PATCH /api/students/me/target-band — set target band (reading) once.
+ * PATCH /api/students/me/target-band  -  set target band (reading) once.
  */
 export async function setTargetBandOnce(payload: {
   reading: number;
@@ -101,7 +101,7 @@ export async function setTargetBandOnce(payload: {
 }
 
 /**
- * GET /api/students/reading/dashboard — profile summary (reading).
+ * GET /api/students/reading/dashboard  -  profile summary (reading).
  */
 export async function getProfileSummary(): Promise<ProfileSummary | null> {
   return dedupeRequest("students/reading/dashboard", async () => {

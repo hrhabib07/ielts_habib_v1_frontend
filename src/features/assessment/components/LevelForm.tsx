@@ -134,7 +134,7 @@ export function LevelForm({
         <CardContent className="space-y-4">
           {isActivation && (
             <div className="rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
-              Activation Level — unlock condition is set to &quot;none&quot;.
+              Activation Level  -  unlock condition is set to &quot;none&quot;.
             </div>
           )}
 

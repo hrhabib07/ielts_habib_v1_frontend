@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const FLOAT_WORDS = ["Subject", "Verb", "Object", "I", "eat", "rice"] as const;
 
 /**
- * Full-bleed camp journey visual — the product’s world, not a browser chrome mockup.
+ * Full-bleed camp journey visual  -  the product’s world, not a browser chrome mockup.
  * Dominant first-viewport image for the guest landing.
  */
 export function GuestHeroWorld({ className }: { className?: string }) {

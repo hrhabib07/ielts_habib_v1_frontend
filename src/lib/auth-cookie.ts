@@ -12,6 +12,8 @@ export function authCookieBaseOptions(
     httpOnly: true,
     sameSite: "lax" as const,
     secure: isProd,
+    // Share session across apex + www so payment submit never loses auth.
+    ...(isProd ? { domain: ".gamlish.com" as const } : {}),
   };
 }
 

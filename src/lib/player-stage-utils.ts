@@ -7,7 +7,7 @@ export type PlayerStageKindLabelInput = {
   title?: string;
 };
 
-/** First-stage mission brief — not a narrative story. */
+/** First-stage mission brief  -  not a narrative story. */
 export function isMissionOpeningStage(stage: PlayerStageKindLabelInput): boolean {
   if (stage.kind !== "story") return false;
   if (stage.order === 1) return true;

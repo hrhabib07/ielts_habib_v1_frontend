@@ -34,7 +34,7 @@ type BulkFinalItem = {
 };
 
 const L1_BULK_INSTRUCTIONS =
-  "Level 2 (student) / L1 TFNG — Gamlish True/False/Not Given engine. " +
+  "Level 2 (student) / L1 TFNG  -  Gamlish True/False/Not Given engine. " +
   "Each practiceTests[] entry must include gamlishTfng with exactly 4 questions. " +
   "Use the Load template button for all 3 practice tests. " +
   "Run Delete all TFNG tests first if replacing legacy STANDARD tests.";

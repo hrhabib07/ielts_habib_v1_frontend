@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { FounderInlineCountdown } from "@/src/components/founding-member/FounderInlineCountdown";
 import {
   getFoundersWall,
   type FounderTier,
@@ -119,19 +120,21 @@ function MemberChip({ member }: { member: FounderWallMember }) {
   );
 }
 
-/** Last-slot invite — open founder seat until the first 100 are filled. */
+/** Last-slot invite: open founder seat until the first 100 are filled. */
 function YouCanBeHereBanner({
   founderNumber,
   title,
   href,
   numberLabel,
   ctaLabel,
+  locale,
 }: {
   founderNumber: number;
   title: string;
   href: string;
   numberLabel: string;
   ctaLabel: string;
+  locale: "bn" | "en";
 }) {
   return (
     <Link
@@ -145,7 +148,8 @@ function YouCanBeHereBanner({
         <span className="block text-base font-bold tracking-tight text-amber-950 dark:text-amber-100 sm:text-lg">
           {numberLabel}
         </span>
-        <span className="mt-0.5 block text-sm text-amber-900/80 dark:text-amber-200/80">
+        <FounderInlineCountdown locale={locale} size="sm" className="mt-1.5" />
+        <span className="mt-1 block text-sm text-amber-900/80 dark:text-amber-200/80">
           {title}
         </span>
       </span>
@@ -236,6 +240,12 @@ export function GuestFoundersWallSection() {
           <p className="mx-auto mt-3 max-w-lg text-sm font-semibold text-amber-800 dark:text-amber-300">
             {content.urgency}
           </p>
+          <div className="mt-3 flex justify-center">
+            <FounderInlineCountdown
+              locale={locale === "bn" ? "bn" : "en"}
+              className="rounded-full border border-amber-500/35 bg-amber-500/10 px-3 py-1.5"
+            />
+          </div>
           <p className="mt-4 text-sm font-bold tabular-nums text-foreground">
             {content.slotsLine(filledLabel, maxLabel)}
           </p>
@@ -281,6 +291,7 @@ export function GuestFoundersWallSection() {
                       String(slot.founderNumber).padStart(3, "0"),
                     )}
                     ctaLabel={content.joinHereCta}
+                    locale={locale === "bn" ? "bn" : "en"}
                   />
                 ) : (
                   <MemberChip member={slot.member} />

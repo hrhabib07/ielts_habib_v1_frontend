@@ -685,7 +685,7 @@ function QuestionRow({
   const summary = extractQuestionText(question.questionBody).slice(0, 80);
   const correctDisplay = Array.isArray(question.correctAnswer)
     ? question.correctAnswer.join(", ")
-    : (question.correctAnswer ?? "—");
+    : (question.correctAnswer ?? "-");
 
   return (
     <Card
@@ -855,7 +855,7 @@ function JsonTab({
         {isSentenceLocatorPreviewContent(content)
           ? "Read-only export of sentence locator authoring data. To change content, use Practice tests → edit (JSON) on the level version."
           : isProgressiveMcqPreviewContent(content)
-            ? "Read-only export of progressive MCQ authoring data. Edit via bulk JSON — see docs/PROGRESSIVE_MCQ_L5_JSON.md."
+            ? "Read-only export of progressive MCQ authoring data. Edit via bulk JSON  -  see docs/PROGRESSIVE_MCQ_L5_JSON.md."
           : "Export the full content as JSON. Use this to inspect structure or prepare bulk edits. To apply changes, edit the passage or questions in their tabs."}
       </p>
       <div className="flex gap-2">

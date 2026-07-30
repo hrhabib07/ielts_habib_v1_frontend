@@ -68,7 +68,7 @@ export function PublishChecklist({ level, detail }: PublishChecklistProps) {
   const title = isL0
     ? "Publish checklist (Level 0)"
     : isL5
-      ? "Publish checklist (Level 5 — Vocabulary)"
+      ? "Publish checklist (Level 5  -  Vocabulary)"
       : isSkill
         ? "Publish checklist (Skill)"
         : "Publish checklist (Foundation)";

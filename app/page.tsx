@@ -16,7 +16,7 @@ export default async function HomePage() {
 
   // Logged-in students go straight to the mission roadmap (Duolingo-style home).
   if (initialUser?.role === "STUDENT") {
-    // English-first mode: skip /students/me on `/` — /player already gates
+    // English-first mode: skip /students/me on `/`  -  /player already gates
     // username claim and learning readiness on the client.
     if (!ENABLE_READING) {
       redirect(PRIMARY_STUDENT_HREF);

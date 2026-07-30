@@ -14,7 +14,7 @@ import {
 
 /**
  * Runtime font loading (browser only). Avoids next/font/google at build time.
- * Keep weight count low — each family×weight is a blocking download on first paint.
+ * Keep weight count low  -  each family×weight is a blocking download on first paint.
  * Latin digits are used in Bangla UI, so Hind Siliguri alone is enough (no Noto).
  */
 const RUNTIME_FONT_STYLESHEET =

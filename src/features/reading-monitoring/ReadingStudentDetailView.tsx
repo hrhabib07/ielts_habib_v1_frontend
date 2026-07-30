@@ -15,7 +15,7 @@ import {
 } from "@/src/lib/api/adminReadingMonitoring";
 
 function formatDate(value?: string): string {
-  if (!value) return "—";
+  if (!value) return "-";
   try {
     return new Date(value).toLocaleString();
   } catch {
@@ -24,7 +24,7 @@ function formatDate(value?: string): string {
 }
 
 function bandLabel(value: number | null | undefined): string {
-  return typeof value === "number" ? String(value) : "—";
+  return typeof value === "number" ? String(value) : "-";
 }
 
 export function ReadingStudentDetailView({
@@ -160,27 +160,27 @@ export function ReadingStudentDetailView({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Current city</p>
-              <p className="font-medium">{detail.student.profile.currentCity ?? "—"}</p>
+              <p className="font-medium">{detail.student.profile.currentCity ?? "-"}</p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Current country</p>
-              <p className="font-medium">{detail.student.profile.currentCountry ?? "—"}</p>
+              <p className="font-medium">{detail.student.profile.currentCountry ?? "-"}</p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Dream city</p>
-              <p className="font-medium">{detail.student.profile.dreamCity ?? "—"}</p>
+              <p className="font-medium">{detail.student.profile.dreamCity ?? "-"}</p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Dream country</p>
-              <p className="font-medium">{detail.student.profile.dreamCountry ?? "—"}</p>
+              <p className="font-medium">{detail.student.profile.dreamCountry ?? "-"}</p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Phone</p>
-              <p className="font-medium">{detail.student.profile.phone ?? "—"}</p>
+              <p className="font-medium">{detail.student.profile.phone ?? "-"}</p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Learning stage</p>
-              <p className="font-medium">{detail.student.learningPathStage ?? "—"}</p>
+              <p className="font-medium">{detail.student.learningPathStage ?? "-"}</p>
             </div>
           </div>
           <div className="rounded-lg border bg-muted/30 p-4">

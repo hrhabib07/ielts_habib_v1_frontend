@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -19,6 +19,10 @@ import { submitSubscriptionRequest } from "@/src/lib/api/subscription";
 import { formatBdt, type PublicPricing } from "@/src/lib/api/pricing";
 import { useCheckoutCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { getAccessToken } from "@/src/lib/auth";
+import { waitForClientAuthReady } from "@/src/lib/auth-session-ready";
+import { trackFunnelEvent } from "@/src/lib/api/analytics";
+import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { cn } from "@/lib/utils";
 
 const BKASH_SENDER_RE = /^01[3-9]\d{8}$/;
@@ -34,6 +38,51 @@ function normalizeTransactionId(raw: string): string {
   return raw.replace(/\s+/g, "").trim().toUpperCase();
 }
 
+function readApiError(err: unknown): {
+  status?: number;
+  message: string | null;
+  code: string | null;
+  isNetwork: boolean;
+} {
+  if (!err || typeof err !== "object") {
+    return { message: null, code: null, isNetwork: false };
+  }
+
+  const ax = err as {
+    message?: string;
+    code?: string;
+    response?: {
+      status?: number;
+      data?: {
+        message?: string;
+        code?: string;
+        errorSources?: { message?: string }[];
+      };
+    };
+  };
+
+  const isNetwork =
+    !ax.response &&
+    (ax.code === "ERR_NETWORK" ||
+      ax.code === "ECONNABORTED" ||
+      /network/i.test(ax.message ?? ""));
+
+  const apiMessage =
+    ax.response?.data?.message ??
+    ax.response?.data?.errorSources?.[0]?.message ??
+    null;
+
+  return {
+    status: ax.response?.status,
+    message: typeof apiMessage === "string" ? apiMessage : null,
+    code:
+      typeof ax.response?.data?.code === "string"
+        ? ax.response.data.code
+        : null,
+    isNetwork,
+  };
+}
+
 export function BkashCheckoutForm({
   pricing,
   onClose,
@@ -45,15 +94,47 @@ export function BkashCheckoutForm({
 }) {
   const copy = useCheckoutCopy();
   const { locale } = useUiLocale();
+  const { profile } = useStudentSession();
   const [senderNumber, setSenderNumber] = useState("");
   const [transactionId, setTransactionId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionChecking, setSessionChecking] = useState(true);
+
+  const authProviders = profile?.authProviders ?? [];
+  const isPhoneUser =
+    authProviders.includes("phone") || Boolean(profile?.phoneVerified);
+  const paymentTrackMeta = () => ({
+    authProviders,
+    isPhoneUser,
+    phoneVerified: Boolean(profile?.phoneVerified),
+    hasBearer: Boolean(getAccessToken()),
+    devicePath: typeof window !== "undefined" ? window.location.pathname : "/checkout",
+  });
+
+  /** Phone OTP users often open checkout before cookie/Bearer finishes settling. */
+  useEffect(() => {
+    let cancelled = false;
+    setSessionChecking(true);
+    void (async () => {
+      const token = await waitForClientAuthReady({ timeoutMs: 12_000 });
+      if (cancelled) return;
+      setSessionReady(Boolean(token));
+      setSessionChecking(false);
+      if (!token) setError(copy.sessionExpired);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [copy.sessionExpired]);
 
   const payableAmount = pricing.finalPriceBdt;
   const bkashNumber = pricing.bkashNumber.trim();
   const canSubmit =
+    sessionReady &&
+    !sessionChecking &&
     Boolean(bkashNumber) &&
     BKASH_SENDER_RE.test(normalizeBkashNumber(senderNumber)) &&
     BKASH_TRX_RE.test(normalizeTransactionId(transactionId)) &&
@@ -92,49 +173,145 @@ export function BkashCheckoutForm({
     }
 
     setSubmitting(true);
+    void trackFunnelEvent({
+      event: "payment_submit_clicked",
+      path: "/checkout",
+      screen: "bkash_checkout",
+      metadata: {
+        ...paymentTrackMeta(),
+        trxLength: normalizedTrx.length,
+      },
+    });
+
     try {
-      await submitSubscriptionRequest({
-        planId: pricing.planId,
-        paymentMethod: "BKASH",
-        senderNumber: normalizedSender,
-        transactionId: normalizedTrx,
-        paidAmount: payableAmount,
+      const token = await waitForClientAuthReady({ timeoutMs: 8_000 });
+      if (!token) {
+        void trackFunnelEvent({
+          event: "payment_submit_error",
+          path: "/checkout",
+          screen: "bkash_checkout",
+          metadata: {
+            ...paymentTrackMeta(),
+            errorCode: "NO_SESSION",
+            status: 401,
+          },
+        });
+        setError(copy.sessionExpired);
+        window.location.href = `/login?redirect=${encodeURIComponent("/checkout")}`;
+        return;
+      }
+
+      const submitOnce = () =>
+        submitSubscriptionRequest({
+          planId: pricing.planId,
+          paymentMethod: "BKASH",
+          senderNumber: normalizedSender,
+          transactionId: normalizedTrx,
+          paidAmount: payableAmount,
+        });
+
+      try {
+        await submitOnce();
+      } catch (firstErr: unknown) {
+        const first = readApiError(firstErr);
+        // One automatic retry for flaky mobile networks after auth recovery.
+        if (
+          first.isNetwork ||
+          first.status === 401 ||
+          first.status === 502 ||
+          first.status === 503
+        ) {
+          await waitForClientAuthReady({ timeoutMs: 5_000 });
+          await submitOnce();
+        } else {
+          throw firstErr;
+        }
+      }
+      void trackFunnelEvent({
+        event: "payment_submit_success",
+        path: "/checkout",
+        screen: "bkash_checkout",
+        metadata: {
+          ...paymentTrackMeta(),
+          hasBearer: true,
+        },
       });
       onSubmitted();
     } catch (err: unknown) {
-      const ax =
-        err && typeof err === "object" && "response" in err
-          ? (err as {
-              response?: {
-                status?: number;
-                data?: {
-                  message?: string;
-                  errorSources?: { message?: string }[];
-                };
-              };
-            })
-          : null;
-      const apiMessage =
-        ax?.response?.data?.message ??
-        ax?.response?.data?.errorSources?.[0]?.message ??
-        null;
+      const { status, message: apiMessage, code: apiCode, isNetwork } =
+        readApiError(err);
 
       // Already submitted / under review → treat as success (avoid scary false failure).
       const alreadySubmitted =
-        ax?.response?.status === 409 &&
+        status === 409 &&
         typeof apiMessage === "string" &&
         (/under review/i.test(apiMessage) ||
           /already been used/i.test(apiMessage) ||
           /already have a payment/i.test(apiMessage));
 
       if (alreadySubmitted) {
+        void trackFunnelEvent({
+          event: "payment_submit_success",
+          path: "/checkout",
+          screen: "bkash_checkout",
+          metadata: {
+            ...paymentTrackMeta(),
+            idempotent: true,
+            status: 409,
+          },
+        });
         onSubmitted();
+        return;
+      }
+
+      const errorCode = isNetwork
+        ? "NETWORK"
+        : apiCode
+          ? apiCode
+          : status === 401 || status === 403
+            ? "AUTH"
+            : status === 429
+              ? "RATE_LIMIT"
+              : status
+                ? `HTTP_${status}`
+                : "UNKNOWN";
+
+      void trackFunnelEvent({
+        event: "payment_submit_error",
+        path: "/checkout",
+        screen: "bkash_checkout",
+        metadata: {
+          ...paymentTrackMeta(),
+          errorCode,
+          status: status ?? null,
+          apiMessage: apiMessage?.slice(0, 180) ?? null,
+          isNetwork,
+        },
+      });
+
+      if (status === 401 || status === 403) {
+        setError(copy.sessionExpired);
+        return;
+      }
+
+      if (isNetwork) {
+        setError(copy.networkError);
+        return;
+      }
+
+      if (apiMessage && /too many subscription requests/i.test(apiMessage)) {
+        setError(
+          locale === "bn"
+            ? "অনেকবার চেষ্টা করা হয়েছে। ১৫ মিনিট পর আবার সাবমিট করুন।"
+            : apiMessage,
+        );
         return;
       }
 
       setError(
         apiMessage === "Validation Error"
-          ? ax?.response?.data?.errorSources?.[0]?.message ?? copy.submitFailed
+          ? (err as { response?: { data?: { errorSources?: { message?: string }[] } } })
+              ?.response?.data?.errorSources?.[0]?.message ?? copy.submitFailed
           : apiMessage ?? copy.submitFailed,
       );
     } finally {
@@ -362,6 +539,13 @@ export function BkashCheckoutForm({
             <p className="text-xs text-muted-foreground">{copy.trxHint}</p>
           </div>
 
+          {sessionChecking ? (
+            <p className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              {copy.sessionPreparing}
+            </p>
+          ) : null}
+
           {error ? (
             <p className="text-sm font-medium text-destructive" role="alert">
               {error}
@@ -373,10 +557,10 @@ export function BkashCheckoutForm({
             disabled={!canSubmit}
             className="hidden h-14 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 text-base font-black text-white shadow-lg shadow-pink-500/30 hover:from-pink-400 hover:to-rose-500 sm:inline-flex"
           >
-            {submitting ? (
+            {submitting || sessionChecking ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {copy.submitting}
+                {sessionChecking ? copy.sessionPreparing : copy.submitting}
               </>
             ) : (
               copy.submit
@@ -423,10 +607,10 @@ export function BkashCheckoutForm({
           disabled={!canSubmit}
           className="h-12 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 text-[15px] font-black text-white shadow-md shadow-pink-500/30 hover:from-pink-400 hover:to-rose-500"
         >
-          {submitting ? (
+          {submitting || sessionChecking ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {copy.submitting}
+              {sessionChecking ? copy.sessionPreparing : copy.submitting}
             </>
           ) : (
             copy.stickySubmit

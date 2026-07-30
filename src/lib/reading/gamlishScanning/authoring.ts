@@ -1,6 +1,6 @@
 import type { GamlishScanningTestData } from "./types";
 
-/** Instructor authoring sample — inner `gamlishScanning` object for Level 0 bulk/create forms. */
+/** Instructor authoring sample  -  inner `gamlishScanning` object for Level 0 bulk/create forms. */
 export const GAMLISH_SCANNING_AUTHORING_SAMPLE = {
   passageTitle: "The Evolution of Football: From Ancient Rituals to Global Phenomenon",
   briefing:

@@ -61,7 +61,7 @@ export function needsProfileMigration(profile: StudentProfile | null): boolean {
 
 export type MigrationReasonKey = "missingUsername" | "sameCountries";
 
-/** Locale-agnostic keys — translate via ONBOARDING_COPY in the UI. */
+/** Locale-agnostic keys  -  translate via ONBOARDING_COPY in the UI. */
 export function getMigrationReasonKeys(
   profile: StudentProfile | null,
 ): MigrationReasonKey[] {

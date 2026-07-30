@@ -13,6 +13,7 @@ import {
   MessageSquareHeart,
   MessagesSquare,
   PackageCheck,
+  Shield,
   TrendingDown,
   Users,
 } from "lucide-react";
@@ -46,6 +47,23 @@ export function EnglishAdminHome() {
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Link href="/dashboard/admin/activity">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                <Shield className="h-5 w-5 text-emerald-700 dark:text-emerald-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">Admin activity</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  See which admin approved, rejected, or unlocked access
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
         <Link href="/dashboard/admin/demo-conversion">
           <Card className="h-full p-5 transition-shadow hover:shadow-md">
             <div className="flex items-start gap-3">
@@ -55,7 +73,7 @@ export function EnglishAdminHome() {
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-foreground">Conversion funnel</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  Why users leave after the demo — phone OTP & Google drop-off
+                  Why users leave after the demo  -  phone OTP & Google drop-off
                 </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />

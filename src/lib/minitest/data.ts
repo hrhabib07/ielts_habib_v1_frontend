@@ -51,7 +51,7 @@ export const STAGE_CONFIGS: StageConfig[] = [
     stage: 3,
     duration: 90,
     passage:
-      "Thomas Carlyle's 'Great Man' theory posits that history is primarily shaped by the impact of highly influential individuals who, due to their charisma or intellect, utilize their power in ways that have decisive historical effects. Conversely, proponents of social determinism contend that such individuals are merely the products of their social environment—the 'ripples' on a tide of inevitable societal shifts. To suggest that a single figure could unilaterally pivot the course of a civilization is, to the social determinist, to ignore the myriad of underlying socioeconomic factors that necessitate the emergence of such a leader at a specific historical juncture.",
+      "Thomas Carlyle's 'Great Man' theory posits that history is primarily shaped by the impact of highly influential individuals who, due to their charisma or intellect, utilize their power in ways that have decisive historical effects. Conversely, proponents of social determinism contend that such individuals are merely the products of their social environment - the 'ripples' on a tide of inevitable societal shifts. To suggest that a single figure could unilaterally pivot the course of a civilization is, to the social determinist, to ignore the myriad of underlying socioeconomic factors that necessitate the emergence of such a leader at a specific historical juncture.",
     questions: [
       {
         id: "s3-q1",

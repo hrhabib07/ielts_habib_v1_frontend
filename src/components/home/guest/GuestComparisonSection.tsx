@@ -63,7 +63,7 @@ export function GuestComparisonSection() {
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.55, delay: 0.1, ease: GUEST_EASE }}
         >
-          {/* ——— BEFORE: quiet, archival ——— */}
+          {/*  -  -  -  BEFORE: quiet, archival  -  -  -  */}
           <div className="relative flex flex-col overflow-hidden rounded-3xl border border-stone-200/80 bg-stone-50/90 p-7 text-left sm:p-8 dark:border-stone-700/50 dark:bg-stone-900/40">
             <div
               className="pointer-events-none absolute inset-y-6 left-0 w-px bg-stone-300/70 dark:bg-stone-600/50"
@@ -102,7 +102,7 @@ export function GuestComparisonSection() {
             </p>
           </div>
 
-          {/* ——— Bridge ——— */}
+          {/*  -  -  -  Bridge  -  -  -  */}
           <div className="relative hidden items-center justify-center lg:flex">
             <div
               className="absolute inset-y-10 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-stone-200 via-sky-400/50 to-slate-800"
@@ -129,7 +129,7 @@ export function GuestComparisonSection() {
             <div className="h-px flex-1 bg-gradient-to-r from-sky-400/40 via-border to-transparent" />
           </div>
 
-          {/* ——— AFTER: game loop ——— */}
+          {/*  -  -  -  AFTER: game loop  -  -  -  */}
           <div className="relative flex flex-col overflow-hidden rounded-3xl border border-slate-800/80 bg-slate-950 p-7 text-left text-slate-50 shadow-[0_32px_80px_-36px_rgba(15,23,42,0.55)] sm:p-8">
             <div
               className="pointer-events-none absolute -right-16 top-0 h-48 w-48 rounded-full bg-sky-500/15 blur-3xl"

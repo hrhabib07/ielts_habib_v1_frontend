@@ -1,5 +1,5 @@
 /**
- * Premium reading-path surface tokens — Gamlish navy palette only.
+ * Premium reading-path surface tokens  -  Gamlish navy palette only.
  * accent #1e3a8a · primary #0f172a · slate neutrals · dark accent #38bdf8
  */
 
@@ -20,7 +20,7 @@ export const readingPathPremium = {
   zoneSticky:
     "sticky top-14 z-10 mb-8 border-b border-border/40 bg-background/95 py-4 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 dark:bg-background/90",
 
-  /** Locked level — soft lift, hairline ring, no harsh border */
+  /** Locked level  -  soft lift, hairline ring, no harsh border */
   cardLocked:
     "border border-[color:var(--primary)]/[0.04] bg-muted/25 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.04)] ring-1 ring-[color:var(--accent)]/[0.03] dark:border-white/[0.04] dark:bg-muted/15 dark:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.35)]",
 
@@ -28,7 +28,7 @@ export const readingPathPremium = {
   cardDefault:
     "border border-border/35 bg-card shadow-[0_2px_14px_-4px_rgba(15,23,42,0.06)] ring-1 ring-[color:var(--accent)]/[0.05] dark:border-border/50 dark:shadow-[0_2px_16px_-6px_rgba(0,0,0,0.4)]",
 
-  /** Active level — elevated + accent glow ring */
+  /** Active level  -  elevated + accent glow ring */
   cardActive:
     "border border-border/50 bg-card shadow-[0_8px_30px_-8px_rgba(15,23,42,0.1)] ring-1 ring-accent/15 dark:border-accent/20 dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.55)] dark:ring-accent/25",
 

@@ -1,4 +1,4 @@
-/** Gamlish brand — Bangladesh-first; product name stays Latin, voice stays Bangla. */
+/** Gamlish brand  -  Bangladesh-first; product name stays Latin, voice stays Bangla. */
 export const GAMLISH_BRAND = {
   name: "Gamlish",
   taglineLine1: "ইংরেজি শেখার গেইম",

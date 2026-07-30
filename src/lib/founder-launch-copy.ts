@@ -29,7 +29,7 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     headline: "Founder স্ট্যাটাস + পূর্ণ গেম লক করুন",
     intro:
       "পেমেন্ট ভেরিফাই হলে (স্পট থাকলে) পাবেন: স্থায়ী ব্যাজ, Founder Number, Wall, আর 1 আগস্ট থেকে প্রিমিয়াম অ্যাক্সেস।",
-    scarcity: "প্রথম 100 জন: Founder Number ও ব্যাজ। 100 পূর্ণ বা 1 আগস্টে অফার বন্ধ।",
+    scarcity: "প্রথম 100 জন: Founder Number ও ব্যাজ। 100 পূর্ণ বা 31 July · 11:59 PM (BD)-এ অফার বন্ধ।",
     accessNote: "মূল্য এখনই লক। অ্যাক্সেস 1 আগস্ট থেকে।",
     accessStartsLabel: (dateLabel) => `শুরু: ${dateLabel}`,
     durationLabel: (days) => `${days} দিন (1 আগস্ট থেকে)`,
@@ -51,7 +51,7 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     headline: "Lock Founder status + the full game",
     intro:
       "After payment is verified (if spots remain): permanent badge, Founder Number, Wall, plus premium access from 1 August.",
-    scarcity: "First 100 buyers get Founder Number and badge. Closes at 100 or on 1 August.",
+    scarcity: "First 100 buyers get Founder Number and badge. Closes at 100 or on 31 July · 11:59 PM BD.",
     accessNote: "Price locks now. Access starts 1 August.",
     accessStartsLabel: (dateLabel) => `Starts: ${dateLabel}`,
     durationLabel: (days) => `${days} days (from 1 August)`,

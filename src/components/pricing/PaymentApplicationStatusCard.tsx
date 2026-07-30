@@ -157,7 +157,7 @@ export function PaymentApplicationStatusCard({
                   আপনার bKash
                 </dt>
                 <dd className="font-mono font-medium">
-                  {latestRequest.senderNumber || "—"}
+                  {latestRequest.senderNumber || "-"}
                 </dd>
               </div>
               {latestRequest.transactionId ? (
@@ -231,7 +231,7 @@ export function PaymentApplicationStatusCard({
                 <dt className="text-xs uppercase tracking-wide text-red-700/70 dark:text-red-200/60">
                   আপনার bKash
                 </dt>
-                <dd className="font-mono">{latestRequest.senderNumber || "—"}</dd>
+                <dd className="font-mono">{latestRequest.senderNumber || "-"}</dd>
               </div>
               {latestRequest.transactionId ? (
                 <div>

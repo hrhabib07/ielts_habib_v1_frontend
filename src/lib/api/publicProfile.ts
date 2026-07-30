@@ -77,7 +77,7 @@ export const PROFILE_VIEWER_STORAGE_KEY = "gamlish_profile_viewer_key";
 
 /**
  * Stable anonymous visitor id (localStorage, sessionStorage fallback).
- * Returns "" if we cannot persist — skip recording to avoid reload inflation.
+ * Returns "" if we cannot persist  -  skip recording to avoid reload inflation.
  */
 export function getOrCreateProfileViewerKey(): string {
   if (typeof window === "undefined") return "";

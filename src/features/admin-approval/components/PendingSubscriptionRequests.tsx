@@ -126,10 +126,10 @@ export function PendingSubscriptionRequests() {
                   <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-foreground">
                     <span>
                       TrxID:{" "}
-                      <strong>{request.transactionId?.trim() || "—"}</strong>
+                      <strong>{request.transactionId?.trim() || "-"}</strong>
                     </span>
                     <span className="text-muted-foreground">
-                      bKash {request.senderNumber || "—"}
+                      bKash {request.senderNumber || "-"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">

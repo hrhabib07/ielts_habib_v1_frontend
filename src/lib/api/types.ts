@@ -89,7 +89,7 @@ export interface StudentProfile {
   userId?: string;
   username?: string | null;
   publicId?: string | null;
-  /** username ?? publicId — use for /u/{handle} links */
+  /** username ?? publicId  -  use for /u/{handle} links */
   publicHandle?: string | null;
   displayName?: string | null;
   avatarUrl?: string | null;
@@ -118,7 +118,7 @@ export interface StudentProfile {
     longest: number;
     lastActiveDate: string | null;
   };
-  /** ISO join date — always visible on profile / public profile. */
+  /** ISO join date  -  always visible on profile / public profile. */
   joinedAt?: string | null;
   profileCompletion?: ProfileCompletionStatus;
   targetBands?: {

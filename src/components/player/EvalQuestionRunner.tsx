@@ -616,7 +616,7 @@ export function EvalQuestionRunner({
         });
         setCheckResults((prev) => ({ ...prev, [questionId]: result }));
         void playCorrectEvalSfx();
-        // Instant dopamine — micro XP burst on every correct answer.
+        // Instant dopamine  -  micro XP burst on every correct answer.
         emitXpGain(1, "answer");
         return;
       }

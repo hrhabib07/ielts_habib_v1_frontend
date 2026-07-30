@@ -1,7 +1,10 @@
 import type { ActiveSubscription } from "@/src/lib/api/subscription";
 
-/** Inclusive cutoff — last moment to earn Founding pricing (ends before 1 Aug 2026). */
-export const FOUNDING_MEMBER_CUTOFF_ISO = "2026-07-31T23:59:59.999Z";
+/**
+ * Wall / Founding Member offer closes at 31 July 2026, 11:59 PM Bangladesh time
+ * (Asia/Dhaka). From that instant, new Founder numbers are not issued.
+ */
+export const FOUNDING_MEMBER_CUTOFF_ISO = "2026-07-31T17:59:59.999Z";
 
 export const FOUNDING_MEMBER_CUTOFF = new Date(FOUNDING_MEMBER_CUTOFF_ISO);
 
@@ -20,12 +23,14 @@ export function formatFoundingCountdown(ms: number): {
   days: number;
   hours: number;
   minutes: number;
+  seconds: number;
 } {
-  const totalMinutes = Math.floor(ms / 60_000);
-  const days = Math.floor(totalMinutes / (60 * 24));
-  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-  const minutes = totalMinutes % 60;
-  return { days, hours, minutes };
+  const totalSeconds = Math.floor(ms / 1000);
+  const days = Math.floor(totalSeconds / 86_400);
+  const hours = Math.floor((totalSeconds % 86_400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return { days, hours, minutes, seconds };
 }
 
 export function isFoundingMemberEligible(
@@ -35,7 +40,5 @@ export function isFoundingMemberEligible(
   // Permanent founder flag on the user wins (count-based Founding Member program).
   if (profile?.isFoundingMember === true) return true;
   if (subscription?.isFoundingMember === true) return true;
-  if (!subscription || subscription.status !== "ACTIVE") return false;
-  if (new Date(subscription.endDate).getTime() <= Date.now()) return false;
-  return subscription.isFounderUser === true;
+  return Boolean(subscription?.isFounderUser);
 }

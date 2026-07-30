@@ -26,7 +26,7 @@ function ActivationBadge() {
 }
 
 function AssessmentSummary({ hasAssessment }: { hasAssessment: boolean }) {
-  if (!hasAssessment) return <span className="text-muted-foreground">—</span>;
+  if (!hasAssessment) return <span className="text-muted-foreground"> - </span>;
   return (
     <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">
       <FileQuestion className="h-3.5 w-3.5" />

@@ -10,7 +10,7 @@ import {
 import { GAMLISH_XP_EVENT, GAMLISH_XP_REFRESH } from "@/src/lib/xp-events";
 
 /**
- * Minimal sticky XP strip — one clean row, no clutter.
+ * Minimal sticky XP strip  -  one clean row, no clutter.
  */
 export function PlayerXpHud({ className }: { className?: string }) {
   const [profile, setProfile] = useState<MyPlayerProfile | null>(null);
@@ -31,7 +31,7 @@ export function PlayerXpHud({ className }: { className?: string }) {
       const detail = (e as CustomEvent<{ amount: number; source: "answer" | "stage" }>)
         .detail;
       if (!detail?.amount || detail.amount <= 0) return;
-      // Only stage XP is persisted — answer bursts are dopamine-only.
+      // Only stage XP is persisted  -  answer bursts are dopamine-only.
       if (detail.source === "stage") {
         setProfile((p) => (p ? { ...p, totalXp: p.totalXp + detail.amount } : p));
       }
@@ -57,7 +57,7 @@ export function PlayerXpHud({ className }: { className?: string }) {
       <div className="mx-auto flex max-w-lg items-center justify-between gap-3 sm:max-w-2xl">
         <div className="flex items-center gap-3 text-sm">
           <span className="font-semibold text-muted-foreground">
-            Lv <span className="tabular-nums text-foreground">{profile?.level ?? "—"}</span>
+            Lv <span className="tabular-nums text-foreground">{profile?.level ?? "-"}</span>
           </span>
           <span className="h-3 w-px bg-border" aria-hidden />
           <span
@@ -67,7 +67,7 @@ export function PlayerXpHud({ className }: { className?: string }) {
             )}
           >
             <Zap className="h-3.5 w-3.5 text-amber-500" />
-            {profile ? profile.totalXp.toLocaleString() : "—"}
+            {profile ? profile.totalXp.toLocaleString() : "-"}
             <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
               XP
             </span>

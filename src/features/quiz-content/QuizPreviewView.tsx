@@ -127,12 +127,12 @@ function QuestionPreviewBlock({
             )}
           </div>
           <p className="text-[15px] font-medium leading-snug text-stone-900 dark:text-stone-100">
-            {question.questionText || "—"}
+            {question.questionText || "-"}
           </p>
           {question.type === "MCQ" && opts.length > 0 && (
             <ul className="list-inside list-disc space-y-1 text-sm text-stone-600 dark:text-stone-400">
               {opts.map((opt, i) => (
-                <li key={i}>{opt || "—"}</li>
+                <li key={i}>{opt || "-"}</li>
               ))}
             </ul>
           )}

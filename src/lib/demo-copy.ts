@@ -1,4 +1,4 @@
-import type { UiLocale } from "@/src/lib/ui-locale";
+﻿import type { UiLocale } from "@/src/lib/ui-locale";
 
 /** Per-stage XP in live player + demo (stage clear). */
 export const GAME_STAGE_XP = 10;
@@ -77,7 +77,7 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     homeEyebrow: "Free demo · real game home",
     homeTitle: (name) => `Welcome, ${name}`,
     homeSub: "Same map logged-in players see. Tap Mission 01 to play.",
-    roadmapTapHint: "Tap the glowing Mission 01 — this is the real Gamlish map.",
+    roadmapTapHint: "Tap the glowing Mission 01  -  this is the real Gamlish map.",
     campLabel: (order) => `Camp ${order}`,
     missionLabel: "Mission",
     stages: "stages",
@@ -85,7 +85,7 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     lockedHint: "Unlocks after you finish the previous mission",
     subscribeHint: "Unlocks with full access",
     continueMission: "Play Mission 01",
-    guestBanner: "You're in guest demo mode — no login required.",
+    guestBanner: "You're in guest demo mode  -  no login required.",
     missionUnlocked: "Mission 01 unlocked",
     otherCampsHint: "Other camps unlock as you play",
     playMission: "Play Mission 01",
@@ -99,7 +99,7 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     feedbackTitle: "How would you rate your journey with Gamlish so far?",
     feedbackTitleBn: "Gamlish-এর সাথে আপনার অভিজ্ঞতা কেমন ছিল?",
     feedbackPrompt: "Pick one option below",
-    feedbackTapHint: "Required — tap an option to continue",
+    feedbackTapHint: "Required  -  tap an option to continue",
     feedbackLiked: "Want to say more? (optional)",
     feedbackPlaceholder: "The video, the questions, the XP...",
     feedbackSubmit: "Send & continue",
@@ -151,7 +151,7 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     homeEyebrow: "ফ্রি ডেমো · আসল গেম হোম",
     homeTitle: (name) => `স্বাগতম, ${name}`,
     homeSub: "লগইন করা প্লেয়ারদের মতোই ম্যাপ। Mission 01-এ ট্যাপ করে খেলো।",
-    roadmapTapHint: "জ্বলজ্বলে Mission 01-এ ট্যাপ করো — এটাই আসল Gamlish ম্যাপ।",
+    roadmapTapHint: "জ্বলজ্বলে Mission 01-এ ট্যাপ করো  -  এটাই আসল Gamlish ম্যাপ।",
     campLabel: (order) => `ক্যাম্প ${order}`,
     missionLabel: "মিশন",
     stages: "স্টেজ",
@@ -159,7 +159,7 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     lockedHint: "আগের মিশন শেষ করলে আনলক হবে",
     subscribeHint: "পূর্ণ অ্যাক্সেসে আনলক",
     continueMission: "Mission 01 খেলো",
-    guestBanner: "তুমি গেস্ট ডেমো মোডে আছো — লগইন লাগবে না।",
+    guestBanner: "তুমি গেস্ট ডেমো মোডে আছো  -  লগইন লাগবে না।",
     missionUnlocked: "Mission 01 আনলক হয়েছে",
     otherCampsHint: "খেলতে থাকলেই বাকি ক্যাম্পগুলো আনলক হবে",
     playMission: "Mission 01 খেলো",
@@ -174,7 +174,7 @@ export const DEMO_COPY: Record<UiLocale, DemoCopy> = {
     feedbackTitle: "How would you rate your journey with Gamlish so far?",
     feedbackTitleBn: "Gamlish-এর সাথে আপনার অভিজ্ঞতা কেমন ছিল?",
     feedbackPrompt: "নিচ থেকে একটা অপশন বাছুন",
-    feedbackTapHint: "আবশ্যক — চালিয়ে যেতে একটি অপশনে ট্যাপ করুন",
+    feedbackTapHint: "আবশ্যক  -  চালিয়ে যেতে একটি অপশনে ট্যাপ করুন",
     feedbackLiked: "আরও কিছু বলতে চাও? (ঐচ্ছিক)",
     feedbackPlaceholder: "ভিডিও, প্রশ্ন, XP...",
     feedbackSubmit: "পাঠাও ও চালিয়ে যাও",

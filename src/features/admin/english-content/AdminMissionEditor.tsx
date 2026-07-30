@@ -134,7 +134,7 @@ export function AdminMissionEditor({ slug }: AdminMissionEditorProps) {
           <p className="text-sm text-muted-foreground">{mission.campTitle}</p>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Edit each step below. No coding needed — just type like a document.
+            Edit each step below. No coding needed  -  just type like a document.
           </p>
         </div>
         <Link href="/dashboard/admin/english">

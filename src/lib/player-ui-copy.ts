@@ -1,4 +1,4 @@
-import type { UiLocale } from "@/src/lib/ui-locale";
+﻿import type { UiLocale } from "@/src/lib/ui-locale";
 
 export interface PlayerUiCopy {
   readonly loadingMap: string;
@@ -153,7 +153,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     backToMap: "ক্যাম্প ম্যাপে ফিরে যাও",
     backToMission: "মিশনে ফিরে যাও",
     campMapEyebrow: "Gamlish · ইংরেজি শেখার গেইম",
-    roadmapTapHint: "খোলা মিশনে ট্যাপ করো — সঙ্গে সঙ্গে খেলা শুরু।",
+    roadmapTapHint: "খোলা মিশনে ট্যাপ করো  -  সঙ্গে সঙ্গে খেলা শুরু।",
     campLabel: (order) => `ক্যাম্প ${order}`,
     yourJourney: "তোমার যাত্রা",
     continueMission: "মিশন চালিয়ে যাও",

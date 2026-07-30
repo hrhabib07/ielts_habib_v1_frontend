@@ -206,7 +206,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
               </p>
             </div>
 
-            {/* Loud register path — above the form so new users cannot miss it */}
+            {/* Loud register path  -  above the form so new users cannot miss it */}
             <Link
               href={registerHref}
               className="group flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-3.5 transition-colors hover:border-sky-500/45 hover:bg-sky-500/15 dark:border-sky-400/25 dark:bg-sky-400/10 dark:hover:bg-sky-400/15"

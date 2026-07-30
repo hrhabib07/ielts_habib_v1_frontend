@@ -1,4 +1,4 @@
-import type { UiLocale } from "@/src/lib/ui-locale";
+﻿import type { UiLocale } from "@/src/lib/ui-locale";
 
 export type OnboardingMigrationReasonKey = "missingUsername" | "sameCountries";
 
@@ -9,7 +9,7 @@ export interface OnboardingCopy {
   readonly welcomeSubEnglish: string;
   readonly welcomeSubReading: string;
   readonly migrateSub: string;
-  /** Extra guidance under the subtitle — especially helpful for Bangla speakers. */
+  /** Extra guidance under the subtitle  -  especially helpful for Bangla speakers. */
   readonly welcomeTips: readonly string[];
   readonly migrateWhyTitle: string;
   readonly migrationReasons: Record<OnboardingMigrationReasonKey, string>;
@@ -54,13 +54,13 @@ function buildOnboardingCopy(locale: UiLocale): OnboardingCopy {
       welcomeTitle: "Gamlish-এ স্বাগতম",
       migrateTitle: "প্রোফাইল আপডেট করুন",
       welcomeSubEnglish:
-        "একটা ডাকনাম দিন — তারপরই Mission 01 শুরু। ইউজারনেম লাগবে না।",
+        "একটা ডাকনাম দিন  -  তারপরই Mission 01 শুরু। ইউজারনেম লাগবে না।",
       welcomeSubReading:
         "প্রোফাইল সেট করুন, তারপর সরাসরি Reading-এ ঢুকুন।",
       migrateSub: "চালিয়ে যেতে আরও কয়েকটা তথ্য দরকার।",
       welcomeTips: [
         "ডাকনাম = গেইমে আপনাকে যে নামে দেখাবে (যেমন: তানভীর)। পরে প্রোফাইল থেকে বদলাতে পারবেন।",
-        "ইমেইল বদলানো যায় না — এটাই আপনার লগইন পরিচয়।",
+        "ইমেইল বদলানো যায় না  -  এটাই আপনার লগইন পরিচয়।",
         "পরের ধাপ: হোমে গিয়ে Mission 01 খেলুন। ভিডিও দেখে প্রশ্ন উত্তর দিন।",
       ],
       migrateWhyTitle: "কেন জিজ্ঞাসা করছি",
@@ -75,7 +75,7 @@ function buildOnboardingCopy(locale: UiLocale): OnboardingCopy {
       nicknameHelp:
         "হোম স্ক্রিন ও গেইমে এই নাম দেখাবে। পরে প্রোফাইল সেটিংস থেকে বদলাতে পারবেন।",
       emailLabel: "ইমেইল",
-      emailReadonlyHint: "লগইনের জন্য ব্যবহৃত — এখানে বদলানো যায় না।",
+      emailReadonlyHint: "লগইনের জন্য ব্যবহৃত  -  এখানে বদলানো যায় না।",
       usernameLabel: "ইউজারনেম",
       usernamePlaceholder: "your_handle",
       displayNameLabel: "ডিসপ্লে নাম",
@@ -119,8 +119,8 @@ function buildOnboardingCopy(locale: UiLocale): OnboardingCopy {
     migrateSub: "We need a few details before you can continue.",
     welcomeTips: [
       "Nickname = the name shown in the game (e.g. Tanvir). You can change it later in profile.",
-      "Email cannot be changed here — it is your login identity.",
-      "Next: go home and play Mission 01 — watch the video, then answer questions.",
+      "Email cannot be changed here  -  it is your login identity.",
+      "Next: go home and play Mission 01  -  watch the video, then answer questions.",
     ],
     migrateWhyTitle: "Why we're asking",
     migrationReasons: {
@@ -134,7 +134,7 @@ function buildOnboardingCopy(locale: UiLocale): OnboardingCopy {
     nicknameHelp:
       "Shown on your home screen and in the game. You can change it later in profile settings.",
     emailLabel: "Email",
-    emailReadonlyHint: "Used for login — cannot be changed here.",
+    emailReadonlyHint: "Used for login  -  cannot be changed here.",
     usernameLabel: "Username",
     usernamePlaceholder: "your_handle",
     displayNameLabel: "Display name",

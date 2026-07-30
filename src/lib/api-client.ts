@@ -7,14 +7,13 @@ import {
 import { getApiBaseUrl } from "./api-base-url";
 
 let handlingUnauthorized = false;
-let bootstrapAttempted = false;
 
 const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: true,
-  timeout: 20_000,
+  timeout: 30_000,
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -32,6 +31,8 @@ function shouldForceLogout(error: AxiosError): boolean {
   if (typeof window === "undefined") return false;
   const path = window.location.pathname;
   if (path.startsWith("/login") || path.startsWith("/register")) return false;
+  // Never kick buyers off checkout mid-payment  -  show an inline re-login prompt instead.
+  if (path.startsWith("/checkout") || path.startsWith("/pricing")) return false;
 
   const url = String(error.config?.url ?? "");
   // Public pricing / health should never nuke the session
@@ -65,15 +66,9 @@ apiClient.interceptors.response.use(
       | (InternalAxiosRequestConfig & { _retried?: boolean })
       | undefined;
 
-    // No Bearer was sent — guest request, do not clear session
-    const hadToken = Boolean(getAccessToken() || original?.headers?.Authorization);
-    if (!hadToken) {
-      return Promise.reject(error);
-    }
-
-    // One recovery: hydrate from httpOnly cookie then retry
-    if (original && !original._retried && !bootstrapAttempted) {
-      bootstrapAttempted = true;
+    // Always try cookie → Bearer recovery once, even when localStorage was empty.
+    // Checkout can load via httpOnly cookie while localStorage token is missing.
+    if (original && !original._retried) {
       original._retried = true;
       const restored = await hydrateAccessTokenFromCookie();
       if (restored) {
@@ -83,7 +78,11 @@ apiClient.interceptors.response.use(
       }
     }
 
-    if (!handlingUnauthorized && shouldForceLogout(error)) {
+    const hadToken = Boolean(
+      getAccessToken() || original?.headers?.Authorization,
+    );
+
+    if (hadToken && !handlingUnauthorized && shouldForceLogout(error)) {
       handlingUnauthorized = true;
       await forceClientLogout();
     }

@@ -216,7 +216,7 @@ export function MissionOneFeedbackModal({
       aria-modal="true"
       aria-labelledby="m1-feedback-title"
     >
-      {/* Backdrop — no close on tap (intentional, keeps focus on survey) */}
+      {/* Backdrop  -  no close on tap (intentional, keeps focus on survey) */}
       <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[3px]" />
 
       <motion.div
@@ -239,7 +239,7 @@ export function MissionOneFeedbackModal({
           />
         </div>
 
-        {/* step indicator — no X button */}
+        {/* step indicator  -  no X button */}
         <div className="flex items-center justify-between gap-3 px-4 pb-1 pt-3">
           <p className="text-[11px] font-medium tabular-nums text-muted-foreground">
             ধাপ {step} / ৩
@@ -374,7 +374,7 @@ export function MissionOneFeedbackModal({
             )}
           </AnimatePresence>
 
-          {/* Delayed skip link — fades in after SKIP_REVEAL_DELAY_MS, extremely subtle */}
+          {/* Delayed skip link  -  fades in after SKIP_REVEAL_DELAY_MS, extremely subtle */}
           {!thanks ? (
             <AnimatePresence>
               {skipVisible ? (
