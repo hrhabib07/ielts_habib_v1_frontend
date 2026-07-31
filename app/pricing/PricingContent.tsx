@@ -7,7 +7,6 @@ import { Loader2, Smartphone } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
 import { FounderLaunchPricingCard } from "@/src/components/pricing/FounderLaunchPricingCard";
-import { FounderBenefitsShowcase } from "@/src/components/pricing/FounderBenefitsShowcase";
 import {
   hasBlockingPaymentStatus,
   PaymentApplicationStatusCard,
@@ -164,8 +163,6 @@ export function PricingContent({
         </div>
       ) : null}
 
-      {/* Benefits + FAQ below the fold so Pay stays first on mobile */}
-      {!hasPurchased && !blocked ? <FounderBenefitsShowcase /> : null}
       <PricingFaqSection />
 
       {showPayCta ? (

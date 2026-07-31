@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Checkout · Gamlish",
-  description: "Complete your Gamlish pre-order with bKash Send Money.",
+  description: "Complete your Gamlish VIP enrollment with bKash Send Money.",
 };
 
 export default async function CheckoutPage() {

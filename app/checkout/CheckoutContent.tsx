@@ -10,7 +10,6 @@ import {
   hasBlockingPaymentStatus,
   PaymentApplicationStatusCard,
 } from "@/src/components/pricing/PaymentApplicationStatusCard";
-import { FounderBenefitsShowcase } from "@/src/components/pricing/FounderBenefitsShowcase";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
 import { useCheckoutCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
@@ -213,8 +212,6 @@ export function CheckoutContent({
             />
           </div>
         </div>
-
-        <FounderBenefitsShowcase />
       </div>
     </div>
   );

@@ -17,8 +17,8 @@ import { cn } from "@/lib/utils";
 
 const EN_FACE = "font-sans tabular-nums";
 const REGULAR = 1590;
-const FOUNDER = 159;
-const SAVE = 1431;
+const FOUNDER = 490;
+const SAVE = 1100;
 
 const FALLBACK_GOLD: FounderTierLiveStat = {
   tier: "GOLD",
@@ -237,32 +237,38 @@ export function FounderVipClaimCard({
           </span>
         </div>
 
-        {/* seat progress */}
-        <div className="space-y-2">
-          <div className="flex items-end justify-between gap-3">
-            <p className="text-[12px] font-medium leading-snug text-foreground/90">
-              {copy.seatsLeft(left, active.capacity, tierLabel)}
-            </p>
-            <p className={cn(EN_FACE, "shrink-0 text-[11px] font-medium text-muted-foreground")}>
-              {copy.seatsFilled(filledLabel, capacityLabel)}
-            </p>
+        {/* seat progress (founder window only) */}
+        {copy.seatsFilled(filledLabel, capacityLabel) ? (
+          <div className="space-y-2">
+            <div className="flex items-end justify-between gap-3">
+              <p className="text-[12px] font-medium leading-snug text-foreground/90">
+                {copy.seatsLeft(left, active.capacity, tierLabel)}
+              </p>
+              <p className={cn(EN_FACE, "shrink-0 text-[11px] font-medium text-muted-foreground")}>
+                {copy.seatsFilled(filledLabel, capacityLabel)}
+              </p>
+            </div>
+            <div
+              className="h-1.5 overflow-hidden rounded-full bg-muted"
+              role="progressbar"
+              aria-valuenow={active.filled}
+              aria-valuemin={0}
+              aria-valuemax={active.capacity}
+              aria-label={copy.seatsLeft(left, active.capacity, tierLabel)}
+            >
+              <motion.div
+                className={cn("h-full rounded-full", accent.bar)}
+                initial={reduceMotion ? false : { width: 0 }}
+                animate={{ width: `${fillPct}%` }}
+                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </div>
           </div>
-          <div
-            className="h-1.5 overflow-hidden rounded-full bg-muted"
-            role="progressbar"
-            aria-valuenow={active.filled}
-            aria-valuemin={0}
-            aria-valuemax={active.capacity}
-            aria-label={copy.seatsLeft(left, active.capacity, tierLabel)}
-          >
-            <motion.div
-              className={cn("h-full rounded-full", accent.bar)}
-              initial={reduceMotion ? false : { width: 0 }}
-              animate={{ width: `${fillPct}%` }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-        </div>
+        ) : (
+          <p className="text-[12px] font-medium text-foreground/90">
+            {copy.seatsLeft(left, active.capacity, tierLabel)}
+          </p>
+        )}
 
         {/* CTA */}
         <Button

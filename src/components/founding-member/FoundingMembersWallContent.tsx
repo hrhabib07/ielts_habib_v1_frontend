@@ -12,8 +12,6 @@ import {
   type FounderWallMember,
 } from "@/src/lib/api/gamlish";
 import { FoundersWallClosingCountdown } from "@/src/components/founding-member/FoundersWallClosingCountdown";
-import { FounderInlineCountdown } from "@/src/components/founding-member/FounderInlineCountdown";
-import { isFoundingMemberWindowOpen } from "@/src/lib/foundingMember";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { FOUNDERS_WALL_PAGE_COPY } from "@/src/lib/founders-wall-page-copy";
 import { localizeDigits } from "@/src/lib/ui-locale";
@@ -101,54 +99,6 @@ function MemberRow({ member }: { member: FounderWallMember }) {
   );
 }
 
-function JoinHereSlot({
-  nextNumber,
-  numberLabel,
-  sub,
-  cta,
-  aria,
-  locale,
-}: {
-  nextNumber: number;
-  numberLabel: string;
-  sub: string;
-  cta: string;
-  aria: string;
-  locale: "bn" | "en";
-}) {
-  const padded = String(nextNumber).padStart(3, "0");
-  if (!isFoundingMemberWindowOpen()) return null;
-
-  return (
-    <section className="mt-10" aria-label={aria}>
-      <Link
-        href="/checkout"
-        className="flex w-full flex-col gap-3 rounded-2xl border border-dashed border-amber-500/55 bg-gradient-to-r from-amber-400/15 via-amber-400/10 to-transparent p-4 transition-colors hover:from-amber-400/25 sm:flex-row sm:items-center sm:gap-4 sm:p-5"
-      >
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-sm font-black tabular-nums text-amber-950 shadow-sm">
-          #{padded}
-        </span>
-        <span className="min-w-0 flex-1 text-left">
-          <span className="block text-base font-bold tracking-tight text-amber-950 dark:text-amber-100 sm:text-lg">
-            {numberLabel}
-          </span>
-          <FounderInlineCountdown
-            locale={locale}
-            size="sm"
-            className="mt-1.5"
-          />
-          <span className="mt-1 block text-sm text-amber-900/80 dark:text-amber-200/80">
-            {sub}
-          </span>
-        </span>
-        <span className="inline-flex h-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 px-4 text-sm font-bold text-amber-950 shadow-sm transition-colors hover:bg-amber-400">
-          {cta}
-        </span>
-      </Link>
-    </section>
-  );
-}
-
 export function FoundingMembersWallContent() {
   const { locale } = useUiLocale();
   const copy = FOUNDERS_WALL_PAGE_COPY[locale === "bn" ? "bn" : "en"];
@@ -168,10 +118,8 @@ export function FoundingMembersWallContent() {
 
   const filled = wall?.counter.slotsFilled ?? 0;
   const max = wall?.counter.maxSlots ?? 100;
-  const showJoinSlot = wall?.counter.isOpen === true && filled < max;
   const filledLabel = localizeDigits(filled, locale);
   const maxLabel = localizeDigits(max, locale);
-  const nextPadded = String(filled + 1).padStart(3, "0");
 
   const tierLabel = (tier: FounderTier): string => {
     if (tier === "GOLD") return copy.gold;
@@ -188,8 +136,7 @@ export function FoundingMembersWallContent() {
       lang={locale}
     >
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
-        <div className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-amber-400/15 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 rounded-full bg-muted/60 blur-3xl" />
       </div>
 
       <header className="text-center">
@@ -197,7 +144,7 @@ export function FoundingMembersWallContent() {
           {locale === "bn" ? copy.titleBn : copy.titleEn}
         </h1>
         {locale === "bn" && copy.titleEnSmall ? (
-          <p className="mt-1 font-sans text-sm font-semibold tracking-wide text-amber-800/80 dark:text-amber-300/80">
+          <p className="mt-1 font-sans text-sm font-semibold tracking-wide text-muted-foreground">
             {copy.titleEnSmall}
           </p>
         ) : null}
@@ -206,9 +153,7 @@ export function FoundingMembersWallContent() {
         </p>
       </header>
 
-      <FoundersWallClosingCountdown
-        nextFounderNumber={wall ? filled + 1 : null}
-      />
+      <FoundersWallClosingCountdown />
 
       {loading ? (
         <div className="mt-12 flex justify-center text-muted-foreground">
@@ -272,17 +217,6 @@ export function FoundingMembersWallContent() {
               .
             </p>
           )}
-
-          {showJoinSlot ? (
-            <JoinHereSlot
-              nextNumber={filled + 1}
-              numberLabel={copy.joinNumber(nextPadded)}
-              sub={copy.joinSub}
-              cta={copy.joinCta}
-              aria={copy.joinAria}
-              locale={locale === "bn" ? "bn" : "en"}
-            />
-          ) : null}
         </>
       )}
     </div>

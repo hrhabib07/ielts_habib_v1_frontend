@@ -98,10 +98,10 @@ export function PaymentApplicationStatusCard({
           <div className="space-y-3">
             <div>
               <p className={cn("text-lg font-semibold", brandStatus.pending.title)}>
-                August pre-order confirmed
+                Payment verified · access scheduled
               </p>
               <p className={cn("mt-1 text-sm leading-relaxed", brandStatus.pending.body)}>
-                Your payment is verified. Premium access is not available yet. It unlocks on{" "}
+                Your payment is verified. Premium access unlocks on{" "}
                 <strong>{startLabel}</strong> and runs until{" "}
                 <strong>{formatDateTime(activeSubscription!.endDate)}</strong>.
               </p>
@@ -139,8 +139,8 @@ export function PaymentApplicationStatusCard({
                 Pending Verification
               </p>
               <p className={cn("mt-1 text-sm leading-relaxed", brandStatus.pending.body)}>
-                আমরা আপনার bKash পেমেন্ট প্রুফ পেয়েছি। অ্যাডমিন ভেরিফাই করলে প্রি-অর্ডার কনফার্ম হবে।
-                প্রিমিয়াম অ্যাক্সেস সাথে সাথে চালু হবে না। অ্যাক্সেস শুরু হবে 1 আগস্ট থেকে।
+                আমরা আপনার bKash পেমেন্ট প্রুফ পেয়েছি। অ্যাডমিন ভেরিফাই করলে
+                1 মাসের VIP অ্যাক্সেস সাথে সাথে চালু হবে।
               </p>
             </div>
             <dl className={cn("grid gap-2 rounded-xl border p-4 text-sm sm:grid-cols-2", brandStatus.pending.detail)}>

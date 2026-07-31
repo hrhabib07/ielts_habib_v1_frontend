@@ -25,20 +25,20 @@ export function PlayerSubscriptionGate({
   const PLAYER_UI = usePlayerUiCopy();
   const { locale } = useUiLocale();
   const { subscription } = useStudentSession();
-  const awaitingAugust = isPreorderAwaitingAccess(subscription);
+  const awaitingAccess = isPreorderAwaitingAccess(subscription);
 
-  const title = awaitingAugust
+  const title = awaitingAccess
     ? locale === "bn"
-      ? "আগস্টে আপনার অ্যাক্সেস খুলবে"
-      : "Your access opens in August"
+      ? "আপনার অ্যাক্সেস শীঘ্রই খুলবে"
+      : "Your access opens soon"
     : missionTitle?.trim()
       ? PLAYER_UI.subscribeModalTitle(missionTitle.trim())
       : PLAYER_UI.paywallTitle;
 
-  const body = awaitingAugust
+  const body = awaitingAccess
     ? locale === "bn"
-      ? `আপনার প্রি-অর্ডার কনফার্ম। প্রিমিয়াম মিশন ${formatAccessDate(subscription!.startDate, "bn-BD")} থেকে খেলতে পারবেন। তার আগে Mission 01 ফ্রি খেলুন।`
-      : `Your pre-order is confirmed. Premium missions unlock on ${formatAccessDate(subscription!.startDate)}. Until then, Mission 01 stays free.`
+      ? `পেমেন্ট ভেরিফাই হয়েছে। প্রিমিয়াম মিশন ${formatAccessDate(subscription!.startDate, "bn-BD")} থেকে খেলতে পারবেন। তার আগে Mission 01 ফ্রি খেলুন।`
+      : `Your payment is verified. Premium missions unlock on ${formatAccessDate(subscription!.startDate)}. Until then, Mission 01 stays free.`
     : PLAYER_UI.paywallBody;
 
   return (
@@ -60,7 +60,7 @@ export function PlayerSubscriptionGate({
         />
 
         <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-accent-foreground shadow-lg shadow-accent/30">
-          {awaitingAugust ? (
+          {awaitingAccess ? (
             <CalendarClock className="h-7 w-7" />
           ) : (
             <Crown className="h-7 w-7" />
@@ -68,7 +68,11 @@ export function PlayerSubscriptionGate({
         </div>
 
         <p className="relative mt-5 text-[11px] font-bold uppercase tracking-[0.2em] text-accent">
-          {awaitingAugust ? "August Pre-Order" : PLAYER_UI.subscribeModalEyebrow}
+          {awaitingAccess
+            ? locale === "bn"
+              ? "অ্যাক্সেস নির্ধারিত"
+              : "Access scheduled"
+            : PLAYER_UI.subscribeModalEyebrow}
         </p>
         <h1 className="relative mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           {title}
@@ -78,7 +82,7 @@ export function PlayerSubscriptionGate({
         </p>
 
         <div className="relative mt-6 flex flex-col gap-2.5">
-          {!awaitingAugust ? (
+          {!awaitingAccess ? (
             <Button
               asChild
               className={cn("h-12 rounded-full text-base font-semibold", brandSurfaces.ctaButton)}
@@ -95,7 +99,7 @@ export function PlayerSubscriptionGate({
             >
               <Link href="/pricing">
                 <CalendarClock className="mr-2 h-4 w-4" />
-                {locale === "bn" ? "প্রি-অর্ডার স্ট্যাটাস দেখুন" : "View pre-order status"}
+                {locale === "bn" ? "স্ট্যাটাস দেখুন" : "View status"}
               </Link>
             </Button>
           )}

@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarClock, Check, ChevronDown, Crown, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Crown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatBdt, type PublicPricing } from "@/src/lib/api/pricing";
 import { useFounderLaunchCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { brandSurfaces } from "@/src/lib/brand-theme";
-import { formatAccessDate } from "@/src/lib/subscription-access";
 import { toLatinDigits } from "@/src/lib/ui-locale";
 import { cn } from "@/lib/utils";
 
@@ -28,19 +27,11 @@ export function FounderLaunchPricingCard({
   const { locale } = useUiLocale();
   const [showAllFeatures, setShowAllFeatures] = useState(false);
   const showDiscount = pricing.discountEnabled && pricing.discountPercent > 0;
-  const isPreOrder = pricing.preOrderEnabled !== false;
   const cohort = pricing.offerCohort ?? "founder";
   const offerBadge =
     locale === "bn"
       ? (pricing.offerLabelBn ?? pricing.offerLabelEn ?? copy.founderBadge)
       : (pricing.offerLabelEn ?? copy.founderBadge);
-
-  const accessStartsAt =
-    pricing.accessStartsAt ?? "2026-07-31T18:00:00.000Z";
-  const accessDateLabel = formatAccessDate(
-    accessStartsAt,
-    locale === "bn" ? "bn-BD" : "en-GB",
-  );
 
   const headline =
     cohort === "first_week"
@@ -75,12 +66,12 @@ export function FounderLaunchPricingCard({
   const scarcity =
     cohort === "first_week"
       ? locale === "bn"
-        ? "7 আগস্ট · 11:59 PM (BD)-এ এই মূল্য শেষ। স্থায়ী First Week Adopter ব্যাজ পাবেন (Wall নয়)।"
-        : "Ends 7 Aug · 11:59 PM BD. You get a permanent First Week Adopter badge (not the Founders Wall)."
+        ? "রেগুলার 1590 টাকা। এখন 490 টাকায় 1 মাস। স্থায়ী First Week Adopter ব্যাজ (Wall নয়)।"
+        : "Regular 1590 BDT. Now 490 BDT for 1 month. Permanent First Week Adopter badge (not the Founders Wall)."
       : cohort === "first_month"
         ? locale === "bn"
-          ? "31 আগস্ট পর্যন্ত 590 টাকা/মাস। স্থায়ী First Month Adopter ব্যাজ (Wall নয়)।"
-          : "590 BDT/month through 31 Aug. Permanent First Month Adopter badge (not the Founders Wall)."
+          ? "রেগুলার 1590 টাকা। এখন 590 টাকা/মাস। স্থায়ী First Month Adopter ব্যাজ (Wall নয়)।"
+          : "Regular 1590 BDT. Now 590 BDT/month. Permanent First Month Adopter badge (not the Founders Wall)."
         : cohort === "standard_q4"
           ? locale === "bn"
             ? "সেপ্টেম্বর থেকে ডিসেম্বর · 999 টাকা/মাস।"
@@ -131,7 +122,6 @@ export function FounderLaunchPricingCard({
         />
 
         <div className="relative space-y-5 p-5 sm:space-y-6 sm:p-7">
-          {/* Hero: title + price first so CTA is near the fold */}
           <div className="space-y-2 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-800 dark:text-amber-300">
               {eyebrow}
@@ -146,17 +136,6 @@ export function FounderLaunchPricingCard({
 
           <div className="rounded-2xl border border-amber-500/30 bg-background/90 p-4 shadow-sm dark:bg-card/80 sm:p-5">
             <div className="mb-3 flex flex-wrap items-center justify-center gap-1.5">
-              {isPreOrder ? (
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1",
-                    brandSurfaces.eyebrowBadge,
-                  )}
-                >
-                  <CalendarClock className="h-3 w-3" aria-hidden />
-                  {copy.preOrderBadge}
-                </span>
-              ) : null}
               {showDiscount ? (
                 <span
                   className={cn(
@@ -198,22 +177,13 @@ export function FounderLaunchPricingCard({
                 </span>
               </p>
               <p className="mt-1 text-center text-sm font-semibold text-foreground/85">
-                {isPreOrder ? (
-                  <>
-                    <span className="num">{copy.accessStartsLabel(accessDateLabel)}</span>
-                    <span className="text-muted-foreground"> · </span>
-                  </>
-                ) : null}
                 <span className="num">{durationLabel}</span>
               </p>
-              {isPreOrder ? (
-                <p className="mt-1 text-center text-xs font-medium text-amber-800 dark:text-amber-300">
-                  {copy.accessNote}
-                </p>
-              ) : null}
+              <p className="mt-1 text-center text-xs font-medium text-amber-800 dark:text-amber-300">
+                {copy.accessNote}
+              </p>
             </div>
 
-            {/* Primary CTA high on the card for mobile */}
             <Button
               type="button"
               size="lg"
@@ -237,7 +207,6 @@ export function FounderLaunchPricingCard({
             {scarcity}
           </p>
 
-          {/* Features collapsed by default to keep height short */}
           <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
             <ul className="space-y-2.5">
               {visibleFeatures.map((feature) => (

@@ -1,6 +1,6 @@
 import type { UiLocale } from "@/src/lib/ui-locale";
 
-/** Dashboard Founder offer: user facing copy must not include -, -, or  - . */
+/** Dashboard VIP offer copy for unpaid players (Founder window closed). */
 export interface FounderDashboardOfferCopy {
   readonly alert: (remainingSeats: number) => string;
   readonly headline: string;
@@ -11,11 +11,8 @@ export interface FounderDashboardOfferCopy {
   readonly trust: string;
   readonly saveLabel: string;
   readonly tierOpen: (tierLabel: string) => string;
-  /** Urgency line above the timer: "price will rise to X after this" */
   readonly countdownLabel: (nextPrice: number) => string;
-  /** Sub-hour critical variant */
   readonly countdownCritical: (nextPrice: number) => string;
-  /** Shown once the window has expired */
   readonly countdownExpired: string;
 }
 
@@ -24,17 +21,16 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
   FounderDashboardOfferCopy
 > = {
   bn: {
-    alert: (remainingSeats) =>
-      `আজীবন অ্যাক্সেস 159 টাকায়। আর ${remainingSeats} টি সিট বাকি।`,
-    headline: "এখনই আজীবন অ্যাক্সেস লক করুন",
-    priceHint: "প্রথম 100 জন Founder এর জন্য",
-    seatsLeft: (left, _capacity, tierLabel) =>
-      `আর ${left} টি ${tierLabel} সিট বাকি`,
-    seatsFilled: (filled, capacity) => `${filled} / ${capacity}`,
-    cta: "159 টাকায় আজীবন অ্যাক্সেস নিন",
-    trust: "bKash · একবার পেমেন্ট · আজীবন",
+    alert: () =>
+      "VIP অ্যাক্সেস 490 টাকায়। রেগুলার 1590 টাকা।",
+    headline: "এখনই VIP হিসেবে যোগ দিন",
+    priceHint: "1 মাসের পূর্ণ অ্যাক্সেস · পেমেন্ট ভেরিফাই হলে সাথে সাথে",
+    seatsLeft: () => "বিশেষ VIP অফার চলছে",
+    seatsFilled: () => "",
+    cta: "490 টাকায় VIP অ্যাক্সেস নিন",
+    trust: "bKash · 1 মাস · ভেরিফাইর পর অ্যাক্সেস",
     saveLabel: "বাঁচবে",
-    tierOpen: (tierLabel) => `${tierLabel} খোলা`,
+    tierOpen: () => "VIP অফার",
     countdownLabel: (nextPrice) =>
       `এই অফার শেষ হলে মূল্য হবে ${nextPrice} টাকা`,
     countdownCritical: (nextPrice) =>
@@ -42,17 +38,16 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
     countdownExpired: "অফারের সময় শেষ হয়েছে",
   },
   en: {
-    alert: (remainingSeats) =>
-      `Lifetime access for 159 BDT. Only ${remainingSeats} seats left.`,
-    headline: "Lock lifetime access today",
-    priceHint: "For the first 100 Founders",
-    seatsLeft: (left, _capacity, tierLabel) =>
-      `${left} ${tierLabel} seats left`,
-    seatsFilled: (filled, capacity) => `${filled} / ${capacity}`,
-    cta: "Get lifetime for 159 BDT",
-    trust: "bKash · Pay once · Lifetime",
+    alert: () =>
+      "VIP access for 490 BDT. Regular price 1590 BDT.",
+    headline: "Join as VIP now",
+    priceHint: "1 month full access · starts after payment verification",
+    seatsLeft: () => "Special VIP offer is live",
+    seatsFilled: () => "",
+    cta: "Take VIP access for 490 BDT",
+    trust: "bKash · 1 month · access after verify",
     saveLabel: "Save",
-    tierOpen: (tierLabel) => `${tierLabel} open`,
+    tierOpen: () => "VIP offer",
     countdownLabel: (nextPrice) =>
       `Price rises to ${nextPrice} BDT when this ends`,
     countdownCritical: (nextPrice) =>
@@ -61,12 +56,5 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
   },
 };
 
-/**
- * Next price after the Founder window closes.
- * We deliberately keep this as a stepped test value  -  not the final 1590  - 
- * so you can A/B the urgency anchor.
- *
- * Update this constant to control what the timer shows as the "after" price.
- * Phase 1 test: 490 BDT → Phase 2: 790 BDT → Phase 3: 1590 BDT
- */
-export const COUNTDOWN_NEXT_PRICE_BDT = 490;
+/** Anchor shown if a legacy founder countdown still renders. */
+export const COUNTDOWN_NEXT_PRICE_BDT = 1590;

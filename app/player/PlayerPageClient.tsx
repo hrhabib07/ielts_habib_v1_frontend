@@ -10,6 +10,8 @@ import {
 import { CampMapView } from "@/src/components/player/CampMapView";
 import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
 import { FounderVipClaimCard } from "@/src/components/home/FounderVipClaimCard";
+import { SeasonalOfferHomeCard } from "@/src/components/home/SeasonalOfferHomeCard";
+import { isFoundingMemberWindowOpen } from "@/src/lib/foundingMember";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
@@ -151,12 +153,16 @@ export default function PlayerPageClient() {
     <div>
       <div className="mx-auto max-w-lg px-4 pt-4 sm:max-w-2xl">
         {showFounderOffer ? (
-          <FounderVipClaimCard
-            tiers={founderTiers}
-            deadlineIso={founderDeadline}
-            className="mb-2"
-            href="/checkout"
-          />
+          isFoundingMemberWindowOpen() ? (
+            <FounderVipClaimCard
+              tiers={founderTiers}
+              deadlineIso={founderDeadline}
+              className="mb-2"
+              href="/checkout"
+            />
+          ) : (
+            <SeasonalOfferHomeCard className="mb-2" />
+          )
         ) : (
           <UsernameClaimBanner />
         )}

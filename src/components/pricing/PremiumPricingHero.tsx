@@ -123,7 +123,7 @@ export function PremiumPricingHero({
           {foundingWindowOpen && (
             <p className="mt-4 text-sm text-muted-foreground">
               <BadgeCheck className="mr-1 inline h-4 w-4 text-primary" />
-              Founder bundle before 1 August 2026 (regular {PREMIUM_LIST_PRICE_BDT} BDT)
+              Special VIP offer (regular {PREMIUM_LIST_PRICE_BDT} BDT)
             </p>
           )}
         </div>

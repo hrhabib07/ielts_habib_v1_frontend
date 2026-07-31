@@ -6,17 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Lock, Moon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
-import { getMyMissionOneFeedback } from "@/src/lib/api/missionOneFeedback";
+import { getMyMissionEndFeedback } from "@/src/lib/api/missionEndFeedback";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { resolveStageKindLabel } from "@/src/lib/player-stage-utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
 import { PlayerSubscriptionGate } from "@/src/components/player/PlayerSubscriptionGate";
-import {
-  MissionOneFeedbackModal,
-  MISSION_ONE_CHECKOUT_HREF,
-} from "@/src/components/player/MissionOneFeedbackModal";
-import { MISSION_ONE_FEEDBACK_STORAGE_KEY } from "@/src/lib/mission-one-feedback";
+import { MissionEndFeedbackModal } from "@/src/components/player/MissionEndFeedbackModal";
+import { missionEndFeedbackStorageKey } from "@/src/lib/mission-end-feedback";
 import { MissionRoadmapCelebration } from "@/src/components/player/MissionRoadmapCelebration";
 import { MasterPathModal } from "@/src/components/player/MasterPathModal";
 import {
@@ -60,6 +57,7 @@ export function MissionHubView({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [showCompleteBanner, setShowCompleteBanner] = useState(justCompleted);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackDone, setFeedbackDone] = useState(false);
   const [roadmapOpen, setRoadmapOpen] = useState(justCompleted);
   const [roadmapSeen, setRoadmapSeen] = useState(false);
 
@@ -68,24 +66,36 @@ export function MissionHubView({ slug }: { slug: string }) {
     router.replace(`/player/missions/${slug}`, { scroll: false });
   }, [searchParams, router, slug]);
 
-  // Mission 01 feedback is asked only after the roadmap celebration is dismissed.
+  // Celebration first on complete. Feedback stays available after celebration exits,
+  // and also when the learner revisits a completed mission later.
   const feedbackGateOpen =
-    !roadmapOpen && (roadmapSeen || (mission != null && mission.status !== "completed"));
+    !roadmapOpen &&
+    mission?.status === "completed" &&
+    (!justCompleted || roadmapSeen);
 
   useEffect(() => {
-    if (slug !== FREE_MISSION_SLUG || !justCompleted || !feedbackGateOpen) return;
+    if (!feedbackGateOpen || feedbackDone) return;
 
     let cancelled = false;
+    const key = missionEndFeedbackStorageKey(slug);
     try {
-      const local = localStorage.getItem(MISSION_ONE_FEEDBACK_STORAGE_KEY);
-      if (local === "completed" || local === "skipped") return;
+      if (localStorage.getItem(key) === "completed") {
+        setFeedbackDone(true);
+        return;
+      }
+      // Same-session "later" only suppresses auto-open; manual CTA still works.
+      if (sessionStorage.getItem(key) === "skipped") return;
     } catch {
       /* continue */
     }
 
-    getMyMissionOneFeedback()
+    getMyMissionEndFeedback(slug)
       .then((existing) => {
-        if (cancelled || existing) return;
+        if (cancelled) return;
+        if (existing?.status === "completed") {
+          setFeedbackDone(true);
+          return;
+        }
         setFeedbackOpen(true);
       })
       .catch(() => {
@@ -95,7 +105,7 @@ export function MissionHubView({ slug }: { slug: string }) {
     return () => {
       cancelled = true;
     };
-  }, [slug, justCompleted, feedbackGateOpen]);
+  }, [slug, feedbackGateOpen, feedbackDone]);
 
   useEffect(() => {
     let cancelled = false;
@@ -191,14 +201,19 @@ export function MissionHubView({ slug }: { slug: string }) {
 
   return (
     <div className={cn("mx-auto max-w-lg px-4 py-8", locale === "bn" && "font-bengali")}>
-      <MissionOneFeedbackModal
+      <MissionEndFeedbackModal
         isOpen={feedbackOpen}
-        onClose={() => setFeedbackOpen(false)}
-        onComplete={() => {
-          /* persistence handled inside modal; keep open for thanks state */
-        }}
-        onBuyNow={() => {
-          router.push(MISSION_ONE_CHECKOUT_HREF);
+        missionSlug={slug}
+        missionTitle={mission.title}
+        onClose={() => {
+          setFeedbackOpen(false);
+          try {
+            if (localStorage.getItem(missionEndFeedbackStorageKey(slug)) === "completed") {
+              setFeedbackDone(true);
+            }
+          } catch {
+            /* ignore */
+          }
         }}
       />
 
@@ -306,6 +321,17 @@ export function MissionHubView({ slug }: { slug: string }) {
       {!locked &&
         (mission.status === "completed" ? (
           <div className="mt-8 space-y-3">
+            {!feedbackDone ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                size="lg"
+                onClick={() => setFeedbackOpen(true)}
+              >
+                {locale === "bn" ? "ফিডব্যাক দিন" : "Give feedback"}
+              </Button>
+            ) : null}
             {mission.campRest?.active ? (
               <div className="flex items-start gap-3 rounded-2xl border border-amber-500/35 bg-amber-500/10 px-4 py-3.5 text-left">
                 <Moon className="mt-0.5 h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden />

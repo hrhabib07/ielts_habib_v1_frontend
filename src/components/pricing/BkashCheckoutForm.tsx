@@ -424,7 +424,11 @@ export function BkashCheckoutForm({
               <p className="mt-2 text-center text-xs font-medium text-amber-800 dark:text-amber-300">
                 {copy.preOrderNote}
               </p>
-            ) : null}
+            ) : (
+              <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
+                {copy.preOrderNote}
+              </p>
+            )}
           </div>
         </div>
 

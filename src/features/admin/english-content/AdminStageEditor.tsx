@@ -102,6 +102,39 @@ function VideoStageForm({
   );
 }
 
+/** Shown to students after they answer · stored on the question as explanationEn / explanationBn. */
+function ExplanationFields({
+  question,
+  onChange,
+}: {
+  question: EvalQuestion;
+  onChange: (q: EvalQuestion) => void;
+}) {
+  return (
+    <div className="space-y-3 rounded-lg border border-border/60 bg-muted/10 p-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Explanation (shown after answer)
+      </p>
+      <FieldGroup label="Explanation (English)" hint="Students see this when their UI language is English.">
+        <Textarea
+          rows={3}
+          value={String(question.explanationEn ?? "")}
+          onChange={(e) => onChange({ ...question, explanationEn: e.target.value })}
+          placeholder="Why this answer is correct…"
+        />
+      </FieldGroup>
+      <FieldGroup label="Explanation (Bangla)" hint="Students see this when their UI language is Bangla.">
+        <Textarea
+          rows={3}
+          value={String(question.explanationBn ?? "")}
+          onChange={(e) => onChange({ ...question, explanationBn: e.target.value })}
+          placeholder="এই উত্তর কেন সঠিক…"
+        />
+      </FieldGroup>
+    </div>
+  );
+}
+
 function OptionsEditor({
   options,
   correctAnswer,
@@ -196,6 +229,7 @@ function McqQuestionCard({
         correctAnswer={String(question.correctAnswer ?? "")}
         onChange={(opts, correct) => onChange({ ...question, options: opts, correctAnswer: correct })}
       />
+      <ExplanationFields question={question} onChange={onChange} />
     </Card>
   );
 }
@@ -247,6 +281,7 @@ function CompoundQuestionCard({
           />
         </div>
       ))}
+      <ExplanationFields question={question} onChange={onChange} />
     </Card>
   );
 }
@@ -443,6 +478,12 @@ function EvaluationStageForm({
                   </Button>
                 ))}
               </div>
+              <ExplanationFields
+                question={q}
+                onChange={(next) =>
+                  setQuestions(questions.map((item, idx) => (idx === i ? next : item)))
+                }
+              />
             </Card>
           ))}
           <Button type="button" variant="outline" size="sm" className="gap-2" onClick={addQuestion}>
@@ -498,6 +539,12 @@ function EvaluationStageForm({
                   placeholder="They eat mangoes."
                 />
               </FieldGroup>
+              <ExplanationFields
+                question={q}
+                onChange={(next) =>
+                  setQuestions(questions.map((item, idx) => (idx === i ? next : item)))
+                }
+              />
             </Card>
           ))}
           <Button type="button" variant="outline" size="sm" className="gap-2" onClick={addQuestion}>
@@ -565,6 +612,12 @@ function EvaluationStageForm({
                   }
                 />
               </FieldGroup>
+              <ExplanationFields
+                question={q}
+                onChange={(next) =>
+                  setQuestions(questions.map((item, idx) => (idx === i ? next : item)))
+                }
+              />
             </Card>
           ))}
           <Button type="button" variant="outline" size="sm" className="gap-2" onClick={addQuestion}>

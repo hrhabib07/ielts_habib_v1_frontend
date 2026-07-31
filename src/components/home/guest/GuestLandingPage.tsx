@@ -63,14 +63,14 @@ function GuestLandingSurface() {
       </div>
       <div className="relative">
         <GuestLandingHero />
-        <div id="founding-members">
-          <GuestFoundersWallSection />
-        </div>
         <GuestProblemHook />
         <GuestTransformGrid />
         <GuestCampsRoadmap />
         <GuestGameEngine />
         <GuestCompareFounder />
+        <div id="founding-members">
+          <GuestFoundersWallSection />
+        </div>
         <GuestLandingFaq />
         <GuestLandingFooter />
       </div>

@@ -47,12 +47,12 @@ export interface CheckoutCopy {
 
 export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
   bn: {
-    statusLock: "Founder মূল্য এখনো লক করা যায়",
+    statusLock: "VIP মূল্য এখনো লক করা যায়",
     statusNext: "bKash Send Money → TrxID সাবমিট",
     urgencyEyebrow: "শেষ ধাপ",
-    urgencyTitle: "পেমেন্ট সম্পন্ন না হলে আপনার স্পট যাবে না!",
+    urgencyTitle: "পেমেন্ট সম্পন্ন না হলে অ্যাক্সেস চালু হবে না!",
     urgencyBody:
-      "মূল্য এখনই লক করতে bKash এ Send Money করুন। প্রথম 100 জনের Founder নম্বর ও ব্যাজ সীমিত। পেমেন্ট ভেরিফাই হলে আপনার জায়গা নিশ্চিত।",
+      "মূল্য লক করতে bKash এ Send Money করুন। পেমেন্ট ভেরিফাই হলে সাথে সাথে 1 মাসের VIP অ্যাক্সেস চালু হবে।",
     amountLabel: "পাঠাতে হবে",
     regularPriceLabel: "রেগুলার মূল্য",
     founderPriceLabel: "আজকের মূল্য",
@@ -80,7 +80,7 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     perkFounder: "অফার ভেরিফাইয়ের পর লক",
     trustBadge:
       "Gamlish: বাংলাদেশের প্রথম ও একমাত্র গ্যামিফাইড ইংলিশ লার্নিং প্ল্যাটফর্ম",
-    preOrderNote: "এটি আগস্ট প্রি-অর্ডার। অ্যাক্সেস 1 আগস্ট থেকে শুরু হবে।",
+    preOrderNote: "পেমেন্ট ভেরিফাই হলে অ্যাক্সেস সাথে সাথে চালু হবে।",
     invalidSender: "সঠিক bKash নম্বর দিন (01XXXXXXXXX)",
     invalidTrx: "সঠিক Transaction ID (TrxID) দিন। bKash SMS বা অ্যাপে পাবেন।",
     missingBkash: "bKash নম্বর এখনো সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।",
@@ -91,16 +91,16 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
       "নেটওয়ার্ক সমস্যা হয়েছে। আবার সাবমিট করুন  -  একই TrxID দুবার চার্জ হবে না।",
     sessionPreparing: "সেশন প্রস্তুত হচ্ছে… এক মুহূর্ত অপেক্ষা করুন",
     pageEyebrow: "Checkout",
-    pageTitle: "আপনার Founder স্পট লক করুন",
+    pageTitle: "VIP অ্যাক্সেস লক করুন",
     pageSub: "bKash Send Money করুন, তারপর TrxID সাবমিট করুন",
   },
   en: {
-    statusLock: "Founder price can still be locked",
+    statusLock: "VIP price can still be locked",
     statusNext: "bKash Send Money → submit TrxID",
     urgencyEyebrow: "Final step",
-    urgencyTitle: "Your spot is not secured until payment is submitted!",
+    urgencyTitle: "Access does not start until payment is submitted!",
     urgencyBody:
-      "Send Money on bKash now to lock this price. Founder numbers and badges are limited to the first 100. Your seat is confirmed after verification.",
+      "Send Money on bKash now to lock this price. After verification, your 1-month VIP access starts right away.",
     amountLabel: "Amount to send",
     regularPriceLabel: "Regular price",
     founderPriceLabel: "Today's price",
@@ -128,7 +128,7 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     perkFounder: "Offer locks after verify",
     trustBadge:
       "Gamlish: Bangladesh's first and only gamified English learning platform",
-    preOrderNote: "This is an August pre-order. Access starts on 1 August.",
+    preOrderNote: "Access starts as soon as payment is verified.",
     invalidSender: "Enter a valid bKash number (01XXXXXXXXX)",
     invalidTrx: "Enter a valid Transaction ID (TrxID) from your bKash SMS or app.",
     missingBkash: "bKash number is not set yet. Please contact admin.",
@@ -139,7 +139,7 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
       "Network error. Please submit again  -  the same TrxID will not charge you twice.",
     sessionPreparing: "Preparing your session… please wait a moment",
     pageEyebrow: "Checkout",
-    pageTitle: "Lock your Founder spot",
+    pageTitle: "Lock your VIP access",
     pageSub: "Send Money on bKash, then submit your TrxID",
   },
 };

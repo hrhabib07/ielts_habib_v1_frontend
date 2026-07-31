@@ -51,7 +51,7 @@ export function PaymentConfirmationContent() {
       event: "purchase",
       ecommerce: {
         currency: "BDT",
-        items: [{ item_name: "Gamlish Founder Pre-order" }],
+        items: [{ item_name: "Gamlish VIP Access" }],
       },
       payment_status: "PENDING",
       is_test: isTest,
@@ -115,12 +115,11 @@ export function PaymentConfirmationContent() {
         </p>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
           স্ট্যাটাস: <strong>Pending Verification</strong>। অ্যাডমিন ভেরিফাই
-          করলে প্রি-অর্ডার কনফার্ম হবে। প্রিমিয়াম অ্যাক্সেস সাথে সাথে চালু হবে না।
+          করলে 1 মাসের VIP অ্যাক্সেস সাথে সাথে চালু হবে।
         </p>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-          Status: <strong>Pending Verification</strong>. Your pre-order will be
-          confirmed after admin review. Premium access does not start
-          immediately.
+          Status: <strong>Pending Verification</strong>. After admin review,
+          your 1-month VIP access starts right away.
         </p>
       </div>
 

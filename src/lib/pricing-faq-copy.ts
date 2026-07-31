@@ -29,7 +29,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "No. This is a pre-order for the August subscription. After we verify your payment, your premium access starts on 1 August for one month. You cannot play paid missions before that date.",
+            "Yes. After we verify your bKash payment, your 1-month VIP access starts right away. You can play all paid missions as soon as verification is complete.",
         },
       },
       {
@@ -37,15 +37,15 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "This is a pre-launch offer. After 1 August, discounts will be limited and the regular price will be much higher. Buying now locks today's special price.",
+            "A special VIP offer is running. Regular price is 1590 BDT per month. Right now you can enroll for 490 BDT and lock today's price.",
         },
       },
       {
-        question: "What do I get for free before August?",
+        question: "What can I try for free?",
         answer: {
           kind: "plain",
           text:
-            "Mission 01 stays free. You can create an account, play the first mission, and learn how Gamlish works while you wait for August access.",
+            "Mission 01 stays free. You can create an account, play the first mission, and learn how Gamlish works before you take VIP access.",
         },
       },
       {
@@ -70,7 +70,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "না। এটি আগস্ট সাবস্ক্রিপশনের প্রি-অর্ডার। পেমেন্ট ভেরিফাই হওয়ার পর 1 আগস্ট থেকে এক মাসের প্রিমিয়াম অ্যাক্সেস শুরু হবে। তার আগে পেইড মিশন খেলা যাবে না।",
+            "হ্যাঁ। bKash পেমেন্ট ভেরিফাই হওয়ার পর 1 মাসের VIP অ্যাক্সেস সাথে সাথে চালু হবে। ভেরিফিকেশন শেষ হলেই পেইড মিশন খেলতে পারবেন।",
         },
       },
       {
@@ -78,15 +78,15 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "এটি লঞ্চের আগের বিশেষ অফার। 1 আগস্টের পর ছাড় সীমিত হবে এবং রেগুলার মূল্য অনেক বেড়ে যাবে। এখন কিনলে আজকের বিশেষ মূল্য লক হয়ে যায়।",
+            "এখন বিশেষ VIP অফার চলছে। রেগুলার মূল্য 1590 টাকা/মাস। এখন মাত্র 490 টাকায় এনরোল করে আজকের মূল্য লক করতে পারেন।",
         },
       },
       {
-        question: "আগস্টের আগে ফ্রিতে কী পাব?",
+        question: "ফ্রিতে কী ট্রাই করতে পারব?",
         answer: {
           kind: "plain",
           text:
-            "Mission 01 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলতে পারবেন, আর আগস্ট অ্যাক্সেসের জন্য অপেক্ষা করতে করতে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
+            "Mission 01 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলতে পারবেন, VIP অ্যাক্সেস নেওয়ার আগে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
         },
       },
       {

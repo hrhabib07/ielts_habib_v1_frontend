@@ -54,17 +54,17 @@ export function GuestLandingFooter() {
           </div>
         </div>
 
-        <div className="mt-8 rounded-2xl border-2 border-amber-500/40 bg-amber-400/10 p-5 text-center dark:border-amber-400/35">
-          <p className="text-base font-black text-amber-950 dark:text-amber-100">
+        <div className="mt-8 rounded-2xl border border-border/60 bg-muted/40 p-5 text-center">
+          <p className="text-base font-bold text-foreground">
             {locale === "bn"
-              ? "কোর্স কিনতে চান? এখানে প্রি-অর্ডার করুন"
-              : "Want the full course? Pre-order here"}
+              ? "পূর্ণ কোর্স চান? VIP অ্যাক্সেস নিন"
+              : "Want the full course? Take VIP access"}
           </p>
           <Link
             href="/pricing"
-            className="mt-3 inline-flex h-12 w-full max-w-xs items-center justify-center rounded-2xl bg-amber-500 px-6 text-base font-bold text-amber-950 shadow-lg shadow-amber-500/25 transition-colors hover:bg-amber-400"
+            className="mt-3 inline-flex h-12 w-full max-w-xs items-center justify-center rounded-2xl bg-foreground px-6 text-base font-bold text-background transition-opacity hover:opacity-90"
           >
-            {locale === "bn" ? "এখনই প্রি-অর্ডার করুন" : "Pre-order Now"}
+            {locale === "bn" ? "VIP হিসেবে যোগ দিন" : "Join as VIP"}
           </Link>
         </div>
 
