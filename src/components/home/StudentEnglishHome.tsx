@@ -17,6 +17,8 @@ import {
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
 import { FounderVipClaimCard } from "@/src/components/home/FounderVipClaimCard";
+import { SeasonalOfferHomeCard } from "@/src/components/home/SeasonalOfferHomeCard";
+import { isFoundingMemberWindowOpen } from "@/src/lib/foundingMember";
 import { CampMapView } from "@/src/components/player/CampMapView";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
 import { cn } from "@/lib/utils";
@@ -129,12 +131,16 @@ export function StudentEnglishHome() {
 
       <div className="relative mx-auto max-w-2xl px-4 pt-5 sm:px-6 sm:pt-6">
         {showFounderOffer ? (
-          <FounderVipClaimCard
-            tiers={founderTiers}
-            deadlineIso={founderDeadline}
-            className="mb-5"
-            href="/checkout"
-          />
+          isFoundingMemberWindowOpen() ? (
+            <FounderVipClaimCard
+              tiers={founderTiers}
+              deadlineIso={founderDeadline}
+              className="mb-5"
+              href="/checkout"
+            />
+          ) : (
+            <SeasonalOfferHomeCard className="mb-5" />
+          )
         ) : (
           <UsernameClaimBanner className="mb-4" />
         )}

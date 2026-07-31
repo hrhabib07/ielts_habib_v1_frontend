@@ -394,7 +394,7 @@ export default function QuestionSetsPage() {
             <p className="mb-3 text-sm font-medium">
               Meta fields
               <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                – specific to{" "}
+                - specific to{" "}
                 {QUESTION_TYPE_CONFIG[form.questionType]?.label ?? form.questionType}
               </span>
             </p>
@@ -475,7 +475,7 @@ export default function QuestionSetsPage() {
                     <p className="truncate font-medium">{s.instruction}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {passageTitle(pid)} · P{s.passageNumber} · Order{" "}
-                      {s.order} · Q{s.startQuestionNumber}–
+                      {s.order} · Q{s.startQuestionNumber}-
                       {s.endQuestionNumber} ·{" "}
                       {QUESTION_TYPE_CONFIG[
                         s.questionType as CreateQuestionSetPayload["questionType"]

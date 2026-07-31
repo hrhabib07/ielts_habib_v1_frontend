@@ -344,7 +344,7 @@ function QuestionBlock({
 export interface ReadingMockTestViewProps {
   levelId: string;
   content: GroupTestContentForStudent;
-  /** When set, submits a single sequential final (1–3) instead of a bundled group test. */
+  /** When set, submits a single sequential final (1-3) instead of a bundled group test. */
   sequentialFinalIndex?: 1 | 2 | 3;
   /** When set, submits as a full-mock practice test step (3 passages). */
   practiceStepId?: string;
@@ -363,7 +363,7 @@ export interface ReadingMockTestViewProps {
     bestBandScore?: number;
     isNewBest?: boolean;
     levelComplete?: boolean;
-    /** Sequential final (1–3) only */
+    /** Sequential final (1-3) only */
     finalTestIndex?: 1 | 2 | 3;
     nextFinalTestIndex?: 1 | 2 | 3 | null;
     isMastered?: boolean;
@@ -990,7 +990,7 @@ export const ReadingMockTestView = forwardRef<
                   return (
                     <section key={gIdx} className="mb-8">
                       <h3 className="mb-3 border-l-4 border-[#1e3a8a] pl-3 text-lg font-bold text-[#0f172a] dark:text-slate-100">
-                        Questions {group.startQuestionNumber}–{group.endQuestionNumber}: {typeLabel}
+                        Questions {group.startQuestionNumber}-{group.endQuestionNumber}: {typeLabel}
                       </h3>
                       {group.instruction && (
                         <div
@@ -1042,7 +1042,7 @@ export const ReadingMockTestView = forwardRef<
             ) : (
               <>
                 <h3 className="mb-3 border-l-4 border-[#1e3a8a] pl-3 text-sm font-bold uppercase tracking-wide text-[#0f172a] dark:text-slate-100">
-                  Questions {miniTest.questions.length > 0 && `(1–${miniTest.questions.length})`}
+                  Questions {miniTest.questions.length > 0 && `(1-${miniTest.questions.length})`}
                 </h3>
                 {miniTest.questions.map((q) => (
                   <div key={q._id} id={`q-${q._id}`} className="scroll-mt-4">

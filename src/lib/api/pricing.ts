@@ -11,6 +11,16 @@ export interface PublicPricing {
   bkashNumber: string;
   paymentInstructions: string;
   features: string[];
+  offerCohort?:
+    | "founder"
+    | "first_week"
+    | "first_month"
+    | "standard_q4"
+    | "standard";
+  offerLabelEn?: string;
+  offerLabelBn?: string;
+  offerEndsAt?: string | null;
+  badgeKind?: "first_week" | "first_month" | null;
 }
 
 export interface AdminPricing extends PublicPricing {

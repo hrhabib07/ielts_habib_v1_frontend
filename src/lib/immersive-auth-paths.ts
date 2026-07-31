@@ -13,3 +13,12 @@ export function isImmersiveAuthPath(pathname: string | null): boolean {
     pathname === "/reset-password"
   );
 }
+
+/**
+ * Mission stage player · a focused, full-screen learning screen that renders its own
+ * compact header, so the site nav and footer stay out of the way.
+ */
+export function isImmersivePlayerPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return /^\/player\/missions\/[^/]+\/stage\/[^/]+\/?$/.test(pathname);
+}

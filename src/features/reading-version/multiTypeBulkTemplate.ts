@@ -2,7 +2,7 @@ import type { ReadingQuestionType, QuestionSetMeta } from "@/src/lib/api/instruc
 import { QUESTION_TYPE_CONFIG } from "@/src/lib/questionTypeConfig";
 import type { BulkPassageQuestionSetInput } from "./strictReadingBulkUtils";
 
-/** L4 = Passage 1 (2–3 types); L15–L16 = multi-type single passage. L17–L20 = full mock (see FULL_MOCK_LEVEL_ORDERS). */
+/** L4 = Passage 1 (2-3 types); L15-L16 = multi-type single passage. L17-L20 = full mock (see FULL_MOCK_LEVEL_ORDERS). */
 export const MULTI_TYPE_LEVEL_ORDERS = new Set([4, 15, 16]);
 
 /** Levels that use 3-passage full IELTS Reading mock practice tests (~60 min each). */
@@ -30,10 +30,10 @@ const ALL_QUESTION_TYPES: ReadingQuestionType[] = [
 const INSTRUCTIONS_L2 = `L2 FILL IN THE BLANKS: Use exactly 3 question types in order: SENTENCE_COMPLETION, NOTE_COMPLETION, TABLE_COMPLETION.
 expectedTotalQuestions: 13 or 14. Three questionGroups  -  one per completion type.`;
 
-const INSTRUCTIONS_L4 = `L4 PASSAGE 1: Use 2–3 question types from: TRUE_FALSE_NOT_GIVEN, SENTENCE_COMPLETION, SHORT_ANSWER.
+const INSTRUCTIONS_L4 = `L4 PASSAGE 1: Use 2-3 question types from: TRUE_FALSE_NOT_GIVEN, SENTENCE_COMPLETION, SHORT_ANSWER.
 expectedTotalQuestions: 13 or 14. At least 2 questionGroups.`;
 
-const INSTRUCTIONS_PRACTICE = `MULTI-TYPE LEVELS: L4 = Passage 1 (TFNG + Sentence Completion + Short Answer); L15–L19 = Passage 2 / Passage 3 / full test / master.
+const INSTRUCTIONS_PRACTICE = `MULTI-TYPE LEVELS: L4 = Passage 1 (TFNG + Sentence Completion + Short Answer); L15-L19 = Passage 2 / Passage 3 / full test / master.
 
 HOW TO BUILD A VALID passageQuestionSet
 1) Choose ANY number of questionGroups >= 2 (e.g. 2, 3, 4, 5…). There is no fixed mix.
@@ -45,7 +45,7 @@ HOW TO BUILD A VALID passageQuestionSet
 REFERENCE CATALOG
 __questionTypeCatalog lists every allowed ReadingQuestionType with one minimal sampleQuestion. It is NOT a real questionGroup block  -  do not paste it as-is into questionGroups.`;
 
-const INSTRUCTIONS_GROUP = `MULTI-TYPE LEVELS (L15–L19): Group test = 3 mini tests (passage 1 / 2 / 3).
+const INSTRUCTIONS_GROUP = `MULTI-TYPE LEVELS (L15-L19): Group test = 3 mini tests (passage 1 / 2 / 3).
 
 Each miniTests[i].passageQuestionSet follows the same rules as practice bulk:
 - At least 2 questionGroups per mini test
@@ -89,7 +89,7 @@ function catalogHowToCustomize(qt: ReadingQuestionType): string {
     TABLE_COMPLETION: `${common} layout TABLE, string[][] cells; put {{gapN}} inside cell strings + blanks[].`,
     FLOW_CHART_COMPLETION:
       `${common} For bulk, simplest is TEXT stem with {{gap1}} + blanks[] (flow-chart layout is optional in advanced UIs).`,
-    SHORT_ANSWER: `${common} meta.wordLimit required (1–5). correctAnswer is short text from passage.`,
+    SHORT_ANSWER: `${common} meta.wordLimit required (1-5). correctAnswer is short text from passage.`,
     DIAGRAM_LABEL_COMPLETION: `${common} meta.labels (>=1). Question may use layout DIAGRAM or TEXT + correctAnswer for bulk.`,
   };
   return byType[qt] ?? common;
@@ -110,7 +110,7 @@ function sampleQuestionForType(qt: ReadingQuestionType): Record<string, unknown>
     case "MCQ_MULTIPLE":
       return {
         ...base,
-        questionBody: { layout: "TEXT", content: "12–13. Which TWO statements…?" },
+        questionBody: { layout: "TEXT", content: "12-13. Which TWO statements…?" },
         options: ["A. …", "B. …", "C. …", "D. …", "E. …"],
         correctAnswer: ["A", "D"],
       };
@@ -268,7 +268,7 @@ function passageQuestionSet13(): BulkPassageQuestionSetInput {
         instruction: "Which paragraph contains the following information?",
         meta: { paragraphCount: 4 },
         questions: repeatQuestions(4, 1, (n) => ({
-          questionBody: { layout: "TEXT", content: `Question ${n}  -  which paragraph (A–D)?` },
+          questionBody: { layout: "TEXT", content: `Question ${n}  -  which paragraph (A-D)?` },
           correctAnswer: "A",
           explanation: `Explanation for Q${n}.`,
         })) as BulkPassageQuestionSetInput["questionGroups"][0]["questions"],
@@ -420,7 +420,7 @@ function l2FillBlanksQuestionSet(): BulkPassageQuestionSetInput {
   };
 }
 
-/** L4 Passage 1: TFNG + Sentence Completion + Short Answer (2–3 types) */
+/** L4 Passage 1: TFNG + Sentence Completion + Short Answer (2-3 types) */
 function passage1QuestionSet(): BulkPassageQuestionSetInput {
   return {
     difficulty: "MEDIUM",

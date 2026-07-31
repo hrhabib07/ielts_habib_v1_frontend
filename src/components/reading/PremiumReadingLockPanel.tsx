@@ -36,11 +36,11 @@ const MESSAGES: Record<
   step_content: {
     en: {
       eyebrow: "Free trial complete",
-      body: "Thank you for your progress. You've finished everything included in the free trial. The rest of this level and Levels 3–21 are for subscribed learners. Upgrade to keep your momentum and complete the structured path to your desired band.",
+      body: "Thank you for your progress. You've finished everything included in the free trial. The rest of this level and Levels 3-21 are for subscribed learners. Upgrade to keep your momentum and complete the structured path to your desired band.",
     },
     bn: {
       eyebrow: "ফ্রি ট্রায়াল সম্পন্ন",
-      body: "আপনার অগ্রগতির জন্য ধন্যবাদ। ফ্রি ট্রায়ালে যা ছিল তা আপনি শেষ করেছেন। এই লেভেলের বাকি অংশ ও লেভেল 3–21 সাবস্ক্রাইবড শিক্ষার্থীদের জন্য। আপনার লক্ষ্য ব্যান্ডের পথে গতি ধরে রাখতে আপগ্রেড করুন।",
+      body: "আপনার অগ্রগতির জন্য ধন্যবাদ। ফ্রি ট্রায়ালে যা ছিল তা আপনি শেষ করেছেন। এই লেভেলের বাকি অংশ ও লেভেল 3-21 সাবস্ক্রাইবড শিক্ষার্থীদের জন্য। আপনার লক্ষ্য ব্যান্ডের পথে গতি ধরে রাখতে আপগ্রেড করুন।",
     },
   },
   final_evaluation: {

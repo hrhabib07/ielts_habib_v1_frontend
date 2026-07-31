@@ -502,7 +502,7 @@ export function ReadingLevelsListClient() {
         if (existing) return existing._id;
         const slug = `level-${lvl.order}-${generateSlug(lvl.labelName) || `skill-${lvl.order}`}`;
         const created = await createLevel({
-          title: `Level ${lvl.order - 1} – ${lvl.labelName}`,
+          title: `Level ${lvl.order - 1} - ${lvl.labelName}`,
           slug,
           order: lvl.order,
           levelType: "SKILL",

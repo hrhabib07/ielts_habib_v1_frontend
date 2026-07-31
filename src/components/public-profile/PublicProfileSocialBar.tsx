@@ -80,14 +80,14 @@ export function PublicProfileSocialBar({
               <Eye className="h-4 w-4 text-muted-foreground" aria-hidden />
               <span className="text-muted-foreground">Total Views</span>
               <span className="font-bold tabular-nums text-foreground">
-                {localSocial.totalViews.toLocaleString()}
+                {localSocial.totalViews.toLocaleString("en-US")}
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Heart className="h-4 w-4 text-rose-500" aria-hidden />
               <span className="text-muted-foreground">Total Likes</span>
               <span className="font-bold tabular-nums text-foreground">
-                {localSocial.totalLikes.toLocaleString()}
+                {localSocial.totalLikes.toLocaleString("en-US")}
               </span>
             </div>
           </div>

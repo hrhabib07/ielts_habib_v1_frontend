@@ -60,13 +60,13 @@ type BulkL0EmbeddedItem = {
   sentenceLocator?: SentenceLocatorContentAuthoringPreview;
 };
 
-/** L15–L19: Passage 2 / 3 / full test / master (and extended pool)  -  multi-type passage question sets */
+/** L15-L19: Passage 2 / 3 / full test / master (and extended pool)  -  multi-type passage question sets */
 const MULTI_TYPE_LEVELS = MULTI_TYPE_LEVEL_ORDERS;
 
 const L0_BULK_INSTRUCTIONS =
   "Level 0 (student Level 1  -  Reading Fundamentals) uses Gamlish scanning practice tests. " +
   "Each practiceTests[] entry must include gamlishScanning (see docs/GAMLISH_SCANNING_PRACTICE_TEST_JSON.md). " +
-  "Legacy sentenceLocator is still accepted. You can list 1–3 tests per bulk run. " +
+  "Legacy sentenceLocator is still accepted. You can list 1-3 tests per bulk run. " +
   "Omit order on each entry to append at the end of the version (recommended when tests already exist).";
 
 function validateL0EmbeddedBulk(payload: unknown): { practiceTests: BulkL0EmbeddedItem[] } {
@@ -485,7 +485,7 @@ export function PracticeTestsBulkCreateCard(props: {
                 ? "Level 2: Sentence Completion only, 8 questions per passage. Use {{gap1}} in content and blanks[] for each question."
                 : MULTI_TYPE_LEVELS.has(levelOrder)
                   ? `Multi-type levels ${[...MULTI_TYPE_LEVELS].sort((a, b) => a - b).join(", ")}: use ≥2 question groups per passage set; totals must be 13 or 14. Load template includes __instructions and __questionTypeCatalog (reference only  -  stripped before API calls).`
-                  : "Load template is one complete passage + passage question set. Duplicate the object inside practiceTests (and renumber) to create 2–3 tests in one run."}
+                  : "Load template is one complete passage + passage question set. Duplicate the object inside practiceTests (and renumber) to create 2-3 tests in one run."}
           </p>
         </CardContent>
       )}

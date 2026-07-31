@@ -403,7 +403,7 @@ export default function PassageQuestionSetsPage() {
                       className="rounded"
                     />
                     <span className="text-sm">
-                      Q{qs.startQuestionNumber}–{qs.endQuestionNumber}:{" "}
+                      Q{qs.startQuestionNumber}-{qs.endQuestionNumber}:{" "}
                       {qs.instruction.slice(0, 50)}…
                     </span>
                   </label>

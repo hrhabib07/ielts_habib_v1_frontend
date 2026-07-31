@@ -21,7 +21,7 @@ export function formatJourneyProgressLabel(actualPct: number): string {
   return `${Math.round(p)}%`;
 }
 
-/** True journey % (0–100) for progress bars and plane position. */
+/** True journey % (0-100) for progress bars and plane position. */
 export function journeyToVisualProgressPercent(actualPct: number): number {
   const p = Math.min(100, Math.max(0, actualPct));
   if (p <= 0) return 0;
@@ -50,7 +50,7 @@ export interface JourneyProgressSource {
 }
 
 export interface ResolvedJourneyProgress {
-  /** Passed-level % (0–100). */
+  /** Passed-level % (0-100). */
   actualPct: number;
   /** Same as actualPct  -  kept for callers that expect a separate visual field. */
   visualPct: number;

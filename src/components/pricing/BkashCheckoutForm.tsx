@@ -302,7 +302,7 @@ export function BkashCheckoutForm({
       if (apiMessage && /too many subscription requests/i.test(apiMessage)) {
         setError(
           locale === "bn"
-            ? "অনেকবার চেষ্টা করা হয়েছে। ১৫ মিনিট পর আবার সাবমিট করুন।"
+            ? "অনেকবার চেষ্টা করা হয়েছে। 15 মিনিট পর আবার সাবমিট করুন।"
             : apiMessage,
         );
         return;

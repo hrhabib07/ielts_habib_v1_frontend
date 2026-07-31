@@ -320,7 +320,7 @@ export default function MetaFormFields({ questionType, meta, onChange }: Props) 
             items={m.headings ?? []}
             minItems={2}
             onChange={(headings) => onChange({ ...m, headings })}
-            placeholder="e.g. Heading i – The rise of automation"
+            placeholder="e.g. Heading i - The rise of automation"
           />
           <div className="flex items-center gap-2">
             <input
@@ -346,7 +346,7 @@ export default function MetaFormFields({ questionType, meta, onChange }: Props) 
             Number of paragraphs
           </Label>
           <p className="mt-1 text-xs text-muted-foreground">
-            How many paragraphs from the passage are valid answer options (e.g. 5 → A–E).
+            How many paragraphs from the passage are valid answer options (e.g. 5 → A-E).
             Labels are auto-generated from the passage.
           </p>
           <Input

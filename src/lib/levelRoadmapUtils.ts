@@ -37,7 +37,7 @@ export function isSequentialFinalPracticeStep(step: LevelDetailStep): boolean {
   return isSequentialFinalTitle(step.title);
 }
 
-/** Remove hub-style FINAL_EVALUATION when Final 1–3 already exist as practice tests. */
+/** Remove hub-style FINAL_EVALUATION when Final 1-3 already exist as practice tests. */
 export function stripRedundantFinalEvaluationSteps(steps: LevelDetailStep[]): LevelDetailStep[] {
   const hasEmbeddedFinals = steps.some(isSequentialFinalPracticeStep);
   if (!hasEmbeddedFinals) return steps;

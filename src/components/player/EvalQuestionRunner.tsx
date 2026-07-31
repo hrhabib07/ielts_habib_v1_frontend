@@ -2,10 +2,14 @@
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
+  Check,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
+  Info,
   Lightbulb,
   Loader2,
+  X,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,6 +39,103 @@ type EvalQuestion = Record<string, unknown>;
 
 /** Duolingo-style pause so feedback is readable, then auto-advance. */
 const AUTO_ADVANCE_MS = 1500;
+const AUTO_ADVANCE_WITH_EXPLANATION_MS = 4500;
+
+const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F"] as const;
+
+/** Quoted target words + blanks + verb trios get their own visual treatment. */
+const PROMPT_TOKEN_RE = /[“"']([^“”"']+)[”"']|(_{3,})|((?:\S+\s*→\s*)+\S+)/g;
+
+function TargetChip({ children }: { children: ReactNode }) {
+  return (
+    <span className="mx-0.5 inline-flex items-baseline rounded-lg bg-primary/12 px-2 py-0.5 text-[1.15em] font-black tracking-tight text-primary ring-1 ring-inset ring-primary/25 dark:bg-primary/20 dark:text-primary-foreground">
+      {children}
+    </span>
+  );
+}
+
+function TrioChips({ text }: { text: string }) {
+  const tokens = text.split("→").map((token) => token.trim());
+  return (
+    <span className="mx-0.5 inline-flex flex-wrap items-center gap-1.5 align-middle">
+      {tokens.map((token, idx) => (
+        <span key={`${token}-${idx}`} className="inline-flex items-center gap-1.5">
+          {idx > 0 ? <span className="text-primary/50">→</span> : null}
+          <span
+            className={cn(
+              "inline-flex items-center rounded-lg px-2 py-0.5 text-[0.95em] font-black tracking-tight",
+              /^_{3,}$/.test(token)
+                ? "border-2 border-dashed border-primary/50 bg-primary/5 px-4 text-primary"
+                : "bg-muted text-foreground ring-1 ring-inset ring-border",
+            )}
+          >
+            {/^_{3,}$/.test(token) ? "?" : token}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/** Renders a prompt with the important word(s) visually highlighted. */
+function PromptRich({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) {
+  const nodes: ReactNode[] = [];
+  const regex = new RegExp(PROMPT_TOKEN_RE.source, "g");
+  let lastIndex = 0;
+  let match: RegExpExecArray | null = regex.exec(text);
+  let key = 0;
+
+  while (match) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    if (match[1]) {
+      nodes.push(<TargetChip key={`c-${key}`}>{match[1]}</TargetChip>);
+    } else if (match[2]) {
+      nodes.push(
+        <span
+          key={`g-${key}`}
+          className="mx-1 inline-block min-w-[3.5rem] rounded-md border-2 border-dashed border-primary/50 bg-primary/5 px-2 text-center align-middle font-black text-primary"
+        >
+          ?
+        </span>,
+      );
+    } else if (match[3]) {
+      nodes.push(<TrioChips key={`t-${key}`} text={match[3]} />);
+    }
+    lastIndex = match.index + match[0].length;
+    key += 1;
+    match = regex.exec(text);
+  }
+
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+
+  return (
+    <p
+      className={cn(
+        "text-balance text-xl font-bold leading-snug text-foreground sm:text-2xl",
+        className,
+      )}
+    >
+      {nodes}
+    </p>
+  );
+}
+
+/** The sentence a question is about · shown as a focused stage panel. */
+function QuestionSentence({ text }: { text: string }) {
+  return (
+    <p className="rounded-2xl border border-border/70 bg-gradient-to-br from-muted/60 via-background to-primary/[0.04] px-4 py-3.5 text-lg font-bold leading-relaxed text-foreground shadow-sm sm:text-xl dark:from-card dark:to-primary/10">
+      {text}
+    </p>
+  );
+}
 
 /**
  * True when every rearrange tile is present in the answer string (order = student order).
@@ -118,12 +219,12 @@ function feedbackMessage(
 function ThinkAgainPrompt({ copy }: { copy: PlayerUiCopy["eval"] }) {
   return (
     <div
-      className="flex items-start gap-3 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300"
+      className="flex items-start gap-3 rounded-2xl border-2 border-primary/40 bg-primary/10 px-4 py-3.5 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300"
       role="status"
     >
       <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
       <div className="space-y-1 text-left">
-        <p className="font-semibold text-foreground">{copy.thinkAgainTitle}</p>
+        <p className="text-base font-bold text-foreground">{copy.thinkAgainTitle}</p>
         <p className="font-medium leading-relaxed text-muted-foreground">{copy.thinkAgainBody}</p>
       </div>
     </div>
@@ -139,12 +240,18 @@ function QuestionFeedback({
   stageType: string;
   copy: PlayerUiCopy["eval"];
 }) {
+  const { locale } = useUiLocale();
+  const explanation =
+    locale === "bn"
+      ? (result.explanationBn ?? result.explanationEn)
+      : (result.explanationEn ?? result.explanationBn);
+
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-xl border px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300",
+        "flex items-start gap-3 rounded-2xl border-2 px-4 py-3.5 text-sm animate-in fade-in slide-in-from-bottom-2 duration-300",
         result.correct
-          ? "border-primary/40 bg-primary/10 text-primary"
+          ? "border-emerald-500/50 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
           : "border-destructive/40 bg-destructive/10 text-destructive",
       )}
       role="status"
@@ -154,7 +261,14 @@ function QuestionFeedback({
       ) : (
         <XCircle className="mt-0.5 h-5 w-5 shrink-0" />
       )}
-      <p className="font-medium leading-relaxed">{feedbackMessage(result, stageType, copy)}</p>
+      <div className="space-y-2 text-left">
+        <p className="text-base font-bold leading-relaxed">
+          {feedbackMessage(result, stageType, copy)}
+        </p>
+        {explanation ? (
+          <p className="leading-relaxed text-foreground/90">{explanation}</p>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -186,17 +300,16 @@ function McqOptions({
   const correctOption = thinkAgain ? undefined : checkResult?.correctAnswer;
 
   return (
-    <div className="space-y-3">
-      {question.sentence ? (
-        <p className="text-base font-semibold text-foreground">{String(question.sentence)}</p>
-      ) : null}
-      <p className="text-sm font-medium text-foreground">{promptText}</p>
-      <div className="space-y-2">
-        {options.map((opt) => {
+    <div className="space-y-4">
+      {question.sentence ? <QuestionSentence text={String(question.sentence)} /> : null}
+      <PromptRich text={promptText} />
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        {options.map((opt, index) => {
           const isSelected = value === opt;
           const isCorrectOption = locked && !thinkAgain && correctOption === opt;
           const isWrongPick = locked && !thinkAgain && isSelected && !checkResult?.correct;
           const isThinkAgainPick = thinkAgain && isSelected;
+          const letter = OPTION_LETTERS[index] ?? String(index + 1);
 
           return (
             <button
@@ -205,17 +318,42 @@ function McqOptions({
               disabled={disabled || locked}
               onClick={() => onChange(opt)}
               className={cn(
-                "flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors",
-                isCorrectOption && "border-primary bg-primary/5 dark:bg-primary/10",
+                "group flex w-full items-center gap-3 rounded-2xl border-2 bg-card px-3.5 py-3.5 text-left transition-all duration-150",
+                "hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm disabled:hover:translate-y-0 disabled:hover:shadow-none",
+                isCorrectOption && "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40",
                 isWrongPick && "border-red-500 bg-red-50 dark:bg-red-950/40",
                 isThinkAgainPick && "border-primary/60 bg-primary/5 dark:bg-primary/10",
-                !locked && !thinkAgain && isSelected && "border-primary bg-primary/10 dark:bg-primary/15",
-                !locked && !isSelected && "border-border hover:border-primary/40",
-                locked && !isCorrectOption && !isWrongPick && "opacity-60",
+                !locked &&
+                  !thinkAgain &&
+                  isSelected &&
+                  "border-primary bg-primary/10 shadow-md ring-2 ring-primary/25 dark:bg-primary/15",
+                !locked && !isSelected && "border-border/80 hover:border-primary/50",
+                locked && !isCorrectOption && !isWrongPick && "opacity-50",
               )}
             >
-              <span className="font-semibold text-primary">{opt.charAt(0).toUpperCase()}</span>
-              <span>{opt}</span>
+              <span
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black transition-colors",
+                  isCorrectOption
+                    ? "bg-emerald-500 text-white"
+                    : isWrongPick
+                      ? "bg-red-500 text-white"
+                      : isSelected
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground group-hover:bg-primary/15 group-hover:text-primary",
+                )}
+              >
+                {isCorrectOption ? (
+                  <Check className="h-5 w-5 stroke-[3]" />
+                ) : isWrongPick ? (
+                  <X className="h-5 w-5 stroke-[3]" />
+                ) : (
+                  letter
+                )}
+              </span>
+              <span className="min-w-0 flex-1 text-base font-semibold leading-snug text-foreground">
+                {opt}
+              </span>
             </button>
           );
         })}
@@ -279,36 +417,42 @@ function EvaluationQuestionBody({
 
   if (stageType === "correct_incorrect") {
     return (
-      <div className="space-y-3">
-        <p className="text-base font-semibold">{String(question.sentence)}</p>
-        <p className="text-sm font-medium text-foreground">{copy.correctIncorrectPrompt}</p>
-        <div className="flex gap-2">
+      <div className="space-y-4">
+        <QuestionSentence text={String(question.sentence)} />
+        <PromptRich text={copy.correctIncorrectPrompt} />
+        <div className="grid grid-cols-2 gap-3">
           {(
             [
-              { value: "correct", label: copy.correct },
-              { value: "incorrect", label: copy.incorrect },
+              { value: "correct", label: copy.correct, Icon: Check },
+              { value: "incorrect", label: copy.incorrect, Icon: X },
             ] as const
-          ).map(({ value, label }) => {
+          ).map(({ value, label, Icon }) => {
             const isSelected = answers[id] === value;
             const isCorrectOption =
               locked && !thinkAgain && checkResult?.correctAnswer === value;
             const isWrongPick =
               locked && !thinkAgain && isSelected && !checkResult?.correct;
             return (
-              <Button
+              <button
                 key={value}
                 type="button"
-                variant={isSelected && !locked ? "default" : "outline"}
                 disabled={disabled || locked}
                 onClick={() => touchAnswer((prev) => ({ ...prev, [id]: value }))}
                 className={cn(
-                  "flex-1",
-                  isCorrectOption && "border-primary bg-primary hover:bg-primary",
-                  isWrongPick && "border-red-500 bg-red-600 hover:bg-red-600 text-white",
+                  "flex items-center justify-center gap-2 rounded-2xl border-2 bg-card px-4 py-4 text-base font-bold transition-all duration-150",
+                  "hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:hover:translate-y-0 disabled:hover:shadow-none",
+                  isCorrectOption && "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
+                  isWrongPick && "border-red-500 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300",
+                  !locked &&
+                    isSelected &&
+                    "border-primary bg-primary/10 text-primary shadow-md ring-2 ring-primary/25",
+                  !locked && !isSelected && "border-border/80 text-foreground hover:border-primary/50",
+                  locked && !isCorrectOption && !isWrongPick && "opacity-50",
                 )}
               >
+                <Icon className="h-5 w-5 stroke-[3]" />
                 {label}
-              </Button>
+              </button>
             );
           })}
         </div>
@@ -368,7 +512,7 @@ function EvaluationQuestionBody({
               {gapParts.banglaHint}
             </p>
           ) : null}
-          <p className="text-sm font-medium text-foreground">{copy.gapFillPrompt}</p>
+          <PromptRich text={copy.gapFillPrompt} className="text-lg sm:text-xl" />
           {Array.isArray(question.hints) && (question.hints as string[]).length > 0 ? (
             <ul className="list-inside list-disc text-xs text-muted-foreground">
               {(question.hints as string[]).map((h) => (
@@ -421,11 +565,11 @@ function EvaluationQuestionBody({
     }
 
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         {question.sourceText ? (
-          <p className="text-base font-semibold">{String(question.sourceText)}</p>
+          <QuestionSentence text={String(question.sourceText)} />
         ) : null}
-        <p className="text-sm font-medium text-foreground">{copy.translatePrompt}</p>
+        <PromptRich text={copy.translatePrompt} className="text-lg sm:text-xl" />
         {Array.isArray(question.hints) ? (
           <ul className="list-inside list-disc text-xs text-muted-foreground">
             {(question.hints as string[]).map((h) => (
@@ -439,8 +583,9 @@ function EvaluationQuestionBody({
           value={(answers[id] as string) ?? ""}
           onChange={(e) => touchAnswer((prev) => ({ ...prev, [id]: e.target.value }))}
           className={cn(
-            "w-full rounded-lg border bg-background px-3 py-2.5 text-sm",
-            locked && checkResult?.correct && "border-primary",
+            "w-full rounded-2xl border-2 border-border/80 bg-background px-4 py-3.5 text-base font-semibold outline-none transition",
+            "focus:border-primary focus:ring-4 focus:ring-primary/15",
+            locked && checkResult?.correct && "border-emerald-500",
             locked && !checkResult?.correct && "border-destructive",
           )}
           placeholder={copy.answerPlaceholder}
@@ -455,23 +600,22 @@ function EvaluationQuestionBody({
       options: string[];
     }>;
     return (
-      <div className="space-y-4">
-        <p className="text-base font-semibold">{String(question.sentence)}</p>
+      <div className="space-y-5">
+        <QuestionSentence text={String(question.sentence)} />
         {parts.map((part, idx) => (
           <div key={`${id}-${idx}`}>
-            <p className="mb-2 text-sm font-medium text-foreground">
-              {localizeEvalPrompt(part.prompt, locale)}
-            </p>
+            <PromptRich
+              text={localizeEvalPrompt(part.prompt, locale)}
+              className="mb-2.5 text-lg sm:text-xl"
+            />
             <div className="flex flex-wrap gap-2">
               {part.options.map((opt) => {
                 const current = (answers[id] as Record<string, string> | undefined) ?? {};
                 const selected = current[String(idx)] === opt;
                 return (
-                  <Button
+                  <button
                     key={opt}
                     type="button"
-                    size="sm"
-                    variant={selected ? "default" : "outline"}
                     disabled={disabled || locked}
                     onClick={() =>
                       touchAnswer((prev) => ({
@@ -482,9 +626,17 @@ function EvaluationQuestionBody({
                         },
                       }))
                     }
+                    className={cn(
+                      "rounded-xl border-2 px-4 py-2.5 text-sm font-bold transition-all duration-150",
+                      "hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0 disabled:hover:translate-y-0 disabled:hover:shadow-none",
+                      selected
+                        ? "border-primary bg-primary/10 text-primary ring-2 ring-primary/25"
+                        : "border-border/80 bg-card text-foreground hover:border-primary/50",
+                      locked && !selected && "opacity-50",
+                    )}
                   >
                     {opt}
-                  </Button>
+                  </button>
                 );
               })}
             </div>
@@ -616,8 +768,10 @@ export function EvalQuestionRunner({
         });
         setCheckResults((prev) => ({ ...prev, [questionId]: result }));
         void playCorrectEvalSfx();
-        // Instant dopamine  -  micro XP burst on every correct answer.
-        emitXpGain(1, "answer");
+        const xp = result.xpAwarded ?? 0;
+        if (xp > 0) {
+          emitXpGain(xp, "answer");
+        }
         return;
       }
 
@@ -668,9 +822,14 @@ export function EvalQuestionRunner({
     if (retryMode && currentCheck && !currentCheck.correct) return;
     if (continueLockRef.current === questionId) return;
 
+    const hasExplanation = Boolean(
+      currentCheck?.explanationBn || currentCheck?.explanationEn,
+    );
+    const delay = hasExplanation ? AUTO_ADVANCE_WITH_EXPLANATION_MS : AUTO_ADVANCE_MS;
+
     const timer = window.setTimeout(() => {
       handleContinueRef.current();
-    }, AUTO_ADVANCE_MS);
+    }, delay);
 
     return () => window.clearTimeout(timer);
   }, [isChecked, checking, questionId, retryMode, currentCheck]);
@@ -713,20 +872,36 @@ export function EvalQuestionRunner({
     >
       {total > 0 && currentQuestion ? (
         <>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-              <span>{copy.questionLabel}</span>
-              <span>{Math.round(progressPct)}%</span>
+          <div className="flex items-center gap-3 sm:block sm:space-y-2">
+            <div className="flex shrink-0 items-center justify-between gap-2 sm:w-full">
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary sm:rounded-full sm:bg-primary/10 sm:px-3 sm:py-1">
+                <span className="hidden sm:inline">{copy.questionLabel}</span>
+                <span className="tabular-nums">
+                  {currentIndex + 1}/{total}
+                </span>
+              </span>
+              <span className="hidden text-xs font-bold tabular-nums text-muted-foreground sm:inline">
+                {Math.round(progressPct)}%
+              </span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${progressPct}%` }}
-              />
+            <div className="flex flex-1 gap-1">
+              {questions.map((q, idx) => (
+                <span
+                  key={String(q.id)}
+                  className={cn(
+                    "h-1.5 flex-1 rounded-full transition-colors duration-300 sm:h-2",
+                    idx < currentIndex
+                      ? "bg-emerald-500"
+                      : idx === currentIndex
+                        ? "bg-primary"
+                        : "bg-muted",
+                  )}
+                />
+              ))}
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5">
+          <div className="rounded-3xl border-2 border-border/60 bg-gradient-to-b from-card to-muted/20 p-4 shadow-lg shadow-primary/[0.04] sm:p-7 dark:to-background">
             <EvaluationQuestionBody
               question={currentQuestion}
               stageType={stageType}
@@ -758,7 +933,7 @@ export function EvalQuestionRunner({
                 type="submit"
                 size="lg"
                 disabled={!currentAnswered || checking || submitting}
-                className="min-w-[160px] gap-2"
+                className="h-12 w-full gap-2 rounded-xl text-base font-bold shadow-md transition-transform hover:-translate-y-0.5 disabled:hover:translate-y-0 sm:w-auto sm:min-w-[180px]"
               >
                 {checking ? (
                   <>
@@ -780,7 +955,7 @@ export function EvalQuestionRunner({
                   advanceLockedForId === questionId ||
                   (retryMode && currentCheck != null && !currentCheck.correct)
                 }
-                className="min-w-[160px] gap-2"
+                className="h-12 w-full gap-2 rounded-xl text-base font-bold shadow-md transition-transform hover:-translate-y-0.5 disabled:hover:translate-y-0 sm:w-auto sm:min-w-[180px]"
               >
                 {submitting ? (
                   <>
@@ -832,7 +1007,7 @@ export function EvalQuestionRunner({
   );
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {retryMode ? (
         <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-foreground">
           {copy.retryBanner}
@@ -840,7 +1015,7 @@ export function EvalQuestionRunner({
       ) : null}
 
       {instruction && !retryMode ? (
-        <p className="text-sm leading-relaxed text-muted-foreground">{instruction}</p>
+        <InstructionNote text={instruction} />
       ) : null}
 
       {aside ? (
@@ -851,6 +1026,41 @@ export function EvalQuestionRunner({
       ) : (
         questionPanel
       )}
+    </div>
+  );
+}
+
+/** Task hint: one tappable line on phones, always open from `sm` up. */
+function InstructionNote({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="rounded-xl border border-border/50 bg-muted/40 dark:bg-card/60">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-2 px-3 py-2 text-left sm:hidden"
+      >
+        <Info className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <span
+          className={cn(
+            "min-w-0 flex-1 text-xs leading-snug text-muted-foreground",
+            !open && "truncate",
+          )}
+        >
+          {text}
+        </span>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+      <p className="hidden px-4 py-3 text-sm font-medium leading-relaxed text-muted-foreground sm:block">
+        {text}
+      </p>
     </div>
   );
 }

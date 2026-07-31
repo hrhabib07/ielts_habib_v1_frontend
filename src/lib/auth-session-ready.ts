@@ -11,7 +11,7 @@ import {
  * 2) Next.js httpOnly cookie (RSC / checkout page access)
  *
  * Phone OTP previously raced past sync and let users open checkout before the
- * cookie was ready  -  submit failed for ~30–90s, then worked on retry.
+ * cookie was ready  -  submit failed for ~30-90s, then worked on retry.
  */
 export async function persistSessionToken(token: string): Promise<{
   ok: boolean;

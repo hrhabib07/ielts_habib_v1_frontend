@@ -15,12 +15,12 @@ export interface ReadingPathZone {
   glowClass: string;
 }
 
-/** Curriculum zones: 21 levels (display 1–21). All themes use Gamlish accent/primary. */
+/** Curriculum zones: 21 levels (display 1-21). All themes use Gamlish accent/primary. */
 export const READING_PATH_ZONES: ReadingPathZone[] = [
   {
     id: "beginner",
     title: "Beginner Zone",
-    subtitle: "Foundation & core skills · Levels 1–7",
+    subtitle: "Foundation & core skills · Levels 1-7",
     levelOrders: [0, 1, 2, 3, 4, 5, 6],
     zoneLabel: "Zone 1",
     glowClass: "bg-accent/12 dark:bg-accent/18",
@@ -28,7 +28,7 @@ export const READING_PATH_ZONES: ReadingPathZone[] = [
   {
     id: "intermediate",
     title: "Intermediate Zone",
-    subtitle: "Skill integration · Levels 8–14",
+    subtitle: "Skill integration · Levels 8-14",
     levelOrders: [7, 8, 9, 10, 11, 12, 13],
     zoneLabel: "Zone 2",
     glowClass: "bg-accent/16 dark:bg-accent/22",
@@ -36,7 +36,7 @@ export const READING_PATH_ZONES: ReadingPathZone[] = [
   {
     id: "advanced",
     title: "Advanced Zone",
-    subtitle: "Mastery & full mocks · Levels 15–21",
+    subtitle: "Mastery & full mocks · Levels 15-21",
     levelOrders: [14, 15, 16, 17, 18, 19, 20],
     zoneLabel: "Zone 3",
     glowClass: "bg-accent/20 dark:bg-accent/28",

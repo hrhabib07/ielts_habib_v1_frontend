@@ -26,7 +26,7 @@ export function MonitoringPagination({
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       <p className="text-sm text-muted-foreground">
-        Showing {from}–{to} of {total}
+        Showing {from}-{to} of {total}
       </p>
       <div className="flex items-center gap-1">
         <Button

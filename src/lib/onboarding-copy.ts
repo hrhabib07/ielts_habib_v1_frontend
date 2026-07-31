@@ -1,4 +1,4 @@
-﻿import type { UiLocale } from "@/src/lib/ui-locale";
+import type { UiLocale } from "@/src/lib/ui-locale";
 
 export type OnboardingMigrationReasonKey = "missingUsername" | "sameCountries";
 
@@ -98,7 +98,7 @@ function buildOnboardingCopy(locale: UiLocale): OnboardingCopy {
       errNicknameSave: "ডাকনাম সেভ হয়নি। আবার চেষ্টা করুন।",
       errGeneric: "কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।",
       errUsernameFormat:
-        "ইউজারনেম বাছুন (3–30 অক্ষর: ইংরেজি অক্ষর, সংখ্যা, আন্ডারস্কোর)।",
+        "ইউজারনেম বাছুন (3-30 অক্ষর: ইংরেজি অক্ষর, সংখ্যা, আন্ডারস্কোর)।",
       errDisplayName: "ডিসপ্লে নাম আবশ্যক।",
       errUsernameTaken: "এই ইউজারনেম ইতিমধ্যে নেওয়া। অন্যটা বাছুন।",
       errUsernameChecking: "ইউজারনেম চেক হচ্ছে। একটু পর আবার চেষ্টা করুন।",
@@ -157,7 +157,7 @@ function buildOnboardingCopy(locale: UiLocale): OnboardingCopy {
     errNicknameSave: "Could not save your nickname. Please try again.",
     errGeneric: "Something went wrong. Please try again.",
     errUsernameFormat:
-      "Choose a username (3–30 characters: letters, numbers, underscores).",
+      "Choose a username (3-30 characters: letters, numbers, underscores).",
     errDisplayName: "Display name is required.",
     errUsernameTaken: "This username is already taken. Please choose another.",
     errUsernameChecking:

@@ -66,15 +66,15 @@ export function buildInstructionFromWordLimit(
 export const QUESTION_TYPE_CONFIG: Record<QuestionTypeKey, QuestionTypeConfig> =
   {
     MCQ_SINGLE: {
-      label: "MCQ – Single Answer",
+      label: "MCQ - Single Answer",
       defaultInstruction:
         "Choose the correct letter, A, B, C or D.",
       defaultMeta: { options: ["A", "B", "C", "D"], selectCount: 1 },
     },
     MCQ_MULTIPLE: {
-      label: "MCQ – Multiple Answers",
+      label: "MCQ - Multiple Answers",
       defaultInstruction:
-        "Choose TWO correct letters from A–E.",
+        "Choose TWO correct letters from A-E.",
       defaultMeta: { options: ["A", "B", "C", "D", "E"], selectCount: 2 },
     },
     TRUE_FALSE_NOT_GIVEN: {
@@ -104,7 +104,7 @@ NOT GIVEN	if it is impossible to say what the writer thinks about this`,
     MATCHING_HEADINGS: {
       label: "Matching Headings",
       defaultInstruction:
-        "The reading passage has several sections A–H. Choose the correct heading for each section from the list of headings below.",
+        "The reading passage has several sections A-H. Choose the correct heading for each section from the list of headings below.",
       defaultMeta: {
         headings: ["Heading i", "Heading ii", "Heading iii"],
         allowReuse: false,
@@ -113,19 +113,19 @@ NOT GIVEN	if it is impossible to say what the writer thinks about this`,
     MATCHING_INFORMATION: {
       label: "Matching Information",
       defaultInstruction:
-        "The reading passage has several paragraphs A–E. Which paragraph contains the following information?",
+        "The reading passage has several paragraphs A-E. Which paragraph contains the following information?",
       defaultMeta: { paragraphCount: 4 },
     },
     MATCHING_FEATURES: {
       label: "Matching Features",
       defaultInstruction:
-        "Match each statement with the correct category A–C from the box below.",
+        "Match each statement with the correct category A-C from the box below.",
       defaultMeta: { features: ["Feature A", "Feature B", "Feature C"] },
     },
     MATCHING_SENTENCE_ENDINGS: {
       label: "Matching Sentence Endings",
       defaultInstruction:
-        "Complete each sentence with the correct ending A–F from the box below.",
+        "Complete each sentence with the correct ending A-F from the box below.",
       defaultMeta: { endings: ["Ending A", "Ending B", "Ending C"] },
     },
     SENTENCE_COMPLETION: {

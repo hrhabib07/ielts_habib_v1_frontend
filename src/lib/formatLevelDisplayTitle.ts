@@ -3,7 +3,7 @@ import type { Level } from "@/src/lib/api/levels";
 /** Strip repeated leading "Level N" prefixes (colon, dash, em dash, etc.). */
 export function stripLevelTitlePrefix(title: string): string {
   let name = title.trim();
-  const prefixRe = /^Level\s+\d+\s*(?:[ - –\-:]\s*|\s+)/i;
+  const prefixRe = /^Level\s+\d+\s*(?:[ - -\-:]\s*|\s+)/i;
   while (prefixRe.test(name)) {
     name = name.replace(prefixRe, "").trim();
   }

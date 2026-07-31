@@ -399,7 +399,7 @@ export const StepQuizSubmitCard = forwardRef<
               <form onSubmit={handleSubmitManual} className="space-y-3">
                 {isBand ? (
                   <div>
-                    <Label className="text-xs">Band score (0–9)</Label>
+                    <Label className="text-xs">Band score (0-9)</Label>
                     <Input
                       type="number"
                       min={0}
@@ -414,7 +414,7 @@ export const StepQuizSubmitCard = forwardRef<
                   </div>
                 ) : (
                   <div>
-                    <Label className="text-xs">Score % (0–100)</Label>
+                    <Label className="text-xs">Score % (0-100)</Label>
                     <Input
                       type="number"
                       min={0}
@@ -453,7 +453,7 @@ export const StepQuizSubmitCard = forwardRef<
         <form onSubmit={handleSubmitManual} className="space-y-3">
           {isBand ? (
             <div>
-              <Label className="text-sm">Band score (0–9)</Label>
+              <Label className="text-sm">Band score (0-9)</Label>
               <Input
                 type="number"
                 min={0}
@@ -468,7 +468,7 @@ export const StepQuizSubmitCard = forwardRef<
             </div>
           ) : (
             <div>
-              <Label className="text-sm">Score % (0–100)</Label>
+              <Label className="text-sm">Score % (0-100)</Label>
               <Input
                 type="number"
                 min={0}

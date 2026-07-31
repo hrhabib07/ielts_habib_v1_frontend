@@ -28,7 +28,7 @@ export interface ScoreProps {
 
 /** Neutral pipe connects jar mouth → band top (no liquid color yet) */
 const PIPE_CONNECT_S = 0.5;
-/** Colored water runs top → bottom along pipe; starts after connect (0.5s–2s) */
+/** Colored water runs top → bottom along pipe; starts after connect (0.5s-2s) */
 const PIPE_WATER_S = 1.5;
 /** Band fills + jar drains after pipe water completes */
 const POUR_DURATION_S = 5;
@@ -84,7 +84,7 @@ interface StreamGeom {
   /** Path start (lip) */
   readonly mouthX: number;
   readonly mouthY: number;
-  /** Corner: horizontal meets vertical (L-shape); for smooth cubic, control-2–like anchor */
+  /** Corner: horizontal meets vertical (L-shape); for smooth cubic, control-2-like anchor */
   readonly elbowX: number;
   readonly elbowY: number;
   /** Top of band text ink (for socket / flange) */
@@ -92,7 +92,7 @@ interface StreamGeom {
   /** Pipe end Y (slightly below ink top. overlaps stroked outline) */
   readonly bandTopX: number;
   readonly bandTopY: number;
-  /** Smooth cubic path (non–plumb-only): droplets / normals use this */
+  /** Smooth cubic path (non-plumb-only): droplets / normals use this */
   readonly cubic?: StreamGeomCubic;
 }
 
@@ -568,7 +568,7 @@ function JarWithLiquid({
   );
 }
 
-/** Slots 0–1–2 = visible window; slot 3 = next-upcoming (off-screen right until slide). */
+/** Slots 0-1-2 = visible window; slot 3 = next-upcoming (off-screen right until slide). */
 function slotRole(i: number): PositionState["slot"] {
   if (i === 0) return "left";
   if (i === 1) return "center";

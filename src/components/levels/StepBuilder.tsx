@@ -241,7 +241,7 @@ export function StepBuilderAddForm({
               <option value="">Select question set</option>
               {questionSets.map((qs) => (
                 <option key={qs._id} value={qs._id}>
-                  {qs.instruction?.slice(0, 50) ?? qs._id} (Q{qs.startQuestionNumber}–{qs.endQuestionNumber})
+                  {qs.instruction?.slice(0, 50) ?? qs._id} (Q{qs.startQuestionNumber}-{qs.endQuestionNumber})
                 </option>
               ))}
             </select>
@@ -274,7 +274,7 @@ export function StepBuilderAddForm({
             <option value="">Select question set</option>
             {questionSets.map((qs) => (
               <option key={qs._id} value={qs._id}>
-                {qs.instruction?.slice(0, 50) ?? qs._id} (Q{qs.startQuestionNumber}–{qs.endQuestionNumber})
+                {qs.instruction?.slice(0, 50) ?? qs._id} (Q{qs.startQuestionNumber}-{qs.endQuestionNumber})
               </option>
             ))}
           </select>

@@ -1,14 +1,14 @@
 /**
- * Maps level order index (0–18, where 0 = L0) to the correct question type for
+ * Maps level order index (0-18, where 0 = L0) to the correct question type for
  * single-type levels. Used by Practice Test Manager and Group Test Manager bulk create.
  *
  * Level titles (from instructor dashboard):
  * L0: IELTS Reading Basics (quiz = MCQ) | L1: True/False/Not Given | L2: Fill in the Blanks
- * L3: Short Answer | L4: Passage 1 (multi: TFNG + Sentence Completion + Short Answer, 2–3 types)
+ * L3: Short Answer | L4: Passage 1 (multi: TFNG + Sentence Completion + Short Answer, 2-3 types)
  * L5: Vocabulary (foundation/quiz = MCQ) | L6: Summary Completion (no clues)
  * L7: Summary Completion (with clues) | L8: Yes/No/Not Given | L9: MCQ
  * L10: Double MCQ | L11: Matching Sentence Endings | L12: Matching Features/Names
- * L13: Matching Information | L14: Matching Headings | L15–L18: Multi-type (Passage 2/3/Full/Master)
+ * L13: Matching Information | L14: Matching Headings | L15-L18: Multi-type (Passage 2/3/Full/Master)
  */
 import type { ReadingQuestionType } from "@/src/lib/api/instructor";
 
@@ -17,7 +17,7 @@ export const SINGLE_TYPE_QUESTION_TYPE_BY_LEVEL: Record<number, ReadingQuestionT
   1: "TRUE_FALSE_NOT_GIVEN", // L1: Mastering True/False/Not Given
   2: "SENTENCE_COMPLETION", // L2: Fill in the Blanks  -  only Sentence Completion, 8 questions per passage
   3: "SHORT_ANSWER", // L3: Short Answer Questions
-  // 4: multi-type (Passage 1 = TFNG + Sentence Completion + Short Answer, 2–3 groups)
+  // 4: multi-type (Passage 1 = TFNG + Sentence Completion + Short Answer, 2-3 groups)
   5: "MCQ_SINGLE", // L5: Vocabulary (foundation/quiz, multiple choice)
   6: "SUMMARY_COMPLETION", // L6: Summary Completion Without Clues
   7: "SUMMARY_COMPLETION_WITH_CLUES", // L7: Summary Completion (with clues)
@@ -170,7 +170,7 @@ export function resolveLevelTemplateIndex(params: {
   // Prefer parsing from title (what instructors see as "L8"/"Level 8").
   // Covers common formats:
   // - "L8: Yes/No/Not Given"
-  // - "Level 8 – Yes/No/Not Given"
+  // - "Level 8 - Yes/No/Not Given"
   const titleL = title.match(/\bL\s*(\d+)\b/i)?.[1];
   if (titleL != null) return clamp(Number(titleL));
 

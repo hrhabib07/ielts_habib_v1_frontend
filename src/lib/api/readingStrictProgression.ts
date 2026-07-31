@@ -599,7 +599,7 @@ export interface GroupTestQuestionForStudent {
   options?: string[];
 }
 
-/** One question type block (e.g. "Questions 1–7: True/False/Not Given") */
+/** One question type block (e.g. "Questions 1-7: True/False/Not Given") */
 export interface GroupTestQuestionGroup {
   questionType: string;
   startQuestionNumber: number;
@@ -879,7 +879,7 @@ export async function submitAttemptStatementFeedback(
   return { ...unwrap(res), updatedAt: new Date().toISOString() };
 }
 
-/** GET reading target band (4–9). Null if not set yet (required before Level 1). */
+/** GET reading target band (4-9). Null if not set yet (required before Level 1). */
 export async function getReadingTargetBand(): Promise<number | null> {
   const res = await apiClient.get<{
     success: boolean;
@@ -889,7 +889,7 @@ export async function getReadingTargetBand(): Promise<number | null> {
   return data?.readingTargetBand ?? null;
 }
 
-/** POST set reading target band (4–9). Required before entering first skill level. */
+/** POST set reading target band (4-9). Required before entering first skill level. */
 export async function setReadingTargetBand(
   targetBand: number,
 ): Promise<number> {

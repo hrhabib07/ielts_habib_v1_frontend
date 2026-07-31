@@ -721,7 +721,7 @@ export default function QuestionsPage() {
                   <option value="">Select question set…</option>
                   {setsForPassage(bulkPassageId).map((s) => (
                     <option key={s._id} value={s._id}>
-                      Q{s.startQuestionNumber}–{s.endQuestionNumber}: {s.instruction.slice(0, 35)}…
+                      Q{s.startQuestionNumber}-{s.endQuestionNumber}: {s.instruction.slice(0, 35)}…
                     </option>
                   ))}
                 </select>
@@ -829,7 +829,7 @@ export default function QuestionsPage() {
                 <option value="">Select question set…</option>
                 {setsForPassage(form.passageId).map((s) => (
                   <option key={s._id} value={s._id}>
-                    Q{s.startQuestionNumber}–{s.endQuestionNumber}:{" "}
+                    Q{s.startQuestionNumber}-{s.endQuestionNumber}:{" "}
                     {s.instruction.slice(0, 40)}…
                   </option>
                 ))}

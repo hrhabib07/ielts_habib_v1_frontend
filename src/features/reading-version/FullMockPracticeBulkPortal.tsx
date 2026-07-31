@@ -189,7 +189,7 @@ export function FullMockPracticeBulkPortal(props: {
         <div className="min-w-0 space-y-1">
           <CardTitle className="flex items-center gap-2 text-base font-semibold text-stone-900">
             <Sparkles className="h-4 w-4 text-indigo-600" />
-            Full mock practice tests  -  Levels 17–20
+            Full mock practice tests  -  Levels 17-20
           </CardTitle>
           <p className="text-sm text-stone-600">
             Bulk-create complete IELTS Reading mocks (3 passages · ~40 questions · 60 minutes each).

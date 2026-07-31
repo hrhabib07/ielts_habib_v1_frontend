@@ -54,7 +54,7 @@ export interface LevelStep {
   isActive: boolean;
   /** Required when contentType is FULL_TEST. 1 | 2 | 3. */
   miniTestIndex?: 1 | 2 | 3;
-  /** Required when contentType is FULL_TEST. 1–10, full test group. */
+  /** Required when contentType is FULL_TEST. 1-10, full test group. */
   fullTestGroupIndex?: number;
   createdAt?: string;
   updatedAt?: string;
@@ -140,7 +140,7 @@ export interface CreateLevelStepPayload {
   unlockAfterStepId?: string | null;
   /** Required when contentType is FULL_TEST. 1 | 2 | 3. */
   miniTestIndex?: 1 | 2 | 3;
-  /** Required when contentType is FULL_TEST. 1–10. */
+  /** Required when contentType is FULL_TEST. 1-10. */
   fullTestGroupIndex?: number;
 }
 

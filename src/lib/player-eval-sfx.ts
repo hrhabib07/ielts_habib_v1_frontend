@@ -126,3 +126,20 @@ export async function playCelebrateSfx(): Promise<void> {
   playTone(ctx, 1046.5, now + 0.32, 0.22, { type: "sine", volume: 0.08 });
 }
 
+/** Longer festive fanfare for camp graduation. */
+export async function playGraduationCelebrateSfx(): Promise<void> {
+  const ctx = await getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  playTone(ctx, 392.0, now, 0.12, { type: "sine", volume: 0.08 });
+  playTone(ctx, 523.25, now + 0.1, 0.12, { type: "sine", volume: 0.09 });
+  playTone(ctx, 659.25, now + 0.2, 0.14, { type: "triangle", volume: 0.1 });
+  playTone(ctx, 783.99, now + 0.32, 0.16, { type: "sine", volume: 0.11 });
+  playTone(ctx, 1046.5, now + 0.46, 0.2, { type: "triangle", volume: 0.1 });
+  playTone(ctx, 523.25, now + 0.62, 0.28, { type: "sine", volume: 0.07 });
+  playTone(ctx, 659.25, now + 0.62, 0.28, { type: "sine", volume: 0.06 });
+  playTone(ctx, 783.99, now + 0.62, 0.32, { type: "triangle", volume: 0.08 });
+  playTone(ctx, 1046.5, now + 0.72, 0.35, { type: "sine", volume: 0.07 });
+}
+
+

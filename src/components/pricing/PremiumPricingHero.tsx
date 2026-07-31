@@ -105,11 +105,11 @@ export function PremiumPricingHero({
         >
           {scholarshipActive && (
             <p className="mb-1 text-lg font-medium text-muted-foreground line-through">
-              {basePrice.toLocaleString()} BDT
+              {basePrice.toLocaleString("en-US")} BDT
             </p>
           )}
           <p className="text-6xl font-extrabold tracking-tight text-foreground sm:text-7xl">
-            {displayPrice.toLocaleString()}
+            {displayPrice.toLocaleString("en-US")}
             <span className="ml-2 text-2xl font-semibold text-muted-foreground">BDT</span>
           </p>
           {scholarshipActive ? (
@@ -173,7 +173,7 @@ export function PremiumPricingHero({
                 onClick={onPurchase}
               >
                 <Zap className="mr-2 h-4 w-4" />
-                Get full access · {displayPrice.toLocaleString()} BDT
+                Get full access · {displayPrice.toLocaleString("en-US")} BDT
               </Button>
             )
           ) : (

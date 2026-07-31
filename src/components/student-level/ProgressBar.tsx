@@ -1,7 +1,7 @@
 "use client";
 
 interface ProgressBarProps {
-  value: number; // 0–100
+  value: number; // 0-100
   label?: string;
 }
 

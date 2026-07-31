@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
+  BookOpen,
   Check,
   ChevronRight,
   Crown,
   Lock,
+  Moon,
   Play,
   Shield,
   Sparkles,
@@ -92,7 +94,7 @@ function segmentTrailStyle(
 }
 
 function formatDisplayTitle(title: string): string {
-  return title.replace(/\s*[ - –]\s*/g, " · ");
+  return title.replace(/\s*[ - -]\s*/g, " · ");
 }
 
 function missionShortTitle(title: string): string {
@@ -480,6 +482,40 @@ export function CampMapView({
         <p className="rounded-2xl border border-sky-400/30 bg-sky-400/10 px-4 py-3 text-center text-sm font-semibold text-sky-900 dark:text-sky-100">
           {PLAYER_UI.roadmapTapHint}
         </p>
+        {map.campRest?.active ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-500/35 bg-amber-500/10 px-4 py-3.5">
+            <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-200">
+              <Moon className="h-5 w-5" aria-hidden />
+            </span>
+            <div className="min-w-0 text-left">
+              <p className="text-sm font-bold text-foreground">
+                {PLAYER_UI.campRest.mapTitle}
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                {PLAYER_UI.campRest.mapBody(
+                  locale === "bn"
+                    ? (map.campRest.campTitleBn ?? "এই ক্যাম্প")
+                    : (map.campRest.campTitleEn ?? "this camp"),
+                  map.campRest.hoursLeft ?? 24,
+                )}
+              </p>
+            </div>
+          </div>
+        ) : null}
+        <Link
+          href="/player/verb-bag"
+          className="flex items-center gap-3 rounded-2xl border border-sky-400/25 bg-gradient-to-r from-sky-500/10 via-background to-blue-500/10 px-4 py-3 transition hover:border-sky-400/45"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-white shadow-md shadow-sky-500/20">
+            <BookOpen className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block text-sm font-bold text-foreground">Verb Bag</span>
+            <span className="block text-xs text-muted-foreground">
+              Practice unlocked verbs anytime
+            </span>
+          </span>
+        </Link>
         {map.camps.map((camp, index) => (
           <CampZonePath
             key={camp.id}

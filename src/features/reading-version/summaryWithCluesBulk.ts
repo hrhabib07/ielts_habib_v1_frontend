@@ -26,16 +26,16 @@ MULTI-SENTENCE BLOCKS (recommended)
 • blanks[] on that item lists every gap in this block only, with id matching the number inside {{gapN}}.
 
 TYPICAL IELTS SHAPE (7 gaps total)
-• questions[0]: 3 sentences / 3 gaps ({{gap1}}–{{gap3}})
-• questions[1]: 2–3 sentences / 2 gaps ({{gap4}}–{{gap5}})
-• questions[2]: 2–3 sentences / 2 gaps ({{gap6}}–{{gap7}})
+• questions[0]: 3 sentences / 3 gaps ({{gap1}}-{{gap3}})
+• questions[1]: 2-3 sentences / 2 gaps ({{gap4}}-{{gap5}})
+• questions[2]: 2-3 sentences / 2 gaps ({{gap6}}-{{gap7}})
 
 WORD LIMIT
 • meta.wordLimit = max words per gap (often 1 for “ONE WORD ONLY”).
 • Each blank may repeat wordLimit; must stay consistent with instruction text.
 `.trim();
 
-/** Split total gap count into blocks of 2–3 gaps (IELTS-style paragraphs). */
+/** Split total gap count into blocks of 2-3 gaps (IELTS-style paragraphs). */
 export function allocateSummaryWithCluesGapChunks(totalGaps: number): number[] {
   if (totalGaps < 1) return [];
   const chunks: number[] = [];

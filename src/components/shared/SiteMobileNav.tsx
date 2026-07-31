@@ -32,6 +32,7 @@ const STUDENT_LINKS = ENABLE_READING
     ] as const)
   : ([
       { href: "/player", labelKey: "play" as const },
+      { href: "/leaderboard", labelKey: "leaderboard" as const },
       { href: "/squad", labelKey: "squad" as const },
       { href: "/profile", labelKey: "myProfile" as const },
     ] as const);

@@ -41,7 +41,7 @@ export const INTENT_OPTIONS: ReadonlyArray<{
   value: MissionOneIntent;
   label: string;
 }> = [
-  { value: "buy_now", label: "🚀 এখনই আনলক করব (১৫৯৳)" },
+  { value: "buy_now", label: "🚀 এখনই আনলক করব (159৳)" },
   { value: "buy_later", label: "⏳ ইচ্ছে আছে, কিন্তু পরে করব" },
   { value: "stick_to_free", label: "🛑 না, ফ্রি ভার্সনই ব্যবহার করব" },
 ];
@@ -57,11 +57,11 @@ export const OBJECTION_OPTIONS: ReadonlyArray<{
   },
   {
     value: "too_easy_no_upgrade",
-    label: "🥱 মিশন ১ খুব সহজ ছিল, তাই আপগ্রেড লাগবে না",
+    label: "🥱 মিশন 1 খুব সহজ ছিল, তাই আপগ্রেড লাগবে না",
   },
   {
     value: "too_hard_confusing",
-    label: "🤯 মিশন ১ খুব কঠিন লেগেছে / বুঝতে সমস্যা হয়েছে",
+    label: "🤯 মিশন 1 খুব কঠিন লেগেছে / বুঝতে সমস্যা হয়েছে",
   },
   {
     value: "payment_issue",

@@ -49,6 +49,7 @@ const STUDENT_LINKS_READING = [
 
 const STUDENT_LINKS_PLAYER = [
   { href: "/player", labelKey: "play" as const },
+  { href: "/leaderboard", labelKey: "leaderboard" as const },
   { href: "/squad", labelKey: "squad" as const },
   { href: "/profile", labelKey: "myProfile" as const },
 ] as const;

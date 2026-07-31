@@ -156,7 +156,7 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       bullets: [
         "The Clock is the Enemy: 60 minutes, 40 questions, 3 passages  -  about 1.5 minutes per question.",
         "The Golden Rule: You will NEVER have time to read everything.",
-        "The Fatal Mistake: Spending 5–10 minutes reading the wrong part of the passage.",
+        "The Fatal Mistake: Spending 5-10 minutes reading the wrong part of the passage.",
       ],
       content:
         "If you look for your car keys in the fridge, you will never find them. We teach you exactly which \"room\" to look in.",
@@ -167,7 +167,7 @@ export const NOTE_SECTION_TEMPLATES: NoteSectionTemplate[] = [
       bullets: [
         "সময়ের সাথে যুদ্ধ: 60 মিনিট, 40 প্রশ্ন, 3 প্যাসেজ  -  প্রতি প্রশ্নে দেড় মিনিট।",
         "গোল্ডেন রুল: পুরো প্যাসেজ পড়ার মতো সময় কখনোই পাবে না।",
-        "সবচেয়ে বড় ভুল: যেখানে উত্তর নেই সেখানে 5–10 মিনিট পড়া।",
+        "সবচেয়ে বড় ভুল: যেখানে উত্তর নেই সেখানে 5-10 মিনিট পড়া।",
       ],
       content: "গাড়ির চাবি ফ্রিজে খুঁজলে পাবে না  -  ঠিক কোথায় খুঁজতে হবে শিখবে।",
     },
@@ -394,11 +394,11 @@ export function buildLevel0PlaybookBlocks(): IntegratedLessonBlock[] {
     mcq(
       "What is a Fatal Mistake?",
       "সবচেয়ে বড় ভুল কী?",
-      ["Guessing", "Too much highlighting", "Reading the wrong part 5–10 minutes", "Skipping"],
-      ["অনুমান", "হাইলাইট", "ভুল জায়গায় 5–10 মিনিট", "স্কিপ"],
+      ["Guessing", "Too much highlighting", "Reading the wrong part 5-10 minutes", "Skipping"],
+      ["অনুমান", "হাইলাইট", "ভুল জায়গায় 5-10 মিনিট", "স্কিপ"],
       "C",
-      "Spending 5–10 minutes where the answer is not hiding.",
-      "যেখানে উত্তর নেই সেখানে 5–10 মিনিট।",
+      "Spending 5-10 minutes where the answer is not hiding.",
+      "যেখানে উত্তর নেই সেখানে 5-10 মিনিট।",
     ),
   ]);
 

@@ -352,7 +352,7 @@ export async function bulkCreateLevel(
 
 export const SAMPLE_BULK_CREATE_PAYLOAD: BulkCreateLevelPayload = {
   level: {
-    title: "Level 0 – Foundation",
+    title: "Level 0 - Foundation",
     slug: "level-0-foundation",
     order: 0,
     levelType: "FOUNDATION",
@@ -367,7 +367,7 @@ export const SAMPLE_BULK_CREATE_PAYLOAD: BulkCreateLevelPayload = {
   ],
   quiz: {
     contentCode: "L0C6",
-    title: "Level 0 – Final quiz",
+    title: "Level 0 - Final quiz",
     description: "Quiz after completing the 5 content steps.",
     timeLimit: 15,
     quizUseType: "FINAL",
@@ -376,7 +376,7 @@ export const SAMPLE_BULK_CREATE_PAYLOAD: BulkCreateLevelPayload = {
         title: "Vocabulary",
         order: 0,
         questions: [
-          { type: "MCQ", questionText: "Sample question – replace with real question.", options: ["A", "B", "C", "D"], correctAnswer: "A", marks: 1 },
+          { type: "MCQ", questionText: "Sample question - replace with real question.", options: ["A", "B", "C", "D"], correctAnswer: "A", marks: 1 },
         ],
       },
     ],
@@ -1190,7 +1190,7 @@ export interface GroupTestQuestionForPreview {
   explanation?: string;
 }
 
-/** One question type block (e.g. "Questions 1–7: True/False/Not Given") */
+/** One question type block (e.g. "Questions 1-7: True/False/Not Given") */
 export interface GroupTestQuestionGroupForPreview {
   _id?: string;
   questionType: string;

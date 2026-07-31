@@ -452,7 +452,7 @@ export default function ReadingStrictLevelPage() {
               Set your desired band score
             </h2>
             <p className="mb-6 text-sm leading-6 text-gray-500 dark:text-gray-400">
-              To continue to this level, choose your target IELTS band (4–9).
+              To continue to this level, choose your target IELTS band (4-9).
               You can update this when moving from Level 1 to Level 2.
             </p>
             <SetTargetBandForm
@@ -569,7 +569,7 @@ export default function ReadingStrictLevelPage() {
           <div className="mx-auto max-w-3xl rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-white/80 dark:bg-indigo-950/40 p-6 shadow-sm">
             <SetTargetBandForm
               heading="Set your desired band score before Level 1"
-              description="Choose your target IELTS band (4–9). You can set or update this when moving from Level 1 to Level 2."
+              description="Choose your target IELTS band (4-9). You can set or update this when moving from Level 1 to Level 2."
               submitLabel="Save and continue to Level 1"
               onSuccess={(band) => {
                 setReadingTargetBandState(band);

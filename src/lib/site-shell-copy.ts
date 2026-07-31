@@ -3,6 +3,7 @@ import type { UiLocale } from "@/src/lib/ui-locale";
 export interface SiteShellCopy {
   readonly play: string;
   readonly squad: string;
+  readonly leaderboard: string;
   readonly myProfile: string;
   readonly plansPricing: string;
   readonly home: string;
@@ -37,6 +38,7 @@ export const SITE_SHELL_COPY: Record<UiLocale, SiteShellCopy> = {
   bn: {
     play: "খেলা",
     squad: "স্কোয়াড",
+    leaderboard: "লিডারবোর্ড",
     myProfile: "আমার প্রোফাইল",
     plansPricing: "প্ল্যান ও মূল্য",
     home: "হোম",
@@ -72,6 +74,7 @@ export const SITE_SHELL_COPY: Record<UiLocale, SiteShellCopy> = {
   en: {
     play: "Play",
     squad: "Squad",
+    leaderboard: "Leaderboard",
     myProfile: "My profile",
     plansPricing: "Plans & pricing",
     home: "Home",

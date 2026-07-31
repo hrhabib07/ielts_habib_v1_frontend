@@ -1,4 +1,4 @@
-﻿import type { UiLocale } from "@/src/lib/ui-locale";
+import type { UiLocale } from "@/src/lib/ui-locale";
 
 export interface CheckoutCopy {
   readonly statusLock: string;
@@ -55,9 +55,9 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
       "মূল্য এখনই লক করতে bKash এ Send Money করুন। প্রথম 100 জনের Founder নম্বর ও ব্যাজ সীমিত। পেমেন্ট ভেরিফাই হলে আপনার জায়গা নিশ্চিত।",
     amountLabel: "পাঠাতে হবে",
     regularPriceLabel: "রেগুলার মূল্য",
-    founderPriceLabel: "Founder মূল্য আজ",
+    founderPriceLabel: "আজকের মূল্য",
     youSaveLabel: "আজ বাঁচবে",
-    stepsTitle: "৩ ধাপে শেষ করুন",
+    stepsTitle: "3 ধাপে শেষ করুন",
     step1: "ধাপ 1: bKash অ্যাপে Send Money খুলুন",
     step2: "ধাপ 2: নিচের নম্বরে ঠিক এই পরিমাণ পাঠান",
     step3: "ধাপ 3: আপনার নম্বর + TrxID দিয়ে সাবমিট করুন",
@@ -77,7 +77,7 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     back: "প্রাইসিং এ ফিরে যান",
     perkSecure: "নিরাপদ ম্যানুয়াল ভেরিফিকেশন",
     perkManual: "ভুল TrxID হলে সাপোর্ট সাহায্য করবে",
-    perkFounder: "Founder স্পট ভেরিফাইয়ের পর লক",
+    perkFounder: "অফার ভেরিফাইয়ের পর লক",
     trustBadge:
       "Gamlish: বাংলাদেশের প্রথম ও একমাত্র গ্যামিফাইড ইংলিশ লার্নিং প্ল্যাটফর্ম",
     preOrderNote: "এটি আগস্ট প্রি-অর্ডার। অ্যাক্সেস 1 আগস্ট থেকে শুরু হবে।",
@@ -103,8 +103,8 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
       "Send Money on bKash now to lock this price. Founder numbers and badges are limited to the first 100. Your seat is confirmed after verification.",
     amountLabel: "Amount to send",
     regularPriceLabel: "Regular price",
-    founderPriceLabel: "Founder price today",
-    youSaveLabel: "You save today",
+    founderPriceLabel: "Today's price",
+    youSaveLabel: "You save",
     stepsTitle: "Finish in 3 steps",
     step1: "Step 1: Open Send Money in the bKash app",
     step2: "Step 2: Send exactly this amount to the number below",
@@ -125,7 +125,7 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     back: "Back to pricing",
     perkSecure: "Secure manual verification",
     perkManual: "Support can help if TrxID is wrong",
-    perkFounder: "Founder spot locks after verify",
+    perkFounder: "Offer locks after verify",
     trustBadge:
       "Gamlish: Bangladesh's first and only gamified English learning platform",
     preOrderNote: "This is an August pre-order. Access starts on 1 August.",

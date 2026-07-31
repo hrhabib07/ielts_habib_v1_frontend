@@ -424,7 +424,7 @@ export const GamlishTfngPracticeView = forwardRef<
         <p className="reading-exam-arial-11 font-bold text-black">Part 1</p>
         <p className="reading-exam-arial-11 text-black">
           Read the text and answer questions{" "}
-          {data.questions.length > 1 ? `1–${data.questions.length}` : "1"}.
+          {data.questions.length > 1 ? `1-${data.questions.length}` : "1"}.
           {!passageUnlocked ? " Click a locator word in the statements to unlock the passage." : null}
         </p>
       </div>
@@ -496,7 +496,7 @@ export const GamlishTfngPracticeView = forwardRef<
               className="text-[11pt] font-bold text-black"
               style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
             >
-              Questions {data.questions.length > 1 ? `1–${data.questions.length}` : "1"}
+              Questions {data.questions.length > 1 ? `1-${data.questions.length}` : "1"}
             </p>
             <p className="reading-exam-arial-9 mt-1.5 text-[#333]">
               Choose <strong className="font-semibold">TRUE</strong> if the statement agrees with

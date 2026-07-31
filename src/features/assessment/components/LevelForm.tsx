@@ -255,7 +255,7 @@ export function LevelForm({
                 id={titleId}
                 value={values.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Level 0 – Onboarding"
+                placeholder="Level 0 - Onboarding"
                 required
               />
             </div>

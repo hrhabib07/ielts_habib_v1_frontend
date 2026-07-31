@@ -66,7 +66,7 @@ export interface StudentBandJourneyFlightVisualProps {
   dreamCountryLabel: string;
   from: { x: number; y: number };
   to: { x: number; y: number };
-  /** 0–100: completed route length and plane position along path. */
+  /** 0-100: completed route length and plane position along path. */
   journeyProgressPct: number;
   className?: string;
   /** Pin map graphic to top of container (hero layouts that start below a badge). */

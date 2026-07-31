@@ -50,7 +50,8 @@ export function isTelemetryPathAllowed(pathname: string): boolean {
     p.startsWith("/login") ||
     p.startsWith("/pricing") ||
     p.startsWith("/founding-members") ||
-    p.startsWith("/squad")
+    p.startsWith("/squad") ||
+    p.startsWith("/leaderboard")
   );
 }
 

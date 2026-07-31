@@ -242,10 +242,10 @@ export function MissionOneFeedbackModal({
         {/* step indicator  -  no X button */}
         <div className="flex items-center justify-between gap-3 px-4 pb-1 pt-3">
           <p className="text-[11px] font-medium tabular-nums text-muted-foreground">
-            ধাপ {step} / ৩
+            ধাপ {step} / 3
           </p>
           <p className="text-[10px] font-medium text-muted-foreground/70">
-            মাত্র ৩টি প্রশ্ন
+            মাত্র 3টি প্রশ্ন
           </p>
         </div>
 
@@ -277,10 +277,10 @@ export function MissionOneFeedbackModal({
                     id="m1-feedback-title"
                     className="text-balance text-[1.15rem] font-semibold leading-snug tracking-tight text-foreground"
                   >
-                    মিশন ১ কমপ্লিট করে আপনার অভিজ্ঞতা কেমন ছিল?
+                    মিশন 1 কমপ্লিট করে আপনার অভিজ্ঞতা কেমন ছিল?
                   </h2>
                   <p className="text-[13px] leading-relaxed text-muted-foreground">
-                    আপনার ১ ক্লিকেই আমরা প্ল্যাটফর্মটিকে আরও উন্নত করতে পারব
+                    আপনার 1 ক্লিকেই আমরা প্ল্যাটফর্মটিকে আরও উন্নত করতে পারব
                   </p>
                 </div>
                 <div className="grid gap-2">
@@ -304,7 +304,7 @@ export function MissionOneFeedbackModal({
               >
                 <div className="space-y-1.5">
                   <h2 className="text-balance text-[1.15rem] font-semibold leading-snug tracking-tight text-foreground">
-                    বাকি ২০টি প্রিমিয়াম মিশন আনলক করার ব্যাপারে আপনার প্ল্যান কী?
+                    বাকি 20টি প্রিমিয়াম মিশন আনলক করার ব্যাপারে আপনার প্ল্যান কী?
                   </h2>
                 </div>
                 <div className="grid gap-2">

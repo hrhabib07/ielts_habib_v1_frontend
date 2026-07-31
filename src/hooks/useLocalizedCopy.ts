@@ -17,6 +17,7 @@ import { SITE_SHELL_COPY } from "@/src/lib/site-shell-copy";
 import { SQUAD_UI_COPY } from "@/src/lib/squad-ui-copy";
 import { STUDENT_HOME_COPY } from "@/src/lib/student-home-copy";
 import { USERNAME_FLOW_COPY } from "@/src/lib/username-flow-copy";
+import { LEADERBOARD_UI_COPY } from "@/src/lib/leaderboard-ui-copy";
 
 export function useSiteShellCopy() {
   const { locale } = useUiLocale();
@@ -31,6 +32,11 @@ export function usePlayerUiCopy() {
 export function useSquadUiCopy() {
   const { locale } = useUiLocale();
   return useMemo(() => SQUAD_UI_COPY[locale], [locale]);
+}
+
+export function useLeaderboardUiCopy() {
+  const { locale } = useUiLocale();
+  return useMemo(() => LEADERBOARD_UI_COPY[locale], [locale]);
 }
 
 export function useStudentHomeCopy() {

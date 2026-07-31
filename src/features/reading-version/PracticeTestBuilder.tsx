@@ -192,7 +192,7 @@ export function PracticeTestBuilder({
 
   const sortedList = [...(practiceTests ?? [])].sort((a, b) => a.order - b.order);
   const isMisplacedL0Final = (pt: PracticeTest) =>
-    /\b(l0\s*[ - –-]\s*)?final\b/i.test(pt.title) && !finalSlotIdSet.has(pt._id);
+    /\b(l0\s*[ - --]\s*)?final\b/i.test(pt.title) && !finalSlotIdSet.has(pt._id);
   const practiceOnlyList = isL0Foundation
     ? sortedList.filter((p) => !finalSlotIdSet.has(p._id) && !isMisplacedL0Final(p))
     : sortedList;

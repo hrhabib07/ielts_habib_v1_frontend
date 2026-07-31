@@ -897,7 +897,7 @@ export const PracticeTestReadingView = forwardRef<
                   return (
                     <section key={gIdx} className="mb-8">
                       <h3 className="mb-3 border-l-4 border-[#1e3a8a] pl-3 text-lg font-bold text-[#0f172a] dark:text-slate-100">
-                        Questions {group.startQuestionNumber}–{group.endQuestionNumber}: {typeLabel}
+                        Questions {group.startQuestionNumber}-{group.endQuestionNumber}: {typeLabel}
                       </h3>
                       {group.instruction && (
                         <div
@@ -949,7 +949,7 @@ export const PracticeTestReadingView = forwardRef<
             ) : (
               <>
                 <h3 className="mb-3 border-l-4 border-[#1e3a8a] pl-3 text-sm font-bold uppercase tracking-wide text-[#0f172a] dark:text-slate-100">
-                  Questions {totalQuestions > 0 && `(1–${totalQuestions})`}
+                  Questions {totalQuestions > 0 && `(1-${totalQuestions})`}
                 </h3>
                 {(miniTest.questions ?? []).map((q, idx) => (
                   <div key={q._id} id={`q-${q._id}`} className="scroll-mt-4">

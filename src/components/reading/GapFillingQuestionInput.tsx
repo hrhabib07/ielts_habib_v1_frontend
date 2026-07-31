@@ -51,7 +51,7 @@ function GapDropTarget({
         const text = e.dataTransfer.getData("text/plain") || e.dataTransfer.getData(DRAG_TYPE_WORD_BANK);
         if (text.trim()) onValueChange(text.trim());
       }}
-      aria-label={`Gap ${gapDisplayNumber} – drop an option here`}
+      aria-label={`Gap ${gapDisplayNumber} - drop an option here`}
     >
       {children}
     </span>

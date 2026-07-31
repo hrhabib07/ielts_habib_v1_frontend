@@ -17,7 +17,7 @@ import {
 function formatDate(value?: string): string {
   if (!value) return "-";
   try {
-    return new Date(value).toLocaleString();
+    return new Date(value).toLocaleString("en-US");
   } catch {
     return value;
   }

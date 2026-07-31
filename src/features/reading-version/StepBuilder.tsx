@@ -634,7 +634,7 @@ function StepForm({
             <div className="space-y-2">
               <Label>Quiz pool (attempt 1 → first, attempt 2 → second, …)</Label>
               <p className="text-xs text-muted-foreground">
-                Add 5–10 quizzes; student gets one per attempt. Pass any to advance. If you enable &quot;Advance with average&quot;, they advance after all attempts with average score.
+                Add 5-10 quizzes; student gets one per attempt. Pass any to advance. If you enable &quot;Advance with average&quot;, they advance after all attempts with average score.
               </p>
               {contentIds.map((id, idx) => (
                 <div key={`${id}-${idx}`} className="flex items-center gap-2">

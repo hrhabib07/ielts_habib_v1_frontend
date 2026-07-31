@@ -179,7 +179,7 @@ function QuestionPreviewBlock({
   const textHasGaps = hasGaps(rawText);
   const usePerGapNumbers = blankCount > 1 && (structuredNote != null || textHasGaps);
   const displayNumberEnd = startNum + blankCount - 1;
-  const displayLabel = usePerGapNumbers ? `${startNum}–${displayNumberEnd}` : String(displayNumber);
+  const displayLabel = usePerGapNumbers ? `${startNum}-${displayNumberEnd}` : String(displayNumber);
   const hideBodyLabel = displayNumberStart != null && blankCount > 1;
   const hideNumberInText = questionStartsWithNumber(rawText);
   const showBodyLabel = !hideBodyLabel && !hideNumberInText;
@@ -502,7 +502,7 @@ export function PracticeTestPreviewInline({
             {(questionGroups as GroupTestQuestionGroupForPreview[]).map((grp) => (
               <div key={`${grp.startQuestionNumber}-${grp.endQuestionNumber}`}>
                 <p className="mb-2 text-sm font-medium text-stone-700 dark:text-stone-300">
-                  Questions {grp.startQuestionNumber}–{grp.endQuestionNumber}:{" "}
+                  Questions {grp.startQuestionNumber}-{grp.endQuestionNumber}:{" "}
                   {QUESTION_TYPE_LABEL[grp.questionType] ?? grp.questionType}
                 </p>
                 {grp.instruction && (

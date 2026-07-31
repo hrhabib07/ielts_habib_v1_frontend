@@ -20,7 +20,7 @@ export interface WeaknessTagFull {
   isActive: boolean;
   /** ObjectId string of the creator */
   createdBy?: string;
-  /** Moderation status – may be absent on legacy docs (treat as APPROVED) */
+  /** Moderation status - may be absent on legacy docs (treat as APPROVED) */
   status?: WeaknessTagStatus;
   createdAt?: string;
   updatedAt?: string;

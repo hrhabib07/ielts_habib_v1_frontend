@@ -6,7 +6,7 @@ import type { NextResponse } from "next/server";
  */
 export const AUTH_TOKEN_COOKIE = "ielts_habib_token";
 
-/** Legacy flag from an earlier logout fix — always expire; do not gate routes on it. */
+/** Legacy flag from an earlier logout fix · always expire; do not gate routes on it. */
 export const FORCE_LOGOUT_COOKIE = "gamlish_force_logout";
 
 export function authCookieBaseOptions(

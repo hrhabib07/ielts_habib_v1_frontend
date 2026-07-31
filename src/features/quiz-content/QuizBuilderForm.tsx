@@ -505,7 +505,7 @@ export function QuizBuilderForm({
               id="title"
               value={form.title}
               onChange={(e) => update({ title: e.target.value })}
-              placeholder="e.g. Reading practice – Section 1"
+              placeholder="e.g. Reading practice - Section 1"
               className="max-w-xl"
               required
             />

@@ -13,7 +13,7 @@ const anchorsOut = path.join(
   "src/components/home/worldJourneyAnchors.generated.ts",
 );
 
-/** [lng, lat] approximate geographic centers — projected to hero viewBox. */
+/** [lng, lat] approximate geographic centers · projected to hero viewBox. */
 const COUNTRY_LNGLAT = {
   bangladesh: [90.3563, 23.685],
   india: [78.9629, 20.5937],
@@ -70,7 +70,7 @@ if (!d || typeof d !== "string") {
 const clipHeader = `/**
  * Auto-generated from Natural Earth land-110m (via topojson/world-atlas, ISC license).
  * Projection: equirectangular fitted to viewBox 0 0 1000 500.
- * Do not edit by hand — run: node scripts/generate-world-clip.mjs
+ * Do not edit by hand · run: node scripts/generate-world-clip.mjs
  */
 `;
 
@@ -95,7 +95,7 @@ const defaultTo = anchors.uk ?? { x: 500, y: 200 };
 
 const anchorsHeader = `/**
  * Country label → {x,y} in hero map viewBox (same projection as worldLandClipPath.generated).
- * Auto-generated — run: node scripts/generate-world-clip.mjs
+ * Auto-generated · run: node scripts/generate-world-clip.mjs
  */
 `;
 

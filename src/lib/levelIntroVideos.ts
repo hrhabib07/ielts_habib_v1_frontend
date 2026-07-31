@@ -25,7 +25,7 @@ function buildConfig(
 const PLACEHOLDER_BODY =
   "Ask your admin to set this video in Admin → Subscription Plans → YouTube videos.";
 
-/** Key = student display level (1–21). */
+/** Key = student display level (1-21). */
 function configForDisplayLevel(
   displayLevel: number,
   videos: PlatformVideos,

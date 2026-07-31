@@ -135,7 +135,7 @@ export function AssessmentForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="negativeMarkingRatio">Negative marking ratio (0–1)</Label>
+            <Label htmlFor="negativeMarkingRatio">Negative marking ratio (0-1)</Label>
             <Input
               id="negativeMarkingRatio"
               type="number"

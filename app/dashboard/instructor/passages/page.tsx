@@ -27,7 +27,7 @@ const SAMPLE_PARAGRAPHS_JSON = `[
   { "paragraphIndex": 2, "text": "Third paragraph. The server will use paragraphIndex for order; text must be at least 10 characters." }
 ]`;
 
-/** Sample for glossary JSON. Each entry: term (1–100 chars), definition (3–500 chars), order (0-based). */
+/** Sample for glossary JSON. Each entry: term (1-100 chars), definition (3-500 chars), order (0-based). */
 const SAMPLE_GLOSSARY_JSON = `[
   { "term": "caravel", "definition": "A small, fast Spanish or Portuguese ship used for long voyages from the 15th to 17th centuries.", "order": 0 },
   { "term": "navigate", "definition": "To plan and direct the route of a ship or other vehicle.", "order": 1 }
@@ -90,7 +90,7 @@ function parseGlossaryJson(
     const definition = typeof item?.definition === "string" ? item.definition.trim() : "";
     const order = typeof item?.order === "number" && Number.isInteger(item.order) ? item.order : i;
     if (term.length < 1) {
-      return { success: false, error: `Glossary entry ${i + 1}: term is required (1–100 characters).` };
+      return { success: false, error: `Glossary entry ${i + 1}: term is required (1-100 characters).` };
     }
     if (term.length > 100) {
       return { success: false, error: `Glossary entry ${i + 1}: term must be at most 100 characters.` };
@@ -528,8 +528,8 @@ export default function PassagesPage() {
               </label>
             </div>
             <p className="mb-3 text-xs text-muted-foreground">
-              When enabled, you can add term–definition pairs (short meanings) for this passage. Paste a JSON array of{" "}
-              <code className="rounded bg-muted px-1">{"{ term, definition, order }"}</code>. Term: 1–100 chars; definition: 3–500 chars.
+              When enabled, you can add term-definition pairs (short meanings) for this passage. Paste a JSON array of{" "}
+              <code className="rounded bg-muted px-1">{"{ term, definition, order }"}</code>. Term: 1-100 chars; definition: 3-500 chars.
             </p>
             {hasGlossary && (
               <>

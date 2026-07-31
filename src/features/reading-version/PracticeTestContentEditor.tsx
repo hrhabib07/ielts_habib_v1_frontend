@@ -516,7 +516,7 @@ function QuestionsTab({
         <div key={grp._id ?? `${grp.startQuestionNumber}-${grp.endQuestionNumber}`}>
           <div className="mb-2 flex items-center gap-2">
             <span className="font-medium text-stone-900 dark:text-stone-100">
-              Questions {grp.startQuestionNumber}–{grp.endQuestionNumber}:{" "}
+              Questions {grp.startQuestionNumber}-{grp.endQuestionNumber}:{" "}
               {QUESTION_TYPE_LABEL[grp.questionType] ?? grp.questionType}
             </span>
             {grp._id && (

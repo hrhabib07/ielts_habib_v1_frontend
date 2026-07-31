@@ -177,7 +177,7 @@ function cambridgePassage3Set(): BulkPassageQuestionSetInput {
         startQuestionNumber: 6,
         endQuestionNumber: 9,
         questionType: "MATCHING_FEATURES",
-        instruction: "Match each statement with the correct feature A–D.",
+        instruction: "Match each statement with the correct feature A-D.",
         meta: {
           features: ["Feature A", "Feature B", "Feature C", "Feature D"],
         },
@@ -215,7 +215,7 @@ function placeholderPassage(label: string, questionRange: string): BulkPassageIn
     title: `Sample passage  -  ${label}`,
     subTitle: `You should spend about 20 minutes on Questions ${questionRange}.`,
     contentParagraphs: [
-      { paragraphIndex: 1, text: "A. Replace with real academic passage paragraph A (700–900 words total across all paragraphs)." },
+      { paragraphIndex: 1, text: "A. Replace with real academic passage paragraph A (700-900 words total across all paragraphs)." },
       { paragraphIndex: 2, text: "B. Replace with paragraph B  -  paraphrase-friendly factual or discursive content." },
       { paragraphIndex: 3, text: "C. Replace with paragraph C." },
       { paragraphIndex: 4, text: "D. Replace with paragraph D." },
@@ -233,17 +233,17 @@ function buildOneMockPracticeTest(
     passages: [
       {
         recommendedTimeMinutes: 20,
-        passage: placeholderPassage(`Mock ${mockNumber} Passage 1`, "1–13"),
+        passage: placeholderPassage(`Mock ${mockNumber} Passage 1`, "1-13"),
         passageQuestionSet: cambridgePassage1Set(),
       },
       {
         recommendedTimeMinutes: 20,
-        passage: placeholderPassage(`Mock ${mockNumber} Passage 2`, "1–14"),
+        passage: placeholderPassage(`Mock ${mockNumber} Passage 2`, "1-14"),
         passageQuestionSet: cambridgePassage2Set(),
       },
       {
         recommendedTimeMinutes: 20,
-        passage: placeholderPassage(`Mock ${mockNumber} Passage 3`, "1–13"),
+        passage: placeholderPassage(`Mock ${mockNumber} Passage 3`, "1-13"),
         passageQuestionSet: cambridgePassage3Set(),
       },
     ],
@@ -270,7 +270,7 @@ OUTPUT: Return ONLY one object matching this shape (use the Gamlish bulk JSON st
   "passages": [
     {
       "recommendedTimeMinutes": 20,
-      "passage": { "title": "...", "subTitle": "You should spend about 20 minutes on Questions 1–13.", "contentParagraphs": [{ "paragraphIndex": 1, "text": "..." }] },
+      "passage": { "title": "...", "subTitle": "You should spend about 20 minutes on Questions 1-13.", "contentParagraphs": [{ "paragraphIndex": 1, "text": "..." }] },
       "passageQuestionSet": { "difficulty": "MEDIUM", "expectedTotalQuestions": 13, "recommendedTimeMinutes": 20, "questionGroups": [ ... ] }
     },
     { "... Passage 2  -  expectedTotalQuestions: 14 ..." },
@@ -279,7 +279,7 @@ OUTPUT: Return ONLY one object matching this shape (use the Gamlish bulk JSON st
 }
 
 QUESTION RULES (real IELTS mix):
-1) Use 6–8 distinct questionType values across the whole mock (not all 16 types).
+1) Use 6-8 distinct questionType values across the whole mock (not all 16 types).
 2) MANDATORY: at least 5 questions total of TRUE_FALSE_NOT_GIVEN and/or YES_NO_NOT_GIVEN.
 3) MANDATORY: at least 6 gap-filling answers (SENTENCE_COMPLETION, SUMMARY_COMPLETION, NOTE_COMPLETION, TABLE_COMPLETION, or FLOW_CHART_COMPLETION).
 4) MANDATORY: at least one matching group (MATCHING_HEADINGS, MATCHING_INFORMATION, MATCHING_FEATURES, or MATCHING_SENTENCE_ENDINGS).
@@ -294,7 +294,7 @@ TECHNICAL:
 Return JSON only.`;
 }
 
-const INSTRUCTIONS = `FULL IELTS READING MOCK  -  Levels 17–20 Practice Tests
+const INSTRUCTIONS = `FULL IELTS READING MOCK  -  Levels 17-20 Practice Tests
 
 WORKFLOW:
 1) Click "Load template"  -  get 3 complete mock shells (or 1 if you prefer).
@@ -306,7 +306,7 @@ RULES:
 - Each practiceTests[] item = one 60-minute mock with exactly 3 passages.
 - Total ~40 questions (13 + 14 + 13). Question numbers restart at 1 per passage.
 - __questionTypeCatalog is reference only  -  do not paste it into questionGroups.
-- Mandatory in every mock: TFNG/YNNG (≥5 Q), gap filling (≥6 gaps), ≥1 matching group, 6–8 question types total.`;
+- Mandatory in every mock: TFNG/YNNG (≥5 Q), gap filling (≥6 gaps), ≥1 matching group, 6-8 question types total.`;
 
 export function buildFullMockPracticeBulkPayload(levelOrder: number): Record<string, unknown> {
   return {
@@ -450,14 +450,14 @@ export function validateFullMockPracticeBulk(params: {
       messages.push({
         level: "warn",
         path: base,
-        message: `Mock ${ti + 1}: only ${types.size} question types  -  aim for 6–8 for a realistic IELTS mix.`,
+        message: `Mock ${ti + 1}: only ${types.size} question types  -  aim for 6-8 for a realistic IELTS mix.`,
       });
     }
     if (totalQ < 39 || totalQ > 42) {
       messages.push({
         level: "warn",
         path: base,
-        message: `Mock ${ti + 1}: total questions is ${totalQ}; Cambridge mocks usually have 39–42 (target 40).`,
+        message: `Mock ${ti + 1}: total questions is ${totalQ}; Cambridge mocks usually have 39-42 (target 40).`,
       });
     }
 
@@ -472,7 +472,7 @@ export function validateFullMockPracticeBulk(params: {
     messages.push({
       level: "warn",
       path: "levelOrder",
-      message: `Level ${levelOrder} is outside L17–L20; full mock bulk is intended for mock-test levels.`,
+      message: `Level ${levelOrder} is outside L17-L20; full mock bulk is intended for mock-test levels.`,
     });
   }
 

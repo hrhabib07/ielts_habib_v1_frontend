@@ -297,7 +297,7 @@ export function PracticeTestManager({
           </h3>
           <p className="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
             {FULL_MOCK_LEVEL_ORDERS.has(levelOrder)
-              ? "Levels 17–20: each test is a full 60-minute mock (3 passages). Use the bulk portal above, then add Practice Test steps in the Level Builder."
+              ? "Levels 17-20: each test is a full 60-minute mock (3 passages). Use the bulk portal above, then add Practice Test steps in the Level Builder."
               : isL5ProgressiveMcq
                 ? "Level 5: each test is a progressive paraphrase quiz (6 context MCQs, one at a time). Use the builder above, then add Practice Test steps in the Level Builder."
                 : 'Each test = one passage + question set. Add a step of type "Practice Test" in the Level Builder and select one of these.'}
@@ -1365,7 +1365,7 @@ function PracticeTestQuestionBlock({
   const hasGaps = /\{\{gap\d+\}\}/.test(rawText);
   const usePerGapNumbers = blankCount > 1 && (structuredNote != null || structuredTable != null || hasGaps);
   const displayNumberEnd = startNum + blankCount - 1;
-  const displayLabel = usePerGapNumbers ? `${startNum}–${displayNumberEnd}` : String(displayNumber);
+  const displayLabel = usePerGapNumbers ? `${startNum}-${displayNumberEnd}` : String(displayNumber);
   const hideBodyLabel = displayNumberStart != null && blankCount > 1;
   const hideNumberInText = questionStartsWithNumber(rawText);
   const showBodyLabel = !hideBodyLabel && !hideNumberInText;
@@ -1515,7 +1515,7 @@ function PracticeTestMiniPreviewBody({ miniTest }: { miniTest: GroupTestMiniTest
             {(questionGroups as GroupTestQuestionGroupForPreview[]).map((grp) => (
               <div key={`${grp.startQuestionNumber}-${grp.endQuestionNumber}`}>
                 <p className="mb-2 text-sm font-medium text-stone-700 dark:text-stone-300">
-                  Questions {grp.startQuestionNumber}–{grp.endQuestionNumber}:{" "}
+                  Questions {grp.startQuestionNumber}-{grp.endQuestionNumber}:{" "}
                   {QUESTION_TYPE_LABEL[grp.questionType] ?? grp.questionType}
                 </p>
                 {grp.instruction && (

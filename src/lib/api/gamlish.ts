@@ -57,6 +57,29 @@ export interface GamlishProfileSocial {
   followerCount?: number;
 }
 
+export interface CampGraduationView {
+  campOrder: 1 | 2 | 3 | 4;
+  campTitle: string;
+  campTitleBn: string;
+  unlocked: boolean;
+  badge: "master" | "explorer" | "apprentice" | null;
+  badgeTitle: string | null;
+  scorePercent: number | null;
+  unlockedAt: string | null;
+}
+
+export interface MasterPathStatus {
+  foundationsStartedAt: string | null;
+  windowEndsAt: string | null;
+  daysLeft: number | null;
+  mastersEarned: number;
+  totalCamps: 4;
+  masterByCamp: Record<1 | 2 | 3 | 4, boolean>;
+  intermediateCampFreeAccess: boolean;
+  intermediateCampQualifiedAt: string | null;
+  qualified: boolean;
+}
+
 export interface GamlishPublicProfile {
   canonicalHandle: string;
   isCanonical: boolean;
@@ -71,6 +94,8 @@ export interface GamlishPublicProfile {
     founderNumber: number | null;
     founderTier: FounderTier | null;
     memberSince: string | null;
+    isFirstWeekAdopter?: boolean;
+    isFirstMonthAdopter?: boolean;
   };
   stats: {
     level: number;
@@ -82,6 +107,8 @@ export interface GamlishPublicProfile {
   squad: ProfileSquadSummary | null;
   missionCards: MissionCard[];
   achievements: AchievementView[];
+  campGraduations: CampGraduationView[];
+  masterPath?: MasterPathStatus | null;
   social: GamlishProfileSocial;
   recentActivity: RecentActivityItem[];
 }

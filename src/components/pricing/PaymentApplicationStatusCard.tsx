@@ -150,7 +150,7 @@ export function PaymentApplicationStatusCard({
               </div>
               <div>
                 <dt className={cn("text-xs uppercase tracking-wide", brandStatus.pending.label)}>Amount paid</dt>
-                <dd className="font-medium">{latestRequest.paidAmount.toLocaleString()} BDT</dd>
+                <dd className="font-medium">{latestRequest.paidAmount.toLocaleString("en-US")} BDT</dd>
               </div>
               <div>
                 <dt className={cn("text-xs uppercase tracking-wide", brandStatus.pending.label)}>

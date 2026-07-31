@@ -7,7 +7,7 @@ import { STEP_ICONS, STEP_LABELS } from "./levelStepConstants";
 export interface LevelStepFlowProps {
   learningSteps: LevelStep[];
   assessmentSteps: LevelStep[];
-  /** When provided, shown as a separate "Full Test" row (Mini Test 1–3). */
+  /** When provided, shown as a separate "Full Test" row (Mini Test 1-3). */
   fullTestSteps?: LevelStep[];
   onStepClick?: (stepId: string) => void;
 }

@@ -3,7 +3,10 @@
 import { usePathname } from "next/navigation";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { Header } from "@/src/components/shared/Header";
-import { isImmersiveAuthPath } from "@/src/lib/immersive-auth-paths";
+import {
+  isImmersiveAuthPath,
+  isImmersivePlayerPath,
+} from "@/src/lib/immersive-auth-paths";
 
 export function StickySiteChrome({
   initialUser,
@@ -12,7 +15,7 @@ export function StickySiteChrome({
 }) {
   const pathname = usePathname() ?? "";
 
-  if (isImmersiveAuthPath(pathname)) {
+  if (isImmersiveAuthPath(pathname) || isImmersivePlayerPath(pathname)) {
     return null;
   }
 

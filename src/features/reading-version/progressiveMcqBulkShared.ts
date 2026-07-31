@@ -202,7 +202,7 @@ export function validateL5ProgressiveMcqBulk(payload: unknown): { practiceTests:
   const p = normalized as { practiceTests?: unknown };
   if (!Array.isArray(p.practiceTests) || p.practiceTests.length < 1 || p.practiceTests.length > 3) {
     throw new Error(
-      "Wrap each test in practiceTests (1–3 items). Example: { \"practiceTests\": [{ \"title\": \"...\", \"progressiveMcq\": { \"items\": [...] } }] }. You can also paste a single test object with title + progressiveMcq.",
+      "Wrap each test in practiceTests (1-3 items). Example: { \"practiceTests\": [{ \"title\": \"...\", \"progressiveMcq\": { \"items\": [...] } }] }. You can also paste a single test object with title + progressiveMcq.",
     );
   }
   const out: BulkL5ProgressiveMcqItem[] = [];

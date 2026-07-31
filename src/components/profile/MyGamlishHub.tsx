@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  BookOpen,
   Flame,
   Lock,
   Sparkles,
@@ -19,6 +20,7 @@ import {
   type MissionCard,
 } from "@/src/lib/api/gamlish";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { CampGraduationsSection } from "@/src/components/profile/CampGraduationsSection";
 
 function MissionMini({ card }: { card: MissionCard }) {
   const n = String(card.order).padStart(2, "0");
@@ -118,9 +120,18 @@ export function MyGamlishHub() {
             Level, XP and streak  -  the dopamine loop. Keep playing to grow them.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm" className="rounded-full">
-          <Link href={`/u/${handle}`}>Open public profile</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm" className="rounded-full">
+            <Link href={`/u/${handle}`}>Open public profile</Link>
+          </Button>
+          <Button
+            asChild
+            size="sm"
+            className="rounded-full bg-amber-500 text-amber-950 hover:bg-amber-400"
+          >
+            <Link href="/leaderboard">XP Leaderboard</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -134,7 +145,7 @@ export function MyGamlishHub() {
         <Stat
           icon={<Zap className="h-5 w-5 text-white" />}
           label="XP"
-          value={(stats?.totalXp ?? 0).toLocaleString()}
+          value={(stats?.totalXp ?? 0).toLocaleString("en-US")}
           accent="from-sky-400 to-blue-600"
           big
           highlight
@@ -149,6 +160,22 @@ export function MyGamlishHub() {
         />
       </div>
 
+      <Link
+        href="/player/verb-bag"
+        className="flex items-center gap-3 rounded-2xl border border-sky-400/25 bg-gradient-to-r from-sky-500/10 via-card to-blue-500/10 px-4 py-3 transition hover:border-sky-400/45"
+      >
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-white shadow-md shadow-sky-500/25">
+          <BookOpen className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold text-foreground">Verb Bag</span>
+          <span className="block text-xs text-muted-foreground">
+            Your unlocked verb cards · practice weak spots anytime
+          </span>
+        </span>
+        <span className="text-xs font-bold text-sky-700 dark:text-sky-300">Open</span>
+      </Link>
+
       {profile?.isFoundingMember && profile.founderNumber ? (
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
           <Trophy className="h-5 w-5 text-amber-600" />
@@ -162,7 +189,7 @@ export function MyGamlishHub() {
               Founder · #{String(profile.founderNumber).padStart(3, "0")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Permanent badge  -  you appear on the Founders&apos; Wall.
+              Permanent badge · you appear on the Founders&apos; Wall.
             </p>
           </div>
           <Button asChild size="sm" variant="secondary" className="rounded-full">
@@ -170,6 +197,32 @@ export function MyGamlishHub() {
           </Button>
         </div>
       ) : null}
+
+      {profile?.isFirstWeekAdopter ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-sky-400/30 bg-sky-400/10 px-4 py-3">
+          <Sparkles className="h-5 w-5 text-sky-600" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">First Week Adopter</p>
+            <p className="text-xs text-muted-foreground">
+              Permanent badge · August first-week offer (no Founders Wall).
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      {profile?.isFirstMonthAdopter && !profile?.isFirstWeekAdopter ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3">
+          <Sparkles className="h-5 w-5 text-emerald-600" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">First Month Adopter</p>
+            <p className="text-xs text-muted-foreground">
+              Permanent badge · August monthly offer (no Founders Wall).
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      <CampGraduationsSection camps={data?.campGraduations ?? []} />
 
       {cards.length > 0 ? (
         <div>

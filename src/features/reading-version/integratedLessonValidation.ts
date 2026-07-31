@@ -60,7 +60,7 @@ export function validateIntegratedLessonBlocks(
             ? q.correctAnswer.map((s) => String(s).trim()).join("")
             : "";
       if (!correct) {
-        return `${qLabel}: select correct answer (A–D for MCQ).`;
+        return `${qLabel}: select correct answer (A-D for MCQ).`;
       }
 
       if (q.type === "MCQ" || q.type === "MATCHING") {

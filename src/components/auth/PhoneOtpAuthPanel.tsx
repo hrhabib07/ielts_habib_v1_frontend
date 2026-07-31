@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, Lock, Phone, ShieldCheck, UserRound } from "lucide-react";
@@ -59,7 +59,7 @@ const COPY = {
     sendOtp: "OTP পাঠান",
     sending: "পাঠানো হচ্ছে…",
     otpLabel: "SMS কোড",
-    otpPlaceholder: "৬ অঙ্কের কোড",
+    otpPlaceholder: "6 অঙ্কের কোড",
     verify: "ভেরিফাই করুন",
     verifying: "চেক করা হচ্ছে…",
     resend: "আবার OTP পাঠান",

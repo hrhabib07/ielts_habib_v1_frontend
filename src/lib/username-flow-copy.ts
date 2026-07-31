@@ -1,4 +1,4 @@
-﻿import type { UiLocale } from "@/src/lib/ui-locale";
+import type { UiLocale } from "@/src/lib/ui-locale";
 
 export interface UsernameFlowCopy {
   readonly loadError: string;
@@ -46,7 +46,7 @@ function buildUsernameFlowCopy(locale: UiLocale): UsernameFlowCopy {
       permanentBadge: "স্থায়ী  -  বদলানো যাবে না",
       changeUntil: (when) => `${when} পর্যন্ত একবার বদলাতে পারবেন।`,
       available: (name) => `@${name} পাওয়া যাচ্ছে।`,
-      rules: "3–30 অক্ষর · ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও আন্ডারস্কোর।",
+      rules: "3-30 অক্ষর · ছোট হাতের ইংরেজি অক্ষর, সংখ্যা ও আন্ডারস্কোর।",
       takenFallback: "এই ইউজারনেম নেওয়া আছে।",
       saveError: "ইউজারনেম সেভ হয়নি। অন্যটা চেষ্টা করুন।",
       saveNew: "নতুন ইউজারনেম সেভ করুন",
@@ -84,7 +84,7 @@ function buildUsernameFlowCopy(locale: UiLocale): UsernameFlowCopy {
     permanentBadge: "Permanent  -  cannot be changed",
     changeUntil: (when) => `You can change it once until ${when}.`,
     available: (name) => `@${name} is available.`,
-    rules: "3–30 characters · lowercase letters, numbers and underscores.",
+    rules: "3-30 characters · lowercase letters, numbers and underscores.",
     takenFallback: "This username is taken.",
     saveError: "Could not save this username. Try another one.",
     saveNew: "Save new username",

@@ -156,7 +156,7 @@ function QuestionPreviewBlock({
   const startNum = displayNumberStart ?? displayNumber;
   const usePerGapNumbers = blankCount > 1 && (structuredNote != null || /\{\{gap\d+\}\}/.test(rawText));
   const displayNumberEnd = startNum + blankCount - 1;
-  const displayLabel = usePerGapNumbers ? `${startNum}–${displayNumberEnd}` : String(displayNumber);
+  const displayLabel = usePerGapNumbers ? `${startNum}-${displayNumberEnd}` : String(displayNumber);
   const hideBodyLabel = displayNumberStart != null && blankCount > 1;
   const hideNumberInText = questionStartsWithNumber(rawText);
   const showBodyLabel = !hideBodyLabel && !hideNumberInText;
@@ -352,7 +352,7 @@ export function ReadingFinalEvaluationPreviewView({
                   return (
                     <section key={gIdx} className="mb-8">
                       <h3 className="mb-3 text-lg font-bold text-emerald-800 dark:text-emerald-200">
-                        Questions {group.startQuestionNumber}–{group.endQuestionNumber}: {typeLabel}
+                        Questions {group.startQuestionNumber}-{group.endQuestionNumber}: {typeLabel}
                       </h3>
                       {group.instruction && (
                         <div
@@ -399,7 +399,7 @@ export function ReadingFinalEvaluationPreviewView({
             ) : (
               <>
                 <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Questions (1–{miniTest.questions.length})
+                  Questions (1-{miniTest.questions.length})
                 </h3>
                 {miniTest.questions.map((q) => (
                   <QuestionPreviewBlock

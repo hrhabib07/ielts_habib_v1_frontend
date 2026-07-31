@@ -177,7 +177,7 @@ export default function PassageQuestionSetPreviewModal({
                     <div className="flex flex-shrink-0 items-center gap-2">
                       <AlignLeft className="h-4 w-4 text-stone-400" />
                       <span className="rounded-full bg-stone-200 px-2.5 py-0.5 text-[11px] font-medium text-stone-600">
-                        Q{qs.startQuestionNumber}–{qs.endQuestionNumber}
+                        Q{qs.startQuestionNumber}-{qs.endQuestionNumber}
                       </span>
                       <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-medium text-stone-600">
                         {typeLabel}

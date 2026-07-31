@@ -186,7 +186,7 @@ export function SquadDetailView({
         <StatCard label={SQUAD_UI.lifetimeXp} value={squad.lifetimeXp} icon={<Trophy className="h-4 w-4" />} />
         <StatCard
           label={SQUAD_UI.weeklyRank}
-          value={squad.weeklyRank ?? "–"}
+          value={squad.weeklyRank ?? "-"}
           icon={<Crown className="h-4 w-4" />}
         />
         <StatCard label={SQUAD_UI.members} value={squad.memberCount} icon={<Users className="h-4 w-4" />} />

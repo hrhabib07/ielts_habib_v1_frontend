@@ -589,7 +589,7 @@ export default function QuestionPreviewModal({
   const isMultiGapCompletion = isGapBasedType && blankCount > 1;
   const displayNumberEnd = displayNumber + blankCount - 1;
   const displayNumberLabel = isMultiGapCompletion
-    ? `Q${displayNumber}–${displayNumberEnd}`
+    ? `Q${displayNumber}-${displayNumberEnd}`
     : `Q${displayNumber}`;
   const hideQuestionBodyNumber = isMultiGapCompletion;
 

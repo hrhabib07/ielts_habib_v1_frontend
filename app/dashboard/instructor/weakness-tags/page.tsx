@@ -643,7 +643,7 @@ export default function InstructorWeaknessTagsPage() {
                         {tag.description}
                       </p>
                     </div>
-                    {/* edit button – only for own tags (all of these are own) */}
+                    {/* edit button - only for own tags (all of these are own) */}
                     <Button
                       variant="ghost"
                       size="sm"

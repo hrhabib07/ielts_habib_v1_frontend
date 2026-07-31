@@ -148,7 +148,7 @@ export function WritingReviewForm({
           onChange={(e) => setContent(e.target.value)}
           rows={12}
           className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm leading-relaxed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-          placeholder="Write your paragraph here (120–150 words)..."
+          placeholder="Write your paragraph here (120-150 words)..."
         />
         <p className={`text-xs ${wordCount < minWords ? "text-amber-600" : "text-muted-foreground"}`}>
           {wordCount} words {wordCount < minWords ? `(minimum ${minWords})` : ""}

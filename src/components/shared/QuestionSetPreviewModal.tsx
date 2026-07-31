@@ -222,7 +222,7 @@ export default function QuestionSetPreviewModal({ passage, questionSet, onClose 
               {typeLabel}
             </span>
             <span className="rounded-full bg-stone-200 px-2.5 py-0.5 text-[11px] font-medium text-stone-600">
-              Q{questionSet.startQuestionNumber}–{questionSet.endQuestionNumber}
+              Q{questionSet.startQuestionNumber}-{questionSet.endQuestionNumber}
             </span>
           </div>
           <button
@@ -294,7 +294,7 @@ export default function QuestionSetPreviewModal({ passage, questionSet, onClose 
             <div className="mb-4 flex items-center gap-2">
               <AlignLeft className="h-4 w-4 text-stone-400" />
               <span className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                Questions {questionSet.startQuestionNumber}–{questionSet.endQuestionNumber}
+                Questions {questionSet.startQuestionNumber}-{questionSet.endQuestionNumber}
               </span>
             </div>
 

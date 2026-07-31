@@ -113,6 +113,10 @@ export interface StudentProfile {
   founderNumber?: number | null;
   founderTier?: "GOLD" | "SILVER" | "BRONZE" | null;
   founderApprovedAt?: string | null;
+  isFirstWeekAdopter?: boolean;
+  firstWeekAdopterAt?: string | null;
+  isFirstMonthAdopter?: boolean;
+  firstMonthAdopterAt?: string | null;
   streak?: {
     current: number;
     longest: number;

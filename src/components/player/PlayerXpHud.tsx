@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flame, Zap } from "lucide-react";
+import { Flag, Flame, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   getMyPlayerProfile,
@@ -11,8 +11,22 @@ import { GAMLISH_XP_EVENT, GAMLISH_XP_REFRESH } from "@/src/lib/xp-events";
 
 /**
  * Minimal sticky XP strip  -  one clean row, no clutter.
+ * `variant="inline"` drops the bar chrome so it can sit inside another header.
+ * Pass `missionNumber` on stage screens to show the mission badge instead of streak.
  */
-export function PlayerXpHud({ className }: { className?: string }) {
+export function PlayerXpHud({
+  className,
+  variant = "bar",
+  missionNumber,
+  missionLabel = "Mission",
+}: {
+  className?: string;
+  variant?: "bar" | "inline";
+  /** Current mission number (e.g. 6) · replaces streak on stage screens. */
+  missionNumber?: number;
+  /** Localized short label, e.g. "Mission" / "মিশন". */
+  missionLabel?: string;
+}) {
   const [profile, setProfile] = useState<MyPlayerProfile | null>(null);
   const [xpPulse, setXpPulse] = useState(false);
 
@@ -47,6 +61,41 @@ export function PlayerXpHud({ className }: { className?: string }) {
     };
   }, []);
 
+  if (variant === "inline") {
+    const missionPad =
+      missionNumber != null
+        ? String(missionNumber).padStart(2, "0")
+        : null;
+
+    return (
+      <div className={cn("flex shrink-0 items-center gap-1.5", className)}>
+        {missionPad != null ? (
+          <span
+            className="inline-flex items-center gap-1 rounded-full bg-sky-500/15 px-2.5 py-1 text-xs font-black tabular-nums text-sky-800 shadow-sm shadow-sky-500/10 dark:text-sky-200"
+            title={`${missionLabel} ${missionPad}`}
+          >
+            <Flag className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" />
+            <span className="tracking-tight">
+              <span className="mr-0.5 text-[10px] font-bold uppercase tracking-wide opacity-80">
+                {missionLabel}
+              </span>
+              {missionPad}
+            </span>
+          </span>
+        ) : null}
+        <span
+          className={cn(
+            "inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-xs font-black tabular-nums text-amber-700 transition-transform dark:text-amber-300",
+            xpPulse && "scale-110",
+          )}
+        >
+          <Zap className="h-3.5 w-3.5 text-amber-500" />
+          {profile ? profile.totalXp.toLocaleString("en-US") : "-"}
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -67,7 +116,7 @@ export function PlayerXpHud({ className }: { className?: string }) {
             )}
           >
             <Zap className="h-3.5 w-3.5 text-amber-500" />
-            {profile ? profile.totalXp.toLocaleString() : "-"}
+            {profile ? profile.totalXp.toLocaleString("en-US") : "-"}
             <span className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
               XP
             </span>

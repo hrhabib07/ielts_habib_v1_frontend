@@ -377,7 +377,7 @@ export default function AdminContentPage() {
                         </td>
                         <td className="p-4">{s.questionType}</td>
                         <td className="p-4">
-                          {s.startQuestionNumber}–{s.endQuestionNumber}
+                          {s.startQuestionNumber}-{s.endQuestionNumber}
                         </td>
                         <td className="p-4">
                           <span

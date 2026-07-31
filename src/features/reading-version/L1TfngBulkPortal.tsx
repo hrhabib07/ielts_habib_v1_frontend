@@ -244,7 +244,7 @@ export function L1TfngBulkPortal(props: {
 
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <Label>Practice tests JSON (1–3)</Label>
+            <Label>Practice tests JSON (1-3)</Label>
             <Button type="button" variant="outline" size="sm" onClick={() => setPracticeJson(practiceTemplate)}>
               Load template
             </Button>

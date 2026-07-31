@@ -7,6 +7,7 @@ import {
   isLogoutLocked,
 } from "./auth";
 import { getApiBaseUrl } from "./api-base-url";
+import { stripEmDashesDeep } from "./strip-em-dashes";
 
 let handlingUnauthorized = false;
 
@@ -61,7 +62,12 @@ async function forceClientLogout(): Promise<void> {
 }
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data != null) {
+      response.data = stripEmDashesDeep(response.data);
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     if (error.response?.status !== 401 || typeof window === "undefined") {
       return Promise.reject(error);

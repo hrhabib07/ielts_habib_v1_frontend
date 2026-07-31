@@ -44,7 +44,7 @@ function getLockMessage(params: {
 
   if (access.premiumLocked) {
     if (paymentPending) {
-      return "Your payment is being reviewed. Level 3 and beyond will unlock automatically once approved. usually within 24–48 hours.";
+      return "Your payment is being reviewed. Level 3 and beyond will unlock automatically once approved. usually within 24-48 hours.";
     }
     return "You finished the free levels. Unlock premium on the pricing page to start Level 3 and continue your 21-level journey.";
   }

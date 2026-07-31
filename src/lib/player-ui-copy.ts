@@ -33,6 +33,16 @@ export interface PlayerUiCopy {
   readonly campMissionsDone: (done: number, total: number) => string;
   readonly lockedHint: string;
   readonly subscribeHint: string;
+  readonly campRest: {
+    readonly mapTitle: string;
+    readonly mapBody: (
+      campTitle: string,
+      hoursLeft: number,
+    ) => string;
+    readonly graduationTitle: string;
+    readonly graduationBody: (hoursLeft: number) => string;
+    readonly unlockLater: (campLabel: string) => string;
+  };
   readonly subscribeModalEyebrow: string;
   readonly subscribeModalTitle: (missionTitle: string) => string;
   readonly subscribeModalBody: string;
@@ -52,10 +62,31 @@ export interface PlayerUiCopy {
   readonly missionCompleteBanner: string;
   readonly missionCompleteHubTitle: string;
   readonly missionCompleteHubBody: string;
+  readonly roadmap: {
+    readonly eyebrow: string;
+    readonly missionDoneTitle: (order: number) => string;
+    readonly inspectionDoneTitle: (order: number) => string;
+    readonly missionDoneBody: string;
+    readonly campDoneEyebrow: string;
+    readonly campDoneTitle: (order: number) => string;
+    readonly campDoneBody: string;
+    readonly completedBadge: string;
+    readonly unlockedBadge: string;
+    readonly lockedBadge: string;
+    readonly nextUpLabel: string;
+    readonly journeyProgress: (percent: number) => string;
+    readonly missionsDone: (done: number, total: number) => string;
+    readonly continueCta: string;
+    readonly autoContinue: (seconds: number) => string;
+    readonly skip: string;
+    readonly needsSubscription: string;
+    readonly courseDone: string;
+  };
   readonly coinsLabel: string;
   readonly xpLabel: string;
   readonly evalInstruction: Record<string, string>;
   readonly storyLabel: string;
+  readonly dialogueLabel: string;
   readonly result: {
     readonly successEvalTitle: string;
     readonly successStageTitle: string;
@@ -179,6 +210,16 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     campMissionsDone: (done, total) => `${done}/${total}`,
     lockedHint: "আগের মিশন শেষ করো",
     subscribeHint: "সাবস্ক্রাইব লাগবে",
+    campRest: {
+      mapTitle: "গ্র্যাজুয়েশন বিরতি",
+      mapBody: (campTitle, hoursLeft) =>
+        `দারুণ কাজ! ${campTitle} শেষ করেছ। বিষয়টা হজম করতে আনুমানিক ${hoursLeft} ঘণ্টা বিরতি নাও। তাড়াহুড়ো করলে এই গেম তোমাকে তেমন সাহায্য করবে না। বিরতির পর পরের ক্যাম্প খুলবে।`,
+      graduationTitle: "এখন একদিন বিরতি নাও",
+      graduationBody: (hoursLeft) =>
+        `তুমি অসাধারণ করেছ। বিষয়গুলো মাথায় বসতে দাও। আনুমানিক ${hoursLeft} ঘণ্টা পর পরের ক্যাম্পে ফিরে এসো। বিশ্রাম ছাড়া তাড়াহুড়ো করলে শেখা টিকবে না।`,
+      unlockLater: (campLabel) =>
+        `${campLabel} ২৪ ঘণ্টা পর আনলক হবে। এখন বিরতি নাও।`,
+    },
     subscribeModalEyebrow: "পরবর্তী মিশন আনলক করো",
     subscribeModalTitle: (missionTitle) => `«${missionTitle}» তোমার জন্য অপেক্ষা করছে!`,
     subscribeModalBody:
@@ -207,10 +248,31 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     missionCompleteHubTitle: "মিশন জয় হয়েছে!",
     missionCompleteHubBody:
       "তুমি এই মিশনের সব ধাপ শেষ করেছো। ক্যাম্প ম্যাপে ফিরে পরের মিশনে যাও।",
+    roadmap: {
+      eyebrow: "মিশন সম্পন্ন",
+      missionDoneTitle: (order) => `মিশন ${order} জয় করেছ!`,
+      inspectionDoneTitle: (order) => `ইনস্পেকশন ${order} পাশ করেছ!`,
+      missionDoneBody: "তোমার রোডম্যাপে টিক পড়ল। পরের মিশন খুলে যাচ্ছে…",
+      campDoneEyebrow: "ক্যাম্প সম্পন্ন",
+      campDoneTitle: (order) => `ক্যাম্প ${order} শেষ!`,
+      campDoneBody: "একটা পুরো ক্যাম্প শেষ করলে। পরের ক্যাম্পের দরজা এখন খোলা।",
+      completedBadge: "সম্পন্ন",
+      unlockedBadge: "আনলক হয়েছে",
+      lockedBadge: "লক",
+      nextUpLabel: "পরের মিশন",
+      journeyProgress: (percent) => `ইংরেজি লক্ষ্যের ${percent}% পথ শেষ`,
+      missionsDone: (done, total) => `${done}/${total} মিশন সম্পন্ন`,
+      continueCta: "পরের মিশন শুরু করো",
+      autoContinue: (seconds) => `${seconds} সেকেন্ডে শুরু হচ্ছে…`,
+      skip: "এখনই যাও",
+      needsSubscription: "পরের মিশন খেলতে সাবস্ক্রিপশন লাগবে।",
+      courseDone: "তুমি সব মিশন শেষ করেছ! ক্যাম্প ম্যাপে ফিরে দেখো।",
+    },
     coinsLabel: "কয়েন",
     xpLabel: "XP",
     evalInstruction: BN_EVAL,
     storyLabel: "গল্প",
+    dialogueLabel: "কথোপকথন",
     result: {
       successEvalTitle: "অসাধারণ!",
       successStageTitle: "ধাপ সম্পন্ন!",
@@ -233,7 +295,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       stageCleared: (current, total) => `ধাপ ${current} / ${total} সম্পন্ন`,
       headingNext: (label) => `পরবর্তী: ${label}`,
       bridgeTitle: "দারুণ অগ্রগতি!",
-      bridgeMissionDone: "মিশন হাবে ফিরছি…",
+      bridgeMissionDone: "তোমার রোডম্যাপ খুলছে…",
     },
     eval: {
       questionLabel: "প্রশ্ন",
@@ -314,6 +376,16 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     campMissionsDone: (done, total) => `${done}/${total}`,
     lockedHint: "Finish the previous mission",
     subscribeHint: "Subscription required",
+    campRest: {
+      mapTitle: "Graduation rest",
+      mapBody: (campTitle, hoursLeft) =>
+        `Excellent work finishing ${campTitle}. Take about ${hoursLeft} hours to digest what you learned. Rushing this game will not help you much. The next camp unlocks after your break.`,
+      graduationTitle: "Take a one-day rest",
+      graduationBody: (hoursLeft) =>
+        `You did excellently. Let these topics settle. Come back to the next camp in about ${hoursLeft} hours. Without rest, rushing will not make this game useful.`,
+      unlockLater: (campLabel) =>
+        `${campLabel} unlocks after 24 hours. Rest now.`,
+    },
     subscribeModalEyebrow: "Unlock your next mission",
     subscribeModalTitle: (missionTitle) => `"${missionTitle}" is waiting for you!`,
     subscribeModalBody:
@@ -342,10 +414,31 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     missionCompleteHubTitle: "Mission cleared!",
     missionCompleteHubBody:
       "You finished every stage in this mission. Head back to the camp map for the next one.",
+    roadmap: {
+      eyebrow: "Mission complete",
+      missionDoneTitle: (order) => `Mission ${order} cleared!`,
+      inspectionDoneTitle: (order) => `Inspection ${order} passed!`,
+      missionDoneBody: "Your roadmap just earned a new tick. Unlocking the next mission…",
+      campDoneEyebrow: "Camp complete",
+      campDoneTitle: (order) => `Camp ${order} finished!`,
+      campDoneBody: "A whole camp done. The next camp is open for you now.",
+      completedBadge: "Done",
+      unlockedBadge: "Unlocked",
+      lockedBadge: "Locked",
+      nextUpLabel: "Next mission",
+      journeyProgress: (percent) => `${percent}% of the way to your English goal`,
+      missionsDone: (done, total) => `${done}/${total} missions complete`,
+      continueCta: "Start next mission",
+      autoContinue: (seconds) => `Starting in ${seconds}s…`,
+      skip: "Go now",
+      needsSubscription: "A subscription is needed to play the next mission.",
+      courseDone: "You finished every mission! Head back to the camp map.",
+    },
     coinsLabel: "Coins",
     xpLabel: "XP",
     evalInstruction: EN_EVAL,
     storyLabel: "Story",
+    dialogueLabel: "Dialogue",
     result: {
       successEvalTitle: "Outstanding!",
       successStageTitle: "Stage complete!",
@@ -368,7 +461,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       stageCleared: (current, total) => `Stage ${current} of ${total} cleared`,
       headingNext: (label) => `Next: ${label}`,
       bridgeTitle: "Great progress!",
-      bridgeMissionDone: "Returning to mission hub…",
+      bridgeMissionDone: "Opening your roadmap…",
     },
     eval: {
       questionLabel: "Question",

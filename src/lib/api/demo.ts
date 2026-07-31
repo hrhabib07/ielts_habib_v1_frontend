@@ -187,11 +187,22 @@ export async function checkDemoAnswer(
   stageOrder: number,
   questionId: string,
   answer: unknown,
-): Promise<{ correct: boolean }> {
-  const res = await apiClient.post<ApiResponse<{ correct: boolean }>>(
-    `/demo/${sessionId}/stages/${stageOrder}/check`,
-    { questionId, answer },
-  );
+): Promise<{
+  correct: boolean;
+  correctAnswer?: string;
+  correctAnswers?: string[];
+  explanationEn?: string;
+  explanationBn?: string;
+}> {
+  const res = await apiClient.post<
+    ApiResponse<{
+      correct: boolean;
+      correctAnswer?: string;
+      correctAnswers?: string[];
+      explanationEn?: string;
+      explanationBn?: string;
+    }>
+  >(`/demo/${sessionId}/stages/${stageOrder}/check`, { questionId, answer });
   return res.data.data;
 }
 

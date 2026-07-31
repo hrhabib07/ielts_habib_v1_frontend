@@ -37,18 +37,18 @@ export function calculateScore(
 
 export function predictBand(score: number, total: number): TestResult {
   const bandMap: Array<{ min: number; max: number; band: string; range: string }> = [
-    { min: 0, max: 1, band: "4.0–5.0", range: "4.0–5.0" },
-    { min: 2, max: 3, band: "5.5–6.5", range: "5.5–6.5" },
-    { min: 4, max: 4, band: "7.0–7.5", range: "7.0–7.5" },
-    { min: 5, max: total, band: "8.0–9.0", range: "8.0–9.0" },
+    { min: 0, max: 1, band: "4.0-5.0", range: "4.0-5.0" },
+    { min: 2, max: 3, band: "5.5-6.5", range: "5.5-6.5" },
+    { min: 4, max: 4, band: "7.0-7.5", range: "7.0-7.5" },
+    { min: 5, max: total, band: "8.0-9.0", range: "8.0-9.0" },
   ];
   const clamped = Math.min(score, total);
   const entry =
     bandMap.find((e) => clamped >= e.min && clamped <= e.max) ?? bandMap[0] ?? {
       min: 0,
       max: total,
-      band: "4.0–5.0",
-      range: "4.0–5.0",
+      band: "4.0-5.0",
+      range: "4.0-5.0",
     };
   return {
     score,

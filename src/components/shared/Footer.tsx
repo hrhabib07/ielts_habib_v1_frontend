@@ -10,7 +10,10 @@ import {
   SUPPORT_WHATSAPP_HREF,
 } from "@/src/lib/contact";
 import { MessageCircle } from "lucide-react";
-import { isImmersiveAuthPath } from "@/src/lib/immersive-auth-paths";
+import {
+  isImmersiveAuthPath,
+  isImmersivePlayerPath,
+} from "@/src/lib/immersive-auth-paths";
 import { ENABLE_READING } from "@/src/lib/platform-config";
 import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
@@ -34,7 +37,7 @@ export function Footer({ initialUser = null }: FooterProps) {
     return null;
   }
 
-  if (isImmersiveAuthPath(pathname)) {
+  if (isImmersiveAuthPath(pathname) || isImmersivePlayerPath(pathname)) {
     return null;
   }
 

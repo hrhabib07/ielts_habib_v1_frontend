@@ -21,7 +21,7 @@ import { Loader2, ClipboardList, AlertCircle, Plus } from "lucide-react";
 const MINI_TEST_INDICES = [1, 2, 3] as const;
 const MAX_FULL_TEST_GROUPS = 10;
 
-/** Group steps by fullTestGroupIndex (1–10). Missing groupIndex treated as 1 for backward compat. */
+/** Group steps by fullTestGroupIndex (1-10). Missing groupIndex treated as 1 for backward compat. */
 function groupStepsByGroupIndex(steps: LevelStep[]): Map<number, LevelStep[]> {
   const map = new Map<number, LevelStep[]>();
   for (const s of steps) {
@@ -341,7 +341,7 @@ function MiniTestSlot({
                 <option value="">Change question set</option>
                 {questionSets.map((qs) => (
                   <option key={qs._id} value={qs._id}>
-                    {qs.instruction?.slice(0, 40) ?? qs._id} (Q{qs.startQuestionNumber}–{qs.endQuestionNumber})
+                    {qs.instruction?.slice(0, 40) ?? qs._id} (Q{qs.startQuestionNumber}-{qs.endQuestionNumber})
                   </option>
                 ))}
               </select>
@@ -371,7 +371,7 @@ function MiniTestSlot({
             <option value="">Select question set</option>
             {questionSets.map((qs) => (
               <option key={qs._id} value={qs._id}>
-                {qs.instruction?.slice(0, 40) ?? qs._id} (Q{qs.startQuestionNumber}–{qs.endQuestionNumber})
+                {qs.instruction?.slice(0, 40) ?? qs._id} (Q{qs.startQuestionNumber}-{qs.endQuestionNumber})
               </option>
             ))}
           </select>

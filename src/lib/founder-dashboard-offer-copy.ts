@@ -1,6 +1,6 @@
-﻿import type { UiLocale } from "@/src/lib/ui-locale";
+import type { UiLocale } from "@/src/lib/ui-locale";
 
-/** Dashboard Founder offer: user facing copy must not include -, –, or  - . */
+/** Dashboard Founder offer: user facing copy must not include -, -, or  - . */
 export interface FounderDashboardOfferCopy {
   readonly alert: (remainingSeats: number) => string;
   readonly headline: string;

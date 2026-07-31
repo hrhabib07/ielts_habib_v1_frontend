@@ -27,6 +27,7 @@ import {
   type MissionCard,
 } from "@/src/lib/api/gamlish";
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
+import { CampGraduationsSection } from "@/src/components/profile/CampGraduationsSection";
 import {
   getOrCreateProfileViewerKey,
   recordPublicProfileView,
@@ -128,7 +129,7 @@ export function GamlishProfileContent({
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const { identity, stats, squad, missionCards, achievements, social, recentActivity } =
+  const { identity, stats, squad, missionCards, achievements, social, recentActivity, campGraduations } =
     profile;
 
   const isLoggedIn = typeof window !== "undefined" && Boolean(getAccessToken());
@@ -338,6 +339,18 @@ export function GamlishProfileContent({
             </div>
           ) : null}
 
+          {identity.isFirstWeekAdopter ? (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-sky-500/15 px-4 py-1.5 text-sm font-bold text-sky-800 ring-1 ring-sky-500/30 dark:text-sky-100">
+              First Week Adopter
+            </div>
+          ) : null}
+
+          {identity.isFirstMonthAdopter && !identity.isFirstWeekAdopter ? (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-4 py-1.5 text-sm font-bold text-emerald-900 ring-1 ring-emerald-500/30 dark:text-emerald-100">
+              First Month Adopter
+            </div>
+          ) : null}
+
           <div className="mt-3 flex flex-col items-center gap-2">
             <JoinedDateBadge joinedAt={identity.joinDate} />
             {identity.isFoundingMember && identity.memberSince ? (
@@ -410,10 +423,10 @@ export function GamlishProfileContent({
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1 font-medium text-foreground">
               <Users className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-              <span className="tabular-nums">{(social.followerCount ?? 0).toLocaleString()}</span>{" "}
+              <span className="tabular-nums">{(social.followerCount ?? 0).toLocaleString("en-US")}</span>{" "}
               {(social.followerCount ?? 0) === 1 ? "follower" : "followers"}
             </span>
-            <span>{social.totalViews.toLocaleString()} profile views</span>
+            <span>{social.totalViews.toLocaleString("en-US")} profile views</span>
           </div>
 
           <div className="mt-4">
@@ -475,7 +488,7 @@ export function GamlishProfileContent({
               <StatCard
                 icon={<Zap className="h-4 w-4 text-white" />}
                 label="XP"
-                value={stats.totalXp.toLocaleString()}
+                value={stats.totalXp.toLocaleString("en-US")}
                 accent="bg-gradient-to-br from-sky-400 to-blue-600"
               />
               <StatCard
@@ -486,6 +499,19 @@ export function GamlishProfileContent({
               />
             </section>
           ) : null}
+
+          <Link
+            href="/leaderboard"
+            className="mt-4 flex items-center justify-between rounded-2xl border border-amber-400/30 bg-gradient-to-r from-amber-400/10 via-card to-sky-500/10 px-4 py-3 transition hover:border-amber-400/50"
+          >
+            <span className="flex items-center gap-2 text-sm font-bold text-foreground">
+              <Trophy className="h-4 w-4 text-amber-600" />
+              XP Leaderboard
+            </span>
+            <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+              View ranks
+            </span>
+          </Link>
 
           {/* Squad */}
           {squad ? (
@@ -530,6 +556,13 @@ export function GamlishProfileContent({
                   <MissionCardTile key={card.missionId} card={card} />
                 ))}
               </div>
+            </section>
+          ) : null}
+
+          {/* Camp graduation badges */}
+          {(campGraduations?.length ?? 0) > 0 ? (
+            <section className="mt-8">
+              <CampGraduationsSection camps={campGraduations ?? []} />
             </section>
           ) : null}
 

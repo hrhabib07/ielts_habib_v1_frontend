@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Lock, Star } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Lock, Moon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
 import { getMyMissionOneFeedback } from "@/src/lib/api/missionOneFeedback";
@@ -17,6 +17,8 @@ import {
   MISSION_ONE_CHECKOUT_HREF,
 } from "@/src/components/player/MissionOneFeedbackModal";
 import { MISSION_ONE_FEEDBACK_STORAGE_KEY } from "@/src/lib/mission-one-feedback";
+import { MissionRoadmapCelebration } from "@/src/components/player/MissionRoadmapCelebration";
+import { MasterPathModal } from "@/src/components/player/MasterPathModal";
 import {
   isPlayerSubscriptionRequiredError,
   playerApiErrorMessage,
@@ -49,16 +51,29 @@ export function MissionHubView({ slug }: { slug: string }) {
   const { locale } = useUiLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const justCompleted = searchParams.get("complete") === "1";
+  // Captured once per mission: the flag is cleared from the URL right after mount so a
+  // refresh or a back-navigation never replays the celebration.
+  const [justCompleted] = useState(() => searchParams.get("complete") === "1");
   const [mission, setMission] = useState<PlayerMissionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [needsSubscription, setNeedsSubscription] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showCompleteBanner, setShowCompleteBanner] = useState(justCompleted);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [roadmapOpen, setRoadmapOpen] = useState(justCompleted);
+  const [roadmapSeen, setRoadmapSeen] = useState(false);
 
   useEffect(() => {
-    if (slug !== FREE_MISSION_SLUG || !justCompleted) return;
+    if (searchParams.get("complete") !== "1") return;
+    router.replace(`/player/missions/${slug}`, { scroll: false });
+  }, [searchParams, router, slug]);
+
+  // Mission 01 feedback is asked only after the roadmap celebration is dismissed.
+  const feedbackGateOpen =
+    !roadmapOpen && (roadmapSeen || (mission != null && mission.status !== "completed"));
+
+  useEffect(() => {
+    if (slug !== FREE_MISSION_SLUG || !justCompleted || !feedbackGateOpen) return;
 
     let cancelled = false;
     try {
@@ -80,7 +95,7 @@ export function MissionHubView({ slug }: { slug: string }) {
     return () => {
       cancelled = true;
     };
-  }, [slug, justCompleted]);
+  }, [slug, justCompleted, feedbackGateOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -117,6 +132,18 @@ export function MissionHubView({ slug }: { slug: string }) {
       cancelled = true;
     };
   }, [slug, PLAYER_UI.couldNotContinue, router]);
+
+  if (roadmapOpen && !needsSubscription) {
+    return (
+      <MissionRoadmapCelebration
+        completedMissionSlug={slug}
+        onExit={() => {
+          setRoadmapOpen(false);
+          setRoadmapSeen(true);
+        }}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -173,6 +200,11 @@ export function MissionHubView({ slug }: { slug: string }) {
         onBuyNow={() => {
           router.push(MISSION_ONE_CHECKOUT_HREF);
         }}
+      />
+
+      <MasterPathModal
+        missionSlug={slug}
+        enabled={!loading && !needsSubscription && mission != null && !locked}
       />
 
       <Link
@@ -271,21 +303,50 @@ export function MissionHubView({ slug }: { slug: string }) {
         })}
       </ol>
 
-      {!locked && (
-        <Button asChild className="mt-8 w-full" size="lg">
-          {mission.status === "completed" && mission.nextMissionSlug ? (
-            <Link href={`/player/missions/${mission.nextMissionSlug}`}>
-              {PLAYER_UI.goToNextMission}
-            </Link>
-          ) : mission.status === "completed" ? (
-            <Link href="/player">{PLAYER_UI.backToMap}</Link>
-          ) : (
+      {!locked &&
+        (mission.status === "completed" ? (
+          <div className="mt-8 space-y-3">
+            {mission.campRest?.active ? (
+              <div className="flex items-start gap-3 rounded-2xl border border-amber-500/35 bg-amber-500/10 px-4 py-3.5 text-left">
+                <Moon className="mt-0.5 h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden />
+                <div>
+                  <p className="text-sm font-bold text-foreground">
+                    {PLAYER_UI.campRest.mapTitle}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {PLAYER_UI.campRest.mapBody(
+                      locale === "bn"
+                        ? (mission.campRest.campTitleBn ?? "এই ক্যাম্প")
+                        : (mission.campRest.campTitleEn ?? "this camp"),
+                      mission.campRest.hoursLeft ?? 24,
+                    )}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+            {mission.nextMissionSlug ? (
+              <Button asChild className="w-full" size="lg">
+                <Link href={`/player/missions/${mission.nextMissionSlug}`}>
+                  {PLAYER_UI.goToNextMission}
+                </Link>
+              </Button>
+            ) : null}
+            <Button
+              asChild
+              variant={mission.nextMissionSlug ? "outline" : "default"}
+              className="w-full"
+              size="lg"
+            >
+              <Link href="/player">{PLAYER_UI.backToMap}</Link>
+            </Button>
+          </div>
+        ) : (
+          <Button asChild className="mt-8 w-full" size="lg">
             <Link href={`/player/missions/${slug}/stage/${nextStage}`}>
               {PLAYER_UI.continueMission}
             </Link>
-          )}
-        </Button>
-      )}
+          </Button>
+        ))}
     </div>
   );
 }

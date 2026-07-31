@@ -28,6 +28,14 @@ export interface PlayerCourseMap {
   hasEnglishAccess: boolean;
   /** False until guest or in-app Mission Zero is finished. */
   missionZeroCompleted?: boolean;
+  campRest?: {
+    active: boolean;
+    until: string | null;
+    afterCampOrder: 1 | 2 | 3 | 4 | null;
+    campTitleEn: string | null;
+    campTitleBn: string | null;
+    hoursLeft: number | null;
+  } | null;
   camps: PlayerCampMap[];
   currentMissionSlug: string | null;
 }
@@ -50,6 +58,14 @@ export interface PlayerMissionDetail {
   xpEarned: number;
   coinsEarned: number;
   nextMissionSlug?: string | null;
+  campRest?: {
+    active: boolean;
+    until: string | null;
+    afterCampOrder: 1 | 2 | 3 | 4 | null;
+    campTitleEn: string | null;
+    campTitleBn: string | null;
+    hoursLeft: number | null;
+  } | null;
 }
 
 export type PlayerEvalType =
@@ -73,6 +89,35 @@ export interface PlayerWritingReviewState {
   passed: boolean | null;
   submittedAt: string;
   reviewedAt: string | null;
+}
+
+export interface PlayerCampOutcome {
+  displayName: string;
+  campOrder?: 1 | 2 | 3 | 4;
+  campTitleEn?: string;
+  campTitleBn?: string;
+  scorePercent: number | null;
+  badge: "master" | "explorer" | "apprentice";
+  badgeTitleBn: string;
+  badgeTitleEn: string;
+  coachNoteBn: string;
+  coachNoteEn: string;
+  rewardXp: number;
+  rewardCoins: number;
+  skillsUnlockedBn: string[];
+  skillsUnlockedEn: string[];
+  scoreBreakdown?: {
+    practiceAvg: number | null;
+    inspectionScore: number;
+    graduationChallengePercent: number;
+    campScore: number;
+    practiceWeightPercent: number;
+    inspectionWeightPercent: number;
+  } | null;
+  rest?: {
+    until: string | null;
+    hoursLeft: number | null;
+  } | null;
 }
 
 export interface PlayerStageContent {
@@ -104,6 +149,7 @@ export interface PlayerStageContent {
   submitStageOrder?: number;
   isReview?: boolean;
   writingReview?: PlayerWritingReviewState | null;
+  campOutcome?: PlayerCampOutcome;
 }
 
 export interface PlayerSubmitResult {
@@ -114,6 +160,7 @@ export interface PlayerSubmitResult {
   correctCount?: number;
   totalCount?: number;
   perQuestion?: Array<{ questionId: string; correct: boolean }>;
+  graduationBadge?: "master" | "explorer" | "apprentice";
   missionComplete: boolean;
   nextMissionSlug: string | null;
   nextStageOrder: number | null;
@@ -138,6 +185,17 @@ export interface MyPlayerProfile {
   streakLongest: number;
   displayName: string | null;
   publicHandle: string | null;
+  masterPath?: {
+    foundationsStartedAt: string | null;
+    windowEndsAt: string | null;
+    daysLeft: number | null;
+    mastersEarned: number;
+    totalCamps: 4;
+    masterByCamp: Record<1 | 2 | 3 | 4, boolean>;
+    intermediateCampFreeAccess: boolean;
+    intermediateCampQualifiedAt: string | null;
+    qualified: boolean;
+  };
 }
 
 export async function getMyPlayerProfile(): Promise<MyPlayerProfile> {
@@ -202,6 +260,10 @@ export interface PlayerAnswerCheckResult {
   correct: boolean;
   correctAnswer?: string;
   correctAnswers?: string[];
+  explanationEn?: string;
+  explanationBn?: string;
+  xpAwarded?: number;
+  attemptNumber?: number;
 }
 
 export async function checkPlayerAnswer(

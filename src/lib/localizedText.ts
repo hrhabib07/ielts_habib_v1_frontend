@@ -58,7 +58,7 @@ export function mcqOptionLabel(index: number): string {
   return MCQ_LETTERS[index] ?? String(index + 1);
 }
 
-/** MCQ correct answer: letter A–D or legacy exact option text. */
+/** MCQ correct answer: letter A-D or legacy exact option text. */
 export function isMcqAnswerCorrect(
   correctAnswer: string,
   selected: string | undefined,

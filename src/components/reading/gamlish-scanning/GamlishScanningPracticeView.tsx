@@ -480,7 +480,7 @@ export const GamlishScanningPracticeView = forwardRef<
         <main className="flex min-h-0 min-w-0 flex-1 flex-col bg-[#1e3a8a]/[0.06] dark:bg-[#0c1929]/40 lg:min-w-[280px]">
           <div className="shrink-0 border-b border-[#1e3a8a]/18 bg-[#1e3a8a]/[0.08] px-4 py-3 dark:border-blue-900/45 dark:bg-[#0c1929]/55 sm:px-5">
             <p className="text-sm font-semibold text-[#0f172a] dark:text-slate-100">
-              Questions 1–{data.questions.length}
+              Questions 1-{data.questions.length}
             </p>
             <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
               {data.briefing}

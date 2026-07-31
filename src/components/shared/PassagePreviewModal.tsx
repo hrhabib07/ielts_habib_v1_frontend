@@ -38,9 +38,9 @@ export default function PassagePreviewModal({
   );
 
   const difficultyLabel: Record<string, string> = {
-    EASY: "Band 5–6",
-    MEDIUM: "Band 6.5–7",
-    HARD: "Band 7.5–9",
+    EASY: "Band 5-6",
+    MEDIUM: "Band 6.5-7",
+    HARD: "Band 7.5-9",
   };
 
   return (
