@@ -124,6 +124,8 @@ export interface PlayerUiCopy {
     readonly translatePrompt: string;
     readonly gapFillPrompt: string;
     readonly gapPlaceholder: string;
+    /** Label above verb / word clues shown with gap-fill and translation questions. */
+    readonly clueLabel: string;
     readonly answerPlaceholder: string;
     readonly pickAnswerFirst: string;
     readonly checkFailed: string;
@@ -312,6 +314,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       translatePrompt: "ইংরেজিতে অনুবাদ করো",
       gapFillPrompt: "খালি ঘরে শব্দটি লেখো",
       gapPlaceholder: "…",
+      clueLabel: "সহায়িকা",
       answerPlaceholder: "উত্তর লেখো…",
       pickAnswerFirst: "আগে একটি উত্তর বেছে নাও।",
       checkFailed: "উত্তর যাচাই করা যায়নি। আবার চেষ্টা করো।",
@@ -478,6 +481,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       translatePrompt: "Translate into English",
       gapFillPrompt: "Type the missing word in the blank",
       gapPlaceholder: "…",
+      clueLabel: "Clue",
       answerPlaceholder: "Type your answer…",
       pickAnswerFirst: "Choose an answer first.",
       checkFailed: "Could not check the answer. Please try again.",

@@ -513,13 +513,7 @@ function EvaluationQuestionBody({
             </p>
           ) : null}
           <PromptRich text={copy.gapFillPrompt} className="text-lg sm:text-xl" />
-          {Array.isArray(question.hints) && (question.hints as string[]).length > 0 ? (
-            <ul className="list-inside list-disc text-xs text-muted-foreground">
-              {(question.hints as string[]).map((h) => (
-                <li key={h}>{h}</li>
-              ))}
-            </ul>
-          ) : null}
+          <QuestionHints hints={question.hints} label={copy.clueLabel} />
           <p
             className={cn(
               "rounded-xl border bg-background px-3 py-3 text-base font-semibold leading-relaxed text-foreground",
@@ -570,13 +564,7 @@ function EvaluationQuestionBody({
           <QuestionSentence text={String(question.sourceText)} />
         ) : null}
         <PromptRich text={copy.translatePrompt} className="text-lg sm:text-xl" />
-        {Array.isArray(question.hints) ? (
-          <ul className="list-inside list-disc text-xs text-muted-foreground">
-            {(question.hints as string[]).map((h) => (
-              <li key={h}>{h}</li>
-            ))}
-          </ul>
-        ) : null}
+        <QuestionHints hints={question.hints} label={copy.clueLabel} />
         <input
           type="text"
           disabled={disabled || locked}
@@ -1061,6 +1049,46 @@ function InstructionNote({ text }: { text: string }) {
       <p className="hidden px-4 py-3 text-sm font-medium leading-relaxed text-muted-foreground sm:block">
         {text}
       </p>
+    </div>
+  );
+}
+
+/** Verb / word clues for gap-fill and translation. Large, high-contrast chips. */
+function QuestionHints({
+  hints,
+  label,
+}: {
+  hints: unknown;
+  label: string;
+}) {
+  if (!Array.isArray(hints) || hints.length === 0) return null;
+  const items = hints
+    .map((h) => String(h ?? "").trim())
+    .filter(Boolean);
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      className="rounded-2xl border-2 border-sky-500/35 bg-sky-500/10 px-4 py-3.5 dark:border-sky-400/30 dark:bg-sky-500/15"
+      role="group"
+      aria-label={label}
+    >
+      <div className="mb-2.5 flex items-center gap-2">
+        <Lightbulb className="h-4 w-4 shrink-0 text-sky-700 dark:text-sky-300" aria-hidden />
+        <p className="text-sm font-bold uppercase tracking-wide text-sky-800 dark:text-sky-200">
+          {label}
+        </p>
+      </div>
+      <ul className="flex flex-wrap gap-2">
+        {items.map((h) => (
+          <li
+            key={h}
+            className="rounded-xl border border-sky-500/25 bg-background px-3.5 py-2 text-lg font-bold leading-snug text-foreground shadow-sm sm:text-xl"
+          >
+            {h}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

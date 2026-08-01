@@ -167,8 +167,10 @@ export function RearrangeWordTiles({
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-2 text-sm font-medium text-foreground">{copy.rearrangeTitle}</p>
-        <p className="text-xs text-muted-foreground">{copy.rearrangeHint}</p>
+        <p className="mb-2 text-base font-semibold text-foreground sm:text-lg">{copy.rearrangeTitle}</p>
+        <p className="text-sm font-medium leading-relaxed text-foreground/80 sm:text-base">
+          {copy.rearrangeHint}
+        </p>
       </div>
 
       <div
