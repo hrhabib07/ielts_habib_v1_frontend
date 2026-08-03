@@ -46,6 +46,7 @@ import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanne
 import { MyGamlishHub } from "@/src/components/profile/MyGamlishHub";
 import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
+import { ProfilePlaySettings } from "@/src/components/profile/ProfilePlaySettings";
 import { cn } from "@/lib/utils";
 
 function formatSubscriptionDate(iso: string): string {
@@ -592,6 +593,8 @@ export default function ProfilePage() {
             </li>
           </ul>
         </Card>
+
+        <ProfilePlaySettings />
 
         <Card className="border-border/70 p-6 shadow-sm md:p-8">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

@@ -140,6 +140,8 @@ export interface PlayerUiCopy {
     readonly retryBanner: string;
     /** Shown under wrong-answer feedback · Continue is required (no auto-advance). */
     readonly readThenContinue: string;
+    /** When auto-advance is off and the answer was correct. */
+    readonly continueWhenReady: string;
     readonly rearrangeTitle: string;
     readonly rearrangeHint: string;
     readonly rearrangeDrop: string;
@@ -331,6 +333,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       retryBanner:
         "তুমি শুধু যে প্রশ্নগুলো ভুল করেছিলে সেগুলো আবার করো। প্রতিটি সঠিক হলে পরের ধাপে যেতে পারবে।",
       readThenContinue: "ব্যাখ্যাটি ভালো করে পড়ো, তারপর এগিয়ে যাও।",
+      continueWhenReady: "প্রস্তুত হলে এগিয়ে যাও।",
       rearrangeTitle: "শব্দগুলো সাজিয়ে সঠিক বাক্য তৈরি করো",
       rearrangeHint: "শব্দ টেনে এনে উপরে সাজাও, অথবা ট্যাপ করে বেছে নাও।",
       rearrangeDrop: "শব্দ এখানে সাজাও…",
@@ -499,6 +502,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       retryBanner:
         "Retry only the questions you missed. Get each one right to unlock the next stage.",
       readThenContinue: "Read the explanation carefully, then continue.",
+      continueWhenReady: "Continue when you are ready.",
       rearrangeTitle: "Arrange the words into a correct sentence",
       rearrangeHint: "Drag words up, or tap to place them.",
       rearrangeDrop: "Drop words here…",

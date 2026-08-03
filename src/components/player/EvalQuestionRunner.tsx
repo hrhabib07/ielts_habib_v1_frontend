@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { RearrangeWordTiles } from "@/src/components/player/RearrangeWordTiles";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
+import { useAutoAdvanceCorrect } from "@/src/hooks/useAutoAdvanceCorrect";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { PlayerUiCopy } from "@/src/lib/player-ui-copy";
 import { emitXpGain } from "@/src/lib/xp-events";
@@ -667,6 +668,7 @@ export function EvalQuestionRunner({
 }) {
   const PLAYER_UI = usePlayerUiCopy();
   const copy = PLAYER_UI.eval;
+  const autoAdvanceCorrect = useAutoAdvanceCorrect();
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
@@ -803,10 +805,11 @@ export function EvalQuestionRunner({
   };
   handleContinueRef.current = handleContinue;
 
-  // Correct: short auto-advance. Wrong: stay until Continue so feedback can be read.
+  // Correct + preference ON: short auto-advance. Wrong (or preference OFF): wait for Continue.
   useEffect(() => {
     if (!isChecked || checking || !questionId) return;
     if (!currentCheck?.correct) return;
+    if (!autoAdvanceCorrect) return;
     if (continueLockRef.current === questionId) return;
 
     const timer = window.setTimeout(() => {
@@ -814,7 +817,7 @@ export function EvalQuestionRunner({
     }, AUTO_ADVANCE_CORRECT_MS);
 
     return () => window.clearTimeout(timer);
-  }, [isChecked, checking, questionId, currentCheck]);
+  }, [isChecked, checking, questionId, currentCheck, autoAdvanceCorrect]);
 
   // Recover if index overshoots (legacy double-advance) so the CTA never vanishes.
   useEffect(() => {
@@ -906,6 +909,12 @@ export function EvalQuestionRunner({
           {currentCheck && !currentCheck.correct && !retryMode ? (
             <p className="text-sm font-medium leading-relaxed text-foreground/80">
               {copy.readThenContinue}
+            </p>
+          ) : null}
+
+          {currentCheck?.correct && !autoAdvanceCorrect ? (
+            <p className="text-sm font-medium leading-relaxed text-foreground/80">
+              {copy.continueWhenReady}
             </p>
           ) : null}
 
