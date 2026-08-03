@@ -37,9 +37,8 @@ import {
 
 type EvalQuestion = Record<string, unknown>;
 
-/** Duolingo-style pause so feedback is readable, then auto-advance. */
-const AUTO_ADVANCE_MS = 1500;
-const AUTO_ADVANCE_WITH_EXPLANATION_MS = 4500;
+/** Short pause after a correct answer, then auto-advance. Wrong answers wait for Continue. */
+const AUTO_ADVANCE_CORRECT_MS = 1500;
 
 const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F"] as const;
 
@@ -804,23 +803,18 @@ export function EvalQuestionRunner({
   };
   handleContinueRef.current = handleContinue;
 
-  // After feedback (correct or confirmed wrong), auto-advance like Duolingo.
+  // Correct: short auto-advance. Wrong: stay until Continue so feedback can be read.
   useEffect(() => {
     if (!isChecked || checking || !questionId) return;
-    if (retryMode && currentCheck && !currentCheck.correct) return;
+    if (!currentCheck?.correct) return;
     if (continueLockRef.current === questionId) return;
-
-    const hasExplanation = Boolean(
-      currentCheck?.explanationBn || currentCheck?.explanationEn,
-    );
-    const delay = hasExplanation ? AUTO_ADVANCE_WITH_EXPLANATION_MS : AUTO_ADVANCE_MS;
 
     const timer = window.setTimeout(() => {
       handleContinueRef.current();
-    }, delay);
+    }, AUTO_ADVANCE_CORRECT_MS);
 
     return () => window.clearTimeout(timer);
-  }, [isChecked, checking, questionId, retryMode, currentCheck]);
+  }, [isChecked, checking, questionId, currentCheck]);
 
   // Recover if index overshoots (legacy double-advance) so the CTA never vanishes.
   useEffect(() => {
@@ -907,6 +901,12 @@ export function EvalQuestionRunner({
           {isThinkAgain ? <ThinkAgainPrompt copy={copy} /> : null}
           {currentCheck ? (
             <QuestionFeedback result={currentCheck} stageType={stageType} copy={copy} />
+          ) : null}
+
+          {currentCheck && !currentCheck.correct && !retryMode ? (
+            <p className="text-sm font-medium leading-relaxed text-foreground/80">
+              {copy.readThenContinue}
+            </p>
           ) : null}
 
           {stepError ? (
