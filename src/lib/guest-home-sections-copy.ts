@@ -1,6 +1,19 @@
 import type { GuestLandingLocale } from "@/src/lib/guest-landing-copy";
 
 export interface GuestHomeSectionsCopy {
+  readonly joinOffer: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly sub: string;
+    readonly weekOutcomes: readonly {
+      readonly label: string;
+      readonly body: string;
+    }[];
+    readonly missionLoop: string;
+    readonly whyNow: string;
+    readonly ctaPrimary: string;
+    readonly ctaSecondary: string;
+  };
   readonly problemBadge: string;
   readonly problemTitle: string;
   readonly problemP1: string;
@@ -54,6 +67,36 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
   GuestHomeSectionsCopy
 > = {
   en: {
+    joinOffer: {
+      eyebrow: "What you get if you join",
+      title:
+        "In 4 weeks · what you think in Bangla, you express in correct English",
+      sub: "21 missions · game-like practice · write, get corrected, level up",
+      weekOutcomes: [
+        {
+          label: "Week 1 · Foundation",
+          body: "Build correct sentences. Stop reversed Bangla word order.",
+        },
+        {
+          label: "Week 2 · Action",
+          body: "Ask, answer, and use daily English with confidence.",
+        },
+        {
+          label: "Week 3 · Time",
+          body: "Use the right tense for real situations.",
+        },
+        {
+          label: "Week 4 · Real English",
+          body: "Commands, passive, reported speech, and natural writing.",
+        },
+      ],
+      missionLoop:
+        "Every mission: lesson · guided writing · instant correction · XP",
+      whyNow:
+        "You can start today. Build the English skill you actually need.",
+      ctaPrimary: "You can do this too · Start now",
+      ctaSecondary: "Play Free Demo",
+    },
     problemBadge: "The Real Problem",
     problemTitle: "Why do we still freeze when writing a simple English sentence?",
     problemP1:
@@ -223,6 +266,36 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
     ],
   },
   bn: {
+    joinOffer: {
+      eyebrow: "যোগ দিলে আপনি যা পাবেন",
+      title:
+        "4 সপ্তাহে · বাংলায় যা ভাববেন, ইংরেজিতে সঠিকভাবে প্রকাশ করবেন",
+      sub: "21টি মিশন · গেমের মতো অনুশীলন · লিখুন, শুধরে নিন, লেভেল আপ করুন",
+      weekOutcomes: [
+        {
+          label: "Week 1 · Foundation",
+          body: "সঠিক বাক্য গঠন শিখবেন। বাংলার উল্টো ওয়ার্ড অর্ডার বন্ধ হবে।",
+        },
+        {
+          label: "Week 2 · Action",
+          body: "প্রশ্ন করবেন, উত্তর দিবেন, দৈনন্দিন ইংরেজি ব্যবহার করবেন।",
+        },
+        {
+          label: "Week 3 · Time",
+          body: "বাস্তব পরিস্থিতিতে সঠিক Tense ব্যবহার করতে পারবেন।",
+        },
+        {
+          label: "Week 4 · Real English",
+          body: "Command, Passive, Reported Speech ও natural writing আয়ত্ত করবেন।",
+        },
+      ],
+      missionLoop:
+        "প্রতিটি মিশনে: লেসন · guided writing · instant correction · XP",
+      whyNow:
+        "আজই শুরু করতে পারেন। যে ইংরেজি দক্ষতা আপনার সত্যিই দরকার, সেটাই গড়ুন।",
+      ctaPrimary: "আপনিও পারবেন · এখনই শুরু করুন",
+      ctaSecondary: "ফ্রি ডেমো খেলুন",
+    },
     problemBadge: "আসল সমস্যা",
     problemTitle:
       "বছরের পর বছর পড়েও কেন আমরা একটি সাধারণ ইংরেজি বাক্য লিখতে ভয় পাই?",

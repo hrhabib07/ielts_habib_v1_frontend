@@ -17,3 +17,10 @@ export const ENGLISH_COURSE_SLUG = "english-foundations";
  * Hidden while counts are low. Flip to true to show again.
  */
 export const SHOW_GUEST_DEMO_SOCIAL_PROOF = false;
+
+/**
+ * Right-side hero visual:
+ * true  = Magic Translate cinema (Bangla thought → English reveal)
+ * false = legacy mission progress card (instant rollback)
+ */
+export const USE_HERO_TRANSLATE_CINEMA = true;

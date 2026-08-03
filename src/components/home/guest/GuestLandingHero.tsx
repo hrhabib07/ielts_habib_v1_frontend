@@ -40,11 +40,34 @@ export function GuestLandingHero() {
           <GuestHeroHeadline className="mx-auto mt-4 max-w-xl lg:mx-0" />
 
           <motion.p
-            className="mx-auto mt-3 max-w-md text-pretty text-lg leading-relaxed text-foreground/80 lg:mx-0"
+            className="mx-auto mt-4 max-w-lg text-pretty text-base font-semibold leading-snug text-foreground/90 sm:text-lg lg:mx-0"
             initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.06, ease: GUEST_EASE }}
           >
+            <span className="mr-1.5 inline-flex items-center gap-1.5 align-middle">
+              <span
+                className="relative inline-flex h-[1.05em] w-[1.75em] shrink-0 overflow-hidden rounded-[3px] shadow-[0_0_0_1px_rgba(0,0,0,0.12)]"
+                role="img"
+                aria-label="Bangladesh"
+              >
+                <svg
+                  viewBox="0 0 20 12"
+                  className="h-full w-full"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden
+                >
+                  <rect width="20" height="12" fill="#006A4E" />
+                  <circle cx="9" cy="6" r="4" fill="#F42A41" />
+                </svg>
+              </span>
+              <span className="font-black tracking-tight text-sky-700 dark:text-sky-300">
+                {copy.heroClaimRank}
+              </span>
+              <span className="font-semibold text-foreground/35" aria-hidden>
+                ·
+              </span>
+            </span>
             {copy.heroSubheadline}
           </motion.p>
 

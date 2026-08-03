@@ -7,6 +7,7 @@ import {
   useGuestLandingLocale,
 } from "@/src/components/home/guest/GuestLandingLocale";
 import { GuestLandingHero } from "@/src/components/home/guest/GuestLandingHero";
+import { GuestJoinOfferSection } from "@/src/components/home/guest/GuestJoinOfferSection";
 import { GuestProblemHook } from "@/src/components/home/guest/GuestProblemHook";
 import { GuestTransformGrid } from "@/src/components/home/guest/GuestTransformGrid";
 import { GuestCampsRoadmap } from "@/src/components/home/guest/GuestCampsRoadmap";
@@ -63,6 +64,7 @@ function GuestLandingSurface() {
       </div>
       <div className="relative">
         <GuestLandingHero />
+        <GuestJoinOfferSection />
         <GuestProblemHook />
         <GuestTransformGrid />
         <GuestCampsRoadmap />

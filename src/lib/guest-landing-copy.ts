@@ -31,6 +31,24 @@ export interface GuestTryOneQuestionCopy {
   readonly tryAgain: string;
 }
 
+/** Right-column Magic Translate cinema (does not affect left hero copy). */
+export interface GuestHeroCinemaCopy {
+  readonly eyebrow: string;
+  readonly banglaChip: string;
+  readonly englishChip: string;
+  readonly banglaSentence: string;
+  readonly englishSentence: string;
+  /** Shown under Bangla thought: before joining Gamlish. */
+  readonly beforeLabel: string;
+  /** Shown under English result: after 21 missions. */
+  readonly afterLabel: string;
+  readonly missionLabel: string;
+  readonly missionsPlural: string;
+  readonly stepLabel: string;
+  readonly xpPop: string;
+  readonly payoffLine: string;
+}
+
 export interface GuestLandingCopy {
   readonly languageToggleAria: string;
   readonly englishLabel: string;
@@ -42,7 +60,12 @@ export interface GuestLandingCopy {
   readonly heroHeadlineLine2: string;
   /** Words highlighted in brand blue (e.g. games + English). */
   readonly heroAccentWords: readonly string[];
+  /** Rank signal shown with the Bangladesh flag in the hero claim. */
+  readonly heroClaimRank: string;
+  /** Core market claim after the flag · #1 signal. */
   readonly heroSubheadline: string;
+  /** Right-column only: Magic Translate cinema strings. */
+  readonly heroCinema: GuestHeroCinemaCopy;
   readonly ctaPrimary: string;
   readonly ctaPrimarySub: string;
   readonly ctaSecondary: string;
@@ -107,13 +130,28 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     heroHeadlineLine1: "Play games,",
     heroHeadlineLine2: "learn English",
     heroAccentWords: ["games", "English"],
+    heroClaimRank: "#1",
     heroSubheadline:
-      "Bangladesh's first homegrown, game-based English learning platform, designed to strengthen your English foundation step by step",
+      "Bangladesh's First Gamified English Learning Website",
+    heroCinema: {
+      eyebrow: "21-mission transformation",
+      banglaChip: "বাংলায় চিন্তা",
+      englishChip: "Express in English",
+      banglaSentence: "আমি কাল বাজারে যাব",
+      englishSentence: "I will go to the market tomorrow",
+      beforeLabel: "Before joining Gamlish",
+      afterLabel: "After completing 21 missions",
+      missionLabel: "Mission",
+      missionsPlural: "21 Missions",
+      stepLabel: "Step",
+      xpPop: "+XP",
+      payoffLine: "You can do this too · Start now",
+    },
     ctaPrimary: "Play Free Demo",
     ctaPrimarySub: "60 seconds · No account needed",
     ctaSecondary: "How it works",
     ctaPreOrder: "Join as VIP",
-    ctaPreOrderSub: "1 month access · pay with bKash",
+    ctaPreOrderSub: "45-day full access · pay with bKash",
     stickyCta: "Play Free Demo",
     stickyPreOrder: "VIP access",
     socialProofFallback:
@@ -216,13 +254,28 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     heroHeadlineLine1: "গেম খেলুন,",
     heroHeadlineLine2: "ইংরেজি শিখুন",
     heroAccentWords: ["গেম", "ইংরেজি"],
+    heroClaimRank: "#1",
     heroSubheadline:
-      "দেশে তৈরি প্রথম গেমভিত্তিক ইংরেজি শেখার প্ল্যাটফর্ম, যা ধাপে ধাপে মজবুত করবে আপনার ইংরেজির ভিত্তি",
+      "বাংলাদেশের প্রথম গেমভিত্তিক ইংরেজি শেখার ওয়েবসাইট",
+    heroCinema: {
+      eyebrow: "21 মিশনের রূপান্তর",
+      banglaChip: "বাংলায় চিন্তা",
+      englishChip: "ইংরেজিতে প্রকাশ",
+      banglaSentence: "আমি কাল বাজারে যাব",
+      englishSentence: "I will go to the market tomorrow",
+      beforeLabel: "Gamlish-এ যোগ দেওয়ার আগে",
+      afterLabel: "21টি মিশন শেষ করার পর",
+      missionLabel: "মিশন",
+      missionsPlural: "21টি মিশন",
+      stepLabel: "ধাপ",
+      xpPop: "+XP",
+      payoffLine: "আপনিও পারবেন · এখনই শুরু করুন",
+    },
     ctaPrimary: "ফ্রি ডেমো খেলুন",
     ctaPrimarySub: "60 সেকেন্ড · কোনো অ্যাকাউন্ট লাগবে না",
     ctaSecondary: "কীভাবে কাজ করে",
     ctaPreOrder: "VIP হিসেবে যোগ দিন",
-    ctaPreOrderSub: "1 মাসের অ্যাক্সেস · bKash দিয়ে পেমেন্ট",
+    ctaPreOrderSub: "45 দিনের পূর্ণ অ্যাক্সেস · bKash দিয়ে পেমেন্ট",
     stickyCta: "ফ্রি ডেমো খেলুন",
     stickyPreOrder: "VIP অ্যাক্সেস",
     socialProofFallback: "প্লেয়াররা ইতিমধ্যে প্রথম মিশনে যোগ দিয়েছেন।",
