@@ -8,12 +8,14 @@ export interface FounderLaunchCopy {
   readonly accessNote: string;
   readonly accessStartsLabel: (dateLabel: string) => string;
   readonly durationLabel: (days: number) => string;
+  readonly completionClaim: string;
   readonly cta: string;
   readonly trust: string;
   readonly founderBadge: string;
   readonly preOrderBadge: string;
   readonly offBadge: (percent: number) => string;
-  readonly perMonth: string;
+  /** Unit under the deal price — not monthly. */
+  readonly onePayment: string;
   readonly premiumLabel: string;
   readonly upgrade: string;
   /** Short sticky / mobile pay label */
@@ -21,53 +23,58 @@ export interface FounderLaunchCopy {
   readonly featuresMore: string;
   readonly featuresLess: string;
   readonly stickyPriceHint: string;
+  readonly limitedOffer: string;
 }
 
 export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
   bn: {
-    eyebrow: "VIP অ্যাক্সেস · বিশেষ অফার চলছে",
-    headline: "এখনই VIP হিসেবে যোগ দিন",
+    eyebrow: "ফুল জার্নি অ্যাক্সেস · বিশেষ অফার",
+    headline: "এখনই ফুল জার্নি অ্যাক্সেস নিন",
     intro:
-      "পেমেন্ট ভেরিফাই হলে সাথে সাথে 1 মাসের পূর্ণ English Foundations অ্যাক্সেস পাবেন।",
+      "পেমেন্ট ভেরিফাই হলে অ্যাক্টিভ হওয়ার পর 45 দিনের পূর্ণ English Foundations অ্যাক্সেস পাবেন।",
     scarcity:
-      "রেগুলার মূল্য 1590 টাকা। এখন বিশেষ অফারে মাত্র 490 টাকায় 1 মাস।",
-    accessNote: "পেমেন্ট ভেরিফাই হলে অ্যাক্সেস সাথে সাথে চালু।",
+      "রেগুলার মূল্য 1,590 টাকা। এখন বিশেষ অফারে 690 টাকা।",
+    accessNote: "পেমেন্ট ভেরিফাই হলে অ্যাক্সেস চালু হবে।",
     accessStartsLabel: (dateLabel) => `শুরু: ${dateLabel}`,
-    durationLabel: (days) => `${days} দিনের অ্যাক্সেস`,
-    cta: "VIP অ্যাক্সেস নিন · এখনই শেখা শুরু করুন।",
-    trust: "bKash · ম্যানুয়াল ভেরিফিকেশন · নিরাপদ",
-    founderBadge: "VIP Offer",
-    preOrderBadge: "VIP Access",
+    durationLabel: (days) => `অ্যাক্টিভ হওয়ার পর ${days} দিনের অ্যাক্সেস`,
+    completionClaim: "সাধারণত 21টি মিশন শেষ করতে 21 দিন লাগে।",
+    cta: "ফুল জার্নি অ্যাক্সেস নিন · এখনই শেখা শুরু করুন।",
+    trust: "bKash · ম্যানুয়াল ভেরিফিকেশন",
+    founderBadge: "বিশেষ অফার",
+    preOrderBadge: "ফুল জার্নি অ্যাক্সেস",
     offBadge: (percent) => `${percent}% ছাড়`,
-    perMonth: "/মাস",
-    premiumLabel: "Gamlish Premium · VIP",
-    upgrade: "VIP হিসেবে যোগ দিন",
-    upgradeShort: "VIP অ্যাক্সেস",
+    onePayment: "একবারের পেমেন্ট",
+    premiumLabel: "Gamlish · ফুল জার্নি অ্যাক্সেস",
+    upgrade: "VIP এক্সেস নিন",
+    upgradeShort: "VIP এক্সেস নিন",
     featuresMore: "আরও সুবিধা দেখুন",
     featuresLess: "কম দেখুন",
     stickyPriceHint: "bKash দিয়ে পেমেন্ট",
+    limitedOffer: "অফারটি সীমিত সময়ের জন্যে",
   },
   en: {
-    eyebrow: "VIP access · limited offer",
-    headline: "Join as VIP now",
+    eyebrow: "Full Journey Access · special offer",
+    headline: "Get Full Journey Access now",
     intro:
-      "After payment verification you get 1 month of full English Foundations access right away.",
+      "After payment verification you get 45 days of full English Foundations access from activation.",
     scarcity:
-      "Regular price 1590 BDT. Special offer: 1 month for 490 BDT.",
-    accessNote: "Access starts as soon as payment is verified.",
+      "Regular price 1,590 BDT. Special offer: 690 BDT.",
+    accessNote: "Access starts when payment is verified.",
     accessStartsLabel: (dateLabel) => `Starts: ${dateLabel}`,
-    durationLabel: (days) => `${days} days of access`,
-    cta: "Take VIP access · start learning now.",
-    trust: "bKash · manual verify · secure",
-    founderBadge: "VIP Offer",
-    preOrderBadge: "VIP Access",
+    durationLabel: (days) => `${days} days of access from activation`,
+    completionClaim: "Usually it takes 21 days to complete 21 missions.",
+    cta: "Take Full Journey Access · start learning now.",
+    trust: "bKash · manual verification",
+    founderBadge: "Special offer",
+    preOrderBadge: "Full Journey Access",
     offBadge: (percent) => `${percent}% OFF`,
-    perMonth: "/month",
-    premiumLabel: "Gamlish Premium · VIP",
-    upgrade: "Join as VIP",
-    upgradeShort: "VIP access",
+    onePayment: "one payment",
+    premiumLabel: "Gamlish · Full Journey Access",
+    upgrade: "Take VIP access",
+    upgradeShort: "Take VIP access",
     featuresMore: "Show more benefits",
     featuresLess: "Show less",
     stickyPriceHint: "Pay with bKash",
+    limitedOffer: "Limited-time offer",
   },
 } as const;

@@ -115,11 +115,13 @@ export function PaymentConfirmationContent() {
         </p>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
           স্ট্যাটাস: <strong>Pending Verification</strong>। অ্যাডমিন ভেরিফাই
-          করলে 1 মাসের VIP অ্যাক্সেস সাথে সাথে চালু হবে।
+          করলে অ্যাক্টিভ হওয়ার পর 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে।
+          সাধারণত 21টি মিশন শেষ করতে 21 দিন লাগে।
         </p>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
           Status: <strong>Pending Verification</strong>. After admin review,
-          your 1-month VIP access starts right away.
+          you get 45 days of Full Journey Access from activation. Usually it
+          takes 21 days to complete 21 missions.
         </p>
       </div>
 

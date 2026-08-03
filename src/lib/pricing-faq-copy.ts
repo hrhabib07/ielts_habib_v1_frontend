@@ -29,7 +29,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Yes. After we verify your bKash payment, your 1-month VIP access starts right away. You can play all paid missions as soon as verification is complete.",
+            "Yes. After we verify your bKash payment, you get 45 days of Full Journey Access from activation. You can play all paid missions as soon as verification is complete. Usually it takes 21 days to complete 21 missions.",
         },
       },
       {
@@ -37,7 +37,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "A special VIP offer is running. Regular price is 1590 BDT per month. Right now you can enroll for 490 BDT and lock today's price.",
+            "A special Full Journey Access offer is running. Regular price is 1,590 BDT. Right now you can enroll for 690 BDT — one payment.",
         },
       },
       {
@@ -45,7 +45,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Mission 01 stays free. You can create an account, play the first mission, and learn how Gamlish works before you take VIP access.",
+            "Mission 01 stays free. You can create an account, play the first mission, and learn how Gamlish works before you take Full Journey Access.",
         },
       },
       {
@@ -70,7 +70,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "হ্যাঁ। bKash পেমেন্ট ভেরিফাই হওয়ার পর 1 মাসের VIP অ্যাক্সেস সাথে সাথে চালু হবে। ভেরিফিকেশন শেষ হলেই পেইড মিশন খেলতে পারবেন।",
+            "হ্যাঁ। bKash পেমেন্ট ভেরিফাই হওয়ার পর অ্যাক্টিভ হওয়ার থেকে 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে। ভেরিফিকেশন শেষ হলেই পেইড মিশন খেলতে পারবেন। সাধারণত 21টি মিশন শেষ করতে 21 দিন লাগে।",
         },
       },
       {
@@ -78,7 +78,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "এখন বিশেষ VIP অফার চলছে। রেগুলার মূল্য 1590 টাকা/মাস। এখন মাত্র 490 টাকায় এনরোল করে আজকের মূল্য লক করতে পারেন।",
+            "এখন বিশেষ ফুল জার্নি অ্যাক্সেস অফার চলছে। রেগুলার মূল্য 1,590 টাকা। এখন একবারের পেমেন্টে 690 টাকায় এনরোল করতে পারেন।",
         },
       },
       {
@@ -86,7 +86,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Mission 01 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলতে পারবেন, VIP অ্যাক্সেস নেওয়ার আগে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
+            "Mission 01 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলতে পারবেন, ফুল জার্নি অ্যাক্সেস নেওয়ার আগে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
         },
       },
       {

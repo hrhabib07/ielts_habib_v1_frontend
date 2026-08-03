@@ -1,6 +1,6 @@
 import type { UiLocale } from "@/src/lib/ui-locale";
 
-/** Dashboard VIP offer copy for unpaid players (Founder window closed). */
+/** Dashboard offer copy for unpaid players (legacy Founder card fallback). */
 export interface FounderDashboardOfferCopy {
   readonly alert: (remainingSeats: number) => string;
   readonly headline: string;
@@ -22,39 +22,35 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
 > = {
   bn: {
     alert: () =>
-      "VIP অ্যাক্সেস 490 টাকায়। রেগুলার 1590 টাকা।",
-    headline: "এখনই VIP হিসেবে যোগ দিন",
-    priceHint: "1 মাসের পূর্ণ অ্যাক্সেস · পেমেন্ট ভেরিফাই হলে সাথে সাথে",
-    seatsLeft: () => "বিশেষ VIP অফার চলছে",
+      "ফুল জার্নি অ্যাক্সেস 690 টাকা। রেগুলার 1,590 টাকা।",
+    headline: "এখনই ফুল জার্নি অ্যাক্সেস নিন",
+    priceHint: "45 দিনের অ্যাক্সেস · সাধারণত 21 মিশন শেষ করতে 21 দিন সময় লাগে",
+    seatsLeft: () => "বিশেষ অফার চলছে",
     seatsFilled: () => "",
-    cta: "490 টাকায় VIP অ্যাক্সেস নিন",
-    trust: "bKash · 1 মাস · ভেরিফাইর পর অ্যাক্সেস",
+    cta: "VIP এক্সেস নিন",
+    trust: "bKash · ম্যানুয়াল ভেরিফিকেশন",
     saveLabel: "বাঁচবে",
-    tierOpen: () => "VIP অফার",
-    countdownLabel: (nextPrice) =>
-      `এই অফার শেষ হলে মূল্য হবে ${nextPrice} টাকা`,
-    countdownCritical: (nextPrice) =>
-      `মাত্র কয়েক মিনিট বাকি! এরপর ${nextPrice} টাকা হবে`,
-    countdownExpired: "অফারের সময় শেষ হয়েছে",
+    tierOpen: () => "বিশেষ অফার",
+    countdownLabel: () => "অফারটি সীমিত সময়ের জন্যে",
+    countdownCritical: () => "অফারটি সীমিত সময়ের জন্যে",
+    countdownExpired: "অফার আপডেট হতে পারে",
   },
   en: {
     alert: () =>
-      "VIP access for 490 BDT. Regular price 1590 BDT.",
-    headline: "Join as VIP now",
-    priceHint: "1 month full access · starts after payment verification",
-    seatsLeft: () => "Special VIP offer is live",
+      "Full Journey Access for 690 BDT. Regular 1,590 BDT.",
+    headline: "Get Full Journey Access now",
+    priceHint: "45-day access · usually takes 21 days to finish 21 missions",
+    seatsLeft: () => "Special offer is live",
     seatsFilled: () => "",
-    cta: "Take VIP access for 490 BDT",
-    trust: "bKash · 1 month · access after verify",
+    cta: "Take VIP access",
+    trust: "bKash · manual verification",
     saveLabel: "Save",
-    tierOpen: () => "VIP offer",
-    countdownLabel: (nextPrice) =>
-      `Price rises to ${nextPrice} BDT when this ends`,
-    countdownCritical: (nextPrice) =>
-      `Last few minutes! Jumps to ${nextPrice} BDT`,
-    countdownExpired: "Offer window has closed",
+    tierOpen: () => "Special offer",
+    countdownLabel: () => "Limited-time offer",
+    countdownCritical: () => "Limited-time offer",
+    countdownExpired: "Offer may update later",
   },
 };
 
-/** Anchor shown if a legacy founder countdown still renders. */
+/** List / strike anchor. */
 export const COUNTDOWN_NEXT_PRICE_BDT = 1590;

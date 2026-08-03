@@ -33,70 +33,23 @@ export function FounderLaunchPricingCard({
       ? (pricing.offerLabelBn ?? pricing.offerLabelEn ?? copy.founderBadge)
       : (pricing.offerLabelEn ?? copy.founderBadge);
 
-  const headline =
+  const badgeNote =
     cohort === "first_week"
       ? locale === "bn"
-        ? "First Week Adopter · 490 টাকায় 1 মাস"
-        : "First Week Adopter · 1 month for 490 BDT"
+        ? "এখন যোগ দিলে পাবেন স্থায়ী First Week Adopter ব্যাজ।"
+        : "Join now for a permanent First Week Adopter badge."
       : cohort === "first_month"
         ? locale === "bn"
-          ? "First Month Adopter · 590 টাকায় 1 মাস"
-          : "First Month Adopter · 1 month for 590 BDT"
-        : cohort === "standard_q4" || cohort === "standard"
-          ? locale === "bn"
-            ? "মাসিক সাবস্ক্রিপশন"
-            : "Monthly subscription"
-          : copy.headline;
-
-  const eyebrow =
-    cohort === "first_week"
-      ? locale === "bn"
-        ? "1-7 আগস্ট · শুধু 7 দিন"
-        : "1-7 August · 7 days only"
-      : cohort === "first_month"
-        ? locale === "bn"
-          ? "8-31 আগস্ট · First Month Adopter"
-          : "8-31 August · First Month Adopter"
-        : cohort === "standard_q4"
-          ? locale === "bn"
-            ? "সেপ্টেম্বর-ডিসেম্বর · মাসিক"
-            : "Sep-Dec · monthly"
-          : copy.eyebrow;
-
-  const scarcity =
-    cohort === "first_week"
-      ? locale === "bn"
-        ? "রেগুলার 1590 টাকা। এখন 490 টাকায় 1 মাস। স্থায়ী First Week Adopter ব্যাজ (Wall নয়)।"
-        : "Regular 1590 BDT. Now 490 BDT for 1 month. Permanent First Week Adopter badge (not the Founders Wall)."
-      : cohort === "first_month"
-        ? locale === "bn"
-          ? "রেগুলার 1590 টাকা। এখন 590 টাকা/মাস। স্থায়ী First Month Adopter ব্যাজ (Wall নয়)।"
-          : "Regular 1590 BDT. Now 590 BDT/month. Permanent First Month Adopter badge (not the Founders Wall)."
-        : cohort === "standard_q4"
-          ? locale === "bn"
-            ? "সেপ্টেম্বর থেকে ডিসেম্বর · 999 টাকা/মাস।"
-            : "September to December · 999 BDT per month."
-          : copy.scarcity;
-
-  const intro =
-    cohort === "founder"
-      ? copy.intro
-      : locale === "bn"
-        ? "পেমেন্ট ভেরিফাই হলে পাবেন 1 মাসের পূর্ণ English Foundations অ্যাক্সেস।"
-        : "After payment verification you get 1 month of full English Foundations access.";
-
-  const durationLabel =
-    cohort === "founder"
-      ? copy.durationLabel(pricing.durationDays)
-      : locale === "bn"
-        ? `${pricing.durationDays} দিন অ্যাক্সেস`
-        : `${pricing.durationDays} days of access`;
+          ? "এখন যোগ দিলে পাবেন স্থায়ী First Month Adopter ব্যাজ।"
+          : "Join now for a permanent First Month Adopter badge."
+        : null;
 
   const features = pricing.features.map((f) => toLatinDigits(f));
   const visibleFeatures = showAllFeatures
     ? features
     : features.slice(0, FEATURES_PREVIEW);
   const hasMoreFeatures = features.length > FEATURES_PREVIEW;
+  const saveAmount = Math.max(0, pricing.regularPriceBdt - pricing.finalPriceBdt);
 
   return (
     <div
@@ -122,15 +75,19 @@ export function FounderLaunchPricingCard({
         />
 
         <div className="relative space-y-5 p-5 sm:space-y-6 sm:p-7">
+          <div className="mx-auto inline-flex items-center rounded-full bg-amber-400/15 px-3 py-1 text-xs font-bold text-amber-900 ring-1 ring-amber-500/25 dark:text-amber-200">
+            {copy.limitedOffer}
+          </div>
+
           <div className="space-y-2 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-800 dark:text-amber-300">
-              {eyebrow}
+              {copy.eyebrow}
             </p>
             <h1 className="text-balance text-xl font-black leading-snug tracking-tight text-foreground sm:text-2xl md:text-3xl">
-              {headline}
+              {copy.headline}
             </h1>
             <p className="mx-auto max-w-md text-pretty text-sm leading-relaxed text-muted-foreground">
-              {intro}
+              {copy.intro}
             </p>
           </div>
 
@@ -163,21 +120,30 @@ export function FounderLaunchPricingCard({
               {copy.premiumLabel}
             </p>
 
-            <div className="mt-2 flex flex-col items-center gap-0.5">
+            <div className="mt-3 flex flex-col items-center gap-1">
               {showDiscount ? (
-                <p className="num text-sm text-muted-foreground line-through">
+                <p className="font-sans text-base font-medium text-muted-foreground line-through decoration-2 decoration-muted-foreground/80">
                   {formatBdt(pricing.regularPriceBdt)}
-                  {copy.perMonth}
                 </p>
               ) : null}
-              <p className="num text-4xl font-black tracking-tight text-foreground sm:text-5xl">
+              <p className="font-sans text-5xl font-black tracking-tight text-foreground sm:text-6xl">
                 {formatBdt(pricing.finalPriceBdt)}
-                <span className="text-base font-semibold text-muted-foreground">
-                  {copy.perMonth}
-                </span>
               </p>
-              <p className="mt-1 text-center text-sm font-semibold text-foreground/85">
-                <span className="num">{durationLabel}</span>
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                {copy.onePayment}
+              </p>
+              {saveAmount > 0 ? (
+                <p className="mt-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                  {locale === "bn"
+                    ? `বাঁচবে ${saveAmount.toLocaleString("en-BD")} টাকা`
+                    : `Save ${saveAmount.toLocaleString("en-BD")} BDT`}
+                </p>
+              ) : null}
+              <p className="mt-2 text-center text-sm font-semibold text-foreground/85">
+                <span className="num">{copy.durationLabel(pricing.durationDays)}</span>
+              </p>
+              <p className="text-center text-xs font-medium text-muted-foreground">
+                {copy.completionClaim}
               </p>
               <p className="mt-1 text-center text-xs font-medium text-amber-800 dark:text-amber-300">
                 {copy.accessNote}
@@ -204,8 +170,13 @@ export function FounderLaunchPricingCard({
           </div>
 
           <p className="text-center text-sm font-semibold leading-snug text-amber-900 dark:text-amber-200">
-            {scarcity}
+            {copy.scarcity}
           </p>
+          {badgeNote ? (
+            <p className="text-center text-xs font-medium text-muted-foreground">
+              {badgeNote}
+            </p>
+          ) : null}
 
           <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
             <ul className="space-y-2.5">

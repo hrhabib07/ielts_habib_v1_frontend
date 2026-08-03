@@ -140,7 +140,8 @@ export function PaymentApplicationStatusCard({
               </p>
               <p className={cn("mt-1 text-sm leading-relaxed", brandStatus.pending.body)}>
                 আমরা আপনার bKash পেমেন্ট প্রুফ পেয়েছি। অ্যাডমিন ভেরিফাই করলে
-                1 মাসের VIP অ্যাক্সেস সাথে সাথে চালু হবে।
+                অ্যাক্টিভ হওয়ার পর 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে।
+                সাধারণত 21টি মিশন শেষ করতে 21 দিন লাগে।
               </p>
             </div>
             <dl className={cn("grid gap-2 rounded-xl border p-4 text-sm sm:grid-cols-2", brandStatus.pending.detail)}>
