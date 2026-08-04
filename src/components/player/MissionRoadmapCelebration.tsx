@@ -20,6 +20,7 @@ import {
   primeEvalSfx,
 } from "@/src/lib/player-eval-sfx";
 import { cn } from "@/lib/utils";
+import { ContentPauseNotice } from "@/src/components/player/ContentPauseNotice";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const AUTO_ADVANCE_SECONDS = 4;
@@ -52,6 +53,7 @@ type RoadmapModel = {
   next: FlatMission | null;
   nextNeedsPay: boolean;
   nextOnRest: boolean;
+  nextOnContentPause: boolean;
   campCompleted: boolean;
   missionsDone: number;
   missionsTotal: number;
@@ -75,6 +77,7 @@ function buildModel(
     campTitleEn: string | null;
     campTitleBn: string | null;
   } | null | undefined,
+  contentPauseActive: boolean,
 ): RoadmapModel | null {
   const flat: FlatMission[] = camps.flatMap((camp) =>
     camp.missions.map((mission) => ({ mission, camp })),
@@ -104,6 +107,9 @@ function buildModel(
   const nextOnRest = Boolean(
     campRest?.active && next && next.mission.status === "locked",
   );
+  const nextOnContentPause = Boolean(
+    contentPauseActive && next && next.mission.status === "locked",
+  );
 
   return {
     nodes,
@@ -111,6 +117,7 @@ function buildModel(
     next,
     nextNeedsPay: Boolean(next && next.mission.accessTier === "PAID" && !hasEnglishAccess),
     nextOnRest,
+    nextOnContentPause,
     campCompleted,
     missionsDone: flat.filter((entry) => entry.mission.status === "completed").length,
     missionsTotal: flat.length,
@@ -312,6 +319,7 @@ export function MissionRoadmapCelebration({
           map.hasEnglishAccess,
           completedMissionSlug,
           map.campRest,
+          Boolean(map.contentPause?.active),
         );
         if (!built) {
           setFailed(true);
@@ -618,21 +626,27 @@ export function MissionRoadmapCelebration({
             </>
           ) : (
             <>
-              <p className="mt-4 text-center text-sm text-white/65">
-                {model.next
-                  ? model.nextNeedsPay
-                    ? COPY.needsSubscription
-                    : model.nextOnRest
-                      ? PLAYER_UI.campRest.mapBody(
-                          locale === "bn"
-                            ? (model.restCampTitleBn ?? "এই ক্যাম্প")
-                            : (model.restCampTitleEn ?? "this camp"),
-                          model.restHoursLeft ?? 24,
-                        )
-                      : PLAYER_UI.lockedHint
-                  : COPY.courseDone}
-              </p>
-              {model.nextNeedsPay ? (
+              {model.nextOnContentPause ? (
+                <div className="mt-4">
+                  <ContentPauseNotice />
+                </div>
+              ) : (
+                <p className="mt-4 text-center text-sm text-white/65">
+                  {model.next
+                    ? model.nextNeedsPay
+                      ? COPY.needsSubscription
+                      : model.nextOnRest
+                        ? PLAYER_UI.campRest.mapBody(
+                            locale === "bn"
+                              ? (model.restCampTitleBn ?? "এই ক্যাম্প")
+                              : (model.restCampTitleEn ?? "this camp"),
+                            model.restHoursLeft ?? 24,
+                          )
+                        : PLAYER_UI.lockedHint
+                    : COPY.courseDone}
+                </p>
+              )}
+              {model.nextNeedsPay && !model.nextOnContentPause ? (
                 <Button
                   asChild
                   size="lg"

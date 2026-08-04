@@ -24,3 +24,12 @@ export const SHOW_GUEST_DEMO_SOCIAL_PROOF = false;
  * false = legacy mission progress card (instant rollback)
  */
 export const USE_HERO_TRANSLATE_CINEMA = true;
+
+/**
+ * Pause players after Mission 10 / Camp 02 until Camp 03 content is ready.
+ * Keep in sync with backend `IS_CONTENT_PAUSE_AFTER_CAMP_02`.
+ * Set false when Camp 03 is live.
+ */
+export const PAUSE_AFTER_MISSION_10 = true;
+
+export const CONTENT_PAUSE_AFTER_MISSION_ORDER = 10;

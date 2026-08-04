@@ -33,6 +33,12 @@ export interface PlayerUiCopy {
   readonly campMissionsDone: (done: number, total: number) => string;
   readonly lockedHint: string;
   readonly subscribeHint: string;
+  readonly contentPause: {
+    readonly title: string;
+    readonly body: string;
+    readonly cta: string;
+    readonly whatsappMessage: string;
+  };
   readonly campRest: {
     readonly mapTitle: string;
     readonly mapBody: (
@@ -216,6 +222,13 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     campMissionsDone: (done, total) => `${done}/${total}`,
     lockedHint: "আগের মিশন শেষ করো",
     subscribeHint: "সাবস্ক্রাইব লাগবে",
+    contentPause: {
+      title: "Camp 02 সম্পন্ন হয়েছে",
+      body: "অভিনন্দন। আপনি Mission 10 পর্যন্ত শেষ করেছেন। Camp 03 এখন প্রস্তুত করা হচ্ছে। পরবর্তী মিশন খুলতে আমাদের সাথে WhatsApp-এ যোগাযোগ করুন।",
+      cta: "WhatsApp-এ যোগাযোগ করুন",
+      whatsappMessage:
+        "Assalamu Alaikum, আমি Gamlish-এ Mission 10 / Camp 02 শেষ করেছি। Camp 03 অ্যাক্সেসের জন্য যোগাযোগ করছি।",
+    },
     campRest: {
       mapTitle: "গ্র্যাজুয়েশন বিরতি",
       mapBody: (campTitle, hoursLeft) =>
@@ -385,6 +398,13 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     campMissionsDone: (done, total) => `${done}/${total}`,
     lockedHint: "Finish the previous mission",
     subscribeHint: "Subscription required",
+    contentPause: {
+      title: "Camp 02 complete",
+      body: "Congratulations. You have finished through Mission 10. Camp 03 is being prepared now. Message us on WhatsApp so we can open the next part for you.",
+      cta: "Contact us on WhatsApp",
+      whatsappMessage:
+        "Assalamu Alaikum, I completed Mission 10 / Camp 02 on Gamlish. I'm contacting you for Camp 03 access.",
+    },
     campRest: {
       mapTitle: "Graduation rest",
       mapBody: (campTitle, hoursLeft) =>

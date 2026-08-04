@@ -16,6 +16,7 @@ import { MissionEndFeedbackModal } from "@/src/components/player/MissionEndFeedb
 import { missionEndFeedbackStorageKey } from "@/src/lib/mission-end-feedback";
 import { MissionRoadmapCelebration } from "@/src/components/player/MissionRoadmapCelebration";
 import { MasterPathModal } from "@/src/components/player/MasterPathModal";
+import { ContentPauseNotice } from "@/src/components/player/ContentPauseNotice";
 import {
   isPlayerSubscriptionRequiredError,
   playerApiErrorMessage,
@@ -349,6 +350,9 @@ export function MissionHubView({ slug }: { slug: string }) {
                   </p>
                 </div>
               </div>
+            ) : null}
+            {mission.contentPause?.active ? (
+              <ContentPauseNotice compact />
             ) : null}
             {mission.nextMissionSlug ? (
               <Button asChild className="w-full" size="lg">

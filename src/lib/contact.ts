@@ -6,6 +6,10 @@ export const SUPPORT_WHATSAPP_WA_ME = "8801612098484";
 
 export const SUPPORT_WHATSAPP_HREF = `https://wa.me/${SUPPORT_WHATSAPP_WA_ME}`;
 
+export function supportWhatsAppHrefWithText(message: string): string {
+  return `${SUPPORT_WHATSAPP_HREF}?text=${encodeURIComponent(message)}`;
+}
+
 /** Official support email (privacy, deletions, account help). */
 export const SUPPORT_EMAIL = "support@gamlish.com";
 

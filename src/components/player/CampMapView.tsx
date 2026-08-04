@@ -20,6 +20,7 @@ import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { PlayerSubscribeModal } from "@/src/components/player/PlayerSubscribeModal";
 import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
 import { XpGainToaster } from "@/src/components/player/XpGainToaster";
+import { ContentPauseNotice } from "@/src/components/player/ContentPauseNotice";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -502,6 +503,7 @@ export function CampMapView({
             </div>
           </div>
         ) : null}
+        {map.contentPause?.active ? <ContentPauseNotice /> : null}
         <Link
           href="/player/verb-bag"
           className="flex items-center gap-3 rounded-2xl border border-sky-400/25 bg-gradient-to-r from-sky-500/10 via-background to-blue-500/10 px-4 py-3 transition hover:border-sky-400/45"

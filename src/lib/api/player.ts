@@ -36,6 +36,11 @@ export interface PlayerCourseMap {
     campTitleBn: string | null;
     hoursLeft: number | null;
   } | null;
+  /** Present when Camp 03 is paused after Mission 10. */
+  contentPause?: {
+    active: boolean;
+    afterMissionOrder: number;
+  } | null;
   camps: PlayerCampMap[];
   currentMissionSlug: string | null;
 }
@@ -58,6 +63,10 @@ export interface PlayerMissionDetail {
   xpEarned: number;
   coinsEarned: number;
   nextMissionSlug?: string | null;
+  contentPause?: {
+    active: boolean;
+    afterMissionOrder: number;
+  } | null;
   campRest?: {
     active: boolean;
     until: string | null;
