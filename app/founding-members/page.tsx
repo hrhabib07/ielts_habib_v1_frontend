@@ -1,9 +1,30 @@
-﻿import { FoundingMembersWallContent } from "@/src/components/founding-member/FoundingMembersWallContent";
+﻿import type { Metadata } from "next";
+import { FoundingMembersWallContent } from "@/src/components/founding-member/FoundingMembersWallContent";
+import { GAMLISH_CANONICAL_ORIGIN } from "@/lib/gamlish-canonical";
 
-export const metadata = {
-  title: "Founders' Wall | Gamlish",
+const wallUrl = `${GAMLISH_CANONICAL_ORIGIN}/founding-members`;
+
+export const metadata: Metadata = {
+  title: "Founders' Wall",
   description:
-    "ফাউন্ডারস ওয়াল  -  Gamlish-এর প্রথম 100 Founding Member. Permanent badge, number, and Founder price before 31 July 2026, 11:59 PM BD.",
+    "Gamlish Founders' Wall: 100 Founder seats were offered; 40 Founding Members filled them. Permanent badge, number, and Wall place.",
+  alternates: { canonical: wallUrl },
+  openGraph: {
+    title: "Founders' Wall | Gamlish",
+    description:
+      "Meet Gamlish Founding Members. 100 seats offered; 40 claimed. Permanent Founder numbers and badges.",
+    url: wallUrl,
+    type: "website",
+    siteName: "Gamlish",
+    locale: "bn_BD",
+  },
+  twitter: {
+    card: "summary",
+    title: "Founders' Wall | Gamlish",
+    description:
+      "Meet Gamlish Founding Members. 100 seats offered; 40 claimed. Permanent Founder numbers and badges.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function FoundingMembersPage() {

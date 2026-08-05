@@ -77,6 +77,27 @@ const nextConfig: NextConfig = {
         destination: "/username",
         permanent: false,
       },
+      // Retired IELTS Reading SEO landings → current English Foundations SEO
+      {
+        source: "/ielts-reading-matching-headings",
+        destination: "/english-foundations-missions-gamlish",
+        permanent: true,
+      },
+      {
+        source: "/best-ielts-reading-modules-platform-bangladesh",
+        destination: "/gamified-english-learning-bangladesh",
+        permanent: true,
+      },
+      {
+        source: "/game-of-english-gamlish-ielts",
+        destination: "/game-of-english-gamlish",
+        permanent: true,
+      },
+      {
+        source: "/game-of-ielts-reading-writing-gamlish",
+        destination: "/english-foundations-missions-gamlish",
+        permanent: true,
+      },
     ];
   },
   images: {

@@ -49,7 +49,7 @@ export async function generateMetadata({
       title: entry.title,
       description: entry.description,
       url: canonical,
-      siteName: "GAMLISH",
+      siteName: "Gamlish",
       type: "article",
       locale: "en",
     },
@@ -87,7 +87,7 @@ function SeoArticleBody({ page }: Readonly<{ page: ProgramSeoPage }>) {
       </nav>
       <header className="mb-10 border-b border-border pb-8">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          GAMLISH · IELTS preparation
+          Gamlish · English Foundations
         </p>
         <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           {page.h1}
@@ -150,6 +150,22 @@ function SeoArticleBody({ page }: Readonly<{ page: ProgramSeoPage }>) {
           <Link href="/directory" className="text-primary underline-offset-4 hover:underline">
             HTML sitemap directory
           </Link>
+          . Learn more on{" "}
+          <Link href="/about" className="text-primary underline-offset-4 hover:underline">
+            About
+          </Link>
+          {" · "}
+          <Link href="/pricing" className="text-primary underline-offset-4 hover:underline">
+            Pricing
+          </Link>
+          {" · "}
+          <Link href="/blog" className="text-primary underline-offset-4 hover:underline">
+            Blog
+          </Link>
+          {" · "}
+          <Link href="/llms.txt" className="text-primary underline-offset-4 hover:underline">
+            llms.txt
+          </Link>
           .
         </p>
       </footer>
@@ -181,7 +197,7 @@ export default async function ProgrammaticSeoPage({
   return (
     <>
       <SchemaMarkup
-        site={{ name: "GAMLISH", url: GAMLISH_CANONICAL_ORIGIN }}
+        site={{ name: "Gamlish", url: GAMLISH_CANONICAL_ORIGIN }}
         webpage={{
           url,
           name: page.title,

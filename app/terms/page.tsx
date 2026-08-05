@@ -3,11 +3,30 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { GAMLISH_CANONICAL_ORIGIN } from "@/lib/gamlish-canonical";
+
+const termsUrl = `${GAMLISH_CANONICAL_ORIGIN}/terms`;
 
 export const metadata: Metadata = {
-  title: "Terms & policies | Gamlish",
+  title: "Terms & policies",
   description:
-    "Gamlish terms of use and privacy summary.",
+    "Gamlish terms of use and privacy summary for learners using the gamified English platform.",
+  alternates: { canonical: termsUrl },
+  openGraph: {
+    title: "Terms & policies | Gamlish",
+    description:
+      "Gamlish terms of use and privacy summary for learners using the gamified English platform.",
+    url: termsUrl,
+    type: "website",
+    siteName: "Gamlish",
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms & policies | Gamlish",
+    description:
+      "Gamlish terms of use and privacy summary for learners using the gamified English platform.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function TermsPage() {

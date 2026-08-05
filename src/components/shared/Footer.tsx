@@ -109,6 +109,14 @@ export function Footer({ initialUser = null }: FooterProps) {
                   {shell.about}
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/blog"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Blog
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -198,6 +206,35 @@ export function Footer({ initialUser = null }: FooterProps) {
 
         <div className="mt-12 border-t border-border/60 pt-8 text-center text-xs text-muted-foreground md:text-sm">
           <p>{shell.footerRights(new Date().getFullYear())}</p>
+          <p className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <Link
+              href="/directory"
+              className="transition-colors hover:text-foreground"
+            >
+              Directory
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link
+              href="/llms.txt"
+              className="transition-colors hover:text-foreground"
+            >
+              llms.txt
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link
+              href="/product.json"
+              className="transition-colors hover:text-foreground"
+            >
+              product.json
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link
+              href="/humans.txt"
+              className="transition-colors hover:text-foreground"
+            >
+              humans.txt
+            </Link>
+          </p>
         </div>
       </div>
     </footer>

@@ -3,6 +3,7 @@ import { BRAND } from "@/src/lib/constants";
 import { getAppOrigin } from "@/src/lib/api-base-url";
 import { GAMLISH_SOCIAL_LINKS } from "@/src/lib/social";
 import { ABOUT_PAGE_COPY, ABOUT_SEO } from "@/src/lib/about-page-copy";
+import { FOUNDER_SITE_URL } from "@/src/lib/seo/gamlish-public-facts";
 
 type JsonLdRecord = { [key: string]: unknown };
 
@@ -32,9 +33,12 @@ export function AboutJsonLd() {
       },
       founder: {
         "@type": "Person",
+        "@id": `${origin}/#founder`,
         name: FOUNDER_PROFILE.nameEn,
         jobTitle: "Founder & ESL Instructor",
+        url: FOUNDER_SITE_URL,
         image: FOUNDER_PROFILE.imageUrl,
+        sameAs: [FOUNDER_SITE_URL],
         knowsAbout: [
           "English as a Second Language",
           "IELTS Preparation",
@@ -44,7 +48,10 @@ export function AboutJsonLd() {
         description:
           "Professional IELTS and ESL instructor since May 2022 with a C1 Advanced English proficiency level, dedicated to helping Bengali speakers build an unbreakable English foundation.",
       },
-      sameAs: GAMLISH_SOCIAL_LINKS.map((link) => link.href),
+      sameAs: [
+        ...GAMLISH_SOCIAL_LINKS.map((link) => link.href),
+        FOUNDER_SITE_URL,
+      ],
     },
     {
       "@type": "AboutPage",

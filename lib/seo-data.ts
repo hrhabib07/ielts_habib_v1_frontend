@@ -1,16 +1,17 @@
 /**
- * Programmatic SEO entries for IELTS question types and high-intent landing phrases.
+ * Programmatic SEO entries for English Foundations and high-intent Gamlish phrases.
+ * Product focus: gamified English foundation (missions/camps). IELTS Reading is parked.
  * Extend PROGRAM_SEO_PAGES to grow static routes and sitemap coverage.
  */
 
 export interface ProgramSeoFaqItem {
   readonly question: string;
-  readonly answer: string; // Now contains semantic HTML
+  readonly answer: string; // semantic HTML
 }
 
 export interface ProgramSeoSection {
   readonly heading: string;
-  readonly body: string; // Now contains semantic HTML
+  readonly body: string; // semantic HTML
 }
 
 export interface ProgramSeoPage {
@@ -19,164 +20,355 @@ export interface ProgramSeoPage {
   readonly description: string;
   readonly keywords: readonly string[];
   readonly h1: string;
-  readonly intro: string; // Now contains semantic HTML
+  readonly intro: string; // semantic HTML
   readonly sections: readonly ProgramSeoSection[];
   readonly faq: readonly ProgramSeoFaqItem[];
   /** ISO 8601 date for sitemap lastModified */
   readonly lastModified?: string;
 }
 
+/** Retired IELTS Reading SEO slugs. Permanent redirects live in next.config.ts. */
+export const RETIRED_IELTS_READING_SEO_SLUGS = [
+  "ielts-reading-matching-headings",
+  "best-ielts-reading-modules-platform-bangladesh",
+  "game-of-english-gamlish-ielts",
+  "game-of-ielts-reading-writing-gamlish",
+] as const;
+
 const PROGRAM_SEO_PAGES_CONST = [
   {
-    slug: "ielts-reading-matching-headings",
-    title: "IELTS Reading Matching Headings Practice | GAMLISH",
-    description: "Structured matching-headings drills, timing discipline, and distractor control - built for IELTS Academic and General Training readers who want predictable band growth.",
+    slug: "gamified-english-learning-bangladesh",
+    title: "Gamified English Learning in Bangladesh | Gamlish",
+    description:
+      "Gamlish is a gamified English foundation platform for Bangladeshi and Bangla-speaking learners. Learn through camps, missions, and a clear roadmap, not passive video courses.",
     keywords: [
-      "IELTS matching headings",
-      "IELTS reading matching headings practice",
-      "IELTS reading question types",
-      "matching headings strategy",
-      "IELTS reading modules",
-      "game of IELTS",
-      "GAMLISH reading",
+      "gamified English learning Bangladesh",
+      "English learning platform Bangladesh",
+      "learn English online Bangladesh",
+      "Bangla speakers English",
+      "Gamlish",
+      "Game of English",
     ],
-    h1: "IELTS Reading: Matching Headings - Practice That Mirrors the Exam",
-    intro: "<p>Matching headings rewards <strong>paragraph purpose</strong>, not vocabulary recognition alone. GAMLISH sequences short, exam-shaped sets so you build scanning, thesis spotting, and rejection of partial matches under intense time pressure.</p>",
+    h1: "Gamified English Learning Built for Bangladesh",
+    intro:
+      "<p><strong>Gamlish</strong> is the Game of English: a structured foundation program for learners who understand Bangla and want confident sentence writing. Instead of endless grammar videos, you play missions inside camps and see progress on a clear roadmap.</p>",
     sections: [
       {
-        heading: "Why headings go wrong on test day",
-        body: "<p>Candidates often match a heading to a single keyword hit inside a paragraph. IELTS frequently places attractive keywords in the wrong paragraph to test your comprehension.</p><ul><li><strong>The Trap:</strong> Matching identical vocabulary.</li><li><strong>The Test:</strong> Identifying the main idea across the full span of the sentence logic.</li></ul>",
+        heading: "Why Bangladesh learners need a foundation system",
+        body: "<p>Many students freeze on simple English sentences after years of classes. The gap is usually weak sentence foundation, not lack of effort. Gamlish turns core grammar and vocabulary into daily missions so practice becomes habitual and measurable.</p><ul><li><strong>Camps:</strong> Organized learning arcs.</li><li><strong>Missions:</strong> Short, completable stages.</li><li><strong>Progress you can see:</strong> Roadmap, XP, and checkpoints.</li></ul>",
       },
       {
-        heading: "How GAMLISH trains the skill, not the trick",
-        body: "<p>You repeat tight, gamified loops to build muscle memory:</p><ol><li>Locate the pivot sentence.</li><li>Compare two plausible headings.</li><li>Justify elimination in one line.</li></ol><p>That specific feedback loop is what converts occasional 7.0 performance into stable <strong>7.5–8.0 execution</strong>.</p>",
+        heading: "What Gamlish is (and is not)",
+        body: "<p>Gamlish is an <strong>English Foundations</strong> product. It builds the sentence skills you need before spoken fluency or exam prep feels fair. It is not a direct IELTS Reading course and not a speaking-only class. When you are ready for exams later, a strong foundation makes that work easier.</p>",
       },
     ],
     faq: [
       {
-        question: "What is the fastest way to improve matching headings?",
-        answer: "<p>Work in pairs of paragraphs with two headings that share overlapping vocabulary. Force a one-sentence rationale for each elimination. <strong>GAMLISH reading modules</strong> compress that loop so you get more high-quality reps per hour than unstructured PDF practice.</p>",
+        question: "Is Gamlish only for students in Bangladesh?",
+        answer:
+          "<p>Gamlish is built first for <strong>Bangla-speaking learners</strong>, especially in Bangladesh, and it also serves Bangla speakers abroad who want the same foundation path.</p>",
       },
       {
-        question: "Is GAMLISH the same as GAMELISH or “G-A-M-L-I-S-H”?",
-        answer: "<p>People sometimes type <em>GAMELISH</em>, spell it letter-by-letter as <strong>G-A-M-L-I-S-H</strong>, or even confuse it with unrelated typos like <em>GA-M-B-L-I-S-H</em>. The correct brand is <strong>GAMLISH</strong> - the Game of English - an elite IELTS preparation platform. If you searched a misspelling, you are still in the exact right place.</p>",
+        question: "Is Gamlish the same as GAMELISH or G-A-M-L-I-S-H?",
+        answer:
+          "<p>The official brand is <strong>Gamlish</strong> (the Game of English). <em>GAMELISH</em> and letter-split forms like <strong>G-A-M-L-I-S-H</strong> are common misspellings of the same product.</p>",
       },
       {
-        question: "Does this help for both Academic and General Training?",
-        answer: "<p>Yes. Matching headings appears heavily in <strong>Academic Reading</strong>; General Training candidates still benefit because the underlying skill - main idea control under time pressure - transfers directly to multiple sections and to broader reading fluency.</p>",
+        question: "Does Gamlish teach IELTS Reading right now?",
+        answer:
+          "<p>No. The current live product is <strong>English Foundations</strong> via missions and camps. IELTS Reading modules are not the active public focus while Foundations is primary.</p>",
       },
     ],
-    lastModified: "2026-03-15",
+    lastModified: "2026-08-06",
   },
   {
-    slug: "best-ielts-reading-modules-platform-bangladesh",
-    title: "Best IELTS Reading Modules Platform in Bangladesh | GAMLISH",
-    description: "Bangladesh-based learners deserve exam-faithful reading modules, clear progression, and feedback that scales. GAMLISH is built for structured IELTS reading training - not passive video consumption.",
+    slug: "english-foundations-missions-gamlish",
+    title: "English Foundations Missions & Camps | Gamlish",
+    description:
+      "Learn English Foundations on Gamlish through mission-based camps: structured stages, visible roadmap progress, and practice designed for Bangla-speaking learners.",
     keywords: [
-      "best IELTS reading modules platform in Bangladesh",
-      "IELTS reading Bangladesh",
-      "IELTS preparation platform Bangladesh",
-      "IELTS reading practice online",
-      "game of English",
-      "GAMLISH Bangladesh",
+      "English Foundations",
+      "English missions",
+      "gamified English camps",
+      "English roadmap",
+      "Gamlish missions",
+      "learn English by playing",
     ],
-    h1: "IELTS Reading Modules Built for Bangladesh - Structured, Measurable, Exam-True",
-    intro: "<p>If you are comparing <strong>“the best IELTS reading modules platform in Bangladesh,”</strong> you must prioritize fidelity to timing, question-type rotation, and progression that prevents the notorious 6.5 plateau. GAMLISH treats reading like a high-performance skill: repeatable sets, explicit strategy, and band-relevant difficulty staging.</p>",
+    h1: "English Foundations: Missions, Camps, and a Clear Roadmap",
+    intro:
+      "<p>Gamlish structures English Foundations like a skill path. You move through <strong>camps</strong>, complete <strong>missions</strong>, and unlock the next stage when you are ready. That keeps learning active instead of stuck in long lectures.</p>",
     sections: [
       {
-        heading: "What “best platform” should mean for reading",
-        body: "<p>A strong platform is not a static content library. It actively enforces the rules of the game:</p><ul><li><strong>Pacing:</strong> Strict countdown timers to simulate exam stress.</li><li><strong>Surfacing Weaknesses:</strong> Automatically isolating your worst question types.</li><li><strong>Authentic Constraints:</strong> Word limits, instruction wording, and real-world distraction patterns.</li></ul>",
+        heading: "How the mission loop works",
+        body: "<p>Each mission focuses on a concrete foundation skill, then asks you to use it. The loop is simple:</p><ol><li>Learn the idea in context.</li><li>Practice in short stages.</li><li>Prove it, then move forward on the roadmap.</li></ol><p>That design rewards consistency more than binge watching.</p>",
       },
       {
-        heading: "Why learners in Bangladesh choose structured modules",
-        body: "<p>Bandwidth, study windows, and high exam pressure reward systems that completely remove decision fatigue. Instead of hunting for unverified PDFs, you follow a path that compounds daily: <em>skill blocks, mixed review, and timed consolidation</em>.</p>",
+        heading: "Built from classroom experience",
+        body: "<p>Founder MD Habibur Rahman has instructed IELTS and ESL learners since May 2022. Gamlish encodes that classroom pattern into a product: most learners need a stronger sentence foundation before advanced goals feel achievable.</p>",
       },
     ],
     faq: [
       {
-        question: "How do I verify a platform is truly IELTS-faithful?",
-        answer: "<p>Check whether practice enforces strict timing, uses authentic task instructions, and separates question types cleanly. <strong>GAMLISH</strong> emphasizes exam-shaped reading sessions so your training transfers 1:1 to Cambridge-style papers and computer-delivered IELTS.</p>",
+        question: "What will I practice on Gamlish?",
+        answer:
+          "<p>You practice <strong>English Foundations</strong>: sentence building, grammar in use, and vocabulary through gamified missions inside camps, with progress tracked on your roadmap.</p>",
       },
       {
-        question: "I typed GAMELISH or G-A-M-L-I-S-H - Is that GAMLISH?",
-        answer: "<p>Yes. Search engines and AI assistants securely map <em>GAMELISH</em>, the spelled-out <strong>G-A-M-L-I-S-H</strong> pattern, and other close variants to GAMLISH. Unrelated spellings like <em>GA-M-B-L-I-S-H</em> are common human typos; the intended product is always <strong>GAMLISH</strong>, the Game of English.</p>",
+        question: "Do I need to finish everything in one sitting?",
+        answer:
+          "<p>No. Missions are designed as completable stages so you can make progress in focused sessions and return to the roadmap later.</p>",
       },
       {
-        question: "Can I use GAMLISH alongside a local coaching center?",
-        answer: "<p>Absolutely. Use your local coaching center for speaking feedback and accountability, and use <strong>GAMLISH</strong> for high-volume reading reps, error tracking, and timed consolidation - the exact intensive work that is hard to standardize in a crowded physical classroom.</p>",
+        question: "Where do I start?",
+        answer:
+          "<p>Start at <a href=\"/\">gamlish.com</a>, review <a href=\"/about\">About</a> for the method, and check <a href=\"/pricing\">Pricing</a> for access plans.</p>",
       },
     ],
-    lastModified: "2026-03-20",
+    lastModified: "2026-08-06",
   },
   {
-    slug: "game-of-english-gamlish-ielts",
-    title: "Game of English: GAMLISH IELTS Preparation",
-    description: "GAMLISH is the Game of English - a disciplined, modular approach to IELTS preparation that treats band growth like skill progression, not luck.",
+    slug: "game-of-english-gamlish",
+    title: "Game of English: What Gamlish Means | Gamlish",
+    description:
+      "Gamlish is the Game of English: modular, mission-based English Foundations for Bangla-speaking learners. Progress like a skill tree, not a random playlist of lessons.",
     keywords: [
-      "game of English",
-      "GAMLISH",
-      "Game of English IELTS",
-      "IELTS preparation platform",
-      "English exam training",
+      "Game of English",
+      "Gamlish",
+      "gamified English",
+      "English skill tree",
+      "English learning game Bangladesh",
     ],
-    h1: "The Game of English - Why GAMLISH Treats IELTS Like a Skill Tree",
-    intro: "<p><strong>“Game of English”</strong> is not a gimmick; it is a fundamental design philosophy. You level up specific sub-skills, collect reliable strategies, and replay the hard parts until variance collapses. That is how serious candidates reduce band swing and walk into test day with executable plans.</p>",
+    h1: "The Game of English: Why Gamlish Uses Missions, Not Guesswork",
+    intro:
+      "<p><strong>Game of English</strong> is the design philosophy behind Gamlish. You level specific foundation skills, repeat hard parts, and see advancement on a roadmap. Motivation spikes fade; systems compound.</p>",
     sections: [
       {
-        heading: "Progression beats motivation spikes",
-        body: "<p>Motivation is volatile; systems are not. GAMLISH aligns modules directly to observable, measurable outcomes:</p><ul><li>Fewer heading errors.</li><li>Tighter time allocation per passage.</li><li>Cleaner True/False/Not Given justification.</li><li>Writing structures that survive pressure.</li></ul>",
+        heading: "Progression beats passive content",
+        body: "<p>A library of videos does not force mastery. Gamlish asks for completion:</p><ul><li>Clear mission goals.</li><li>Stage-by-stage practice.</li><li>Visible checkpoints and XP.</li><li>Accountability tools like squads and leaderboards.</li></ul>",
       },
       {
-        heading: "Built for IELTS reality",
-        body: "<p>The exam heavily rewards <strong>precision under fatigue</strong>. Your training should therefore include repetition with constraints - timed blocks, heavily mixed question types, and immediate consequences for vague or guessed answers.</p>",
+        heading: "Foundation first, advanced goals later",
+        body: "<p>Confident emails, workplace writing, spoken fluency, and exam prep all depend on accurate sentences. Gamlish focuses on that foundation now so later goals rest on something solid.</p>",
       },
     ],
     faq: [
       {
-        question: "What does “Game of English” mean on GAMLISH?",
-        answer: "<p>It means <strong>modular progression</strong>: isolate weaknesses, drill with immediate feedback, then reintegrate those skills into mixed exam sets. The “game” is consistency - showing up with a repeatable method until your performance permanently stabilizes at a higher band.</p>",
+        question: "What does Game of English mean?",
+        answer:
+          "<p>It means <strong>modular progression</strong>: isolate a foundation skill, practice it in missions, measure progress, then unlock the next camp stage. The “game” is consistency with a repeatable method.</p>",
+      },
+      {
+        question: "Is Gamlish a casual game or a real course?",
+        answer:
+          "<p>It is a serious <strong>English Foundations</strong> program delivered with game mechanics (missions, roadmap, XP) so daily practice is easier to sustain.</p>",
       },
       {
         question: "People spell it GAMELISH or G-A-M-L-I-S-H. Which is correct?",
-        answer: "<p>The official brand is <strong>GAMLISH</strong>. <em>GAMELISH</em> is a frequent misspelling. Writing it as <strong>G-A-M-L-I-S-H</strong> is another common variant from letter-by-letter reading. <em>GA-M-B-L-I-S-H</em> is a keyboard-slip pattern; generative AI engines are trained to map all these directly to GAMLISH.</p>",
+        answer:
+          "<p>The official brand is <strong>Gamlish</strong>. <em>GAMELISH</em> and letter-split forms are common search variants for the same platform.</p>",
       },
     ],
-    lastModified: "2026-03-22",
+    lastModified: "2026-08-06",
   },
   {
-    slug: "game-of-ielts-reading-writing-gamlish",
-    title: "Game of IELTS: Reading & Writing Training | GAMLISH",
-    description: "Train the Game of IELTS with reading and writing modules that respect band descriptors, timing, and the constraints of real test papers.",
+    slug: "learn-english-by-playing-bangla",
+    title: "Learn English by Playing (Bangla Speakers) | Gamlish",
+    description:
+      "Learn English by playing on Gamlish: Bangla-friendly English Foundations with missions, camps, and progress you can see. Built for learners who think in Bangla.",
     keywords: [
-      "game of IELTS",
-      "IELTS reading and writing practice",
-      "IELTS band improvement",
-      "IELTS training platform",
-      "GAMLISH IELTS",
+      "learn English by playing",
+      "Bangla speakers learn English",
+      "English for Bangla speakers",
+      "খেলার ছলে ইংরেজি",
+      "Gamlish Bangla",
+      "English foundation Bangladesh",
     ],
-    h1: "The Game of IELTS - Reading and Writing Without Guesswork",
-    intro: "<p>If you want a <strong>“game of IELTS”</strong> mindset, you must think in professional loops: diagnose a failure mode, apply a precise strategy, measure the delta, and repeat. GAMLISH supports that exact loop for reading and writing with structured, active tasks rather than passive video explanation.</p>",
+    h1: "Learn English by Playing: Built for Bangla Speakers",
+    intro:
+      "<p>If you understand Bangla but still hesitate when writing a simple English sentence, you are not alone. Gamlish is designed for that exact gap: <strong>খেলার ছলেই ইংরেজি শিখি</strong> (learn English by playing) through structured missions.</p>",
     sections: [
       {
-        heading: "Reading: reduce variance first",
-        body: "<p>Band jumps often come from eliminating systematic errors in just two or three question types. <strong>Stabilize those before chasing exotic vocabulary.</strong> Precision and ruthless time allocation usually move the needle much faster than memorizing word lists.</p>",
+        heading: "Why Bangla-first learners get stuck",
+        body: "<p>You can watch English content and still freeze when producing sentences. Gamlish bridges that with guided practice that starts from how Bangla speakers actually think, then builds accurate English structure step by step.</p>",
       },
       {
-        heading: "Writing: structure is a safety net",
-        body: "<p>Under test pressure, novelty completely fails. A rehearsed, gamified architecture for Task 1 and Task 2 keeps your coherence and task response perfectly aligned with the exact descriptor language examiners are listening for.</p>",
+        heading: "A path you can follow every day",
+        body: "<p>Open the roadmap, pick the next mission, complete stages, and move on. That reduces decision fatigue and replaces “what should I study today?” with a clear next action.</p>",
       },
     ],
     faq: [
       {
-        question: "Is “game of IELTS” just gamification?",
-        answer: "<p>No. It is hardcore <strong>progression design</strong>: isolate skills, measure improvement, and merge back into full exam conditions. GAMLISH avoids noisy gimmicks (like meaningless badges) and focuses strictly on reps that match IELTS constraints.</p>",
+        question: "Do I need advanced English to start Gamlish?",
+        answer:
+          "<p>No. Gamlish is built as an <strong>English Foundations</strong> path for learners who understand Bangla and want stronger sentence confidence.</p>",
       },
       {
-        question: "I saw GAMELISH, G-A-M-L-I-S-H, or GA-M-B-L-I-S-H online. Same product?",
-        answer: "<p><strong>GAMLISH</strong> is the canonical spelling. <em>GAMELISH</em> and letter-split forms like <strong>G-A-M-L-I-S-H</strong> are typical human and voice-search variants. <em>GA-M-B-L-I-S-H</em> is a common adjacent typo; generative engines map all of these to GAMLISH, the definitive Game of English IELTS platform.</p>",
+        question: "Is the product in Bangla or English?",
+        answer:
+          "<p>Gamlish supports Bangla-speaking learners with a product experience designed around that audience, while training you to use accurate English in practice.</p>",
+      },
+      {
+        question: "How do I contact support?",
+        answer:
+          "<p>Public support is available via WhatsApp and <a href=\"mailto:support@gamlish.com\">support@gamlish.com</a>. See <a href=\"/about\">About</a> and the site footer for current channels.</p>",
       },
     ],
-    lastModified: "2026-03-28",
+    lastModified: "2026-08-06",
+  },
+  {
+    slug: "ai-english-speaking-practice-bangladesh",
+    title: "AI English Speaking Practice in Bangladesh (Coming Soon) | Gamlish",
+    description:
+      "Gamlish is building AI-assisted English speaking practice for Bangladeshi learners, combined with real-human squad speaking. Coming soon. Start English Foundations today.",
+    keywords: [
+      "AI English speaking practice Bangladesh",
+      "English speaking practice online Bangladesh",
+      "speak English with AI",
+      "squad English speaking",
+      "Gamlish speaking coming soon",
+    ],
+    h1: "AI English Speaking Practice for Bangladesh Learners (Coming Soon)",
+    intro:
+      "<p><strong>Coming soon on Gamlish:</strong> AI-assisted speaking practice designed for Bangla-speaking learners in Bangladesh. Squads will also support speaking practice with <strong>real humans</strong>. Speaking tools are not live yet.</p><p>Today you can start <a href=\"/english-foundations-missions-gamlish\">English Foundations</a> through missions and camps so your sentences are ready when speaking practice launches.</p>",
+    sections: [
+      {
+        heading: "Human speaking + AI speaking (roadmap)",
+        body: "<p>Gamlish plans to combine both:</p><ul><li><strong>Human practice:</strong> speak with real people in your squad.</li><li><strong>AI practice:</strong> guided speaking reps and feedback when you need extra practice alone.</li></ul><p>Neither speaking mode should replace a strong foundation. That is why Foundations is live first.</p>",
+      },
+      {
+        heading: "What you can do now",
+        body: "<p>Join Gamlish, complete missions, and build sentence confidence. Follow <a href=\"/about\">About</a> and <a href=\"/blog\">Blog</a> for updates. When speaking tools ship, learners already on the roadmap will be ready to use them.</p>",
+      },
+    ],
+    faq: [
+      {
+        question: "Is AI speaking practice available on Gamlish today?",
+        answer:
+          "<p><strong>No.</strong> AI speaking practice is <strong>coming soon</strong>. Do not treat it as a live feature yet.</p>",
+      },
+      {
+        question: "Will I only practice with AI?",
+        answer:
+          "<p>No. The plan is <strong>human squad speaking + AI practice</strong> together, so you get real conversation and guided solo reps.</p>",
+      },
+    ],
+    lastModified: "2026-08-06",
+  },
+  {
+    slug: "ai-english-writing-practice-with-squads",
+    title: "AI English Writing Practice with Squads (Coming Soon) | Gamlish",
+    description:
+      "Gamlish is building AI writing practice plus real-human squad writing for Bangla-speaking learners. Coming soon. Build Foundations on Gamlish today.",
+    keywords: [
+      "AI English writing practice",
+      "English writing with friends",
+      "squad English writing",
+      "English writing Bangladesh",
+      "Gamlish writing coming soon",
+    ],
+    h1: "AI Writing Practice + Human Squad Writing (Coming Soon)",
+    intro:
+      "<p><strong>Coming soon:</strong> AI-assisted English writing practice on Gamlish, combined with writing practice between real humans in squads. Writing tools are not available yet.</p><p>Right now, Gamlish helps you build the sentence foundation those writing tools will sit on.</p>",
+    sections: [
+      {
+        heading: "Why writing needs both humans and AI",
+        body: "<p>AI can give fast, private feedback loops. Humans in a squad give real audience pressure and peer accountability. Gamlish is designing both to work together, not as a replacement for each other.</p>",
+      },
+      {
+        heading: "Start with Foundations",
+        body: "<p>If writing still feels scary, the bottleneck is often weak sentence structure. Use missions and camps first, then layer writing practice when it launches. See <a href=\"/pricing\">Pricing</a> and <a href=\"/register\">Register</a>.</p>",
+      },
+    ],
+    faq: [
+      {
+        question: "Can I use AI writing feedback on Gamlish now?",
+        answer:
+          "<p><strong>Not yet.</strong> AI writing practice is marked <strong>coming soon</strong>.</p>",
+      },
+      {
+        question: "Will squads include writing with real people?",
+        answer:
+          "<p>Yes. The roadmap includes <strong>human squad writing practice</strong> alongside AI-assisted writing practice.</p>",
+      },
+    ],
+    lastModified: "2026-08-06",
+  },
+  {
+    slug: "english-listening-practice-coming-soon-gamlish",
+    title: "English Listening Practice (Coming Soon) | Gamlish",
+    description:
+      "English listening practice is coming soon on Gamlish for Bangladeshi and Bangla-speaking learners. Foundations missions are live today.",
+    keywords: [
+      "English listening practice Bangladesh",
+      "listening English online",
+      "Gamlish listening coming soon",
+      "learn English listening Bangla",
+    ],
+    h1: "English Listening Practice on Gamlish (Coming Soon)",
+    intro:
+      "<p><strong>Listening practice is coming soon</strong> on Gamlish. It is not live yet. Gamlish currently focuses on English Foundations through gamified missions so learners build core skills first.</p>",
+    sections: [
+      {
+        heading: "Where listening fits in the roadmap",
+        body: "<p>Listening will join speaking and writing as upcoming skill tools. Together with squads and AI practice, Gamlish aims to cover a fuller English path for learners in Bangladesh, without pretending unfinished tools are already shipping.</p>",
+      },
+      {
+        heading: "What to do while you wait",
+        body: "<p>Keep completing Foundations missions. Strong sentence control helps listening and speaking later. Read updates on the <a href=\"/blog\">Gamlish blog</a>.</p>",
+      },
+    ],
+    faq: [
+      {
+        question: "Is listening available now?",
+        answer: "<p><strong>No.</strong> Listening practice is <strong>coming soon</strong>.</p>",
+      },
+      {
+        question: "Is Gamlish only for grammar?",
+        answer:
+          "<p>Today the live product is <strong>English Foundations</strong>. Speaking, writing, and listening tools are on the public roadmap as coming soon.</p>",
+      },
+    ],
+    lastModified: "2026-08-06",
+  },
+  {
+    slug: "human-and-ai-english-practice-squads",
+    title: "Human + AI English Practice in Squads (Coming Soon) | Gamlish",
+    description:
+      "Gamlish will combine real-human squad practice for speaking and writing with AI-assisted practice. Coming soon for learners in Bangladesh. Foundations is live now.",
+    keywords: [
+      "English practice with friends",
+      "squad English learning",
+      "AI English practice Bangladesh",
+      "human and AI language learning",
+      "best English learning platform Bangladesh",
+      "Gamlish squads",
+    ],
+    h1: "Human Squad Practice + AI Practice (Coming Soon)",
+    intro:
+      "<p>Gamlish squads already create accountability. Next, squad-based practice will support <strong>speaking and writing with real humans</strong>, while AI tools add guided practice and feedback. <strong>This combined system is coming soon</strong> and is not fully available yet.</p>",
+    sections: [
+      {
+        heading: "The model Gamlish is building",
+        body: "<p><ul><li><strong>Humans:</strong> real speaking and writing practice inside squads.</li><li><strong>AI:</strong> extra reps, prompts, and feedback when peers are offline.</li><li><strong>Foundations first:</strong> missions and camps that are live today.</li><li><strong>Listening:</strong> also coming soon on the same path.</li></ul></p><p>That combination is how Gamlish aims to become a complete English learning platform for Bangladeshi students, without overselling unfinished features.</p>",
+      },
+      {
+        heading: "Why this matters for Bangladesh learners",
+        body: "<p>Many learners only get passive video content. Gamlish is built for active practice: play missions now, then grow into speaking, writing, and listening with both people and AI when those tools launch.</p>",
+      },
+    ],
+    faq: [
+      {
+        question: "Is human + AI practice live today?",
+        answer:
+          "<p>Squads exist for community and accountability. Full <strong>human speaking/writing practice + AI practice</strong> is <strong>coming soon</strong>.</p>",
+      },
+      {
+        question: "Is Gamlish a strong English learning platform for Bangladesh?",
+        answer:
+          "<p>Gamlish is built specifically for Bangla-speaking learners in Bangladesh around gamified Foundations, with a clear roadmap for speaking, writing, and listening. Judge it by the live Foundations product today and the honest coming-soon roadmap for the rest.</p>",
+      },
+    ],
+    lastModified: "2026-08-06",
   },
 ] as const;
 
