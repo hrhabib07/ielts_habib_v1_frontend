@@ -17,11 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { submitSubscriptionRequest } from "@/src/lib/api/subscription";
 import { formatBdt, type PublicPricing } from "@/src/lib/api/pricing";
+import { PersonalOfferCountdown } from "@/src/components/pricing/PersonalOfferCountdown";
 import { useCheckoutCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { getAccessToken } from "@/src/lib/auth";
 import { waitForClientAuthReady } from "@/src/lib/auth-session-ready";
 import { trackFunnelEvent } from "@/src/lib/api/analytics";
+import { getOrCreateVisitorId } from "@/src/lib/analytics-visitor";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { cn } from "@/lib/utils";
 
@@ -208,6 +210,7 @@ export function BkashCheckoutForm({
           senderNumber: normalizedSender,
           transactionId: normalizedTrx,
           paidAmount: payableAmount,
+          visitorId: getOrCreateVisitorId(),
         });
 
       try {
@@ -362,6 +365,8 @@ export function BkashCheckoutForm({
           <p className="mt-2 text-pretty text-[14px] font-medium leading-relaxed text-foreground/80 sm:text-[15px]">
             {copy.urgencyBody}
           </p>
+
+          <PersonalOfferCountdown size="lg" className="mt-3 w-full" />
 
           <div className="mt-3.5 rounded-2xl border border-amber-500/30 bg-background/85 px-3.5 py-3">
             <p className="text-center text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">

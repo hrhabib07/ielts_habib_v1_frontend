@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SHOW_GUEST_DEMO_SOCIAL_PROOF } from "@/src/lib/platform-config";
 import { GuestDemoCounter } from "@/src/components/home/guest/GuestDemoCounter";
+import { EarlyAdopterCountdown } from "@/src/components/founding-member/EarlyAdopterCountdown";
 
 export function GuestLandingHero() {
   const reduceMotion = useReducedMotion();
@@ -108,6 +109,10 @@ export function GuestLandingHero() {
             <p className="text-xs font-medium text-foreground/65">
               {copy.ctaPreOrderSub}
             </p>
+
+            <div className="w-full max-w-sm lg:max-w-md">
+              <EarlyAdopterCountdown showLink className="mt-1" />
+            </div>
           </motion.div>
         </div>
 

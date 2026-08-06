@@ -1,45 +1,49 @@
-const DEMO_SESSION_KEY = "gamlish-demo-session-id";
-const DEMO_CONTINUE_KEY = "gamlish-demo-continue-path";
-const DEMO_STEP_KEY = "gamlish-demo-step";
-const DEMO_EARNED_XP_KEY = "gamlish-demo-earned-xp";
-const DEMO_WELCOME_BONUS_KEY = "gamlish-demo-welcome-bonus";
-const DEMO_COMPLETED_KEY = "gamlish-demo-completed";
-const DEMO_Q1_KEY = "gamlish-demo-q1-correct";
-const DEMO_SAVED_AT_KEY = "gamlish-demo-saved-at";
+export type DemoProgressNs =
+  | "gamlish-demo"
+  | "gamlish-demo-tps"
+  | "gamlish-demo-tps-a";
+
+const DEFAULT_NS: DemoProgressNs = "gamlish-demo";
+
+function key(ns: DemoProgressNs, suffix: string): string {
+  return `${ns}-${suffix}`;
+}
 
 /** Guest demo progress expires so returning visitors can play again. */
 export const MISSION_ZERO_TTL_MS = 1000 * 60 * 60 * 48; // 48 hours
 
 export type MissionZeroStep = 1 | 2 | 3 | 4;
 
-function touchSavedAt(): void {
+function touchSavedAt(ns: DemoProgressNs): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DEMO_SAVED_AT_KEY, String(Date.now()));
+    window.localStorage.setItem(key(ns, "saved-at"), String(Date.now()));
   } catch {
     /* ignore */
   }
 }
 
 /** Clears stale guest demo progress after TTL. Returns true if state was wiped. */
-export function expireMissionZeroIfStale(): boolean {
+export function expireMissionZeroIfStale(
+  ns: DemoProgressNs = DEFAULT_NS,
+): boolean {
   if (typeof window === "undefined") return false;
   try {
-    const raw = window.localStorage.getItem(DEMO_SAVED_AT_KEY);
+    const raw = window.localStorage.getItem(key(ns, "saved-at"));
     if (!raw) {
       // Legacy saves without timestamp: treat as expired so users can replay.
       const hasProgress =
-        window.localStorage.getItem(DEMO_STEP_KEY) ||
-        window.localStorage.getItem(DEMO_COMPLETED_KEY);
+        window.localStorage.getItem(key(ns, "step")) ||
+        window.localStorage.getItem(key(ns, "completed"));
       if (hasProgress) {
-        clearMissionZeroLocalState();
+        clearMissionZeroLocalState(ns);
         return true;
       }
       return false;
     }
     const savedAt = Number(raw);
     if (!Number.isFinite(savedAt) || Date.now() - savedAt > MISSION_ZERO_TTL_MS) {
-      clearMissionZeroLocalState();
+      clearMissionZeroLocalState(ns);
       return true;
     }
     return false;
@@ -48,60 +52,72 @@ export function expireMissionZeroIfStale(): boolean {
   }
 }
 
-export function readDemoSessionId(): string | null {
+export function readDemoSessionId(
+  ns: DemoProgressNs = DEFAULT_NS,
+): string | null {
   if (typeof window === "undefined") return null;
   try {
-    expireMissionZeroIfStale();
-    return window.localStorage.getItem(DEMO_SESSION_KEY);
+    expireMissionZeroIfStale(ns);
+    return window.localStorage.getItem(key(ns, "session-id"));
   } catch {
     return null;
   }
 }
 
-export function writeDemoSessionId(sessionId: string): void {
+export function writeDemoSessionId(
+  sessionId: string,
+  ns: DemoProgressNs = DEFAULT_NS,
+): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DEMO_SESSION_KEY, sessionId);
-    touchSavedAt();
+    window.localStorage.setItem(key(ns, "session-id"), sessionId);
+    touchSavedAt(ns);
   } catch {
     /* ignore */
   }
 }
 
-export function clearDemoSessionId(): void {
+export function clearDemoSessionId(ns: DemoProgressNs = DEFAULT_NS): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.removeItem(DEMO_SESSION_KEY);
+    window.localStorage.removeItem(key(ns, "session-id"));
   } catch {
     /* ignore */
   }
 }
 
-export function writeDemoContinuePath(path: string): void {
+export function writeDemoContinuePath(
+  path: string,
+  ns: DemoProgressNs = DEFAULT_NS,
+): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DEMO_CONTINUE_KEY, path);
+    window.localStorage.setItem(key(ns, "continue-path"), path);
   } catch {
     /* ignore */
   }
 }
 
-export function consumeDemoContinuePath(): string | null {
+export function consumeDemoContinuePath(
+  ns: DemoProgressNs = DEFAULT_NS,
+): string | null {
   if (typeof window === "undefined") return null;
   try {
-    const path = window.localStorage.getItem(DEMO_CONTINUE_KEY);
-    window.localStorage.removeItem(DEMO_CONTINUE_KEY);
+    const path = window.localStorage.getItem(key(ns, "continue-path"));
+    window.localStorage.removeItem(key(ns, "continue-path"));
     return path;
   } catch {
     return null;
   }
 }
 
-export function readMissionZeroStep(): MissionZeroStep {
+export function readMissionZeroStep(
+  ns: DemoProgressNs = DEFAULT_NS,
+): MissionZeroStep {
   if (typeof window === "undefined") return 1;
   try {
-    expireMissionZeroIfStale();
-    const raw = Number(window.localStorage.getItem(DEMO_STEP_KEY) ?? "1");
+    expireMissionZeroIfStale(ns);
+    const raw = Number(window.localStorage.getItem(key(ns, "step")) ?? "1");
     if (raw === 2 || raw === 3 || raw === 4) return raw;
     return 1;
   } catch {
@@ -109,84 +125,104 @@ export function readMissionZeroStep(): MissionZeroStep {
   }
 }
 
-export function writeMissionZeroStep(step: MissionZeroStep): void {
+export function writeMissionZeroStep(
+  step: MissionZeroStep,
+  ns: DemoProgressNs = DEFAULT_NS,
+): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DEMO_STEP_KEY, String(step));
-    touchSavedAt();
+    window.localStorage.setItem(key(ns, "step"), String(step));
+    touchSavedAt(ns);
   } catch {
     /* ignore */
   }
 }
 
-export function readMissionZeroEarnedXp(): number {
+export function readMissionZeroEarnedXp(
+  ns: DemoProgressNs = DEFAULT_NS,
+): number {
   if (typeof window === "undefined") return 0;
   try {
-    expireMissionZeroIfStale();
-    return Math.max(0, Number(window.localStorage.getItem(DEMO_EARNED_XP_KEY) ?? "0"));
+    expireMissionZeroIfStale(ns);
+    return Math.max(0, Number(window.localStorage.getItem(key(ns, "earned-xp")) ?? "0"));
   } catch {
     return 0;
   }
 }
 
-export function writeMissionZeroEarnedXp(xp: number): void {
+export function writeMissionZeroEarnedXp(
+  xp: number,
+  ns: DemoProgressNs = DEFAULT_NS,
+): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DEMO_EARNED_XP_KEY, String(xp));
-    touchSavedAt();
+    window.localStorage.setItem(key(ns, "earned-xp"), String(xp));
+    touchSavedAt(ns);
   } catch {
     /* ignore */
   }
 }
 
-export function readMissionZeroWelcomeBonus(): number {
+export function readMissionZeroWelcomeBonus(
+  ns: DemoProgressNs = DEFAULT_NS,
+): number {
   if (typeof window === "undefined") return 0;
   try {
-    expireMissionZeroIfStale();
+    expireMissionZeroIfStale(ns);
     return Math.max(
       0,
-      Number(window.localStorage.getItem(DEMO_WELCOME_BONUS_KEY) ?? "0"),
+      Number(window.localStorage.getItem(key(ns, "welcome-bonus")) ?? "0"),
     );
   } catch {
     return 0;
   }
 }
 
-export function writeMissionZeroWelcomeBonus(xp: number): void {
+export function writeMissionZeroWelcomeBonus(
+  xp: number,
+  ns: DemoProgressNs = DEFAULT_NS,
+): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DEMO_WELCOME_BONUS_KEY, String(xp));
-    touchSavedAt();
+    window.localStorage.setItem(key(ns, "welcome-bonus"), String(xp));
+    touchSavedAt(ns);
   } catch {
     /* ignore */
   }
 }
 
-export function readMissionZeroCompleted(): boolean {
+export function readMissionZeroCompleted(
+  ns: DemoProgressNs = DEFAULT_NS,
+): boolean {
   if (typeof window === "undefined") return false;
   try {
-    expireMissionZeroIfStale();
-    return window.localStorage.getItem(DEMO_COMPLETED_KEY) === "true";
+    expireMissionZeroIfStale(ns);
+    return window.localStorage.getItem(key(ns, "completed")) === "true";
   } catch {
     return false;
   }
 }
 
-export function writeMissionZeroCompleted(done: boolean): void {
+export function writeMissionZeroCompleted(
+  done: boolean,
+  ns: DemoProgressNs = DEFAULT_NS,
+): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DEMO_COMPLETED_KEY, done ? "true" : "false");
-    touchSavedAt();
+    window.localStorage.setItem(key(ns, "completed"), done ? "true" : "false");
+    touchSavedAt(ns);
   } catch {
     /* ignore */
   }
 }
 
-export function readMissionZeroQ1Correct(): boolean | null {
+export function readMissionZeroQ1Correct(
+  ns: DemoProgressNs = DEFAULT_NS,
+): boolean | null {
   if (typeof window === "undefined") return null;
   try {
-    expireMissionZeroIfStale();
-    const v = window.localStorage.getItem(DEMO_Q1_KEY);
+    expireMissionZeroIfStale(ns);
+    const v = window.localStorage.getItem(key(ns, "q1-correct"));
     if (v === "true") return true;
     if (v === "false") return false;
     return null;
@@ -195,27 +231,32 @@ export function readMissionZeroQ1Correct(): boolean | null {
   }
 }
 
-export function writeMissionZeroQ1Correct(correct: boolean): void {
+export function writeMissionZeroQ1Correct(
+  correct: boolean,
+  ns: DemoProgressNs = DEFAULT_NS,
+): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(DEMO_Q1_KEY, correct ? "true" : "false");
-    touchSavedAt();
+    window.localStorage.setItem(key(ns, "q1-correct"), correct ? "true" : "false");
+    touchSavedAt(ns);
   } catch {
     /* ignore */
   }
 }
 
-export function clearMissionZeroLocalState(): void {
+export function clearMissionZeroLocalState(
+  ns: DemoProgressNs = DEFAULT_NS,
+): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.removeItem(DEMO_STEP_KEY);
-    window.localStorage.removeItem(DEMO_EARNED_XP_KEY);
-    window.localStorage.removeItem(DEMO_WELCOME_BONUS_KEY);
-    window.localStorage.removeItem(DEMO_COMPLETED_KEY);
-    window.localStorage.removeItem(DEMO_Q1_KEY);
-    window.localStorage.removeItem(DEMO_SESSION_KEY);
-    window.localStorage.removeItem(DEMO_CONTINUE_KEY);
-    window.localStorage.removeItem(DEMO_SAVED_AT_KEY);
+    window.localStorage.removeItem(key(ns, "step"));
+    window.localStorage.removeItem(key(ns, "earned-xp"));
+    window.localStorage.removeItem(key(ns, "welcome-bonus"));
+    window.localStorage.removeItem(key(ns, "completed"));
+    window.localStorage.removeItem(key(ns, "q1-correct"));
+    window.localStorage.removeItem(key(ns, "session-id"));
+    window.localStorage.removeItem(key(ns, "continue-path"));
+    window.localStorage.removeItem(key(ns, "saved-at"));
   } catch {
     /* ignore */
   }

@@ -8,6 +8,7 @@ import { useFounderLaunchCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { brandSurfaces } from "@/src/lib/brand-theme";
 import { toLatinDigits } from "@/src/lib/ui-locale";
+import { PersonalOfferCountdown } from "@/src/components/pricing/PersonalOfferCountdown";
 import { cn } from "@/lib/utils";
 
 const FEATURES_PREVIEW = 3;
@@ -78,6 +79,8 @@ export function FounderLaunchPricingCard({
           <div className="mx-auto inline-flex items-center rounded-full bg-amber-400/15 px-3 py-1 text-xs font-bold text-amber-900 ring-1 ring-amber-500/25 dark:text-amber-200">
             {copy.limitedOffer}
           </div>
+
+          <PersonalOfferCountdown size="lg" className="w-full" />
 
           <div className="space-y-2 text-center">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-amber-800 dark:text-amber-300">

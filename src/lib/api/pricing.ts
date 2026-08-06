@@ -21,6 +21,15 @@ export interface PublicPricing {
   offerLabelBn?: string;
   offerEndsAt?: string | null;
   badgeKind?: "first_week" | "first_month" | null;
+  personalOffer?: {
+    visitorId: string;
+    listPriceBdt: number;
+    offerPriceBdt: number;
+    startedAt: string;
+    endsAt: string;
+    isExpired: boolean;
+    remainingMs: number;
+  } | null;
 }
 
 export interface AdminPricing extends PublicPricing {
@@ -44,7 +53,12 @@ function unwrapPricing<T>(payload: unknown): T {
 
 export async function getPublicPricing(): Promise<PublicPricing> {
   const { default: apiClient } = await import("@/src/lib/api-client");
-  const res = await apiClient.get("/pricing");
+  const { getOrCreateVisitorId } = await import("@/src/lib/analytics-visitor");
+  const visitorId = getOrCreateVisitorId();
+  const res = await apiClient.get("/pricing", {
+    params: visitorId !== "ssr" ? { visitorId } : undefined,
+    headers: visitorId !== "ssr" ? { "X-Visitor-Id": visitorId } : undefined,
+  });
   return unwrapPricing<PublicPricing>(res.data);
 }
 

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatBdt, getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
+import { fetchPersonalOffer } from "@/src/lib/api/visitor-offer";
+import { InlineOfferCountdown } from "@/src/components/pricing/InlineOfferCountdown";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
 
@@ -15,16 +17,30 @@ import { cn } from "@/lib/utils";
 export function SeasonalOfferHomeCard({ className }: { className?: string }) {
   const { locale } = useUiLocale();
   const [pricing, setPricing] = useState<PublicPricing | null>(null);
+  const [endsAt, setEndsAt] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     void getPublicPricing()
       .then((p) => {
-        if (!cancelled) setPricing(p);
+        if (cancelled) return;
+        setPricing(p);
+        if (p.personalOffer?.endsAt && !p.personalOffer.isExpired) {
+          setEndsAt(p.personalOffer.endsAt);
+        }
       })
       .catch(() => {
         if (!cancelled) setPricing(null);
       });
+
+    // Ensure personal offer clock exists even if pricing omitted it.
+    void fetchPersonalOffer()
+      .then((offer) => {
+        if (cancelled || offer.isExpired) return;
+        setEndsAt(offer.endsAt);
+      })
+      .catch(() => undefined);
+
     return () => {
       cancelled = true;
     };
@@ -61,13 +77,11 @@ export function SeasonalOfferHomeCard({ className }: { className?: string }) {
         aria-hidden
       />
 
-      <div className="flex items-center justify-between gap-2 border-b border-amber-500/15 bg-amber-400/10 px-3 py-1.5">
-        <p className="text-[11px] font-bold tracking-wide text-amber-900 dark:text-amber-200">
+      <div className="flex h-8 items-center justify-between gap-2 border-b border-amber-500/15 bg-amber-400/10 px-3">
+        <p className="min-w-0 truncate text-[11px] font-bold tracking-wide text-amber-900 dark:text-amber-200">
           {isBn ? "অফারটি সীমিত সময়ের জন্যে" : "Limited-time offer"}
         </p>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {isBn ? "ফুল জার্নি অ্যাক্সেস" : "Full Journey Access"}
-        </p>
+        <InlineOfferCountdown endsAt={endsAt} />
       </div>
 
       <div className="flex items-center gap-3 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
@@ -114,7 +128,7 @@ export function SeasonalOfferHomeCard({ className }: { className?: string }) {
           asChild
           size="sm"
           className={cn(
-            "h-9 shrink-0 rounded-xl px-2.5 text-[11px] font-black shadow-md shadow-amber-500/25 sm:px-3 sm:text-xs",
+            "h-9 shrink-0 rounded-full px-2.5 text-[11px] font-black shadow-md shadow-amber-500/25 sm:px-3 sm:text-xs",
             "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950",
             "hover:from-amber-300 hover:to-amber-400",
           )}

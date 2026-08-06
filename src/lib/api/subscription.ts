@@ -50,6 +50,8 @@ export interface SubmitRequestPayload {
   paidAmount: number;
   couponCode?: string;
   screenshotUrl?: string;
+  /** Personal offer clock (690 during window, 699 after forever). */
+  visitorId?: string;
 }
 
 export type SubscriptionRequestStatus = "PENDING" | "APPROVED" | "REJECTED";

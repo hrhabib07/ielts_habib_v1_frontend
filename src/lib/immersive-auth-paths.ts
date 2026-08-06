@@ -22,6 +22,8 @@ export function isImmersivePlayerPath(pathname: string | null): boolean {
   if (!pathname) return false;
   return (
     pathname === "/player/mission-one-lab" ||
+    pathname === "/player/mission-one-lab-test" ||
+    pathname === "/player/mission-zero-test" ||
     /^\/player\/missions\/[^/]+\/stage\/[^/]+\/?$/.test(pathname)
   );
 }

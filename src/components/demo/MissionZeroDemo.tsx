@@ -43,7 +43,10 @@ import {
   writeMissionZeroWelcomeBonus,
   type MissionZeroStep,
 } from "@/src/lib/demo-session";
-import { MISSION_ZERO_COPY } from "@/src/lib/mission-zero-copy";
+import {
+  MISSION_ZERO_VARIANTS,
+  type MissionZeroVariantId,
+} from "@/src/lib/mission-zero-variant";
 import {
   playCelebrateSfx,
   playCorrectEvalSfx,
@@ -57,6 +60,10 @@ export type MissionZeroMode = "guest" | "authenticated";
 
 type Props = {
   mode?: MissionZeroMode;
+  /** Live = did. Recommendation tests = third-person*. */
+  variant?: MissionZeroVariantId;
+  /** Save screen layout. default = live phone-first. a = Google-first test. */
+  saveLayout?: "default" | "a";
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -154,10 +161,17 @@ function HighlightVerb({
   );
 }
 
-export function MissionZeroDemo({ mode = "guest" }: Props) {
+export function MissionZeroDemo({
+  mode = "guest",
+  variant = "did",
+  saveLayout = "default",
+}: Props) {
   const router = useRouter();
   const { locale } = useUiLocale();
-  const copy = MISSION_ZERO_COPY[locale];
+  const config = MISSION_ZERO_VARIANTS[variant];
+  const ns = config.storageNs;
+  const analyticsPath = config.analyticsPath;
+  const copy = config.copy[locale];
   const reduceMotion = useReducedMotion();
 
   const [ready, setReady] = useState(false);
@@ -182,17 +196,17 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
   q1Ref.current = q1Correct;
 
   useEffect(() => {
-    expireMissionZeroIfStale();
-    const restoredStep = readMissionZeroStep();
-    const restoredXp = readMissionZeroEarnedXp();
-    const restoredQ1 = readMissionZeroQ1Correct();
-    const completed = readMissionZeroCompleted();
+    expireMissionZeroIfStale(ns);
+    const restoredStep = readMissionZeroStep(ns);
+    const restoredXp = readMissionZeroEarnedXp(ns);
+    const restoredQ1 = readMissionZeroQ1Correct(ns);
+    const completed = readMissionZeroCompleted(ns);
     setStep(completed ? 4 : restoredStep);
     setEarnedXp(restoredXp);
     setQ1Correct(restoredQ1);
-    setSessionId(readDemoSessionId());
+    setSessionId(readDemoSessionId(ns));
     setReady(true);
-  }, []);
+  }, [ns]);
 
   useEffect(() => {
     if (step === 4) {
@@ -225,14 +239,15 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     })
       .then((session) => {
         if (cancelled) return;
-        writeDemoSessionId(session.sessionId);
+        writeDemoSessionId(session.sessionId, ns);
         setSessionId(session.sessionId);
         void trackFunnelEvent({
           event: "demo_start",
-          path: "/demo",
+          path: analyticsPath,
           demoSessionId: session.sessionId,
           step: 1,
           screen: "demo_step_1_question",
+          metadata: { demo_variant: variant },
         });
       })
       .catch(() => {
@@ -242,7 +257,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [ready, mode, sessionId]);
+  }, [ready, mode, sessionId, ns, analyticsPath, variant]);
 
   const syncProgress = useCallback(
     (
@@ -258,7 +273,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
         }).catch(() => undefined);
         void trackFunnelEvent({
           event: extras?.event ?? "demo_step",
-          path: "/demo",
+          path: analyticsPath,
           demoSessionId: sessionId,
           step: nextStep,
           screen,
@@ -267,12 +282,13 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
               ? {
                   q1Correct: extras.q1Correct,
                   q1_result: extras.q1Correct ? "correct" : "wrong",
+                  demo_variant: variant,
                 }
-              : null,
+              : { demo_variant: variant },
         });
       }
     },
-    [mode, sessionId],
+    [mode, sessionId, analyticsPath, variant],
   );
 
   useEffect(() => {
@@ -306,7 +322,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
           : null;
       trackFunnelEventBeacon({
         event: "demo_exit",
-        path: "/demo",
+        path: analyticsPath,
         demoSessionId: sessionId,
         step: currentStep,
         screen,
@@ -316,6 +332,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
           q1_result:
             q1 === true ? "correct" : q1 === false ? "wrong" : null,
           clicked_google_save: false,
+          demo_variant: variant,
         },
       });
     };
@@ -335,15 +352,15 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pagehide", onPageHide);
     };
-  }, [ready, mode, sessionId]);
+  }, [ready, mode, sessionId, analyticsPath, variant]);
 
   const goStep = useCallback(
     (next: MissionZeroStep, extras?: { q1Correct?: boolean | null }) => {
       setStep(next);
-      writeMissionZeroStep(next);
+      writeMissionZeroStep(next, ns);
       syncProgress(next, extras);
     },
-    [syncProgress],
+    [syncProgress, ns],
   );
 
   const flashXp = useCallback((text: string) => {
@@ -356,10 +373,10 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     await primeEvalSfx();
     await playUiClickSfx();
     setSelectedQ1(choice);
-    const correct = choice === "b";
+    const correct = choice === config.q1Correct;
     setQ1Correct(correct);
-    writeMissionZeroQ1Correct(correct);
-    writeMissionZeroEarnedXp(5);
+    writeMissionZeroQ1Correct(correct, ns);
+    writeMissionZeroEarnedXp(5, ns);
     setEarnedXp(5);
 
     if (correct) {
@@ -376,7 +393,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
   const onContinueInsight = async () => {
     await primeEvalSfx();
     await playUiClickSfx();
-    writeMissionZeroEarnedXp(10);
+    writeMissionZeroEarnedXp(10, ns);
     setEarnedXp(10);
     flashXp(copy.xpCorrect);
     await playCorrectEvalSfx();
@@ -388,13 +405,13 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     setBlankBusy(true);
     setBlankWrong(false);
     setBlankChoice(choice);
-    setBlankFilled(choice);
+    setBlankFilled(choice === "went" ? copy.blankWent : copy.blankGo);
 
     try {
       await primeEvalSfx();
       await playUiClickSfx();
 
-      if (choice !== "go") {
+      if (choice !== config.blankCorrect) {
         await playSoftNotifySfx();
         setBlankWrong(true);
         window.setTimeout(() => {
@@ -409,18 +426,19 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
       setMastery(true);
       setConfetti(true);
       await playCelebrateSfx();
-      writeMissionZeroWelcomeBonus(40);
-      writeMissionZeroCompleted(true);
-      writeMissionZeroEarnedXp(10);
+      writeMissionZeroWelcomeBonus(40, ns);
+      writeMissionZeroCompleted(true, ns);
+      writeMissionZeroEarnedXp(10, ns);
 
       if (mode === "guest" && sessionId) {
         void completeMissionZeroSession(sessionId).catch(() => undefined);
         void trackFunnelEvent({
           event: "demo_complete",
-          path: "/demo",
+          path: analyticsPath,
           demoSessionId: sessionId,
           step: 4,
           screen: "demo_step_4_signup",
+          metadata: { demo_variant: variant },
         });
       }
 
@@ -438,7 +456,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
   };
 
   const onPlayAgain = () => {
-    clearMissionZeroLocalState();
+    clearMissionZeroLocalState(ns);
     setStep(1);
     setQ1Correct(null);
     setEarnedXp(0);
@@ -452,7 +470,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     setMastery(false);
     setSessionId(null);
     setFinishing(false);
-    writeMissionZeroStep(1);
+    writeMissionZeroStep(1, ns);
   };
 
   const onStartMission1 = async () => {
@@ -460,7 +478,7 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     setFinishing(true);
     try {
       const result = await completeMissionZeroAuth();
-      clearMissionZeroLocalState();
+      clearMissionZeroLocalState(ns);
       router.replace(
         result.continuePath || "/player/missions/mission-01-word-order",
       );
@@ -473,13 +491,14 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
     if (mode === "guest" && sessionId) {
       void trackFunnelEvent({
         event: "demo_skip",
-        path: "/demo",
+        path: analyticsPath,
         demoSessionId: sessionId,
         step,
         screen: screenForStep(step),
+        metadata: { demo_variant: variant },
       });
     }
-    clearMissionZeroLocalState();
+    clearMissionZeroLocalState(ns);
     router.push("/");
   };
 
@@ -620,9 +639,9 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                       />
                       <span className="min-w-0 flex-1">
                         <HighlightVerb
-                          before="Did I "
-                          verb="called"
-                          after=" you?"
+                          before={config.optionA.before}
+                          verb={config.optionA.verb}
+                          after={config.optionA.after}
                         />
                       </span>
                       {selectedQ1 === "a" ? (
@@ -655,9 +674,9 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                       />
                       <span className="min-w-0 flex-1">
                         <HighlightVerb
-                          before="Did I "
-                          verb="call"
-                          after=" you?"
+                          before={config.optionB.before}
+                          verb={config.optionB.verb}
+                          after={config.optionB.after}
                         />
                       </span>
                       {selectedQ1 === "b" || selectedQ1 === "a" ? (
@@ -870,32 +889,33 @@ export function MissionZeroDemo({ mode = "guest" }: Props) {
                   copy={copy}
                   totalXp={earnedXp + 40}
                   sessionId={sessionId}
+                  saveLayout={saveLayout}
                   onGoogleNavigate={() => {
                     void trackFunnelEvent({
                       event: "clicked_google_save_button",
-                      path: "/demo",
+                      path: analyticsPath,
                       demoSessionId: sessionId,
                       step: 4,
                       screen: "demo_step_4_signup",
-                      metadata: { method: "google" },
+                      metadata: { method: "google", demo_variant: variant },
                     });
                     void trackFunnelEvent({
                       event: "demo_signup_click",
-                      path: "/demo",
+                      path: analyticsPath,
                       demoSessionId: sessionId,
                       step: 4,
                       screen: "demo_step_4_signup",
-                      metadata: { method: "google" },
+                      metadata: { method: "google", demo_variant: variant },
                     });
                   }}
                   onEmailNavigate={() => {
                     void trackFunnelEvent({
                       event: "demo_signup_click",
-                      path: "/demo",
+                      path: analyticsPath,
                       demoSessionId: sessionId,
                       step: 4,
                       screen: "demo_step_4_signup",
-                      metadata: { method: "email" },
+                      metadata: { method: "email", demo_variant: variant },
                     });
                   }}
                   onPlayAgain={onPlayAgain}

@@ -1,52 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFounderDashboardOfferCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
-import { getFounderTierLabel } from "@/src/lib/founder-benefits-copy";
 import { localizeDigits } from "@/src/lib/ui-locale";
 import { COUNTDOWN_NEXT_PRICE_BDT } from "@/src/lib/founder-dashboard-offer-copy";
 import type { FounderTierLiveStat } from "@/src/lib/api/gamlish";
+import {
+  fetchPersonalOffer,
+  type PersonalOfferView,
+} from "@/src/lib/api/visitor-offer";
+import { InlineOfferCountdown } from "@/src/components/pricing/InlineOfferCountdown";
 import { cn } from "@/lib/utils";
 
 const EN_FACE = "font-sans tabular-nums";
-const REGULAR = 1590;
-const OFFER = 690;
-const SAVE = 900;
-
-const FALLBACK_GOLD: FounderTierLiveStat = {
-  tier: "GOLD",
-  label: "Gold Founder",
-  from: 1,
-  to: 25,
-  capacity: 25,
-  filled: 0,
-  status: "OPEN",
-};
-
-function resolveActiveTier(
-  tiers: FounderTierLiveStat[] | undefined,
-): FounderTierLiveStat {
-  if (!tiers?.length) return FALLBACK_GOLD;
-  return (
-    tiers.find((t) => t.status === "OPEN") ??
-    tiers.find((t) => t.status === "LOCKED") ??
-    tiers[tiers.length - 1] ??
-    FALLBACK_GOLD
-  );
-}
+const FALLBACK_LIST = 1590;
+const FALLBACK_OFFER = 690;
 
 export function FounderVipClaimCard({
-  tiers,
   className,
   href = "/checkout",
 }: {
-  /** @deprecated Prefer `tiers`. Kept for call-site compat. */
   remainingSeats?: number;
   tiers?: FounderTierLiveStat[];
-  /** ISO deadline — unused (no countdown). Kept for call-site compat. */
   deadlineIso?: string;
   className?: string;
   href?: string;
@@ -54,12 +34,26 @@ export function FounderVipClaimCard({
   const copy = useFounderDashboardOfferCopy();
   const { locale } = useUiLocale();
   const reduceMotion = useReducedMotion();
+  const [offer, setOffer] = useState<PersonalOfferView | null>(null);
 
-  const active = resolveActiveTier(tiers);
-  const tierLabel = getFounderTierLabel(active.tier, locale);
-  const saveLabel = localizeDigits(SAVE, locale);
-  const regularLabel = localizeDigits(REGULAR, locale);
-  const offerLabel = localizeDigits(OFFER, locale);
+  useEffect(() => {
+    let cancelled = false;
+    void fetchPersonalOffer()
+      .then((data) => {
+        if (!cancelled) setOffer(data);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const listPrice = offer?.listPriceBdt ?? FALLBACK_LIST;
+  const offerPrice = offer?.offerPriceBdt ?? FALLBACK_OFFER;
+  const regularLabel = localizeDigits(listPrice, locale);
+  const offerLabel = localizeDigits(offerPrice, locale);
+  const endsAt =
+    offer && !offer.isExpired ? offer.endsAt : offer?.isExpired ? offer.endsAt : null;
 
   return (
     <motion.div
@@ -81,13 +75,11 @@ export function FounderVipClaimCard({
         aria-hidden
       />
 
-      <div className="flex items-center justify-between gap-2 border-b border-amber-500/15 bg-amber-400/10 px-3 py-1.5">
-        <p className="text-[11px] font-bold text-amber-900 dark:text-amber-200">
+      <div className="flex h-8 items-center justify-between gap-2 border-b border-amber-500/15 bg-amber-400/10 px-3">
+        <p className="min-w-0 truncate text-[11px] font-bold text-amber-900 dark:text-amber-200">
           {copy.countdownLabel(COUNTDOWN_NEXT_PRICE_BDT)}
         </p>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {copy.tierOpen(tierLabel)}
-        </p>
+        <InlineOfferCountdown endsAt={endsAt} />
       </div>
 
       <div className="flex items-center gap-3 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
@@ -112,8 +104,8 @@ export function FounderVipClaimCard({
             >
               {offerLabel}
             </span>
-            <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
-              {copy.saveLabel} {saveLabel}
+            <span className="text-[10px] font-semibold text-muted-foreground">
+              {locale === "bn" ? "একবারের পেমেন্ট" : "One-time payment"}
             </span>
           </div>
           <p className="text-[10px] leading-snug text-muted-foreground">
@@ -125,12 +117,13 @@ export function FounderVipClaimCard({
           asChild
           size="sm"
           className={cn(
-            "h-9 shrink-0 rounded-xl px-3 text-xs font-black",
+            "h-9 shrink-0 gap-1 rounded-full px-3 text-xs font-black",
             "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950",
             "hover:from-amber-300 hover:to-amber-400 shadow-md shadow-amber-500/25",
           )}
         >
           <Link href={href} data-telemetry="founder-cta" data-telemetry-cta="true">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {locale === "bn" ? "VIP এক্সেস নিন" : "Take VIP access"}
           </Link>
         </Button>
