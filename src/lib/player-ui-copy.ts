@@ -223,11 +223,11 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     lockedHint: "আগের মিশন শেষ করো",
     subscribeHint: "সাবস্ক্রাইব লাগবে",
     contentPause: {
-      title: "Camp 02 সম্পন্ন হয়েছে",
-      body: "অভিনন্দন। আপনি Mission 10 পর্যন্ত শেষ করেছেন। Camp 03 এখন প্রস্তুত করা হচ্ছে। পরবর্তী মিশন খুলতে আমাদের সাথে WhatsApp-এ যোগাযোগ করুন।",
+      title: "Camp 03 সম্পন্ন হয়েছে",
+      body: "অভিনন্দন। আপনি Mission 15 পর্যন্ত শেষ করেছেন। Camp 04 এখন প্রস্তুত করা হচ্ছে। পরবর্তী মিশন খুলতে আমাদের সাথে WhatsApp-এ যোগাযোগ করুন।",
       cta: "WhatsApp-এ যোগাযোগ করুন",
       whatsappMessage:
-        "Assalamu Alaikum, আমি Gamlish-এ Mission 10 / Camp 02 শেষ করেছি। Camp 03 অ্যাক্সেসের জন্য যোগাযোগ করছি।",
+        "Assalamu Alaikum, আমি Gamlish-এ Mission 15 / Camp 03 শেষ করেছি। Camp 04 অ্যাক্সেসের জন্য যোগাযোগ করছি।",
     },
     campRest: {
       mapTitle: "গ্র্যাজুয়েশন বিরতি",
@@ -399,11 +399,11 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
     lockedHint: "Finish the previous mission",
     subscribeHint: "Subscription required",
     contentPause: {
-      title: "Camp 02 complete",
-      body: "Congratulations. You have finished through Mission 10. Camp 03 is being prepared now. Message us on WhatsApp so we can open the next part for you.",
+      title: "Camp 03 complete",
+      body: "Congratulations. You have finished through Mission 15. Camp 04 is being prepared now. Message us on WhatsApp so we can open the next part for you.",
       cta: "Contact us on WhatsApp",
       whatsappMessage:
-        "Assalamu Alaikum, I completed Mission 10 / Camp 02 on Gamlish. I'm contacting you for Camp 03 access.",
+        "Assalamu Alaikum, I completed Mission 15 / Camp 03 on Gamlish. I'm contacting you for Camp 04 access.",
     },
     campRest: {
       mapTitle: "Graduation rest",

@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flag, Flame, Zap } from "lucide-react";
+import Link from "next/link";
+import { Flag, Flame, Trophy, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   getMyPlayerProfile,
   type MyPlayerProfile,
 } from "@/src/lib/api/player";
+import { getXpLeaderboard } from "@/src/lib/api/xpLeaderboard";
 import { GAMLISH_XP_EVENT, GAMLISH_XP_REFRESH } from "@/src/lib/xp-events";
+import { rememberXpRankBaseline } from "@/src/lib/xp-rank-session";
 
 /**
  * Minimal sticky XP strip  -  one clean row, no clutter.
@@ -28,12 +31,20 @@ export function PlayerXpHud({
   missionLabel?: string;
 }) {
   const [profile, setProfile] = useState<MyPlayerProfile | null>(null);
+  const [rank, setRank] = useState<number | null>(null);
   const [xpPulse, setXpPulse] = useState(false);
 
   const load = () => {
     getMyPlayerProfile()
       .then(setProfile)
       .catch(() => setProfile(null));
+    getXpLeaderboard({ page: 1, limit: 1 })
+      .then((board) => {
+        const next = board.me?.rank ?? null;
+        setRank(next);
+        if (next != null) rememberXpRankBaseline(next);
+      })
+      .catch(() => setRank(null));
   };
 
   useEffect(() => {
@@ -127,13 +138,18 @@ export function PlayerXpHud({
             {profile?.streakCurrent ?? 0}d
           </span>
         </div>
-        {profile ? (
-          <span className="text-[11px] text-muted-foreground">
-            {profile.missionsCompleted} missions
+        <Link
+          href="/leaderboard"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 text-[11px] font-black tabular-nums text-amber-950 shadow-md shadow-amber-500/25 ring-2 ring-amber-300/40 transition hover:brightness-105"
+          title="XP Leaderboard"
+        >
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-200 opacity-80" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-100" />
           </span>
-        ) : (
-          <span className="h-3 w-16 animate-pulse rounded bg-muted" />
-        )}
+          <Trophy className="h-3.5 w-3.5" />
+          {rank != null ? `#${rank}` : "Arena"}
+        </Link>
       </div>
     </div>
   );

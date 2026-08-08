@@ -7,19 +7,14 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  Crown,
   HelpCircle,
   LockKeyhole,
-  RotateCcw,
-  Sparkles,
-  Trophy,
   X,
   Zap,
   Pause,
   Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MissionZeroConfetti } from "@/src/components/demo/MissionZeroFx";
 import { PlayerVideoEmbed } from "@/src/components/player/PlayerVideoEmbed";
 import { MissionOneVideoSoftLock } from "@/src/components/player/MissionOneVideoSoftLock";
 import {
@@ -34,6 +29,7 @@ import type {
   MissionOneLabPack,
   MissionOneLabRole,
 } from "@/src/lib/mission-one-lab/types";
+import { MissionOnePaywallFlow } from "@/src/components/player/MissionOnePaywallFlow";
 
 const ROLE_STYLES: Record<MissionOneLabRole, string> = {
   subject: "border-emerald-500 bg-emerald-100 text-emerald-950",
@@ -279,9 +275,27 @@ export function MissionOneLabFromPack({ pack }: { pack: MissionOneLabPack }) {
     );
   }
 
+  if (screen === "victory") {
+    const percent =
+      totalQuestions > 0
+        ? Math.round((correctCount / totalQuestions) * 100)
+        : 0;
+    return (
+      <MissionOnePaywallFlow
+        score={{
+          correct: correctCount,
+          total: totalQuestions,
+          percent,
+        }}
+        missionsDone={1}
+        missionsTotal={21}
+        onLater={reset}
+      />
+    );
+  }
+
   return (
     <main className="relative min-h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,#e0f2fe_0%,#f8fafc_45%,#ffffff_100%)] text-slate-900">
-      <MissionZeroConfetti active={screen === "victory"} />
       <div className="pointer-events-none absolute -left-24 top-28 h-64 w-64 rounded-full bg-emerald-300/20 blur-3xl" />
       <div className="pointer-events-none absolute -right-24 top-8 h-72 w-72 rounded-full bg-sky-300/25 blur-3xl" />
 
@@ -723,93 +737,6 @@ export function MissionOneLabFromPack({ pack }: { pack: MissionOneLabPack }) {
                       <Link href="/player">
                         <Pause className="h-4 w-4" /> এখন বিরতি নিই
                       </Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </motion.section>
-          ) : null}
-
-          {screen === "victory" ? (
-            <motion.section
-              key="victory"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="my-auto"
-            >
-              <div className="overflow-hidden rounded-[2rem] border border-amber-200 bg-white/95 text-center shadow-2xl shadow-amber-900/15">
-                <div className="bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-500 px-6 py-8">
-                  <motion.div
-                    initial={{ rotate: -15, scale: 0.5 }}
-                    animate={{ rotate: 0, scale: 1 }}
-                    transition={{ type: "spring", stiffness: 240, damping: 14 }}
-                    className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white text-amber-500 shadow-xl"
-                  >
-                    <Trophy className="h-11 w-11 fill-current" />
-                  </motion.div>
-                  <h2 className="mt-4 font-bengali text-3xl font-black text-slate-950">
-                    {pack.victoryTitle}
-                  </h2>
-                  <p className="mt-1 font-bengali text-sm font-bold text-amber-950/75">
-                    {pack.victorySub}
-                  </p>
-                </div>
-                <div className="space-y-5 px-5 py-6 sm:px-8">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-2xl bg-sky-50 p-4 ring-1 ring-sky-200">
-                      <p className="text-2xl font-black text-sky-700">
-                        {correctCount}/{totalQuestions}
-                      </p>
-                      <p className="font-bengali text-xs font-bold text-slate-500">Skills cleared</p>
-                    </div>
-                    <div className="rounded-2xl bg-amber-50 p-4 ring-1 ring-amber-200">
-                      <p className="text-2xl font-black text-amber-700">{xp} XP</p>
-                      <p className="font-bengali text-xs font-bold text-slate-500">Lab reward</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {pack.skillBadges.map((skill) => (
-                      <span
-                        key={skill}
-                        className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1.5 text-xs font-black text-violet-800"
-                      >
-                        <Sparkles className="h-3.5 w-3.5" /> {skill}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="rounded-2xl bg-slate-950 p-5 text-left text-white">
-                    <p className="text-xs font-black uppercase tracking-wider text-rose-300">
-                      Something is missing
-                    </p>
-                    <div className="mt-2 flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-lg font-black">{pack.cliffhangerTitle}</p>
-                        <p className="mt-1 font-bengali text-xs text-white/70">
-                          {pack.cliffhangerBody}
-                        </p>
-                        <ul className="mt-3 space-y-1 font-sans text-sm font-bold text-sky-200">
-                          {pack.cliffhangerTeaser.map((line) => (
-                            <li key={line}>{line}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <Crown className="h-8 w-8 shrink-0 text-amber-300" />
-                    </div>
-                  </div>
-                  <p className="font-bengali text-xs font-bold leading-relaxed text-slate-600">
-                    {pack.unlockClarity}
-                  </p>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <Button asChild size="lg" className="h-13 rounded-2xl font-black">
-                      <Link href="/pricing?course=english-foundations">পুরো পথ আনলক করি</Link>
-                    </Button>
-                    <Button
-                      onClick={reset}
-                      variant="outline"
-                      size="lg"
-                      className="h-13 rounded-2xl font-black"
-                    >
-                      <RotateCcw className="h-4 w-4" /> আবার টেস্ট করি
                     </Button>
                   </div>
                 </div>

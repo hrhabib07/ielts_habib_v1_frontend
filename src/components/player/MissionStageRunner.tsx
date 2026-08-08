@@ -35,6 +35,7 @@ import {
   AhaMomentExperience,
   hasAhaMomentExperience,
 } from "@/src/components/player/AhaMomentExperience";
+import { saveMissionCompletionScore } from "@/src/lib/mission-one-paywall";
 
 type EvalQuestion = Record<string, unknown>;
 
@@ -233,6 +234,13 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
       totalStages,
       nextLabel: nextStageLabel(result),
     });
+    if (result.missionComplete) {
+      saveMissionCompletionScore(missionSlug, {
+        correctCount: result.correctCount,
+        totalCount: result.totalCount,
+        scorePercent: result.scorePercent,
+      });
+    }
     // Bowling-style score after the stage  -  bump HUD + floating toast.
     emitXpGain(xp, "stage");
     window.setTimeout(() => emitXpRefresh(), 800);

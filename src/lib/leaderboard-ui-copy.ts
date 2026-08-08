@@ -3,7 +3,9 @@ import type { UiLocale } from "@/src/lib/ui-locale";
 export interface LeaderboardUiCopy {
   readonly title: string;
   readonly subtitle: string;
+  readonly searchLabel: string;
   readonly searchPlaceholder: string;
+  readonly searchAction: string;
   readonly findMe: string;
   readonly yourRank: string;
   readonly empty: string;
@@ -20,15 +22,22 @@ export interface LeaderboardUiCopy {
   readonly podiumHint: string;
   readonly playersAtRank: string;
   readonly tieRule: string;
+  readonly restOfBoard: string;
   readonly backToPlay: string;
   readonly loading: string;
+  readonly tabWeekly: string;
+  readonly tabAllTime: string;
+  readonly weeklyXpLabel: string;
+  readonly weeklyPodiumHint: string;
 }
 
 export const LEADERBOARD_UI_COPY: Record<UiLocale, LeaderboardUiCopy> = {
   bn: {
     title: "XP Leaderboard",
     subtitle: "প্রতিটি খেলোয়াড়ের র‍্যাঙ্ক · XP দিয়ে এগিয়ে যাও, প্রোফাইল খুলে দেখো।",
-    searchPlaceholder: "নাম বা username খুঁজো…",
+    searchLabel: "খেলোয়াড় খুঁজো",
+    searchPlaceholder: "নাম বা username লিখো…",
+    searchAction: "খুঁজো",
     findMe: "আমাকে খুঁজো",
     yourRank: "তোমার র‍্যাঙ্ক",
     empty: "এখনো কেউ leaderboard-এ নেই। খেলা শুরু করো!",
@@ -46,13 +55,20 @@ export const LEADERBOARD_UI_COPY: Record<UiLocale, LeaderboardUiCopy> = {
     playersAtRank: "জন একই র‍্যাঙ্কে",
     tieRule:
       "সমান XP মানে একই র‍্যাঙ্ক। একই র‍্যাঙ্কের তালিকায় বেশি মিশন, বেশি লেভেল, তারপর আগে XP অর্জন করাকে অগ্রাধিকার দেওয়া হয়।",
+    restOfBoard: "বাকি র‍্যাঙ্ক",
     backToPlay: "খেলায় ফিরে যাও",
     loading: "লোড হচ্ছে…",
+    tabWeekly: "এই সপ্তাহের সেরা",
+    tabAllTime: "সর্বকালের সেরা",
+    weeklyXpLabel: "weekly XP",
+    weeklyPodiumHint: "টপ ৩ · ২০ টাকা রেস",
   },
   en: {
     title: "XP Leaderboard",
     subtitle: "Every player ranked by XP · climb up, open profiles, get motivated.",
-    searchPlaceholder: "Search name or username…",
+    searchLabel: "Find a player",
+    searchPlaceholder: "Type a name or username…",
+    searchAction: "Search",
     findMe: "Find me",
     yourRank: "Your rank",
     empty: "No players on the board yet. Start playing!",
@@ -70,7 +86,12 @@ export const LEADERBOARD_UI_COPY: Record<UiLocale, LeaderboardUiCopy> = {
     playersAtRank: "players tied",
     tieRule:
       "Equal XP means equal rank. Within a tied rank, players are ordered by missions completed, level reached, then who reached the XP earlier.",
+    restOfBoard: "Rest of the board",
     backToPlay: "Back to play",
     loading: "Loading…",
+    tabWeekly: "এই সপ্তাহের সেরা",
+    tabAllTime: "সর্বকালের সেরা",
+    weeklyXpLabel: "weekly XP",
+    weeklyPodiumHint: "Top 3 · 20 TK race",
   },
 } as const;

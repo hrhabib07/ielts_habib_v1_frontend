@@ -57,22 +57,21 @@ export const MISSION_ZERO_TPS_COPY: Record<UiLocale, MissionZeroCopy> = {
       statusDone: "Demo completed! You did great!",
       statusNext: "Mission 1 is waiting for you",
       unsavedEyebrow: "Not saved yet",
-      unsavedTitle: "Your progress from today is not saved yet!",
+      unsavedTitle: "Your 50 XP is still unlocked · save it now",
       unsavedBody: (totalXp) =>
-        `Careful! Your ${totalXp} XP and Level 2 from the demo can disappear anytime. Save in 1 click and start Mission 1.`,
+        `You just earned ${totalXp} XP and Level 2. Without an account, this progress can disappear when you leave. Save in a few seconds and unlock Mission 01.`,
       googleCta: "Save my progress (Google · 1 click)",
       stickyCta: "Save progress",
-      perkFree: "Completely free",
-      perkNoPassword: "OTP now · password login later",
-      perkFast: "Name and password together",
+      socialProofJoined: (countLabel) =>
+        `${countLabel} learners already joined · do not stay behind`,
       saveOther: "I want to save with email or mobile",
       roadmapTitle: "What waits for you next?",
       roadmapStep1: (totalXp) =>
         `Step 1: Demo completed! You earned ${totalXp} XP and Level 2.`,
-      roadmapStep2: "Step 2: Save your progress. Secure your XP and badges.",
-      roadmapStep2Here: "You are here",
+      roadmapStep2: "Step 2: Save now · lock your XP before it disappears.",
+      roadmapStep2Here: "Do this now",
       roadmapStep3:
-        "Step 3: Unlock Mission 1 and secret rewards. Start your real journey!",
+        "Step 3: Unlock Mission 01 and keep climbing with everyone else.",
       trustBadge:
         "Gamlish: Bangladesh's first and only gamified English learning platform",
       xpChip: (totalXp) => `${totalXp} XP`,
@@ -129,22 +128,21 @@ export const MISSION_ZERO_TPS_COPY: Record<UiLocale, MissionZeroCopy> = {
       statusDone: "ডেমো সম্পন্ন! আপনি দারুণ করেছেন!",
       statusNext: "মিশন 1 আপনার জন্য অপেক্ষা করছে",
       unsavedEyebrow: "এখনো সেভ হয়নি",
-      unsavedTitle: "আপনার আজকের অগ্রগতি এখনো সেভ করা হয়নি!",
+      unsavedTitle: "তোমার ৫০ XP এখনো আনলক · এখনই সেভ করো",
       unsavedBody: (totalXp) =>
-        `সাবধান! ডেমোতে অর্জিত আপনার ${totalXp} XP এবং Level 2 যেকোনো সময় মুছে যেতে পারে। মাত্র 1 ক্লিকে অগ্রগতি সেভ করুন এবং মূল গেমের মিশন 1 শুরু করুন।`,
+        `তুমি এইমাত্র ${totalXp} XP ও Level 2 পেয়েছ। অ্যাকাউন্ট না করলে বেরিয়ে যাওয়ার সাথে সাথে এটা মুছে যেতে পারে। কয়েক সেকেন্ডে সেভ করে Mission 01 আনলক করো।`,
       googleCta: "আমার অগ্রগতি সেভ করুন (Google দিয়ে 1 ক্লিকে)",
       stickyCta: "অগ্রগতি সেভ করুন",
-      perkFree: "সম্পূর্ণ ফ্রি",
-      perkNoPassword: "এখন OTP · পরে পাসওয়ার্ড দিয়ে লগইন",
-      perkFast: "নাম ও পাসওয়ার্ড একসাথে সেট",
+      socialProofJoined: (countLabel) =>
+        `ইতিমধ্যেই ${countLabel} লার্নার জয়েন করেছে · একা পিছিয়ে থেকো না`,
       saveOther: "ইমেইল বা মোবাইল নম্বর দিয়ে সেভ করতে চাই",
       roadmapTitle: "এরপর আপনার জন্য কী অপেক্ষা করছে?",
       roadmapStep1: (totalXp) =>
         `ধাপ 1: ডেমো সম্পন্ন! আপনি পেয়েছেন ${totalXp} XP ও Level 2।`,
-      roadmapStep2: "ধাপ 2: অগ্রগতি সেভ করুন। আপনার XP ও ব্যাজ সুরক্ষিত করুন।",
-      roadmapStep2Here: "বর্তমান অবস্থান",
+      roadmapStep2: "ধাপ 2: এখনই সেভ করো · XP হারানোর আগে লক করে ফেলো।",
+      roadmapStep2Here: "এখনই করো",
       roadmapStep3:
-        "ধাপ 3: মিশন 1 ও সিক্রেট রিওয়ার্ড আনলক। এখনই আসল যাত্রা শুরু করুন!",
+        "ধাপ 3: Mission 01 আনলক করো এবং সবার সাথে যাত্রা চালিয়ে যাও।",
       trustBadge:
         "Gamlish: বাংলাদেশের প্রথম ও একমাত্র গ্যামিফাইড ইংলিশ লার্নিং প্ল্যাটফর্ম",
       xpChip: (totalXp) => `${totalXp} XP`,

@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { RearrangeWordTiles } from "@/src/components/player/RearrangeWordTiles";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useAutoAdvanceCorrect } from "@/src/hooks/useAutoAdvanceCorrect";
+import { useTypedAnswerAutofocus } from "@/src/hooks/useTypedAnswerAutofocus";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { PlayerUiCopy } from "@/src/lib/player-ui-copy";
 import { emitXpGain } from "@/src/lib/xp-events";
@@ -298,12 +299,37 @@ function McqOptions({
     !thinkAgain &&
     (!retryMode || checkResult?.correct === true);
   const correctOption = thinkAgain ? undefined : checkResult?.correctAnswer;
+  const canPick = !(disabled || locked);
+
+  useEffect(() => {
+    if (!canPick) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      const letter = event.key.toUpperCase();
+      const index = OPTION_LETTERS.indexOf(letter as (typeof OPTION_LETTERS)[number]);
+      if (index < 0 || index >= options.length) return;
+      event.preventDefault();
+      onChange(options[index]!);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [canPick, onChange, options]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 sm:space-y-5">
       {question.sentence ? <QuestionSentence text={String(question.sentence)} /> : null}
       <PromptRich text={promptText} />
-      <div className="grid gap-2.5 sm:grid-cols-2">
+      {/* Mobile/tablet: compact 2-col. Laptop+: full-width stack for clear reading beside the story. */}
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-1 lg:gap-3">
         {options.map((opt, index) => {
           const isSelected = value === opt;
           const isCorrectOption = locked && !thinkAgain && correctOption === opt;
@@ -315,10 +341,11 @@ function McqOptions({
             <button
               key={opt}
               type="button"
-              disabled={disabled || locked}
+              disabled={!canPick}
               onClick={() => onChange(opt)}
               className={cn(
                 "group flex w-full items-center gap-3 rounded-2xl border-2 bg-card px-3.5 py-3.5 text-left transition-all duration-150",
+                "lg:gap-4 lg:px-5 lg:py-4",
                 "hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm disabled:hover:translate-y-0 disabled:hover:shadow-none",
                 isCorrectOption && "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40",
                 isWrongPick && "border-red-500 bg-red-50 dark:bg-red-950/40",
@@ -333,7 +360,7 @@ function McqOptions({
             >
               <span
                 className={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black transition-colors",
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-black transition-colors lg:h-11 lg:w-11 lg:text-base",
                   isCorrectOption
                     ? "bg-emerald-500 text-white"
                     : isWrongPick
@@ -351,7 +378,7 @@ function McqOptions({
                   letter
                 )}
               </span>
-              <span className="min-w-0 flex-1 text-base font-semibold leading-snug text-foreground">
+              <span className="min-w-0 flex-1 text-base font-semibold leading-snug text-foreground lg:text-[1.05rem] lg:leading-relaxed">
                 {opt}
               </span>
             </button>
@@ -391,6 +418,20 @@ function EvaluationQuestionBody({
     Boolean(checkResult) &&
     !thinkAgain &&
     (!retryMode || checkResult?.correct === true);
+  const answerInputRef = useRef<HTMLInputElement>(null);
+  const firstGapRef = useRef<HTMLInputElement>(null);
+  const sourceTextForFocus = String(question.sourceText ?? "");
+  const isGapTranslation =
+    stageType === "translation" && Boolean(parseGapSourceText(sourceTextForFocus));
+  const typedFocusEnabled =
+    stageType === "translation" && !(disabled || locked);
+
+  useTypedAnswerAutofocus(
+    isGapTranslation ? firstGapRef : answerInputRef,
+    id,
+    typedFocusEnabled,
+  );
+
   const touchAnswer = (
     updater: (prev: Record<string, unknown>) => Record<string, unknown>,
   ) => {
@@ -532,6 +573,7 @@ function EvaluationQuestionBody({
                   {segment}
                   {idx < gapParts.gapCount ? (
                     <input
+                      ref={idx === 0 ? firstGapRef : undefined}
                       type="text"
                       disabled={disabled || locked}
                       value={gapValue}
@@ -566,10 +608,15 @@ function EvaluationQuestionBody({
         <PromptRich text={copy.translatePrompt} className="text-lg sm:text-xl" />
         <QuestionHints hints={question.hints} label={copy.clueLabel} />
         <input
+          ref={answerInputRef}
           type="text"
           disabled={disabled || locked}
           value={(answers[id] as string) ?? ""}
           onChange={(e) => touchAnswer((prev) => ({ ...prev, [id]: e.target.value }))}
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          enterKeyHint="done"
           className={cn(
             "w-full rounded-2xl border-2 border-border/80 bg-background px-4 py-3.5 text-base font-semibold outline-none transition",
             "focus:border-primary focus:ring-4 focus:ring-primary/15",
@@ -1016,9 +1063,9 @@ export function EvalQuestionRunner({
       ) : null}
 
       {aside ? (
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start lg:gap-8">
           <div className="lg:sticky lg:top-24">{aside}</div>
-          <div>{questionPanel}</div>
+          <div className="min-w-0">{questionPanel}</div>
         </div>
       ) : (
         questionPanel

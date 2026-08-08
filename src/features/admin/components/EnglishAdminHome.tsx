@@ -14,6 +14,7 @@ import {
   MessagesSquare,
   PackageCheck,
   Shield,
+  Smartphone,
   TrendingDown,
   Users,
 } from "lucide-react";
@@ -149,6 +150,23 @@ export function EnglishAdminHome() {
           </Card>
         </Link>
 
+        <Link href="/dashboard/admin/learner-feedback">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
+                <MessageSquareHeart className="h-5 w-5 text-violet-700 dark:text-violet-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">Learner stories</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Approve homepage testimonials from paid learners
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
         <Link href="/dashboard/admin/pricing">
           <Card className="h-full p-5 transition-shadow hover:shadow-md">
             <div className="flex items-start gap-3">
@@ -159,6 +177,23 @@ export function EnglishAdminHome() {
                 <p className="font-semibold text-foreground">Pricing & payments</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   Founder Launch price, bKash, and payment verification
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/admin/weekly-challenge">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                <Smartphone className="h-5 w-5 text-emerald-700 dark:text-emerald-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">Weekly 20 TK</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Locked Top 3 phones · mark manual recharge done
                 </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />

@@ -33,7 +33,6 @@ const STUDENT_LINKS = ENABLE_READING
   : ([
       { href: "/player", labelKey: "play" as const },
       { href: "/leaderboard", labelKey: "leaderboard" as const },
-      { href: "/squad", labelKey: "squad" as const },
       { href: "/profile", labelKey: "myProfile" as const },
     ] as const);
 
@@ -138,16 +137,29 @@ export function SiteMobileNav(props: {
 
           <nav className="flex flex-col gap-0.5" aria-label="Mobile navigation">
             {isStudent &&
-              STUDENT_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={close}
-                  className={mobileLinkClass(isNavActive(link.href))}
-                >
-                  {shell[link.labelKey]}
-                </Link>
-              ))}
+              STUDENT_LINKS.map((link) => {
+                const isLeaderboard = link.href === "/leaderboard";
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={close}
+                    className={cn(
+                      mobileLinkClass(isNavActive(link.href)),
+                      isLeaderboard &&
+                        "inline-flex items-center gap-2 font-semibold text-amber-900 dark:text-amber-100",
+                    )}
+                  >
+                    {isLeaderboard ? (
+                      <span className="relative flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                      </span>
+                    ) : null}
+                    {shell[link.labelKey]}
+                  </Link>
+                );
+              })}
 
             {(isInstructor || isAdmin) && (
               <Link

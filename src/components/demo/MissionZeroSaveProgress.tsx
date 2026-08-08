@@ -6,7 +6,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   AlertTriangle,
   CheckCircle2,
-  Clock3,
   Gift,
   Lock,
   Phone,
@@ -16,6 +15,8 @@ import {
 } from "lucide-react";
 import { ContinueWithGoogleButton } from "@/src/components/auth/ContinueWithGoogleButton";
 import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
+import { DemoJoinedSocialProof } from "@/src/components/demo/DemoJoinedSocialProof";
+import { SoftActiveOfferCountdown } from "@/src/components/demo/SoftActiveOfferCountdown";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { MissionZeroCopy } from "@/src/lib/mission-zero-copy";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,8 @@ type Props = {
    * a = Google-first, phone collapsed, no roadmap (conversion test).
    */
   saveLayout?: MissionZeroSaveLayout;
+  /** QA only · force active personal-offer countdown on this save screen. */
+  forceActiveOfferCountdownMs?: number;
 };
 
 export function MissionZeroSaveProgress({
@@ -49,6 +52,7 @@ export function MissionZeroSaveProgress({
   onGoogleNavigate,
   onEmailNavigate,
   saveLayout = "default",
+  forceActiveOfferCountdownMs,
 }: Props) {
   const reduceMotion = useReducedMotion();
   const { locale } = useUiLocale();
@@ -110,16 +114,16 @@ export function MissionZeroSaveProgress({
       : "or save with email instead";
   const trustLine =
     locale === "bn"
-      ? "ফ্রি · OTP দিয়ে ভেরিফাই · পাসওয়ার্ড সেট করুন"
-      : "Free · Verify with OTP · Then set a password";
+      ? "ফ্রি · কয়েক সেকেন্ড · Mission 01 আনলক"
+      : "Free · a few seconds · unlock Mission 01";
   const layoutAHeadline =
-    locale === "bn" ? "আজকের অগ্রগতি সেভ করো" : "Save today's progress";
+    locale === "bn" ? "তোমার ৫০ XP এখনই সেভ করো" : "Save your 50 XP now";
   const layoutASub =
     locale === "bn"
       ? "সেভ করলেই Mission 01 আনলক। না করলে XP মুছে যেতে পারে।"
       : "Save to unlock Mission 01. Skip and your XP can disappear.";
   const layoutATrust =
-    locale === "bn" ? "ফ্রি · ১০ সেকেন্ড · পাসওয়ার্ড পরে" : "Free · 10 seconds · Password later";
+    locale === "bn" ? "ফ্রি · কয়েক সেকেন্ড · সবাই জয়েন করছে" : "Free · seconds · others are joining";
   const phoneExpandLabel =
     locale === "bn" ? "মোবাইল নম্বর দিয়ে সেভ" : "Save with mobile number";
 
@@ -162,6 +166,10 @@ export function MissionZeroSaveProgress({
           <p className="mx-auto mt-1.5 max-w-sm text-pretty font-bengali text-[13px] font-medium leading-snug text-foreground/80 sm:text-sm">
             {layoutASub}
           </p>
+          <SoftActiveOfferCountdown
+            className="mx-auto mt-3 max-w-md"
+            forceDemoRemainingMs={forceActiveOfferCountdownMs}
+          />
         </div>
 
         <div className="space-y-3">
@@ -185,6 +193,11 @@ export function MissionZeroSaveProgress({
               });
               onGoogleNavigate();
             }}
+          />
+          <DemoJoinedSocialProof
+            locale={locale}
+            className="mt-0"
+            line={s.socialProofJoined}
           />
           <p className="text-center text-[12px] font-semibold text-muted-foreground">
             {layoutATrust}
@@ -211,7 +224,12 @@ export function MissionZeroSaveProgress({
           ) : (
             <div className="rounded-2xl border border-sky-500/30 bg-sky-500/[0.06] p-3.5 sm:p-4">
               <p className="mb-2.5 text-[14px] font-black text-foreground">{phoneTitle}</p>
-              <PhoneOtpAuthPanel locale={locale} forceReturnTo="/player" compact />
+              <PhoneOtpAuthPanel
+                locale={locale}
+                forceReturnTo="/player"
+                compact
+                ctaMode="saveXp"
+              />
             </div>
           )}
 
@@ -290,22 +308,17 @@ export function MissionZeroSaveProgress({
           </div>
         </div>
 
-        <PhoneOtpAuthPanel locale={locale} forceReturnTo="/player" compact />
+        <PhoneOtpAuthPanel
+          locale={locale}
+          forceReturnTo="/player"
+          compact
+          ctaMode="saveXp"
+        />
 
-        <ul className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-4 sm:gap-y-1.5">
-          <li className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground/80">
-            <Shield className="h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
-            <span>{s.perkFree}</span>
-          </li>
-          <li className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground/80">
-            <Lock className="h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
-            <span>{s.perkNoPassword}</span>
-          </li>
-          <li className="flex items-center gap-1.5 text-[12px] font-semibold text-foreground/80">
-            <Clock3 className="h-3.5 w-3.5 shrink-0 text-sky-600" aria-hidden />
-            <span>{s.perkFast}</span>
-          </li>
-        </ul>
+        <DemoJoinedSocialProof locale={locale} line={s.socialProofJoined} />
+        <SoftActiveOfferCountdown
+          forceDemoRemainingMs={forceActiveOfferCountdownMs}
+        />
 
         <div className="my-3.5 flex items-center gap-3">
           <div className="h-px flex-1 bg-border/70" />

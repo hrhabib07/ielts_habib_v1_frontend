@@ -7,6 +7,7 @@ import { ArrowLeft, CheckCircle2, Lock, Moon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
 import { getMyMissionEndFeedback } from "@/src/lib/api/missionEndFeedback";
+import { getLearnerFeedbackInvite } from "@/src/lib/api/learnerFeedback";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { resolveStageKindLabel } from "@/src/lib/player-stage-utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
@@ -17,6 +18,12 @@ import { missionEndFeedbackStorageKey } from "@/src/lib/mission-end-feedback";
 import { MissionRoadmapCelebration } from "@/src/components/player/MissionRoadmapCelebration";
 import { MasterPathModal } from "@/src/components/player/MasterPathModal";
 import { ContentPauseNotice } from "@/src/components/player/ContentPauseNotice";
+import { LearnerStoryInviteModal } from "@/src/components/feedback/LearnerStoryInviteModal";
+import { RankClimbSheet } from "@/src/components/player/RankClimbSheet";
+import { LeaderboardMissionNudge } from "@/src/components/player/LeaderboardMissionNudge";
+import { LEARNER_FEEDBACK_MIN_MISSION_ORDER } from "@/src/lib/learner-feedback";
+import { getXpLeaderboard } from "@/src/lib/api/xpLeaderboard";
+import { consumeXpRankClimb } from "@/src/lib/xp-rank-session";
 import {
   isPlayerSubscriptionRequiredError,
   playerApiErrorMessage,
@@ -61,16 +68,100 @@ export function MissionHubView({ slug }: { slug: string }) {
   const [feedbackDone, setFeedbackDone] = useState(false);
   const [roadmapOpen, setRoadmapOpen] = useState(justCompleted);
   const [roadmapSeen, setRoadmapSeen] = useState(false);
+  const [storyInviteOpen, setStoryInviteOpen] = useState(false);
+  const [storyInviteReady, setStoryInviteReady] = useState(!justCompleted);
+  const [storyInviteStats, setStoryInviteStats] = useState<{
+    missionsCompleted: number;
+    totalXp: number;
+    rewardXp: number;
+  } | null>(null);
+  const [rankClimb, setRankClimb] = useState<{ from: number; to: number } | null>(
+    null,
+  );
+  const [rankClimbReady, setRankClimbReady] = useState(!justCompleted);
+  const [lbNudgeRank, setLbNudgeRank] = useState<number | null>(null);
+  const [showLbNudge, setShowLbNudge] = useState(false);
 
   useEffect(() => {
     if (searchParams.get("complete") !== "1") return;
     router.replace(`/player/missions/${slug}`, { scroll: false });
   }, [searchParams, router, slug]);
 
+  // After celebration: rank climb first (if any), then learner-story invite.
+  useEffect(() => {
+    if (!justCompleted || !roadmapSeen || roadmapOpen) return;
+
+    let cancelled = false;
+    getXpLeaderboard({ page: 1, limit: 1 })
+      .then((board) => {
+        if (cancelled) return;
+        const next = board.me?.rank;
+        if (next != null) {
+          const climb = consumeXpRankClimb(next);
+          if (climb) {
+            setRankClimb(climb);
+          } else {
+            setLbNudgeRank(next);
+            setShowLbNudge(true);
+          }
+        } else {
+          setShowLbNudge(true);
+        }
+        setRankClimbReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setShowLbNudge(true);
+          setRankClimbReady(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [justCompleted, roadmapSeen, roadmapOpen]);
+
+  // After rank climb is handled: soft learner-story invite (Mission 3+).
+  useEffect(() => {
+    if (!justCompleted || !roadmapSeen || roadmapOpen) return;
+    if (!rankClimbReady || rankClimb != null) return;
+    if (!mission) return;
+    if (mission.order < LEARNER_FEEDBACK_MIN_MISSION_ORDER) {
+      setStoryInviteReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    getLearnerFeedbackInvite()
+      .then((invite) => {
+        if (cancelled) return;
+        if (invite.eligible) {
+          setStoryInviteStats({
+            missionsCompleted: invite.missionsCompleted,
+            totalXp: invite.totalXp,
+            rewardXp: invite.rewardXp,
+          });
+          setStoryInviteOpen(true);
+        }
+        setStoryInviteReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) setStoryInviteReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [justCompleted, roadmapSeen, roadmapOpen, mission, rankClimbReady, rankClimb]);
+
   // Celebration first on complete. Feedback stays available after celebration exits,
   // and also when the learner revisits a completed mission later.
   const feedbackGateOpen =
     !roadmapOpen &&
+    rankClimbReady &&
+    rankClimb == null &&
+    storyInviteReady &&
+    !storyInviteOpen &&
     mission?.status === "completed" &&
     (!justCompleted || roadmapSeen);
 
@@ -202,6 +293,21 @@ export function MissionHubView({ slug }: { slug: string }) {
 
   return (
     <div className={cn("mx-auto max-w-lg px-4 py-8", locale === "bn" && "font-bengali")}>
+      <RankClimbSheet
+        isOpen={rankClimb != null}
+        fromRank={rankClimb?.from ?? 0}
+        toRank={rankClimb?.to ?? 0}
+        onContinue={() => setRankClimb(null)}
+      />
+
+      <LearnerStoryInviteModal
+        isOpen={storyInviteOpen}
+        missionsCompleted={storyInviteStats?.missionsCompleted ?? 0}
+        totalXp={storyInviteStats?.totalXp ?? 0}
+        rewardXp={storyInviteStats?.rewardXp}
+        onLater={() => setStoryInviteOpen(false)}
+      />
+
       <MissionEndFeedbackModal
         isOpen={feedbackOpen}
         missionSlug={slug}
@@ -258,6 +364,17 @@ export function MissionHubView({ slug }: { slug: string }) {
           </button>
         </div>
       ) : null}
+
+      <LeaderboardMissionNudge
+        isVisible={
+          justCompleted &&
+          showLbNudge &&
+          rankClimb == null &&
+          !storyInviteOpen &&
+          !roadmapOpen
+        }
+        rank={lbNudgeRank}
+      />
 
       <div className="mt-6 flex items-center gap-4 text-sm">
         <span className="rounded-full bg-primary/10 px-2.5 py-1 font-medium text-primary dark:bg-primary/15 dark:text-primary-foreground">

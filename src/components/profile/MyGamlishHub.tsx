@@ -6,6 +6,7 @@ import {
   BookOpen,
   Flame,
   Lock,
+  MessageSquareHeart,
   Sparkles,
   Star,
   Trophy,
@@ -19,8 +20,10 @@ import {
   type GamlishPublicProfile,
   type MissionCard,
 } from "@/src/lib/api/gamlish";
+import { getLearnerFeedbackInvite } from "@/src/lib/api/learnerFeedback";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { CampGraduationsSection } from "@/src/components/profile/CampGraduationsSection";
+import { LEARNER_FEEDBACK_REWARD_XP } from "@/src/lib/learner-feedback";
 
 function MissionMini({ card }: { card: MissionCard }) {
   const n = String(card.order).padStart(2, "0");
@@ -55,6 +58,7 @@ export function MyGamlishHub() {
   const { profile, loading: sessionLoading } = useStudentSession();
   const [data, setData] = useState<GamlishPublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showStoryInvite, setShowStoryInvite] = useState(false);
 
   const handle =
     profile?.publicHandle ?? profile?.username ?? profile?.publicId ?? null;
@@ -67,12 +71,20 @@ export function MyGamlishHub() {
     }
     let cancelled = false;
     setLoading(true);
-    getGamlishProfile(handle)
-      .then((p) => {
-        if (!cancelled) setData(p);
+    Promise.all([
+      getGamlishProfile(handle),
+      getLearnerFeedbackInvite().catch(() => null),
+    ])
+      .then(([p, invite]) => {
+        if (cancelled) return;
+        setData(p);
+        setShowStoryInvite(Boolean(invite?.eligible));
       })
       .catch(() => {
-        if (!cancelled) setData(null);
+        if (!cancelled) {
+          setData(null);
+          setShowStoryInvite(false);
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -175,6 +187,28 @@ export function MyGamlishHub() {
         </span>
         <span className="text-xs font-bold text-sky-700 dark:text-sky-300">Open</span>
       </Link>
+
+      {showStoryInvite ? (
+        <Link
+          href="/feedback"
+          className="flex items-center gap-3 rounded-2xl border border-emerald-400/30 bg-gradient-to-r from-emerald-500/10 via-card to-sky-500/10 px-4 py-3 font-bengali transition hover:border-emerald-400/50"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-md shadow-emerald-600/25">
+            <MessageSquareHeart className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-bold text-foreground">
+              বোনাস চ্যালেঞ্জ · +{LEARNER_FEEDBACK_REWARD_XP} XP
+            </span>
+            <span className="block text-xs text-muted-foreground">
+              মাত্র ২ মিনিট · একবারই · পাঠানোর পর এই অপশন চলে যাবে
+            </span>
+          </span>
+          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+            Open
+          </span>
+        </Link>
+      ) : null}
 
       {profile?.isFoundingMember && profile.founderNumber ? (
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">

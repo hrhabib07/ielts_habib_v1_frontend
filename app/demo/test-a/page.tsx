@@ -6,8 +6,8 @@ export const metadata = {
 };
 
 /**
- * Conversion test A: third-person demo + Google-primary save screen.
- * Live /demo and /demo/test keep the phone-first save layout.
+ * Conversion test A archive: third-person demo + Google-primary save.
+ * Live /demo now also uses saveLayout="a" · this page remains TPS variant A.
  */
 export default function DemoTestAPage() {
   return (

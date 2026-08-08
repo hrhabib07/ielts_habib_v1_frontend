@@ -103,6 +103,13 @@ type Props = {
   className?: string;
   /** sm = inline cards · md = default · lg = pricing featured strip */
   size?: "sm" | "md" | "lg";
+  /** Optional visitor id override (test pages). Defaults to browser visitor id. */
+  visitorId?: string;
+  /**
+   * Dev/test only · skip API and show an active countdown ending in this many ms.
+   * Use for visual QA when the real visitor/IP clock is already expired.
+   */
+  demoRemainingMs?: number;
 };
 
 /**
@@ -112,6 +119,8 @@ type Props = {
 export function PersonalOfferCountdown({
   className,
   size = "md",
+  visitorId,
+  demoRemainingMs,
 }: Props) {
   const { locale } = useUiLocale();
   const reduceMotion = useReducedMotion();
@@ -119,8 +128,25 @@ export function PersonalOfferCountdown({
   const [remainingMs, setRemainingMs] = useState(0);
 
   useEffect(() => {
+    if (demoRemainingMs != null && demoRemainingMs > 0) {
+      const now = Date.now();
+      const endsAt = new Date(now + demoRemainingMs).toISOString();
+      const demo: PersonalOfferView = {
+        visitorId: visitorId ?? "demo-preview",
+        listPriceBdt: 1590,
+        offerPriceBdt: 690,
+        startedAt: new Date(now).toISOString(),
+        endsAt,
+        isExpired: false,
+        remainingMs: demoRemainingMs,
+      };
+      setOffer(demo);
+      setRemainingMs(demoRemainingMs);
+      return;
+    }
+
     let cancelled = false;
-    void fetchPersonalOffer()
+    void fetchPersonalOffer(visitorId)
       .then((data) => {
         if (cancelled) return;
         setOffer(data);
@@ -130,7 +156,7 @@ export function PersonalOfferCountdown({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [demoRemainingMs, visitorId]);
 
   useEffect(() => {
     if (!offer || offer.isExpired) return;

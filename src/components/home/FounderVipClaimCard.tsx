@@ -118,13 +118,12 @@ export function FounderVipClaimCard({
           size="sm"
           className={cn(
             "h-9 shrink-0 gap-1 rounded-full px-3 text-xs font-black",
-            "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950",
-            "hover:from-amber-300 hover:to-amber-400 shadow-md shadow-amber-500/25",
+            "bg-amber-500 text-amber-950 hover:bg-amber-400",
           )}
         >
-          <Link href={href} data-telemetry="founder-cta" data-telemetry-cta="true">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            {locale === "bn" ? "VIP এক্সেস নিন" : "Take VIP access"}
+          <Link href={href}>
+            <Sparkles className="h-3.5 w-3.5" />
+            {copy.cta}
           </Link>
         </Button>
       </div>

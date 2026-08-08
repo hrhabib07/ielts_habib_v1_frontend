@@ -21,8 +21,11 @@ import {
 } from "@/src/lib/player-eval-sfx";
 import { cn } from "@/lib/utils";
 import { ContentPauseNotice } from "@/src/components/player/ContentPauseNotice";
+import { MissionOnePaywallFlow } from "@/src/components/player/MissionOnePaywallFlow";
+import { readMissionCompletionScore } from "@/src/lib/mission-one-paywall";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+const FREE_MISSION_SLUG = "mission-01-word-order";
 const AUTO_ADVANCE_SECONDS = 4;
 const CAMP_AUTO_ADVANCE_SECONDS = 6;
 
@@ -403,6 +406,21 @@ export function MissionRoadmapCelebration({
       <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/95">
         <span className="h-8 w-8 animate-spin rounded-full border-2 border-white/25 border-t-white" />
       </div>
+    );
+  }
+
+  if (
+    model.nextNeedsPay &&
+    !model.nextOnContentPause &&
+    completedMissionSlug === FREE_MISSION_SLUG
+  ) {
+    return (
+      <MissionOnePaywallFlow
+        score={readMissionCompletionScore(completedMissionSlug)}
+        missionsDone={model.missionsDone}
+        missionsTotal={model.missionsTotal}
+        onLater={onExit}
+      />
     );
   }
 

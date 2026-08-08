@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Compact player/home conversion card · Full Journey Access offer.
- * Short by design — must not dominate the camp map.
+ * Short by design · must not dominate the camp map.
  */
 export function SeasonalOfferHomeCard({ className }: { className?: string }) {
   const { locale } = useUiLocale();
@@ -33,7 +33,6 @@ export function SeasonalOfferHomeCard({ className }: { className?: string }) {
         if (!cancelled) setPricing(null);
       });
 
-    // Ensure personal offer clock exists even if pricing omitted it.
     void fetchPersonalOffer()
       .then((offer) => {
         if (cancelled || offer.isExpired) return;
@@ -128,14 +127,13 @@ export function SeasonalOfferHomeCard({ className }: { className?: string }) {
           asChild
           size="sm"
           className={cn(
-            "h-9 shrink-0 rounded-full px-2.5 text-[11px] font-black shadow-md shadow-amber-500/25 sm:px-3 sm:text-xs",
-            "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950",
-            "hover:from-amber-300 hover:to-amber-400",
+            "h-9 shrink-0 gap-1 rounded-full px-3 text-xs font-black",
+            "bg-amber-500 text-amber-950 hover:bg-amber-400",
           )}
         >
           <Link href="/checkout">
-            <Sparkles className="mr-1 h-3.5 w-3.5 shrink-0" aria-hidden />
-            {isBn ? "VIP এক্সেস নিন" : "Take VIP access"}
+            <Sparkles className="h-3.5 w-3.5" />
+            {isBn ? "আনলক" : "Unlock"}
           </Link>
         </Button>
       </div>

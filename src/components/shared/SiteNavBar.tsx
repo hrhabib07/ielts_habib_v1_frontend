@@ -50,7 +50,6 @@ const STUDENT_LINKS_READING = [
 const STUDENT_LINKS_PLAYER = [
   { href: "/player", labelKey: "play" as const },
   { href: "/leaderboard", labelKey: "leaderboard" as const },
-  { href: "/squad", labelKey: "squad" as const },
   { href: "/profile", labelKey: "myProfile" as const },
 ] as const;
 
@@ -178,11 +177,35 @@ export function SiteNavBar(props: {
 
         <nav className="hidden items-center gap-0.5 lg:flex">
           {isStudent &&
-            STUDENT_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className={navLinkClass(isNavActive(link.href))}>
-                {shell[link.labelKey]}
-              </Link>
-            ))}
+            STUDENT_LINKS.map((link) => {
+              const active = isNavActive(link.href);
+              const isLeaderboard = link.href === "/leaderboard";
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    navLinkClass(active),
+                    isLeaderboard &&
+                      !active &&
+                      "text-amber-800 hover:bg-amber-400/10 hover:text-amber-900 dark:text-amber-200 dark:hover:text-amber-100",
+                    isLeaderboard &&
+                      active &&
+                      "bg-amber-400/15 text-amber-950 ring-amber-400/25 dark:bg-amber-400/15 dark:text-amber-100 dark:ring-amber-400/30",
+                  )}
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {isLeaderboard ? (
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      </span>
+                    ) : null}
+                    {shell[link.labelKey]}
+                  </span>
+                </Link>
+              );
+            })}
           {(isInstructor || isAdmin) && (
             <Link
               href={isAdmin ? "/dashboard/admin" : "/dashboard/instructor"}

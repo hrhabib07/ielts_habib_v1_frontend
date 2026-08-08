@@ -15,6 +15,7 @@ import {
 import { getStudentPostAuthHref } from "@/src/lib/auth-redirects";
 import { cn } from "@/lib/utils";
 import { trackFunnelEvent } from "@/src/lib/api/analytics";
+import { DemoOtpWaitTheater } from "@/src/components/demo/DemoOtpWaitTheater";
 
 type Locale = "en" | "bn";
 type Step = "phone" | "otp" | "setup";
@@ -29,6 +30,11 @@ type Props = {
   forceReturnTo?: string;
   /** Hide the intro hint (used inside accordion panels). */
   compact?: boolean;
+  /**
+   * saveXp = outcome CTA for demo save screen
+   * ("Save my XP" + tiny OTP subline). Login/register stay default.
+   */
+  ctaMode?: "default" | "saveXp";
 };
 
 function extractApiError(err: unknown): string | null {
@@ -57,6 +63,8 @@ const COPY = {
     phoneLabel: "মোবাইল নম্বর",
     phonePlaceholder: "01XXXXXXXXX",
     sendOtp: "OTP পাঠান",
+    sendOtpSaveXp: "আমার XP সেভ করো",
+    sendOtpSaveXpHint: "মোবাইলে OTP যাবে",
     sending: "পাঠানো হচ্ছে…",
     otpLabel: "SMS কোড",
     otpPlaceholder: "6 অঙ্কের কোড",
@@ -86,6 +94,8 @@ const COPY = {
     phoneLabel: "Mobile number",
     phonePlaceholder: "01XXXXXXXXX",
     sendOtp: "Send OTP",
+    sendOtpSaveXp: "Save my XP",
+    sendOtpSaveXpHint: "We'll text you an OTP",
     sending: "Sending…",
     otpLabel: "SMS code",
     otpPlaceholder: "6-digit code",
@@ -120,8 +130,12 @@ export function PhoneOtpAuthPanel({
   onSuccessNavigate,
   forceReturnTo,
   compact = false,
+  ctaMode = "default",
 }: Props) {
   const copy = COPY[locale];
+  const isSaveXpCta = ctaMode === "saveXp";
+  const phoneSubmitLabel = isSaveXpCta ? copy.sendOtpSaveXp : copy.sendOtp;
+  const phoneSubmitHint = isSaveXpCta ? copy.sendOtpSaveXpHint : null;
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -378,15 +392,25 @@ export function PhoneOtpAuthPanel({
           <Button
             type="submit"
             disabled={loading || phone.trim().length < 10}
-            className="h-11 w-full rounded-xl text-[15px] font-semibold"
+            className={cn(
+              "h-auto min-h-11 w-full rounded-xl text-[15px] font-semibold",
+              phoneSubmitHint ? "flex-col gap-0.5 py-2.5" : "",
+            )}
             size="lg"
           >
             {loading ? (
               copy.sending
             ) : (
               <>
-                {copy.sendOtp}
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <span className="inline-flex items-center">
+                  {phoneSubmitLabel}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </span>
+                {phoneSubmitHint ? (
+                  <span className="text-[10px] font-medium leading-none opacity-80">
+                    {phoneSubmitHint}
+                  </span>
+                ) : null}
               </>
             )}
           </Button>
@@ -401,6 +425,8 @@ export function PhoneOtpAuthPanel({
             void verify();
           }}
         >
+          {isSaveXpCta ? <DemoOtpWaitTheater locale={locale} /> : null}
+
           <p className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-foreground/80">
             <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden />
             {copy.sentTo(phoneMasked)}

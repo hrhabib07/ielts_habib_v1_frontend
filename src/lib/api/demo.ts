@@ -101,10 +101,13 @@ interface ApiResponse<T> {
   data: T;
 }
 
-export async function getDemoStats(): Promise<{ completions: number }> {
-  const res = await apiClient.get<ApiResponse<{ completions: number }>>(
-    "/demo/stats",
-  );
+export async function getDemoStats(): Promise<{
+  completions: number;
+  registeredStudents?: number;
+}> {
+  const res = await apiClient.get<
+    ApiResponse<{ completions: number; registeredStudents?: number }>
+  >("/demo/stats");
   return res.data.data;
 }
 

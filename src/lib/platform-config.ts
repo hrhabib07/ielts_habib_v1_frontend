@@ -26,10 +26,13 @@ export const SHOW_GUEST_DEMO_SOCIAL_PROOF = false;
 export const USE_HERO_TRANSLATE_CINEMA = true;
 
 /**
- * Pause players after Mission 10 / Camp 02 until Camp 03 content is ready.
- * Keep in sync with backend `IS_CONTENT_PAUSE_AFTER_CAMP_02`.
- * Set false when Camp 03 is live.
+ * Pause players after Mission 15 / Camp 03 until Camp 04 content is ready.
+ * Keep in sync with backend `CONTENT_PAUSE_AFTER_MISSION_ORDER`.
+ * Set false when Camp 04 is live.
  */
-export const PAUSE_AFTER_MISSION_10 = true;
+export const PAUSE_AFTER_MISSION_15 = true;
 
-export const CONTENT_PAUSE_AFTER_MISSION_ORDER = 10;
+/** @deprecated Use PAUSE_AFTER_MISSION_15 */
+export const PAUSE_AFTER_MISSION_10 = PAUSE_AFTER_MISSION_15;
+
+export const CONTENT_PAUSE_AFTER_MISSION_ORDER = 15;

@@ -48,6 +48,7 @@ export interface PlayerCourseMap {
 export interface PlayerMissionDetail {
   id: string;
   slug: string;
+  order: number;
   title: string;
   grammarTarget?: string;
   isInspection: boolean;
