@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Crown, Trophy, Zap } from "lucide-react";
 import { getXpLeaderboard, type XpLeaderboardEntry } from "@/src/lib/api/xpLeaderboard";
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
+import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
 
 /**
@@ -105,18 +106,23 @@ export function GuestLeaderboardTeaser() {
           </li>
         </ol>
 
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-6 flex flex-col items-stretch gap-3">
           <Link
             href="/demo"
-            className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl bg-sky-600 text-sm font-black text-white transition hover:bg-sky-500"
+            className={cn(
+              "group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black transition active:scale-[0.99]",
+              LANDING_CTA_CLASS,
+            )}
           >
-            {bn ? "ডেমো খেলে জয়েন করো" : "Play demo · join the race"}
+            <Zap className="h-4 w-4 text-amber-300 transition group-hover:scale-110" />
+            {bn ? "গেম খেলে জয়েন করো" : "Play · join the race"}
           </Link>
           <Link
             href="/leaderboard"
-            className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl border border-border bg-card text-sm font-bold text-foreground transition hover:bg-muted"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-transparent px-4 py-2.5 text-sm font-bold text-sky-500 underline-offset-4 transition hover:bg-sky-400/10 hover:text-sky-400 hover:underline dark:text-sky-400 dark:hover:text-sky-300"
           >
-            {bn ? "লিডারবোর্ড দেখো" : "See full leaderboard"}
+            <Trophy className="h-4 w-4" />
+            {bn ? "পুরো লিডারবোর্ড দেখো" : "See full leaderboard"}
           </Link>
         </div>
       </div>
