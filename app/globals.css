@@ -282,6 +282,80 @@
   animation: band-glow 2.5s ease-in-out infinite;
 }
 
+/* Mission progress pill · liquid fill + drifting water marks */
+@keyframes mission-pill-water-drift {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 48px 0%;
+  }
+}
+
+@keyframes mission-pill-surface-sheen {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+.mission-progress-pill-fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: width;
+}
+
+.mission-progress-pill-fill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -28deg,
+    transparent 0 8px,
+    rgb(255 255 255 / 0.22) 8px 12px,
+    transparent 12px 20px
+  );
+  background-size: 40px 100%;
+  animation: mission-pill-water-drift 3.6s linear infinite;
+  pointer-events: none;
+}
+
+.mission-progress-pill-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 8px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.4)
+  );
+  animation: mission-pill-surface-sheen 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mission-progress-pill-fill {
+    transition: none;
+    will-change: auto;
+  }
+
+  .mission-progress-pill-fill::before,
+  .mission-progress-pill-fill::after {
+    animation: none;
+  }
+}
+
 /* Band score: outline text + navy water-type fill that grows (plant-like) */
 .band-score-container {
   position: relative;

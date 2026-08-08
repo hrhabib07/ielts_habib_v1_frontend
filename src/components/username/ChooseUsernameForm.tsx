@@ -38,19 +38,6 @@ function apiErrorMessage(err: unknown, fallback: string): string {
   return fallback;
 }
 
-function formatWindowEnd(iso: string | null, locale: "en" | "bn"): string | null {
-  if (!iso) return null;
-  try {
-    return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", {
-      dateStyle: "medium",
-      timeStyle: "short",
-      numberingSystem: "latn",
-    }).format(new Date(iso));
-  } catch {
-    return null;
-  }
-}
-
 export function ChooseUsernameForm() {
   const copy = useUsernameFlowCopy();
   const { locale } = useUiLocale();
@@ -205,8 +192,6 @@ export function ChooseUsernameForm() {
 
   const hasUsername = Boolean(state?.username);
   const canChange = state?.canChange ?? false;
-  const isLocked = state?.isLocked ?? false;
-  const windowEnd = formatWindowEnd(state?.changeWindowEndsAt ?? null, locale);
   const availableSuggestions = suggestions.filter(
     (s) => suggestionStatus[s] === "available",
   );
@@ -242,15 +227,9 @@ export function ChooseUsernameForm() {
             <p className="mt-1 break-all text-xs text-muted-foreground">
               gamlish.com/u/{state?.username}
             </p>
-            {isLocked ? (
-              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                <Lock className="h-3.5 w-3.5" /> {copy.permanentBadge}
-              </p>
-            ) : windowEnd ? (
-              <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">
-                {copy.changeUntil(windowEnd)}
-              </p>
-            ) : null}
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" /> {copy.permanentBadge}
+            </p>
             <Button
               asChild
               className="mt-4 w-full rounded-full"
@@ -338,8 +317,6 @@ export function ChooseUsernameForm() {
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
-              ) : hasUsername ? (
-                copy.saveNew
               ) : (
                 copy.claimCta
               )}

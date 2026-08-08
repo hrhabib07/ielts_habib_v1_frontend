@@ -23,12 +23,14 @@ export function MissionOnePaywallFlow({
   missionsTotal,
   onLater,
   className,
+  checkoutHref = COPY.checkoutHref,
 }: {
   score: MissionOnePaywallScore | null;
   missionsDone: number;
   missionsTotal: number;
   onLater: () => void;
   className?: string;
+  checkoutHref?: string;
 }) {
   const reduceMotion = useReducedMotion();
   const [step, setStep] = useState<Step>(0);
@@ -188,7 +190,7 @@ export function MissionOnePaywallFlow({
                 size="lg"
                 className="h-14 w-full rounded-2xl bg-amber-400 text-base font-black text-slate-950 hover:bg-amber-300"
               >
-                <Link href={COPY.checkoutHref}>{COPY.cta}</Link>
+                <Link href={checkoutHref}>{COPY.cta}</Link>
               </Button>
               <button
                 type="button"

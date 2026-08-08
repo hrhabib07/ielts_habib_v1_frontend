@@ -32,6 +32,13 @@ export interface LearnerFeedbackPublicItem {
   status?: LearnerFeedbackStatus;
   createdAt?: string | null;
   xpAwarded?: number;
+  username?: string | null;
+  publicId?: string | null;
+  profileHandle?: string | null;
+  avatarUrl?: string | null;
+  totalXp?: number;
+  missionsCompleted?: number;
+  level?: number;
 }
 
 export interface LearnerFeedbackInviteStatus {

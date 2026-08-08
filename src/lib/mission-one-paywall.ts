@@ -84,4 +84,5 @@ export const MISSION_ONE_PAYWALL_COPY = {
     `স্কোর: ${percent}% · সঠিক: ${correct}/${total}`,
   scoreFallback: "মিশন ০১ শেষ করেছ · এখন পূর্ণ পথের দিকে এগোও",
   checkoutHref: "/checkout?course=english-foundations&from=mission-01-complete",
+  gateCheckoutHref: "/checkout?course=english-foundations&from=paid-mission-unlock",
 } as const;

@@ -8,6 +8,7 @@ import {
   Hand,
   Link2,
   Lock,
+  MessageSquareHeart,
   Share2,
   Sparkles,
   Star,
@@ -28,6 +29,7 @@ import {
 } from "@/src/lib/api/gamlish";
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
 import { CampGraduationsSection } from "@/src/components/profile/CampGraduationsSection";
+import { LearnerFeedbackCard } from "@/src/components/feedback/LearnerFeedbackCard";
 import {
   getOrCreateProfileViewerKey,
   recordPublicProfileView,
@@ -129,7 +131,7 @@ export function GamlishProfileContent({
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const { identity, stats, squad, missionCards, achievements, social, recentActivity, campGraduations } =
+  const { identity, stats, squad, missionCards, achievements, social, recentActivity, campGraduations, learnerStory } =
     profile;
 
   const isLoggedIn = typeof window !== "undefined" && Boolean(getAccessToken());
@@ -496,6 +498,29 @@ export function GamlishProfileContent({
                 label="Streak"
                 value={`${stats.streakCurrent}d`}
                 accent="bg-gradient-to-br from-orange-400 to-rose-600"
+              />
+            </section>
+          ) : null}
+
+          {learnerStory ? (
+            <section className="mt-6">
+              <div className="mb-3 flex items-center gap-2">
+                <MessageSquareHeart className="h-4 w-4 text-sky-600" />
+                <h2 className="text-sm font-bold tracking-tight text-foreground">
+                  Gamlish review
+                </h2>
+              </div>
+              <LearnerFeedbackCard
+                displayName={identity.displayName}
+                title={learnerStory.title}
+                rating={learnerStory.rating}
+                body={learnerStory.body}
+                username={identity.username}
+                profileHandle={identity.username || identity.publicId}
+                avatarUrl={identity.avatarUrl}
+                totalXp={stats?.totalXp}
+                missionsCompleted={stats?.missionsCompleted}
+                interactive={false}
               />
             </section>
           ) : null}

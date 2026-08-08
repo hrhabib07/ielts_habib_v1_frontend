@@ -111,6 +111,12 @@ export interface GamlishPublicProfile {
   masterPath?: MasterPathStatus | null;
   social: GamlishProfileSocial;
   recentActivity: RecentActivityItem[];
+  learnerStory?: {
+    title: string;
+    rating: number;
+    body: string;
+    createdAt: string | null;
+  } | null;
 }
 
 export interface UsernameState {

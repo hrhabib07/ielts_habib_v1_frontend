@@ -473,6 +473,7 @@ export function CampMapView({
     >
       <PlayerSubscribeModal
         mission={paywallMission}
+        map={map}
         onClose={() => setPaywallMission(null)}
       />
 

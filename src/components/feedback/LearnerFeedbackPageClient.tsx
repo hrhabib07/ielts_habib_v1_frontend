@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Star, Trophy, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LearnerFeedbackCard } from "@/src/components/feedback/LearnerFeedbackCard";
+import { DisplayNameEditor } from "@/src/components/profile/DisplayNameEditor";
 import {
   getLearnerFeedbackInvite,
   getMyLearnerFeedback,
@@ -224,12 +225,30 @@ export function LearnerFeedbackPageClient() {
               </p>
             ) : null}
             <LearnerFeedbackCard
-              displayName={existing.displayName}
+              displayName={displayName}
               title={existing.title}
               rating={existing.rating}
               body={existing.body}
               pendingBadge={existing.status === "pending"}
             />
+            <div className="rounded-2xl border border-sky-400/25 bg-sky-500/5 px-4 py-3">
+              <p className="mb-2 text-xs font-bold text-sky-900 dark:text-sky-100">
+                কার্ডে যে নাম দেখাচ্ছে, সেটা ঠিক করতে পারো (username লক থাকবে)
+              </p>
+              <DisplayNameEditor
+                initialName={displayName}
+                username={profile?.username}
+                size="card"
+                onSaved={(next) => {
+                  setProfile((prev) =>
+                    prev ? { ...prev, displayName: next } : prev,
+                  );
+                  setExisting((prev) =>
+                    prev ? { ...prev, displayName: next } : prev,
+                  );
+                }}
+              />
+            </div>
             {existing.status === "approved" ? (
               <p className="text-center text-xs font-semibold text-muted-foreground">
                 অ্যাপ্রুভড · হোমপেজে দেখানো হতে পারে

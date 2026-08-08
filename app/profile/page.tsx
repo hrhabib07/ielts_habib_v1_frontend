@@ -47,6 +47,7 @@ import { MyGamlishHub } from "@/src/components/profile/MyGamlishHub";
 import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
 import { ProfilePlaySettings } from "@/src/components/profile/ProfilePlaySettings";
+import { DisplayNameEditor } from "@/src/components/profile/DisplayNameEditor";
 import { cn } from "@/lib/utils";
 
 function formatSubscriptionDate(iso: string): string {
@@ -260,9 +261,24 @@ export default function ProfilePage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
                     {copy.workspaceLabel}
                   </p>
-                  <h1 className="mt-1 truncate text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-                    {displayName.trim() || "Student"}
-                  </h1>
+                  <div className="mt-1">
+                    <DisplayNameEditor
+                      initialName={displayName}
+                      username={profileRecord.username}
+                      size="hero"
+                      onSaved={(next) => {
+                        setDisplayName(next);
+                        setProfileRecord((prev) =>
+                          prev ? { ...prev, displayName: next } : prev,
+                        );
+                      }}
+                    />
+                    {!profileRecord.username && publicHandle ? (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        ID · {publicHandle}
+                      </p>
+                    ) : null}
+                  </div>
                   {showFoundingBadge && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <FoundingMemberBadge size="md" />
@@ -276,13 +292,6 @@ export default function ProfilePage() {
                       ) : null}
                     </div>
                   )}
-                  {publicHandle ? (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {profileRecord.username
-                        ? `@${profileRecord.username}`
-                        : `ID · ${publicHandle}`}
-                    </p>
-                  ) : null}
                   <div className="mt-2">
                     <JoinedDateBadge
                       joinedAt={
@@ -604,8 +613,10 @@ export default function ProfilePage() {
               </h2>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 {ENABLE_READING
-                  ? "Display name, countries, and phone. Username is permanent and cannot be changed."
-                  : copy.profileSettingsHint}
+                  ? "Display name, countries, and phone. Username is permanent and cannot be changed. Tip: you can also edit your display name at the top of this page."
+                  : locale === "bn"
+                    ? `${copy.profileSettingsHint} উপরে প্রোফাইল হেডারেও নাম বদলাতে পারো।`
+                    : `${copy.profileSettingsHint} You can also edit your name at the top of this page.`}
               </p>
             </div>
             {!editingPersonalDetails ? (
