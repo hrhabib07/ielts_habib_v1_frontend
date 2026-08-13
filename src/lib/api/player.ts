@@ -36,7 +36,7 @@ export interface PlayerCourseMap {
     campTitleBn: string | null;
     hoursLeft: number | null;
   } | null;
-  /** Present when Camp 03 is paused after Mission 10. */
+  /** Present when a content pause is holding the next camp. */
   contentPause?: {
     active: boolean;
     afterMissionOrder: number;
