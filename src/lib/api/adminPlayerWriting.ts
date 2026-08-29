@@ -15,7 +15,9 @@ export interface AdminWritingSubmission {
   id: string;
   userId: string;
   studentName: string;
+  studentUsername: string | null;
   studentEmail: string;
+  studentPhoneMasked: string | null;
   missionSlug: string;
   stageOrder: number;
   topicOption: "A" | "B" | "C";
@@ -33,6 +35,14 @@ function unwrap<T>(res: { data?: { data?: T } }): T {
   const d = res.data?.data;
   if (d === undefined) throw new Error("No data");
   return d;
+}
+
+export async function getAdminWritingPendingCount(): Promise<number> {
+  const { default: apiClient } = await import("@/src/lib/api-client");
+  const res = await apiClient.get<{ data: { count: number } }>(
+    "/admin/player/writing-submissions/pending-count",
+  );
+  return unwrap(res).count;
 }
 
 export async function listAdminWritingSubmissions(

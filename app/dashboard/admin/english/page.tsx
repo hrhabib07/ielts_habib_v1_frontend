@@ -136,8 +136,20 @@ export default function AdminEnglishContentPage() {
             Review Final Pitch paragraphs and mark students out of 10.
           </p>
         </div>
-        <Link href="/dashboard/admin/english/writing-reviews">
+        <Link href="/dashboard/admin/writing-reviews">
           <Button>Open review queue</Button>
+        </Link>
+      </Card>
+
+      <Card className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Typed answer checks</h2>
+          <p className="text-sm text-muted-foreground">
+            See meaning-API calls, responses, and wordings saved in Mongo.
+          </p>
+        </div>
+        <Link href="/dashboard/admin/answer-checks">
+          <Button variant="outline">Open log</Button>
         </Link>
       </Card>
 

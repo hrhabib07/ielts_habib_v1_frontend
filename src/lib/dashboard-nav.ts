@@ -1,8 +1,10 @@
 import {
   Activity,
+  Award,
   BarChart3,
   BookOpen,
   ClipboardCheck,
+  Cpu,
   FileQuestion,
   FileText,
   FolderKanban,
@@ -11,6 +13,7 @@ import {
   Layers,
   LayoutDashboard,
   ListChecks,
+  PenLine,
   Settings,
   Tag,
   UserCheck,
@@ -67,7 +70,10 @@ const ENGLISH_ADMIN_NAV: DashboardNavGroup = {
   roles: ["ADMIN"],
   items: [
     { label: "Admin Home", href: "/dashboard/admin", icon: LayoutDashboard },
+    { label: "Writing reviews", href: "/dashboard/admin/writing-reviews", icon: PenLine },
+    { label: "Certifications", href: "/dashboard/admin/certifications", icon: Award },
     { label: "Course & Missions", href: "/dashboard/admin/english", icon: Gamepad2 },
+    { label: "Answer checks", href: "/dashboard/admin/answer-checks", icon: Cpu },
     { label: "Students", href: "/dashboard/admin/users", icon: Users },
     { label: "Demo funnel", href: "/dashboard/admin/demo-feedback", icon: MessageSquareHeart },
     { label: "Mission feedback", href: "/dashboard/admin/mission-feedback", icon: MessagesSquare },
@@ -93,7 +99,10 @@ export function getDashboardNavGroups(role: UserRole, enableReading: boolean): D
       {
         title: "MAIN",
         roles: ["INSTRUCTOR"],
-        items: [{ label: "Dashboard", href: "/dashboard/instructor", icon: BarChart3 }],
+        items: [
+          { label: "Dashboard", href: "/dashboard/instructor", icon: BarChart3 },
+          { label: "Writing reviews", href: "/dashboard/instructor/writing-reviews", icon: PenLine },
+        ],
       },
     ];
   }

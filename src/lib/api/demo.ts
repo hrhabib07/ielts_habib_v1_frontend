@@ -79,6 +79,13 @@ export interface DemoStageContent {
   submitStageOrder: number;
   isReview: boolean;
   isDemo: true;
+  evalResume?: Array<{
+    questionId: string;
+    settled: boolean;
+    correct: boolean;
+    attempts: number;
+    answer?: unknown;
+  }>;
 }
 
 export interface DemoSubmitResult {

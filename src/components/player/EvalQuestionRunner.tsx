@@ -36,6 +36,16 @@ import {
   buildGapFillAnswer,
   parseGapSourceText,
 } from "@/src/lib/player-gap-fill";
+import {
+  answersFromResume,
+  clientEvalResumeKey,
+  firstUnsettledQuestionIndex,
+  hydrateEvalCheckState,
+  mergeEvalResume,
+  readClientEvalResume,
+  upsertClientEvalResume,
+  type PlayerEvalResumeItem,
+} from "@/src/lib/player-eval-resume";
 
 type EvalQuestion = Record<string, unknown>;
 
@@ -695,6 +705,9 @@ export function EvalQuestionRunner({
   aside,
   retryMode = false,
   preservedAnswers = {},
+  resume,
+  isReview = false,
+  clientResumeScope,
   checkAnswer,
 }: {
   missionSlug: string;
@@ -707,6 +720,11 @@ export function EvalQuestionRunner({
   aside?: ReactNode;
   retryMode?: boolean;
   preservedAnswers?: Record<string, unknown>;
+  resume?: PlayerEvalResumeItem[];
+  /** Skip resume when reviewing a finished stage. */
+  isReview?: boolean;
+  /** Persist checks locally (demo, or extra backup). */
+  clientResumeScope?: string;
   /** Override live check (e.g. free demo without student auth). */
   checkAnswer?: (
     questionId: string,
@@ -716,16 +734,31 @@ export function EvalQuestionRunner({
   const PLAYER_UI = usePlayerUiCopy();
   const copy = PLAYER_UI.eval;
   const autoAdvanceCorrect = useAutoAdvanceCorrect();
-  const [answers, setAnswers] = useState<Record<string, unknown>>({});
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const questionIds = questions.map((q) => String(q.id));
+  const clientKey =
+    clientResumeScope && !retryMode && !isReview
+      ? clientEvalResumeKey(clientResumeScope, stageOrder)
+      : null;
+  const mergedResume =
+    retryMode || isReview
+      ? []
+      : mergeEvalResume(resume, clientKey ? readClientEvalResume(clientKey) : []);
+  const hydrated = hydrateEvalCheckState(mergedResume);
+  const [answers, setAnswers] = useState<Record<string, unknown>>(() => ({
+    ...answersFromResume(mergedResume),
+    ...(preservedAnswers ?? {}),
+  }));
+  const [currentIndex, setCurrentIndex] = useState(() =>
+    firstUnsettledQuestionIndex(questionIds, mergedResume, Boolean(retryMode)),
+  );
   const [stepError, setStepError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [checkResults, setCheckResults] = useState<
     Record<string, PlayerAnswerCheckResult>
-  >({});
+  >(() => hydrated.checkResults);
   const [wrongAttemptCounts, setWrongAttemptCounts] = useState<
     Record<string, number>
-  >({});
+  >(() => hydrated.wrongAttemptCounts);
   const handleContinueRef = useRef<() => void>(() => undefined);
   /** Prevents auto-advance + manual Continue from skipping a question (blank UI / no button). */
   const continueLockRef = useRef<string | null>(null);
@@ -796,6 +829,10 @@ export function EvalQuestionRunner({
             answers[questionId],
           );
 
+      const persistItem = (item: PlayerEvalResumeItem) => {
+        if (clientKey) upsertClientEvalResume(clientKey, item);
+      };
+
       if (result.correct) {
         setWrongAttemptCounts((prev) => {
           const next = { ...prev };
@@ -803,6 +840,13 @@ export function EvalQuestionRunner({
           return next;
         });
         setCheckResults((prev) => ({ ...prev, [questionId]: result }));
+        persistItem({
+          questionId,
+          settled: true,
+          correct: true,
+          attempts: result.attemptNumber ?? 1,
+          answer: answers[questionId],
+        });
         void playCorrectEvalSfx();
         const xp = result.xpAwarded ?? 0;
         if (xp > 0) {
@@ -816,6 +860,14 @@ export function EvalQuestionRunner({
         ...prev,
         [questionId]: nextWrongAttempts,
       }));
+
+      persistItem({
+        questionId,
+        settled: nextWrongAttempts >= 2,
+        correct: false,
+        attempts: nextWrongAttempts,
+        answer: answers[questionId],
+      });
 
       if (nextWrongAttempts >= 2) {
         setCheckResults((prev) => ({ ...prev, [questionId]: result }));

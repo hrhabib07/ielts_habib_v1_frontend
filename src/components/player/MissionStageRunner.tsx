@@ -69,6 +69,8 @@ function EvaluationForm({
   onSubmit,
   submitting,
   retryState,
+  resume,
+  isReview,
 }: {
   stage: NonNullable<PlayerStageContent["stage"]["evaluation"]>;
   missionSlug: string;
@@ -76,6 +78,8 @@ function EvaluationForm({
   onSubmit: (answers: Record<string, unknown>) => void;
   submitting: boolean;
   retryState: EvalRetryState | null;
+  resume?: PlayerStageContent["evalResume"];
+  isReview?: boolean;
 }) {
   const PLAYER_UI = usePlayerUiCopy();
   const { locale } = useUiLocale();
@@ -126,6 +130,9 @@ function EvaluationForm({
       aside={storyAside}
       retryMode={retryMode}
       preservedAnswers={retryState?.preservedAnswers ?? {}}
+      resume={resume}
+      isReview={isReview}
+      clientResumeScope={missionSlug}
     />
   );
 }
@@ -552,6 +559,8 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
               stageOrder={activeStageOrder}
               submitting={submitting}
               retryState={evalRetryState}
+              resume={content.evalResume}
+              isReview={content.isReview}
               onSubmit={(answers) => void handleEvalSubmit(answers)}
             />
           )}

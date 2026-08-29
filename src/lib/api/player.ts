@@ -160,6 +160,13 @@ export interface PlayerStageContent {
   isReview?: boolean;
   writingReview?: PlayerWritingReviewState | null;
   campOutcome?: PlayerCampOutcome;
+  evalResume?: Array<{
+    questionId: string;
+    settled: boolean;
+    correct: boolean;
+    attempts: number;
+    answer?: unknown;
+  }>;
 }
 
 export interface PlayerSubmitResult {

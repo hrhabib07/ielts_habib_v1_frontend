@@ -117,3 +117,62 @@ export async function updateAdminPlayerMission(
   if (!res.data?.data) throw new Error("Failed to update mission");
   return res.data.data;
 }
+
+export type EquivalentCallOutcome =
+  | "disabled"
+  | "accepted"
+  | "rejected"
+  | "http_error"
+  | "quota"
+  | "timeout"
+  | "parse_fail";
+
+export interface AdminEquivalentCall {
+  id: string;
+  missionSlug: string;
+  questionId: string;
+  sourceText: string;
+  expected: string[];
+  studentText: string;
+  outcome: EquivalentCallOutcome;
+  equivalent: boolean;
+  learnedSaved: boolean;
+  httpStatus: number | null;
+  durationMs: number;
+  model: string;
+  provider?: string;
+  rawExcerpt: string;
+  createdAt: string;
+}
+
+export interface AdminLearnedAnswer {
+  id: string;
+  missionSlug: string;
+  questionId: string;
+  normalizedText: string;
+  displayText: string;
+  source: string;
+  createdAt: string;
+}
+
+export interface AdminEquivalentDashboard {
+  totalCalls: number;
+  learnedCount: number;
+  accepted: number;
+  rejected: number;
+  quota: number;
+  httpError: number;
+  timeout: number;
+  parseFail: number;
+  disabled: number;
+  calls: AdminEquivalentCall[];
+  learned: AdminLearnedAnswer[];
+}
+
+export async function getAdminEquivalentLog(): Promise<AdminEquivalentDashboard> {
+  const res = await apiClient.get<ApiResponse<AdminEquivalentDashboard>>(
+    "/admin/player/equivalent-log",
+  );
+  if (!res.data?.data) throw new Error("Failed to load answer checks");
+  return res.data.data;
+}

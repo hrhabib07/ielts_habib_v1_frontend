@@ -278,6 +278,9 @@ export function DemoStageRunner({
             submitting={submitting}
             retryMode={Boolean(evalRetryState?.wrongQuestionIds.length)}
             preservedAnswers={evalRetryState?.preservedAnswers}
+            resume={content.evalResume}
+            isReview={content.isReview}
+            clientResumeScope={`demo:${sessionId}`}
             checkAnswer={async (questionId, answer) =>
               checkDemoAnswer(sessionId, stageOrder, questionId, answer)
             }

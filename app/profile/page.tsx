@@ -44,6 +44,7 @@ import { useOnboardingCopy, useProfilePageCopy } from "@/src/hooks/useLocalizedC
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
 import { MyGamlishHub } from "@/src/components/profile/MyGamlishHub";
+import { ProfileCertificationSection } from "@/src/components/certification/ProfileCertificationSection";
 import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
 import { ProfilePlaySettings } from "@/src/components/profile/ProfilePlaySettings";
@@ -391,9 +392,12 @@ export default function ProfilePage() {
         <UsernameClaimBanner />
 
         {!ENABLE_READING ? (
-          <Card className="border border-border/60 bg-card/80 p-5 shadow-sm md:p-7">
-            <MyGamlishHub />
-          </Card>
+          <>
+            <ProfileCertificationSection />
+            <Card className="border border-border/60 bg-card/80 p-5 shadow-sm md:p-7">
+              <MyGamlishHub />
+            </Card>
+          </>
         ) : null}
 
         <Card className="overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-card shadow-sm transition-shadow hover:shadow-md">

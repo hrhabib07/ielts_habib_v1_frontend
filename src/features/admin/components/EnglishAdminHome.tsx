@@ -5,10 +5,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PendingInstructorRequests } from "@/src/features/admin-approval/components/PendingInstructorRequests";
 import { PendingSubscriptionRequests } from "@/src/features/admin-approval/components/PendingSubscriptionRequests";
+import { PendingWritingReviewsCard } from "@/src/features/admin/components/PendingWritingReviewsCard";
+import { PendingCertificationCard } from "@/src/features/admin/components/PendingCertificationCard";
 import {
   ArrowLeft,
   ChevronRight,
   CreditCard,
+  Cpu,
   Gamepad2,
   MessageSquareHeart,
   MessagesSquare,
@@ -46,6 +49,10 @@ export function EnglishAdminHome() {
           <PendingSubscriptionRequests />
         </Card>
       </section>
+
+      <PendingWritingReviewsCard />
+
+      <PendingCertificationCard />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link href="/dashboard/admin/activity">
@@ -92,6 +99,23 @@ export function EnglishAdminHome() {
                 <p className="font-semibold text-foreground">English content</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   Camps, missions, stories, videos, and quizzes
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/admin/answer-checks">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-500/10">
+                <Cpu className="h-5 w-5 text-teal-700 dark:text-teal-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">Typed answer checks</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Meaning API calls, responses, quota, and learned wordings
                 </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />

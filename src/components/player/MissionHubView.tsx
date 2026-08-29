@@ -6,15 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Lock, Moon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
-import { getMyMissionEndFeedback } from "@/src/lib/api/missionEndFeedback";
 import { getLearnerFeedbackInvite } from "@/src/lib/api/learnerFeedback";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { resolveStageKindLabel } from "@/src/lib/player-stage-utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
 import { PlayerSubscriptionGate } from "@/src/components/player/PlayerSubscriptionGate";
-import { MissionEndFeedbackModal } from "@/src/components/player/MissionEndFeedbackModal";
-import { missionEndFeedbackStorageKey } from "@/src/lib/mission-end-feedback";
 import { MissionRoadmapCelebration } from "@/src/components/player/MissionRoadmapCelebration";
 import { MasterPathModal } from "@/src/components/player/MasterPathModal";
 import { ContentPauseNotice } from "@/src/components/player/ContentPauseNotice";
@@ -64,12 +61,9 @@ export function MissionHubView({ slug }: { slug: string }) {
   const [needsSubscription, setNeedsSubscription] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showCompleteBanner, setShowCompleteBanner] = useState(justCompleted);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [feedbackDone, setFeedbackDone] = useState(false);
   const [roadmapOpen, setRoadmapOpen] = useState(justCompleted);
   const [roadmapSeen, setRoadmapSeen] = useState(false);
   const [storyInviteOpen, setStoryInviteOpen] = useState(false);
-  const [storyInviteReady, setStoryInviteReady] = useState(!justCompleted);
   const [storyInviteStats, setStoryInviteStats] = useState<{
     missionsCompleted: number;
     totalXp: number;
@@ -127,7 +121,6 @@ export function MissionHubView({ slug }: { slug: string }) {
     if (!rankClimbReady || rankClimb != null) return;
     if (!mission) return;
     if (mission.order < LEARNER_FEEDBACK_MIN_MISSION_ORDER) {
-      setStoryInviteReady(true);
       return;
     }
 
@@ -143,61 +136,15 @@ export function MissionHubView({ slug }: { slug: string }) {
           });
           setStoryInviteOpen(true);
         }
-        setStoryInviteReady(true);
       })
       .catch(() => {
-        if (!cancelled) setStoryInviteReady(true);
+        /* invite is optional */
       });
 
     return () => {
       cancelled = true;
     };
   }, [justCompleted, roadmapSeen, roadmapOpen, mission, rankClimbReady, rankClimb]);
-
-  // Celebration first on complete. Feedback stays available after celebration exits,
-  // and also when the learner revisits a completed mission later.
-  const feedbackGateOpen =
-    !roadmapOpen &&
-    rankClimbReady &&
-    rankClimb == null &&
-    storyInviteReady &&
-    !storyInviteOpen &&
-    mission?.status === "completed" &&
-    (!justCompleted || roadmapSeen);
-
-  useEffect(() => {
-    if (!feedbackGateOpen || feedbackDone) return;
-
-    let cancelled = false;
-    const key = missionEndFeedbackStorageKey(slug);
-    try {
-      if (localStorage.getItem(key) === "completed") {
-        setFeedbackDone(true);
-        return;
-      }
-      // Same-session "later" only suppresses auto-open; manual CTA still works.
-      if (sessionStorage.getItem(key) === "skipped") return;
-    } catch {
-      /* continue */
-    }
-
-    getMyMissionEndFeedback(slug)
-      .then((existing) => {
-        if (cancelled) return;
-        if (existing?.status === "completed") {
-          setFeedbackDone(true);
-          return;
-        }
-        setFeedbackOpen(true);
-      })
-      .catch(() => {
-        if (!cancelled) setFeedbackOpen(true);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [slug, feedbackGateOpen, feedbackDone]);
 
   useEffect(() => {
     let cancelled = false;
@@ -306,22 +253,6 @@ export function MissionHubView({ slug }: { slug: string }) {
         totalXp={storyInviteStats?.totalXp ?? 0}
         rewardXp={storyInviteStats?.rewardXp}
         onLater={() => setStoryInviteOpen(false)}
-      />
-
-      <MissionEndFeedbackModal
-        isOpen={feedbackOpen}
-        missionSlug={slug}
-        missionTitle={mission.title}
-        onClose={() => {
-          setFeedbackOpen(false);
-          try {
-            if (localStorage.getItem(missionEndFeedbackStorageKey(slug)) === "completed") {
-              setFeedbackDone(true);
-            }
-          } catch {
-            /* ignore */
-          }
-        }}
       />
 
       <MasterPathModal
@@ -439,17 +370,6 @@ export function MissionHubView({ slug }: { slug: string }) {
       {!locked &&
         (mission.status === "completed" ? (
           <div className="mt-8 space-y-3">
-            {!feedbackDone ? (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                size="lg"
-                onClick={() => setFeedbackOpen(true)}
-              >
-                {locale === "bn" ? "ফিডব্যাক দিন" : "Give feedback"}
-              </Button>
-            ) : null}
             {mission.campRest?.active ? (
               <div className="flex items-start gap-3 rounded-2xl border border-amber-500/35 bg-amber-500/10 px-4 py-3.5 text-left">
                 <Moon className="mt-0.5 h-5 w-5 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden />
