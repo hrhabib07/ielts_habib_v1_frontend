@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PendingInstructorRequests } from "@/src/features/admin-approval/components/PendingInstructorRequests";
 import { PendingSubscriptionRequests } from "@/src/features/admin-approval/components/PendingSubscriptionRequests";
-import { PendingWritingReviewsCard } from "@/src/features/admin/components/PendingWritingReviewsCard";
 import { PendingCertificationCard } from "@/src/features/admin/components/PendingCertificationCard";
 import {
   ArrowLeft,
@@ -49,8 +48,6 @@ export function EnglishAdminHome() {
           <PendingSubscriptionRequests />
         </Card>
       </section>
-
-      <PendingWritingReviewsCard />
 
       <PendingCertificationCard />
 

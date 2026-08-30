@@ -13,7 +13,6 @@ import {
   Layers,
   LayoutDashboard,
   ListChecks,
-  PenLine,
   Settings,
   Tag,
   UserCheck,
@@ -70,7 +69,6 @@ const ENGLISH_ADMIN_NAV: DashboardNavGroup = {
   roles: ["ADMIN"],
   items: [
     { label: "Admin Home", href: "/dashboard/admin", icon: LayoutDashboard },
-    { label: "Writing reviews", href: "/dashboard/admin/writing-reviews", icon: PenLine },
     { label: "Certifications", href: "/dashboard/admin/certifications", icon: Award },
     { label: "Course & Missions", href: "/dashboard/admin/english", icon: Gamepad2 },
     { label: "Answer checks", href: "/dashboard/admin/answer-checks", icon: Cpu },
@@ -101,7 +99,6 @@ export function getDashboardNavGroups(role: UserRole, enableReading: boolean): D
         roles: ["INSTRUCTOR"],
         items: [
           { label: "Dashboard", href: "/dashboard/instructor", icon: BarChart3 },
-          { label: "Writing reviews", href: "/dashboard/instructor/writing-reviews", icon: PenLine },
         ],
       },
     ];

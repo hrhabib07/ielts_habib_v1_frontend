@@ -1,10 +1,5 @@
-import { WritingReviewsClient } from "@/src/features/admin/english-content/WritingReviewsClient";
+import { redirect } from "next/navigation";
 
 export default function InstructorWritingReviewsPage() {
-  return (
-    <WritingReviewsClient
-      backHref="/dashboard/instructor"
-      backLabel="Back to instructor dashboard"
-    />
-  );
+  redirect("/dashboard/instructor");
 }

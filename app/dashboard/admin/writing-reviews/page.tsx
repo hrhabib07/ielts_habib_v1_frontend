@@ -1,10 +1,5 @@
-import { WritingReviewsClient } from "@/src/features/admin/english-content/WritingReviewsClient";
+import { redirect } from "next/navigation";
 
 export default function AdminWritingReviewsShortcutPage() {
-  return (
-    <WritingReviewsClient
-      backHref="/dashboard/admin"
-      backLabel="Back to admin dashboard"
-    />
-  );
+  redirect("/dashboard/admin");
 }
