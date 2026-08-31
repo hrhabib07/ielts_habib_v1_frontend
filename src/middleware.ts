@@ -109,7 +109,7 @@ export async function middleware(request: NextRequest) {
     return attachLegacyCleanup(NextResponse.next());
   }
 
-  if (pathname.startsWith("/profile")) {
+  if (pathname.startsWith("/profile") || pathname.startsWith("/certification")) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", request.url));
     }

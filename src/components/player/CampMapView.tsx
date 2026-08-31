@@ -24,6 +24,7 @@ import { ContentPauseNotice } from "@/src/components/player/ContentPauseNotice";
 import { LeaderboardArenaPromo } from "@/src/components/player/LeaderboardArenaPromo";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { CampMapCertificateBanner } from "@/src/components/player/CampMapCertificateBanner";
 import { useState } from "react";
 import { brandSurfaces } from "@/src/lib/brand-theme";
 
@@ -486,6 +487,7 @@ export function CampMapView({
           {PLAYER_UI.roadmapTapHint}
         </p>
         <LeaderboardArenaPromo />
+        <CampMapCertificateBanner />
         {map.campRest?.active ? (
           <div className="flex items-start gap-3 rounded-2xl border border-amber-500/35 bg-amber-500/10 px-4 py-3.5">
             <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-200">

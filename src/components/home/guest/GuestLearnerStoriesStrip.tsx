@@ -7,22 +7,50 @@ import { LearnerFeedbackCard } from "@/src/components/feedback/LearnerFeedbackCa
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { cn } from "@/lib/utils";
 
-function StoryCard({ item }: { item: LearnerFeedbackPublicItem }) {
+function StoryCard({
+  item,
+  rank,
+}: {
+  item: LearnerFeedbackPublicItem;
+  rank: number;
+}) {
   return (
-    <LearnerFeedbackCard
-      displayName={item.displayName}
-      title={item.title}
-      rating={item.rating}
-      body={item.body}
-      username={item.username}
-      profileHandle={item.profileHandle}
-      avatarUrl={item.avatarUrl}
-      totalXp={item.totalXp}
-      missionsCompleted={item.missionsCompleted}
-      interactive
-      className="h-full"
-    />
+    <div className="relative h-full">
+      <span
+        className="absolute right-3 top-3 z-20 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-sky-600 px-2 text-[11px] font-black tabular-nums text-white shadow-sm"
+        aria-label={`Rank ${rank}`}
+      >
+        {rank}
+      </span>
+      <LearnerFeedbackCard
+        displayName={item.displayName}
+        title={item.title}
+        rating={item.rating}
+        body={item.body}
+        username={item.username}
+        profileHandle={item.profileHandle}
+        avatarUrl={item.avatarUrl}
+        totalXp={item.totalXp}
+        missionsCompleted={item.missionsCompleted}
+        interactive
+        className="h-full"
+      />
+    </div>
   );
+}
+
+function sortStoriesByMission(
+  rows: LearnerFeedbackPublicItem[],
+): LearnerFeedbackPublicItem[] {
+  return [...rows].sort((a, b) => {
+    const aLevel = a.highestCompletedMissionOrder ?? a.missionsCompleted ?? 0;
+    const bLevel = b.highestCompletedMissionOrder ?? b.missionsCompleted ?? 0;
+    if (bLevel !== aLevel) return bLevel - aLevel;
+    const aDone = a.missionsCompleted ?? 0;
+    const bDone = b.missionsCompleted ?? 0;
+    if (bDone !== aDone) return bDone - aDone;
+    return (b.totalXp ?? 0) - (a.totalXp ?? 0);
+  });
 }
 
 export function GuestLearnerStoriesStrip() {
@@ -34,9 +62,9 @@ export function GuestLearnerStoriesStrip() {
 
   useEffect(() => {
     let cancelled = false;
-    void getPublicLearnerFeedback(12)
+    void getPublicLearnerFeedback(100)
       .then((rows) => {
-        if (!cancelled) setItems(rows);
+        if (!cancelled) setItems(sortStoriesByMission(rows));
       })
       .catch(() => {
         if (!cancelled) setItems([]);
@@ -108,6 +136,11 @@ export function GuestLearnerStoriesStrip() {
           <h2 className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl">
             {isBn ? "যারা আগেই জয়েন করেছেন" : "Learners who already joined"}
           </h2>
+          <p className="mt-2 text-sm font-medium text-muted-foreground">
+            {isBn
+              ? `${items.length}টি স্টোরি · যারা সবচেয়ে বেশি মিশন শেষ করেছে, তারা আগে`
+              : `${items.length} stories · furthest mission first`}
+          </p>
         </div>
 
         {/* Mobile · premium peek carousel */}
@@ -143,7 +176,7 @@ export function GuestLearnerStoriesStrip() {
                   }
                   aria-current={isActive ? "true" : undefined}
                 >
-                  <StoryCard item={item} />
+                  <StoryCard item={item} rank={index + 1} />
                 </div>
               );
             })}
@@ -188,8 +221,8 @@ export function GuestLearnerStoriesStrip() {
 
         {/* Tablet / desktop grid */}
         <div className="mt-6 hidden gap-3 px-4 sm:grid sm:grid-cols-2 sm:px-0 lg:grid-cols-3">
-          {items.map((item) => (
-            <StoryCard key={item.id} item={item} />
+          {items.map((item, index) => (
+            <StoryCard key={item.id} item={item} rank={index + 1} />
           ))}
         </div>
       </div>

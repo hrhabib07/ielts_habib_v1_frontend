@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Lock, Moon, Star } from "lucide-react";
+import { ArrowLeft, Award, CheckCircle2, Lock, Moon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getPlayerMission, type PlayerMissionDetail } from "@/src/lib/api/player";
 import { getLearnerFeedbackInvite } from "@/src/lib/api/learnerFeedback";
@@ -276,6 +276,25 @@ export function MissionHubView({ slug }: { slug: string }) {
           <p className="mt-2 text-sm text-muted-foreground">{mission.grammarTarget}</p>
         ) : null}
       </header>
+
+      {mission.order >= 21 && mission.status === "completed" ? (
+        <Link
+          href="/certification"
+          className="mt-5 flex items-center gap-3 rounded-2xl border border-amber-400/40 bg-amber-500/10 px-4 py-4"
+        >
+          <Award className="h-5 w-5 shrink-0 text-amber-600" />
+          <span className="min-w-0 flex-1 text-left">
+            <span className="block text-sm font-bold">
+              {locale === "bn" ? "সার্টিফিকেট ক্লেইম করো" : "Claim your certificate"}
+            </span>
+            <span className="block text-xs text-muted-foreground">
+              {locale === "bn"
+                ? "Fundamental English শেষ। এখন অফিসিয়াল সার্টিফিকেটের জন্য আবেদন করো।"
+                : "Fundamental English is complete. Apply for your official certificate."}
+            </span>
+          </span>
+        </Link>
+      ) : null}
 
       {showCompleteBanner ? (
         <div className="mt-5 animate-in fade-in slide-in-from-bottom-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 duration-500">

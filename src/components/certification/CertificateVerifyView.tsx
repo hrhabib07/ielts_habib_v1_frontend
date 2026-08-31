@@ -12,8 +12,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { VerifyLookupForm } from "@/src/components/certification/VerifyLookupForm";
 import type { VerifyCertificateResult } from "@/src/lib/api/certification";
 import {
+  CERTIFICATE_SIGNER_NAME,
+  CERTIFICATE_SIGNER_ORG,
+  CERTIFICATE_SIGNER_TITLE,
   buildLinkedInCertificateText,
   formatVerifyDate,
   type CertificatePerformanceView,
@@ -242,14 +246,30 @@ export function CertificateVerifyView({ certificateId, result }: CertificateVeri
               </div>
             ) : null}
 
-            <p className="text-center text-xs text-muted-foreground">
-              Issued by Gamlish · The Game of English
+            <div className="text-center text-xs text-muted-foreground">
+              <p className="font-semibold uppercase tracking-wide text-foreground">
+                {CERTIFICATE_SIGNER_NAME}
+              </p>
+              <p className="mt-0.5">
+                {CERTIFICATE_SIGNER_TITLE} · {CERTIFICATE_SIGNER_ORG}
+              </p>
+            </div>
+            <p className="text-center">
+              <a
+                href="/verify"
+                className="text-xs font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                Verify another certificate
+              </a>
             </p>
           </div>
         ) : state === "not_found" ? (
-          <div className="space-y-3 p-6 text-sm text-muted-foreground sm:p-8">
-            <p>Check that the certificate ID matches the QR code or PDF exactly.</p>
+          <div className="space-y-5 p-6 sm:p-8">
+            <p className="text-sm text-muted-foreground">
+              Check that the Certificate ID or Learner ID matches the PDF exactly.
+            </p>
             <p className="font-mono text-xs text-foreground">{certificateId}</p>
+            <VerifyLookupForm initialValue={certificateId} compact />
           </div>
         ) : null}
       </Card>

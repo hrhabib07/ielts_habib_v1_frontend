@@ -1,3 +1,7 @@
+export const CERTIFICATE_SIGNER_NAME = "MD HABIBUR RAHMAN";
+export const CERTIFICATE_SIGNER_TITLE = "Founder & Program Director";
+export const CERTIFICATE_SIGNER_ORG = "Gamlish";
+
 export interface CertificatePerformanceView {
   completionResult: string;
   achievementLevel: string | null;

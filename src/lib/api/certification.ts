@@ -1,3 +1,5 @@
+import { throwApiError } from "@/src/lib/api-error";
+
 export type CertificationApplicationStatus =
   | "draft"
   | "submitted"
@@ -54,8 +56,10 @@ export interface CertificationStatus {
     hasVerifiedPhone: boolean;
     hasVerifiedEmail: boolean;
     phoneMasked: string | null;
+    phoneLocal?: string | null;
     email: string | null;
   };
+  suggestedOfficialName?: string;
   application: CertificationApplication | null;
   certificate: CertificateView | null;
   learnerProfile: {
@@ -121,9 +125,13 @@ function unwrap<T>(res: { data?: { data?: T } }): T {
 }
 
 export async function getCertificationStatus(): Promise<CertificationStatus> {
-  const { default: apiClient } = await import("@/src/lib/api-client");
-  const res = await apiClient.get<{ data: CertificationStatus }>("/certification/status");
-  return unwrap(res);
+  try {
+    const { default: apiClient } = await import("@/src/lib/api-client");
+    const res = await apiClient.get<{ data: CertificationStatus }>("/certification/status");
+    return unwrap(res);
+  } catch (err) {
+    throwApiError(err, "Could not load certification status.");
+  }
 }
 
 export async function submitCertificationApplication(payload: {
@@ -140,38 +148,78 @@ export async function submitCertificationApplication(payload: {
   storyGamlishFeedback: string;
   publicStoryConsent: boolean;
 }): Promise<CertificationApplication> {
-  const { default: apiClient } = await import("@/src/lib/api-client");
-  const res = await apiClient.post<{ data: CertificationApplication }>(
-    "/certification/application",
-    payload,
-  );
-  return unwrap(res);
+  try {
+    const { default: apiClient } = await import("@/src/lib/api-client");
+    const res = await apiClient.post<{ data: CertificationApplication }>(
+      "/certification/application",
+      payload,
+    );
+    return unwrap(res);
+  } catch (err) {
+    throwApiError(err, "Could not submit your application.");
+  }
 }
 
-export async function requestCertificationLinkEmail(email: string): Promise<void> {
-  const { default: apiClient } = await import("@/src/lib/api-client");
-  await apiClient.post("/certification/contact/link-email/request", { email });
+export async function requestCertificationLinkEmail(
+  email: string,
+): Promise<{ willRemoveUnusedAccount?: boolean }> {
+  try {
+    const { default: apiClient } = await import("@/src/lib/api-client");
+    const res = await apiClient.post<{ data: { willRemoveUnusedAccount?: boolean } }>(
+      "/certification/contact/link-email/request",
+      { email },
+    );
+    return unwrap(res);
+  } catch (err) {
+    throwApiError(err, "Could not send the email code.");
+  }
 }
 
 export async function verifyCertificationLinkEmail(
   email: string,
   otp: string,
-): Promise<void> {
-  const { default: apiClient } = await import("@/src/lib/api-client");
-  await apiClient.post("/certification/contact/link-email/verify", { email, otp });
+): Promise<{ unusedAccountRemoved?: boolean }> {
+  try {
+    const { default: apiClient } = await import("@/src/lib/api-client");
+    const res = await apiClient.post<{ data: { unusedAccountRemoved?: boolean } }>(
+      "/certification/contact/link-email/verify",
+      { email, otp },
+    );
+    return unwrap(res);
+  } catch (err) {
+    throwApiError(err, "Invalid or expired email code.");
+  }
 }
 
-export async function requestCertificationLinkPhone(phone: string): Promise<void> {
-  const { default: apiClient } = await import("@/src/lib/api-client");
-  await apiClient.post("/certification/contact/link-phone/request", { phone });
+export async function requestCertificationLinkPhone(
+  phone: string,
+): Promise<{ willRemoveUnusedAccount?: boolean }> {
+  try {
+    const { default: apiClient } = await import("@/src/lib/api-client");
+    const res = await apiClient.post<{ data: { willRemoveUnusedAccount?: boolean } }>(
+      "/certification/contact/link-phone/request",
+      { phone },
+    );
+    return unwrap(res);
+  } catch (err) {
+    throwApiError(err, "Could not send the phone OTP.");
+  }
 }
 
 export async function verifyCertificationLinkPhone(
   phone: string,
   otp: string,
-): Promise<void> {
-  const { default: apiClient } = await import("@/src/lib/api-client");
-  await apiClient.post("/certification/contact/link-phone/verify", { phone, otp });
+): Promise<{ unusedAccountRemoved?: boolean }> {
+  try {
+    const { default: apiClient } = await import("@/src/lib/api-client");
+    const res = await apiClient.post<{ data: { unusedAccountRemoved?: boolean } }>(
+      "/certification/contact/link-phone/verify",
+      { phone, otp },
+    );
+    return unwrap(res);
+  } catch (err) {
+    throwApiError(err, "Invalid or expired phone OTP.");
+  }
 }
 
 export async function downloadCertificatePdf(): Promise<Blob> {

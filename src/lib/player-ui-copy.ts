@@ -87,6 +87,9 @@ export interface PlayerUiCopy {
     readonly skip: string;
     readonly needsSubscription: string;
     readonly courseDone: string;
+    readonly claimCertificateCta: string;
+    readonly claimCertificateBody: string;
+    readonly autoContinueCert: (seconds: number) => string;
   };
   readonly coinsLabel: string;
   readonly xpLabel: string;
@@ -285,7 +288,11 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       autoContinue: (seconds) => `${seconds} সেকেন্ডে শুরু হচ্ছে…`,
       skip: "এখনই যাও",
       needsSubscription: "পরের মিশন খেলতে সাবস্ক্রিপশন লাগবে।",
-      courseDone: "তুমি সব মিশন শেষ করেছ! ক্যাম্প ম্যাপে ফিরে দেখো।",
+      courseDone: "তুমি Fundamental English শেষ করেছ! এখন সার্টিফিকেটের জন্য আবেদন করো।",
+      claimCertificateCta: "সার্টিফিকেট ক্লেইম করো",
+      claimCertificateBody:
+        "২১টি মিশন শেষ। এখন যাচাইকৃত প্রোফাইল দিয়ে অফিসিয়াল সার্টিফিকেটের জন্য আবেদন করো।",
+      autoContinueCert: (seconds) => `${seconds} সেকেন্ডে সার্টিফিকেট আবেদন খুলবে…`,
     },
     coinsLabel: "কয়েন",
     xpLabel: "XP",
@@ -461,7 +468,11 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       autoContinue: (seconds) => `Starting in ${seconds}s…`,
       skip: "Go now",
       needsSubscription: "A subscription is needed to play the next mission.",
-      courseDone: "You finished every mission! Head back to the camp map.",
+      courseDone: "You finished Fundamental English. Claim your official certificate next.",
+      claimCertificateCta: "Claim your certificate",
+      claimCertificateBody:
+        "21 missions done. Submit your verified profile so Gamlish can issue your official certificate.",
+      autoContinueCert: (seconds) => `Opening certificate claim in ${seconds}s…`,
     },
     coinsLabel: "Coins",
     xpLabel: "XP",

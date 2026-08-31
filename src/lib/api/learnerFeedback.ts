@@ -46,7 +46,7 @@ export async function submitLearnerFeedback(payload: {
 }
 
 export async function getPublicLearnerFeedback(
-  limit = 24,
+  limit = 100,
 ): Promise<LearnerFeedbackPublicItem[]> {
   const res = await apiClient.get("/learner-feedback/public", {
     params: { limit },

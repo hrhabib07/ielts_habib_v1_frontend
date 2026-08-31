@@ -38,6 +38,8 @@ export interface LearnerFeedbackPublicItem {
   avatarUrl?: string | null;
   totalXp?: number;
   missionsCompleted?: number;
+  highestCompletedMissionOrder?: number;
+  currentMissionOrder?: number;
   level?: number;
 }
 

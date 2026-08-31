@@ -483,6 +483,11 @@ export function CampGraduationStage({
         ) : (
           <>
             {PLAYER_UI.continue}
+            {campOrder >= 4 ? (
+              <span className="ml-1 font-semibold">
+                {isBn ? "· সার্টিফিকেট" : "to certificate"}
+              </span>
+            ) : null}
             <ChevronRight className="h-4 w-4" />
           </>
         )}

@@ -339,6 +339,7 @@ export function MissionRoadmapCelebration({
   }, [completedMissionSlug]);
 
   const nextSlug = model?.next?.mission.slug ?? null;
+  const courseComplete = Boolean(model && !model.next);
   const canAutoAdvance = Boolean(
     nextSlug && !model?.nextNeedsPay && model?.next?.mission.status !== "locked",
   );
@@ -346,12 +347,17 @@ export function MissionRoadmapCelebration({
   const goNext = useCallback(() => {
     if (advancedRef.current) return;
     if (!nextSlug) {
+      if (courseComplete) {
+        advancedRef.current = true;
+        router.push("/certification");
+        return;
+      }
       onExit();
       return;
     }
     advancedRef.current = true;
     router.push(`/player/missions/${nextSlug}`);
-  }, [nextSlug, onExit, router]);
+  }, [nextSlug, courseComplete, onExit, router]);
 
   useEffect(() => {
     if (!model) return;
@@ -378,9 +384,10 @@ export function MissionRoadmapCelebration({
   const autoSeconds = model?.campCompleted
     ? CAMP_AUTO_ADVANCE_SECONDS
     : AUTO_ADVANCE_SECONDS;
+  const shouldAutoAdvance = canAutoAdvance || courseComplete;
 
   useEffect(() => {
-    if (phase < 4 || !canAutoAdvance) return;
+    if (phase < 4 || !shouldAutoAdvance) return;
 
     const interval = window.setInterval(() => {
       setCountdown((current) => {
@@ -395,7 +402,7 @@ export function MissionRoadmapCelebration({
     }, 1000);
 
     return () => window.clearInterval(interval);
-  }, [phase, canAutoAdvance, autoSeconds, goNext]);
+  }, [phase, shouldAutoAdvance, autoSeconds, goNext]);
 
   useEffect(() => {
     if (failed) onExit();
@@ -480,7 +487,7 @@ export function MissionRoadmapCelebration({
 
           <button
             type="button"
-            onClick={canAutoAdvance ? goNext : onExit}
+            onClick={canAutoAdvance || courseComplete ? goNext : onExit}
             className="rounded-full px-3 py-1 text-xs font-semibold text-white/55 transition-colors hover:bg-white/10 hover:text-white"
           >
             {COPY.skip}
@@ -629,18 +636,23 @@ export function MissionRoadmapCelebration({
             </div>
           </div>
 
-          {canAutoAdvance ? (
+          {canAutoAdvance || courseComplete ? (
             <>
               <Button
                 size="lg"
                 onClick={goNext}
                 className="mt-4 w-full rounded-xl bg-white text-base font-bold text-slate-950 hover:bg-white/90"
               >
-                {COPY.continueCta}
+                {courseComplete ? COPY.claimCertificateCta : COPY.continueCta}
               </Button>
               <p className="mt-2 text-center text-xs tabular-nums text-white/45">
-                {COPY.autoContinue(countdown ?? autoSeconds)}
+                {courseComplete
+                  ? COPY.autoContinueCert(countdown ?? autoSeconds)
+                  : COPY.autoContinue(countdown ?? autoSeconds)}
               </p>
+              {courseComplete ? (
+                <p className="mt-2 text-center text-sm text-white/65">{COPY.claimCertificateBody}</p>
+              ) : null}
             </>
           ) : (
             <>
