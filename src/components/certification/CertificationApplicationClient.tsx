@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   Award,
@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BANGLADESH_DISTRICTS } from "@/src/lib/constants/bangladesh-districts";
 import { DateOfBirthFields } from "@/src/components/certification/DateOfBirthFields";
 import { formatDobDisplay } from "@/src/lib/date-of-birth";
+import { CERTIFICATION_STORY_QUESTIONS } from "@/src/lib/certification-story-copy";
 import {
   getCertificationStatus,
   requestCertificationLinkEmail,
@@ -31,14 +32,6 @@ import {
 import { cn } from "@/lib/utils";
 
 const STEPS = ["Contact", "Identity", "Address", "Your story", "Review"] as const;
-
-const STORY_MIN = {
-  before: 40,
-  journey: 40,
-  transformation: 40,
-  message: 20,
-  feedback: 20,
-} as const;
 
 function DistrictSelect({
   id,
@@ -156,39 +149,40 @@ function ExtraAccountWarning({
   );
 }
 
-function StoryField({
-  label,
-  hint,
-  value,
-  min,
-  onChange,
+function ReviewSection({
+  title,
+  onEdit,
+  children,
 }: {
-  label: string;
-  hint: string;
-  value: string;
-  min: number;
-  onChange: (v: string) => void;
+  title: string;
+  onEdit: () => void;
+  children: ReactNode;
 }) {
-  const count = value.trim().length;
-  const ok = count >= min;
   return (
-    <div className="space-y-2">
-      <div className="flex items-end justify-between gap-3">
-        <Label>{label}</Label>
-        <span
-          className={cn(
-            "text-[11px] tabular-nums",
-            ok ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground",
-          )}
-        >
-          {count}/{min}
-        </span>
+    <div className="space-y-2 rounded-xl border bg-muted/20 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-semibold">{title}</p>
+        <Button type="button" variant="ghost" size="sm" onClick={onEdit}>
+          Change
+        </Button>
       </div>
-      <Textarea rows={4} value={value} onChange={(e) => onChange(e.target.value)} />
-      <p className="text-xs text-muted-foreground">{hint}</p>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 }
+
+function ReviewStoryBlock({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
+      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+        {body.trim() ? body : "Left blank"}
+      </p>
+    </div>
+  );
+}
+
+const STORY_LAST = CERTIFICATION_STORY_QUESTIONS.length - 1;
 
 export function CertificationApplicationClient() {
   const [status, setStatus] = useState<CertificationStatus | null>(null);
@@ -231,6 +225,7 @@ export function CertificationApplicationClient() {
   const [storyMessage, setStoryMessage] = useState("");
   const [storyFeedback, setStoryFeedback] = useState("");
   const [publicConsent, setPublicConsent] = useState(false);
+  const [storyIndex, setStoryIndex] = useState(0);
 
   useEffect(() => {
     if (otpCooldown <= 0) return;
@@ -293,12 +288,7 @@ export function CertificationApplicationClient() {
     Boolean(presentDistrict && presentCity.trim().length >= 2) &&
     (sameAddress || Boolean(permDistrict && permCity.trim().length >= 2));
 
-  const storyReady =
-    storyBefore.trim().length >= STORY_MIN.before &&
-    storyJourney.trim().length >= STORY_MIN.journey &&
-    storyTransformation.trim().length >= STORY_MIN.transformation &&
-    storyMessage.trim().length >= STORY_MIN.message &&
-    storyFeedback.trim().length >= STORY_MIN.feedback;
+  const storyReady = true;
 
   const stepReady = [contactReady, identityReady, addressReady, storyReady, true];
 
@@ -318,6 +308,15 @@ export function CertificationApplicationClient() {
     [sameAddress, presentDistrict, presentCity, presentLine, permDistrict, permCity, permLine],
   );
 
+  const storyAnswers = [storyBefore, storyJourney, storyTransformation, storyMessage, storyFeedback];
+  const storySetters = [
+    setStoryBefore,
+    setStoryJourney,
+    setStoryTransformation,
+    setStoryMessage,
+    setStoryFeedback,
+  ];
+
   const goNext = () => {
     if (step === 0 && !contactReady) {
       setError("Verify both your phone and Gmail before continuing.");
@@ -331,13 +330,31 @@ export function CertificationApplicationClient() {
       setError("Select your district and enter your city or area.");
       return;
     }
-    if (step === 3 && !storyReady) {
-      setError("Complete every story field. Short answers cannot be submitted.");
-      return;
-    }
     setError(null);
     setInfo(null);
+    if (step === 2) setStoryIndex(0);
     setStep((s) => s + 1);
+  };
+
+  const goBack = () => {
+    setError(null);
+    setInfo(null);
+    if (step === 3 && storyIndex > 0) {
+      setStoryIndex((i) => i - 1);
+      return;
+    }
+    if (step === 4) setStoryIndex(STORY_LAST);
+    setStep((s) => Math.max(0, s - 1));
+  };
+
+  const goForward = () => {
+    if (step === 3 && storyIndex < STORY_LAST) {
+      setError(null);
+      setInfo(null);
+      setStoryIndex((i) => i + 1);
+      return;
+    }
+    goNext();
   };
 
   const handleSubmit = async () => {
@@ -346,8 +363,8 @@ export function CertificationApplicationClient() {
       setError("Verify both your phone and Gmail before submitting.");
       return;
     }
-    if (!identityReady || !addressReady || !storyReady) {
-      setError("Complete every step before submitting.");
+    if (!identityReady || !addressReady) {
+      setError("Complete your name, date of birth, WhatsApp, and address before submitting.");
       return;
     }
     setSubmitting(true);
@@ -457,7 +474,7 @@ export function CertificationApplicationClient() {
         </p>
         <h1 className="text-2xl font-bold">Claim your Fundamental English certificate</h1>
         <p className="text-sm text-muted-foreground">
-          Verify your contact, confirm your identity, then submit for Gamlish review.
+          Five short steps. One screen at a time. You can skip a story question if you want.
         </p>
       </div>
 
@@ -481,6 +498,7 @@ export function CertificationApplicationClient() {
                 if (!unlocked) return;
                 setError(null);
                 setInfo(null);
+                if (i === 3) setStoryIndex(0);
                 setStep(i);
               }}
               className={cn(
@@ -745,14 +763,19 @@ export function CertificationApplicationClient() {
 
         {step === 1 ? (
           <div className="space-y-4">
-            <p className="font-semibold">Official identity</p>
+            <p className="font-semibold">Your name on the certificate</p>
             <p className="text-sm text-muted-foreground">
-              Use the name on your NID or passport. This becomes your certificate name and cannot be
-              changed after approval.
+              NID বা পাসপোর্টের নাম লিখুন. This name is printed on the certificate and cannot change
+              after approval.
             </p>
             <div className="space-y-2">
               <Label>Official full name</Label>
-              <Input value={officialName} onChange={(e) => setOfficialName(e.target.value)} />
+              <Input
+                value={officialName}
+                onChange={(e) => setOfficialName(e.target.value)}
+                placeholder="As written on your NID"
+                className="h-12 text-base"
+              />
             </div>
             <DateOfBirthFields value={dateOfBirth} onChange={setDateOfBirth} />
             <div className="space-y-2">
@@ -762,14 +785,21 @@ export function CertificationApplicationClient() {
                 onChange={(e) => setWhatsapp(e.target.value)}
                 placeholder="01XXXXXXXXX"
                 inputMode="tel"
+                className="h-12 text-base"
               />
+              <p className="text-xs text-muted-foreground">
+                We use this if we need to reach you about the certificate.
+              </p>
             </div>
           </div>
         ) : null}
 
         {step === 2 ? (
           <div className="space-y-4">
-            <p className="font-semibold">Address</p>
+            <p className="font-semibold">Where you live</p>
+            <p className="text-sm text-muted-foreground">
+              District আর city সিলেক্ট করুন. Same as NID is fine.
+            </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Present district</Label>
@@ -820,47 +850,96 @@ export function CertificationApplicationClient() {
         ) : null}
 
         {step === 3 ? (
-          <div className="space-y-4">
-            <p className="font-semibold">Your Gamlish story</p>
-            <p className="text-sm text-muted-foreground">
-              Write honestly in your own words. Short answers will be rejected. AI-generated text
-              may delay certification.
-            </p>
-            <StoryField
-              label="Before Gamlish"
-              hint="What was hard about English before you started?"
-              value={storyBefore}
-              min={STORY_MIN.before}
-              onChange={setStoryBefore}
-            />
-            <StoryField
-              label="Your journey"
-              hint="What did you actually do on Gamlish?"
-              value={storyJourney}
-              min={STORY_MIN.journey}
-              onChange={setStoryJourney}
-            />
-            <StoryField
-              label="What changed"
-              hint="What can you do now that you could not do before?"
-              value={storyTransformation}
-              min={STORY_MIN.transformation}
-              onChange={setStoryTransformation}
-            />
-            <StoryField
-              label="Message for future learners"
-              hint="One honest line for the next student."
-              value={storyMessage}
-              min={STORY_MIN.message}
-              onChange={setStoryMessage}
-            />
-            <StoryField
-              label="How Gamlish can teach better"
-              hint="What should we improve?"
-              value={storyFeedback}
-              min={STORY_MIN.feedback}
-              onChange={setStoryFeedback}
-            />
+          <div className="space-y-5">
+            {(() => {
+              const q = CERTIFICATION_STORY_QUESTIONS[storyIndex];
+              if (!q) return null;
+              return (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-primary">
+                      Story {storyIndex + 1} of {CERTIFICATION_STORY_QUESTIONS.length}
+                    </p>
+                    <div className="flex gap-1.5">
+                      {CERTIFICATION_STORY_QUESTIONS.map((item, i) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setStoryIndex(i)}
+                          className={cn(
+                            "h-2.5 w-2.5 rounded-full",
+                            i === storyIndex
+                              ? "bg-primary"
+                              : storyAnswers[i]?.trim()
+                                ? "bg-emerald-500"
+                                : "bg-muted-foreground/30",
+                          )}
+                          aria-label={item.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-lg font-semibold leading-snug">{q.questionBn}</p>
+                    <p className="text-sm text-muted-foreground">{q.questionEn}</p>
+                  </div>
+                  <Textarea
+                    key={q.id}
+                    autoFocus
+                    rows={8}
+                    value={storyAnswers[storyIndex] ?? ""}
+                    onChange={(e) => storySetters[storyIndex]?.(e.target.value)}
+                    placeholder={q.placeholder}
+                    className="min-h-[11rem] text-base leading-relaxed"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Short or long is fine. You can skip and come back.
+                  </p>
+                </>
+              );
+            })()}
+          </div>
+        ) : null}
+
+        {step === 4 ? (
+          <div className="space-y-4 text-sm">
+            <p className="font-semibold">Check once, then send</p>
+            <div className="space-y-3">
+              <ReviewSection
+                title="Name and contact"
+                onEdit={() => setStep(1)}
+              >
+                <p>{officialName}</p>
+                <p className="text-muted-foreground">{formatDobDisplay(dateOfBirth)}</p>
+                <p className="text-muted-foreground">WhatsApp {whatsapp}</p>
+                <p className="text-muted-foreground">
+                  {status.contact.phoneMasked} · {status.contact.email}
+                </p>
+              </ReviewSection>
+              <ReviewSection title="Address" onEdit={() => setStep(2)}>
+                <p>
+                  {presentDistrict}, {presentCity}
+                  {presentLine ? ` · ${presentLine}` : ""}
+                </p>
+                <p className="text-muted-foreground">
+                  Permanent:{" "}
+                  {sameAddress
+                    ? "same as present"
+                    : `${permDistrict}, ${permCity}${permLine ? ` · ${permLine}` : ""}`}
+                </p>
+              </ReviewSection>
+              <ReviewSection
+                title="Your story"
+                onEdit={() => {
+                  setStoryIndex(0);
+                  setStep(3);
+                }}
+              >
+                {CERTIFICATION_STORY_QUESTIONS.map((item, i) => (
+                  <ReviewStoryBlock key={item.id} title={item.label} body={storyAnswers[i] ?? ""} />
+                ))}
+              </ReviewSection>
+            </div>
             <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
@@ -868,71 +947,50 @@ export function CertificationApplicationClient() {
                 checked={publicConsent}
                 onChange={(e) => setPublicConsent(e.target.checked)}
               />
-              I agree Gamlish may show my story on my public profile after approval (optional).
+              Gamlish may show my story on my public profile after approval (optional).
             </label>
-          </div>
-        ) : null}
-
-        {step === 4 ? (
-          <div className="space-y-3 text-sm">
-            <p className="font-semibold">Review before submit</p>
-            <p>
-              <span className="text-muted-foreground">Name:</span> {officialName}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Date of birth:</span>{" "}
-              {formatDobDisplay(dateOfBirth)}
-            </p>
-            <p>
-              <span className="text-muted-foreground">WhatsApp:</span> {whatsapp}
-            </p>
-            <p>
-              <span className="text-muted-foreground">District:</span> {presentDistrict},{" "}
-              {presentCity}
-            </p>
-            <p>
-              <span className="text-muted-foreground">Contact:</span>{" "}
-              {status.contact.phoneMasked} · {status.contact.email}
-            </p>
             <p className="text-muted-foreground">
-              After Gamlish approves, your official name will replace your display name on your
-              profile. Your @username will not change.
+              After approval, this official name replaces your display name. Your @username stays
+              the same.
             </p>
           </div>
         ) : null}
 
-        <div className="flex justify-between pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={step === 0}
-            onClick={() => {
-              setError(null);
-              setInfo(null);
-              setStep((s) => Math.max(0, s - 1));
-            }}
-          >
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+          <Button type="button" variant="outline" disabled={step === 0} onClick={goBack}>
             <ChevronLeft className="mr-1 h-4 w-4" /> Back
           </Button>
-          {step < STEPS.length - 1 ? (
-            <Button type="button" onClick={goNext}>
-              Next <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              disabled={submitting || !contactReady || !identityReady || !addressReady || !storyReady}
-              onClick={() => void handleSubmit()}
-            >
-              {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <CheckCircle2 className="mr-2 h-4 w-4" /> Submit for review
-                </>
-              )}
-            </Button>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {step === 3 ? (
+              <Button type="button" variant="ghost" onClick={goForward}>
+                Skip this one
+              </Button>
+            ) : null}
+            {step < STEPS.length - 1 ? (
+              <Button type="button" onClick={goForward}>
+                {step === 3 && storyIndex < STORY_LAST
+                  ? "Next question"
+                  : step === 3
+                    ? "See review"
+                    : "Next"}
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                disabled={submitting || !contactReady || !identityReady || !addressReady}
+                onClick={() => void handleSubmit()}
+              >
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <CheckCircle2 className="mr-2 h-4 w-4" /> Submit for review
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
       {removalPrompt ? (

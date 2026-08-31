@@ -14,6 +14,20 @@ import {
   type AdminCertificationApplication,
 } from "@/src/lib/api/certification";
 import { AdminCertificateSampleCard } from "@/src/features/admin/certification/AdminCertificateSampleCard";
+import { AdminLearnerFormPreviewCard } from "@/src/features/admin/certification/AdminLearnerFormPreviewCard";
+import { formatDobDisplay } from "@/src/lib/date-of-birth";
+
+function AdminStoryBlock({ title, body }: { title: string; body: string }) {
+  const text = body?.trim() ?? "";
+  return (
+    <div className="rounded-xl border bg-muted/20 p-4">
+      <p className="font-medium">{title}</p>
+      <p className="mt-1 whitespace-pre-wrap leading-relaxed text-muted-foreground">
+        {text || "Left blank"}
+      </p>
+    </div>
+  );
+}
 
 export function AdminCertificationsClient() {
   const [rows, setRows] = useState<AdminCertificationApplication[]>([]);
@@ -75,6 +89,7 @@ export function AdminCertificationsClient() {
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <AdminCertificateSampleCard />
+      <AdminLearnerFormPreviewCard />
 
       {loading ? (
         <div className="flex justify-center py-16">
@@ -96,7 +111,11 @@ export function AdminCertificationsClient() {
                     {row.studentEmail} · {row.studentPhoneMasked}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    DOB {row.dateOfBirth} · {row.presentAddress.district}, {row.presentAddress.city}
+                    Date of birth {formatDobDisplay(row.dateOfBirth)} · WhatsApp {row.whatsapp}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Present: {row.presentAddress.district}, {row.presentAddress.city}
+                    {row.presentAddress.addressLine ? ` · ${row.presentAddress.addressLine}` : ""}
                   </p>
                 </div>
                 <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
@@ -105,21 +124,16 @@ export function AdminCertificationsClient() {
               </div>
 
               <div className="grid gap-3 text-sm md:grid-cols-2">
-                <div>
-                  <p className="font-medium">Before Gamlish</p>
-                  <p className="text-muted-foreground">{row.storyBefore}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Journey</p>
-                  <p className="text-muted-foreground">{row.storyJourney}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Transformation</p>
-                  <p className="text-muted-foreground">{row.storyTransformation}</p>
-                </div>
-                <div>
-                  <p className="font-medium">Feedback for Gamlish</p>
-                  <p className="text-muted-foreground">{row.storyGamlishFeedback}</p>
+                <AdminStoryBlock title="Before Gamlish" body={row.storyBefore} />
+                <AdminStoryBlock title="Journey" body={row.storyJourney} />
+                <AdminStoryBlock title="What changed" body={row.storyTransformation} />
+                <AdminStoryBlock title="Message for future learners" body={row.storyMessage} />
+                <AdminStoryBlock title="Feedback for Gamlish" body={row.storyGamlishFeedback} />
+                <div className="rounded-xl border bg-muted/20 p-4">
+                  <p className="font-medium">Public story consent</p>
+                  <p className="mt-1 text-muted-foreground">
+                    {row.publicStoryConsent ? "Yes · may show on profile" : "No"}
+                  </p>
                 </div>
               </div>
 
