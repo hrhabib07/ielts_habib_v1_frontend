@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { BANGLADESH_DISTRICTS } from "@/src/lib/constants/bangladesh-districts";
+import { DateOfBirthFields } from "@/src/components/certification/DateOfBirthFields";
+import { formatDobDisplay } from "@/src/lib/date-of-birth";
 import {
   getCertificationStatus,
   requestCertificationLinkEmail,
@@ -752,14 +754,7 @@ export function CertificationApplicationClient() {
               <Label>Official full name</Label>
               <Input value={officialName} onChange={(e) => setOfficialName(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label>Date of birth</Label>
-              <Input
-                type="date"
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-              />
-            </div>
+            <DateOfBirthFields value={dateOfBirth} onChange={setDateOfBirth} />
             <div className="space-y-2">
               <Label>WhatsApp number</Label>
               <Input
@@ -885,7 +880,8 @@ export function CertificationApplicationClient() {
               <span className="text-muted-foreground">Name:</span> {officialName}
             </p>
             <p>
-              <span className="text-muted-foreground">DOB:</span> {dateOfBirth}
+              <span className="text-muted-foreground">Date of birth:</span>{" "}
+              {formatDobDisplay(dateOfBirth)}
             </p>
             <p>
               <span className="text-muted-foreground">WhatsApp:</span> {whatsapp}
