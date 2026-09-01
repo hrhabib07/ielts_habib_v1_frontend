@@ -173,7 +173,7 @@ export function FounderLaunchPricingCard({
           </div>
 
           <p className="text-center text-sm font-semibold leading-snug text-amber-900 dark:text-amber-200">
-            {copy.scarcity}
+            {copy.scarcity(pricing.regularPriceBdt, pricing.finalPriceBdt)}
           </p>
           {badgeNote ? (
             <p className="text-center text-xs font-medium text-muted-foreground">

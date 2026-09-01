@@ -1,5 +1,6 @@
 import type { UiLocale } from "@/src/lib/ui-locale";
 import { FOUNDER_LAUNCH_COPY } from "@/src/lib/founder-launch-copy";
+import { JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT } from "@/src/lib/journey-prices";
 
 export interface AuthRegisterCopy {
   readonly title: string;
@@ -47,7 +48,7 @@ function buildAuthRegisterCopy(locale: UiLocale): AuthRegisterCopy {
       ],
       heroFootnote: "যারা ইংরেজি সত্যিই শিখতে চান, তাদের জন্য Gamlish।",
       promoTitle: founder.eyebrow,
-      promoBody: `${founder.intro} ${founder.scarcity}`,
+      promoBody: `${founder.intro} ${founder.scarcity(JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT)}`,
       promoLink: "Founder Launch মূল্য দেখুন",
       promoCompact: "Founder Launch · বিশেষ প্রাথমিক সদস্য মূল্য",
       backHome: "হোমে ফিরে যান",
@@ -76,7 +77,7 @@ function buildAuthRegisterCopy(locale: UiLocale): AuthRegisterCopy {
     ],
     heroFootnote: "Trusted by learners who want English that sticks.",
     promoTitle: founder.eyebrow,
-    promoBody: `${founder.intro} ${founder.scarcity}`,
+    promoBody: `${founder.intro} ${founder.scarcity(JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT)}`,
     promoLink: "See Founder Launch pricing",
     promoCompact: "Founder Launch · special early-member price on /pricing",
     backHome: "Back to home",

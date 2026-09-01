@@ -4,7 +4,7 @@ export interface FounderLaunchCopy {
   readonly eyebrow: string;
   readonly headline: string;
   readonly intro: string;
-  readonly scarcity: string;
+  readonly scarcity: (regularBdt: number, offerBdt: number) => string;
   readonly accessNote: string;
   readonly accessStartsLabel: (dateLabel: string) => string;
   readonly durationLabel: (days: number) => string;
@@ -32,8 +32,8 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     headline: "এখনই ফুল জার্নি অ্যাক্সেস নিন",
     intro:
       "পেমেন্ট ভেরিফাই হলে অ্যাক্টিভ হওয়ার পর 45 দিনের পূর্ণ English Foundations অ্যাক্সেস পাবেন।",
-    scarcity:
-      "রেগুলার মূল্য 1,590 টাকা। এখন বিশেষ অফারে 290 টাকা।",
+    scarcity: (regularBdt, offerBdt) =>
+      `রেগুলার মূল্য ${regularBdt.toLocaleString("en-US")} টাকা। এখন বিশেষ অফারে ${offerBdt.toLocaleString("en-US")} টাকা।`,
     accessNote: "পেমেন্ট ভেরিফাই হলে অ্যাক্সেস চালু হবে।",
     accessStartsLabel: (dateLabel) => `শুরু: ${dateLabel}`,
     durationLabel: (days) => `অ্যাক্টিভ হওয়ার পর ${days} দিনের অ্যাক্সেস`,
@@ -57,8 +57,8 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     headline: "Get Full Journey Access now",
     intro:
       "After payment verification you get 45 days of full English Foundations access from activation.",
-    scarcity:
-      "Regular price 1,590 BDT. Special offer: 290 BDT.",
+    scarcity: (regularBdt, offerBdt) =>
+      `Regular price ${regularBdt.toLocaleString("en-US")} BDT. Special offer: ${offerBdt.toLocaleString("en-US")} BDT.`,
     accessNote: "Access starts when payment is verified.",
     accessStartsLabel: (dateLabel) => `Starts: ${dateLabel}`,
     durationLabel: (days) => `${days} days of access from activation`,
