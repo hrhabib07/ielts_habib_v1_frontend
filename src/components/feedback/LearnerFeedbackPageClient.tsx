@@ -323,7 +323,7 @@ export function LearnerFeedbackPageClient() {
 
             <div>
               <label className="text-xs font-bold text-muted-foreground">
-                রেটিং (১ থেকে ৫)
+                রেটিং (1 থেকে 5)
               </label>
               <div className="mt-2 flex items-center gap-1">
                 {Array.from({ length: 5 }, (_, i) => {

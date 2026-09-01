@@ -178,6 +178,8 @@ export const config = {
     "/checkout/:path*",
     "/onboarding/:path*",
     "/profile/:path*",
+    "/certification/:path*",
+    "/dashboard",
     "/dashboard/:path*",
   ],
 };

@@ -1,8 +1,13 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 
 const PRODUCTION_API =
   "https://ieltshabibv1backend-production.up.railway.app/api";
 const PRODUCTION_APP_URL = "https://gamlish.com";
+
+/** This package folder. Parent `ielts_habib_v1` also has a lockfile (backend). */
+const frontendRoot = path.dirname(fileURLToPath(import.meta.url));
 
 function resolveUpstreamApiBase(): string {
   const raw =
@@ -19,6 +24,10 @@ const apiBase = resolveUpstreamApiBase();
 const apiOrigin = apiBase.replace(/\/api\/?$/, "");
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: frontendRoot,
+  turbopack: {
+    root: frontendRoot,
+  },
   /**
    * Production public URL fallbacks when Vercel env was only set on Preview.
    * JWT_SECRET remains optional (sync can validate via Railway API).

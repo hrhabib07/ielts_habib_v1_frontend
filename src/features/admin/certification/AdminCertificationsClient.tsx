@@ -14,8 +14,10 @@ import {
   type AdminCertificationApplication,
 } from "@/src/lib/api/certification";
 import { AdminCertificateSampleCard } from "@/src/features/admin/certification/AdminCertificateSampleCard";
+import { AdminIssuedCertificatesList } from "@/src/features/admin/certification/AdminIssuedCertificatesList";
 import { AdminLearnerFormPreviewCard } from "@/src/features/admin/certification/AdminLearnerFormPreviewCard";
 import { formatDobDisplay } from "@/src/lib/date-of-birth";
+import { cn } from "@/lib/utils";
 
 function AdminStoryBlock({ title, body }: { title: string; body: string }) {
   const text = body?.trim() ?? "";
@@ -30,6 +32,7 @@ function AdminStoryBlock({ title, body }: { title: string; body: string }) {
 }
 
 export function AdminCertificationsClient() {
+  const [tab, setTab] = useState<"queue" | "issued">("queue");
   const [rows, setRows] = useState<AdminCertificationApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +68,9 @@ export function AdminCertificationsClient() {
         changeRequestNote: changeNotes[row.id],
       });
       await load();
+      if (action === "approve") {
+        setTab("issued");
+      }
     } catch {
       setError("Action failed.");
     } finally {
@@ -79,9 +85,9 @@ export function AdminCertificationsClient() {
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">Certification applications</h1>
+          <h1 className="text-2xl font-bold">Certification</h1>
           <p className="text-sm text-muted-foreground">
-            Review learner identity and story before issuing certificates.
+            Review applications, then open the exact PDF each graduate received.
           </p>
         </div>
       </div>
@@ -91,7 +97,26 @@ export function AdminCertificationsClient() {
       <AdminCertificateSampleCard />
       <AdminLearnerFormPreviewCard />
 
-      {loading ? (
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant={tab === "queue" ? "default" : "outline"}
+          onClick={() => setTab("queue")}
+          className={cn(tab === "queue" && "pointer-events-none")}
+        >
+          Review queue
+        </Button>
+        <Button
+          type="button"
+          variant={tab === "issued" ? "default" : "outline"}
+          onClick={() => setTab("issued")}
+          className={cn(tab === "issued" && "pointer-events-none")}
+        >
+          Issued certificates
+        </Button>
+      </div>
+
+      {tab === "issued" ? <AdminIssuedCertificatesList /> : loading ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
@@ -132,7 +157,7 @@ export function AdminCertificationsClient() {
                 <div className="rounded-xl border bg-muted/20 p-4">
                   <p className="font-medium">Public story consent</p>
                   <p className="mt-1 text-muted-foreground">
-                    {row.publicStoryConsent ? "Yes · may show on profile" : "No"}
+                    {row.publicStoryConsent ? "Yes · may show on homepage and profile" : "No"}
                   </p>
                 </div>
               </div>

@@ -41,6 +41,8 @@ function shouldForceLogout(error: AxiosError): boolean {
   const url = String(error.config?.url ?? "");
   // Public pricing / health should never nuke the session
   if (url.includes("/pricing") && !url.includes("/admin")) return false;
+  if (url.includes("/certification/graduates")) return false;
+  if (url.includes("/certification/verify/")) return false;
 
   return true;
 }

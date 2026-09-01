@@ -240,7 +240,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       graduationBody: (hoursLeft) =>
         `তুমি অসাধারণ করেছ। বিষয়গুলো মাথায় বসতে দাও। আনুমানিক ${hoursLeft} ঘণ্টা পর পরের ক্যাম্পে ফিরে এসো। বিশ্রাম ছাড়া তাড়াহুড়ো করলে শেখা টিকবে না।`,
       unlockLater: (campLabel) =>
-        `${campLabel} ২৪ ঘণ্টা পর আনলক হবে। এখন বিরতি নাও।`,
+        `${campLabel} 24 ঘণ্টা পর আনলক হবে। এখন বিরতি নাও।`,
     },
     subscribeModalEyebrow: "পরবর্তী মিশন আনলক করো",
     subscribeModalTitle: (missionTitle) => `«${missionTitle}» তোমার জন্য অপেক্ষা করছে!`,
@@ -291,7 +291,7 @@ export const PLAYER_UI_COPY: Record<UiLocale, PlayerUiCopy> = {
       courseDone: "তুমি Fundamental English শেষ করেছ! এখন সার্টিফিকেটের জন্য আবেদন করো।",
       claimCertificateCta: "সার্টিফিকেট ক্লেইম করো",
       claimCertificateBody:
-        "২১টি মিশন শেষ। এখন যাচাইকৃত প্রোফাইল দিয়ে অফিসিয়াল সার্টিফিকেটের জন্য আবেদন করো।",
+        "21টি মিশন শেষ। এখন যাচাইকৃত প্রোফাইল দিয়ে অফিসিয়াল সার্টিফিকেটের জন্য আবেদন করো।",
       autoContinueCert: (seconds) => `${seconds} সেকেন্ডে সার্টিফিকেট আবেদন খুলবে…`,
     },
     coinsLabel: "কয়েন",

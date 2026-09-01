@@ -20,7 +20,7 @@ const BEATS: Beat[] = [
   {
     untilSec: 3,
     icon: "zap",
-    titleBn: "তোমার ৫০ XP সুরক্ষিত করা হচ্ছে…",
+    titleBn: "তোমার 50 XP সুরক্ষিত করা হচ্ছে…",
     titleEn: "Securing your 50 XP…",
     subBn: "ডেমোর জয় এখন প্রোফাইলে লক হচ্ছে।",
     subEn: "Your demo win is locking onto your profile.",

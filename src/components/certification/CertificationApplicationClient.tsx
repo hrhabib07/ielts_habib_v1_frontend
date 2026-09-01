@@ -947,7 +947,8 @@ export function CertificationApplicationClient() {
                 checked={publicConsent}
                 onChange={(e) => setPublicConsent(e.target.checked)}
               />
-              Gamlish may show my story on my public profile after approval (optional).
+              Gamlish may show my story on the homepage and my public profile after approval
+              (optional).
             </label>
             <p className="text-muted-foreground">
               After approval, this official name replaces your display name. Your @username stays

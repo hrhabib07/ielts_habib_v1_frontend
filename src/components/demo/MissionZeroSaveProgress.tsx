@@ -117,7 +117,7 @@ export function MissionZeroSaveProgress({
       ? "ফ্রি · কয়েক সেকেন্ড · Mission 01 আনলক"
       : "Free · a few seconds · unlock Mission 01";
   const layoutAHeadline =
-    locale === "bn" ? "তোমার ৫০ XP এখনই সেভ করো" : "Save your 50 XP now";
+    locale === "bn" ? "তোমার 50 XP এখনই সেভ করো" : "Save your 50 XP now";
   const layoutASub =
     locale === "bn"
       ? "সেভ করলেই Mission 01 আনলক। না করলে XP মুছে যেতে পারে।"

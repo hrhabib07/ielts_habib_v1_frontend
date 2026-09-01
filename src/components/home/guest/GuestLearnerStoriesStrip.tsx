@@ -131,10 +131,10 @@ export function GuestLearnerStoriesStrip() {
       <div className="mx-auto max-w-5xl">
         <div className="mx-auto max-w-2xl px-4 text-center sm:px-0">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">
-            {isBn ? "রিয়েল লার্নার স্টোরি" : "Real learner stories"}
+            {isBn ? "গেইমের ভিতরে" : "Inside the game"}
           </p>
           <h2 className="mt-2 text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-            {isBn ? "যারা আগেই জয়েন করেছেন" : "Learners who already joined"}
+            {isBn ? "যারা এখন খেলছে" : "Learners already playing"}
           </h2>
           <p className="mt-2 text-sm font-medium text-muted-foreground">
             {isBn

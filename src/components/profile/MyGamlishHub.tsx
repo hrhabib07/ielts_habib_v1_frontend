@@ -201,7 +201,7 @@ export function MyGamlishHub() {
               বোনাস চ্যালেঞ্জ · +{LEARNER_FEEDBACK_REWARD_XP} XP
             </span>
             <span className="block text-xs text-muted-foreground">
-              মাত্র ২ মিনিট · একবারই · পাঠানোর পর এই অপশন চলে যাবে
+              মাত্র 2 মিনিট · একবারই · পাঠানোর পর এই অপশন চলে যাবে
             </span>
           </span>
           <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">

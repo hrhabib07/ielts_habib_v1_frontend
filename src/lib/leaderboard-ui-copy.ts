@@ -51,7 +51,7 @@ export const LEADERBOARD_UI_COPY: Record<UiLocale, LeaderboardUiCopy> = {
     next: "পরে",
     pageOf: (page, totalPages) => `পৃষ্ঠা ${page} / ${totalPages}`,
     openProfile: "প্রোফাইল",
-    podiumHint: "শীর্ষ ৩ · ক্যাম্পের চ্যাম্পিয়নরা",
+    podiumHint: "শীর্ষ 3 · ক্যাম্পের চ্যাম্পিয়নরা",
     playersAtRank: "জন একই র‍্যাঙ্কে",
     tieRule:
       "সমান XP মানে একই র‍্যাঙ্ক। একই র‍্যাঙ্কের তালিকায় বেশি মিশন, বেশি লেভেল, তারপর আগে XP অর্জন করাকে অগ্রাধিকার দেওয়া হয়।",
@@ -61,7 +61,7 @@ export const LEADERBOARD_UI_COPY: Record<UiLocale, LeaderboardUiCopy> = {
     tabWeekly: "এই সপ্তাহের সেরা",
     tabAllTime: "সর্বকালের সেরা",
     weeklyXpLabel: "weekly XP",
-    weeklyPodiumHint: "টপ ৩ · ২০ টাকা রেস",
+    weeklyPodiumHint: "টপ 3 · 20 টাকা রেস",
   },
   en: {
     title: "XP Leaderboard",

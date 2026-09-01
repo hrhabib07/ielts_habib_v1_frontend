@@ -226,7 +226,7 @@ function WeeklyPodium({
     <div className="mb-4">
       <p className="mb-2 flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
         <Trophy className="h-3.5 w-3.5" />
-        টপ ৩ · ২০ টাকা রেস
+        টপ 3 · 20 টাকা রেস
       </p>
       <div className="flex items-end gap-2 sm:gap-3">
         <Pedestal entry={second} rank={2} />
@@ -351,7 +351,7 @@ export const WeeklyChallengePanel = forwardRef<WeeklyArenaHandle, Props>(
               Weekly 20 TK · Live
             </p>
             <h2 className="mt-1 text-base font-black tracking-tight text-foreground sm:text-lg">
-              টপ ৩ পাবে {state.prizeBdt} টাকা রিচার্জ
+              টপ 3 পাবে {state.prizeBdt} টাকা রিচার্জ
             </h2>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
               শুধু এই সপ্তাহের নতুন XP। লক: {state.nextLockLabel}.

@@ -30,10 +30,10 @@ export const MASTER_PATH_UI_COPY: Record<UiLocale, MasterPathUiCopy> = {
       "চারটি ক্যাম্পেই Master (90%+) হলে, Intermediate Camp লঞ্চ হলে তুমি ফ্রি অ্যাক্সেস পাবে।",
     rewardTitle: "ফ্রি Intermediate এর শর্ত",
     rewardBody:
-      "সব ক্যাম্পে Master + পুরো Foundations কোর্স ১ মাসের মধ্যে শেষ করতে হবে।",
+      "সব ক্যাম্পে Master + পুরো Foundations কোর্স 1 মাসের মধ্যে শেষ করতে হবে।",
     conditionsTitle: "দুইটি শর্ত",
     conditionMaster: "Camp 01, 02, 03 ও 04 সবগুলোতে Master ব্যাজ (90%+)",
-    conditionMonth: "Mission 1 শেষ করার পর থেকে ৩০ দিনের মধ্যে পুরো কোর্স শেষ",
+    conditionMonth: "Mission 1 শেষ করার পর থেকে 30 দিনের মধ্যে পুরো কোর্স শেষ",
     tipsTitle: "সেরা উপায় · মার্ক হারাবে না",
     tipLearn:
       "অনুশীলনের আগে শেখো। বুঝতে ChatGPT ব্যবহার করতে পারো। কিন্তু শুধু মুখস্থ নয়, বুঝে নাও।",

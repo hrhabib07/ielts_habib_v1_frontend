@@ -606,7 +606,7 @@ export const MISSION_ONE_LAB_TEST_PACK: MissionOneLabPack = {
     "তুমি কাজের বাক্য বানাতে পারো। কিন্তু এখনো নিজের পরিচয় বলতে পারো না।",
   cliffhangerTeaser: ["I ___ a student.", "You ___ brave.", "They ___ my friends."],
   unlockClarity:
-    "Mission 01 ফ্রি। পেইড আনলক = Mission 02 এবং পুরো Foundations পথ (শুধু ১টা মিশন নয়)।",
+    "Mission 01 ফ্রি। পেইড আনলক = Mission 02 এবং পুরো Foundations পথ (শুধু 1টা মিশন নয়)।",
   videoUrl: "https://youtu.be/UeD25OfPXew",
   videoTitle: "Learn: Word Order",
   videoSoftLock: true,

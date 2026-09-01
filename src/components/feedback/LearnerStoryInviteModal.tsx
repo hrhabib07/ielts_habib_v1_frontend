@@ -88,7 +88,7 @@ export function LearnerStoryInviteModal({
           </div>
 
           <p className="mt-4 text-center text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-            মাত্র ২ মিনিট লাগবে!
+            মাত্র 2 মিনিট লাগবে!
           </p>
 
           <Button

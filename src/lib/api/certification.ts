@@ -86,6 +86,32 @@ export interface AdminCertificationApplication extends CertificationApplication 
   performance: CertificationStatus["performance"];
 }
 
+export interface AdminIssuedCertificate extends CertificateView {
+  studentEmail: string;
+  studentUsername: string | null;
+  district: string | null;
+  publicStoryConsent: boolean;
+  storyBefore: string;
+  storyJourney: string;
+  storyTransformation: string;
+  storyMessage: string;
+  storyGamlishFeedback: string;
+}
+
+export interface PublicGraduateStory {
+  id: string;
+  officialName: string;
+  district: string | null;
+  username: string | null;
+  certificateId?: string;
+  programName: string;
+  issuedAt: string;
+  storyBefore: string;
+  storyJourney: string;
+  storyTransformation: string;
+  storyMessage: string;
+}
+
 export interface CertificatePerformanceView {
   completionResult: string;
   achievementLevel: string | null;
@@ -240,6 +266,16 @@ export async function verifyCertificatePublic(
   return unwrap(res);
 }
 
+export async function getPublicGraduateStories(): Promise<PublicGraduateStory[]> {
+  try {
+    const { default: apiClient } = await import("@/src/lib/api-client");
+    const res = await apiClient.get<{ data: PublicGraduateStory[] }>("/certification/graduates");
+    return unwrap(res);
+  } catch (err) {
+    throwApiError(err, "Could not load graduate stories.");
+  }
+}
+
 export async function getAdminCertificationPendingCount(): Promise<number> {
   const { default: apiClient } = await import("@/src/lib/api-client");
   const res = await apiClient.get<{ data: { count: number } }>(
@@ -275,6 +311,7 @@ export async function reviewAdminCertificationApplication(
 async function fetchAdminCertificationPdf(
   path: string,
   mode: "inline" | "download",
+  downloadName?: string,
 ): Promise<void> {
   const { default: apiClient } = await import("@/src/lib/api-client");
   const res = await apiClient.get(path, { responseType: "blob" });
@@ -284,7 +321,12 @@ async function fetchAdminCertificationPdf(
     const a = document.createElement("a");
     a.href = url;
     a.download =
-      path.includes("sample") ? "Gamlish-Certificate-SAMPLE.pdf" : "Gamlish-Certificate-PREVIEW.pdf";
+      downloadName ??
+      (path.includes("sample")
+        ? "Gamlish-Certificate-SAMPLE.pdf"
+        : path.includes("/issued/")
+          ? "Gamlish-Certificate.pdf"
+          : "Gamlish-Certificate-PREVIEW.pdf");
     a.click();
   } else {
     window.open(url, "_blank", "noopener,noreferrer");
@@ -317,6 +359,29 @@ export async function downloadAdminApplicationCertificatePreview(
   await fetchAdminCertificationPdf(
     `/admin/certification/applications/${applicationId}/preview/download`,
     "download",
+  );
+}
+
+export async function listAdminIssuedCertificates(): Promise<AdminIssuedCertificate[]> {
+  const { default: apiClient } = await import("@/src/lib/api-client");
+  const res = await apiClient.get<{ data: AdminIssuedCertificate[] }>(
+    "/admin/certification/issued",
+  );
+  return unwrap(res);
+}
+
+export async function openAdminIssuedCertificatePdf(certificateId: string): Promise<void> {
+  await fetchAdminCertificationPdf(
+    `/admin/certification/issued/${encodeURIComponent(certificateId)}/pdf`,
+    "inline",
+  );
+}
+
+export async function downloadAdminIssuedCertificate(certificateId: string): Promise<void> {
+  await fetchAdminCertificationPdf(
+    `/admin/certification/issued/${encodeURIComponent(certificateId)}/download`,
+    "download",
+    "Gamlish-Certificate.pdf",
   );
 }
 

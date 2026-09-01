@@ -187,7 +187,7 @@ export const MISSION_ZERO_COPY: Record<MissionZeroLocale, MissionZeroCopy> = {
       statusDone: "ডেমো সম্পন্ন! আপনি দারুণ করেছেন!",
       statusNext: "মিশন 1 আপনার জন্য অপেক্ষা করছে",
       unsavedEyebrow: "এখনো সেভ হয়নি",
-      unsavedTitle: "তোমার ৫০ XP এখনো আনলক · এখনই সেভ করো",
+      unsavedTitle: "তোমার 50 XP এখনো আনলক · এখনই সেভ করো",
       unsavedBody: (totalXp) =>
         `তুমি এইমাত্র ${totalXp} XP ও Level 2 পেয়েছ। অ্যাকাউন্ট না করলে বেরিয়ে যাওয়ার সাথে সাথে এটা মুছে যেতে পারে। কয়েক সেকেন্ডে সেভ করে Mission 01 আনলক করো।`,
       googleCta: "আমার অগ্রগতি সেভ করুন (Google দিয়ে 1 ক্লিকে)",
