@@ -14,7 +14,7 @@ export interface FounderLaunchCopy {
   readonly founderBadge: string;
   readonly preOrderBadge: string;
   readonly offBadge: (percent: number) => string;
-  /** Unit under the deal price — not monthly. */
+  /** Unit under the deal price. Not monthly. */
   readonly onePayment: string;
   readonly premiumLabel: string;
   readonly upgrade: string;
@@ -33,7 +33,7 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     intro:
       "পেমেন্ট ভেরিফাই হলে অ্যাক্টিভ হওয়ার পর 45 দিনের পূর্ণ English Foundations অ্যাক্সেস পাবেন।",
     scarcity:
-      "রেগুলার মূল্য 1,590 টাকা। এখন বিশেষ অফারে 690 টাকা।",
+      "রেগুলার মূল্য 1,590 টাকা। এখন বিশেষ অফারে 290 টাকা।",
     accessNote: "পেমেন্ট ভেরিফাই হলে অ্যাক্সেস চালু হবে।",
     accessStartsLabel: (dateLabel) => `শুরু: ${dateLabel}`,
     durationLabel: (days) => `অ্যাক্টিভ হওয়ার পর ${days} দিনের অ্যাক্সেস`,
@@ -58,7 +58,7 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     intro:
       "After payment verification you get 45 days of full English Foundations access from activation.",
     scarcity:
-      "Regular price 1,590 BDT. Special offer: 690 BDT.",
+      "Regular price 1,590 BDT. Special offer: 290 BDT.",
     accessNote: "Access starts when payment is verified.",
     accessStartsLabel: (dateLabel) => `Starts: ${dateLabel}`,
     durationLabel: (days) => `${days} days of access from activation`,

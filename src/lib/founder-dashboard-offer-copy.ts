@@ -22,7 +22,7 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
 > = {
   bn: {
     alert: () =>
-      "ফুল জার্নি অ্যাক্সেস 690 টাকা। রেগুলার 1,590 টাকা।",
+      "ফুল জার্নি অ্যাক্সেস 290 টাকা। রেগুলার 1,590 টাকা।",
     headline: "এখনই ফুল জার্নি অ্যাক্সেস নিন",
     priceHint: "45 দিনের অ্যাক্সেস · সাধারণত 21 মিশন শেষ করতে 21 দিন সময় লাগে",
     seatsLeft: () => "বিশেষ অফার চলছে",
@@ -37,7 +37,7 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
   },
   en: {
     alert: () =>
-      "Full Journey Access for 690 BDT. Regular 1,590 BDT.",
+      "Full Journey Access for 290 BDT. Regular 1,590 BDT.",
     headline: "Get Full Journey Access now",
     priceHint: "45-day access · usually takes 21 days to finish 21 missions",
     seatsLeft: () => "Special offer is live",

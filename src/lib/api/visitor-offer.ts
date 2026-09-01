@@ -23,7 +23,7 @@ function unwrapOffer(payload: unknown): PersonalOfferView {
   throw new Error("No offer data");
 }
 
-/** Get or create the personal 690→699 forever countdown for this browser. */
+/** Get or create the personal 290→299 forever countdown for this browser. */
 export async function fetchPersonalOffer(
   visitorId = getOrCreateVisitorId(),
 ): Promise<PersonalOfferView> {

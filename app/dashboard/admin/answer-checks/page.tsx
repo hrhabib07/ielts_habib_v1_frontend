@@ -6,9 +6,11 @@ import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
+  deleteAdminLearnedAnswer,
   getAdminEquivalentLog,
   type AdminEquivalentCall,
   type AdminEquivalentDashboard,
+  type AdminLearnedAnswer,
   type EquivalentCallOutcome,
 } from "@/src/lib/api/adminPlayer";
 import { cn } from "@/lib/utils";
@@ -100,6 +102,41 @@ function CallRow({ row }: { row: AdminEquivalentCall }) {
   );
 }
 
+function LearnedRow({ row, onDeleted }: { row: AdminLearnedAnswer; onDeleted: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const verdict = row.verdict === "rejected" ? "rejected" : "accepted";
+
+  async function remove() {
+    setBusy(true);
+    try {
+      await deleteAdminLearnedAnswer(row.id);
+      onDeleted();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", outcomeClass(verdict))}>
+            {verdict === "accepted" ? "Accepted" : "Rejected"}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {row.missionSlug} · {row.questionId} · {row.source} · {formatWhen(row.createdAt)}
+          </span>
+        </div>
+        <p className="mt-1 text-sm font-medium text-foreground">{row.displayText}</p>
+        <p className="text-xs text-muted-foreground">{row.normalizedText}</p>
+      </div>
+      <Button variant="outline" size="sm" onClick={() => void remove()} disabled={busy}>
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remove"}
+      </Button>
+    </Card>
+  );
+}
+
 export default function AdminAnswerChecksPage() {
   const [data, setData] = useState<AdminEquivalentDashboard | null>(null);
   const [loading, setLoading] = useState(true);
@@ -128,8 +165,9 @@ export default function AdminAnswerChecksPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Typed answer checks</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Every meaning-API call after local rules miss. Groq runs first when a Groq key is set. Gemini is used
-            only if Groq is missing, quota, timeout, or an error. Learned wordings are stored in Mongo and reused.
-            Calls from before this log existed will not appear.
+            only if Groq is missing, quota, timeout, or an error. The same wording is stored after a clean yes or no
+            and reused, so repeat answers skip the API. Quota and timeouts are not stored as wrong. Calls from
+            before this log existed will not appear.
           </p>
         </div>
         <div className="flex gap-2">
@@ -169,6 +207,9 @@ export default function AdminAnswerChecksPage() {
           <Card className="p-4">
             <p className="text-xs font-medium text-muted-foreground">Learned wordings</p>
             <p className="mt-1 text-2xl font-bold text-foreground">{data.learnedCount}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {data.learnedAcceptedCount ?? 0} accepted · {data.learnedRejectedCount ?? 0} rejected
+            </p>
           </Card>
         </div>
       ) : null}
@@ -197,18 +238,12 @@ export default function AdminAnswerChecksPage() {
         <h2 className="text-lg font-semibold text-foreground">Learned wordings in Mongo</h2>
         {data && data.learned.length === 0 ? (
           <Card className="p-6 text-sm text-muted-foreground">
-            Nothing saved yet. A wording is stored only when the meaning API says yes.
+            Nothing saved yet. A wording is stored when the meaning API gives a clean yes or no.
           </Card>
         ) : null}
         <div className="space-y-2">
           {data?.learned.map((row) => (
-            <Card key={row.id} className="p-4">
-              <p className="text-xs text-muted-foreground">
-                {row.missionSlug} · {row.questionId} · {row.source} · {formatWhen(row.createdAt)}
-              </p>
-              <p className="mt-1 text-sm font-medium text-foreground">{row.displayText}</p>
-              <p className="text-xs text-muted-foreground">{row.normalizedText}</p>
-            </Card>
+            <LearnedRow key={row.id} row={row} onDeleted={() => void load()} />
           ))}
         </div>
       </section>

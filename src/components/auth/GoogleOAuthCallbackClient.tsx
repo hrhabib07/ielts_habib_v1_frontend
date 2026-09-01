@@ -9,6 +9,7 @@ import {
 } from "@/src/lib/demo-session";
 import { decodeJwtUser } from "@/src/lib/jwt-verify";
 import { GOOGLE_CALLBACK_COPY } from "@/src/lib/auth-recovery-copy";
+import { formatAuthQueryError } from "@/src/lib/auth-oauth-errors";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +65,7 @@ export function GoogleOAuthCallbackClient() {
     const run = async () => {
       const error = searchParams.get("error");
       if (error) {
-        fail(decodeURIComponent(error), decodeURIComponent(error));
+        fail(formatAuthQueryError(error, locale), error);
         return;
       }
 
@@ -113,7 +114,7 @@ export function GoogleOAuthCallbackClient() {
     return () => {
       cancelled = true;
     };
-  }, [searchParams, copy.missingToken, copy.syncFailed]);
+  }, [searchParams, copy.missingToken, copy.syncFailed, locale]);
 
   return (
     <div

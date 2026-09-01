@@ -152,12 +152,15 @@ export interface AdminLearnedAnswer {
   normalizedText: string;
   displayText: string;
   source: string;
+  verdict?: "accepted" | "rejected";
   createdAt: string;
 }
 
 export interface AdminEquivalentDashboard {
   totalCalls: number;
   learnedCount: number;
+  learnedAcceptedCount?: number;
+  learnedRejectedCount?: number;
   accepted: number;
   rejected: number;
   quota: number;
@@ -175,4 +178,8 @@ export async function getAdminEquivalentLog(): Promise<AdminEquivalentDashboard>
   );
   if (!res.data?.data) throw new Error("Failed to load answer checks");
   return res.data.data;
+}
+
+export async function deleteAdminLearnedAnswer(id: string): Promise<void> {
+  await apiClient.delete(`/admin/player/learned-answers/${encodeURIComponent(id)}`);
 }

@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Crown, Lock, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatBdt, getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
+import { JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT } from "@/src/lib/journey-prices";
 import {
   MISSION_ONE_PAYWALL_COPY as COPY,
   praiseBand,
@@ -50,8 +51,8 @@ export function MissionOnePaywallFlow({
 
   const band = praiseBand(score?.percent ?? null);
   const locked = Math.max(0, missionsTotal - missionsDone);
-  const listPrice = pricing?.regularPriceBdt ?? 1590;
-  const offerPrice = pricing?.finalPriceBdt ?? 690;
+  const listPrice = pricing?.regularPriceBdt ?? JOURNEY_LIST_PRICE_BDT;
+  const offerPrice = pricing?.finalPriceBdt ?? JOURNEY_OFFER_PRICE_BDT;
   const showStrike = listPrice > offerPrice;
 
   const progressPct = useMemo(() => {

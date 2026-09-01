@@ -8,6 +8,7 @@ import {
   fetchPersonalOffer,
   type PersonalOfferView,
 } from "@/src/lib/api/visitor-offer";
+import { JOURNEY_EXPIRED_PRICE_BDT, JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT } from "@/src/lib/journey-prices";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 
 function pad(n: number): string {
@@ -133,8 +134,8 @@ export function PersonalOfferCountdown({
       const endsAt = new Date(now + demoRemainingMs).toISOString();
       const demo: PersonalOfferView = {
         visitorId: visitorId ?? "demo-preview",
-        listPriceBdt: 1590,
-        offerPriceBdt: 690,
+        listPriceBdt: JOURNEY_LIST_PRICE_BDT,
+        offerPriceBdt: JOURNEY_OFFER_PRICE_BDT,
         startedAt: new Date(now).toISOString(),
         endsAt,
         isExpired: false,
@@ -170,7 +171,7 @@ export function PersonalOfferCountdown({
             ? {
                 ...prev,
                 isExpired: true,
-                offerPriceBdt: 699,
+                offerPriceBdt: JOURNEY_EXPIRED_PRICE_BDT,
                 remainingMs: 0,
               }
             : prev,

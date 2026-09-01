@@ -50,7 +50,7 @@ export interface SubmitRequestPayload {
   paidAmount: number;
   couponCode?: string;
   screenshotUrl?: string;
-  /** Personal offer clock (690 during window, 699 after forever). */
+  /** Personal offer clock (290 during window, 299 after forever). */
   visitorId?: string;
 }
 

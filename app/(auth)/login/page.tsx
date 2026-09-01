@@ -19,12 +19,13 @@ export default async function LoginPage({
     next?: string;
     returnTo?: string;
     loggedOut?: string;
+    error?: string;
   }>;
 }) {
   const sp = await searchParams;
 
-  // After logout middleware clears cookies; never bounce this paint.
-  if (sp.loggedOut === "1") {
+  // After logout or a Google error, stay on this page so the message is visible.
+  if (sp.loggedOut === "1" || (typeof sp.error === "string" && sp.error.length > 0)) {
     return <LoginForm resetSuccess={sp.reset === "1"} />;
   }
 

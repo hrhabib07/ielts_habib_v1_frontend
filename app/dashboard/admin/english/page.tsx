@@ -133,7 +133,7 @@ export default function AdminEnglishContentPage() {
         <div>
           <h2 className="text-lg font-semibold text-foreground">Typed answer checks</h2>
           <p className="text-sm text-muted-foreground">
-            See meaning-API calls, responses, and wordings saved in Mongo.
+            See meaning-API calls, quota, and wordings saved as accepted or rejected.
           </p>
         </div>
         <Link href="/dashboard/admin/answer-checks">

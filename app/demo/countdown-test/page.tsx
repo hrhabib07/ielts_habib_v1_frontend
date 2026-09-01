@@ -49,7 +49,7 @@ export default function CountdownTestPage() {
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground">
             Live product uses the exact same <code className="rounded bg-muted px-1">PersonalOfferCountdown</code>{" "}
-            component (690 while active · 699 after). If your phone/laptop already burnt the visitor/IP window,
+            component (290 while active · 299 after). If your phone/laptop already burnt the visitor/IP window,
             home will show the expired state · use the forced demos below to see the active UI again.
           </p>
           <Button asChild variant="outline" size="sm">

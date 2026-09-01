@@ -37,7 +37,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "A special Full Journey Access offer is running. Regular price is 1,590 BDT. Right now you can enroll for 690 BDT — one payment.",
+            "A special Full Journey Access offer is running. Regular price is 1,590 BDT. Right now you can enroll for 290 BDT, one payment.",
         },
       },
       {
@@ -78,7 +78,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "এখন বিশেষ ফুল জার্নি অ্যাক্সেস অফার চলছে। রেগুলার মূল্য 1,590 টাকা। এখন একবারের পেমেন্টে 690 টাকায় এনরোল করতে পারেন।",
+            "এখন বিশেষ ফুল জার্নি অ্যাক্সেস অফার চলছে। রেগুলার মূল্য 1,590 টাকা। এখন একবারের পেমেন্টে 290 টাকায় এনরোল করতে পারেন।",
         },
       },
       {

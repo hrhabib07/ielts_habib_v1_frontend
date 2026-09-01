@@ -9,6 +9,7 @@ import { useFounderDashboardOfferCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { localizeDigits } from "@/src/lib/ui-locale";
 import { COUNTDOWN_NEXT_PRICE_BDT } from "@/src/lib/founder-dashboard-offer-copy";
+import { JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT } from "@/src/lib/journey-prices";
 import type { FounderTierLiveStat } from "@/src/lib/api/gamlish";
 import {
   fetchPersonalOffer,
@@ -18,8 +19,8 @@ import { InlineOfferCountdown } from "@/src/components/pricing/InlineOfferCountd
 import { cn } from "@/lib/utils";
 
 const EN_FACE = "font-sans tabular-nums";
-const FALLBACK_LIST = 1590;
-const FALLBACK_OFFER = 690;
+const FALLBACK_LIST = JOURNEY_LIST_PRICE_BDT;
+const FALLBACK_OFFER = JOURNEY_OFFER_PRICE_BDT;
 
 export function FounderVipClaimCard({
   className,
