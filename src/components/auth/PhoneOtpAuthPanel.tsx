@@ -53,6 +53,18 @@ function extractApiError(err: unknown): string | null {
   );
 }
 
+function friendlyVerifyError(message: string, locale: Locale): string {
+  if (
+    /already in use/i.test(message) ||
+    /already has a Gamlish account/i.test(message)
+  ) {
+    return locale === "bn"
+      ? "এই নম্বরে আগেই অ্যাকাউন্ট আছে। আবার ভেরিফাই করুন, সাইন ইন হয়ে যাবে।"
+      : "This number already has an account. Verify again to sign in.";
+  }
+  return message;
+}
+
 function isPlaceholderDisplayName(name: string | null | undefined): boolean {
   if (!name?.trim()) return true;
   return /^Gamlish[_-]?\d+$/i.test(name.trim());
@@ -280,7 +292,10 @@ export function PhoneOtpAuthPanel({
 
       finishNavigate(href);
     } catch (err) {
-      const errMsg = extractApiError(err) ?? "Invalid or expired OTP.";
+      const errMsg = friendlyVerifyError(
+        extractApiError(err) ?? "Invalid or expired OTP.",
+        locale,
+      );
       track("phone_otp_verified_error", { error: errMsg });
       setError(errMsg);
     } finally {
