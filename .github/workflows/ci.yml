@@ -16,10 +16,10 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: npm
-      - run: npm ci
+      - run: npm ci --include=dev
       - name: Production build
         run: npm run build
         env:
           NEXT_PUBLIC_API_BASE_URL: https://ieltshabibv1backend-production.up.railway.app/api
-          NEXT_PUBLIC_APP_URL: https://gamlish.com
+          NEXT_PUBLIC_APP_URL: https://www.gamlish.com
           JWT_SECRET: ci-build-placeholder-not-for-production

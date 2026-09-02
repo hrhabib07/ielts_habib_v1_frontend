@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 
 const PRODUCTION_API =
   "https://ieltshabibv1backend-production.up.railway.app/api";
-const PRODUCTION_APP_URL = "https://gamlish.com";
+const PRODUCTION_APP_URL = "https://www.gamlish.com";
 
 /** This package folder. Parent `ielts_habib_v1` also has a lockfile (backend). */
 const frontendRoot = path.dirname(fileURLToPath(import.meta.url));
