@@ -10,6 +10,7 @@ import { Mail, ArrowRight, ArrowLeft } from "lucide-react";
 import { useAuthRecoveryCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
+import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 
 export function ForgotPasswordForm() {
   const copy = useAuthRecoveryCopy();
@@ -79,11 +80,7 @@ export function ForgotPasswordForm() {
                   />
                 </div>
               </div>
-              {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
+              {error ? <AuthErrorAlert message={error} /> : null}
               <Button type="submit" disabled={loading} className="w-full" size="lg">
                 {loading ? copy.sending : copy.sendCode}
               </Button>

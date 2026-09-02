@@ -11,6 +11,7 @@ import { Shield, ArrowRight, Mail, Lock, CheckCircle2 } from "lucide-react";
 import { useAuthRecoveryCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
+import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 
 interface VerifyOtpFormProps {
   email: string;
@@ -155,11 +156,7 @@ export function VerifyOtpForm({ email }: VerifyOtpFormProps) {
               )}
             </div>
 
-            {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
+            {error ? <AuthErrorAlert message={error} /> : null}
 
             <Button type="submit" disabled={!canSubmit} className="w-full" size="lg">
               {loading ? (

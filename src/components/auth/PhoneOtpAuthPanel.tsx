@@ -16,6 +16,7 @@ import { getStudentPostAuthHref } from "@/src/lib/auth-redirects";
 import { cn } from "@/lib/utils";
 import { trackFunnelEvent } from "@/src/lib/api/analytics";
 import { DemoOtpWaitTheater } from "@/src/components/demo/DemoOtpWaitTheater";
+import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 
 type Locale = "en" | "bn";
 type Step = "phone" | "otp" | "setup";
@@ -395,14 +396,7 @@ export function PhoneOtpAuthPanel({
             </div>
           </div>
 
-          {error ? (
-            <div
-              className="rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2.5 text-sm text-destructive"
-              role="alert"
-            >
-              {error}
-            </div>
-          ) : null}
+          {error ? <AuthErrorAlert message={error} /> : null}
 
           <Button
             type="submit"
@@ -471,14 +465,7 @@ export function PhoneOtpAuthPanel({
             />
           </div>
 
-          {error ? (
-            <div
-              className="rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2.5 text-sm text-destructive"
-              role="alert"
-            >
-              {error}
-            </div>
-          ) : null}
+          {error ? <AuthErrorAlert message={error} /> : null}
 
           <Button
             type="submit"
@@ -598,14 +585,7 @@ export function PhoneOtpAuthPanel({
             </>
           ) : null}
 
-          {error ? (
-            <div
-              className="rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2.5 text-sm text-destructive"
-              role="alert"
-            >
-              {error}
-            </div>
-          ) : null}
+          {error ? <AuthErrorAlert message={error} /> : null}
 
           <Button
             type="submit"

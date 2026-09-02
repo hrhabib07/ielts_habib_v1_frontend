@@ -11,6 +11,7 @@ import { KeyRound, ArrowLeft } from "lucide-react";
 import { useAuthRecoveryCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
+import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 
 const RESET_TOKEN_KEY = "gamlish_password_reset_token";
 
@@ -83,11 +84,7 @@ function VerifyResetOtpInner() {
                 />
               </div>
             </div>
-            {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
+            {error ? <AuthErrorAlert message={error} /> : null}
             <Button type="submit" disabled={loading} className="w-full" size="lg">
               {loading ? copy.checking : copy.continue}
             </Button>

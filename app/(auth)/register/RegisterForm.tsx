@@ -24,6 +24,7 @@ import {
   ContinueWithGoogleButton,
 } from "@/src/components/auth/ContinueWithGoogleButton";
 import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
+import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
@@ -220,14 +221,7 @@ export function RegisterForm() {
                     </div>
                   </div>
 
-                  {error ? (
-                    <div
-                      className="rounded-xl border border-destructive/25 bg-destructive/10 px-3 py-2.5 text-sm text-destructive"
-                      role="alert"
-                    >
-                      {error}
-                    </div>
-                  ) : null}
+                  {error ? <AuthErrorAlert message={error} /> : null}
 
                   <Button
                     type="submit"

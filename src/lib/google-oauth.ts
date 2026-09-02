@@ -1,7 +1,7 @@
 /**
  * Builds the backend URL that starts the Google OAuth redirect flow.
  * On gamlish.com always start at api.gamlish.com so the browser, Google
- * consent screen, and GOOGLE_REDIRECT_URI share one API host.
+ * consent screen, and GOOGLE_REDIRECT_URI share the branded API host.
  */
 const PRODUCTION_GOOGLE_API_BASE = "https://api.gamlish.com/api";
 
