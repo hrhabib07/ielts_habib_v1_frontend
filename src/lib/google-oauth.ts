@@ -1,27 +1,23 @@
 /**
- * Builds the backend URL that starts the Google OAuth redirect flow.
- * On gamlish.com always start at api.gamlish.com so the browser, Google
- * consent screen, and GOOGLE_REDIRECT_URI share the branded API host.
+ * Starts Google OAuth on the same site origin.
+ * Google returns to /api/backend/auth/google/callback on www.gamlish.com
+ * (Vercel rewrite → API). That keeps the branded app host, not Railway.
  */
-const PRODUCTION_GOOGLE_API_BASE = "https://api.gamlish.com/api";
-
-function isGamlishHost(host: string): boolean {
-  return host === "gamlish.com" || host === "www.gamlish.com";
-}
-
 export function getGoogleOAuthStartUrl(options?: {
   demoSessionId?: string | null;
   returnTo?: string | null;
 }): string {
-  const fromEnv = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/+$/, "");
   const onGamlish =
-    typeof window !== "undefined" && isGamlishHost(window.location.hostname);
-  const apiBase =
-    (onGamlish ? PRODUCTION_GOOGLE_API_BASE : null) ||
-    fromEnv ||
-    (typeof window !== "undefined"
-      ? `${window.location.origin}/api/backend`
-      : "http://localhost:5000/api");
+    typeof window !== "undefined" &&
+    (window.location.hostname === "gamlish.com" ||
+      window.location.hostname === "www.gamlish.com");
+
+  const apiBase = onGamlish
+    ? "https://www.gamlish.com/api/backend"
+    : process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/+$/, "") ||
+      (typeof window !== "undefined"
+        ? `${window.location.origin}/api/backend`
+        : "http://localhost:5000/api");
 
   const params = new URLSearchParams();
   if (options?.demoSessionId) {
