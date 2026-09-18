@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { submitSubscriptionRequest } from "@/src/lib/api/subscription";
 import { formatBdt, type PublicPricing } from "@/src/lib/api/pricing";
-import { PersonalOfferCountdown } from "@/src/components/pricing/PersonalOfferCountdown";
+import { MonthlyOfferStory } from "@/src/components/pricing/MonthlyOfferStory";
 import { useCheckoutCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { getAccessToken } from "@/src/lib/auth";
@@ -366,7 +366,7 @@ export function BkashCheckoutForm({
             {copy.urgencyBody}
           </p>
 
-          <PersonalOfferCountdown size="lg" className="mt-3 w-full" />
+          <MonthlyOfferStory pricing={pricing} size="lg" className="mt-3 w-full" />
 
           <div className="mt-3.5 rounded-2xl border border-amber-500/30 bg-background/85 px-3.5 py-3">
             <p className="text-center text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">

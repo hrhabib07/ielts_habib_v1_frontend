@@ -8,7 +8,6 @@ import {
 } from "@/src/components/home/guest/GuestLandingLocale";
 import { GuestLandingHero } from "@/src/components/home/guest/GuestLandingHero";
 import { GuestGraduateStories } from "@/src/components/home/guest/GuestGraduateStories";
-import { GuestLearnerStoriesStrip } from "@/src/components/home/guest/GuestLearnerStoriesStrip";
 import { GuestLeaderboardTeaser } from "@/src/components/home/guest/GuestLeaderboardTeaser";
 import { GuestJoinOfferSection } from "@/src/components/home/guest/GuestJoinOfferSection";
 import { GuestProblemHook } from "@/src/components/home/guest/GuestProblemHook";
@@ -68,7 +67,6 @@ function GuestLandingSurface() {
       <div className="relative">
         <GuestLandingHero />
         <GuestGraduateStories />
-        <GuestLearnerStoriesStrip />
         <GuestLeaderboardTeaser />
         <GuestJoinOfferSection />
         <GuestProblemHook />

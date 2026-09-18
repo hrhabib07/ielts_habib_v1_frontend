@@ -33,7 +33,7 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     intro:
       "পেমেন্ট ভেরিফাই হলে অ্যাক্টিভ হওয়ার পর 45 দিনের পূর্ণ English Foundations অ্যাক্সেস পাবেন।",
     scarcity: (regularBdt, offerBdt) =>
-      `রেগুলার মূল্য ${regularBdt.toLocaleString("en-US")} টাকা। এখন বিশেষ অফারে ${offerBdt.toLocaleString("en-US")} টাকা।`,
+      `রেগুলার মূল্য ${regularBdt.toLocaleString("en-US")} টাকা। এখন ${offerBdt.toLocaleString("en-US")} টাকা। বাঁচবে ${Math.max(0, regularBdt - offerBdt).toLocaleString("en-US")} টাকা।`,
     accessNote: "পেমেন্ট ভেরিফাই হলে অ্যাক্সেস চালু হবে।",
     accessStartsLabel: (dateLabel) => `শুরু: ${dateLabel}`,
     durationLabel: (days) => `অ্যাক্টিভ হওয়ার পর ${days} দিনের অ্যাক্সেস`,
@@ -50,7 +50,7 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     featuresMore: "আরও সুবিধা দেখুন",
     featuresLess: "কম দেখুন",
     stickyPriceHint: "bKash দিয়ে পেমেন্ট",
-    limitedOffer: "অফারটি সীমিত সময়ের জন্যে",
+    limitedOffer: "এই মাসের বিশেষ অফার",
   },
   en: {
     eyebrow: "Full Journey Access · special offer",
@@ -58,7 +58,7 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     intro:
       "After payment verification you get 45 days of full English Foundations access from activation.",
     scarcity: (regularBdt, offerBdt) =>
-      `Regular price ${regularBdt.toLocaleString("en-US")} BDT. Special offer: ${offerBdt.toLocaleString("en-US")} BDT.`,
+      `Regular price ${regularBdt.toLocaleString("en-US")} BDT. Now ${offerBdt.toLocaleString("en-US")} BDT. You save ${Math.max(0, regularBdt - offerBdt).toLocaleString("en-US")} BDT.`,
     accessNote: "Access starts when payment is verified.",
     accessStartsLabel: (dateLabel) => `Starts: ${dateLabel}`,
     durationLabel: (days) => `${days} days of access from activation`,
@@ -75,6 +75,6 @@ export const FOUNDER_LAUNCH_COPY: Record<UiLocale, FounderLaunchCopy> = {
     featuresMore: "Show more benefits",
     featuresLess: "Show less",
     stickyPriceHint: "Pay with bKash",
-    limitedOffer: "Limited-time offer",
+    limitedOffer: "This month's special offer",
   },
 } as const;

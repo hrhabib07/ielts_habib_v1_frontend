@@ -12,9 +12,7 @@ import {
   LANDING_EYEBROW_CLASS,
 } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
-import { SHOW_GUEST_DEMO_SOCIAL_PROOF } from "@/src/lib/platform-config";
-import { GuestDemoCounter } from "@/src/components/home/guest/GuestDemoCounter";
-import { EarlyAdopterCountdown } from "@/src/components/founding-member/EarlyAdopterCountdown";
+import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
 
 export function GuestLandingHero() {
   const reduceMotion = useReducedMotion();
@@ -90,12 +88,6 @@ export function GuestLandingHero() {
             </Button>
             <p className="text-sm text-foreground/75">
               {copy.ctaPrimarySub}
-              {SHOW_GUEST_DEMO_SOCIAL_PROOF ? (
-                <>
-                  <span className="mx-1.5 text-border">·</span>
-                  <GuestDemoCounter className="inline text-sm text-foreground/75" />
-                </>
-              ) : null}
             </p>
 
             <Button
@@ -111,7 +103,7 @@ export function GuestLandingHero() {
             </p>
 
             <div className="w-full max-w-sm lg:max-w-md">
-              <EarlyAdopterCountdown showLink className="mt-1" />
+              <MonthlyOfferLive size="sm" className="mt-1" />
             </div>
           </motion.div>
         </div>

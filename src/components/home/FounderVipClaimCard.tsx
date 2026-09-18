@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Sparkles } from "lucide-react";
@@ -8,14 +7,10 @@ import { Button } from "@/components/ui/button";
 import { useFounderDashboardOfferCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { localizeDigits } from "@/src/lib/ui-locale";
-import { COUNTDOWN_NEXT_PRICE_BDT } from "@/src/lib/founder-dashboard-offer-copy";
 import { JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT } from "@/src/lib/journey-prices";
 import type { FounderTierLiveStat } from "@/src/lib/api/gamlish";
-import {
-  fetchPersonalOffer,
-  type PersonalOfferView,
-} from "@/src/lib/api/visitor-offer";
-import { InlineOfferCountdown } from "@/src/components/pricing/InlineOfferCountdown";
+import { usePublicPricing } from "@/src/hooks/usePublicPricing";
+import { MonthlyOfferStory } from "@/src/components/pricing/MonthlyOfferStory";
 import { cn } from "@/lib/utils";
 
 const EN_FACE = "font-sans tabular-nums";
@@ -35,26 +30,12 @@ export function FounderVipClaimCard({
   const copy = useFounderDashboardOfferCopy();
   const { locale } = useUiLocale();
   const reduceMotion = useReducedMotion();
-  const [offer, setOffer] = useState<PersonalOfferView | null>(null);
+  const pricing = usePublicPricing();
 
-  useEffect(() => {
-    let cancelled = false;
-    void fetchPersonalOffer()
-      .then((data) => {
-        if (!cancelled) setOffer(data);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const listPrice = offer?.listPriceBdt ?? FALLBACK_LIST;
-  const offerPrice = offer?.offerPriceBdt ?? FALLBACK_OFFER;
+  const listPrice = pricing?.regularPriceBdt ?? FALLBACK_LIST;
+  const offerPrice = pricing?.finalPriceBdt ?? FALLBACK_OFFER;
   const regularLabel = localizeDigits(listPrice, locale);
   const offerLabel = localizeDigits(offerPrice, locale);
-  const endsAt =
-    offer && !offer.isExpired ? offer.endsAt : offer?.isExpired ? offer.endsAt : null;
 
   return (
     <motion.div
@@ -76,11 +57,11 @@ export function FounderVipClaimCard({
         aria-hidden
       />
 
-      <div className="flex h-8 items-center justify-between gap-2 border-b border-amber-500/15 bg-amber-400/10 px-3">
-        <p className="min-w-0 truncate text-[11px] font-bold text-amber-900 dark:text-amber-200">
-          {copy.countdownLabel(COUNTDOWN_NEXT_PRICE_BDT)}
+      <div className="border-b border-amber-500/15 bg-amber-400/10 px-3 py-2">
+        <p className="text-[11px] font-bold text-amber-900 dark:text-amber-200">
+          {copy.countdownLabel(listPrice)}
         </p>
-        <InlineOfferCountdown endsAt={endsAt} />
+        <MonthlyOfferStory pricing={pricing} size="sm" className="mt-1" />
       </div>
 
       <div className="flex items-center gap-3 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">

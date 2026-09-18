@@ -3,23 +3,20 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, Smartphone } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
-import { FounderLaunchPricingCard } from "@/src/components/pricing/FounderLaunchPricingCard";
+import { PricingPageHero } from "@/src/components/pricing/PricingPageHero";
 import {
   hasBlockingPaymentStatus,
   PaymentApplicationStatusCard,
 } from "@/src/components/pricing/PaymentApplicationStatusCard";
-import { PricingFaqSection } from "@/src/components/pricing/PricingFaqSection";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
-import { useFounderLaunchCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { Button } from "@/components/ui/button";
 import { brandStatus } from "@/src/lib/brand-theme";
-import { formatBdt } from "@/src/lib/api/pricing";
 import { cn } from "@/lib/utils";
 
 export function PricingContent({
@@ -33,7 +30,6 @@ export function PricingContent({
   const [pricing, setPricing] = useState<PublicPricing | null>(initialPricing);
   const [pricingError, setPricingError] = useState<string | null>(null);
   const [pricingLoading, setPricingLoading] = useState(!initialPricing);
-  const copy = useFounderLaunchCopy();
   const { locale } = useUiLocale();
 
   const isLoggedIn = Boolean(initialUser);
@@ -42,7 +38,6 @@ export function PricingContent({
   const hasActiveAccess = payment.hasActiveAccess;
   const hasPurchased = payment.hasPurchased;
   const blocked = hasBlockingPaymentStatus(payment.activeSubscription, payment.latestRequest);
-  const showPayCta = !hasPurchased && !blocked;
 
   const loadPricing = useCallback(async (silent = false) => {
     if (!silent) {
@@ -82,7 +77,6 @@ export function PricingContent({
     if (checkout === "1" || checkout === "founder") {
       router.replace("/checkout");
     }
-    // Clean legacy /pricing#pay-now bookmarks to plain /pricing
     if (window.location.hash === "#pay-now") {
       router.replace("/pricing");
     }
@@ -108,7 +102,9 @@ export function PricingContent({
   if (pricingError || !pricing) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center font-bengali">
-        <p className="text-destructive">{pricingError ?? (locale === "bn" ? "মূল্য পাওয়া যায়নি" : "Pricing unavailable")}</p>
+        <p className="text-destructive">
+          {pricingError ?? (locale === "bn" ? "মূল্য পাওয়া যায়নি" : "Pricing unavailable")}
+        </p>
         <Button className="mt-4 rounded-xl" onClick={() => void loadPricing(false)}>
           {locale === "bn" ? "আবার চেষ্টা করুন" : "Try again"}
         </Button>
@@ -119,75 +115,55 @@ export function PricingContent({
   return (
     <div
       className={cn(
-        "mx-auto max-w-3xl space-y-6 px-4 py-6 md:space-y-8 md:py-10",
+        "relative isolate overflow-x-hidden",
         locale === "bn" && "font-bengali",
-        showPayCta && "pb-28",
       )}
       lang={locale}
     >
-      {isFoundingMember ? (
-        <div className="flex justify-center">
-          <FoundingMemberBadge />
-        </div>
-      ) : null}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_45%_at_50%_0%,rgba(56,189,248,0.14),transparent_60%)]"
+        aria-hidden
+      />
 
-      {isLoggedIn ? (
-        <PaymentApplicationStatusCard
-          activeSubscription={payment.activeSubscription}
-          latestRequest={payment.latestRequest}
-          onApplyAgain={() => router.push("/checkout")}
-        />
-      ) : null}
+      <div className="mx-auto max-w-xl space-y-6 px-4 py-8 sm:px-6 sm:py-12">
+        {isFoundingMember ? (
+          <div className="flex justify-center">
+            <FoundingMemberBadge />
+          </div>
+        ) : null}
 
-      {!hasPurchased && !blocked ? (
-        <FounderLaunchPricingCard
-          pricing={pricing}
-          onUpgrade={handleUpgrade}
-          disabled={blocked}
-        />
-      ) : hasActiveAccess ? (
-        <div className={cn("rounded-3xl border p-8 text-center", brandStatus.success.card)}>
-          <h2 className="text-xl font-bold text-foreground">
-            {locale === "bn" ? "আপনার প্রিমিয়াম অ্যাক্সেস সক্রিয়" : "Your premium access is active"}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {locale === "bn"
-              ? "সব ক্যাম্প ও মিশন উপভোগ করতে প্লেয়ারে ফিরে যান।"
-              : "Head back to the player to enjoy every camp and mission."}
-          </p>
-          <Button asChild className="mt-4 rounded-xl">
-            <Link href="/player">
-              {locale === "bn" ? "খেলা চালিয়ে যান" : "Continue playing"}
-            </Link>
-          </Button>
-        </div>
-      ) : null}
+        {isLoggedIn ? (
+          <PaymentApplicationStatusCard
+            activeSubscription={payment.activeSubscription}
+            latestRequest={payment.latestRequest}
+            onApplyAgain={() => router.push("/checkout")}
+          />
+        ) : null}
 
-      <PricingFaqSection />
-
-      {showPayCta ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-amber-500/30 bg-background/95 px-4 py-3 shadow-[0_-12px_40px_rgba(15,23,42,0.15)] backdrop-blur-xl pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          <div className="mx-auto flex max-w-lg items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="num truncate text-sm font-black text-foreground">
-                {formatBdt(pricing.finalPriceBdt)}
-              </p>
-              <p className="truncate text-xs font-medium text-muted-foreground">
-                {copy.stickyPriceHint}
-              </p>
-            </div>
-            <Button
-              type="button"
-              size="lg"
-              onClick={handleUpgrade}
-              className="h-12 shrink-0 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 px-5 text-base font-black text-amber-950 shadow-md shadow-amber-500/25 hover:from-amber-300 hover:to-amber-400 sm:min-w-[12rem]"
-            >
-              <Smartphone className="mr-2 h-4 w-4" aria-hidden />
-              {copy.upgradeShort}
+        {!hasPurchased && !blocked ? (
+          <PricingPageHero
+            pricing={pricing}
+            onUpgrade={handleUpgrade}
+            disabled={blocked}
+          />
+        ) : hasActiveAccess ? (
+          <div className={cn("rounded-3xl border p-8 text-center", brandStatus.success.card)}>
+            <h2 className="text-xl font-bold text-foreground">
+              {locale === "bn" ? "আপনার প্রিমিয়াম অ্যাক্সেস সক্রিয়" : "Your premium access is active"}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {locale === "bn"
+                ? "সব ক্যাম্প ও মিশন উপভোগ করতে প্লেয়ারে ফিরে যান।"
+                : "Head back to the player to enjoy every camp and mission."}
+            </p>
+            <Button asChild className="mt-4 rounded-xl">
+              <Link href="/player">
+                {locale === "bn" ? "খেলা চালিয়ে যান" : "Continue playing"}
+              </Link>
             </Button>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   );
 }

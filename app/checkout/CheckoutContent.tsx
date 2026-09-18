@@ -14,14 +14,19 @@ import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationSt
 import { useCheckoutCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { waitForClientAuthReady } from "@/src/lib/auth-session-ready";
+import type { CurrentUser } from "@/src/lib/auth-server";
 import { Button } from "@/components/ui/button";
 import { brandStatus } from "@/src/lib/brand-theme";
 import { cn } from "@/lib/utils";
 
+const PAYMENT_BOOT_WAIT_MS = 2000;
+
 export function CheckoutContent({
   initialPricing = null,
+  initialUser = null,
 }: {
   initialPricing?: PublicPricing | null;
+  initialUser?: CurrentUser | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -31,8 +36,12 @@ export function CheckoutContent({
   const [pricing, setPricing] = useState<PublicPricing | null>(initialPricing);
   const [pricingError, setPricingError] = useState<string | null>(null);
   const [pricingLoading, setPricingLoading] = useState(!initialPricing);
+  const [sessionReady, setSessionReady] = useState(Boolean(initialUser));
+  const [sessionChecking, setSessionChecking] = useState(!initialUser);
+  const [paymentWaitExpired, setPaymentWaitExpired] = useState(false);
 
-  const payment = usePaymentApplicationStatus(true);
+  const hasSession = Boolean(initialUser) || sessionReady;
+  const payment = usePaymentApplicationStatus(hasSession);
   const blocked = hasBlockingPaymentStatus(
     payment.activeSubscription,
     payment.latestRequest,
@@ -73,10 +82,33 @@ export function CheckoutContent({
     void loadPricing(false);
   }, [initialPricing, loadPricing]);
 
-  /** Warm phone-OTP session before the bKash form mounts (avoids early submit race). */
+  /** Cookie can lag behind phone OTP. Wait on this page instead of bouncing to login. */
   useEffect(() => {
-    void waitForClientAuthReady({ timeoutMs: 12_000 });
-  }, []);
+    if (initialUser) {
+      setSessionReady(true);
+      setSessionChecking(false);
+      return;
+    }
+    let cancelled = false;
+    setSessionChecking(true);
+    void waitForClientAuthReady({ timeoutMs: 1_500 }).then((token) => {
+      if (cancelled) return;
+      setSessionReady(Boolean(token));
+      setSessionChecking(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialUser]);
+
+  useEffect(() => {
+    if (!payment.loading) {
+      setPaymentWaitExpired(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setPaymentWaitExpired(true), PAYMENT_BOOT_WAIT_MS);
+    return () => window.clearTimeout(timer);
+  }, [payment.loading]);
 
   /** Pending real submission: confirmation URL for ad tracking.
    *  Test QA can force the form with ?again=1 to resubmit. */
@@ -94,10 +126,47 @@ export function CheckoutContent({
     router,
   ]);
 
-  if (pricingLoading || payment.loading) {
+  const bootLoading =
+    sessionChecking ||
+    pricingLoading ||
+    (hasSession && payment.loading && !paymentWaitExpired);
+
+  if (bootLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!hasSession) {
+    return (
+      <div
+        className={cn(
+          "mx-auto max-w-lg px-4 py-16 text-center",
+          locale === "bn" && "font-bengali",
+        )}
+      >
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-pink-700 dark:text-pink-300">
+          {copy.pageEyebrow}
+        </p>
+        <h1 className="mt-3 text-2xl font-black tracking-tight text-foreground">
+          {copy.loginGateTitle}
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          {copy.loginGateBody}
+        </p>
+        <Button asChild className="mt-6 rounded-xl">
+          <Link href={`/login?redirect=${encodeURIComponent("/checkout")}`}>
+            {copy.loginGateCta}
+          </Link>
+        </Button>
+        <Link
+          href="/pricing"
+          className="mt-4 block text-sm font-semibold text-foreground/70 underline-offset-4 hover:underline"
+        >
+          {copy.back}
+        </Link>
       </div>
     );
   }
@@ -150,8 +219,17 @@ export function CheckoutContent({
 
   if ((blocked || isPendingReview) && !(forceCheckoutForm && isTestPending)) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div
+        className={cn(
+          "mx-auto max-w-lg px-4 py-16 text-center",
+          locale === "bn" && "font-bengali",
+        )}
+      >
+        <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
+        <p className="mt-4 text-sm text-muted-foreground">{copy.sessionPreparing}</p>
+        <Button asChild variant="outline" className="mt-6 rounded-xl">
+          <Link href="/payment/confirmation">{copy.statusNext}</Link>
+        </Button>
       </div>
     );
   }

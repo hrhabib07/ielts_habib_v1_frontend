@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { Loader2 } from "lucide-react";
 import { getCurrentUser } from "@/src/lib/auth-server";
@@ -16,10 +15,6 @@ export const metadata: Metadata = {
 export default async function CheckoutPage() {
   const initialUser = await getCurrentUser();
 
-  if (!initialUser) {
-    redirect(`/login?redirect=${encodeURIComponent("/checkout")}`);
-  }
-
   let initialPricing: PublicPricing | null = null;
   try {
     initialPricing = await getPublicPricing();
@@ -35,7 +30,10 @@ export default async function CheckoutPage() {
         </div>
       }
     >
-      <CheckoutContent initialPricing={initialPricing} />
+      <CheckoutContent
+        initialPricing={initialPricing}
+        initialUser={initialUser}
+      />
     </Suspense>
   );
 }

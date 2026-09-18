@@ -33,7 +33,7 @@ export function Footer({ initialUser = null }: FooterProps) {
     return null;
   }
 
-  if (pathname === "/") {
+  if (pathname === "/" || pathname === "/test-landing") {
     return null;
   }
 
@@ -85,7 +85,7 @@ export function Footer({ initialUser = null }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="/#how-gamlish-works"
+                  href="/#how-you-learn"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {shell.howItWorks}

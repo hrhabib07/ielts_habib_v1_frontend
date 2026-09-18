@@ -33,6 +33,7 @@ import {
   LANDING_REWARD_PILL_CLASS,
 } from "@/src/components/home/guest/guest-landing-theme";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
+import { PaidLearnersProofBar } from "@/src/components/pricing/PaidLearnersProofChip";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_LOGIN_COPY } from "@/src/lib/auth-login-copy";
 import { formatAuthQueryError } from "@/src/lib/auth-oauth-errors";
@@ -189,6 +190,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
         />
 
         <LoginToolbar copy={copy} />
+        <PaidLearnersProofBar locale={locale} />
 
         <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:px-10 xl:px-14">
           <motion.div

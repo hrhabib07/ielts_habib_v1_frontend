@@ -6,7 +6,7 @@ import { Sparkles } from "lucide-react";
 import { useReadingPathState } from "@/src/hooks/useReadingPathState";
 import { ReadingPathZoneCard } from "@/src/components/reading/ReadingPathZoneCard";
 import { ReadingPathAccessBanner } from "@/src/components/reading/ReadingPathAccessBanner";
-import { EarlyAdopterCountdown } from "@/src/components/founding-member/EarlyAdopterCountdown";
+import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { readingPathPremium } from "@/src/lib/readingPathPremium";
@@ -92,7 +92,7 @@ export function ReadingLearningPath() {
               {isFoundingMember ? (
                 <FoundingMemberBadge size="md" />
               ) : (
-                <EarlyAdopterCountdown className="w-full max-w-lg" />
+                <MonthlyOfferLive className="w-full max-w-lg" size="sm" />
               )}
               <Link
                 href="/founding-members"

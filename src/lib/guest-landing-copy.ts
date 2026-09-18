@@ -2,6 +2,7 @@
   GuestHowGamlishWorksCopy,
   GuestLandingZoneMockCopy,
 } from "@/src/lib/guest-how-it-works-types";
+import { lifetimePaidProofLine } from "@/src/lib/monthly-offer-copy";
 
 export type {
   GuestHowGamlishWorksCopy,
@@ -75,7 +76,7 @@ export interface GuestLandingCopy {
   readonly stickyCta: string;
   readonly stickyPreOrder: string;
   readonly socialProofFallback: string;
-  readonly socialProofLine: (n: string) => string;
+  readonly socialProofLine: (n?: string) => string;
   readonly comparisonEyebrow: string;
   readonly comparisonTitle: string;
   readonly comparisonOldTitle: string;
@@ -154,10 +155,8 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     ctaPreOrderSub: "45-day full access · pay with bKash",
     stickyCta: "Play Free Demo",
     stickyPreOrder: "VIP access",
-    socialProofFallback:
-      "Join players already on their first mission.",
-    socialProofLine: (n) =>
-      `Join ${n}+ players already on their first mission.`,
+    socialProofFallback: lifetimePaidProofLine("en"),
+    socialProofLine: () => lifetimePaidProofLine("en"),
     comparisonEyebrow: "Gamlish is different",
     comparisonTitle: "Stop studying. Start playing.",
     comparisonOldTitle: "Old way",
@@ -278,9 +277,8 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     ctaPreOrderSub: "45 দিনের পূর্ণ অ্যাক্সেস · bKash দিয়ে পেমেন্ট",
     stickyCta: "ফ্রি ডেমো খেলুন",
     stickyPreOrder: "VIP অ্যাক্সেস",
-    socialProofFallback: "প্লেয়াররা ইতিমধ্যে প্রথম মিশনে যোগ দিয়েছেন।",
-    socialProofLine: (n) =>
-      `${n}-এর বেশি প্লেয়ার ইতিমধ্যে প্রথম মিশনে যোগ দিয়েছেন।`,
+    socialProofFallback: lifetimePaidProofLine("bn"),
+    socialProofLine: () => lifetimePaidProofLine("bn"),
     comparisonEyebrow: "Gamlish আলাদা",
     comparisonTitle: "মুখস্থ করা বাদ দিন। খেলে শিখুন।",
     comparisonOldTitle: "পুরনো উপায়",

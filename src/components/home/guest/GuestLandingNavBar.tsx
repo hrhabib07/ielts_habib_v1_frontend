@@ -10,14 +10,34 @@ import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
+import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import {
+  TEST_LANDING_COPY,
+  TEST_LANDING_PRIMARY_HREF,
+} from "@/src/lib/test-landing-copy";
+import { PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
+import type { CurrentUser } from "@/src/lib/auth-server";
+import type { UserRole } from "@/src/lib/constants";
 import { cn } from "@/lib/utils";
 
-export function GuestLandingNavBar({ className }: { className?: string }) {
+type NavUser = CurrentUser | { role: UserRole; userId: string } | null;
+
+export function GuestLandingNavBar({
+  className,
+  user = null,
+}: {
+  className?: string;
+  user?: NavUser;
+}) {
   const pathname = usePathname() ?? "";
   const [menuOpen, setMenuOpen] = useState(false);
-  const { copy } = useGuestLandingLocaleState();
+  const { copy, locale } = useGuestLandingLocaleState();
+  const shell = useSiteShellCopy();
   const isHome = pathname === "/";
+  const isConversionLanding = isHome || pathname === "/test-landing";
+  const testCopy = TEST_LANDING_COPY[locale];
+  const isLoggedIn = Boolean(user);
   /** Demo funnel: keep only brand + language so users stay on the save path. */
   const isDemoFunnel =
     pathname === "/demo" || pathname.startsWith("/demo/");
@@ -25,17 +45,20 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
   const scrollToHowItWorks = () => {
     setMenuOpen(false);
     document
-      .getElementById("how-gamlish-works")
+      .getElementById("how-you-learn")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const linkClass =
     "rounded-lg px-3 py-2.5 text-left text-base font-medium text-foreground hover:bg-muted/60";
 
+  const accountHref = isLoggedIn ? PRIMARY_STUDENT_HREF : "/login";
+  const accountLabel = isLoggedIn ? shell.play : copy.navLogin;
+
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-background/80",
+        "w-full border-b border-border/50 bg-background/95 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-background/80",
         className,
       )}
     >
@@ -58,26 +81,48 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
           <>
             <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
               <Link
-                href="/login"
+                href={accountHref}
                 className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:bg-muted/50 hover:text-foreground"
               >
-                {copy.navLogin}
+                {accountLabel}
               </Link>
-              <Link
-                href="/pricing"
-                className="rounded-lg border border-amber-500/40 bg-amber-400/10 px-3 py-2 text-sm font-bold text-amber-950 transition-colors hover:bg-amber-400/20 dark:border-amber-400/40 dark:text-amber-100"
-              >
-                {copy.navPricing}
-              </Link>
-              <Link
-                href="/demo"
-                className={cn(
-                  "rounded-lg px-3.5 py-2 text-sm font-bold text-white",
-                  LANDING_CTA_CLASS,
-                )}
-              >
-                {copy.ctaPrimary}
-              </Link>
+              {isConversionLanding ? (
+                <>
+                  <Link
+                    href="/demo"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:bg-muted/50 hover:text-foreground"
+                  >
+                    {testCopy.navDemo}
+                  </Link>
+                  <Link
+                    href={TEST_LANDING_PRIMARY_HREF}
+                    className={cn(
+                      "rounded-lg px-3.5 py-2 text-sm font-bold text-white",
+                      LANDING_CTA_CLASS,
+                    )}
+                  >
+                    {testCopy.navPrimary}
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/pricing"
+                    className="rounded-lg border border-amber-500/40 bg-amber-400/10 px-3 py-2 text-sm font-bold text-amber-950 transition-colors hover:bg-amber-400/20 dark:border-amber-400/40 dark:text-amber-100"
+                  >
+                    {copy.navPricing}
+                  </Link>
+                  <Link
+                    href="/demo"
+                    className={cn(
+                      "rounded-lg px-3.5 py-2 text-sm font-bold text-white",
+                      LANDING_CTA_CLASS,
+                    )}
+                  >
+                    {copy.ctaPrimary}
+                  </Link>
+                </>
+              )}
               <UiLanguageToggle variant="segmented" />
               <ThemeToggleButton />
             </div>
@@ -114,46 +159,70 @@ export function GuestLandingNavBar({ className }: { className?: string }) {
                     </div>
 
                     <nav className="flex flex-col gap-2" aria-label={copy.navMenu}>
-                      <Link
-                        href="/demo"
-                        onClick={() => setMenuOpen(false)}
-                        className={cn(
-                          "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
-                          LANDING_CTA_CLASS,
-                        )}
-                      >
-                        {copy.ctaPrimary}
-                      </Link>
-                      <Link
-                        href="/pricing"
-                        onClick={() => setMenuOpen(false)}
-                        className="rounded-xl border-2 border-amber-500/50 bg-amber-400/10 px-4 py-3.5 text-center text-base font-bold text-amber-950 dark:border-amber-400/45 dark:text-amber-100"
-                      >
-                        {copy.ctaPreOrder}
-                      </Link>
-                      {isHome ? (
+                      {isConversionLanding ? (
+                        <>
+                          <Link
+                            href={TEST_LANDING_PRIMARY_HREF}
+                            onClick={() => setMenuOpen(false)}
+                            className={cn(
+                              "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
+                              LANDING_CTA_CLASS,
+                            )}
+                          >
+                            {testCopy.navPrimary}
+                          </Link>
+                          <Link
+                            href="/demo"
+                            onClick={() => setMenuOpen(false)}
+                            className="rounded-xl border-2 border-border px-4 py-3.5 text-center text-base font-bold"
+                          >
+                            {testCopy.navDemo}
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            href="/demo"
+                            onClick={() => setMenuOpen(false)}
+                            className={cn(
+                              "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
+                              LANDING_CTA_CLASS,
+                            )}
+                          >
+                            {copy.ctaPrimary}
+                          </Link>
+                          <Link
+                            href="/pricing"
+                            onClick={() => setMenuOpen(false)}
+                            className="rounded-xl border-2 border-amber-500/50 bg-amber-400/10 px-4 py-3.5 text-center text-base font-bold text-amber-950 dark:border-amber-400/45 dark:text-amber-100"
+                          >
+                            {copy.ctaPreOrder}
+                          </Link>
+                        </>
+                      )}
+                      {isConversionLanding ? (
                         <button
                           type="button"
                           onClick={scrollToHowItWorks}
                           className={linkClass}
                         >
-                          {copy.ctaSecondary}
+                          {testCopy.navHow}
                         </button>
                       ) : (
                         <Link
-                          href="/#how-gamlish-works"
+                          href="/#how-you-learn"
                           onClick={() => setMenuOpen(false)}
                           className={linkClass}
                         >
-                          {copy.ctaSecondary}
+                          {testCopy.navHow}
                         </Link>
                       )}
                       <Link
-                        href="/login"
+                        href={accountHref}
                         onClick={() => setMenuOpen(false)}
                         className={linkClass}
                       >
-                        {copy.navLogin}
+                        {accountLabel}
                       </Link>
                     </nav>
                   </div>

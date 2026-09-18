@@ -24,6 +24,8 @@ const DISALLOW_SENSITIVE = [
   "/username",
   "/feedback/",
   "/squad/",
+  "/test-landing",
+  "/test-landing/",
 ] as const;
 
 const AI_CRAWLERS = [

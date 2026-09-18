@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { useGuestHomeSectionsCopy } from "@/src/components/home/guest/useGuestHomeSectionsCopy";
+import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
 import { cn } from "@/lib/utils";
 
 /**
@@ -96,6 +97,10 @@ export function GuestJoinOfferSection() {
           <p className="text-base font-bold text-foreground sm:text-lg">
             {copy.whyNow}
           </p>
+
+          <div className="mx-auto mt-4 w-full max-w-md text-left">
+            <MonthlyOfferLive size="md" showPaidChip={false} />
+          </div>
 
           <div className="mt-5 flex w-full flex-col items-center gap-3">
             <Button

@@ -12,6 +12,7 @@ import {
   praiseBand,
   type MissionOnePaywallScore,
 } from "@/src/lib/mission-one-paywall";
+import { PaidLearnersProofChip } from "@/src/components/pricing/PaidLearnersProofChip";
 import { cn } from "@/lib/utils";
 
 type Step = 0 | 1 | 2;
@@ -167,9 +168,7 @@ export function MissionOnePaywallFlow({
               transition={{ duration: 0.35, ease: EASE }}
               className="my-auto flex flex-col gap-5"
             >
-              <p className="text-center text-sm font-bold text-sky-200">
-                {COPY.socialProof}
-              </p>
+              <PaidLearnersProofChip className="mx-auto" />
               <div className="rounded-3xl border border-amber-400/30 bg-gradient-to-b from-amber-400/15 to-transparent p-5 text-center">
                 <Crown className="mx-auto h-7 w-7 text-amber-300" />
                 <div className="mt-3 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 font-sans">

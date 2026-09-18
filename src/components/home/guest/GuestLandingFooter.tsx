@@ -16,10 +16,26 @@ import { cn } from "@/lib/utils";
  * Compact closing band for the guest marketing homepage.
  * Main site Footer is hidden on `/`, so social presence lives here.
  */
-export function GuestLandingFooter() {
+export function GuestLandingFooter({
+  closing,
+}: {
+  closing?: {
+    title: string;
+    label: string;
+    href: string;
+  };
+} = {}) {
   const shell = useSiteShellCopy();
   const { locale } = useUiLocale();
   const year = new Date().getFullYear();
+  const closingTitle =
+    closing?.title ??
+    (locale === "bn"
+      ? "পূর্ণ কোর্স চান? VIP অ্যাক্সেস নিন"
+      : "Want the full course? Take VIP access");
+  const closingLabel =
+    closing?.label ?? (locale === "bn" ? "VIP হিসেবে যোগ দিন" : "Join as VIP");
+  const closingHref = closing?.href ?? "/pricing";
 
   return (
     <footer
@@ -55,16 +71,12 @@ export function GuestLandingFooter() {
         </div>
 
         <div className="mt-8 rounded-2xl border border-border/60 bg-muted/40 p-5 text-center">
-          <p className="text-base font-bold text-foreground">
-            {locale === "bn"
-              ? "পূর্ণ কোর্স চান? VIP অ্যাক্সেস নিন"
-              : "Want the full course? Take VIP access"}
-          </p>
+          <p className="text-base font-bold text-foreground">{closingTitle}</p>
           <Link
-            href="/pricing"
+            href={closingHref}
             className="mt-3 inline-flex h-12 w-full max-w-xs items-center justify-center rounded-2xl bg-foreground px-6 text-base font-bold text-background transition-opacity hover:opacity-90"
           >
-            {locale === "bn" ? "VIP হিসেবে যোগ দিন" : "Join as VIP"}
+            {closingLabel}
           </Link>
         </div>
 

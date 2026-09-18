@@ -27,6 +27,7 @@ import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
+import { PaidLearnersProofBar } from "@/src/components/pricing/PaidLearnersProofChip";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_REGISTER_COPY } from "@/src/lib/auth-register-copy";
 import { readAuthReturnPathFromSearch } from "@/src/lib/auth-redirects";
@@ -164,6 +165,7 @@ export function RegisterForm() {
 
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
         <RegisterToolbar copy={copy} />
+        <PaidLearnersProofBar locale={locale} />
 
         <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:px-10 xl:px-14">
           <motion.div

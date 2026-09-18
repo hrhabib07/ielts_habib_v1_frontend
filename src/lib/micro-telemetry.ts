@@ -41,7 +41,7 @@ export function isTelemetryPathBlacklisted(pathname: string): boolean {
 export function isTelemetryPathAllowed(pathname: string): boolean {
   if (isTelemetryPathBlacklisted(pathname)) return false;
   const p = pathname.toLowerCase();
-  if (p === "/" || p === "") return true;
+  if (p === "/" || p === "" || p === "/test-landing") return true;
   return (
     p.startsWith("/demo") ||
     p.startsWith("/dashboard") ||

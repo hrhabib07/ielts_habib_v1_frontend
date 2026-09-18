@@ -30,6 +30,16 @@ export interface PublicPricing {
     isExpired: boolean;
     remainingMs: number;
   } | null;
+  monthlyCampaign?: {
+    monthKey: string;
+    monthLabelEn: string;
+    monthLabelBn: string;
+    cap: number;
+    isBestPriceOpen: boolean;
+    showSeatMeter: boolean;
+    paidThisMonth: number | null;
+    lifetimePaidProofFloor: number;
+  } | null;
 }
 
 export interface AdminPricing extends PublicPricing {

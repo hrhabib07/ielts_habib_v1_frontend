@@ -15,8 +15,9 @@ function newPreviewVisitorId(): string {
 }
 
 /**
- * Isolated visual QA for the personal offer countdown.
- * Does not replace live landing/pricing. Safe to keep or ignore forever.
+ * Isolated visual QA for the saved personal offer countdown.
+ * Live landing, pricing, and checkout do not use this timer.
+ * Safe to keep forever so we can put the same UI back later.
  */
 export default function CountdownTestPage() {
   const [nonce, setNonce] = useState(0);
@@ -48,9 +49,9 @@ export default function CountdownTestPage() {
             Personal countdown preview
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Live product uses the exact same <code className="rounded bg-muted px-1">PersonalOfferCountdown</code>{" "}
-            component (290 while active · 299 after). If your phone/laptop already burnt the visitor/IP window,
-            home will show the expired state · use the forced demos below to see the active UI again.
+            Live product no longer shows this timer. This page keeps the exact{" "}
+            <code className="rounded bg-muted px-1">PersonalOfferCountdown</code> look
+            so we can reuse it later.
           </p>
           <Button asChild variant="outline" size="sm">
             <Link href="/">Back to home</Link>

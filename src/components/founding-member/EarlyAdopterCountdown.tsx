@@ -5,7 +5,8 @@ import { PersonalOfferCountdown } from "@/src/components/pricing/PersonalOfferCo
 import { cn } from "@/lib/utils";
 
 /**
- * Landing / home urgency strip · personal visitor countdown (290 → 299 forever).
+ * Saved countdown strip. Live pages do not mount this.
+ * Preview: /demo/countdown-test
  */
 export function EarlyAdopterCountdown(props: {
   className?: string;

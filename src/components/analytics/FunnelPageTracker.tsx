@@ -5,7 +5,14 @@ import { usePathname } from "next/navigation";
 import { trackFunnelEvent } from "@/src/lib/api/analytics";
 import { captureAndReadUtmAttribution } from "@/src/lib/funnel-attribution";
 
-const TRACKED_PATHS = new Set(["/", "/demo", "/pricing", "/register", "/login"]);
+const TRACKED_PATHS = new Set([
+  "/",
+  "/test-landing",
+  "/demo",
+  "/pricing",
+  "/register",
+  "/login",
+]);
 
 /**
  * Records guest funnel page views for key conversion paths.
@@ -27,9 +34,11 @@ export function FunnelPageTracker() {
       screen:
         pathname === "/"
           ? "landing_home"
-          : pathname === "/demo"
-            ? "demo_enter"
-            : pathname.replace(/^\//, "") || "home",
+          : pathname === "/test-landing"
+            ? "landing_test"
+            : pathname === "/demo"
+              ? "demo_enter"
+              : pathname.replace(/^\//, "") || "home",
     });
   }, [pathname]);
 

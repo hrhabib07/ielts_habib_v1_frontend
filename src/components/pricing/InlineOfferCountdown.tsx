@@ -25,8 +25,8 @@ type Props = {
 };
 
 /**
- * One-line HH:MM:SS with pulsing seconds.
- * Fits existing card headers without adding height.
+ * Saved one-line HH:MM:SS timer. Live pages do not mount this.
+ * Preview: /demo/countdown-test
  */
 export function InlineOfferCountdown({ endsAt, className }: Props) {
   const { locale } = useUiLocale();

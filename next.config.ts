@@ -63,7 +63,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/how-it-works",
-        destination: "/#how-gamlish-works",
+        destination: "/#how-you-learn",
+        permanent: true,
+      },
+      {
+        source: "/test-landing",
+        destination: "/",
         permanent: true,
       },
       {

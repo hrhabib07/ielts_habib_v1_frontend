@@ -115,6 +115,8 @@ type Props = {
 
 /**
  * Personal offer countdown UI.
+ * Saved for QA and future reuse. Live pages do not mount this.
+ * Preview: /demo/countdown-test
  * Never teases the post-expiry price during the active window.
  */
 export function PersonalOfferCountdown({

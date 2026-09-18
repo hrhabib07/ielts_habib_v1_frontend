@@ -147,7 +147,7 @@ export function SiteNavBar(props: {
     );
 
   if (shouldUseGuestLandingNav(pathname, Boolean(user))) {
-    return <GuestLandingNavBar className={className} />;
+    return <GuestLandingNavBar className={className} user={user} />;
   }
 
   const isStudentHome = pathname === "/" && isStudent;

@@ -43,6 +43,9 @@ export interface CheckoutCopy {
   readonly pageEyebrow: string;
   readonly pageTitle: string;
   readonly pageSub: string;
+  readonly loginGateTitle: string;
+  readonly loginGateBody: string;
+  readonly loginGateCta: string;
 }
 
 export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
@@ -52,7 +55,7 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     urgencyEyebrow: "শেষ ধাপ",
     urgencyTitle: "পেমেন্ট সম্পন্ন না হলে অ্যাক্সেস চালু হবে না!",
     urgencyBody:
-      "মূল্য লক করতে bKash এ Send Money করুন। পেমেন্ট ভেরিফাই হলে অ্যাক্টিভ হওয়ার পর 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে।",
+      "মূল্য লক করতে bKash এ Send Money করুন। পেমেন্ট ভেরিফাই হলে অ্যাক্টিভ হওয়ার পর 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে। রেগুলার 1,590 টাকার বদলে এখন বিশেষ অফার।",
     amountLabel: "পাঠাতে হবে",
     regularPriceLabel: "রেগুলার মূল্য",
     founderPriceLabel: "অফার মূল্য",
@@ -93,6 +96,10 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     pageEyebrow: "Checkout",
     pageTitle: "ফুল জার্নি অ্যাক্সেস লক করুন",
     pageSub: "bKash Send Money করুন, তারপর TrxID সাবমিট করুন",
+    loginGateTitle: "পেমেন্ট সম্পন্ন করতে লগইন করুন",
+    loginGateBody:
+      "চেকআউট খোলা আছে। লগইন করুন, তারপর bKash TrxID সাবমিট করুন।",
+    loginGateCta: "লগইন করুন",
   },
   en: {
     statusLock: "Offer price can still be locked",
@@ -100,7 +107,7 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     urgencyEyebrow: "Final step",
     urgencyTitle: "Access does not start until payment is submitted!",
     urgencyBody:
-      "Send Money on bKash now to lock this price. After verification, you get 45 days of Full Journey Access from activation.",
+      "Send Money on bKash now to lock this price. After verification, you get 45 days of Full Journey Access from activation. Regular 1,590 BDT. Special offer if you join now.",
     amountLabel: "Amount to send",
     regularPriceLabel: "Regular price",
     founderPriceLabel: "Offer price",
@@ -141,5 +148,8 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     pageEyebrow: "Checkout",
     pageTitle: "Lock Full Journey Access",
     pageSub: "Send Money on bKash, then submit your TrxID",
+    loginGateTitle: "Log in to finish payment",
+    loginGateBody: "Checkout is ready. Log in, then submit your bKash TrxID.",
+    loginGateCta: "Log in",
   },
 };

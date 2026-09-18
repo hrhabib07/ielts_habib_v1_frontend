@@ -22,7 +22,7 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
 > = {
   bn: {
     alert: () =>
-      "ফুল জার্নি অ্যাক্সেস 290 টাকা। রেগুলার 1,590 টাকা।",
+      "ফুল জার্নি অ্যাক্সেস। রেগুলার 1,590 টাকার বদলে এখন বিশেষ অফার।",
     headline: "এখনই ফুল জার্নি অ্যাক্সেস নিন",
     priceHint: "45 দিনের অ্যাক্সেস · সাধারণত 21 মিশন শেষ করতে 21 দিন সময় লাগে",
     seatsLeft: () => "বিশেষ অফার চলছে",
@@ -31,13 +31,13 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
     trust: "bKash · ম্যানুয়াল ভেরিফিকেশন",
     saveLabel: "বাঁচবে",
     tierOpen: () => "বিশেষ অফার",
-    countdownLabel: () => "অফারটি সীমিত সময়ের জন্যে",
-    countdownCritical: () => "অফারটি সীমিত সময়ের জন্যে",
-    countdownExpired: "অফার আপডেট হতে পারে",
+    countdownLabel: () => "এই মাসের বিশেষ অফার",
+    countdownCritical: () => "এই মাসের বিশেষ অফার",
+    countdownExpired: "বিশেষ অফার এখনো চলছে",
   },
   en: {
     alert: () =>
-      "Full Journey Access for 290 BDT. Regular 1,590 BDT.",
+      "Full Journey Access. Special offer instead of 1,590 BDT.",
     headline: "Get Full Journey Access now",
     priceHint: "45-day access · usually takes 21 days to finish 21 missions",
     seatsLeft: () => "Special offer is live",
@@ -46,9 +46,9 @@ export const FOUNDER_DASHBOARD_OFFER_COPY: Record<
     trust: "bKash · manual verification",
     saveLabel: "Save",
     tierOpen: () => "Special offer",
-    countdownLabel: () => "Limited-time offer",
-    countdownCritical: () => "Limited-time offer",
-    countdownExpired: "Offer may update later",
+    countdownLabel: () => "This month's special offer",
+    countdownCritical: () => "This month's special offer",
+    countdownExpired: "A special offer is still on",
   },
 };
 

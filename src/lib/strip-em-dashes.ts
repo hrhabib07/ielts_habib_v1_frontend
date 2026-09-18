@@ -1,23 +1,36 @@
 /**
- * Strip em dashes (U+2014) and en dashes (U+2013) from user-facing text.
+ * Sanitize user-facing text: no em/en dashes, no Bengali digits.
  * Gamlish never shows these characters on the website.
  */
 
 const EM = "\u2014";
 const EN = "\u2013";
+const BN_DIGIT_CHARS = "\u09E6\u09E7\u09E8\u09E9\u09EA\u09EB\u09EC\u09ED\u09EE\u09EF";
+const LATIN_DIGIT_CHARS = "0123456789";
+
+function toLatinDigits(value: string): string {
+  let out = "";
+  for (const ch of value) {
+    const idx = BN_DIGIT_CHARS.indexOf(ch);
+    out += idx >= 0 ? LATIN_DIGIT_CHARS[idx]! : ch;
+  }
+  return out;
+}
 
 export function stripEmDashes(value: string): string {
-  return value
-    .split(EM)
-    .join(" · ")
-    .split(EN)
-    .join("-")
-    .replace(/\s+·\s+/g, " · ")
-    .replace(/ ·  · /g, " · ")
-    .replace(/ {2,}/g, " ")
-    .replace(/^ · /, "")
-    .replace(/ · $/, "")
-    .trim();
+  return toLatinDigits(
+    value
+      .split(EM)
+      .join(" · ")
+      .split(EN)
+      .join("-")
+      .replace(/\s+·\s+/g, " · ")
+      .replace(/ ·  · /g, " · ")
+      .replace(/ {2,}/g, " ")
+      .replace(/^ · /, "")
+      .replace(/ · $/, "")
+      .trim(),
+  );
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

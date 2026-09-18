@@ -25,13 +25,13 @@ import {
   type ResolvedJourneyProgress,
 } from "@/src/lib/journeyVisualProgress";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
-import { EarlyAdopterCountdown } from "@/src/components/founding-member/EarlyAdopterCountdown";
+import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 
-const GuestLandingPage = dynamic(
+const TestLandingPage = dynamic(
   () =>
-    import("@/src/components/home/guest/GuestLandingPage").then(
-      (m) => m.GuestLandingPage,
+    import("@/src/components/home/test-landing/TestLandingPage").then(
+      (m) => m.TestLandingPage,
     ),
   {
     loading: () => (
@@ -207,7 +207,7 @@ export function HomeHero({
   if (!showAsAuthenticatedUi) {
     return (
       <>
-        <GuestLandingPage />
+        <TestLandingPage />
         {children}
       </>
     );
@@ -323,7 +323,7 @@ function BandHero({
           {isFoundingMember ? (
             <FoundingMemberBadge size="md" />
           ) : (
-            <EarlyAdopterCountdown className="max-w-md" />
+            <MonthlyOfferLive className="max-w-md" size="sm" />
           )}
         </div>
 
