@@ -257,6 +257,14 @@ export const WeeklyChallengePanel = forwardRef<WeeklyArenaHandle, Props>(
       setLoading(true);
       try {
         const data = await getWeeklyChallengeState();
+        if (data.frozen) {
+          stateRef.current = null;
+          setState(null);
+          setRemainingMs(0);
+          setFailed(false);
+          onMeChange?.(null);
+          return;
+        }
         stateRef.current = data;
         setState(data);
         setRemainingMs(data.msUntilLock);

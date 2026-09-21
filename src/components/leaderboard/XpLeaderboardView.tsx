@@ -34,6 +34,7 @@ import {
   type WeeklyArenaHandle,
   type WeeklyMeDock,
 } from "@/src/components/leaderboard/WeeklyChallengePanel";
+import { WEEKLY_LEADERBOARD_ENABLED } from "@/src/lib/leaderboard-flags";
 
 type BoardTab = "weekly" | "alltime";
 
@@ -440,7 +441,9 @@ function BoardTabs({
 export function XpLeaderboardView() {
   const copy = useLeaderboardUiCopy();
   const reduce = useReducedMotion();
-  const [tab, setTab] = useState<BoardTab>("weekly");
+  const [tab, setTab] = useState<BoardTab>(
+    WEEKLY_LEADERBOARD_ENABLED ? "weekly" : "alltime",
+  );
   const [data, setData] = useState<XpLeaderboardResult | null>(null);
   const [weeklyMe, setWeeklyMe] = useState<WeeklyMeDock | null>(null);
   const [loading, setLoading] = useState(true);
@@ -600,6 +603,11 @@ export function XpLeaderboardView() {
             <h1 className="truncate text-2xl font-black tracking-tight text-foreground sm:text-3xl">
               {copy.title}
             </h1>
+            {!WEEKLY_LEADERBOARD_ENABLED ? (
+              <p className="mt-0.5 text-xs font-semibold text-muted-foreground">
+                {copy.tabAllTime}
+              </p>
+            ) : null}
           </div>
           {tab === "alltime" && data ? (
             <p className="flex shrink-0 items-center gap-1.5 pb-0.5 text-xs font-bold tabular-nums text-sky-800 dark:text-sky-300 sm:text-sm">
@@ -612,14 +620,16 @@ export function XpLeaderboardView() {
           ) : null}
         </header>
 
-        <BoardTabs
-          tab={tab}
-          onChange={setTab}
-          weeklyLabel={copy.tabWeekly}
-          allTimeLabel={copy.tabAllTime}
-        />
+        {WEEKLY_LEADERBOARD_ENABLED ? (
+          <BoardTabs
+            tab={tab}
+            onChange={setTab}
+            weeklyLabel={copy.tabWeekly}
+            allTimeLabel={copy.tabAllTime}
+          />
+        ) : null}
 
-        {tab === "weekly" ? (
+        {WEEKLY_LEADERBOARD_ENABLED && tab === "weekly" ? (
           <WeeklyChallengePanel
             ref={weeklyRef}
             youLabel={copy.you}

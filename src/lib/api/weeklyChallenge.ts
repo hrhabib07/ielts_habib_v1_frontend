@@ -10,6 +10,7 @@ export interface WeeklyStanding {
 }
 
 export interface WeeklyChallengeState {
+  frozen?: boolean;
   prizeBdt: number;
   periodKey: string;
   nextLockAt: string;

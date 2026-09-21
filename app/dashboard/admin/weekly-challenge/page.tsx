@@ -88,6 +88,10 @@ export default function AdminWeeklyChallengePage() {
             Locked Top 3 each week with phone numbers. Recharge manually, then
             mark done.
           </p>
+          <p className="mt-2 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm font-medium text-amber-900 dark:text-amber-200">
+            Player weekly board is frozen. Players only see lifetime XP ranks.
+            New weekly XP and Friday locks are paused.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => void load()}>

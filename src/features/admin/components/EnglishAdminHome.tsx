@@ -214,7 +214,7 @@ export function EnglishAdminHome() {
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-foreground">Weekly 20 TK</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  Locked Top 3 phones · mark manual recharge done
+                  Frozen for players · past Top 3 recharge tracking
                 </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
