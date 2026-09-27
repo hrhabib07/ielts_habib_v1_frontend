@@ -1,21 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
-import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { getPublicLearnerFeedback } from "@/src/lib/api/learnerFeedback";
 import type { LearnerFeedbackPublicItem } from "@/src/lib/learner-feedback";
 import { CAMPUS_MISSIONS_TOTAL } from "@/src/components/feedback/LearnerFeedbackCard";
-import {
-  TEST_LANDING_LIST_PRICE,
-  TEST_LANDING_OFF_PERCENT,
-  TEST_LANDING_OFFER_PRICE,
-  TEST_LANDING_PRIMARY_HREF,
-} from "@/src/lib/test-landing-copy";
 import {
   selectPlayingNowStories,
   TEST_LANDING_PLAYING_NOW_FALLBACK,
@@ -380,39 +372,6 @@ export function TestLandingPlayingNow() {
             ) : null}
           </div>
         ) : null}
-
-        <div className="mx-auto mt-6 max-w-md overflow-hidden rounded-[1.35rem] border border-sky-400/25 bg-gradient-to-b from-sky-500/20 to-white/[0.04] p-4 text-center sm:mt-8 sm:p-5 lg:hidden">
-          <p className="text-pretty text-base font-semibold leading-snug text-sky-50">
-            {copy.playingNowHook}
-          </p>
-          <p className="mt-3 flex flex-wrap items-center justify-center gap-2">
-            <span className="relative inline-flex items-center">
-              <span className="num text-base font-semibold tabular-nums text-white/40">
-                {TEST_LANDING_LIST_PRICE}
-              </span>
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-x-[-6%] top-[52%] h-[2px] -translate-y-1/2 -rotate-[14deg] rounded-full bg-rose-400"
-              />
-            </span>
-            <span className="num text-3xl font-black tabular-nums leading-none text-white">
-              {TEST_LANDING_OFFER_PRICE}
-            </span>
-            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide text-white">
-              {TEST_LANDING_OFF_PERCENT}% OFF
-            </span>
-          </p>
-          <Button
-            size="lg"
-            className={cn(
-              "mt-4 h-auto min-h-12 w-full rounded-2xl px-5 py-3 text-base font-bold",
-              LANDING_CTA_CLASS,
-            )}
-            asChild
-          >
-            <Link href={TEST_LANDING_PRIMARY_HREF}>{copy.stickyPrimary}</Link>
-          </Button>
-        </div>
       </div>
     </section>
   );
