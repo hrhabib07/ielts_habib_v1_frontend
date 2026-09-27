@@ -6,16 +6,29 @@ import {
   useTheme as useNextTheme,
 } from "next-themes";
 
+const THEME_STORAGE_KEY = "ielts-habib-theme";
+
 /**
- * Theme: class-based dark mode (Tailwind darkMode: "class").
+ * Theme is locked to light. System preference and a saved dark choice are ignored.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, "light");
+    } catch {
+      /* ignore */
+    }
+    document.documentElement.classList.remove("dark");
+    document.documentElement.style.colorScheme = "light";
+  }, []);
+
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
-      storageKey="ielts-habib-theme"
+      defaultTheme="light"
+      forcedTheme="light"
+      enableSystem={false}
+      storageKey={THEME_STORAGE_KEY}
       disableTransitionOnChange={false}
     >
       {children}
@@ -25,34 +38,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 type Theme = "light" | "dark";
 
-function readDomTheme(): Theme {
-  if (typeof document === "undefined") return "light";
-  return document.documentElement.classList.contains("dark") ? "dark" : "light";
-}
-
-/** useTheme: theme + toggleTheme for nav controls. */
+/** useTheme: locked to light. toggleTheme cannot switch to dark. */
 export function useTheme(): {
   theme: Theme;
   toggleTheme: () => void;
   mounted: boolean;
 } {
-  const { setTheme, resolvedTheme } = useNextTheme();
+  const { setTheme } = useNextTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  const theme: Theme = !mounted
-    ? "light"
-    : resolvedTheme === "dark" || resolvedTheme === "light"
-      ? resolvedTheme
-      : readDomTheme();
-
   const toggleTheme = () => {
-    const currentlyDark =
-      resolvedTheme === "dark" ||
-      (resolvedTheme !== "light" && readDomTheme() === "dark");
-    setTheme(currentlyDark ? "light" : "dark");
+    setTheme("light");
   };
 
-  return { theme, toggleTheme, mounted };
+  return { theme: "light", toggleTheme, mounted };
 }

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight, Star, Trophy, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { NameInitialAvatar } from "@/src/components/shared/NameInitialAvatar";
 
 /** Campus Map mission total · used for fraction progress on player cards. */
 export const CAMPUS_MISSIONS_TOTAL = 21;
@@ -103,7 +104,6 @@ export function LearnerFeedbackCard({
   const text = body.trim() || "তোমার মতামত এখানে দেখা যাবে…";
   const handle = (profileHandle || username || "").trim().toLowerCase();
   const profileHref = handle ? `/u/${encodeURIComponent(handle)}` : null;
-  const initial = (Array.from(name)[0] || "?").toUpperCase();
   const atHandle = username || handle;
   const missionLabel = locale === "bn" ? "মিশন" : "Missions";
   const showProof =
@@ -117,14 +117,12 @@ export function LearnerFeedbackCard({
 
   const identity = (
     <div className="flex min-w-0 items-center gap-3">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-sm font-black text-white shadow-sm ring-2 ring-sky-400/20">
-        {avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-        ) : (
-          initial
-        )}
-      </span>
+      <NameInitialAvatar
+        name={name}
+        url={avatarUrl}
+        size="md"
+        className="h-11 w-11 shadow-sm ring-2 ring-sky-400/20"
+      />
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-center gap-1">
           <span className="truncate text-sm font-black text-foreground">

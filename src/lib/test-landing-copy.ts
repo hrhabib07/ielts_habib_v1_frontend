@@ -4,8 +4,10 @@ import {
   JOURNEY_OFFER_PRICE_BDT,
 } from "@/src/lib/journey-prices";
 
-export const TEST_LANDING_PRIMARY_HREF = "/pricing";
-export const TEST_LANDING_SECONDARY_HREF = "/demo";
+/** One door: join, then play Mission 1. No price and no demo on this path. */
+export const TEST_LANDING_PRIMARY_HREF =
+  "/register?next=%2Fplayer%2Fmissions%2Fmission-01-word-order";
+export const TEST_LANDING_SECONDARY_HREF = TEST_LANDING_PRIMARY_HREF;
 
 export function formatTestLandingPrice(amount: number): string {
   return `৳${amount.toLocaleString("en-BD")}`;
@@ -155,8 +157,8 @@ export interface TestLandingCopy {
 export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
   bn: {
     testBanner: "",
-    navPrimary: `${TEST_LANDING_OFFER_PRICE}-তে শুরু করুন`,
-    navDemo: "ফ্রি ডেমো",
+    navPrimary: "Mission 1 ফ্রি খেলুন",
+    navDemo: "Mission 1 ফ্রি খেলুন",
     navHow: "কীভাবে শিখবেন",
     eyebrow: "Gamlish · Fundamental English",
     headlineLine1: "মাত্র 45 দিনে গেম খেলে গড়ুন",
@@ -169,14 +171,14 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       { value: "21", label: "Mission" },
       { value: "45", label: "দিন" },
     ],
-    proofLine: "40+ শিক্ষার্থী ইতিমধ্যে ফুল জার্নির জন্য পেমেন্ট করেছেন",
+    proofLine: "শিক্ষার্থীরা ইতিমধ্যে এই গেম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।",
     priceWas: "আগে",
     priceNow: "এখন",
     priceSave: `${TEST_LANDING_SAVE_PRICE} সাশ্রয়`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
     priceMeta: "45 দিন · 21টি মিশন",
-    ctaPrimary: "45 দিনের অ্যাক্সেস নিন",
-    ctaSecondary: "আগে ফ্রি ডেমো খেলুন",
+    ctaPrimary: "Mission 1 ফ্রি খেলুন",
+    ctaSecondary: "Mission 1 ফ্রি খেলুন",
     heroCompareAlt:
       "Gamlish ছাড়া ইংরেজি দুর্বল ভিত্তির উপর দাঁড়ায়। Gamlish-এর সাথে একই ইংরেজি শক্ত ভিত্তির উপর মজবুত হয়।",
     heroFoundationLabel: "এখানে Gamlish কাজ করে",
@@ -184,8 +186,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "দুর্বল ভিত্তি",
     heroCompareWithTitle: "Gamlish নিয়ে",
     heroCompareWithSub: "শক্ত ভিত্তি",
-    stickyPrimary: `${TEST_LANDING_OFFER_PRICE}-তে শুরু করুন`,
-    stickySecondary: "ফ্রি ডেমো",
+    stickyPrimary: "Mission 1 ফ্রি খেলুন",
+    stickySecondary: "Mission 1 ফ্রি খেলুন",
     compareEyebrow: "কেন Gamlish",
     compareTitle: "গতানুগতিক ইংরেজি শেখা vs Gamlish",
     compareOld: "পুরনো নিয়ম",
@@ -327,7 +329,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       next: "Mission 06 আনলক",
     },
     howFoot:
-      "ফ্রি ডেমোয় এই লুপটা নিজে খেলে দেখুন। পছন্দ হলে 290 টাকায় 45 দিনের পুরো জার্নি আনলক করুন।",
+      "Mission 1 ফ্রি খেলে এই লুপটা নিজে দেখুন। পছন্দ হলে 45 দিনের পুরো জার্নি আনলক করুন।",
     storiesEyebrow: "শিক্ষার্থীদের গল্প",
     storiesTitle: "তারা শেষ করেছে। এবার আপনার পালা।",
     storiesSub:
@@ -367,13 +369,13 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       "45 দিনের অ্যাক্সেস",
       "গেম, প্র্যাকটিস, সাথে সাথে শুধরে নেওয়া",
       "ক্যাম্প পরীক্ষা + সার্টিফিকেট",
-      "ফ্রি ডেমো · Mission 1 ফ্রি",
+      "Mission 1 ফ্রি",
     ],
-    offerProof: "40+ শিক্ষার্থী ইতিমধ্যে ফুল জার্নির জন্য পেমেন্ট করেছেন।",
+    offerProof: "শিক্ষার্থীরা ইতিমধ্যে এই গেম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।",
     offerRisk:
       "হিডেন চার্জ নেই। পেমেন্ট bKash-এ। 45 দিনের অ্যাক্সেস, আজীবন নয়।",
-    offerCta: "45 দিনের অ্যাক্সেস নিন",
-    footerCtaTitle: "45 দিনের Fundamental English নিন",
+    offerCta: "Mission 1 ফ্রি খেলুন",
+    footerCtaTitle: "প্রথমে Mission 1 ফ্রি খেলুন",
     faqTitle: "প্রায়শই জিজ্ঞাসিত প্রশ্ন",
     faq: [
       {
@@ -397,12 +399,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
         a: "এটা আপনার টার্গেটের উপর নির্ভর করে। 45 দিনের অ্যাক্সেসের মধ্যে জার্নিটা শেষ করতে চাইলে প্রতিদিন প্রায় 45 থেকে 60 মিনিট দিন। আরামে 3 থেকে 4 মাস ধরে শিখতে চাইলে প্রতিদিন কম সময় দিয়েও এগোতে পারবেন। কোনো ফিক্সড ক্লাসের সময় নেই। মোবাইল বা কম্পিউটার থেকে নিজের সুবিধামতো খেলতে পারবেন।",
       },
       {
-        q: "290 টাকায় আমি কী পাব? অ্যাক্সেস কতদিন থাকবে?",
-        a: `রেগুলার প্রাইস ${TEST_LANDING_LIST_PRICE}। এই মাসের প্রথম 100 জন পেইড শিক্ষার্থী এককালীন ${TEST_LANDING_OFFER_PRICE}। এই টাকায় আপনি 45 দিনের অ্যাক্সেস পাবেন: 4টি Camp, 21টি Mission, গেম প্র্যাকটিস, সাথে সাথে শুধরে নেওয়া, ক্যাম্পের পরীক্ষা, আর Mission 21 শেষে সার্টিফিকেটের জন্য আবেদন। হিডেন চার্জ নেই। পেমেন্ট bKash-এ। পেমেন্ট কনফার্ম হলেই পুরো জার্নি খুলবে। 45 দিন মানে এই সময়ের মধ্যে শেখা এবং শেষ করার অ্যাক্সেস। আজীবন অ্যাক্সেস নয়।`,
-      },
-      {
         q: "পেমেন্ট করার আগে কি চেষ্টা করে দেখা যাবে?",
-        a: "হ্যাঁ। আগে একটি ফ্রি ডেমো খেলতে পারবেন। অ্যাকাউন্ট ছাড়াই কয়েক মুহূর্তে বোঝা যাবে গেমটা কেমন, আর শেখার ধরন আপনার সাথে মিলবে কি না। শুধু প্রথম মিশন ফ্রি। পছন্দ হলে তবেই 290 টাকা দিয়ে 45 দিনের পুরো অ্যাক্সেস নিন।",
+        a: "হ্যাঁ। আগে Mission 1 ফ্রি খেলুন। অ্যাকাউন্ট খুলে Mission 1 শুরু করলেই বোঝা যাবে গেমটা কেমন, আর শেখার ধরন আপনার সাথে মিলবে কি না। শুধু প্রথম মিশন ফ্রি। পছন্দ হলে পুরো 45 দিনের জার্নি আনলক করতে পারবেন।",
       },
       {
         q: "সার্টিফিকেট কি পাওয়া যাবে?",
@@ -412,8 +410,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
   },
   en: {
     testBanner: "",
-    navPrimary: "Start for ৳290",
-    navDemo: "Free demo",
+    navPrimary: "Play Mission 1 free",
+    navDemo: "Play Mission 1 free",
     navHow: "How you learn",
     eyebrow: "Gamlish · Fundamental English",
     headlineLine1: "In just 45 days, build by playing",
@@ -426,14 +424,14 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       { value: "21", label: "Missions" },
       { value: "45", label: "Days" },
     ],
-    proofLine: "40+ learners have already paid for the full journey",
+    proofLine: "Students have already started playing this game. Start now.",
     priceWas: "Was",
     priceNow: "Now",
     priceSave: `Save ${TEST_LANDING_SAVE_PRICE}`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
     priceMeta: "45 days · 21 missions",
-    ctaPrimary: "Get 45-day access",
-    ctaSecondary: "Play the free demo first",
+    ctaPrimary: "Play Mission 1 free",
+    ctaSecondary: "Play Mission 1 free",
     heroCompareAlt:
       "Your English without Gamlish stands on a weak foundation. With Gamlish, the same English stands on a strong foundation.",
     heroFoundationLabel: "Gamlish works here",
@@ -441,8 +439,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "Weak foundation",
     heroCompareWithTitle: "With Gamlish",
     heroCompareWithSub: "Strong foundation",
-    stickyPrimary: "Start for ৳290",
-    stickySecondary: "Free demo",
+    stickyPrimary: "Play Mission 1 free",
+    stickySecondary: "Play Mission 1 free",
     compareEyebrow: "Why Gamlish",
     compareTitle: "Traditional English learning vs Gamlish",
     compareOld: "Old way",
@@ -584,7 +582,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       next: "Mission 06 unlocked",
     },
     howFoot:
-      "Play the free demo and feel this loop yourself. If it fits, unlock the full 45-day journey for ৳290.",
+      "Play Mission 1 free and feel this loop yourself. If it fits, unlock the full 45-day journey.",
     storiesEyebrow: "Learner stories",
     storiesTitle: "They finished. Your turn is next.",
     storiesSub:
@@ -624,13 +622,13 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       "45 days of access",
       "Games, practice, instant correction",
       "Camp exams + certificate",
-      "Free demo · Mission 1 is free",
+      "Mission 1 is free",
     ],
-    offerProof: "40+ learners have already paid for the full journey.",
+    offerProof: "Students have already started playing this game. Start now.",
     offerRisk:
       "No hidden fee. Pay with bKash. 45-day access, not lifetime.",
-    offerCta: "Get 45-day access",
-    footerCtaTitle: "Get 45-day Fundamental English",
+    offerCta: "Play Mission 1 free",
+    footerCtaTitle: "Play Mission 1 free first",
     faqTitle: "Frequently asked questions",
     faq: [
       {
@@ -654,12 +652,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
         a: "It depends on your goal. If you want to finish inside the 45-day access window, plan about 45 to 60 minutes a day. If you prefer 3 to 4 months, you can spend less time each day and still move forward. There is no fixed class time. You can play on a phone or a computer when it suits you.",
       },
       {
-        q: "What do I get for ৳290? How long is access?",
-        a: `The regular price is ${TEST_LANDING_LIST_PRICE}. The first 100 paid learners of this month get a one-time ${TEST_LANDING_OFFER_PRICE}. That gives you 45 days of access: 4 camps, 21 missions, game practice, instant correction, camp exams, and a certificate application after Mission 21. No hidden fee. Pay with bKash. Access opens when payment is confirmed. 45 days means time to learn and finish. This is not lifetime access.`,
-      },
-      {
         q: "Can I try before I pay?",
-        a: "Yes. Play a free demo first. You do not need an account to see how the game feels and whether this way of learning fits you. Only Mission 1 is free. If you like it, then pay ৳290 for 45 days of full access.",
+        a: "Yes. Play Mission 1 free first. Create an account, start Mission 1, and feel how the game teaches. Only Mission 1 is free. If you like it, you can unlock the full 45-day journey.",
       },
       {
         q: "Will I get a certificate?",

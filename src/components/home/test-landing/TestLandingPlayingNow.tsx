@@ -16,45 +16,33 @@ import {
   TEST_LANDING_OFFER_PRICE,
   TEST_LANDING_PRIMARY_HREF,
 } from "@/src/lib/test-landing-copy";
-import { selectPlayingNowStories } from "@/src/lib/test-landing-playing-now";
+import {
+  selectPlayingNowStories,
+  TEST_LANDING_PLAYING_NOW_FALLBACK,
+} from "@/src/lib/test-landing-playing-now";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
+import { NameInitialAvatar } from "@/src/components/shared/NameInitialAvatar";
 import { cn } from "@/lib/utils";
 
 const AUTO_MS = 7000;
 const SWIPE_PX = 56;
-const AVATAR_TONES = [
-  "bg-sky-600",
-  "bg-violet-600",
-  "bg-emerald-600",
-  "bg-cyan-600",
-  "bg-indigo-600",
-  "bg-teal-600",
-] as const;
-
-function itemInitial(name: string): string {
-  return (Array.from(name.trim())[0] ?? "?").toUpperCase();
-}
 
 function PlayerAvatar({
   item,
-  tone,
   className,
+  size = "md",
 }: {
   item: LearnerFeedbackPublicItem;
-  tone: string;
   className?: string;
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
 }) {
   return (
-    <span className={cn("relative flex shrink-0 overflow-hidden rounded-full", tone, className)}>
-      {item.avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={item.avatarUrl} alt="" className="h-full w-full object-cover" />
-      ) : (
-        <span className="flex h-full w-full items-center justify-center font-bold text-white">
-          {itemInitial(item.displayName)}
-        </span>
-      )}
-    </span>
+    <NameInitialAvatar
+      name={item.displayName}
+      url={item.avatarUrl}
+      size={size}
+      className={className}
+    />
   );
 }
 
@@ -85,10 +73,16 @@ export function TestLandingPlayingNow() {
     let cancelled = false;
     void getPublicLearnerFeedback(100)
       .then((rows) => {
-        if (!cancelled) setItems(selectPlayingNowStories(rows));
+        if (cancelled) return;
+        const selected = selectPlayingNowStories(rows);
+        setItems(
+          selected.length > 0
+            ? selected
+            : [...TEST_LANDING_PLAYING_NOW_FALLBACK],
+        );
       })
       .catch(() => {
-        if (!cancelled) setItems([]);
+        if (!cancelled) setItems([...TEST_LANDING_PLAYING_NOW_FALLBACK]);
       });
     return () => {
       cancelled = true;
@@ -122,7 +116,6 @@ export function TestLandingPlayingNow() {
   );
   const missionPct = (missions / CAMPUS_MISSIONS_TOTAL) * 100;
   const stars = Math.max(0, Math.min(5, Math.round(active.rating)));
-  const activeTone = AVATAR_TONES[index % AVATAR_TONES.length] ?? AVATAR_TONES[0];
   const nameClass = cn(
     "block max-w-full font-bold text-white",
     profileHref && "hover:text-sky-200",
@@ -207,7 +200,7 @@ export function TestLandingPlayingNow() {
                   <div className="flex min-w-0 items-start gap-3">
                     <PlayerAvatar
                       item={active}
-                      tone={activeTone}
+                      size="md"
                       className="h-11 w-11 ring-2 ring-sky-300/40"
                     />
                     <div className="min-w-0 flex-1 overflow-hidden">
@@ -269,7 +262,7 @@ export function TestLandingPlayingNow() {
               <div className="mt-5 flex min-w-0 items-center gap-4">
                 <PlayerAvatar
                   item={active}
-                  tone={activeTone}
+                  size="xl"
                   className="h-20 w-20 ring-2 ring-sky-300/35 shadow-lg shadow-sky-500/20"
                 />
                 <div className="min-w-0 flex-1 overflow-hidden">
@@ -330,7 +323,6 @@ export function TestLandingPlayingNow() {
               <ul className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                 {items.map((item, itemIndex) => {
                   const selected = itemIndex === index;
-                  const tone = AVATAR_TONES[itemIndex % AVATAR_TONES.length] ?? AVATAR_TONES[0];
                   return (
                     <li key={item.id} className="shrink-0">
                       <button
@@ -347,8 +339,8 @@ export function TestLandingPlayingNow() {
                       >
                         <PlayerAvatar
                           item={item}
-                          tone={tone}
-                          className="h-8 w-8 sm:h-11 sm:w-11"
+                          size="sm"
+                          className="h-8 w-8 sm:h-11 sm:w-11 sm:text-sm"
                         />
                       </button>
                     </li>

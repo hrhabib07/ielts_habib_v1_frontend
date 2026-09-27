@@ -9,7 +9,6 @@ import { TestLandingHero } from "@/src/components/home/test-landing/TestLandingH
 import { TestLandingGraduates } from "@/src/components/home/test-landing/TestLandingGraduates";
 import { TestLandingHowYouLearn } from "@/src/components/home/test-landing/TestLandingHowYouLearn";
 import { TestLandingPlayingNow } from "@/src/components/home/test-landing/TestLandingPlayingNow";
-import { TestLandingOffer } from "@/src/components/home/test-landing/TestLandingOffer";
 import { TestLandingStickyCta } from "@/src/components/home/test-landing/TestLandingStickyCta";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
 import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
@@ -49,7 +48,6 @@ function TestLandingSurface() {
         <TestLandingHowYouLearn />
         <TestLandingGraduates />
         <TestLandingPlayingNow />
-        <TestLandingOffer />
         <TestLandingFaq />
         <GuestLandingFooter
           closing={{

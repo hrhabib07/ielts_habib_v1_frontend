@@ -33,19 +33,11 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         },
       },
       {
-        question: "Why is the price so low right now?",
-        answer: {
-          kind: "plain",
-          text:
-            "A special Full Journey Access offer is running. Regular price is 1,590 BDT. The first 100 paid learners of this month can enroll for 290 BDT, one payment.",
-        },
-      },
-      {
         question: "What can I try for free?",
         answer: {
           kind: "plain",
           text:
-            "Mission 01 stays free. You can create an account, play the first mission, and learn how Gamlish works before you take Full Journey Access.",
+            "Mission 1 is free. Create an account, play the first mission, and feel how Gamlish works before you take Full Journey Access.",
         },
       },
       {
@@ -74,19 +66,11 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         },
       },
       {
-        question: "এখন মূল্য এত কম কেন?",
-        answer: {
-          kind: "plain",
-          text:
-            "এখন বিশেষ ফুল জার্নি অ্যাক্সেস অফার চলছে। রেগুলার মূল্য 1,590 টাকা। এই মাসের প্রথম 100 জন পেইড শিক্ষার্থী একবারের পেমেন্টে 290 টাকায় এনরোল করতে পারেন।",
-        },
-      },
-      {
         question: "ফ্রিতে কী ট্রাই করতে পারব?",
         answer: {
           kind: "plain",
           text:
-            "Mission 01 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলতে পারবেন, ফুল জার্নি অ্যাক্সেস নেওয়ার আগে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
+            "Mission 1 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলতে পারবেন, ফুল জার্নি অ্যাক্সেস নেওয়ার আগে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
         },
       },
       {

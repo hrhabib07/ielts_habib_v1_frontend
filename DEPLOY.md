@@ -17,7 +17,7 @@ API (Railway): https://ieltshabibv1backend-production.up.railway.app
 | Variable | Example |
 |---|---|
 | `NEXT_PUBLIC_API_BASE_URL` | `https://ieltshabibv1backend-production.up.railway.app/api` |
-| `NEXT_PUBLIC_APP_URL` | `https://gamlish.com` |
+| `NEXT_PUBLIC_APP_URL` | `https://www.gamlish.com` |
 | `JWT_SECRET` | **same value** as Railway `JWT_SECRET` |
 
 6. Domains: attach `gamlish.com` / `www.gamlish.com`
@@ -60,6 +60,6 @@ Configured on Railway only (`GOOGLE_*` vars). Frontend just needs `NEXT_PUBLIC_A
 
 Update Railway `FRONTEND_ORIGIN` to match (comma-separated, no trailing slash), e.g.:
 
-`https://gamlish.com,https://www.gamlish.com`
+`https://www.gamlish.com,https://gamlish.com`
 
 Then redeploy the API if CORS blocks login.

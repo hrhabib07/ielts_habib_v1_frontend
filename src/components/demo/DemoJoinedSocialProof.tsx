@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 type Props = {
   locale: "bn" | "en";
   className?: string;
-  /** Ignored. Every page uses the same 40+ paid line. */
+  /** Ignored. Every page uses the same live player-count chip. */
   line?: (countLabel: string) => string;
 };
 
 /**
- * Demo save social proof. Same 40+ paid chip as home, pricing, and landing.
+ * Demo save social proof. Same live registered-player chip as home and register.
  */
 export function DemoJoinedSocialProof({ locale, className }: Props) {
   return (

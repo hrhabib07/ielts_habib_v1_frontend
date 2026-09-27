@@ -118,7 +118,12 @@ function buildModel(
     nodes,
     cleared,
     next,
-    nextNeedsPay: Boolean(next && next.mission.accessTier === "PAID" && !hasEnglishAccess),
+    nextNeedsPay: Boolean(
+      next &&
+        next.mission.accessTier === "PAID" &&
+        !hasEnglishAccess &&
+        next.mission.slug !== "mission-02-meet-the-words",
+    ),
     nextOnRest,
     nextOnContentPause,
     campCompleted,

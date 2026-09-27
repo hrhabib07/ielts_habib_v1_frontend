@@ -37,7 +37,7 @@ export function shouldUseGuestLandingNav(
   return GUEST_NAV_PATHS.has(pathname);
 }
 
-/** Same 40+ paid chip on every public guest page. Hidden during live demo play. */
+/** Same live player-count chip on every public guest page. Hidden during live demo play. */
 export function shouldShowGuestPaidProof(
   pathname: string,
   hasUser: boolean,

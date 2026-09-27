@@ -92,6 +92,12 @@ export default function RootLayout({
   return (
     <html lang="bn" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{localStorage.setItem('ielts-habib-theme','light');document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}catch(e){}",
+          }}
+        />
         <GoogleTagManagerHead />
         <SiteJsonLd />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

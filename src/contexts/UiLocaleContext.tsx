@@ -6,16 +6,9 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
-import {
-  resolveInitialUiLocale,
-  UI_LOCALE_STORAGE_KEY,
-  writeStoredUiLocale,
-  type UiLocale,
-} from "@/src/lib/ui-locale";
-import { logLanguageSwitch } from "@/src/lib/micro-telemetry";
+import { writeStoredUiLocale, type UiLocale } from "@/src/lib/ui-locale";
 
 export const UI_LOCALE_CHANGE_EVENT = "gamlish-ui-locale-change";
 
@@ -24,62 +17,26 @@ interface UiLocaleContextValue {
   setLocale: (locale: UiLocale) => void;
 }
 
+const LOCKED_LOCALE: UiLocale = "bn";
+
 const UiLocaleContext = createContext<UiLocaleContextValue | null>(null);
 
 export function UiLocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<UiLocale>("bn");
-  const [hydrated, setHydrated] = useState(false);
-
   useEffect(() => {
-    setLocaleState(resolveInitialUiLocale());
-    setHydrated(true);
+    writeStoredUiLocale(LOCKED_LOCALE);
+    document.documentElement.lang = "bn";
+    document.body.classList.add("font-bengali");
+    document.body.classList.remove("font-sans");
   }, []);
 
-  useEffect(() => {
-    if (!hydrated) return;
-    const onLocaleChange = (event: Event) => {
-      const detail = (event as CustomEvent<UiLocale>).detail;
-      if (detail === "bn" || detail === "en") {
-        setLocaleState(detail);
-      }
-    };
-    const onStorage = (event: StorageEvent) => {
-      if (event.key !== UI_LOCALE_STORAGE_KEY) return;
-      if (event.newValue === "bn" || event.newValue === "en") {
-        setLocaleState(event.newValue);
-      }
-    };
-    window.addEventListener(UI_LOCALE_CHANGE_EVENT, onLocaleChange);
-    window.addEventListener("storage", onStorage);
-    return () => {
-      window.removeEventListener(UI_LOCALE_CHANGE_EVENT, onLocaleChange);
-      window.removeEventListener("storage", onStorage);
-    };
-  }, [hydrated]);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    document.documentElement.lang = locale === "bn" ? "bn" : "en";
-    document.body.classList.toggle("font-bengali", locale === "bn");
-    document.body.classList.toggle("font-sans", locale === "en");
-  }, [locale, hydrated]);
-
-  const setLocale = useCallback((next: UiLocale) => {
-    setLocaleState((prev) => {
-      if (prev !== next) {
-        try {
-          logLanguageSwitch(prev, next);
-        } catch {
-          /* never block locale UX */
-        }
-      }
-      return next;
-    });
-    writeStoredUiLocale(next);
-    window.dispatchEvent(new CustomEvent(UI_LOCALE_CHANGE_EVENT, { detail: next }));
+  const setLocale = useCallback((_next: UiLocale) => {
+    /* Language is locked to Bangla. */
   }, []);
 
-  const value = useMemo(() => ({ locale, setLocale }), [locale, setLocale]);
+  const value = useMemo(
+    () => ({ locale: LOCKED_LOCALE, setLocale }),
+    [setLocale],
+  );
 
   return <UiLocaleContext.Provider value={value}>{children}</UiLocaleContext.Provider>;
 }

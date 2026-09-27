@@ -26,13 +26,11 @@ import {
 import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
-import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
 import {
   LANDING_CTA_CLASS,
   LANDING_EYEBROW_CLASS,
   LANDING_REWARD_PILL_CLASS,
 } from "@/src/components/home/guest/guest-landing-theme";
-import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { PaidLearnersProofBar } from "@/src/components/pricing/PaidLearnersProofChip";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_LOGIN_COPY } from "@/src/lib/auth-login-copy";
@@ -130,10 +128,6 @@ function LoginToolbar({ copy }: { copy: (typeof AUTH_LOGIN_COPY)["en"] }) {
           <ArrowLeft className="h-4 w-4" />
           {copy.backHome}
         </Link>
-      </div>
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <GuestLandingLanguageToggle />
-        <ThemeToggleButton />
       </div>
     </header>
   );

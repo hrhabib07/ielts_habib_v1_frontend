@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { TestLandingCtas } from "@/src/components/home/test-landing/TestLandingCtas";
 import { TestLandingHeroCompareVisual } from "@/src/components/home/test-landing/TestLandingHeroCompareVisual";
-import { TestLandingPriceLine } from "@/src/components/home/test-landing/TestLandingPriceLine";
 import { PaidLearnersProofChip } from "@/src/components/pricing/PaidLearnersProofChip";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
@@ -125,12 +124,7 @@ export function TestLandingHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.14, ease: GUEST_EASE }}
           >
-            <div className="rounded-[1.6rem] border border-sky-500/25 bg-gradient-to-b from-sky-500/[0.11] to-sky-500/[0.03] p-4 sm:p-5">
-              <TestLandingPriceLine align="box" />
-              <div className="mt-5">
-                <TestLandingCtas copy={copy} align="start" />
-              </div>
-            </div>
+            <TestLandingCtas copy={copy} align="start" />
           </motion.div>
         </div>
 

@@ -35,7 +35,12 @@ export type FunnelEventName =
   | "payment_submit_clicked"
   | "payment_submit_success"
   | "payment_submit_error"
-  | "save_screen_abandoned";
+  | "save_screen_abandoned"
+  | "mission_started"
+  | "mission_question"
+  | "mission_completed"
+  | "paywall_shown"
+  | "checkout_opened";
 
 function apiBase(): string {
   return process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";

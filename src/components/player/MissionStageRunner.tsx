@@ -36,6 +36,11 @@ import {
   hasAhaMomentExperience,
 } from "@/src/components/player/AhaMomentExperience";
 import { saveMissionCompletionScore } from "@/src/lib/mission-one-paywall";
+import { MissionOnePaywallFlow } from "@/src/components/player/MissionOnePaywallFlow";
+import { trackFunnelEvent } from "@/src/lib/api/analytics";
+
+const PREVIEW_MISSION_SLUG = "mission-02-meet-the-words";
+const PREVIEW_FREE_MAX_STAGE = 2;
 
 type EvalQuestion = Record<string, unknown>;
 
@@ -145,6 +150,7 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
   const [error, setError] = useState<string | null>(null);
   const [stageResult, setStageResult] = useState<PlayerStageResult | null>(null);
   const [pendingNav, setPendingNav] = useState<PlayerSubmitResult | null>(null);
+  const [previewLock, setPreviewLock] = useState(false);
   const [bridge, setBridge] = useState<{ title: string; subtitle: string } | null>(null);
   const [evalFormKey, setEvalFormKey] = useState(0);
   const [evalRetryState, setEvalRetryState] = useState<EvalRetryState | null>(null);
@@ -209,6 +215,14 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
 
   const goNext = useCallback(
     (result: PlayerSubmitResult) => {
+      if (
+        missionSlug === PREVIEW_MISSION_SLUG &&
+        result.nextStageOrder != null &&
+        result.nextStageOrder > PREVIEW_FREE_MAX_STAGE
+      ) {
+        setPreviewLock(true);
+        return;
+      }
       if (result.missionComplete) {
         router.push(`/player/missions/${missionSlug}?complete=1`);
         return;
@@ -246,6 +260,16 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
         correctCount: result.correctCount,
         totalCount: result.totalCount,
         scorePercent: result.scorePercent,
+      });
+      void trackFunnelEvent({
+        event: "mission_completed",
+        screen: missionSlug,
+        metadata: {
+          missionSlug,
+          scorePercent: result.scorePercent ?? null,
+          correctCount: result.correctCount ?? null,
+          totalCount: result.totalCount ?? null,
+        },
       });
     }
     // Bowling-style score after the stage  -  bump HUD + floating toast.
@@ -356,6 +380,17 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
     setEvalRetryState(null);
     setEvalFormKey((k) => k + 1);
   };
+
+  if (previewLock) {
+    return (
+      <MissionOnePaywallFlow
+        score={null}
+        missionsDone={1}
+        missionsTotal={21}
+        onLater={() => router.push("/player")}
+      />
+    );
+  }
 
   return (
     <div

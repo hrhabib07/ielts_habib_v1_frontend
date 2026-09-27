@@ -30,6 +30,7 @@ import {
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
 import { CampGraduationsSection } from "@/src/components/profile/CampGraduationsSection";
 import { LearnerFeedbackCard } from "@/src/components/feedback/LearnerFeedbackCard";
+import { NameInitialAvatar } from "@/src/components/shared/NameInitialAvatar";
 import {
   getOrCreateProfileViewerKey,
   recordPublicProfileView,
@@ -269,7 +270,6 @@ export function GamlishProfileContent({
   }, [notice]);
 
   const tier = identity.founderTier ? TIER_STYLE[identity.founderTier] : null;
-  const avatarLetter = identity.displayName.charAt(0).toUpperCase() || "G";
 
   const shareTargets = [
     {
@@ -303,24 +303,19 @@ export function GamlishProfileContent({
       >
         <div className="pointer-events-none absolute inset-x-0 -top-24 h-48 bg-accent/10 blur-3xl" aria-hidden />
         <div className="relative flex flex-col items-center text-center">
-          <div
+          <NameInitialAvatar
+            name={identity.displayName}
+            url={identity.avatarUrl}
+            size="xl"
+            alt={identity.displayName}
             className={cn(
-              "flex h-24 w-24 items-center justify-center rounded-full text-3xl font-bold ring-4",
-              tier ? tier.badge : "bg-accent/15 text-accent",
+              "h-24 w-24 ring-4",
               tier ? tier.ring : "ring-accent/20",
             )}
-          >
-            {identity.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={identity.avatarUrl}
-                alt={identity.displayName}
-                className="h-full w-full rounded-full object-cover"
-              />
-            ) : (
-              avatarLetter
-            )}
-          </div>
+            toneClassName={
+              tier ? tier.badge : "bg-accent/15 text-accent"
+            }
+          />
 
           <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
             {identity.displayName}

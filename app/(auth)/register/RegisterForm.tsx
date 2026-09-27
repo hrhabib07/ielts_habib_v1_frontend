@@ -25,9 +25,8 @@ import {
 } from "@/src/components/auth/ContinueWithGoogleButton";
 import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
-import { GuestLandingLanguageToggle } from "@/src/components/home/guest/GuestLandingLocale";
-import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { PaidLearnersProofBar } from "@/src/components/pricing/PaidLearnersProofChip";
+import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_REGISTER_COPY } from "@/src/lib/auth-register-copy";
 import { readAuthReturnPathFromSearch } from "@/src/lib/auth-redirects";
@@ -125,10 +124,6 @@ function RegisterToolbar({ copy }: { copy: (typeof AUTH_REGISTER_COPY)["en"] }) 
           {copy.backHome}
         </Link>
       </div>
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <GuestLandingLanguageToggle />
-        <ThemeToggleButton />
-      </div>
     </header>
   );
 }
@@ -167,30 +162,58 @@ export function RegisterForm() {
         <RegisterToolbar copy={copy} />
         <PaidLearnersProofBar locale={locale} />
 
-        <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:px-10 xl:px-14">
+        <div className="relative flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:px-10 xl:px-14">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(56,189,248,0.14),transparent_58%)]"
+            aria-hidden
+          />
           <motion.div
-            className="w-full max-w-[420px] space-y-6"
+            className="relative w-full max-w-[420px] space-y-5"
             initial={reduceMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="space-y-2">
-              <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground sm:text-3xl">
+            <div className="space-y-3 text-center sm:text-left">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-sky-800 dark:text-sky-200">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden />
+                {copy.eyebrow}
+              </p>
+              <h1 className="text-balance text-[1.85rem] font-black tracking-tight text-foreground sm:text-[2.1rem]">
                 {copy.title}
               </h1>
-              <p className="text-pretty text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
+              <p className="text-pretty text-[15px] font-medium leading-relaxed text-foreground/85 sm:text-base">
                 {copy.subtitle}
+              </p>
+              <p className="text-pretty text-sm font-semibold leading-relaxed text-sky-700 dark:text-sky-300">
+                {copy.belief}
               </p>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_16px_48px_rgba(15,23,42,0.07)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.28)]">
+            <div className="overflow-hidden rounded-[1.35rem] border border-sky-500/25 bg-card shadow-[0_20px_50px_-28px_rgba(14,165,233,0.55)]">
+              <div className="flex items-center gap-2 border-b border-sky-500/15 bg-gradient-to-r from-sky-500/12 to-transparent px-4 py-3 sm:px-5">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500 text-white shadow-md shadow-sky-500/35">
+                  <Swords className="h-4 w-4" aria-hidden />
+                </span>
+                <p className="text-sm font-bold text-sky-950 dark:text-sky-100">
+                  {copy.missionChip}
+                </p>
+              </div>
+
               <div className="p-5 sm:p-6">
+                <p className="mb-4 text-sm font-medium leading-relaxed text-foreground/80">
+                  {copy.formLead}
+                </p>
+
                 <div className="mb-4 space-y-3">
-                  <ContinueWithGoogleButton returnTo={returnTo} />
+                  <ContinueWithGoogleButton
+                    returnTo={returnTo}
+                    label={copy.googleCta}
+                    className="h-12 rounded-full border-sky-500/30 bg-background text-[15px] font-bold shadow-sm hover:border-sky-500/50 hover:bg-sky-500/5"
+                  />
                   <AuthMethodDivider
                     label={locale === "bn" ? "অথবা মোবাইল OTP" : "or mobile OTP"}
                   />
-                  <PhoneOtpAuthPanel locale={locale} />
+                  <PhoneOtpAuthPanel locale={locale} compact />
                   <AuthMethodDivider
                     label={locale === "bn" ? "অথবা ইমেইল" : "or email"}
                   />
@@ -228,7 +251,10 @@ export function RegisterForm() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="h-11 w-full rounded-xl bg-primary text-[15px] font-semibold text-primary-foreground hover:bg-primary/90"
+                    className={cn(
+                      "h-12 w-full rounded-full text-[15px] font-black tracking-tight",
+                      LANDING_CTA_CLASS,
+                    )}
                     size="lg"
                   >
                     {loading ? (
@@ -242,24 +268,24 @@ export function RegisterForm() {
                   </Button>
                 </form>
 
-                <div className="mt-5 grid gap-2 border-t border-border/50 pt-4 text-[11px] text-muted-foreground sm:grid-cols-3">
+                <div className="mt-5 grid gap-2.5 border-t border-border/50 pt-4 text-[12px] font-semibold text-foreground/75 sm:grid-cols-3">
                   <span className="inline-flex items-center gap-1.5">
-                    <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
+                    <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-sky-600" />
                     {copy.trustOtp}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-sky-600" />
                     {copy.trustFree}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-primary" />
+                    <Zap className="h-3.5 w-3.5 shrink-0 text-sky-600" />
                     {copy.trustSecure}
                   </span>
                 </div>
 
                 <p className="mt-4 text-center text-sm">
                   <span className="text-muted-foreground">{copy.hasAccount} </span>
-                  <Link href={loginHref} className="font-semibold text-primary hover:underline">
+                  <Link href={loginHref} className="font-semibold text-sky-700 hover:underline dark:text-sky-300">
                     {copy.signIn}
                   </Link>
                 </p>

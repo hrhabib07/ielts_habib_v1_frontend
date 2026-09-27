@@ -1,4 +1,4 @@
-import { readStoredUiLocale, type UiLocale } from "@/src/lib/ui-locale";
+import type { UiLocale } from "@/src/lib/ui-locale";
 
 export type TrafficSourceBucket = "fb_ads" | "organic" | "direct" | "campaign" | "other";
 
@@ -88,7 +88,7 @@ export function captureAndReadUtmAttribution(): UtmAttribution {
 }
 
 export function readUiLocaleForAnalytics(): UiLocale {
-  return readStoredUiLocale() ?? "bn";
+  return "bn";
 }
 
 export function buildFunnelAttributionMetadata(): Record<string, unknown> {

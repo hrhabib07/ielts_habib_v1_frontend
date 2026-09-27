@@ -6,7 +6,7 @@ export const UI_LOCALE_STORAGE_KEY = "gamlish-ui-locale";
 const BN_DIGIT_CHARS = "\u09E6\u09E7\u09E8\u09E9\u09EA\u09EB\u09EC\u09ED\u09EE\u09EF";
 const LATIN_DIGIT_CHARS = "0123456789";
 
-/** Product default is always Bengali. Browser language is ignored. */
+/** Site language is locked to Bangla. Browser language is ignored. */
 export function detectBrowserUiLocale(): UiLocale {
   return "bn";
 }
@@ -38,9 +38,9 @@ export function writeStoredUiLocale(locale: UiLocale): void {
   }
 }
 
-/** Explicit choice wins; otherwise Bengali. */
+/** Bangla is locked for every visit. A saved English choice is ignored. */
 export function resolveInitialUiLocale(): UiLocale {
-  return readStoredUiLocale() ?? "bn";
+  return "bn";
 }
 
 /**

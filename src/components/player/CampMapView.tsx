@@ -6,7 +6,6 @@ import {
   BookOpen,
   Check,
   ChevronRight,
-  Crown,
   Lock,
   Moon,
   Play,
@@ -26,7 +25,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CampMapCertificateBanner } from "@/src/components/player/CampMapCertificateBanner";
 import { useState } from "react";
-import { brandSurfaces } from "@/src/lib/brand-theme";
 
 const TRAIL = {
   viewWidth: 360,
@@ -71,7 +69,9 @@ function getMissionState(
   hasEnglishAccess: boolean,
 ): MissionVisualState {
   const locked = mission.status === "locked";
-  const needsPay = mission.accessTier === "PAID" && !hasEnglishAccess && !locked;
+  const previewOpen = mission.slug === PREVIEW_MISSION_SLUG && !locked;
+  const needsPay =
+    mission.accessTier === "PAID" && !hasEnglishAccess && !locked && !previewOpen;
   const playable = !locked && !needsPay;
   return {
     locked,
@@ -105,7 +105,7 @@ function missionShortTitle(title: string): string {
   return match?.[1]?.trim() ?? title;
 }
 
-const FREE_MISSION_SLUG = "mission-01-word-order";
+const PREVIEW_MISSION_SLUG = "mission-02-meet-the-words";
 
 function MissionNodeCard({
   mission,
@@ -121,10 +121,8 @@ function MissionNodeCard({
   const PLAYER_UI = usePlayerUiCopy();
   const state = getMissionState(mission, hasEnglishAccess);
   const shortTitle = missionShortTitle(mission.title);
-  const needsMissionZero =
-    mission.slug === FREE_MISSION_SLUG &&
-    state.playable &&
-    !missionZeroCompleted;
+  const needsMissionZero = false;
+  void missionZeroCompleted;
 
   const nodeInner = (
     <>
@@ -533,30 +531,13 @@ export function CampMapView({
             onNeedsPayClick={setPaywallMission}
           />
         ))}
-
-        {!map.hasEnglishAccess ? (
-          <div className={cn("overflow-hidden rounded-[1.5rem] p-6 text-center", brandSurfaces.premiumBanner)}>
-            <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500/15 text-sky-700 dark:text-sky-300">
-              <Crown className="h-5 w-5" />
-            </div>
-            <p className="text-sm font-semibold text-foreground">{PLAYER_UI.mission01Free}</p>
-            <Button asChild variant="outline" className="mt-4 rounded-full border-sky-500/30">
-              <Link href="/pricing?course=english-foundations">{PLAYER_UI.unlockCta}</Link>
-            </Button>
-          </div>
-        ) : null}
       </div>
 
       {hasContinue ? (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-background/90 px-4 py-3 shadow-[0_-12px_40px_rgba(15,23,42,0.1)] backdrop-blur-xl pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <Button asChild className="camp-continue-cta mx-auto flex h-12 w-full max-w-lg rounded-full text-base font-semibold sm:max-w-2xl">
             <Link
-              href={
-                map.currentMissionSlug === FREE_MISSION_SLUG &&
-                map.missionZeroCompleted === false
-                  ? "/player/mission-zero"
-                  : `/player/missions/${map.currentMissionSlug}`
-              }
+              href={`/player/missions/${map.currentMissionSlug}`}
             >
               <Play className="mr-2 h-4 w-4 fill-current" />
               {PLAYER_UI.continueMission}

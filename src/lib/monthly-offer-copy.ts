@@ -5,6 +5,10 @@ import {
 } from "@/src/lib/journey-prices";
 import type { UiLocale } from "@/src/lib/ui-locale";
 import { localizeDigits } from "@/src/lib/ui-locale";
+import {
+  PLAYERS_PLAYING_PROOF_FLOOR,
+  resolvePlayersPlayingCount,
+} from "@/src/lib/demo-social-proof";
 
 export const LIFETIME_PAID_PROOF_FLOOR = 40;
 
@@ -14,6 +18,21 @@ export function lifetimePaidProofLine(locale: UiLocale): string {
   return locale === "bn"
     ? `${floor}+ শিক্ষার্থী ইতিমধ্যে ফুল জার্নির জন্য পেমেন্ট করেছেন।`
     : `${LIFETIME_PAID_PROOF_FLOOR}+ learners have already paid for the full journey.`;
+}
+
+/** Live registered players. Pass the real student count from /demo/stats. */
+export function playersPlayingProofLine(
+  registeredStudents: number | null | undefined,
+  locale: UiLocale,
+): string {
+  const count = resolvePlayersPlayingCount(
+    registeredStudents,
+    PLAYERS_PLAYING_PROOF_FLOOR,
+  );
+  const label = localizeDigits(count, locale);
+  return locale === "bn"
+    ? `${label}+ জন শিক্ষার্থী ইতিমধ্যে এই গেম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।`
+    : `${count}+ students have already started playing this game. Start now.`;
 }
 
 export function monthLabelFromPricing(

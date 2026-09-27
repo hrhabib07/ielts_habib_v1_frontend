@@ -18,7 +18,6 @@ import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { logout } from "@/src/lib/auth";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import type { UserRole } from "@/src/lib/constants";
-import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { ENABLE_READING } from "@/src/lib/platform-config";
 import type { SiteShellCopy } from "@/src/lib/site-shell-copy";
 import { cn } from "@/lib/utils";
@@ -96,12 +95,6 @@ export function SiteMobileNav(props: {
       >
         <SheetTitle className="sr-only">Navigation menu</SheetTitle>
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain px-5 pb-8 pt-14 [-webkit-overflow-scrolling:touch]">
-          <div className="mb-5 space-y-2 border-b border-border/60 pb-5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              ভাষা · Language
-            </p>
-            <UiLanguageToggle variant="segmented" className="w-full max-w-none justify-center" />
-          </div>
           {isStudent && ENABLE_READING && (
             <div className="mb-6">
               {progressLoading ? (

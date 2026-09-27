@@ -7,8 +7,6 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
-import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
-import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
@@ -73,11 +71,7 @@ export function GuestLandingNavBar({
           <GamlishNavBrand showTagline={false} />
         </Link>
 
-        {isDemoFunnel ? (
-          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <UiLanguageToggle variant="segmented" />
-          </div>
-        ) : (
+        {isDemoFunnel ? null : (
           <>
             <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
               <Link
@@ -86,50 +80,18 @@ export function GuestLandingNavBar({
               >
                 {accountLabel}
               </Link>
-              {isConversionLanding ? (
-                <>
-                  <Link
-                    href="/demo"
-                    className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:bg-muted/50 hover:text-foreground"
-                  >
-                    {testCopy.navDemo}
-                  </Link>
-                  <Link
-                    href={TEST_LANDING_PRIMARY_HREF}
-                    className={cn(
-                      "rounded-lg px-3.5 py-2 text-sm font-bold text-white",
-                      LANDING_CTA_CLASS,
-                    )}
-                  >
-                    {testCopy.navPrimary}
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/pricing"
-                    className="rounded-lg border border-amber-500/40 bg-amber-400/10 px-3 py-2 text-sm font-bold text-amber-950 transition-colors hover:bg-amber-400/20 dark:border-amber-400/40 dark:text-amber-100"
-                  >
-                    {copy.navPricing}
-                  </Link>
-                  <Link
-                    href="/demo"
-                    className={cn(
-                      "rounded-lg px-3.5 py-2 text-sm font-bold text-white",
-                      LANDING_CTA_CLASS,
-                    )}
-                  >
-                    {copy.ctaPrimary}
-                  </Link>
-                </>
-              )}
-              <UiLanguageToggle variant="segmented" />
-              <ThemeToggleButton />
+              <Link
+                href={isLoggedIn ? PRIMARY_STUDENT_HREF : TEST_LANDING_PRIMARY_HREF}
+                className={cn(
+                  "rounded-lg px-3.5 py-2 text-sm font-bold text-white",
+                  LANDING_CTA_CLASS,
+                )}
+              >
+                {testCopy.navPrimary}
+              </Link>
             </div>
 
             <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5 lg:hidden">
-              <UiLanguageToggle variant="segmented" />
-              <ThemeToggleButton />
               <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -148,58 +110,17 @@ export function GuestLandingNavBar({
                 >
                   <SheetTitle className="sr-only">{copy.navMenu}</SheetTitle>
                   <div className="flex flex-col gap-6 px-5 pb-8 pt-14">
-                    <div className="space-y-2 border-b border-border/60 pb-5">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground/70">
-                        ভাষা · Language
-                      </p>
-                      <UiLanguageToggle
-                        variant="segmented"
-                        className="w-full max-w-none justify-center"
-                      />
-                    </div>
-
                     <nav className="flex flex-col gap-2" aria-label={copy.navMenu}>
-                      {isConversionLanding ? (
-                        <>
-                          <Link
-                            href={TEST_LANDING_PRIMARY_HREF}
-                            onClick={() => setMenuOpen(false)}
-                            className={cn(
-                              "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
-                              LANDING_CTA_CLASS,
-                            )}
-                          >
-                            {testCopy.navPrimary}
-                          </Link>
-                          <Link
-                            href="/demo"
-                            onClick={() => setMenuOpen(false)}
-                            className="rounded-xl border-2 border-border px-4 py-3.5 text-center text-base font-bold"
-                          >
-                            {testCopy.navDemo}
-                          </Link>
-                        </>
-                      ) : (
-                        <>
-                          <Link
-                            href="/demo"
-                            onClick={() => setMenuOpen(false)}
-                            className={cn(
-                              "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
-                              LANDING_CTA_CLASS,
-                            )}
-                          >
-                            {copy.ctaPrimary}
-                          </Link>
-                          <Link
-                            href="/pricing"
-                            onClick={() => setMenuOpen(false)}
-                            className="rounded-xl border-2 border-amber-500/50 bg-amber-400/10 px-4 py-3.5 text-center text-base font-bold text-amber-950 dark:border-amber-400/45 dark:text-amber-100"
-                          >
-                            {copy.ctaPreOrder}
-                          </Link>
-                        </>
-                      )}
+                      <Link
+                        href={isLoggedIn ? PRIMARY_STUDENT_HREF : TEST_LANDING_PRIMARY_HREF}
+                        onClick={() => setMenuOpen(false)}
+                        className={cn(
+                          "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
+                          LANDING_CTA_CLASS,
+                        )}
+                      >
+                        {testCopy.navPrimary}
+                      </Link>
                       {isConversionLanding ? (
                         <button
                           type="button"

@@ -13,6 +13,7 @@ import {
   isPlayerSubscriptionRequiredError,
   playerApiErrorMessage,
 } from "@/src/lib/player-access-errors";
+import { trackFunnelEvent } from "@/src/lib/api/analytics";
 
 export default function MissionStagePageClient({
   missionSlug,
@@ -46,6 +47,13 @@ export default function MissionStagePageClient({
     getPlayerStage(missionSlug, stageOrder)
       .then((data) => {
         if (!cancelled) setContent(data);
+        if (stageOrder === 1) {
+          void trackFunnelEvent({
+            event: "mission_started",
+            screen: missionSlug,
+            metadata: { missionSlug, stageOrder },
+          });
+        }
       })
       .catch((err) => {
         if (cancelled) return;

@@ -20,8 +20,6 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
-  Moon,
-  Sun,
 } from "lucide-react";
 import {
   submitGroupTest,
@@ -36,7 +34,6 @@ import {
   GROUP_TEST_PASSAGE_MINUTES,
   GROUP_TEST_TOTAL_MINUTES,
 } from "@/src/constants/readingAssessmentTiming";
-import { useTheme } from "@/src/components/shared/ThemeProvider";
 import { InstructionBlock } from "./InstructionBlock";
 import {
   GapFillingQuestionInput,
@@ -642,8 +639,6 @@ export const ReadingMockTestView = forwardRef<
     };
   }, [draggingVerticalMobile]);
 
-  const { theme: uiTheme, toggleTheme } = useTheme();
-
   const runSubmit = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
       setError(null);
       setSubmitting(true);
@@ -771,19 +766,6 @@ export const ReadingMockTestView = forwardRef<
           </span>
         </div>
         <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-3">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={uiTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            title="Theme"
-            className="flex items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400 dark:hover:bg-slate-800"
-          >
-            {uiTheme === "dark" ? (
-              <Sun className="h-4 w-4" aria-hidden />
-            ) : (
-              <Moon className="h-4 w-4" aria-hidden />
-            )}
-          </button>
           <button
             type="button"
             onClick={() => setNotepadOpen((o) => !o)}

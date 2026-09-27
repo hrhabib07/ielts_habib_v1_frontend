@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
 import { SiteMobileNav } from "@/src/components/shared/SiteMobileNav";
-import { ThemeToggleButton } from "@/src/components/shared/ThemeToggleButton";
 import { useStudentNavProgress } from "@/src/hooks/useStudentNavProgress";
 import { journeyProgressBarStyle } from "@/src/lib/journeyVisualProgress";
 import { getDecodedTokenClient, logout } from "@/src/lib/auth";
@@ -30,7 +29,6 @@ import { readingPathPremium } from "@/src/lib/readingPathPremium";
 import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { cn } from "@/lib/utils";
 import { GuestLandingNavBar } from "@/src/components/home/guest/GuestLandingNavBar";
-import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
 import { shouldUseGuestLandingNav } from "@/src/lib/guest-nav-paths";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
@@ -267,10 +265,6 @@ export function SiteNavBar(props: {
           {isStudent && isFoundingMember && (
             <FoundingMemberBadge size="sm" compact className="hidden lg:inline-flex" />
           )}
-
-          <UiLanguageToggle variant="segmented" />
-
-          <ThemeToggleButton />
 
           {user ? (
             <div className="relative hidden lg:block" ref={menuRef}>

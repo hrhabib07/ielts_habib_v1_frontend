@@ -1276,6 +1276,204 @@
   animation: test-landing-foundation-badge 2s ease-in-out infinite;
 }
 
+@keyframes test-landing-cta-press-ripple {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.28;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes test-landing-cta-invite-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70% {
+    opacity: 0.12;
+  }
+  100% {
+    transform: scale(1.22);
+    opacity: 0;
+  }
+}
+
+/**
+ * Soft sonar rings behind the CTA (invite only).
+ * Border rings expand; no filled color bloom, button fill stays fixed.
+ */
+.test-landing-cta-invite-ripple {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 9999px;
+}
+
+.test-landing-cta-invite-ripple > span {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid rgba(37, 99, 235, 0.42);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.12);
+  opacity: 0;
+  animation: test-landing-cta-invite-ring 2.4s cubic-bezier(0.22, 1, 0.36, 1)
+    infinite;
+}
+
+.test-landing-cta-invite-ripple > span:nth-child(2) {
+  animation-delay: 1.2s;
+}
+
+.group\/cta:hover .test-landing-cta-invite-ripple > span {
+  border-color: rgba(37, 99, 235, 0.55);
+}
+
+.group\/cta:has(.is-pressing) .test-landing-cta-invite-ripple > span {
+  animation-play-state: paused;
+  opacity: 0;
+}
+
+/**
+ * Mission CTA: fixed brand fill.
+ * Click = physical press + white ink wash inside the button only.
+ */
+.test-landing-cta-invite {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background-color: #2563eb;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.05) 36%,
+      transparent 52%
+    ),
+    linear-gradient(
+      105deg,
+      #38bdf8 0%,
+      #0ea5e9 28%,
+      #3b82f6 55%,
+      #2563eb 78%,
+      #1d4ed8 100%
+    );
+  background-size: 100% 100%, 100% 100%;
+  background-position: 0 0, 0 0;
+  box-shadow:
+    0 8px 18px -10px rgba(15, 23, 42, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(29, 78, 216, 0.22);
+  transform: translateY(0) scale(1);
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.test-landing-cta-invite::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: rgba(15, 23, 42, 0);
+  transition: background 140ms ease;
+}
+
+.test-landing-cta-invite::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 120%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.1) 42%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%) scale(0.2);
+  opacity: 0;
+}
+
+.test-landing-cta-invite:hover {
+  background-color: #2563eb;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.05) 36%,
+      transparent 52%
+    ),
+    linear-gradient(
+      105deg,
+      #38bdf8 0%,
+      #0ea5e9 28%,
+      #3b82f6 55%,
+      #2563eb 78%,
+      #1d4ed8 100%
+    );
+  transform: translateY(-1px) scale(1.01);
+  box-shadow:
+    0 10px 20px -10px rgba(15, 23, 42, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 0 rgba(29, 78, 216, 0.22);
+}
+
+.test-landing-cta-invite:hover::before {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.test-landing-cta-invite.is-pressing,
+.test-landing-cta-invite:active {
+  background-color: #2563eb;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.05) 36%,
+      transparent 52%
+    ),
+    linear-gradient(
+      105deg,
+      #38bdf8 0%,
+      #0ea5e9 28%,
+      #3b82f6 55%,
+      #2563eb 78%,
+      #1d4ed8 100%
+    );
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    0 2px 8px -4px rgba(15, 23, 42, 0.35),
+    inset 0 2px 5px rgba(15, 23, 42, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.test-landing-cta-invite.is-pressing::before,
+.test-landing-cta-invite:active::before {
+  background: rgba(15, 23, 42, 0.12);
+}
+
+.test-landing-cta-invite.is-pressing::after {
+  animation: test-landing-cta-press-ripple 380ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+}
+
+.test-landing-cta-sheen,
+.test-landing-cta-glow {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .guest-landing-grid,
   .guest-landing-light-sweep,
@@ -1292,8 +1490,48 @@
   .test-landing-foundation-ring,
   .test-landing-foundation-sheen,
   .test-landing-foundation-sparkle,
-  .test-landing-foundation-badge {
+  .test-landing-foundation-badge,
+  .test-landing-cta-glow,
+  .test-landing-cta-invite,
+  .test-landing-cta-invite-ripple > span,
+  .test-landing-cta-sheen {
     animation: none !important;
+  }
+
+  .test-landing-cta-invite-ripple {
+    display: none;
+  }
+
+  .test-landing-cta-invite {
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        transparent 50%
+      ),
+      linear-gradient(
+        105deg,
+        #38bdf8 0%,
+        #0ea5e9 28%,
+        #2563eb 72%,
+        #1d4ed8 100%
+      );
+    background-size: 100% 100%, 100% 100%;
+    box-shadow:
+      0 8px 18px -10px rgba(15, 23, 42, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transform: none;
+    transition: none;
+  }
+
+  .test-landing-cta-invite:hover,
+  .test-landing-cta-invite:active,
+  .test-landing-cta-invite.is-pressing {
+    transform: none;
+  }
+
+  .test-landing-cta-invite.is-pressing::after {
+    animation: none;
   }
 
   .guest-hiw-mantra-accent {

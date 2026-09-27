@@ -2,7 +2,8 @@
   GuestHowGamlishWorksCopy,
   GuestLandingZoneMockCopy,
 } from "@/src/lib/guest-how-it-works-types";
-import { lifetimePaidProofLine } from "@/src/lib/monthly-offer-copy";
+import { playersPlayingProofLine } from "@/src/lib/monthly-offer-copy";
+import { PLAYERS_PLAYING_PROOF_FLOOR } from "@/src/lib/demo-social-proof";
 
 export type {
   GuestHowGamlishWorksCopy,
@@ -155,8 +156,9 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     ctaPreOrderSub: "45-day full access · pay with bKash",
     stickyCta: "Play Free Demo",
     stickyPreOrder: "VIP access",
-    socialProofFallback: lifetimePaidProofLine("en"),
-    socialProofLine: () => lifetimePaidProofLine("en"),
+    socialProofFallback: playersPlayingProofLine(PLAYERS_PLAYING_PROOF_FLOOR, "en"),
+    socialProofLine: (n) =>
+      playersPlayingProofLine(Number.parseInt(n ?? "0", 10) || 0, "en"),
     comparisonEyebrow: "Gamlish is different",
     comparisonTitle: "Stop studying. Start playing.",
     comparisonOldTitle: "Old way",
@@ -277,8 +279,9 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     ctaPreOrderSub: "45 দিনের পূর্ণ অ্যাক্সেস · bKash দিয়ে পেমেন্ট",
     stickyCta: "ফ্রি ডেমো খেলুন",
     stickyPreOrder: "VIP অ্যাক্সেস",
-    socialProofFallback: lifetimePaidProofLine("bn"),
-    socialProofLine: () => lifetimePaidProofLine("bn"),
+    socialProofFallback: playersPlayingProofLine(PLAYERS_PLAYING_PROOF_FLOOR, "bn"),
+    socialProofLine: (n) =>
+      playersPlayingProofLine(Number.parseInt(n ?? "0", 10) || 0, "bn"),
     comparisonEyebrow: "Gamlish আলাদা",
     comparisonTitle: "মুখস্থ করা বাদ দিন। খেলে শিখুন।",
     comparisonOldTitle: "পুরনো উপায়",

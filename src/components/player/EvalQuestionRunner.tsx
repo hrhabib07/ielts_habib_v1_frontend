@@ -28,6 +28,9 @@ import { cn } from "@/lib/utils";
 import { RearrangeWordTiles } from "@/src/components/player/RearrangeWordTiles";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useAutoAdvanceCorrect } from "@/src/hooks/useAutoAdvanceCorrect";
+import { trackFunnelEvent } from "@/src/lib/api/analytics";
+
+const MISSION_ONE_SLUG = "mission-01-word-order";
 import { useTypedAnswerAutofocus } from "@/src/hooks/useTypedAnswerAutofocus";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { PlayerUiCopy } from "@/src/lib/player-ui-copy";
@@ -804,6 +807,43 @@ export function EvalQuestionRunner({
   const isLast = currentIndex >= total - 1;
   const progressPct = total > 0 ? ((currentIndex + 1) / total) * 100 : 0;
   const questionId = currentQuestion ? String(currentQuestion.id) : "";
+
+  useEffect(() => {
+    if (missionSlug !== MISSION_ONE_SLUG || !questionId || isReview) return;
+    void trackFunnelEvent({
+      event: "mission_question",
+      screen: questionId.slice(0, 80),
+      step: Math.min(10, currentIndex + 1),
+      metadata: {
+        action: "viewed",
+        missionSlug,
+        stageOrder,
+        questionId,
+        questionIndex: currentIndex + 1,
+      },
+    });
+  }, [missionSlug, questionId, stageOrder, currentIndex, isReview]);
+
+  useEffect(() => {
+    if (missionSlug !== MISSION_ONE_SLUG || !questionId || isReview) return;
+    const onHide = () => {
+      if (document.visibilityState !== "hidden") return;
+      void trackFunnelEvent({
+        event: "mission_question",
+        screen: questionId.slice(0, 80),
+        step: Math.min(10, currentIndex + 1),
+        metadata: {
+          action: "left",
+          missionSlug,
+          stageOrder,
+          questionId,
+          questionIndex: currentIndex + 1,
+        },
+      });
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => document.removeEventListener("visibilitychange", onHide);
+  }, [missionSlug, questionId, stageOrder, currentIndex, isReview]);
   const currentAnswered =
     currentQuestion && isQuestionAnswered(currentQuestion, stageType, answers);
   const currentCheck = checkResults[questionId] ?? null;
@@ -832,6 +872,21 @@ export function EvalQuestionRunner({
       const persistItem = (item: PlayerEvalResumeItem) => {
         if (clientKey) upsertClientEvalResume(clientKey, item);
       };
+
+      if (!result.correct && missionSlug === MISSION_ONE_SLUG) {
+        void trackFunnelEvent({
+          event: "mission_question",
+          screen: questionId.slice(0, 80),
+          step: Math.min(10, currentIndex + 1),
+          metadata: {
+            action: "wrong",
+            missionSlug,
+            stageOrder,
+            questionId,
+            questionIndex: currentIndex + 1,
+          },
+        });
+      }
 
       if (result.correct) {
         setWrongAttemptCounts((prev) => {

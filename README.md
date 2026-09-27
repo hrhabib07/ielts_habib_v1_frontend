@@ -6,10 +6,11 @@ Next.js 14+ App Router app for [Gamlish](https://gamlish.com).
 
 ```bash
 cp .env.example .env.local
-# set NEXT_PUBLIC_API_BASE_URL=http://localhost:5050/api
 npm ci
 npm run dev
 ```
+
+The API example expects the backend on `http://localhost:5000/api`. Use Node.js 20 (same as Vercel and Railway).
 
 ## Production build
 

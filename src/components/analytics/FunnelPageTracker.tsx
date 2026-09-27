@@ -12,6 +12,7 @@ const TRACKED_PATHS = new Set([
   "/pricing",
   "/register",
   "/login",
+  "/checkout",
 ]);
 
 /**
@@ -29,7 +30,7 @@ export function FunnelPageTracker() {
     last.current = pathname;
     captureAndReadUtmAttribution();
     void trackFunnelEvent({
-      event: "page_view",
+      event: pathname === "/checkout" ? "checkout_opened" : "page_view",
       path: pathname,
       screen:
         pathname === "/"
@@ -38,7 +39,9 @@ export function FunnelPageTracker() {
             ? "landing_test"
             : pathname === "/demo"
               ? "demo_enter"
-              : pathname.replace(/^\//, "") || "home",
+              : pathname === "/checkout"
+                ? "checkout"
+                : pathname.replace(/^\//, "") || "home",
     });
   }, [pathname]);
 

@@ -29,11 +29,8 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Moon,
-  Sun,
 } from "lucide-react";
 import { TestStartCountdownOverlay } from "@/src/components/reading/TestStartCountdownOverlay";
-import { useTheme } from "@/src/components/shared/ThemeProvider";
 
 /** Flatten all questions from groups into one ordered array for step-by-step flow. */
 function flattenQuestions(
@@ -570,8 +567,6 @@ function QuizFlowOneByOne({
   const isLast = currentIndex === total - 1;
   const canSubmit = total > 0;
 
-  const { theme: uiTheme, toggleTheme } = useTheme();
-
   if (total === 0) return null;
 
   return (
@@ -582,19 +577,6 @@ function QuizFlowOneByOne({
             Question {currentIndex + 1} of {total}
           </span>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={uiTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              title="Theme"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-            >
-              {uiTheme === "dark" ? (
-                <Sun className="h-4 w-4" aria-hidden />
-              ) : (
-                <Moon className="h-4 w-4" aria-hidden />
-              )}
-            </button>
             <span className="tabular-nums text-indigo-700 dark:text-indigo-300">
               {Math.round(progressPercent)}%
             </span>
