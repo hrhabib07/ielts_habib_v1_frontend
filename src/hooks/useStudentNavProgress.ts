@@ -4,8 +4,10 @@ import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { resolveJourneyProgress } from "@/src/lib/journeyVisualProgress";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 
-export function useStudentNavProgress(enabled: boolean) {
-  const { profileSummary, loading: sessionLoading } = useStudentSession();
+export function useStudentNavProgress(enabled: boolean, defer = false) {
+  const { profileSummary, loading: sessionLoading } = useStudentSession(
+    enabled ? { summary: true, defer } : undefined,
+  );
 
   const loading = enabled && sessionLoading && profileSummary == null;
 

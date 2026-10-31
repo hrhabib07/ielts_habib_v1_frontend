@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { usePendingSubscriptionRequests } from "../hooks";
+import { PaymentDetails } from "./PaymentDetails";
 import {
   CheckCircle2,
   Clock,
@@ -123,15 +124,7 @@ export function PendingSubscriptionRequests() {
                       {planName(request)} · {request.paidAmount} BDT · {request.paymentMethod}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-foreground">
-                    <span>
-                      TrxID:{" "}
-                      <strong>{request.transactionId?.trim() || "-"}</strong>
-                    </span>
-                    <span className="text-muted-foreground">
-                      bKash {request.senderNumber || "-"}
-                    </span>
-                  </div>
+                  <PaymentDetails request={request} />
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
                     {new Date(request.createdAt).toLocaleString("en-GB", {

@@ -58,7 +58,6 @@ export interface AboutPageCopy {
   readonly ctaTitle: string;
   readonly ctaBody: string;
   readonly ctaPrimary: string;
-  readonly ctaSecondary: string;
   readonly faqTitle: string;
   readonly faq: readonly AboutFaqItem[];
   readonly disclaimer: string;
@@ -202,9 +201,8 @@ export const ABOUT_PAGE_COPY: Record<UiLocale, AboutPageCopy> = {
     founderRole: "Founder & Instructor, Gamlish",
     founderLocation: "Sylhet, Bangladesh",
     ctaTitle: "Start Your First Mission Today",
-    ctaBody: "Sixty seconds. No account needed for the free demo.",
-    ctaPrimary: "Play Free Demo",
-    ctaSecondary: "Create account",
+    ctaBody: "Level 1 is free. Start playing in 60 seconds.",
+    ctaPrimary: "Start free trial",
     faqTitle: "Frequently Asked Questions",
     faq: [
       {
@@ -366,9 +364,8 @@ export const ABOUT_PAGE_COPY: Record<UiLocale, AboutPageCopy> = {
     founderRole: "Founder & Instructor, Gamlish",
     founderLocation: "Sylhet, Bangladesh",
     ctaTitle: "আপনার প্রথম Mission আজই শুরু করুন",
-    ctaBody: "60 সেকেন্ড · ফ্রি ডেমোর জন্য অ্যাকাউন্ট লাগবে না",
-    ctaPrimary: "ফ্রি ডেমো খেলুন",
-    ctaSecondary: "অ্যাকাউন্ট খুলুন",
+    ctaBody: "লেভেল 1 ফ্রি · 60 সেকেন্ডেই খেলা শুরু করুন",
+    ctaPrimary: "ফ্রি ট্রায়াল শুরু করুন",
     faqTitle: "Frequently Asked Questions (FAQ)",
     faq: [
       {

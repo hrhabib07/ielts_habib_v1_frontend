@@ -31,8 +31,8 @@ export function playersPlayingProofLine(
   );
   const label = localizeDigits(count, locale);
   return locale === "bn"
-    ? `${label}+ জন শিক্ষার্থী ইতিমধ্যে এই গেম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।`
-    : `${count}+ students have already started playing this game. Start now.`;
+    ? `${label}+ জন শিক্ষার্থী ইতিমধ্যে জয়েন করেছে`
+    : `${count}+ students have already joined`;
 }
 
 export function monthLabelFromPricing(

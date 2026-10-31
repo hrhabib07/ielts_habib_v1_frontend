@@ -10,6 +10,7 @@ import {
   applyClearedAuthCookies,
   applyClearedForceLogoutCookie,
 } from "@/src/lib/auth-cookie";
+import { resolveHomeEntryRedirect } from "@/src/lib/home-entry-redirect";
 
 const AUTH_ROUTES = [
   "/login",
@@ -78,6 +79,20 @@ export async function middleware(request: NextRequest) {
   };
 
   const verifiedUser = token ? await resolveMiddlewareUser(token) : null;
+
+  // Signed-in visits to `/` leave for their own home.
+  // The redirect is private so it cannot be stored and shown to someone else.
+  if (pathname === "/" && verifiedUser) {
+    const destination = await resolveHomeEntryRedirect({
+      role: verifiedUser.role,
+      token: token ?? null,
+    });
+    if (destination) {
+      const res = NextResponse.redirect(new URL(destination, request.url));
+      res.headers.set("Cache-Control", "private, no-store");
+      return attachLegacyCleanup(res);
+    }
+  }
 
   if (isAuthRoute) {
     // Stale JWT may still be on this request; loggedOut handling above already ran.

@@ -16,6 +16,7 @@ import {
 import type { PlayerCampMap, PlayerCourseMap, PlayerMapMission } from "@/src/lib/api/player";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { englishLevelShortTitle } from "@/src/lib/ui-locale";
 import { PlayerSubscribeModal } from "@/src/components/player/PlayerSubscribeModal";
 import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
 import { XpGainToaster } from "@/src/components/player/XpGainToaster";
@@ -101,8 +102,7 @@ function formatDisplayTitle(title: string): string {
 }
 
 function missionShortTitle(title: string): string {
-  const match = title.match(/^Mission\s+\d+\s*(?:\[Inspection\])?\s*:\s*(.+)$/i);
-  return match?.[1]?.trim() ?? title;
+  return englishLevelShortTitle(title);
 }
 
 const PREVIEW_MISSION_SLUG = "mission-02-meet-the-words";
@@ -483,6 +483,11 @@ export function CampMapView({
       <div className="relative mx-auto max-w-lg space-y-7 px-4 pt-4 pb-6 sm:max-w-2xl sm:space-y-9 sm:pt-5 sm:pb-8">
         <p className="rounded-2xl border border-sky-400/30 bg-sky-400/10 px-4 py-3 text-center text-sm font-semibold text-sky-900 dark:text-sky-100">
           {PLAYER_UI.roadmapTapHint}
+        </p>
+        <p className="text-center text-sm">
+          <Link href="/player/weakness" className="font-bold text-primary">
+            দুর্বলতা দেখুন
+          </Link>
         </p>
         <LeaderboardArenaPromo />
         <CampMapCertificateBanner />

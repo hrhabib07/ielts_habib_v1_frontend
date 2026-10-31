@@ -1,62 +1,28 @@
 import { redirect } from "next/navigation";
 import { HomeHero } from "@/src/components/home/HomeHero";
 import {
-  getCurrentUser,
   getBearerTokenFromCookie,
+  getCurrentUser,
 } from "@/src/lib/auth-server";
-import { getRedirectPathForRole, getStudentHomeHref } from "@/src/lib/auth-redirects";
-import { fetchStudentProfileServer } from "@/src/lib/api/server-profile";
-import { isStudentLearningReady, needsProfileMigration } from "@/src/lib/student-learning-gate";
-import { ENABLE_READING, PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
+import { resolveHomeEntryRedirect } from "@/src/lib/home-entry-redirect";
 
+/**
+ * Signed-in visits leave before the guest homepage renders.
+ * Middleware does the same redirect when it runs. This page check stays
+ * so a student still leaves even if middleware does not run.
+ */
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const initialUser = await getCurrentUser();
-
-  // Logged-in students go straight to the mission roadmap (Duolingo-style home).
-  if (initialUser?.role === "STUDENT") {
-    // English-first mode: skip /students/me on `/`  -  /player already gates
-    // username claim and learning readiness on the client.
-    if (!ENABLE_READING) {
-      redirect(PRIMARY_STUDENT_HREF);
-    }
-
+  if (initialUser) {
     const token = await getBearerTokenFromCookie();
-    if (token) {
-      const result = await fetchStudentProfileServer(token);
-      if (result.status === "ok" && result.profile) {
-        if (
-          needsProfileMigration(result.profile) ||
-          !isStudentLearningReady(result.profile)
-        ) {
-          redirect(
-            needsProfileMigration(result.profile)
-              ? "/onboarding?migrate=1"
-              : "/onboarding",
-          );
-        }
-        redirect(getStudentHomeHref(result.profile.needsUsername === true));
-      } else if (result.status === "ok" && !result.profile) {
-        redirect("/onboarding");
-      }
-    }
-    redirect(getStudentHomeHref(false));
+    const destination = await resolveHomeEntryRedirect({
+      role: initialUser.role,
+      token,
+    });
+    if (destination) redirect(destination);
   }
 
-  const roleCtaHref = initialUser ? getRedirectPathForRole(initialUser.role) : null;
-  const roleCtaLabel =
-    initialUser?.role === "ADMIN"
-      ? "Go to Admin Panel"
-      : initialUser?.role === "INSTRUCTOR"
-        ? "Go to Dashboard"
-        : null;
-
-  return (
-    <HomeHero
-      initialUser={initialUser}
-      roleCtaHref={roleCtaHref}
-      roleCtaLabel={roleCtaLabel}
-    />
-  );
+  return <HomeHero />;
 }

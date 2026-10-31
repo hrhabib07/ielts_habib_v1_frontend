@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { runWhenIdle, useStudentSession } from "@/src/contexts/StudentSessionContext";
 import {
   getPlayerCourseMap,
   type PlayerCourseMap,
@@ -38,9 +38,13 @@ import { getStudentDisplayName } from "@/src/lib/student-display-name";
  * (even if Mission 01 / QA English access is already open).
  */
 export function StudentEnglishHome() {
-  const { isFoundingMember, profile, loading: sessionLoading } =
-    useStudentSession();
-  const payment = usePaymentApplicationStatus(true);
+  const {
+    isFoundingMember,
+    profile,
+    profileStatus,
+    ensure,
+  } = useStudentSession();
+  const payment = usePaymentApplicationStatus(true, true);
   const { locale } = useUiLocale();
   const copy = useStudentHomeCopy();
   const reduceMotion = useReducedMotion();
@@ -63,30 +67,35 @@ export function StudentEnglishHome() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    ensure("profile");
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [ensure]);
 
   useEffect(() => {
     let cancelled = false;
-    getFounderCounter()
-      .then((counter) => {
-        if (cancelled) return;
-        if (Array.isArray(counter.tiers) && counter.tiers.length > 0) {
-          setFounderTiers(counter.tiers);
-        }
-        if (counter.launchDateIso) setFounderDeadline(counter.launchDateIso);
-      })
-      .catch(() => {
-        /* card falls back to default Gold progress */
-      });
+    const cancelIdle = runWhenIdle(() => {
+      getFounderCounter()
+        .then((counter) => {
+          if (cancelled) return;
+          if (Array.isArray(counter.tiers) && counter.tiers.length > 0) {
+            setFounderTiers(counter.tiers);
+          }
+          if (counter.launchDateIso) setFounderDeadline(counter.launchDateIso);
+        })
+        .catch(() => {
+          /* card falls back to default Gold progress */
+        });
+    });
     return () => {
       cancelled = true;
+      cancelIdle();
     };
   }, []);
 
-  const paymentBusy = sessionLoading || payment.loading;
+  const profilePending = profileStatus === "idle" || profileStatus === "loading";
+  const paymentBusy = profilePending || payment.loading;
   const hasPaidOrPending =
     payment.hasPurchased ||
     isFoundingMember ||

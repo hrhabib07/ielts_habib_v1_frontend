@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/src/hooks/usePrefersReducedMotion";
 import {
   cloudinaryCardLoader,
   cloudinaryHeroLoader,
@@ -32,7 +32,7 @@ export function TestLandingMedia({
   imageClassName,
 }: TestLandingMediaProps) {
   const isLightSkeleton = skeletonTone === "light";
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const imageRef = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
   const lqip = cloudinaryLqipUrl(src);

@@ -13,6 +13,8 @@ import {
   type AdminLearnedAnswer,
   type EquivalentCallOutcome,
 } from "@/src/lib/api/adminPlayer";
+import { getMissedQuestions, type MissedMission } from "@/src/lib/api/weeklyDecision";
+import { MissedQuestionsByMission } from "@/src/features/admin/components/MissedQuestionsByMission";
 import { cn } from "@/lib/utils";
 
 function formatWhen(iso: string): string {
@@ -139,16 +141,26 @@ function LearnedRow({ row, onDeleted }: { row: AdminLearnedAnswer; onDeleted: ()
 
 export default function AdminAnswerChecksPage() {
   const [data, setData] = useState<AdminEquivalentDashboard | null>(null);
+  const [missed, setMissed] = useState<MissedMission[] | null>(null);
+  const [missError, setMissError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setMissError(false);
     try {
       setData(await getAdminEquivalentLog());
     } catch {
       setError("Could not load answer checks. Log in as admin.");
+    }
+    try {
+      const misses = await getMissedQuestions();
+      setMissed(misses.missions);
+    } catch {
+      setMissed(null);
+      setMissError(true);
     } finally {
       setLoading(false);
     }
@@ -187,6 +199,17 @@ export default function AdminAnswerChecksPage() {
       {error ? (
         <Card className="border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">{error}</Card>
       ) : null}
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-foreground">Misses by mission</h2>
+        <p className="text-sm text-muted-foreground">
+          Last 14 days. If many students miss the same question, open that mission and fix the question. Do not change the homepage for this.
+        </p>
+        {missError ? (
+          <p className="text-sm text-destructive">Could not group misses by mission.</p>
+        ) : null}
+        {missed ? <MissedQuestionsByMission missions={missed} /> : null}
+      </section>
 
       {data ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

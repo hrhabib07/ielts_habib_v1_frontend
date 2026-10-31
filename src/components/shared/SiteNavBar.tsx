@@ -33,6 +33,8 @@ import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
 import { shouldUseGuestLandingNav } from "@/src/lib/guest-nav-paths";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { LanguageSwitch } from "@/src/features/chat-lesson/components/LessonChrome";
+import { setLessonLanguage, useLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
 
 import {
   ENABLE_READING,
@@ -60,10 +62,15 @@ export function SiteNavBar(props: {
 }) {
   const { initialUser = null, className, embedded = false } = props;
   const pathname = usePathname() ?? "";
+  const lessonLang = useLessonLanguage();
   const [clientUser, setClientUser] = useState<{ role: UserRole; userId: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isFoundingMember, profile } = useStudentSession();
+  const { isFoundingMember, profile } = useStudentSession({
+    profile: true,
+    subscription: true,
+    defer: true,
+  });
   const publicHandle =
     profile?.publicHandle ?? profile?.username ?? profile?.publicId ?? null;
   const shell = useSiteShellCopy();
@@ -80,7 +87,7 @@ export function SiteNavBar(props: {
     overallProgressPct,
     journeyLabel,
     levelsCompletedCount,
-  } = useStudentNavProgress(isStudent);
+  } = useStudentNavProgress(isStudent, true);
 
   const navProgressBarStyle = journeyProgressBarStyle(overallProgressPct);
 
@@ -252,6 +259,8 @@ export function SiteNavBar(props: {
             navBrandCompact && "gap-1.5",
           )}
         >
+          {isPlayerArea ? <LanguageSwitch lang={lessonLang} onChange={setLessonLanguage} /> : null}
+
           {isStudent && streak && (
             <div
               className="hidden items-center gap-1 rounded-full bg-sky-500/10 px-2 py-1 text-xs font-semibold text-sky-800 ring-1 ring-sky-500/15 dark:bg-sky-400/10 dark:text-sky-300 dark:ring-sky-400/20 lg:flex"

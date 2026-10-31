@@ -14,6 +14,7 @@ import {
   RejectSubscriptionDialog,
   type RejectSubscriptionPayload,
 } from "./RejectSubscriptionDialog";
+import { PaymentDetails } from "./PaymentDetails";
 
 export function SubscriptionRequestsTable() {
   const [requests, setRequests] = useState<SubscriptionRequestItem[]>([]);
@@ -126,7 +127,7 @@ export function SubscriptionRequestsTable() {
                 <th className="p-4 font-medium">User</th>
                 <th className="p-4 font-medium">Plan</th>
                 <th className="p-4 font-medium">Amount</th>
-                <th className="p-4 font-medium">TrxID / bKash</th>
+                <th className="p-4 font-medium">Payment</th>
                 <th className="p-4 font-medium">Status</th>
                 <th className="p-4 font-medium">Date</th>
                 {(filter === "PENDING" || !filter) && (
@@ -150,12 +151,7 @@ export function SubscriptionRequestsTable() {
                     <td className="p-4 text-muted-foreground">{planName(r)}</td>
                     <td className="p-4">{r.paidAmount} BDT</td>
                     <td className="p-4">
-                      <div className="font-mono text-xs font-semibold text-foreground">
-                        {r.transactionId?.trim() || "-"}
-                      </div>
-                      <div className="mt-0.5 text-xs text-muted-foreground">
-                        {r.senderNumber ? `bKash ${r.senderNumber}` : "-"}
-                      </div>
+                      <PaymentDetails request={r} />
                     </td>
                     <td className="p-4">
                       <span

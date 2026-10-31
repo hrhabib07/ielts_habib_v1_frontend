@@ -1,7 +1,7 @@
 "use client";
 
 import { Sparkles } from "lucide-react";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/src/hooks/usePrefersReducedMotion";
 import { TestLandingMedia } from "@/src/components/home/test-landing/TestLandingMedia";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
 import { cn } from "@/lib/utils";
@@ -23,7 +23,7 @@ export function TestLandingHeroCompareVisual({
   className?: string;
   mediaClassName?: string;
 }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const { copy } = useTestLandingCopy();
 
   return (

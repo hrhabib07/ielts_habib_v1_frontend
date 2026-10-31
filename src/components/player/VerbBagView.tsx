@@ -161,7 +161,7 @@ function PracticePanel({
     return (
       <p className="py-10 text-center text-sm text-white/50">
         {locale === "bn"
-          ? "আগে মিশন থেকে Verb Pack আনলক করো।"
+          ? "আগে লেভেল থেকে Verb Pack আনলক করো।"
           : "Unlock a Verb Pack from a mission first."}
       </p>
     );
@@ -264,7 +264,7 @@ export function VerbBagView() {
           </h1>
           <p className="mt-2 text-sm text-white/60">
             {locale === "bn"
-              ? "মিশন থেকে আনলক করা verb কার্ড। প্র্যাকটিস করো, দুর্বল জায়গা ঠিক করো।"
+              ? "লেভেল থেকে আনলক করা verb কার্ড। প্র্যাকটিস করো, দুর্বল জায়গা ঠিক করো।"
               : "Cards unlocked from mission Verb Packs. Practice anytime and fix weak spots."}
           </p>
         </header>
@@ -371,8 +371,8 @@ export function VerbBagView() {
             </p>
             <p className="mt-2 text-sm text-white/55">
               {locale === "bn"
-                ? "Mission 06-এর Verb Pack Boss পাশ করলে প্রথম 10টি কার্ড আসবে।"
-                : "Clear Mission 06 Verb Pack Boss to unlock your first 10 cards."}
+                ? "Level 06-এর Verb Pack Boss পাশ করলে প্রথম 10টি কার্ড আসবে।"
+                : "Clear Level 06 Verb Pack Boss to unlock your first 10 cards."}
             </p>
             <Button asChild className="mt-4 rounded-full">
               <Link href="/player/missions/mission-06-action-words">Open Mission 06</Link>

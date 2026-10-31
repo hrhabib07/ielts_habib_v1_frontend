@@ -208,8 +208,8 @@ export function GuestComparisonSection() {
             <div className="relative mt-8 flex items-center justify-between border-t border-white/10 pt-5">
               <p className="text-[12px] font-medium text-slate-400">
                 {isBn
-                  ? "মিশন → XP → আনলক → আবার খেলো"
-                  : "Mission → XP → unlock → play again"}
+                  ? "লেভেল → XP → আনলক → আবার খেলো"
+                  : "Level → XP → unlock → play again"}
               </p>
               <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-sky-400">
                 {isBn ? "লুপ" : "Loop"}

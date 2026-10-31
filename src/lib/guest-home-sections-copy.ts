@@ -71,7 +71,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       eyebrow: "What you get if you join",
       title:
         "In 4 weeks · what you think in Bangla, you express in correct English",
-      sub: "21 missions · game-like practice · write, get corrected, level up",
+      sub: "21 levels · game-like practice · write, get corrected, level up",
       weekOutcomes: [
         {
           label: "Week 1 · Foundation",
@@ -91,7 +91,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
         },
       ],
       missionLoop:
-        "Every mission: lesson · guided writing · instant correction · XP",
+        "Every level: lesson · guided writing · instant correction · XP",
       whyNow:
         "You can start today. Build the English skill you actually need.",
       ctaPrimary: "You can do this too · Start now",
@@ -106,7 +106,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
     problemOptions: "I went? Did I went? Did I go?",
     problemP3:
       "That hesitation proves the problem is not your intelligence. The real problem is our traditional teaching system. You were taught rules and memorization, but you were never given guided daily practice. Gamlish was built to change that forever.",
-    transformTitle: "What You Will Achieve After 21 Missions",
+    transformTitle: "What You Will Achieve After 21 Levels",
     transformSub:
       "No rote memorization. Just the practical confidence to write correct English in real life.",
     transformCards: [
@@ -137,11 +137,11 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
     ],
     roadmapTitle: "Your Step-by-Step Roadmap to Mastery",
     roadmapSub:
-      "We divided the English language into 4 structured Camps and 21 manageable Missions.",
+      "We divided the English language into 4 structured Camps and 21 manageable Levels.",
     camps: [
       {
         badge: "Camp 01",
-        title: "Camp 01: The Foundation (Missions 1 to 5)",
+        title: "Camp 01: The Foundation (Levels 1 to 5)",
         body: "Master the absolute basics of English sentence structure, word order vs Bangla, subject-verb agreement, Be verbs, articles, and common prepositions.",
         skills: [
           "Word order vs Bangla",
@@ -153,7 +153,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         badge: "Camp 02",
-        title: "Camp 02: Action Kingdom (Missions 6 to 11)",
+        title: "Camp 02: Action Kingdom (Levels 6 to 11)",
         body: "Understand regular and irregular verbs, master simple tenses, and learn how to build negative sentences and questions for real-life conversations.",
         skills: [
           "Regular & irregular verbs",
@@ -165,7 +165,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         badge: "Camp 03",
-        title: "Camp 03: Time Travel (Missions 12 to 16)",
+        title: "Camp 03: Time Travel (Levels 12 to 16)",
         body: "Dive deep into continuous and perfect tenses. Stop memorizing boring formulas and learn how to choose the right tense based on real-world situations.",
         skills: [
           "Continuous tenses",
@@ -176,7 +176,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         badge: "Camp 04",
-        title: "Camp 04: Real English (Missions 17 to 21)",
+        title: "Camp 04: Real English (Levels 17 to 21)",
         body: "Master advanced sentence structures, passive voice, indirect speech, and complex sentences. Finish with the Final Inspection by writing a complete paragraph.",
         skills: [
           "Passive voice",
@@ -186,7 +186,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
         ],
       },
     ],
-    engineTitle: "How Every Gamlish Mission Works",
+    engineTitle: "How Every Gamlish Level Works",
     engineSub:
       "We turned complex grammar practice into a simple, highly addictive learning cycle.",
     engineSteps: [
@@ -200,7 +200,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         title: "3. Earn XP & Level Up",
-        body: "Get instant feedback explaining why an answer is right or wrong. Earn XP, unlock new missions, and climb the leaderboard with your Squad.",
+        body: "Get instant feedback explaining why an answer is right or wrong. Earn XP, unlock new levels, and climb the leaderboard with your Squad.",
       },
     ],
     compareTitle: "Why Gamlish is Different From Traditional Methods",
@@ -222,13 +222,13 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
         feature: "Learning Format",
         traditional: "Long lectures and heavy textbooks",
         apps: "Short random quizzes without context",
-        gamlish: "Step-by-step missions and guided sentence building",
+        gamlish: "Step-by-step levels and guided sentence building",
       },
       {
         feature: "Roadmap",
         traditional: "Rigid academic syllabus",
         apps: "No structured foundation",
-        gamlish: "4 structured Camps and 21 sequential Missions",
+        gamlish: "4 structured Camps and 21 sequential Levels",
       },
       {
         feature: "Final Result",
@@ -245,7 +245,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
     faq: [
       {
         q: "What is Gamlish and how does it work?",
-        a: "Gamlish is a gamified, structured English learning platform. By completing 4 Camps and 21 bite-sized Missions, you build a strong foundation in English grammar, sentence structure, and writing skills through daily interactive practice.",
+        a: "Gamlish is a gamified, structured English learning platform. By completing 4 Camps and 21 bite-sized Levels, you build a strong foundation in English grammar, sentence structure, and writing skills through daily interactive practice.",
       },
       {
         q: "Is Gamlish suitable for complete beginners?",
@@ -257,7 +257,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         q: "How much time do I need to spend every day?",
-        a: "It depends on your goal. If you want to complete the foundation in about one month, plan for 45 to 60 minutes a day. If you prefer a 3 to 4 month pace, you can practice less each day and still finish strong. Missions stay focused either way.",
+        a: "It depends on your goal. If you want to complete the foundation in about one month, plan for 45 to 60 minutes a day. If you prefer a 3 to 4 month pace, you can practice less each day and still finish strong. Levels stay focused either way.",
       },
       {
         q: "Can I use Gamlish on my smartphone?",
@@ -270,7 +270,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       eyebrow: "যোগ দিলে আপনি যা পাবেন",
       title:
         "4 সপ্তাহে · বাংলায় যা ভাববেন, ইংরেজিতে সঠিকভাবে প্রকাশ করবেন",
-      sub: "21টি মিশন · গেমের মতো অনুশীলন · লিখুন, শুধরে নিন, লেভেল আপ করুন",
+      sub: "21টি লেভেল · গেমের মতো অনুশীলন · লিখুন, শুধরে নিন, লেভেল আপ করুন",
       weekOutcomes: [
         {
           label: "Week 1 · Foundation",
@@ -290,7 +290,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
         },
       ],
       missionLoop:
-        "প্রতিটি মিশনে: লেসন · guided writing · instant correction · XP",
+        "প্রতিটি লেভেলে: লেসন · guided writing · instant correction · XP",
       whyNow:
         "আজই শুরু করতে পারেন। যে ইংরেজি দক্ষতা আপনার সত্যিই দরকার, সেটাই গড়ুন।",
       ctaPrimary: "আপনিও পারবেন · এখনই শুরু করুন",
@@ -306,7 +306,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
     problemOptions: "I went? Did I went? Did I go?",
     problemP3:
       "এই কয়েক সেকেন্ডের দ্বিধাই বলে দেয়, সমস্যাটা আপনার মেধার নয়, সমস্যাটা আমাদের গতানুগতিক শেখানোর পদ্ধতির। আপনাকে শেখানো হয়েছে নিয়ম এবং মুখস্থ, কিন্তু করানো হয়নি বাস্তব অনুশীলন। Gamlish তৈরি হয়েছে এই সমস্যার স্থায়ী সমাধানের জন্য।",
-    transformTitle: "21টি Mission শেষ করার পর আপনি কী অর্জন করবেন?",
+    transformTitle: "21টি লেভেল শেষ করার পর আপনি কী অর্জন করবেন?",
     transformSub:
       "মুখস্থ গ্রামার নয়, বাস্তবে নির্ভুল ইংরেজি লেখার সত্যিকারের আত্মবিশ্বাস।",
     transformCards: [
@@ -328,7 +328,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         title: "IELTS ও Spoken এর শক্ত ভিত্তি",
-        body: "স্পিকিং বা অ্যাডভান্সড রাইটিং শুরুর আগে যে মজবুত Foundation প্রয়োজন, এই 21টি মিশন আপনাকে ঠিক সেই ভিত্তি এনে দেবে।",
+        body: "স্পিকিং বা অ্যাডভান্সড রাইটিং শুরুর আগে যে মজবুত Foundation প্রয়োজন, এই 21টি লেভেল আপনাকে ঠিক সেই ভিত্তি এনে দেবে।",
       },
       {
         title: "নিয়মিত শেখার স্থায়ী অভ্যাস",
@@ -337,11 +337,11 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
     ],
     roadmapTitle: "আপনার ইংরেজি শেখার পরিষ্কার রোডম্যাপ",
     roadmapSub:
-      "আমরা পুরো কারিকুলামকে ভাগ করেছি 4টি Camp এবং 21টি সহজ ও কার্যকর Mission এ।",
+      "আমরা পুরো কারিকুলামকে ভাগ করেছি 4টি Camp এবং 21টি সহজ ও কার্যকর Level এ।",
     camps: [
       {
         badge: "Camp 01",
-        title: "Camp 01: The Foundation (মিশন 1 থেকে 5)",
+        title: "Camp 01: The Foundation (লেভেল 1 থেকে 5)",
         body: "বাংলা ও ইংরেজি বাক্যের Word Order এর পার্থক্য, Subject-Verb, Be Verb, Articles এবং Prepositions এর সঠিক ও ব্যবহারিক ভিত্তি গঠন।",
         skills: [
           "Word Order এর পার্থক্য",
@@ -353,7 +353,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         badge: "Camp 02",
-        title: "Camp 02: Action Kingdom (মিশন 6 থেকে 11)",
+        title: "Camp 02: Action Kingdom (লেভেল 6 থেকে 11)",
         body: "Verbs এর সঠিক রূপ, Simple Tenses, এবং বাস্তব কথোপকথনে প্রশ্ন করা ও নেগেটিভ বাক্য তৈরির সহজ কৌশল।",
         skills: [
           "Verbs এর রূপ",
@@ -365,7 +365,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         badge: "Camp 03",
-        title: "Camp 03: Time Travel (মিশন 12 থেকে 16)",
+        title: "Camp 03: Time Travel (লেভেল 12 থেকে 16)",
         body: "মুখস্থ ফর্মুলা নয়, বাস্তব পরিস্থিতি বুঝে Continuous ও Perfect Tenses এর সঠিক প্রয়োগ এবং বিভিন্ন Tense এর মধ্যে পার্থক্য বোঝার দক্ষতা।",
         skills: [
           "Continuous Tenses",
@@ -376,7 +376,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         badge: "Camp 04",
-        title: "Camp 04: Real English (মিশন 17 থেকে 21)",
+        title: "Camp 04: Real English (লেভেল 17 থেকে 21)",
         body: "Passive Voice, Indirect Speech, Complex Sentence এবং সবশেষে Final Inspection, যেখানে আপনি Paragraph Writing এর মাধ্যমে নিজের বাস্তব দক্ষতা প্রমাণ করবেন।",
         skills: [
           "Passive Voice",
@@ -386,7 +386,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
         ],
       },
     ],
-    engineTitle: "প্রতিটি Gamlish Mission যেভাবে কাজ করে",
+    engineTitle: "প্রতিটি Gamlish Level যেভাবে কাজ করে",
     engineSub:
       "কঠিন গ্রামার অনুশীলনকে আমরা পরিণত করেছি একটি সহজ এবং আনন্দদায়ক শেখার সাইকেলে।",
     engineSteps: [
@@ -422,13 +422,13 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
         feature: "শেখার মাধ্যম",
         traditional: "দীর্ঘ লেকচার ও ভারী বই",
         apps: "ছোট কিন্তু এলোমেলো কুইজ বা গেম",
-        gamlish: "ধাপে ধাপে সাজানো Mission ও ইন্টারেক্টিভ প্র্যাকটিস",
+        gamlish: "ধাপে ধাপে সাজানো Level ও ইন্টারেক্টিভ প্র্যাকটিস",
       },
       {
         feature: "কাঠামো",
         traditional: "কোর্স বা সিলেবাস অনুযায়ী",
         apps: "নির্দিষ্ট কোনো Foundation বা Roadmap ছাড়া",
-        gamlish: "4টি Camp এবং 21টি নির্দিষ্ট ও সাজানো Mission",
+        gamlish: "4টি Camp এবং 21টি নির্দিষ্ট ও সাজানো Level",
       },
       {
         feature: "ফলাফল",
@@ -439,13 +439,13 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
     ],
     founderBadge: "অভিজ্ঞ ইনস্ট্রাক্টরের তৈরি",
     founderQuote:
-      "2022 সালের মে মাস থেকে একজন IELTS ইনস্ট্রাক্টর হিসেবে শত শত শিক্ষার্থীর সঙ্গে কাজ করার অভিজ্ঞতা আমার হয়েছে। আমি দেখেছি: বেশিরভাগ শিক্ষার্থীর সমস্যা মেধা বা ইচ্ছাশক্তিতে নয়, সমস্যা হলো তাদের বেসিক Foundation এ। আমার নিজস্ব দীর্ঘদিনের টিচিং অভিজ্ঞতা এবং C1 Advanced English দক্ষতার ওপর ভিত্তি করেই Gamlish এর 4টি Camp এবং 21টি Mission তৈরি করা হয়েছে, যাতে বাংলাভাষী প্রতিটি মানুষ ভয়হীনভাবে সঠিক ইংরেজি শিখতে পারে।",
+      "2022 সালের মে মাস থেকে একজন IELTS ইনস্ট্রাক্টর হিসেবে শত শত শিক্ষার্থীর সঙ্গে কাজ করার অভিজ্ঞতা আমার হয়েছে। আমি দেখেছি: বেশিরভাগ শিক্ষার্থীর সমস্যা মেধা বা ইচ্ছাশক্তিতে নয়, সমস্যা হলো তাদের বেসিক Foundation এ। আমার নিজস্ব দীর্ঘদিনের টিচিং অভিজ্ঞতা এবং C1 Advanced English দক্ষতার ওপর ভিত্তি করেই Gamlish এর 4টি Camp এবং 21টি লেভেল তৈরি করা হয়েছে, যাতে বাংলাভাষী প্রতিটি মানুষ ভয়হীনভাবে সঠিক ইংরেজি শিখতে পারে।",
     founderSign: "মো. হাবিবুর রহমান, Founder & Instructor, Gamlish",
     faqTitle: "প্রায়শই জিজ্ঞাসিত প্রশ্নাবলী (FAQ)",
     faq: [
       {
         q: "Gamlish কী এবং এটি কীভাবে কাজ করে?",
-        a: "Gamlish একটি গেমভিত্তিক Structured English Learning প্ল্যাটফর্ম। এখানে আপনি 4টি Camp এবং 21টি ছোট ছোট Mission সম্পন্ন করার মাধ্যমে ইংরেজি গ্রামার, বাক্য গঠন এবং লেখার একটি শক্ত ভিত্তি তৈরি করতে পারবেন।",
+        a: "Gamlish একটি গেমভিত্তিক Structured English Learning প্ল্যাটফর্ম। এখানে আপনি 4টি Camp এবং 21টি ছোট ছোট Level সম্পন্ন করার মাধ্যমে ইংরেজি গ্রামার, বাক্য গঠন এবং লেখার একটি শক্ত ভিত্তি তৈরি করতে পারবেন।",
       },
       {
         q: "Gamlish কি নতুনদের (Beginners) জন্য উপযুক্ত?",
@@ -457,7 +457,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       },
       {
         q: "প্রতিদিন কতটুকু সময় দিতে হবে?",
-        a: "এটা আপনার লক্ষ্যের ওপর নির্ভর করে। এক মাসে ফাউন্ডেশন শেষ করতে চাইলে প্রতিদিন 45 থেকে 60 মিনিট অনুশীলন করুন। 3 থেকে 4 মাসে শিখতে চাইলে প্রতিদিন কম সময় দিয়েও ধারাবাহিকভাবে এগোতে পারবেন। Mission গুলো যেকোনো গতিতেই ফোকাসড রাখা হয়েছে।",
+        a: "এটা আপনার লক্ষ্যের ওপর নির্ভর করে। এক মাসে ফাউন্ডেশন শেষ করতে চাইলে প্রতিদিন 45 থেকে 60 মিনিট অনুশীলন করুন। 3 থেকে 4 মাসে শিখতে চাইলে প্রতিদিন কম সময় দিয়েও ধারাবাহিকভাবে এগোতে পারবেন। Level গুলো যেকোনো গতিতেই ফোকাসড রাখা হয়েছে।",
       },
       {
         q: "মোবাইল দিয়ে কি Gamlish ব্যবহার করা যাবে?",

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   AlertTriangle,
@@ -96,7 +97,7 @@ export function BkashCheckoutForm({
 }) {
   const copy = useCheckoutCopy();
   const { locale } = useUiLocale();
-  const { profile } = useStudentSession();
+  const { profile, subscription } = useStudentSession({ profile: true, subscription: true });
   const [senderNumber, setSenderNumber] = useState("");
   const [transactionId, setTransactionId] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -321,6 +322,18 @@ export function BkashCheckoutForm({
       setSubmitting(false);
     }
   };
+
+  if (subscription?.status === "ACTIVE") {
+    return (
+      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-6 text-center">
+        <p className="text-lg font-bold text-foreground">আপনি ইতিমধ্যে পেমেন্ট করেছেন।</p>
+        <p className="mt-2 text-sm text-muted-foreground">এই পেমেন্ট ফর্ম আর দেখানো হবে না।</p>
+        <Button asChild className="mt-4 rounded-full">
+          <Link href="/player">লেভেল খুলুন</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div

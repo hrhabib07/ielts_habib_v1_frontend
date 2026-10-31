@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { ABOUT_PAGE_COPY } from "@/src/lib/about-page-copy";
+import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
 import { FounderAvatar } from "@/src/components/shared/FounderAvatar";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
@@ -348,7 +349,7 @@ export function AboutContent() {
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
             {copy.ctaBody}
           </p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-6 flex justify-center">
             <Button
               size="lg"
               className={cn(
@@ -357,15 +358,7 @@ export function AboutContent() {
               )}
               asChild
             >
-              <Link href="/demo">{copy.ctaPrimary}</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-12 min-w-[11rem] rounded-2xl text-sm font-semibold"
-              asChild
-            >
-              <Link href="/register">{copy.ctaSecondary}</Link>
+              <Link href={TEST_LANDING_PRIMARY_HREF}>{copy.ctaPrimary}</Link>
             </Button>
           </div>
         </section>

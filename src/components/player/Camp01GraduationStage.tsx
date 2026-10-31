@@ -342,8 +342,8 @@ export function CampGraduationStage({
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {isBn
-              ? "তোমার ফেয়ার ক্যাম্প স্কোর (অনুশীলন + মিশন 5)"
-              : "Your fair camp score (practice + Mission 5)"}
+              ? "তোমার ফেয়ার ক্যাম্প স্কোর (অনুশীলন + লেভেল 5)"
+              : "Your fair camp score (practice + Level 5)"}
           </p>
           {outcome.scoreBreakdown ? (
             <div className="mt-4 grid grid-cols-2 gap-2 text-left text-xs sm:grid-cols-3">
@@ -362,7 +362,7 @@ export function CampGraduationStage({
               </div>
               <div className="rounded-xl border border-border/50 bg-background/60 px-3 py-2">
                 <p className="text-muted-foreground">
-                  {isBn ? "মিশন 5" : "Mission 5"}{" "}
+                  {isBn ? "লেভেল 5" : "Level 5"}{" "}
                   ({outcome.scoreBreakdown.inspectionWeightPercent}%)
                 </p>
                 <p className="mt-0.5 font-bold tabular-nums text-foreground">

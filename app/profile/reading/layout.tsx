@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser, getBearerTokenFromCookie } from "@/src/lib/auth-server";
 import { fetchStudentProfileServer } from "@/src/lib/api/server-profile";
 import { isStudentLearningReady, needsProfileMigration } from "@/src/lib/student-learning-gate";
+import { ENABLE_READING } from "@/src/lib/platform-config";
 import ReadingLayoutClient from "./ReadingLayoutClient";
 
 export default async function ReadingLayout({
@@ -9,6 +10,10 @@ export default async function ReadingLayout({
 }: {
   children: React.ReactNode;
 }) {
+  if (!ENABLE_READING) {
+    redirect("/player");
+  }
+
   const user = await getCurrentUser();
   if (user?.role === "STUDENT") {
     const token = await getBearerTokenFromCookie();

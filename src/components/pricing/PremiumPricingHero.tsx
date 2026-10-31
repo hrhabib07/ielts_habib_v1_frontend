@@ -28,10 +28,10 @@ import { useScholarshipDecayTimer } from "@/src/hooks/useScholarshipTimer";
 import { FounderCounterBanner } from "./FounderCounterBanner";
 
 const ENGLISH_FEATURES = [
-  { icon: Map, label: "All 4 camps & 21 missions" },
+  { icon: Map, label: "All 4 camps & 21 levels" },
   { icon: Gamepad2, label: "Story, video & evaluation levels" },
   { icon: LineChart, label: "XP, coins & camp progress" },
-  { icon: Trophy, label: "Mission 01 free before you upgrade" },
+  { icon: Trophy, label: "Level 01 free before you upgrade" },
 ] as const;
 
 interface PremiumPricingHeroProps {
@@ -91,7 +91,7 @@ export function PremiumPricingHero({
             Unlock the full Game of English
           </h1>
           <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Mission 01 is free. Upgrade once to open every camp, mission, and evaluation for the
+            Level 01 is free. Upgrade once to open every camp, level, and evaluation for the
             full course period.
           </p>
         </div>
@@ -183,7 +183,7 @@ export function PremiumPricingHero({
                 className={cn("h-14 min-w-[280px] rounded-full px-8 text-base font-bold", brandSurfaces.ctaButton)}
                 asChild
               >
-                <Link href="/register">Create account · Mission 01 free</Link>
+                <Link href="/register">Create account · Level 01 free</Link>
               </Button>
               <Link
                 href="/login"

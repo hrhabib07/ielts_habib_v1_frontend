@@ -9,26 +9,26 @@ import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleSta
 
 const PROGRESS_COPY = {
   en: {
-    missionsDone: "Missions completed",
+    missionsDone: "English levels completed",
     courseProgress: "Course progress",
     continue: "Continue playing",
-    resume: "Resume mission",
+    resume: "Resume level",
     openMap: "Open camp map",
-    empty: "Start Mission 01 to see your progress here.",
-    start: "Start Mission 01",
+    empty: "Start Level 01 to see your progress here.",
+    start: "Start Level 01",
     camps: "Camps unlocked",
-    freeMission: "Mission 01 is free",
+    freeMission: "Level 01 is free",
   },
   bn: {
-    missionsDone: "মিশন সম্পন্ন",
+    missionsDone: "ইংরেজি লেভেল সম্পন্ন",
     courseProgress: "কোর্স প্রোগ্রেস",
     continue: "খেলা চালিয়ে যান",
-    resume: "মিশন চালিয়ে যান",
+    resume: "লেভেল চালিয়ে যান",
     openMap: "ক্যাম্প ম্যাপ খুলুন",
-    empty: "প্রোগ্রেস দেখতে Mission 01 শুরু করুন।",
-    start: "Mission 01 শুরু করুন",
+    empty: "প্রোগ্রেস দেখতে Level 01 শুরু করুন।",
+    start: "Level 01 শুরু করুন",
     camps: "আনলক করা ক্যাম্প",
-    freeMission: "Mission 01 ফ্রি",
+    freeMission: "Level 01 ফ্রি",
   },
 } as const;
 
@@ -129,7 +129,7 @@ export function ProfileEnglishSummarySection() {
         <StatCard
           icon={Gamepad2}
           label={locale === "bn" ? "পরবর্তী মিশন" : "Next mission"}
-          value={stats.nextMission?.title?.replace("Mission ", "M") ?? "M01"}
+          value={stats.nextMission?.title?.replace(/^(Mission|Level)\s+/i, "L") ?? "L01"}
         />
       </div>
 

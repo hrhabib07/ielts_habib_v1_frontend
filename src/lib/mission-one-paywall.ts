@@ -62,25 +62,25 @@ export function praiseBand(percent: number | null): "high" | "mid" | "low" {
 }
 
 export const MISSION_ONE_PAYWALL_COPY = {
-  headline: "মিশন 02 এখানেই থেমে আছে",
+  headline: "লেভেল 02 এখানেই থেমে আছে",
   praise: {
-    high: "তুমি শুরু করেছ। এই মিশন এখনো শেষ হয়নি।",
-    mid: "তুমি শুরু করেছ। এই মিশন এখনো শেষ হয়নি।",
-    low: "তুমি শুরু করেছ। এই মিশন এখনো শেষ হয়নি।",
+    high: "তুমি শুরু করেছ। এই লেভেল এখনো শেষ হয়নি।",
+    mid: "তুমি শুরু করেছ। এই লেভেল এখনো শেষ হয়নি।",
+    low: "তুমি শুরু করেছ। এই লেভেল এখনো শেষ হয়নি।",
   },
   nextStep: "পরের ধাপ",
   progressLabel: (done: number, total: number) =>
-    `যাত্রা মাত্র শুরু · ${total}টির মধ্যে ${done}টি মিশন সম্পন্ন`,
-  gapTitle: (locked: number) => `বাকি ${locked}টি মিশন এখনো বন্ধ`,
+    `যাত্রা মাত্র শুরু · ${total}টির মধ্যে ${done}টি লেভেল সম্পন্ন`,
+  gapTitle: (locked: number) => `বাকি ${locked}টি লেভেল এখনো বন্ধ`,
   gapBody:
-    "Mission 2 এর শুরুটা খোলা। বাকিটা অসম্পূর্ণ। একবার পেমেন্টে পুরো গেম খুলবে।",
+    "Level 2 এর শুরুটা খোলা। বাকিটা অসম্পূর্ণ। একবার পেমেন্টে পুরো গেম খুলবে।",
   unlockHow: "কীভাবে আনলক করব?",
   cta: "1590 টাকায় পুরো গেম খুলুন",
-  clarifier: "একবার 1590 টাকা। 45 দিন। বাকি মিশন খুলবে। কোনো ছাড় নেই।",
+  clarifier: "একবার 1590 টাকা। 45 দিন। বাকি লেভেল খুলবে। কোনো ছাড় নেই।",
   later: "পরে দেখব",
   scoreLabel: (percent: number, correct: number, total: number) =>
     `স্কোর: ${percent}% · সঠিক: ${correct}/${total}`,
-  scoreFallback: "মিশন 01 শেষ করেছ · এখন পূর্ণ পথের দিকে এগোও",
+  scoreFallback: "লেভেল 01 শেষ করেছ · এখন পূর্ণ পথের দিকে এগোও",
   checkoutHref: "/checkout?course=english-foundations&from=mission-01-complete",
   gateCheckoutHref: "/checkout?course=english-foundations&from=paid-mission-unlock",
 } as const;

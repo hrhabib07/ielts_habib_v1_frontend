@@ -13,7 +13,10 @@ import { useUiLocale } from "@/src/contexts/UiLocaleContext";
  * and a lighter tip for anyone who already has a public handle.
  */
 export function UsernameClaimBanner({ className }: { className?: string }) {
-  const { profile, loading, isFoundingMember } = useStudentSession();
+  const { profile, loading, isFoundingMember } = useStudentSession({
+    profile: true,
+    defer: true,
+  });
   const copy = useUsernameFlowCopy();
   const { locale } = useUiLocale();
 

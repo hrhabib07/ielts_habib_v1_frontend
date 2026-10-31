@@ -7,7 +7,7 @@ import { getPlayerStage, type PlayerStageContent } from "@/src/lib/api/player";
 import { MissionStageRunner } from "@/src/components/player/MissionStageRunner";
 import { PlayerSubscriptionGate } from "@/src/components/player/PlayerSubscriptionGate";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
-import { getDecodedTokenClient } from "@/src/lib/auth";
+import { getDecodedTokenClient, hydrateAccessTokenFromCookie } from "@/src/lib/auth";
 import { Button } from "@/components/ui/button";
 import {
   isPlayerSubscriptionRequiredError,
@@ -30,23 +30,30 @@ export default function MissionStagePageClient({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = getDecodedTokenClient();
-    if (!token || token.role !== "STUDENT") {
-      router.replace(
-        `/login?next=/player/missions/${missionSlug}/stage/${stageOrder}`,
-      );
-      return;
-    }
-
     let cancelled = false;
     setLoading(true);
     setError(null);
     setNeedsSubscription(false);
     setContent(null);
 
-    getPlayerStage(missionSlug, stageOrder)
-      .then((data) => {
-        if (!cancelled) setContent(data);
+    void (async () => {
+      let token = getDecodedTokenClient();
+      if (!token) {
+        await hydrateAccessTokenFromCookie();
+        token = getDecodedTokenClient();
+      }
+      if (cancelled) return;
+      if (!token || token.role !== "STUDENT") {
+        router.replace(
+          `/login?next=/player/missions/${missionSlug}/stage/${stageOrder}`,
+        );
+        return;
+      }
+
+      try {
+        const data = await getPlayerStage(missionSlug, stageOrder);
+        if (cancelled) return;
+        setContent(data);
         if (stageOrder === 1) {
           void trackFunnelEvent({
             event: "mission_started",
@@ -54,18 +61,17 @@ export default function MissionStagePageClient({
             metadata: { missionSlug, stageOrder },
           });
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         if (cancelled) return;
         if (isPlayerSubscriptionRequiredError(err)) {
           setNeedsSubscription(true);
           return;
         }
         setError(playerApiErrorMessage(err, PLAYER_UI.couldNotContinue));
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    })();
 
     return () => {
       cancelled = true;

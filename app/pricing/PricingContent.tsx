@@ -33,7 +33,10 @@ export function PricingContent({
   const { locale } = useUiLocale();
 
   const isLoggedIn = Boolean(initialUser);
-  const { isFoundingMember } = useStudentSession();
+  const { isFoundingMember } = useStudentSession({
+    profile: true,
+    subscription: true,
+  });
   const payment = usePaymentApplicationStatus(isLoggedIn);
   const hasActiveAccess = payment.hasActiveAccess;
   const hasPurchased = payment.hasPurchased;
@@ -153,8 +156,8 @@ export function PricingContent({
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               {locale === "bn"
-                ? "সব ক্যাম্প ও মিশন উপভোগ করতে প্লেয়ারে ফিরে যান।"
-                : "Head back to the player to enjoy every camp and mission."}
+                ? "সব ক্যাম্প ও লেভেল উপভোগ করতে প্লেয়ারে ফিরে যান।"
+                : "Head back to the player to enjoy every camp and level."}
             </p>
             <Button asChild className="mt-4 rounded-xl">
               <Link href="/player">

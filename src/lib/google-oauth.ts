@@ -26,6 +26,9 @@ export function getGoogleOAuthStartUrl(options?: {
   if (options?.returnTo) {
     params.set("returnTo", options.returnTo);
   }
+  if (typeof window !== "undefined") {
+    params.set("appOrigin", window.location.origin);
+  }
   const query = params.toString();
   return `${apiBase}/auth/google${query ? `?${query}` : ""}`;
 }

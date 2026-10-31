@@ -11,6 +11,7 @@ import {
   ChevronRight,
   CreditCard,
   Cpu,
+  Flag,
   Gamepad2,
   MessageSquareHeart,
   MessagesSquare,
@@ -52,6 +53,40 @@ export function EnglishAdminHome() {
       <PendingCertificationCard />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Link href="/dashboard/admin/student-behavior">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-500/10">
+                <TrendingDown className="h-5 w-5 text-rose-700 dark:text-rose-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">Student behavior</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Where learners stop, and which question blocks them
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/admin/weekly">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                <TrendingDown className="h-5 w-5 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">Weekly decisions</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  This week next to last week, change notes, and missed questions
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
         <Link href="/dashboard/admin/activity">
           <Card className="h-full p-5 transition-shadow hover:shadow-md">
             <div className="flex items-start gap-3">
@@ -164,6 +199,23 @@ export function EnglishAdminHome() {
                 <p className="font-semibold text-foreground">Mission 1 feedback</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   Experience, buy intent, objections, and auto insights
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/admin/lesson-feedback">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500/10">
+                <Flag className="h-5 w-5 text-orange-600 dark:text-orange-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">Lesson feedback</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Flags and notes learners send from the chat lessons
                 </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />

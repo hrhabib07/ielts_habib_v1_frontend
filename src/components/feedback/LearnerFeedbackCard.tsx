@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { NameInitialAvatar } from "@/src/components/shared/NameInitialAvatar";
 
-/** Campus Map mission total · used for fraction progress on player cards. */
+/** Campus Map level total · used for fraction progress on player cards. */
 export const CAMPUS_MISSIONS_TOTAL = 21;
 
 function MissionProgressPill({
@@ -51,7 +51,7 @@ function MissionProgressPill({
       {/* Track is the light pill · fill is the darker progress slice */}
       <span
         aria-hidden
-        className="mission-progress-pill-fill absolute inset-y-0 left-0 z-0 rounded-full bg-sky-300/85 dark:bg-sky-500/55"
+        className="level-progress-pill-fill absolute inset-y-0 left-0 z-0 rounded-full bg-sky-300/85 dark:bg-sky-500/55"
         style={{ width: `${fillWidth}%` }}
       />
       <Trophy
@@ -105,7 +105,7 @@ export function LearnerFeedbackCard({
   const handle = (profileHandle || username || "").trim().toLowerCase();
   const profileHref = handle ? `/u/${encodeURIComponent(handle)}` : null;
   const atHandle = username || handle;
-  const missionLabel = locale === "bn" ? "মিশন" : "Missions";
+  const missionLabel = locale === "bn" ? "লেভেল" : "Levels";
   const showProof =
     (typeof totalXp === "number" && totalXp > 0) ||
     (typeof missionsCompleted === "number" && missionsCompleted > 0);

@@ -13,6 +13,7 @@ import {
 } from "@/src/lib/api/player";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { englishLevelShortTitle } from "@/src/lib/ui-locale";
 import {
   playCelebrateSfx,
   playCorrectEvalSfx,
@@ -66,8 +67,7 @@ type RoadmapModel = {
 };
 
 function missionShortTitle(title: string): string {
-  const match = title.match(/^Mission\s+\d+\s*(?:\[Inspection\])?\s*:\s*(.+)$/i);
-  return match?.[1]?.trim() ?? title;
+  return englishLevelShortTitle(title);
 }
 
 function buildModel(

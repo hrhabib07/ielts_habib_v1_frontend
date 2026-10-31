@@ -29,7 +29,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Yes. After we verify your bKash payment, you get 45 days of Full Journey Access from activation. You can play all paid missions as soon as verification is complete. Usually it takes 21 days to complete 21 missions.",
+            "Yes. After we verify your bKash payment, you get 45 days of Full Journey Access from activation. You can play all paid levels as soon as verification is complete. Usually it takes 21 days to complete 21 levels.",
         },
       },
       {
@@ -37,7 +37,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Mission 1 is free. Create an account, play the first mission, and feel how Gamlish works before you take Full Journey Access.",
+            "Level 1 is free. Create an account, play the first level, and feel how Gamlish works before you take Full Journey Access.",
         },
       },
       {
@@ -62,7 +62,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "হ্যাঁ। bKash পেমেন্ট ভেরিফাই হওয়ার পর অ্যাক্টিভ হওয়ার থেকে 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে। ভেরিফিকেশন শেষ হলেই পেইড মিশন খেলতে পারবেন। সাধারণত 21টি মিশন শেষ করতে 21 দিন লাগে।",
+            "হ্যাঁ। bKash পেমেন্ট ভেরিফাই হওয়ার পর অ্যাক্টিভ হওয়ার থেকে 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে। ভেরিফিকেশন শেষ হলেই পেইড লেভেল খেলতে পারবেন। সাধারণত 21টি লেভেল শেষ করতে 21 দিন লাগে।",
         },
       },
       {
@@ -70,7 +70,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Mission 1 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম মিশন খেলতে পারবেন, ফুল জার্নি অ্যাক্সেস নেওয়ার আগে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
+            "Level 1 সম্পূর্ণ ফ্রি। অ্যাকাউন্ট খুলে প্রথম লেভেল খেলতে পারবেন, ফুল জার্নি অ্যাক্সেস নেওয়ার আগে Gamlish কীভাবে কাজ করে বুঝতে পারবেন।",
         },
       },
       {

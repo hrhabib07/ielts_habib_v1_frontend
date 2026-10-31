@@ -53,9 +53,9 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     statusLock: "অফার মূল্য এখনো লক করা যায়",
     statusNext: "bKash Send Money → TrxID সাবমিট",
     urgencyEyebrow: "শেষ ধাপ",
-    urgencyTitle: "পেমেন্ট সম্পন্ন না হলে অ্যাক্সেস চালু হবে না!",
+    urgencyTitle: "চারটা ঘর: টাকার পরিমাণ, bKash নম্বর, TrxID, তারপর আমরা পেয়েছি।",
     urgencyBody:
-      "মূল্য লক করতে bKash এ Send Money করুন। পেমেন্ট ভেরিফাই হলে অ্যাক্টিভ হওয়ার পর 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে। রেগুলার 1,590 টাকার বদলে এখন বিশেষ অফার।",
+      "bKash অ্যাপে Send Money করুন। নিচের পরিমাণ, আমাদের নম্বর, তারপর আপনার নম্বর আর TrxID দিন। সাবমিট করলেই লেখা আসবে: পেমেন্ট পেয়েছি।",
     amountLabel: "পাঠাতে হবে",
     regularPriceLabel: "রেগুলার মূল্য",
     founderPriceLabel: "অফার মূল্য",

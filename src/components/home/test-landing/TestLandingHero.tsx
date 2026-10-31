@@ -1,12 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { TestLandingCtas } from "@/src/components/home/test-landing/TestLandingCtas";
 import { TestLandingHeroCompareVisual } from "@/src/components/home/test-landing/TestLandingHeroCompareVisual";
 import { PaidLearnersProofChip } from "@/src/components/pricing/PaidLearnersProofChip";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
-import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import {
   LANDING_ACCENT_WORD_CLASS,
   LANDING_EYEBROW_CLASS,
@@ -42,7 +40,6 @@ function renderWithAccents(
 }
 
 export function TestLandingHero() {
-  const reduceMotion = useReducedMotion();
   const { copy } = useTestLandingCopy();
 
   return (
@@ -54,22 +51,14 @@ export function TestLandingHero() {
 
       <div className="mx-auto grid max-w-6xl items-center gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
         <div className="order-2 text-center lg:order-1 lg:text-left">
-          <motion.p
-            className={LANDING_EYEBROW_CLASS}
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: GUEST_EASE }}
-          >
+          <p className={cn(LANDING_EYEBROW_CLASS, "landing-rise landing-rise-1")}>
             {copy.eyebrow}
-          </motion.p>
+          </p>
 
-          <motion.h1
+          <h1
             className={cn(
-              "mx-auto mt-4 max-w-xl text-balance text-[clamp(2.05rem,6.4vw,3.35rem)] font-bold tracking-[-0.03em] text-foreground lg:mx-0",
+              "landing-rise landing-rise-2 mx-auto mt-4 max-w-xl text-balance text-[clamp(2.05rem,6.4vw,3.35rem)] font-bold tracking-[-0.03em] text-foreground lg:mx-0",
             )}
-            initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.04, ease: GUEST_EASE }}
           >
             <span className="block leading-[1.18]">
               {renderWithAccents(copy.headlineLine1, copy.accentWords)}
@@ -77,65 +66,21 @@ export function TestLandingHero() {
             <span className="mt-1.5 block leading-[1.2]">
               {renderWithAccents(copy.headlineLine2, copy.accentWords)}
             </span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            className="mx-auto mt-5 max-w-xl text-pretty text-lg font-medium leading-relaxed text-foreground/90 sm:text-xl lg:mx-0"
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.06, ease: GUEST_EASE }}
-          >
+          <p className="landing-rise landing-rise-3 mx-auto mt-4 max-w-xl text-pretty text-lg font-medium leading-relaxed text-foreground/90 sm:text-xl lg:mx-0">
             {copy.subheadline}
-          </motion.p>
+          </p>
 
-          <motion.ul
-            className="mt-5 flex flex-wrap items-center justify-center gap-2 lg:justify-start"
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.08, ease: GUEST_EASE }}
-          >
-            {copy.heroStats.map((stat) => (
-              <li
-                key={stat.label}
-                className="inline-flex items-baseline gap-1.5 rounded-full border border-sky-500/25 bg-sky-500/10 px-3 py-1"
-              >
-                <span className="num text-base font-black tabular-nums text-sky-700 dark:text-sky-300">
-                  {stat.value}
-                </span>
-                <span className="text-xs font-bold uppercase tracking-wide text-foreground/70">
-                  {stat.label}
-                </span>
-              </li>
-            ))}
-          </motion.ul>
-
-          <motion.div
-            className="mt-5 flex justify-center lg:justify-start"
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.1, ease: GUEST_EASE }}
-          >
+          <div className="landing-rise landing-rise-4 mx-auto mt-7 flex w-full max-w-md flex-col items-center gap-3 lg:mx-0 lg:items-start">
             <PaidLearnersProofChip />
-          </motion.div>
-
-          <motion.div
-            className="mx-auto mt-6 w-full max-w-md lg:mx-0"
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.14, ease: GUEST_EASE }}
-          >
             <TestLandingCtas copy={copy} align="start" />
-          </motion.div>
+          </div>
         </div>
 
-        <motion.div
-          className="order-1 mx-auto w-full max-w-md lg:order-2 lg:max-w-none"
-          initial={reduceMotion ? false : { y: 10, scale: 0.985 }}
-          animate={{ y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.08, ease: GUEST_EASE }}
-        >
+        <div className="landing-rise-visual order-1 mx-auto w-full max-w-md lg:order-2 lg:max-w-none">
           <TestLandingHeroCompareVisual mediaClassName="aspect-square" />
-        </motion.div>
+        </div>
       </div>
     </section>
   );

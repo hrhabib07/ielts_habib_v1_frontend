@@ -71,6 +71,10 @@ export interface SubscriptionRequestItem {
   senderNumber?: string;
   paidAmount: number;
   screenshotUrl?: string;
+  /** Bank transfers from the Mission 1 chat: what the learner wrote about the payment. */
+  payerNote?: string;
+  offerCohort?: string;
+  durationDaysApplied?: number;
   status: SubscriptionRequestStatus;
   reviewedBy?:
     | {

@@ -47,6 +47,7 @@ import { MyGamlishHub } from "@/src/components/profile/MyGamlishHub";
 import { ProfileCertificationSection } from "@/src/components/certification/ProfileCertificationSection";
 import { PlayerXpHud } from "@/src/components/player/PlayerXpHud";
 import { JoinedDateBadge } from "@/src/components/profile/JoinedDateBadge";
+import { EarlyAdopterV2Badge } from "@/src/components/profile/EarlyAdopterV2Badge";
 import { ProfilePlaySettings } from "@/src/components/profile/ProfilePlaySettings";
 import { DisplayNameEditor } from "@/src/components/profile/DisplayNameEditor";
 import { cn } from "@/lib/utils";
@@ -99,7 +100,7 @@ export default function ProfilePage() {
     subscription: sessionSubscription,
     loading: sessionLoading,
     refresh: refreshSession,
-  } = useStudentSession();
+  } = useStudentSession({ profile: true, subscription: true });
 
   const resetPersonalFormFromRecord = (record: StudentProfile) => {
     setDisplayName(record.displayName ?? "");
@@ -293,6 +294,11 @@ export default function ProfilePage() {
                       ) : null}
                     </div>
                   )}
+                  {profileRecord.isV2EarlyAdopter ? (
+                    <div className="mt-2">
+                      <EarlyAdopterV2Badge />
+                    </div>
+                  ) : null}
                   <div className="mt-2">
                     <JoinedDateBadge
                       joinedAt={

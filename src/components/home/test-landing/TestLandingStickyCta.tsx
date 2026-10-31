@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Play } from "lucide-react";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/src/hooks/usePrefersReducedMotion";
 import { Button } from "@/components/ui/button";
 import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
@@ -13,7 +13,7 @@ const PRESS_MS = 420;
 
 export function TestLandingStickyCta() {
   const { copy } = useTestLandingCopy();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const motionOk = !reduceMotion;
   const [visible, setVisible] = useState(false);
   const [pressed, setPressed] = useState(false);

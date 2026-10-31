@@ -106,7 +106,7 @@ export function PaymentApplicationStatusCard({
                 <strong>{formatDateTime(activeSubscription!.endDate)}</strong>.
               </p>
               <p className={cn("mt-2 text-sm", brandStatus.pending.body)}>
-                Until then you can still play free Mission 01.
+                Until then you can still play free Level 01.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -139,9 +139,7 @@ export function PaymentApplicationStatusCard({
                 Pending Verification
               </p>
               <p className={cn("mt-1 text-sm leading-relaxed", brandStatus.pending.body)}>
-                আমরা আপনার bKash পেমেন্ট প্রুফ পেয়েছি। অ্যাডমিন ভেরিফাই করলে
-                অ্যাক্টিভ হওয়ার পর 45 দিনের ফুল জার্নি অ্যাক্সেস চালু হবে।
-                সাধারণত 21টি মিশন শেষ করতে 21 দিন লাগে।
+                পেমেন্ট পেয়েছি। আমরা আপনার bKash প্রুফ দেখছি। ভেরিফাই হলে লেভেল খুলবে।
               </p>
             </div>
             <dl className={cn("grid gap-2 rounded-xl border p-4 text-sm sm:grid-cols-2", brandStatus.pending.detail)}>

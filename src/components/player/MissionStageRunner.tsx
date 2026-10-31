@@ -20,6 +20,7 @@ import {
 } from "@/src/components/player/PlayerStageResultOverlay";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { displayEnglishLevelTitle } from "@/src/lib/ui-locale";
 import { pickStageInstruction } from "@/src/lib/player-ui-copy";
 import { cn } from "@/lib/utils";
 import { emitXpGain, emitXpRefresh } from "@/src/lib/xp-events";
@@ -182,14 +183,14 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
   const shortMissionTitle = useMemo(
     () =>
       missionTitle
-        .replace(/^\s*(mission|মিশন)\s*\d+\s*[:：.\-·]\s*/i, "")
-        .trim() || missionTitle,
+        .replace(/^\s*(mission|level|মিশন|লেভেল)\s*\d+\s*[:：.\-·]\s*/i, "")
+        .trim() || displayEnglishLevelTitle(missionTitle),
     [missionTitle],
   );
 
   /** Keep only the leading part of a stage title, e.g. "Verb Pack 01 · Discover". */
   const shortStageTitle = useMemo(() => {
-    const raw = stage.title?.trim();
+    const raw = displayEnglishLevelTitle(stage.title?.trim() ?? "");
     if (!raw) return null;
     return raw.split(/\s(?:·|-)\s/)[0]?.trim() || raw;
   }, [stage.title]);
@@ -475,7 +476,7 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
       <main className={cn("mx-auto w-full flex-1 px-4 py-4 sm:py-6", contentWidth)}>
         {stage.kind === "story" && isMissionOpeningStage(stage) && (
           <MissionOpeningStage
-            storyHtml={stage.storyHtml}
+            storyHtml={displayEnglishLevelTitle(stage.storyHtml ?? "")}
             submitting={submitting}
             onContinue={() => void handleComplete()}
           />
@@ -508,8 +509,8 @@ export function MissionStageRunner({ content }: { content: PlayerStageContent })
               {PLAYER_UI.stageKind.story}
             </p>
             <div
-              className="prose prose-sm max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: stage.storyHtml ?? "" }}
+              className="prose prose-lg max-w-none text-[1.125rem] leading-relaxed dark:prose-invert prose-p:text-[1.125rem] sm:text-xl"
+              dangerouslySetInnerHTML={{ __html: displayEnglishLevelTitle(stage.storyHtml ?? "") }}
             />
             <Button className="w-full gap-2" size="lg" disabled={submitting} onClick={() => void handleComplete()}>
               {submitting ? (

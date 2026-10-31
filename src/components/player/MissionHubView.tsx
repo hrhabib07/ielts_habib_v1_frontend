@@ -10,6 +10,7 @@ import { getLearnerFeedbackInvite } from "@/src/lib/api/learnerFeedback";
 import { usePlayerUiCopy } from "@/src/hooks/useLocalizedCopy";
 import { resolveStageKindLabel } from "@/src/lib/player-stage-utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
+import { displayEnglishLevelTitle } from "@/src/lib/ui-locale";
 import { cn } from "@/lib/utils";
 import { PlayerSubscriptionGate } from "@/src/components/player/PlayerSubscriptionGate";
 import { MissionRoadmapCelebration } from "@/src/components/player/MissionRoadmapCelebration";
@@ -271,7 +272,7 @@ export function MissionHubView({ slug }: { slug: string }) {
         <p className="text-xs font-bold uppercase tracking-wider text-primary/80">
           {mission.isInspection ? PLAYER_UI.inspectionLabel : PLAYER_UI.missionLabel}
         </p>
-        <h1 className="mt-1 text-2xl font-bold">{mission.title}</h1>
+        <h1 className="mt-1 text-2xl font-bold">{displayEnglishLevelTitle(mission.title)}</h1>
         {mission.grammarTarget ? (
           <p className="mt-2 text-sm text-muted-foreground">{mission.grammarTarget}</p>
         ) : null}

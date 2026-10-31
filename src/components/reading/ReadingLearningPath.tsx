@@ -51,7 +51,10 @@ export function ReadingLearningPath() {
     displayLevelNumber,
   } = useReadingPathState();
 
-  const { isFoundingMember } = useStudentSession();
+  const { isFoundingMember } = useStudentSession({
+    profile: true,
+    subscription: true,
+  });
 
   const levelsByOrder = useMemo(() => {
     const map = new Map<number, (typeof levels)[0]>();

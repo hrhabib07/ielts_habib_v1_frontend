@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { Play } from "lucide-react";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/src/hooks/usePrefersReducedMotion";
 import { Button } from "@/components/ui/button";
 import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
 import { cn } from "@/lib/utils";
@@ -38,16 +38,17 @@ function useCtaPressFeedback(enabled: boolean) {
   return { pressed, onPointerDown };
 }
 
+/** The single free-trial call to action used across the landing page. */
 export function TestLandingCtas({
   copy,
   align = "center",
   size = "hero",
 }: {
-  copy: Pick<TestLandingCopy, "ctaPrimary" | "ctaSecondary">;
+  copy: Pick<TestLandingCopy, "ctaPrimary">;
   align?: "center" | "start";
   size?: "hero" | "block";
 }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const motionOk = !reduceMotion;
   const { pressed, onPointerDown } = useCtaPressFeedback(motionOk);
   const primaryClass =

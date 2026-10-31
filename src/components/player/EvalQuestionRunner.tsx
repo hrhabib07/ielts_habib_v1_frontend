@@ -35,6 +35,8 @@ import { useTypedAnswerAutofocus } from "@/src/hooks/useTypedAnswerAutofocus";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import type { PlayerUiCopy } from "@/src/lib/player-ui-copy";
 import { emitXpGain } from "@/src/lib/xp-events";
+import { listenForEnglishAnswer, speakPlayerLine, stopPlayerSpeech } from "@/src/lib/player-speech";
+import { noteMissedPattern, weaknessLabelForQuestion } from "@/src/lib/player-weakness";
 import {
   buildGapFillAnswer,
   parseGapSourceText,
@@ -145,9 +147,21 @@ function PromptRich({
 /** The sentence a question is about · shown as a focused stage panel. */
 function QuestionSentence({ text }: { text: string }) {
   return (
-    <p className="rounded-2xl border border-border/70 bg-gradient-to-br from-muted/60 via-background to-primary/[0.04] px-4 py-3.5 text-lg font-bold leading-relaxed text-foreground shadow-sm sm:text-xl dark:from-card dark:to-primary/10">
-      {text}
-    </p>
+    <div className="flex items-start gap-2 rounded-2xl border border-border/70 bg-gradient-to-br from-muted/60 via-background to-primary/[0.04] px-4 py-3.5 shadow-sm dark:from-card dark:to-primary/10">
+      <p className="min-w-0 flex-1 text-lg font-bold leading-relaxed text-foreground sm:text-xl">
+        {text}
+      </p>
+      <button
+        type="button"
+        tabIndex={1}
+        className="shrink-0 rounded-full border border-primary/30 px-3 py-1.5 text-sm font-bold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        onClick={() =>
+          speakPlayerLine(text, /[\u0980-\u09FF]/.test(text) ? "bn-BD" : "en-US")
+        }
+      >
+        শুনুন
+      </button>
+    </div>
   );
 }
 
@@ -259,6 +273,11 @@ function QuestionFeedback({
     locale === "bn"
       ? (result.explanationBn ?? result.explanationEn)
       : (result.explanationEn ?? result.explanationBn);
+  const banglaWhy =
+    result.explanationBn ??
+    (result.correct
+      ? "ঠিক আছে। এই উত্তরটা মিলেছে।"
+      : "এই উত্তরটা মিলেনি। আবার দেখো। সঠিক ইংরেজি বাক্য এখনো তোমাকেই লিখতে হবে।");
 
   return (
     <div
@@ -279,8 +298,12 @@ function QuestionFeedback({
         <p className="text-base font-bold leading-relaxed">
           {feedbackMessage(result, stageType, copy)}
         </p>
-        {explanation ? (
+        {explanation && explanation !== banglaWhy ? (
           <p className="leading-relaxed text-foreground/90">{explanation}</p>
+        ) : null}
+        <p className="leading-relaxed text-foreground/90">{banglaWhy}</p>
+        {result.correct && (result.xpAwarded ?? 0) > 0 ? (
+          <p className="font-bold">টিক · +{result.xpAwarded} XP</p>
         ) : null}
       </div>
     </div>
@@ -354,12 +377,14 @@ function McqOptions({
             <button
               key={opt}
               type="button"
+              tabIndex={index + 2}
               disabled={!canPick}
               onClick={() => onChange(opt)}
               className={cn(
                 "group flex w-full items-center gap-3 rounded-2xl border-2 bg-card px-3.5 py-3.5 text-left transition-all duration-150",
                 "lg:gap-4 lg:px-5 lg:py-4",
                 "hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm disabled:hover:translate-y-0 disabled:hover:shadow-none",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 isCorrectOption && "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40",
                 isWrongPick && "border-red-500 bg-red-50 dark:bg-red-950/40",
                 isThinkAgainPick && "border-primary/60 bg-primary/5 dark:bg-primary/10",
@@ -568,6 +593,10 @@ function EvaluationQuestionBody({
           ) : null}
           <PromptRich text={copy.gapFillPrompt} className="text-lg sm:text-xl" />
           <QuestionHints hints={question.hints} label={copy.clueLabel} />
+          <VoiceAnswerButton
+            disabled={disabled || locked}
+            onText={(spoken) => setGapAt(0, spoken)}
+          />
           <p
             className={cn(
               "rounded-xl border bg-background px-3 py-3 text-base font-semibold leading-relaxed text-foreground",
@@ -620,6 +649,10 @@ function EvaluationQuestionBody({
         ) : null}
         <PromptRich text={copy.translatePrompt} className="text-lg sm:text-xl" />
         <QuestionHints hints={question.hints} label={copy.clueLabel} />
+        <VoiceAnswerButton
+          disabled={disabled || locked}
+          onText={(spoken) => touchAnswer((prev) => ({ ...prev, [id]: spoken }))}
+        />
         <input
           ref={answerInputRef}
           type="text"
@@ -650,6 +683,9 @@ function EvaluationQuestionBody({
     return (
       <div className="space-y-5">
         <QuestionSentence text={String(question.sentence)} />
+        <p className="text-base font-semibold text-foreground">
+          দুটোই বেছে নাও। Number আর Person দুটো মিললে তবেই ঠিক হবে।
+        </p>
         {parts.map((part, idx) => (
           <div key={`${id}-${idx}`}>
             <PromptRich
@@ -664,6 +700,7 @@ function EvaluationQuestionBody({
                   <button
                     key={opt}
                     type="button"
+                    tabIndex={idx + 2}
                     disabled={disabled || locked}
                     onClick={() =>
                       touchAnswer((prev) => ({
@@ -848,8 +885,29 @@ export function EvalQuestionRunner({
     currentQuestion && isQuestionAnswered(currentQuestion, stageType, answers);
   const currentCheck = checkResults[questionId] ?? null;
   const wrongAttempts = wrongAttemptCounts[questionId] ?? 0;
-  const isThinkAgain = wrongAttempts === 1 && !currentCheck;
+  const isThinkAgain = wrongAttempts === 1 && currentCheck == null;
   const isChecked = Boolean(currentCheck);
+
+  useEffect(() => {
+    if (!currentQuestion || currentCheck) return;
+    const source = String(currentQuestion.sourceText ?? "").trim();
+    const sentence = String(currentQuestion.sentence ?? "").trim();
+    const prompt = String(currentQuestion.prompt ?? "").trim();
+    const line = source || sentence || prompt;
+    if (!line) return;
+    speakPlayerLine(line, /[\u0980-\u09FF]/.test(line) ? "bn-BD" : "en-US");
+    return () => stopPlayerSpeech();
+  }, [questionId, currentQuestion, currentCheck]);
+
+  useEffect(() => {
+    if (!currentCheck) return;
+    const line =
+      currentCheck.explanationBn ??
+      (currentCheck.correct
+        ? "ঠিক আছে। এই উত্তরটা মিলেছে।"
+        : "এই উত্তরটা মিলেনি। আবার দেখো।");
+    speakPlayerLine(line, "bn-BD");
+  }, [questionId, currentCheck]);
 
   const handleCheck = async () => {
     if (!currentQuestion || !currentAnswered) {
@@ -923,6 +981,19 @@ export function EvalQuestionRunner({
         attempts: nextWrongAttempts,
         answer: answers[questionId],
       });
+
+      if (nextWrongAttempts >= 1) {
+        noteMissedPattern(
+          weaknessLabelForQuestion({
+            stageType,
+            prompt: String(currentQuestion.prompt ?? currentQuestion.sourceText ?? ""),
+            parts: Array.isArray(currentQuestion.parts)
+              ? (currentQuestion.parts as Array<{ prompt?: string }>)
+              : undefined,
+          }),
+          `/player/missions/${missionSlug}`,
+        );
+      }
 
       if (nextWrongAttempts >= 2) {
         setCheckResults((prev) => ({ ...prev, [questionId]: result }));
@@ -1083,6 +1154,7 @@ export function EvalQuestionRunner({
               <Button
                 type="submit"
                 size="lg"
+                tabIndex={20}
                 disabled={!currentAnswered || checking || submitting}
                 className="h-12 w-full gap-2 rounded-xl text-base font-bold shadow-md transition-transform hover:-translate-y-0.5 disabled:hover:translate-y-0 sm:w-auto sm:min-w-[180px]"
               >
@@ -1101,6 +1173,7 @@ export function EvalQuestionRunner({
               <Button
                 type="submit"
                 size="lg"
+                tabIndex={21}
                 disabled={
                   submitting ||
                   advanceLockedForId === questionId ||
@@ -1216,7 +1289,41 @@ function InstructionNote({ text }: { text: string }) {
   );
 }
 
-/** Verb / word clues for gap-fill and translation. Large, high-contrast chips. */
+function VoiceAnswerButton({
+  disabled,
+  onText,
+}: {
+  disabled?: boolean;
+  onText: (value: string) => void;
+}) {
+  const [note, setNote] = useState<string | null>(null);
+  return (
+    <div className="space-y-1">
+      <button
+        type="button"
+        tabIndex={8}
+        disabled={disabled}
+        className="rounded-full border border-primary/30 px-3 py-1.5 text-sm font-bold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+        onClick={() => {
+          setNote(null);
+          const started = listenForEnglishAnswer(onText);
+          if (!started) setNote("এই ফোনে কথা বলে উত্তর নেওয়া যায় না। টাইপ করুন।");
+        }}
+      >
+        কথা বলে উত্তর দিন
+      </button>
+      {note ? <p className="text-sm text-muted-foreground">{note}</p> : null}
+    </div>
+  );
+}
+
+function hintSides(hint: string): { bangla: string; english: string | null } {
+  const parts = hint.split(/\s*(?:→|->)\s*/);
+  if (parts.length < 2) return { bangla: hint, english: null };
+  return { bangla: parts[0]!.trim(), english: parts.slice(1).join(" ").trim() || null };
+}
+
+/** Verb / word clues. Bangla meaning first. The English word stays hidden until asked. */
 function QuestionHints({
   hints,
   label,
@@ -1224,6 +1331,7 @@ function QuestionHints({
   hints: unknown;
   label: string;
 }) {
+  const [open, setOpen] = useState<Record<string, boolean>>({});
   if (!Array.isArray(hints) || hints.length === 0) return null;
   const items = hints
     .map((h) => String(h ?? "").trim())
@@ -1243,14 +1351,22 @@ function QuestionHints({
         </p>
       </div>
       <ul className="flex flex-wrap gap-2">
-        {items.map((h) => (
-          <li
-            key={h}
-            className="rounded-xl border border-sky-500/25 bg-background px-3.5 py-2 text-lg font-bold leading-snug text-foreground shadow-sm sm:text-xl"
-          >
-            {h}
-          </li>
-        ))}
+        {items.map((h) => {
+          const sides = hintSides(h);
+          const shown = open[h] && sides.english ? sides.english : sides.bangla;
+          return (
+            <li key={h}>
+              <button
+                type="button"
+                tabIndex={7}
+                className="rounded-xl border border-sky-500/25 bg-background px-3.5 py-2 text-lg font-bold leading-snug text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:text-xl"
+                onClick={() => setOpen((prev) => ({ ...prev, [h]: !prev[h] }))}
+              >
+                {shown}
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

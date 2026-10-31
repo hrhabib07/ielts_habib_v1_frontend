@@ -1,4 +1,5 @@
 import MissionStagePageClient from "./MissionStagePageClient";
+import { LegacyMissionGate } from "@/src/features/learner/components/LegacyMissionGate";
 
 export default async function MissionStagePage({
   params,
@@ -6,5 +7,9 @@ export default async function MissionStagePage({
   params: Promise<{ slug: string; order: string }>;
 }) {
   const { slug, order } = await params;
-  return <MissionStagePageClient missionSlug={slug} stageOrder={Number(order)} />;
+  return (
+    <LegacyMissionGate>
+      <MissionStagePageClient missionSlug={slug} stageOrder={Number(order)} />
+    </LegacyMissionGate>
+  );
 }

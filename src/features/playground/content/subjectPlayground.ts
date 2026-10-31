@@ -1,0 +1,673 @@
+import type {
+  AskFirstItem,
+  HiddenYouItem,
+  Playground,
+  StretchItem,
+  TalkItem,
+} from "@/src/features/playground/types";
+
+const PERSON_WHO = (name: string, nameBn: string) => ({
+  en: `${name} is a person. For people, ask Who.`,
+  bn: `${nameBn} একজন মানুষ। মানুষের জন্য প্রশ্ন করুন Who (কে)।`,
+});
+
+const PEOPLE_WHO = (word: string, wordBn: string) => ({
+  en: `${word} means people. For people, ask Who.`,
+  bn: `${word} মানে ${wordBn}, মানে মানুষ। মানুষের জন্য প্রশ্ন করুন Who (কে)।`,
+});
+
+const THING_WHAT = (thing: string, thingBn: string) => ({
+  en: `${thing} is a thing, not a person. For things, ask What.`,
+  bn: `${thingBn} একটি জিনিস, মানুষ নয়। জিনিসের জন্য প্রশ্ন করুন What (কী)।`,
+});
+
+const ASK_FIRST: AskFirstItem[] = [
+  {
+    id: "rafi-cricket",
+    words: ["Rafi", "plays", "cricket."],
+    meaningBn: "রাফি ক্রিকেট খেলে।",
+    kind: "who",
+    kindWhy: PERSON_WHO("Rafi", "রাফি"),
+    question: { en: "Who plays cricket?", bn: "কে ক্রিকেট খেলে?" },
+    subject: 0,
+    trap: {
+      index: 2,
+      hint: { en: "Cricket doesn't play! Ask: Who plays?", bn: "ক্রিকেট তো খেলে না! প্রশ্ন করুন: কে খেলে?" },
+    },
+  },
+  {
+    id: "bus-stops",
+    words: ["The bus", "stops", "here."],
+    meaningBn: "বাসটি এখানে থামে।",
+    kind: "what",
+    kindWhy: THING_WHAT("A bus", "বাস"),
+    question: { en: "What stops here?", bn: "কী এখানে থামে?" },
+    subject: 0,
+  },
+  {
+    id: "alarm-rings",
+    words: ["My alarm", "rings", "at six."],
+    meaningBn: "আমার অ্যালার্ম ছয়টায় বাজে।",
+    kind: "what",
+    kindWhy: THING_WHAT("An alarm", "অ্যালার্ম"),
+    question: { en: "What rings at six?", bn: "ছয়টায় কী বাজে?" },
+    subject: 0,
+  },
+  {
+    id: "we-drink-tea",
+    words: ["We", "drink", "tea", "every morning."],
+    meaningBn: "আমরা প্রতিদিন সকালে চা খাই।",
+    kind: "who",
+    kindWhy: PEOPLE_WHO("We", "আমরা"),
+    question: { en: "Who drinks tea every morning?", bn: "কারা প্রতিদিন সকালে চা খায়?" },
+    subject: 0,
+    trap: {
+      index: 2,
+      hint: { en: "Tea doesn't drink! Ask: Who drinks tea?", bn: "চা তো কিছু খায় না! প্রশ্ন করুন: কারা চা খায়?" },
+    },
+  },
+  {
+    id: "shop-opens",
+    words: ["The shop", "opens", "at nine."],
+    meaningBn: "দোকানটি নয়টায় খোলে।",
+    kind: "what",
+    kindWhy: THING_WHAT("A shop", "দোকান"),
+    question: { en: "What opens at nine?", bn: "নয়টায় কী খোলে?" },
+    subject: 0,
+  },
+  {
+    id: "mina-helps",
+    words: ["Mina", "helps", "her mother."],
+    meaningBn: "মিনা তার মাকে সাহায্য করে।",
+    kind: "who",
+    kindWhy: PERSON_WHO("Mina", "মিনা"),
+    question: { en: "Who helps her mother?", bn: "কে তার মাকে সাহায্য করে?" },
+    subject: 0,
+    trap: {
+      index: 2,
+      hint: {
+        en: "Her mother gets the help. Ask: Who helps?",
+        bn: "মা এখানে সাহায্য পান। প্রশ্ন করুন: কে সাহায্য করে?",
+      },
+    },
+  },
+  {
+    id: "teacher-teaches",
+    words: ["Our teacher", "teaches", "English."],
+    meaningBn: "আমাদের শিক্ষক ইংরেজি পড়ান।",
+    kind: "who",
+    kindWhy: PERSON_WHO("A teacher", "শিক্ষক"),
+    question: { en: "Who teaches English?", bn: "কে ইংরেজি পড়ান?" },
+    subject: 0,
+    trap: {
+      index: 2,
+      hint: {
+        en: "English is what we learn. Ask: Who teaches?",
+        bn: "English হলো যা শেখানো হয়। প্রশ্ন করুন: কে পড়ান?",
+      },
+    },
+  },
+  {
+    id: "train-leaves",
+    words: ["The train", "leaves", "at ten."],
+    meaningBn: "ট্রেনটি দশটায় ছাড়ে।",
+    kind: "what",
+    kindWhy: THING_WHAT("A train", "ট্রেন"),
+    question: { en: "What leaves at ten?", bn: "দশটায় কী ছাড়ে?" },
+    subject: 0,
+  },
+  {
+    id: "phone-rings",
+    words: ["My phone", "rings", "loudly."],
+    meaningBn: "আমার ফোন জোরে বাজে।",
+    kind: "what",
+    kindWhy: THING_WHAT("A phone", "ফোন"),
+    question: { en: "What rings loudly?", bn: "কী জোরে বাজে?" },
+    subject: 0,
+  },
+  {
+    id: "sister-teaches",
+    words: ["My sister", "teaches", "at school."],
+    meaningBn: "আমার বোন স্কুলে পড়ান।",
+    kind: "who",
+    kindWhy: PERSON_WHO("A sister", "বোন"),
+    question: { en: "Who teaches at school?", bn: "কে স্কুলে পড়ান?" },
+    subject: 0,
+  },
+  {
+    id: "rickshaw-waits",
+    words: ["The rickshaw", "waits", "outside."],
+    meaningBn: "রিকশাটি বাইরে অপেক্ষা করে।",
+    kind: "what",
+    kindWhy: THING_WHAT("A rickshaw", "রিকশা"),
+    question: { en: "What waits outside?", bn: "বাইরে কী অপেক্ষা করে?" },
+    subject: 0,
+  },
+  {
+    id: "father-newspaper",
+    words: ["My father", "reads", "the newspaper."],
+    meaningBn: "আমার বাবা পত্রিকা পড়েন।",
+    kind: "who",
+    kindWhy: PERSON_WHO("A father", "বাবা"),
+    question: { en: "Who reads the newspaper?", bn: "কে পত্রিকা পড়েন?" },
+    subject: 0,
+    trap: {
+      index: 2,
+      hint: {
+        en: "A newspaper can't read! Ask: Who reads?",
+        bn: "পত্রিকা তো পড়তে পারে না! প্রশ্ন করুন: কে পড়েন?",
+      },
+    },
+  },
+  {
+    id: "fan-noise",
+    words: ["The fan", "makes", "a noise."],
+    meaningBn: "ফ্যানটি শব্দ করে।",
+    kind: "what",
+    kindWhy: THING_WHAT("A fan", "ফ্যান"),
+    question: { en: "What makes a noise?", bn: "কী শব্দ করে?" },
+    subject: 0,
+  },
+  {
+    id: "they-football",
+    words: ["They", "play", "football", "after class."],
+    meaningBn: "তারা ক্লাসের পরে ফুটবল খেলে।",
+    kind: "who",
+    kindWhy: PEOPLE_WHO("They", "তারা"),
+    question: { en: "Who plays football after class?", bn: "কারা ক্লাসের পরে ফুটবল খেলে?" },
+    subject: 0,
+    trap: {
+      index: 2,
+      hint: { en: "Football doesn't play! Ask: Who plays?", bn: "ফুটবল তো খেলে না! প্রশ্ন করুন: কারা খেলে?" },
+    },
+  },
+];
+
+const STRETCH: StretchItem[] = [
+  {
+    id: "little-brother",
+    words: ["My", "little", "brother", "goes", "to", "school."],
+    meaningBn: "আমার ছোট ভাই স্কুলে যায়।",
+    question: { en: "Who goes to school?", bn: "কে স্কুলে যায়?" },
+    subjectEnd: 2,
+    shortHint: {
+      en: "Whose brother? My little brother. Keep stretching.",
+      bn: "কার ভাই? আমার ছোট ভাই। আরও টানুন।",
+    },
+  },
+  {
+    id: "rahim-karim",
+    words: ["Rahim", "and", "Karim", "play", "football."],
+    meaningBn: "রহিম ও করিম ফুটবল খেলে।",
+    question: { en: "Who plays football?", bn: "কারা ফুটবল খেলে?" },
+    subjectEnd: 2,
+    compound: true,
+    shortHint: {
+      en: "Karim plays too! Take both names with and.",
+      bn: "করিমও খেলে! and সহ দুটি নামই নিন।",
+    },
+  },
+  {
+    id: "girl-red-dress",
+    words: ["The", "girl", "in", "the", "red", "dress", "reads."],
+    meaningBn: "লাল জামা পরা মেয়েটি পড়ে।",
+    question: { en: "Who reads?", bn: "কে পড়ে?" },
+    subjectEnd: 5,
+    shortHint: {
+      en: "Which girl? The girl in the red dress. Keep stretching.",
+      bn: "কোন মেয়ে? লাল জামা পরা মেয়েটি। আরও টানুন।",
+    },
+  },
+  {
+    id: "mother-and-i",
+    words: ["My", "mother", "and", "I", "cook", "dinner."],
+    meaningBn: "আমার মা ও আমি রাতের খাবার রান্না করি।",
+    question: { en: "Who cooks dinner?", bn: "কারা রাতের খাবার রান্না করে?" },
+    subjectEnd: 3,
+    compound: true,
+    shortHint: {
+      en: "I cook too! Take My mother and I.",
+      bn: "আমিও রান্না করি! My mother and I পুরোটা নিন।",
+    },
+  },
+  {
+    id: "tea-stall",
+    words: ["The", "tea", "stall", "near", "our", "school", "opens", "early."],
+    meaningBn: "আমাদের স্কুলের পাশের চায়ের দোকানটি সকাল সকাল খোলে।",
+    question: { en: "What opens early?", bn: "কী সকাল সকাল খোলে?" },
+    subjectEnd: 5,
+    shortHint: {
+      en: "Which tea stall? The one near our school.",
+      bn: "কোন চায়ের দোকান? আমাদের স্কুলের পাশেরটি।",
+    },
+  },
+  {
+    id: "three-girls",
+    words: ["Mina,", "Rina", "and", "Tania", "read", "books."],
+    meaningBn: "মিনা, রিনা ও তানিয়া বই পড়ে।",
+    question: { en: "Who reads books?", bn: "কারা বই পড়ে?" },
+    subjectEnd: 3,
+    compound: true,
+    shortHint: {
+      en: "All three girls read! Take all three names.",
+      bn: "তিনজনই পড়ে! তিনটি নামই নিন।",
+    },
+  },
+  {
+    id: "boys-park",
+    words: ["The", "boys", "in", "the", "park", "play", "cricket."],
+    meaningBn: "পার্কের ছেলেরা ক্রিকেট খেলে।",
+    question: { en: "Who plays cricket?", bn: "কারা ক্রিকেট খেলে?" },
+    subjectEnd: 4,
+    shortHint: {
+      en: "Which boys? The boys in the park.",
+      bn: "কোন ছেলেরা? পার্কের ছেলেরা।",
+    },
+  },
+  {
+    id: "old-man",
+    words: ["The", "old", "man", "next", "door", "sells", "fish."],
+    meaningBn: "পাশের বাসার বৃদ্ধ লোকটি মাছ বিক্রি করেন।",
+    question: { en: "Who sells fish?", bn: "কে মাছ বিক্রি করেন?" },
+    subjectEnd: 4,
+    shortHint: {
+      en: "Which man? The old man next door.",
+      bn: "কোন লোক? পাশের বাসার বৃদ্ধ লোকটি।",
+    },
+  },
+  {
+    id: "father-uncle",
+    words: ["My", "father", "and", "my", "uncle", "run", "a", "shop."],
+    meaningBn: "আমার বাবা ও চাচা একটি দোকান চালান।",
+    question: { en: "Who runs a shop?", bn: "কারা দোকান চালান?" },
+    subjectEnd: 4,
+    compound: true,
+    shortHint: {
+      en: "My uncle runs it too! Take both people with and.",
+      bn: "চাচাও দোকান চালান! and সহ দুজনকেই নিন।",
+    },
+  },
+  {
+    id: "bus-dhaka",
+    words: ["The", "bus", "to", "Dhaka", "leaves", "at", "noon."],
+    meaningBn: "ঢাকার বাসটি দুপুরে ছাড়ে।",
+    question: { en: "What leaves at noon?", bn: "দুপুরে কী ছাড়ে?" },
+    subjectEnd: 3,
+    shortHint: { en: "Which bus? The bus to Dhaka.", bn: "কোন বাস? ঢাকার বাস।" },
+  },
+  {
+    id: "new-teacher",
+    words: ["The", "new", "teacher", "at", "our", "school", "speaks", "English."],
+    meaningBn: "আমাদের স্কুলের নতুন শিক্ষক ইংরেজিতে কথা বলেন।",
+    question: { en: "Who speaks English?", bn: "কে ইংরেজিতে কথা বলেন?" },
+    subjectEnd: 5,
+    shortHint: {
+      en: "Which teacher? The new teacher at our school.",
+      bn: "কোন শিক্ষক? আমাদের স্কুলের নতুন শিক্ষক।",
+    },
+  },
+  {
+    id: "friend-sister",
+    words: ["My", "best", "friend", "and", "her", "sister", "walk", "to", "school."],
+    meaningBn: "আমার সবচেয়ে কাছের বন্ধু ও তার বোন হেঁটে স্কুলে যায়।",
+    question: { en: "Who walks to school?", bn: "কারা হেঁটে স্কুলে যায়?" },
+    subjectEnd: 5,
+    compound: true,
+    shortHint: {
+      en: "Her sister walks too! Take both people.",
+      bn: "তার বোনও হাঁটে! দুজনকেই নিন।",
+    },
+  },
+];
+
+const SPEAKER = {
+  mom: { en: "Mom", bn: "মা" },
+  dad: { en: "Dad", bn: "বাবা" },
+  teacher: { en: "Teacher", bn: "শিক্ষক" },
+  friend: { en: "Friend", bn: "বন্ধু" },
+  sister: { en: "Sister", bn: "বোন" },
+  coach: { en: "Coach", bn: "কোচ" },
+  doctor: { en: "Doctor", bn: "ডাক্তার" },
+  app: { en: "Phone app", bn: "ফোনের অ্যাপ" },
+} as const;
+
+const HIDDEN_YOU: HiddenYouItem[] = [
+  {
+    id: "eat-rice",
+    speaker: "mom",
+    speakerLabel: SPEAKER.mom,
+    words: ["Eat", "your rice!"],
+    meaningBn: "ভাত খাও!",
+    trap: {
+      index: 1,
+      hint: { en: "Rice doesn't eat! Who is Mom talking to?", bn: "ভাত তো খায় না! মা কার সঙ্গে কথা বলছেন?" },
+    },
+  },
+  {
+    id: "open-books",
+    speaker: "teacher",
+    speakerLabel: SPEAKER.teacher,
+    words: ["Open", "your books!"],
+    meaningBn: "তোমাদের বই খোলো!",
+    trap: {
+      index: 1,
+      hint: { en: "Books can't open themselves! Who should open them?", bn: "বই নিজে খোলে না! কে খুলবে?" },
+    },
+  },
+  {
+    id: "rafi-every-day",
+    speaker: "friend",
+    speakerLabel: SPEAKER.friend,
+    words: ["Rafi", "plays cricket", "every day."],
+    meaningBn: "রাফি প্রতিদিন ক্রিকেট খেলে।",
+    subject: 0,
+  },
+  {
+    id: "keep-quiet",
+    speaker: "sign",
+    speakerLabel: { en: "Hospital sign", bn: "হাসপাতালের সাইনবোর্ড" },
+    words: ["Keep", "quiet."],
+    meaningBn: "চুপ থাকুন।",
+  },
+  {
+    id: "father-cng",
+    speaker: "sister",
+    speakerLabel: SPEAKER.sister,
+    words: ["My father", "drives", "a CNG."],
+    meaningBn: "আমার বাবা সিএনজি চালান।",
+    subject: 0,
+  },
+  {
+    id: "tap-start",
+    speaker: "app",
+    speakerLabel: SPEAKER.app,
+    words: ["Tap", "here", "to start."],
+    meaningBn: "শুরু করতে এখানে ট্যাপ করো।",
+  },
+  {
+    id: "close-window",
+    speaker: "teacher",
+    speakerLabel: SPEAKER.teacher,
+    words: ["Please", "close", "the window."],
+    meaningBn: "দয়া করে জানালাটি বন্ধ করো।",
+    trap: {
+      index: 2,
+      hint: {
+        en: "A window can't close itself! Who is the teacher asking?",
+        bn: "জানালা নিজে বন্ধ হয় না! শিক্ষক কাকে বলছেন?",
+      },
+    },
+  },
+  {
+    id: "drink-water",
+    speaker: "doctor",
+    speakerLabel: SPEAKER.doctor,
+    words: ["Drink", "more water."],
+    meaningBn: "আরও পানি পান করুন।",
+  },
+  {
+    id: "mina-writes",
+    speaker: "friend",
+    speakerLabel: SPEAKER.friend,
+    words: ["Mina", "writes", "very well."],
+    meaningBn: "মিনা খুব ভালো লেখে।",
+    subject: 0,
+  },
+  {
+    id: "run-faster",
+    speaker: "coach",
+    speakerLabel: SPEAKER.coach,
+    words: ["Run", "faster!"],
+    meaningBn: "আরও জোরে দৌড়াও!",
+  },
+  {
+    id: "take-off-shoes",
+    speaker: "sign",
+    speakerLabel: { en: "Sign at the door", bn: "দরজার সাইনবোর্ড" },
+    words: ["Take off", "your shoes."],
+    meaningBn: "জুতা খুলে রাখুন।",
+    trap: {
+      index: 1,
+      hint: {
+        en: "Shoes can't take themselves off! Who is the sign talking to?",
+        bn: "জুতা নিজে খোলে না! সাইনবোর্ড কাকে বলছে?",
+      },
+    },
+  },
+  {
+    id: "enter-password",
+    speaker: "app",
+    speakerLabel: SPEAKER.app,
+    words: ["Enter", "your password."],
+    meaningBn: "তোমার পাসওয়ার্ড লেখো।",
+  },
+  {
+    id: "bus-comes",
+    speaker: "friend",
+    speakerLabel: SPEAKER.friend,
+    words: ["The bus", "comes", "at eight."],
+    meaningBn: "বাসটি আটটায় আসে।",
+    subject: 0,
+  },
+  {
+    id: "uncle-calls",
+    speaker: "dad",
+    speakerLabel: SPEAKER.dad,
+    words: ["Your uncle", "calls", "every Friday."],
+    meaningBn: "তোমার চাচা প্রতি শুক্রবার ফোন করেন।",
+    subject: 0,
+  },
+  {
+    id: "finish-homework",
+    speaker: "mom",
+    speakerLabel: SPEAKER.mom,
+    words: ["Finish", "your homework", "first!"],
+    meaningBn: "আগে তোমার হোমওয়ার্ক শেষ করো!",
+    trap: {
+      index: 1,
+      hint: {
+        en: "Homework can't finish itself! Who should finish it?",
+        bn: "হোমওয়ার্ক নিজে শেষ হয় না! কে শেষ করবে?",
+      },
+    },
+  },
+];
+
+const NOT_YOURSELF = {
+  en: "Not you this time! Who else does it?",
+  bn: "এবার নিজেকে নয়! আর কে কাজটা করে?",
+};
+
+const TALK: TalkItem[] = [
+  {
+    id: "who-cooks",
+    question: { en: "Who cooks in your home?", bn: "আপনার বাসায় কে রান্না করে?" },
+    frame: { verb: { one: "cooks", many: "cook" }, after: "at home." },
+    accepts: "person",
+    allowSelf: true,
+    cards: ["My mother", "My father", "My grandmother", "I"],
+    traps: [
+      { text: "rice", hint: { en: "Rice can't cook! Who does the cooking?", bn: "ভাত তো রান্না করতে পারে না! রান্না কে করে?" } },
+      { text: "food", hint: { en: "Food can't cook! Who does the cooking?", bn: "খাবার তো রান্না করতে পারে না! রান্না কে করে?" } },
+    ],
+  },
+  {
+    id: "who-helps-study",
+    question: { en: "Who helps you study?", bn: "পড়াশোনায় কে আপনাকে সাহায্য করে?" },
+    frame: { verb: { one: "helps", many: "help" }, after: "me study." },
+    accepts: "person",
+    allowSelf: false,
+    selfHint: {
+      en: "You can't help yourself here! Who helps you?",
+      bn: "এখানে নিজেকে লেখা যাবে না! কে আপনাকে সাহায্য করে?",
+    },
+    cards: ["My teacher", "My sister", "My brother", "My friend"],
+    traps: [
+      { text: "book", hint: { en: "A book can't help like that! Which person helps you?", bn: "বই তো এভাবে সাহায্য করে না! কোন মানুষ আপনাকে সাহায্য করে?" } },
+      { text: "books", hint: { en: "Books can't help like that! Which person helps you?", bn: "বই তো এভাবে সাহায্য করে না! কোন মানুষ আপনাকে সাহায্য করে?" } },
+    ],
+  },
+  {
+    id: "what-wakes",
+    question: { en: "What wakes you up in the morning?", bn: "সকালে কী আপনার ঘুম ভাঙায়?" },
+    frame: { verb: { one: "wakes", many: "wake" }, after: "me up." },
+    accepts: "any",
+    allowSelf: false,
+    selfHint: NOT_YOURSELF,
+    cards: ["My alarm", "My mother", "The crows", "The sunlight"],
+  },
+  {
+    id: "play-with",
+    question: { en: "Who do you play with?", bn: "আপনি কার সঙ্গে খেলেন?" },
+    frame: { subjectTail: "and I", after: "play together." },
+    accepts: "person",
+    allowSelf: false,
+    selfHint: {
+      en: "I is already in the sentence! Type who you play with.",
+      bn: "I তো বাক্যে আগেই আছে! আপনি কার সঙ্গে খেলেন, সেটি লিখুন।",
+    },
+    cards: ["My brother", "My friend Rafi", "My cousin", "My classmates"],
+    traps: [
+      { text: "football", hint: { en: "That's the game! Who do you play with?", bn: "এটা তো খেলার নাম! আপনি কার সঙ্গে খেলেন?" } },
+      { text: "cricket", hint: { en: "That's the game! Who do you play with?", bn: "এটা তো খেলার নাম! আপনি কার সঙ্গে খেলেন?" } },
+    ],
+  },
+  {
+    id: "sits-next",
+    question: { en: "Who sits next to you in class?", bn: "ক্লাসে আপনার পাশে কে বসে?" },
+    frame: { verb: { one: "sits", many: "sit" }, after: "next to me in class." },
+    accepts: "person",
+    allowSelf: false,
+    selfHint: NOT_YOURSELF,
+    cards: ["My best friend", "Rafi", "Mina", "The new boy"],
+  },
+  {
+    id: "buys-food",
+    question: { en: "Who buys food for your family?", bn: "আপনার পরিবারের জন্য কে বাজার করে?" },
+    frame: { verb: { one: "buys", many: "buy" }, after: "food for my family." },
+    accepts: "person",
+    allowSelf: true,
+    cards: ["My father", "My mother", "My uncle", "I"],
+  },
+  {
+    id: "makes-noise",
+    question: { en: "What makes a lot of noise near your home?", bn: "আপনার বাসার কাছে কী অনেক শব্দ করে?" },
+    frame: { verb: { one: "makes", many: "make" }, after: "a lot of noise." },
+    accepts: "any",
+    allowSelf: false,
+    selfHint: NOT_YOURSELF,
+    cards: ["The traffic", "The rickshaw horns", "The crows", "My neighbours"],
+  },
+  {
+    id: "calls-most",
+    question: { en: "Who calls you the most?", bn: "কে আপনাকে সবচেয়ে বেশি ফোন করে?" },
+    frame: { verb: { one: "calls", many: "call" }, after: "me the most." },
+    accepts: "person",
+    allowSelf: false,
+    selfHint: NOT_YOURSELF,
+    cards: ["My mother", "My best friend", "My grandmother", "My aunt"],
+  },
+  {
+    id: "makes-tea",
+    question: { en: "Who makes tea in your home?", bn: "আপনার বাসায় কে চা বানায়?" },
+    frame: { verb: { one: "makes", many: "make" }, after: "tea at home." },
+    accepts: "person",
+    allowSelf: true,
+    cards: ["My mother", "My father", "My sister", "I"],
+    traps: [
+      { text: "tea", hint: { en: "Tea can't make tea! Who makes it?", bn: "চা তো চা বানাতে পারে না! কে বানায়?" } },
+    ],
+  },
+  {
+    id: "makes-happy",
+    question: { en: "What makes you happy?", bn: "কী আপনাকে খুশি করে?" },
+    frame: { verb: { one: "makes", many: "make" }, after: "me happy." },
+    accepts: "any",
+    allowSelf: false,
+    selfHint: NOT_YOURSELF,
+    cards: ["Cricket", "My family", "Rain", "Books"],
+  },
+];
+
+export const SUBJECT_PLAYGROUND: Playground = {
+  id: "level-1-playground-subject",
+  afterStepId: "level-1-step-3-subject",
+  title: { en: "Subject Playground", bn: "সাবজেক্ট প্লেগ্রাউন্ড" },
+  rounds: [
+    {
+      id: "ask-first",
+      kind: "ask-first",
+      title: { en: "Ask First", bn: "আগে প্রশ্ন করুন" },
+      goal: {
+        en: "{name}, find the Subject with one question: Who or What?",
+        bn: "{name}, একটি প্রশ্নেই Subject খুঁজে বের করুন: কে, নাকি কী?",
+      },
+      instruction: {
+        en: "Who or What? Pick one. Then tap the Subject.",
+        bn: "কে, নাকি কী? একটি বেছে নিন। তারপর Subject-এ ট্যাপ করুন।",
+      },
+      pick: 5,
+      items: ASK_FIRST,
+    },
+    {
+      id: "stretch",
+      kind: "stretch",
+      title: { en: "Stretch It", bn: "পুরোটা ধরুন" },
+      goal: {
+        en: "A Subject can be many words. Catch all of them!",
+        bn: "Subject অনেকগুলো শব্দেরও হতে পারে। সবগুলো ধরুন!",
+      },
+      instruction: {
+        en: "Stretch the light over the whole Subject.",
+        bn: "আলোটি টেনে পুরো Subject-এর ওপর ছড়িয়ে দিন।",
+      },
+      pick: 5,
+      items: STRETCH,
+    },
+    {
+      id: "hidden-you",
+      kind: "hidden-you",
+      title: { en: "Hidden You", bn: "লুকানো You" },
+      goal: {
+        en: "Commands hide their Subject. Can you find it?",
+        bn: "আদেশের বাক্যে Subject লুকিয়ে থাকে। খুঁজে পাবেন?",
+      },
+      instruction: {
+        en: "Find the Subject. Can't see it? Tap the hidden You.",
+        bn: "Subject খুঁজে বের করুন। দেখা যাচ্ছে না? লুকানো You-তে ট্যাপ করুন।",
+      },
+      pick: 5,
+      items: HIDDEN_YOU,
+    },
+    {
+      id: "talk",
+      kind: "talk",
+      title: { en: "Talk About Me", bn: "আমার কথা" },
+      goal: {
+        en: "Make real sentences about your own life.",
+        bn: "নিজের জীবন নিয়ে সত্যিকারের বাক্য বানান।",
+      },
+      instruction: {
+        en: "Answer about your life. Type the Subject.",
+        bn: "নিজের জীবন নিয়ে উত্তর দিন। Subject লিখুন।",
+      },
+      pick: 4,
+      items: TALK,
+    },
+  ],
+  learned: [
+    { en: "Ask Who or What to find the Subject.", bn: "Subject খুঁজতে প্রশ্ন করুন: কে বা কী?" },
+    { en: "A Subject can be many words.", bn: "Subject একাধিক শব্দেরও হতে পারে।" },
+    { en: "And joins Subjects together.", bn: "and দিয়ে একাধিক Subject যুক্ত হয়।" },
+    { en: "Commands have a hidden You.", bn: "আদেশের বাক্যে You লুকিয়ে থাকে।" },
+  ],
+  realLifeTip: {
+    en: "{name}, look around you today. Signs, apps and teachers use the hidden You all the time!",
+    bn: "{name}, আজ চারপাশে খেয়াল করুন। সাইনবোর্ড, অ্যাপ আর শিক্ষকরা সবসময় লুকানো You ব্যবহার করেন!",
+  },
+  passMark: 0.8,
+  collection: {
+    title: { en: "My Sentences", bn: "আমার বাক্য" },
+    sub: { en: "Real English about your own life, {name}!", bn: "{name}, নিজের জীবন নিয়ে সত্যিকারের ইংরেজি!" },
+  },
+};

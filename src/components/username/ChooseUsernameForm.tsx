@@ -43,7 +43,7 @@ export function ChooseUsernameForm() {
   const { locale } = useUiLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { profile, refresh } = useStudentSession();
+  const { profile, refresh } = useStudentSession({ profile: true });
   const [state, setState] = useState<UsernameState | null>(null);
   const [loading, setLoading] = useState(true);
   const [value, setValue] = useState("");

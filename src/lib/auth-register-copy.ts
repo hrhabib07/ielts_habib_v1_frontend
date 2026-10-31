@@ -35,17 +35,17 @@ function buildAuthRegisterCopy(locale: UiLocale): AuthRegisterCopy {
   if (locale === "bn") {
     return {
       eyebrow: "আমরা আপনার জন্য অপেক্ষায় আছি",
-      title: "Mission 1 ফ্রি খেলুন",
+      title: "Level 1 ফ্রি খেলুন",
       subtitle:
         "ইংরেজি শেখা কঠিন নয়। এটা একটা গেম। খেলতে খেলতেই ইংরেজি শেখা হবে।",
       belief: "আমরা বিশ্বাস করি আপনি ইংরেজি শেখার এই গেমে জিততে পারবেন।",
-      missionChip: "Mission 01 · Word Order · সম্পূর্ণ ফ্রি",
+      missionChip: "Level 01 · Word Order · সম্পূর্ণ ফ্রি",
       formLead:
-        "অ্যাকাউন্ট খুলতে কোনো টাকা লাগবে না। Mission 1 পুরোটাই ফ্রি খেলতে পারবেন।",
-      googleCta: "Google দিয়ে Mission 1 শুরু",
+        "ইমেইল লিখুন। আমরা একটি কোড পাঠাব। কোড দিলে অ্যাকাউন্ট খুলবে এবং Level 1 শুরু হবে।",
+      googleCta: "Google দিয়ে Level 1 শুরু",
       emailLabel: "ইমেইল ঠিকানা",
       emailPlaceholder: "you@example.com",
-      submit: "কোড নিন · Mission 1 খুলুন",
+      submit: "কোড নিন · Level 1 খুলুন",
       submitting: "কোড পাঠানো হচ্ছে…",
       hasAccount: "আগে থেকেই অ্যাকাউন্ট আছে?",
       signIn: "লগইন করুন",
@@ -54,8 +54,8 @@ function buildAuthRegisterCopy(locale: UiLocale): AuthRegisterCopy {
         "কঠিন বইয়ের চাপ নয়। খেলতে খেলতে শিখুন। আমরা বিশ্বাস করি আপনি জিততে পারবেন।",
       heroBullets: [
         "এখন কোনো টাকা লাগে না",
-        "Mission 1 পুরোটা ফ্রি খেলুন",
-        "জিতলেই পরের মিশন খুলবে",
+        "Level 1 পুরোটা ফ্রি খেলুন",
+        "জিতলেই পরের লেভেল খুলবে",
       ],
       heroFootnote: "শুধু খেলুন। জেতাই শেখা।",
       promoTitle: founder.eyebrow,
@@ -64,23 +64,23 @@ function buildAuthRegisterCopy(locale: UiLocale): AuthRegisterCopy {
       promoCompact: "Founder Launch · বিশেষ প্রাথমিক সদস্য মূল্য",
       backHome: "হোমে ফিরে যান",
       trustOtp: "এখন কোনো টাকা লাগে না",
-      trustFree: "Mission 1 পুরোটা ফ্রি",
+      trustFree: "Level 1 পুরোটা ফ্রি",
       trustSecure: "৩০ সেকেন্ডে শুরু",
     };
   }
   return {
     eyebrow: "We are waiting for you",
-    title: "Play Mission 1 free",
+    title: "Play Level 1 free",
     subtitle:
       "Learning English isn't hard. It's a game. You learn English by playing.",
     belief: "We believe you can win this English-learning game.",
-    missionChip: "Mission 01 · Word Order · fully free",
+    missionChip: "Level 01 · Word Order · fully free",
     formLead:
-      "You do not need to pay to create an account. Mission 1 is completely free to play.",
-    googleCta: "Start Mission 1 with Google",
+      "Type your email. We send a code. The code opens your account and starts Level 1.",
+    googleCta: "Start Level 1 with Google",
     emailLabel: "Email address",
     emailPlaceholder: "you@example.com",
-    submit: "Get the code · Open Mission 1",
+    submit: "Get the code · Open Level 1",
     submitting: "Sending code…",
     hasAccount: "Already have an account?",
     signIn: "Sign in",
@@ -89,7 +89,7 @@ function buildAuthRegisterCopy(locale: UiLocale): AuthRegisterCopy {
       "No heavy books. Learn by playing. We believe you can win.",
     heroBullets: [
       "No payment needed right now",
-      "Play all of Mission 1 free",
+      "Play all of Level 1 free",
       "Win it, and the next mission opens",
     ],
     heroFootnote: "Just play. Winning is learning.",
@@ -99,7 +99,7 @@ function buildAuthRegisterCopy(locale: UiLocale): AuthRegisterCopy {
     promoCompact: "Founder Launch · special early-member price on /pricing",
     backHome: "Back to home",
     trustOtp: "No payment right now",
-    trustFree: "All of Mission 1 is free",
+    trustFree: "All of Level 1 is free",
     trustSecure: "Start in 30 seconds",
   };
 }

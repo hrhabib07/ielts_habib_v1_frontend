@@ -3,12 +3,8 @@
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 import { GuestLandingLocaleProvider } from "@/src/components/home/guest/GuestLandingLocale";
-import { TestLandingCamps } from "@/src/components/home/test-landing/TestLandingCamps";
-import { TestLandingFaq } from "@/src/components/home/test-landing/TestLandingFaq";
+import { BanglaAnswerLinks } from "@/src/components/home/test-landing/BanglaAnswerLinks";
 import { TestLandingHero } from "@/src/components/home/test-landing/TestLandingHero";
-import { TestLandingGraduates } from "@/src/components/home/test-landing/TestLandingGraduates";
-import { TestLandingHowYouLearn } from "@/src/components/home/test-landing/TestLandingHowYouLearn";
-import { TestLandingPlayingNow } from "@/src/components/home/test-landing/TestLandingPlayingNow";
 import { TestLandingStickyCta } from "@/src/components/home/test-landing/TestLandingStickyCta";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
 import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
@@ -19,6 +15,36 @@ const GuestLandingAmbient = dynamic(
       (m) => m.GuestLandingAmbient,
     ),
   { ssr: false },
+);
+
+const TestLandingCamps = dynamic(() =>
+  import("@/src/components/home/test-landing/TestLandingCamps").then(
+    (m) => m.TestLandingCamps,
+  ),
+);
+
+const TestLandingHowYouLearn = dynamic(() =>
+  import("@/src/components/home/test-landing/TestLandingHowYouLearn").then(
+    (m) => m.TestLandingHowYouLearn,
+  ),
+);
+
+const TestLandingGraduates = dynamic(() =>
+  import("@/src/components/home/test-landing/TestLandingGraduates").then(
+    (m) => m.TestLandingGraduates,
+  ),
+);
+
+const TestLandingPlayingNow = dynamic(() =>
+  import("@/src/components/home/test-landing/TestLandingPlayingNow").then(
+    (m) => m.TestLandingPlayingNow,
+  ),
+);
+
+const TestLandingFaq = dynamic(() =>
+  import("@/src/components/home/test-landing/TestLandingFaq").then(
+    (m) => m.TestLandingFaq,
+  ),
 );
 
 const GuestLandingFooter = dynamic(
@@ -49,6 +75,7 @@ function TestLandingSurface() {
         <TestLandingGraduates />
         <TestLandingPlayingNow />
         <TestLandingFaq />
+        <BanglaAnswerLinks />
         <GuestLandingFooter
           closing={{
             title: copy.footerCtaTitle,

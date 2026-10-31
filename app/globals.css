@@ -164,12 +164,41 @@
 }
 
 /*
- * Hind Siliguri remaps ASCII 0-9 into Bengali digit glyphs. Pin digits to Outfit
- * via unicode-range so Bangla UI always shows English numbers.
+ * Hind Siliguri remaps ASCII 0-9 into Bengali digit glyphs. These faces
+ * only cover 0-9 and always use the self-hosted Outfit files.
  */
 @font-face {
   font-family: "Gamlish Latin Digits";
-  src: local("Outfit"), local("Arial"), local("Helvetica Neue"), local("sans-serif");
+  src: url("/fonts/outfit-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  unicode-range: U+0030-0039;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gamlish Latin Digits";
+  src: url("/fonts/outfit-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  unicode-range: U+0030-0039;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gamlish Latin Digits";
+  src: url("/fonts/outfit-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  unicode-range: U+0030-0039;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gamlish Latin Digits";
+  src: url("/fonts/outfit-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  unicode-range: U+0030-0039;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gamlish Latin Digits";
+  src: url("/fonts/outfit-latin-800-normal.woff2") format("woff2");
+  font-weight: 800;
   unicode-range: U+0030-0039;
   font-display: swap;
 }
@@ -1474,6 +1503,54 @@
   display: none;
 }
 
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes landing-rise-visual {
+  from {
+    transform: translate3d(0, 10px, 0) scale(0.985);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.landing-rise {
+  animation: landing-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-rise-visual {
+  animation: landing-rise-visual 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 80ms;
+}
+
+.landing-rise-1 {
+  animation-delay: 0ms;
+}
+.landing-rise-2 {
+  animation-delay: 40ms;
+}
+.landing-rise-3 {
+  animation-delay: 60ms;
+}
+.landing-rise-4 {
+  animation-delay: 80ms;
+}
+.landing-rise-5 {
+  animation-delay: 100ms;
+}
+.landing-rise-6 {
+  animation-delay: 140ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .guest-landing-grid,
   .guest-landing-light-sweep,
@@ -1492,6 +1569,8 @@
   .test-landing-foundation-sparkle,
   .test-landing-foundation-badge,
   .test-landing-cta-glow,
+  .landing-rise,
+  .landing-rise-visual,
   .test-landing-cta-invite,
   .test-landing-cta-invite-ripple > span,
   .test-landing-cta-sheen {

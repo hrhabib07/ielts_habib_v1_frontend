@@ -11,7 +11,7 @@ export type PlayerStageKindLabelInput = {
 export function isMissionOpeningStage(stage: PlayerStageKindLabelInput): boolean {
   if (stage.kind !== "story") return false;
   if (stage.order === 1) return true;
-  return /mission opening/i.test(stage.title ?? "");
+  return /(?:mission|level) opening/i.test(stage.title ?? "");
 }
 
 export function resolveStageKindLabel(

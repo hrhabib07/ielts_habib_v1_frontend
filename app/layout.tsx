@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import "./self-hosted-fonts.css";
 import "./globals.css";
 import { GAMLISH_CANONICAL_ORIGIN } from "@/lib/gamlish-canonical";
 import { getAppOrigin } from "@/src/lib/api-base-url";
@@ -11,17 +12,9 @@ import { AppShellFallback } from "@/src/components/shared/AppShellFallback";
 import { AppShellWithAuth } from "@/src/components/shared/AppShellWithAuth";
 import { SiteJsonLd } from "@/src/components/seo/SiteJsonLd";
 import {
+  DeferredGoogleTagManager,
   GoogleTagManagerBody,
-  GoogleTagManagerHead,
 } from "@/src/components/analytics/GoogleTagManager";
-
-/**
- * Runtime font loading (browser only). Avoids next/font/google at build time.
- * Keep weight count low  -  each family×weight is a blocking download on first paint.
- * Latin digits are used in Bangla UI, so Hind Siliguri alone is enough (no Noto).
- */
-const RUNTIME_FONT_STYLESHEET =
-  "https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap";
 
 const siteOrigin = getAppOrigin();
 
@@ -98,20 +91,41 @@ export default function RootLayout({
               "try{localStorage.setItem('ielts-habib-theme','light');document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}catch(e){}",
           }}
         />
-        <GoogleTagManagerHead />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.dataLayer=window.dataLayer||[];window.dataLayer.push({'gtm.start':new Date().getTime(),event:'gtm.js'});",
+          }}
+        />
         <SiteJsonLd />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
+          rel="preload"
+          href="/fonts/hind-siliguri-bengali-500-normal.woff2"
+          as="font"
+          type="font/woff2"
           crossOrigin="anonymous"
         />
         <link
           rel="preload"
-          as="style"
-          href={RUNTIME_FONT_STYLESHEET}
+          href="/fonts/hind-siliguri-bengali-700-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
         />
-        <link href={RUNTIME_FONT_STYLESHEET} rel="stylesheet" />
+        <link
+          rel="preload"
+          href="/fonts/hind-siliguri-latin-500-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/hind-siliguri-latin-700-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <link rel="author" href="/humans.txt" />
         <link
           rel="alternate"
@@ -127,6 +141,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased font-bengali">
+        <DeferredGoogleTagManager />
         <GoogleTagManagerBody />
         <ThemeProvider>
           <UiLocaleProvider>

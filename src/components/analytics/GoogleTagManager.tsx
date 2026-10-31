@@ -1,26 +1,46 @@
-/** Google Tag Manager container ID (gamlish.com  -  GTM-5QCTC26K). */
+"use client";
+
+import { useEffect } from "react";
+
+/** Google Tag Manager container ID (gamlish.com: GTM-5QCTC26K). */
 export const GTM_ID = "GTM-5QCTC26K";
 
-const GTM_INLINE_SCRIPT = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${GTM_ID}');`;
+type DataLayerWindow = Window & {
+  dataLayer?: Record<string, unknown>[];
+};
 
 /**
- * GTM head snippet  -  first child of `<head>` (as high as possible).
+ * Download GTM after the page is visible.
+ * The head snippet already created dataLayer, so purchase and page events
+ * stay queued until this script arrives.
  */
-export function GoogleTagManagerHead() {
-  return (
-    <script
-      id="gtm-script"
-      dangerouslySetInnerHTML={{ __html: GTM_INLINE_SCRIPT }}
-    />
-  );
+export function DeferredGoogleTagManager() {
+  useEffect(() => {
+    const load = () => {
+      if (document.getElementById("gtm-script")) return;
+      const win = window as DataLayerWindow;
+      win.dataLayer = win.dataLayer || [];
+      const script = document.createElement("script");
+      script.id = "gtm-script";
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtm.js?id=${GTM_ID}`;
+      document.head.appendChild(script);
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(load, { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
+    }
+
+    const timer = window.setTimeout(load, 1500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return null;
 }
 
 /**
- * GTM noscript fallback  -  first child of `<body>`.
+ * GTM noscript fallback. First paint does not wait on this iframe.
  */
 export function GoogleTagManagerBody() {
   return (
@@ -29,7 +49,7 @@ export function GoogleTagManagerBody() {
         src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
         height="0"
         width="0"
-        style={{ display: "none", visibility: "hidden" }}
+        className="hidden"
         title="Google Tag Manager"
       />
     </noscript>

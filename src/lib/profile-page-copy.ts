@@ -52,7 +52,7 @@ export const PROFILE_PAGE_COPY: Record<GuestLandingLocale, ProfilePageCopy> = {
     cancel: "Cancel",
     saveSuccess: "Profile updated successfully.",
     englishPlayer: "English Foundations",
-    mission01Free: "Mission 01 free",
+    mission01Free: "Level 01 free",
   },
   bn: {
     workspaceLabel: "স্টুডেন্ট ওয়ার্কস্পেস",
@@ -78,6 +78,6 @@ export const PROFILE_PAGE_COPY: Record<GuestLandingLocale, ProfilePageCopy> = {
     cancel: "বাতিল",
     saveSuccess: "প্রোফাইল আপডেট হয়েছে।",
     englishPlayer: "English Foundations",
-    mission01Free: "Mission 01 ফ্রি",
+    mission01Free: "Level 01 ফ্রি",
   },
 };

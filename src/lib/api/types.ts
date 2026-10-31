@@ -117,6 +117,9 @@ export interface StudentProfile {
   firstWeekAdopterAt?: string | null;
   isFirstMonthAdopter?: boolean;
   firstMonthAdopterAt?: string | null;
+  /** Early Adopter · Gamlish v2 (bought v2 early, or paid before v2). */
+  isV2EarlyAdopter?: boolean;
+  v2EarlyAdopterAt?: string | null;
   streak?: {
     current: number;
     longest: number;

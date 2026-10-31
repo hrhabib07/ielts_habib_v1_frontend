@@ -1,0 +1,86 @@
+{
+  "lines": [
+    {
+      "en": "Gamlish makes learning English grammar fun and easy through a game with **21 levels**.",
+      "bn": "গ্যামলিশে 21টি লেভেলের একটি গেমের মাধ্যমে তুমি সহজে ও মজা করে ইংরেজি গ্রামার শিখতে পারবে।"
+    },
+    {
+      "en": "You will start from **Level 1** with very easy grammar topics. As you play, you will slowly move to higher levels and learn more difficult topics **step by step**.",
+      "bn": "তুমি লেভেল 1 থেকে একদম সহজ গ্রামার দিয়ে শুরু করবে। খেলতে খেলতে ধীরে ধীরে পরের লেভেলগুলোতে যাবে এবং একটু একটু করে কঠিন বিষয় শিখবে।"
+    }
+  ],
+  "voices": [
+    {
+      "id": "en-US-AndrewMultilingualNeural",
+      "label": "Andrew · US, warm",
+      "lang": "en",
+      "clips": [
+        "/audio/lab/voice-samples/en-us-andrewmultilingualneural-1.mp3",
+        "/audio/lab/voice-samples/en-us-andrewmultilingualneural-2.mp3"
+      ]
+    },
+    {
+      "id": "en-US-BrianMultilingualNeural",
+      "label": "Brian · US, friendly",
+      "lang": "en",
+      "clips": [
+        "/audio/lab/voice-samples/en-us-brianmultilingualneural-1.mp3",
+        "/audio/lab/voice-samples/en-us-brianmultilingualneural-2.mp3"
+      ]
+    },
+    {
+      "id": "en-US-GuyNeural",
+      "label": "Guy · US, classic",
+      "lang": "en",
+      "clips": [
+        "/audio/lab/voice-samples/en-us-guyneural-1.mp3",
+        "/audio/lab/voice-samples/en-us-guyneural-2.mp3"
+      ]
+    },
+    {
+      "id": "en-GB-RyanNeural",
+      "label": "Ryan · UK",
+      "lang": "en",
+      "clips": [
+        "/audio/lab/voice-samples/en-gb-ryanneural-1.mp3",
+        "/audio/lab/voice-samples/en-gb-ryanneural-2.mp3"
+      ]
+    },
+    {
+      "id": "en-IN-PrabhatNeural",
+      "label": "Prabhat · Indian English",
+      "lang": "en",
+      "clips": [
+        "/audio/lab/voice-samples/en-in-prabhatneural-1.mp3",
+        "/audio/lab/voice-samples/en-in-prabhatneural-2.mp3"
+      ]
+    },
+    {
+      "id": "en-US-Andrew:DragonHDLatestNeural",
+      "label": "Andrew HD · most natural",
+      "lang": "en",
+      "clips": [
+        "/audio/lab/voice-samples/en-us-andrew-dragonhdlatestneural-1.mp3",
+        "/audio/lab/voice-samples/en-us-andrew-dragonhdlatestneural-2.mp3"
+      ]
+    },
+    {
+      "id": "bn-BD-PradeepNeural",
+      "label": "Pradeep · Bangladesh",
+      "lang": "bn",
+      "clips": [
+        "/audio/lab/voice-samples/bn-bd-pradeepneural-1.mp3",
+        "/audio/lab/voice-samples/bn-bd-pradeepneural-2.mp3"
+      ]
+    },
+    {
+      "id": "bn-IN-BashkarNeural",
+      "label": "Bashkar · India",
+      "lang": "bn",
+      "clips": [
+        "/audio/lab/voice-samples/bn-in-bashkarneural-1.mp3",
+        "/audio/lab/voice-samples/bn-in-bashkarneural-2.mp3"
+      ]
+    }
+  ]
+}

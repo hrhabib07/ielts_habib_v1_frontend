@@ -32,7 +32,7 @@ export function MissionOpeningStage({
           </div>
         </div>
         <div
-          className="prose prose-sm max-w-none text-[15px] leading-relaxed dark:prose-invert prose-ul:my-3 prose-li:my-1"
+          className="prose prose-lg max-w-none text-[1.125rem] leading-relaxed dark:prose-invert prose-p:text-[1.125rem] prose-li:text-[1.125rem] sm:text-xl prose-ul:my-3 prose-li:my-1"
           dangerouslySetInnerHTML={{ __html: storyHtml ?? "" }}
         />
       </div>

@@ -183,3 +183,69 @@ export async function getAdminEquivalentLog(): Promise<AdminEquivalentDashboard>
 export async function deleteAdminLearnedAnswer(id: string): Promise<void> {
   await apiClient.delete(`/admin/player/learned-answers/${encodeURIComponent(id)}`);
 }
+
+export interface StudentBehaviorFunnelRow {
+  order: number;
+  slug: string;
+  title: string;
+  accessTier: "FREE" | "PAID";
+  isInspection: boolean;
+  completed: number;
+  startedNotDone: number;
+  parkedIdle: number;
+  finishedPreviousNeverOpened: number;
+}
+
+export interface StudentBehaviorReport {
+  generatedAt: string;
+  idleDays: number;
+  studentsWithProgress: number;
+  activeWithinIdleWindow: number;
+  headlines: {
+    parkedIdleOnMission1: number;
+    finishedMission1NeverOpened2: number;
+    reachedMission9: number;
+    parkedIdleInsideMission9: number;
+    parkedIdleInsideMission10: number;
+  };
+  funnel: StudentBehaviorFunnelRow[];
+  leaks: Array<{
+    fromOrder: number;
+    toOrder: number;
+    fromTitle: string;
+    toTitle: string;
+    finishedFrom: number;
+    neverOpenedNext: number;
+  }>;
+  friction: Array<{
+    missionOrder: number;
+    missionTitle: string;
+    missionSlug: string;
+    stageOrder: number;
+    stageTitle: string;
+    questionId: string;
+    label: string;
+    attempters: number;
+    stillWrong: number;
+    wrongRate: number;
+    parkedHere: number;
+    sampleWrong: string[];
+  }>;
+  parkedLearners: Array<{
+    userId: string;
+    label: string;
+    missionOrder: number;
+    missionTitle: string;
+    missionSlug: string;
+    stageOrder: number;
+    stageTitle: string;
+    questionLabel: string;
+    idleDays: number;
+  }>;
+}
+
+export async function getStudentBehaviorReport(): Promise<StudentBehaviorReport> {
+  const res = await apiClient.get<ApiResponse<StudentBehaviorReport>>("/admin/player/behavior");
+  if (!res.data?.data) throw new Error("Failed to load student behavior");
+  return res.data.data;
+}

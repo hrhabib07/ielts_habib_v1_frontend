@@ -1,23 +1,40 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
+import { Button } from "@/components/ui/button";
 import { getPlayerCourseMap, type PlayerCourseMap } from "@/src/lib/api/player";
 import {
   getFounderCounter,
   type FounderTierLiveStat,
 } from "@/src/lib/api/gamlish";
-import { CampMapView } from "@/src/components/player/CampMapView";
 import { UsernameClaimBanner } from "@/src/components/profile/UsernameClaimBanner";
-import { FounderVipClaimCard } from "@/src/components/home/FounderVipClaimCard";
 import { SeasonalOfferHomeCard } from "@/src/components/home/SeasonalOfferHomeCard";
+import { getChatMissionState, type ChatMissionState } from "@/src/lib/api/chatMission";
+import { LevelsHome, LevelsHomeSkeleton } from "@/src/features/learner/components/LevelsHome";
+import { readMissionState, writeMissionState } from "@/src/features/learner/lib/stateCache";
 import { isFoundingMemberWindowOpen } from "@/src/lib/foundingMember";
-import { getDecodedTokenClient } from "@/src/lib/auth";
-import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { getDecodedTokenClient, hydrateAccessTokenFromCookie } from "@/src/lib/auth";
+import { useStudentSession, runWhenIdle } from "@/src/contexts/StudentSessionContext";
 import { usePaymentApplicationStatus } from "@/src/hooks/usePaymentApplicationStatus";
 import { USERNAME_CLAIM_HREF } from "@/src/lib/auth-redirects";
-import { Button } from "@/components/ui/button";
-import { isAxiosError } from "axios";
+
+const CampMapView = dynamic(
+  () =>
+    import("@/src/components/player/CampMapView").then((m) => m.CampMapView),
+  { loading: () => <PlayerMapSkeleton /> },
+);
+
+type ChatMissionHome = Extract<ChatMissionState, { enabled: true }>;
+
+const FounderVipClaimCard = dynamic(
+  () =>
+    import("@/src/components/home/FounderVipClaimCard").then(
+      (m) => m.FounderVipClaimCard,
+    ),
+);
 
 function mapLoadErrorMessage(err: unknown): string {
   if (isAxiosError(err)) {
@@ -41,12 +58,28 @@ function mapLoadErrorMessage(err: unknown): string {
   return err instanceof Error ? err.message : "Failed to load camp map";
 }
 
+function PlayerMapSkeleton() {
+  return (
+    <div className="mx-auto max-w-lg space-y-4 px-4 py-8" aria-hidden>
+      <div className="mx-auto h-9 w-52 animate-pulse rounded-xl bg-muted" />
+      <div className="h-40 animate-pulse rounded-[1.75rem] bg-muted/70" />
+      <div className="h-40 animate-pulse rounded-[1.75rem] bg-muted/70" />
+    </div>
+  );
+}
+
 export default function PlayerPageClient() {
   const router = useRouter();
-  const { profile, loading: profileLoading, isFoundingMember } =
-    useStudentSession();
-  const payment = usePaymentApplicationStatus(true);
+  const {
+    profile,
+    profileStatus,
+    isFoundingMember,
+    subscription,
+    ensure,
+  } = useStudentSession();
+  const payment = usePaymentApplicationStatus(true, true);
   const [map, setMap] = useState<PlayerCourseMap | null>(null);
+  const [chatHome, setChatHome] = useState<ChatMissionHome | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
@@ -54,24 +87,44 @@ export default function PlayerPageClient() {
     FounderTierLiveStat[] | undefined
   >(undefined);
   const [founderDeadline, setFounderDeadline] = useState<string | undefined>(undefined);
+  const needsUsername = profile?.needsUsername === true;
 
   useEffect(() => {
-    if (profileLoading) return;
-    if (profile?.needsUsername === true) {
-      router.replace(USERNAME_CLAIM_HREF);
-    }
-  }, [profileLoading, profile?.needsUsername, router]);
+    if (!needsUsername) return;
+    router.replace(USERNAME_CLAIM_HREF);
+  }, [needsUsername, router]);
 
   const loadMap = useCallback(async (signal: AbortSignal) => {
-    const token = getDecodedTokenClient();
+    let token = getDecodedTokenClient();
+    if (!token) {
+      await hydrateAccessTokenFromCookie();
+      token = getDecodedTokenClient();
+    }
     if (!token || token.role !== "STUDENT") {
       setLoading(false);
       router.replace("/login?next=/player");
       return;
     }
 
-    setLoading(true);
     setError(null);
+    const cached = readMissionState(token.userId);
+    if (cached?.enabled) {
+      setChatHome(cached);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
+    const chat = await getChatMissionState().catch(() => null);
+    if (signal.aborted) return;
+    if (chat) writeMissionState(token.userId, chat);
+    if (chat?.enabled || (!chat && cached?.enabled)) {
+      if (chat?.enabled) setChatHome(chat);
+      setLoading(false);
+      return;
+    }
+    setChatHome(null);
+    setLoading(true);
 
     try {
       const data = await getPlayerCourseMap({ signal });
@@ -87,31 +140,37 @@ export default function PlayerPageClient() {
   }, [router]);
 
   useEffect(() => {
-    if (profile?.needsUsername) return;
+    if (needsUsername) return;
     const controller = new AbortController();
     void loadMap(controller.signal);
+    ensure("profile");
+    ensure("subscription");
     return () => controller.abort();
-  }, [loadMap, retryKey, profile?.needsUsername]);
+  }, [loadMap, retryKey, needsUsername, ensure]);
 
   useEffect(() => {
     let cancelled = false;
-    getFounderCounter()
-      .then((counter) => {
-        if (cancelled) return;
-        if (Array.isArray(counter.tiers) && counter.tiers.length > 0) {
-          setFounderTiers(counter.tiers);
-        }
-        if (counter.launchDateIso) setFounderDeadline(counter.launchDateIso);
-      })
-      .catch(() => {
-        /* card falls back to default Gold progress */
-      });
+    const cancelIdle = runWhenIdle(() => {
+      getFounderCounter()
+        .then((counter) => {
+          if (cancelled) return;
+          if (Array.isArray(counter.tiers) && counter.tiers.length > 0) {
+            setFounderTiers(counter.tiers);
+          }
+          if (counter.launchDateIso) setFounderDeadline(counter.launchDateIso);
+        })
+        .catch(() => {
+          /* card falls back to default Gold progress */
+        });
+    });
     return () => {
       cancelled = true;
+      cancelIdle();
     };
   }, []);
 
-  const paymentBusy = profileLoading || payment.loading;
+  const profilePending = profileStatus === "idle" || profileStatus === "loading";
+  const paymentBusy = profilePending || payment.loading;
   const hasPaidOrPending =
     payment.hasPurchased ||
     isFoundingMember ||
@@ -119,7 +178,7 @@ export default function PlayerPageClient() {
     payment.latestRequest?.status === "APPROVED";
   const showFounderOffer = !paymentBusy && !hasPaidOrPending;
 
-  if (profileLoading || profile?.needsUsername) {
+  if (needsUsername) {
     return (
       <div className="mx-auto max-w-lg space-y-4 px-4 py-10">
         <UsernameClaimBanner />
@@ -149,6 +208,9 @@ export default function PlayerPageClient() {
     );
   }
 
+  if (chatHome) return <LevelsHome state={chatHome} />;
+  if (loading) return <LevelsHomeSkeleton />;
+
   return (
     <div>
       <div className="mx-auto max-w-lg px-4 pt-4 sm:max-w-2xl">
@@ -168,7 +230,21 @@ export default function PlayerPageClient() {
         )}
       </div>
 
-      <CampMapView map={map} loading={loading} error={null} />
+      <CampMapView
+        map={
+          map
+            ? {
+                ...map,
+                hasEnglishAccess:
+                  map.hasEnglishAccess ||
+                  payment.hasPurchased ||
+                  subscription?.status === "ACTIVE",
+              }
+            : map
+        }
+        loading={false}
+        error={null}
+      />
     </div>
   );
 }

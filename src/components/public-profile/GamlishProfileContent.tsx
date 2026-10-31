@@ -478,7 +478,7 @@ export function GamlishProfileContent({
             <section className="mt-6 grid grid-cols-3 gap-3">
               <StatCard
                 icon={<Sparkles className="h-4 w-4 text-white" />}
-                label="Level"
+                label="Rank"
                 value={stats.level}
                 accent="bg-gradient-to-br from-violet-400 to-purple-600"
               />

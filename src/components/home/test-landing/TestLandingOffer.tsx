@@ -9,10 +9,7 @@ import {
   LANDING_CTA_CLASS,
   LANDING_EYEBROW_CLASS,
 } from "@/src/components/home/guest/guest-landing-theme";
-import {
-  TEST_LANDING_PRIMARY_HREF,
-  TEST_LANDING_SECONDARY_HREF,
-} from "@/src/lib/test-landing-copy";
+import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
 import { TestLandingPriceLine } from "@/src/components/home/test-landing/TestLandingPriceLine";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
 import { usePublicPricing } from "@/src/hooks/usePublicPricing";
@@ -78,12 +75,6 @@ export function TestLandingOffer() {
           >
             <Link href={TEST_LANDING_PRIMARY_HREF}>{copy.offerCta}</Link>
           </Button>
-          <Link
-            href={TEST_LANDING_SECONDARY_HREF}
-            className="mt-3 block text-center text-base font-semibold text-foreground/75 underline-offset-4 hover:underline"
-          >
-            {copy.ctaSecondary}
-          </Link>
           <p className="mt-4 text-center text-sm leading-relaxed text-foreground/65 sm:text-[0.95rem]">
             {copy.offerRisk}
           </p>

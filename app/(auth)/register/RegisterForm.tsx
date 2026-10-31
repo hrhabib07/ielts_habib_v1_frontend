@@ -56,7 +56,7 @@ function RegisterHeroPanel({ locale }: { locale: "en" | "bn" }) {
       >
         <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/85">
           <Sparkles className="h-3.5 w-3.5 text-white/90" aria-hidden />
-          {locale === "bn" ? "4 ক্যাম্প · 21 মিশন" : "4 camps · 21 missions"}
+          {locale === "bn" ? "4 ক্যাম্প · 21 লেভেল" : "4 camps · 21 levels"}
         </p>
 
         <div className="space-y-3">
@@ -88,7 +88,7 @@ function RegisterHeroPanel({ locale }: { locale: "en" | "bn" }) {
         <div className="grid max-w-sm grid-cols-3 gap-2">
           {[
             { label: locale === "bn" ? "ক্যাম্প" : "Camps", value: "4" },
-            { label: locale === "bn" ? "মিশন" : "Missions", value: "21" },
+            { label: locale === "bn" ? "লেভেল" : "Levels", value: "21" },
             { label: locale === "bn" ? "ফ্রি" : "Free", value: "M01" },
           ].map((stat) => (
             <div

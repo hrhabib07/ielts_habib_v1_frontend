@@ -9,15 +9,17 @@ import { BookOpen, MapPin, Sparkles, TrendingUp } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import {
   hasUsableClientToken,
+  getDecodedTokenClient,
   isActiveStudentSessionClient,
 } from "@/src/lib/auth";
-import { ENABLE_READING } from "@/src/lib/platform-config";
+import { ENABLE_READING, PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
 import { BandScoreWaterDisplay } from "@/src/components/home/BandScoreWaterDisplay";
 import {
   STUDENT_JOURNEY_HERO_MOCK,
   resolveJourneyMapPoint,
 } from "@/src/components/home/studentJourneyHeroConfig";
 import { getStudentDisplayName } from "@/src/lib/student-display-name";
+import { getRedirectPathForRole } from "@/src/lib/auth-redirects";
 import { countryCodeToLabel } from "@/src/lib/countryCodes";
 import {
   journeyProgressBarStyle,
@@ -136,20 +138,44 @@ export function HomeHero({
     setAuthBootstrapped(true);
   }, []);
 
-  // Hooks must run unconditionally (Rules of Hooks). Early-return after these.
-  const {
-    profileSummary,
-    profile,
-    isFoundingMember,
-    loading: sessionLoading,
-  } = useStudentSession();
+  useEffect(() => {
+    const leaveIfSignedIn = () => {
+      if (!hasUsableClientToken()) return;
+      const decoded = getDecodedTokenClient();
+      if (!decoded) return;
+      if (decoded.role === "STUDENT") {
+        if (!ENABLE_READING) {
+          window.location.replace(PRIMARY_STUDENT_HREF);
+        }
+        return;
+      }
+      if (decoded.role === "ADMIN" || decoded.role === "INSTRUCTOR") {
+        window.location.replace(getRedirectPathForRole(decoded.role));
+      }
+    };
+    leaveIfSignedIn();
+    window.addEventListener("auth-state-changed", leaveIfSignedIn);
+    return () =>
+      window.removeEventListener("auth-state-changed", leaveIfSignedIn);
+  }, []);
 
+  // Hooks must run unconditionally (Rules of Hooks). Early-return after these.
   const serverStudent = initialUser?.role === "STUDENT";
   const clientStudentFallback =
     authBootstrapped &&
     initialUser == null &&
     isActiveStudentSessionClient();
   const isStudent = serverStudent || clientStudentFallback;
+  const {
+    profileSummary,
+    profile,
+    isFoundingMember,
+    loading: sessionLoading,
+  } = useStudentSession(
+    isStudent
+      ? { profile: true, summary: true, subscription: true }
+      : undefined,
+  );
 
   const studentData = useMemo(() => {
     if (!isStudent) return null;

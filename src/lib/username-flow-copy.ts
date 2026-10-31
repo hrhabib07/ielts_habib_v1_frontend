@@ -63,7 +63,7 @@ function buildUsernameFlowCopy(locale: UiLocale): UsernameFlowCopy {
       bannerPublicTitle: "আপনার পাবলিক Gamlish প্রোফাইল",
       bannerSharePrefix: "শেয়ার করুন",
       bannerFounderBody: "  ·  এখানেই Founder ব্যাজ, টিয়ার ও প্রগ্রেস।",
-      bannerPublicBody: "  ·  লেভেল, XP, স্ট্রিক, মিশন কার্ড ও অ্যাচিভমেন্ট।",
+      bannerPublicBody: "  ·  র‍্যাঙ্ক, XP, স্ট্রিক, লেভেল কার্ড ও অ্যাচিভমেন্ট।",
       viewPublic: "পাবলিক প্রোফাইল দেখুন",
       foundersWall: "Founders' Wall",
       usernameAria: "ইউজারনেম",

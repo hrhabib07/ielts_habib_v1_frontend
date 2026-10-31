@@ -17,7 +17,10 @@ export function StickySiteChrome({
   initialUser: CurrentUser | null;
 }) {
   const pathname = usePathname() ?? "";
-  const { subscription, loading: sessionLoading } = useStudentSession();
+  const { subscription, loading: sessionLoading } = useStudentSession({
+    subscription: true,
+    defer: true,
+  });
 
   if (isImmersiveAuthPath(pathname) || isImmersivePlayerPath(pathname)) {
     return null;
@@ -29,7 +32,7 @@ export function StickySiteChrome({
     subscription?.status !== "ACTIVE";
   const showPaidProof =
     shouldShowGuestPaidProof(pathname, Boolean(initialUser)) ||
-    (Boolean(unpaidStudent) && !pathname.startsWith("/dashboard"));
+    (Boolean(unpaidStudent) && !pathname.startsWith("/dashboard") && pathname !== "/player");
 
   return (
     <>

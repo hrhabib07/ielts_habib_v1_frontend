@@ -1,0 +1,2422 @@
+{
+  "stepId": "level-1-playground-number",
+  "voices": {
+    "en": "en-US-Andrew:DragonHDLatestNeural",
+    "bn": "bn-IN-BashkarNeural"
+  },
+  "clips": {
+    "en|Count the pictures. Pick the number, then the right word.": "/audio/chat-lesson/level-1-playground-number/d06ea8e6bf1b879b.mp3",
+    "en|three tomatoes": "/audio/chat-lesson/level-1-playground-number/2b1acdea853afe63.mp3",
+    "en|two potatoes": "/audio/chat-lesson/level-1-playground-number/819b8ef0adf83efb.mp3",
+    "en|four leaves": "/audio/chat-lesson/level-1-playground-number/6d1f174444844764.mp3",
+    "en|five sheep": "/audio/chat-lesson/level-1-playground-number/d4e07f503ed06e1b.mp3",
+    "en|three fish": "/audio/chat-lesson/level-1-playground-number/fbeea99ba5e80672.mp3",
+    "en|two babies": "/audio/chat-lesson/level-1-playground-number/da78b1f0553e3f6c.mp3",
+    "en|four teeth": "/audio/chat-lesson/level-1-playground-number/b12d0dce136d78a7.mp3",
+    "en|three mice": "/audio/chat-lesson/level-1-playground-number/fe7a9bd74fc4693e.mp3",
+    "en|four children": "/audio/chat-lesson/level-1-playground-number/2521830354a30cd9.mp3",
+    "en|three boxes": "/audio/chat-lesson/level-1-playground-number/07fd879ed4a86a77.mp3",
+    "en|two watches": "/audio/chat-lesson/level-1-playground-number/050f44866dc6a259.mp3",
+    "en|three keys": "/audio/chat-lesson/level-1-playground-number/af5023a17cb9708c.mp3",
+    "en|six eggs": "/audio/chat-lesson/level-1-playground-number/35dcd022cdb59408.mp3",
+    "en|one apple": "/audio/chat-lesson/level-1-playground-number/4687b0bb7625462b.mp3",
+    "en|Type the Plural of the word.": "/audio/chat-lesson/level-1-playground-number/e7528884331d99f6.mp3",
+    "en|cup": "/audio/chat-lesson/level-1-playground-number/92fc8564e8da6cf8.mp3",
+    "en|one cup, two cups": "/audio/chat-lesson/level-1-playground-number/5e71aa03a0e9968d.mp3",
+    "en|bus": "/audio/chat-lesson/level-1-playground-number/bfe0da6da0491666.mp3",
+    "en|one bus, two buses": "/audio/chat-lesson/level-1-playground-number/9b58a0ddba1526b7.mp3",
+    "en|dish": "/audio/chat-lesson/level-1-playground-number/6ada75beb3f0e231.mp3",
+    "en|one dish, two dishes": "/audio/chat-lesson/level-1-playground-number/6ef1c28da4ba3da8.mp3",
+    "en|watch": "/audio/chat-lesson/level-1-playground-number/5b6c50585a252048.mp3",
+    "en|one watch, two watches": "/audio/chat-lesson/level-1-playground-number/2e4d54ebb1c160a5.mp3",
+    "en|city": "/audio/chat-lesson/level-1-playground-number/ca8d5ac5c58a90d8.mp3",
+    "en|one city, two cities": "/audio/chat-lesson/level-1-playground-number/10e47aeef97880e7.mp3",
+    "en|family": "/audio/chat-lesson/level-1-playground-number/3ef27b83f9b1152e.mp3",
+    "en|one family, two families": "/audio/chat-lesson/level-1-playground-number/087504aa82f33dc6.mp3",
+    "en|day": "/audio/chat-lesson/level-1-playground-number/59678a221d408a2c.mp3",
+    "en|one day, two days": "/audio/chat-lesson/level-1-playground-number/f5ad5775bb350093.mp3",
+    "en|toy": "/audio/chat-lesson/level-1-playground-number/e3e5dbdea04cc53a.mp3",
+    "en|one toy, two toys": "/audio/chat-lesson/level-1-playground-number/0d0edeb7570bd332.mp3",
+    "en|child": "/audio/chat-lesson/level-1-playground-number/5b06625ed90f4c35.mp3",
+    "en|one child, two children": "/audio/chat-lesson/level-1-playground-number/efdc2b143553adc9.mp3",
+    "en|man": "/audio/chat-lesson/level-1-playground-number/fc16e3a09f355588.mp3",
+    "en|one man, two men": "/audio/chat-lesson/level-1-playground-number/7873b9d941b797a6.mp3",
+    "en|woman": "/audio/chat-lesson/level-1-playground-number/22ab69d57bec54da.mp3",
+    "en|one woman, two women": "/audio/chat-lesson/level-1-playground-number/523f0ceae9190d0d.mp3",
+    "en|person": "/audio/chat-lesson/level-1-playground-number/cb78a8ff2e494a27.mp3",
+    "en|one person, two people": "/audio/chat-lesson/level-1-playground-number/607a1023fad5ee08.mp3",
+    "en|foot": "/audio/chat-lesson/level-1-playground-number/03710bca0d6ac7d9.mp3",
+    "en|one foot, two feet": "/audio/chat-lesson/level-1-playground-number/c9eddb7340b1e632.mp3",
+    "en|knife": "/audio/chat-lesson/level-1-playground-number/ab830e72e6036060.mp3",
+    "en|one knife, two knives": "/audio/chat-lesson/level-1-playground-number/94b3c13bb93106b2.mp3",
+    "en|potato": "/audio/chat-lesson/level-1-playground-number/295932a026e67c0b.mp3",
+    "en|one potato, two potatoes": "/audio/chat-lesson/level-1-playground-number/d4abf0fd57a42c93.mp3",
+    "en|sheep": "/audio/chat-lesson/level-1-playground-number/f10d95612063f319.mp3",
+    "en|one sheep, two sheep": "/audio/chat-lesson/level-1-playground-number/cec014a2ebc28539.mp3",
+    "en|fish": "/audio/chat-lesson/level-1-playground-number/406ad7b267a56904.mp3",
+    "en|one fish, two fish": "/audio/chat-lesson/level-1-playground-number/3738c6a514a2d6dd.mp3",
+    "en|One English word is wrong. Tap it, then fix it.": "/audio/chat-lesson/level-1-playground-number/b7d5098b45ac46c6.mp3",
+    "en|I have three sisters.": "/audio/chat-lesson/level-1-playground-number/6530a259f46ad798.mp3",
+    "en|There are forty students in our class.": "/audio/chat-lesson/level-1-playground-number/19728fd29b3fd72f.mp3",
+    "en|The children play in the field.": "/audio/chat-lesson/level-1-playground-number/3787dcdb019516ed.mp3",
+    "en|My grandfather has only two teeth.": "/audio/chat-lesson/level-1-playground-number/59fb2aeae7c6863f.mp3",
+    "en|My teacher gives me good advice.": "/audio/chat-lesson/level-1-playground-number/083642117487e82d.mp3",
+    "en|There are many people in the market.": "/audio/chat-lesson/level-1-playground-number/e57094bb60fbc249.mp3",
+    "en|My mother cooks three potatoes.": "/audio/chat-lesson/level-1-playground-number/4f7b31a27e210ebe.mp3",
+    "en|The tree has many leaves.": "/audio/chat-lesson/level-1-playground-number/67c6dd71e1976348.mp3",
+    "en|We have two cats.": "/audio/chat-lesson/level-1-playground-number/389f986ca2e6a33c.mp3",
+    "en|The farm has ten sheep.": "/audio/chat-lesson/level-1-playground-number/f603e4be8a2e01a3.mp3",
+    "en|Many buses run in Dhaka.": "/audio/chat-lesson/level-1-playground-number/8896eedb84f6c74c.mp3",
+    "en|I have one brother.": "/audio/chat-lesson/level-1-playground-number/decf77fa2f175e4c.mp3",
+    "en|Type the right word for Mom's list.": "/audio/chat-lesson/level-1-playground-number/ffca5a2e56869a73.mp3",
+    "en|three potatoes": "/audio/chat-lesson/level-1-playground-number/975ca74fe26c6d94.mp3",
+    "en|two tomatoes": "/audio/chat-lesson/level-1-playground-number/9140e95cefb38763.mp3",
+    "en|twelve eggs": "/audio/chat-lesson/level-1-playground-number/69458fbeb78e63cf.mp3",
+    "en|six bananas": "/audio/chat-lesson/level-1-playground-number/1ac9559162e11cc5.mp3",
+    "en|seven onions": "/audio/chat-lesson/level-1-playground-number/be3154c7c002825f.mp3",
+    "en|five mangoes": "/audio/chat-lesson/level-1-playground-number/526d8908cdac4d23.mp3",
+    "en|four fish": "/audio/chat-lesson/level-1-playground-number/833377d17b1c4342.mp3",
+    "en|two knives": "/audio/chat-lesson/level-1-playground-number/5768d38be3a78c50.mp3",
+    "en|three dishes": "/audio/chat-lesson/level-1-playground-number/2ba434f435196918.mp3",
+    "en|one watermelon": "/audio/chat-lesson/level-1-playground-number/55471209c5113bae.mp3",
+    "en|one kilo of rice": "/audio/chat-lesson/level-1-playground-number/dc9c3df1de760b72.mp3",
+    "en|two litres of milk": "/audio/chat-lesson/level-1-playground-number/3d0eec8545a8f557.mp3",
+    "en|one bottle of water": "/audio/chat-lesson/level-1-playground-number/79aef58a1f77c8dc.mp3",
+    "bn|ছবিগুলো গোনো। আগে সংখ্যা, তারপর সঠিক শব্দটি বেছে নাও।": "/audio/chat-lesson/level-1-playground-number/e50662cb28e627de.mp3",
+    "bn|তিনটি টমেটো": "/audio/chat-lesson/level-1-playground-number/5b3ec2c734b0d006.mp3",
+    "bn|দুটি আলু": "/audio/chat-lesson/level-1-playground-number/c88c8ca1e1a5d8aa.mp3",
+    "bn|চারটি পাতা": "/audio/chat-lesson/level-1-playground-number/b5d9c78bd35814b7.mp3",
+    "bn|পাঁচটি ভেড়া": "/audio/chat-lesson/level-1-playground-number/7010e5ffaf736aa1.mp3",
+    "bn|তিনটি মাছ": "/audio/chat-lesson/level-1-playground-number/38c191126f408a1b.mp3",
+    "bn|দুটি শিশু": "/audio/chat-lesson/level-1-playground-number/75622bdbd3bbf22d.mp3",
+    "bn|চারটি দাঁত": "/audio/chat-lesson/level-1-playground-number/308cc77db88257c1.mp3",
+    "bn|তিনটি ইঁদুর": "/audio/chat-lesson/level-1-playground-number/6e66420f5d080e28.mp3",
+    "bn|চারজন শিশু": "/audio/chat-lesson/level-1-playground-number/5968227b2f8e6e7b.mp3",
+    "bn|তিনটি বাক্স": "/audio/chat-lesson/level-1-playground-number/67bc890a4d6a5f8d.mp3",
+    "bn|দুটি ঘড়ি": "/audio/chat-lesson/level-1-playground-number/dc052bb9750420e8.mp3",
+    "bn|তিনটি চাবি": "/audio/chat-lesson/level-1-playground-number/ece8da24a93c3de8.mp3",
+    "bn|ছয়টি ডিম": "/audio/chat-lesson/level-1-playground-number/9df3234af6a3d2fa.mp3",
+    "bn|একটি আপেল": "/audio/chat-lesson/level-1-playground-number/1453cbe23265a116.mp3",
+    "bn|শব্দটির Plural লেখো।": "/audio/chat-lesson/level-1-playground-number/347e285637cbc77f.mp3",
+    "bn|কাপ": "/audio/chat-lesson/level-1-playground-number/60d4b1cf86995531.mp3",
+    "bn|বাস": "/audio/chat-lesson/level-1-playground-number/55eb0363122a86e2.mp3",
+    "bn|থালা": "/audio/chat-lesson/level-1-playground-number/bd45b4d504f1ec1e.mp3",
+    "bn|ঘড়ি": "/audio/chat-lesson/level-1-playground-number/45c537d04c9dd004.mp3",
+    "bn|শহর": "/audio/chat-lesson/level-1-playground-number/50e8af44b9687925.mp3",
+    "bn|পরিবার": "/audio/chat-lesson/level-1-playground-number/5bdf1bda6f506fea.mp3",
+    "bn|দিন": "/audio/chat-lesson/level-1-playground-number/0b80b6cfa848f8fa.mp3",
+    "bn|খেলনা": "/audio/chat-lesson/level-1-playground-number/6afb8f64a90c59c4.mp3",
+    "bn|শিশু": "/audio/chat-lesson/level-1-playground-number/360a92cb6f1d2546.mp3",
+    "bn|পুরুষ, লোক": "/audio/chat-lesson/level-1-playground-number/f1bdd6642b000ad9.mp3",
+    "bn|মহিলা": "/audio/chat-lesson/level-1-playground-number/5f79cd90003a7056.mp3",
+    "bn|মানুষ": "/audio/chat-lesson/level-1-playground-number/8c11533e5c77eb90.mp3",
+    "bn|পা": "/audio/chat-lesson/level-1-playground-number/1f6ee011b31bd259.mp3",
+    "bn|ছুরি": "/audio/chat-lesson/level-1-playground-number/3bb440a52e11ad6e.mp3",
+    "bn|আলু": "/audio/chat-lesson/level-1-playground-number/c9a1826309a9e141.mp3",
+    "bn|ভেড়া": "/audio/chat-lesson/level-1-playground-number/cf96059f224d82f0.mp3",
+    "bn|মাছ": "/audio/chat-lesson/level-1-playground-number/76e7e3980067202c.mp3",
+    "bn|ইংরেজি বাক্যের একটি শব্দ ভুল। সেটিতে ট্যাপ করো, তারপর ঠিক করো।": "/audio/chat-lesson/level-1-playground-number/f55b278f28701d26.mp3",
+    "bn|আমার তিনটি বোন আছে।": "/audio/chat-lesson/level-1-playground-number/91f8a538477246a8.mp3",
+    "bn|আমাদের ক্লাসে চল্লিশজন ছাত্র আছে।": "/audio/chat-lesson/level-1-playground-number/77d98846272f9380.mp3",
+    "bn|শিশুরা মাঠে খেলে।": "/audio/chat-lesson/level-1-playground-number/6186b207f4ffcfaa.mp3",
+    "bn|আমার দাদার মাত্র দুটি দাঁত আছে।": "/audio/chat-lesson/level-1-playground-number/ce524e9d2de2af0a.mp3",
+    "bn|আমার শিক্ষক আমাকে ভালো পরামর্শ দেন।": "/audio/chat-lesson/level-1-playground-number/5b7db68d31ffe289.mp3",
+    "bn|বাজারে অনেক মানুষ আছে।": "/audio/chat-lesson/level-1-playground-number/0fd06f76745bd80e.mp3",
+    "bn|আমার মা তিনটি আলু রান্না করেন।": "/audio/chat-lesson/level-1-playground-number/b0ad8f14fcbc074a.mp3",
+    "bn|গাছে অনেক পাতা আছে।": "/audio/chat-lesson/level-1-playground-number/0b26221f8df986ec.mp3",
+    "bn|আমাদের দুটি বিড়াল আছে।": "/audio/chat-lesson/level-1-playground-number/747770e65d0f8b74.mp3",
+    "bn|খামারে দশটি ভেড়া আছে।": "/audio/chat-lesson/level-1-playground-number/2578159e9bd09162.mp3",
+    "bn|ঢাকায় অনেক বাস চলে।": "/audio/chat-lesson/level-1-playground-number/70e47a0e6ed8232c.mp3",
+    "bn|আমার একটি ভাই আছে।": "/audio/chat-lesson/level-1-playground-number/9a8bb1c179bd035b.mp3",
+    "bn|মায়ের লিস্টের জন্য সঠিক শব্দটি লেখো।": "/audio/chat-lesson/level-1-playground-number/0550630a150458d1.mp3",
+    "bn|৩টা আলু": "/audio/chat-lesson/level-1-playground-number/95ecd20402e2f7e0.mp3",
+    "bn|২টা টমেটো": "/audio/chat-lesson/level-1-playground-number/1bf347b40d4fd247.mp3",
+    "bn|১২টা ডিম": "/audio/chat-lesson/level-1-playground-number/4ceef1dd60f27d77.mp3",
+    "bn|৬টা কলা": "/audio/chat-lesson/level-1-playground-number/8a9fbe90413ef61a.mp3",
+    "bn|৭টা পেঁয়াজ": "/audio/chat-lesson/level-1-playground-number/b4cfd9790b5d3645.mp3",
+    "bn|৫টা আম": "/audio/chat-lesson/level-1-playground-number/9e35aec2443c6c2b.mp3",
+    "bn|৪টা মাছ": "/audio/chat-lesson/level-1-playground-number/67706ebf4fae1c76.mp3",
+    "bn|২টা ছুরি": "/audio/chat-lesson/level-1-playground-number/3501d32241d22267.mp3",
+    "bn|৩টা থালা": "/audio/chat-lesson/level-1-playground-number/d0061dc9b3c9f092.mp3",
+    "bn|১টা তরমুজ": "/audio/chat-lesson/level-1-playground-number/89efdbda07c59165.mp3",
+    "bn|১ কেজি চাল": "/audio/chat-lesson/level-1-playground-number/a20a1b1ba52b1af7.mp3",
+    "bn|২ লিটার দুধ": "/audio/chat-lesson/level-1-playground-number/6fcfd524cc94d60f.mp3",
+    "bn|১ বোতল পানি": "/audio/chat-lesson/level-1-playground-number/d969b4995ab432ac.mp3"
+  },
+  "timings": {
+    "en|Count the pictures. Pick the number, then the right word.": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        364,
+        1
+      ],
+      [
+        364,
+        1447,
+        2
+      ],
+      [
+        1447,
+        1656,
+        3
+      ],
+      [
+        1656,
+        1781,
+        4
+      ],
+      [
+        1781,
+        2530,
+        5
+      ],
+      [
+        2530,
+        2739,
+        6
+      ],
+      [
+        2739,
+        2864,
+        7
+      ],
+      [
+        2864,
+        3071,
+        8
+      ],
+      [
+        3071,
+        3523,
+        9
+      ]
+    ],
+    "en|three tomatoes": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        964,
+        1
+      ]
+    ],
+    "en|two potatoes": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        1037,
+        1
+      ]
+    ],
+    "en|four leaves": [
+      [
+        31,
+        364,
+        0
+      ],
+      [
+        364,
+        925,
+        1
+      ]
+    ],
+    "en|five sheep": [
+      [
+        31,
+        406,
+        0
+      ],
+      [
+        406,
+        864,
+        1
+      ]
+    ],
+    "en|three fish": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        857,
+        1
+      ]
+    ],
+    "en|two babies": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        839,
+        1
+      ]
+    ],
+    "en|four teeth": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        625,
+        1
+      ]
+    ],
+    "en|three mice": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        817,
+        1
+      ]
+    ],
+    "en|four children": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        786,
+        1
+      ]
+    ],
+    "en|three boxes": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        1041,
+        1
+      ]
+    ],
+    "en|two watches": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        872,
+        1
+      ]
+    ],
+    "en|three keys": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        918,
+        1
+      ]
+    ],
+    "en|six eggs": [
+      [
+        72,
+        1072,
+        0
+      ],
+      [
+        1072,
+        1016,
+        1
+      ]
+    ],
+    "en|one apple": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        776,
+        1
+      ]
+    ],
+    "en|Type the Plural of the word.": [
+      [
+        72,
+        364,
+        0
+      ],
+      [
+        364,
+        531,
+        1
+      ],
+      [
+        531,
+        989,
+        2
+      ],
+      [
+        989,
+        1072,
+        3
+      ],
+      [
+        1072,
+        1197,
+        4
+      ],
+      [
+        1197,
+        1639,
+        5
+      ]
+    ],
+    "en|cup": [
+      [
+        31,
+        1490,
+        0
+      ]
+    ],
+    "en|one cup, two cups": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        1114,
+        1
+      ],
+      [
+        1114,
+        1364,
+        2
+      ],
+      [
+        1364,
+        1920,
+        3
+      ]
+    ],
+    "en|bus": [
+      [
+        31,
+        598,
+        0
+      ]
+    ],
+    "en|one bus, two buses": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        989,
+        1
+      ],
+      [
+        989,
+        1197,
+        2
+      ],
+      [
+        1197,
+        1819,
+        3
+      ]
+    ],
+    "en|dish": [
+      [
+        72,
+        831,
+        0
+      ]
+    ],
+    "en|one dish, two dishes": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        1031,
+        1
+      ],
+      [
+        1031,
+        1322,
+        2
+      ],
+      [
+        1322,
+        1911,
+        3
+      ]
+    ],
+    "en|watch": [
+      [
+        31,
+        652,
+        0
+      ]
+    ],
+    "en|one watch, two watches": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        1114,
+        1
+      ],
+      [
+        1114,
+        1406,
+        2
+      ],
+      [
+        1406,
+        2060,
+        3
+      ]
+    ],
+    "en|city": [
+      [
+        72,
+        662,
+        0
+      ]
+    ],
+    "en|one city, two cities": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        1072,
+        1
+      ],
+      [
+        1072,
+        1364,
+        2
+      ],
+      [
+        1364,
+        1918,
+        3
+      ]
+    ],
+    "en|family": [
+      [
+        31,
+        628,
+        0
+      ]
+    ],
+    "en|one family, two families": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        1114,
+        1
+      ],
+      [
+        1114,
+        1364,
+        2
+      ],
+      [
+        1364,
+        2133,
+        3
+      ]
+    ],
+    "en|day": [
+      [
+        989,
+        856,
+        0
+      ]
+    ],
+    "en|one day, two days": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        864,
+        1
+      ],
+      [
+        864,
+        1114,
+        2
+      ],
+      [
+        1114,
+        1587,
+        3
+      ]
+    ],
+    "en|toy": [
+      [
+        72,
+        1536,
+        0
+      ]
+    ],
+    "en|one toy, two toys": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        1072,
+        1
+      ],
+      [
+        1072,
+        1322,
+        2
+      ],
+      [
+        1322,
+        1868,
+        3
+      ]
+    ],
+    "en|child": [
+      [
+        31,
+        610,
+        0
+      ]
+    ],
+    "en|one child, two children": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        1072,
+        1
+      ],
+      [
+        1072,
+        1322,
+        2
+      ],
+      [
+        1322,
+        1859,
+        3
+      ]
+    ],
+    "en|man": [
+      [
+        31,
+        717,
+        0
+      ]
+    ],
+    "en|one man, two men": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        989,
+        1
+      ],
+      [
+        989,
+        1239,
+        2
+      ],
+      [
+        1239,
+        1566,
+        3
+      ]
+    ],
+    "en|woman": [
+      [
+        31,
+        617,
+        0
+      ]
+    ],
+    "en|one woman, two women": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        1072,
+        1
+      ],
+      [
+        1072,
+        1322,
+        2
+      ],
+      [
+        1322,
+        1760,
+        3
+      ]
+    ],
+    "en|person": [
+      [
+        31,
+        627,
+        0
+      ]
+    ],
+    "en|one person, two people": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        1239,
+        1
+      ],
+      [
+        1239,
+        1447,
+        2
+      ],
+      [
+        1447,
+        1979,
+        3
+      ]
+    ],
+    "en|foot": [
+      [
+        156,
+        679,
+        0
+      ]
+    ],
+    "en|one foot, two feet": [
+      [
+        31,
+        364,
+        0
+      ],
+      [
+        364,
+        906,
+        1
+      ],
+      [
+        906,
+        1197,
+        2
+      ],
+      [
+        1197,
+        1727,
+        3
+      ]
+    ],
+    "en|knife": [
+      [
+        31,
+        1749,
+        0
+      ]
+    ],
+    "en|one knife, two knives": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        1031,
+        1
+      ],
+      [
+        1031,
+        1281,
+        2
+      ],
+      [
+        1281,
+        1906,
+        3
+      ]
+    ],
+    "en|potato": [
+      [
+        31,
+        729,
+        0
+      ]
+    ],
+    "en|one potato, two potatoes": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        1197,
+        1
+      ],
+      [
+        1197,
+        1406,
+        2
+      ],
+      [
+        1406,
+        2113,
+        3
+      ]
+    ],
+    "en|sheep": [
+      [
+        31,
+        609,
+        0
+      ]
+    ],
+    "en|one sheep, two sheep": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        1031,
+        1
+      ],
+      [
+        1031,
+        1281,
+        2
+      ],
+      [
+        1281,
+        1657,
+        3
+      ]
+    ],
+    "en|fish": [
+      [
+        31,
+        712,
+        0
+      ]
+    ],
+    "en|one fish, two fish": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        1031,
+        1
+      ],
+      [
+        1031,
+        1281,
+        2
+      ],
+      [
+        1281,
+        1852,
+        3
+      ]
+    ],
+    "en|One English word is wrong. Tap it, then fix it.": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        739,
+        1
+      ],
+      [
+        739,
+        989,
+        2
+      ],
+      [
+        989,
+        1281,
+        3
+      ],
+      [
+        1281,
+        2197,
+        4
+      ],
+      [
+        2197,
+        2530,
+        5
+      ],
+      [
+        2530,
+        3030,
+        6
+      ],
+      [
+        3030,
+        3239,
+        7
+      ],
+      [
+        3239,
+        3530,
+        8
+      ],
+      [
+        3530,
+        3742,
+        9
+      ]
+    ],
+    "en|I have three sisters.": [
+      [
+        31,
+        114,
+        0
+      ],
+      [
+        114,
+        281,
+        1
+      ],
+      [
+        281,
+        572,
+        2
+      ],
+      [
+        572,
+        1272,
+        3
+      ]
+    ],
+    "en|There are forty students in our class.": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        364,
+        1
+      ],
+      [
+        364,
+        656,
+        2
+      ],
+      [
+        656,
+        989,
+        3
+      ],
+      [
+        989,
+        1072,
+        4
+      ],
+      [
+        1072,
+        1197,
+        5
+      ],
+      [
+        1197,
+        1808,
+        6
+      ]
+    ],
+    "en|The children play in the field.": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        572,
+        1
+      ],
+      [
+        572,
+        739,
+        2
+      ],
+      [
+        739,
+        822,
+        3
+      ],
+      [
+        822,
+        947,
+        4
+      ],
+      [
+        947,
+        1490,
+        5
+      ]
+    ],
+    "en|My grandfather has only two teeth.": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        739,
+        1
+      ],
+      [
+        739,
+        864,
+        2
+      ],
+      [
+        864,
+        1114,
+        3
+      ],
+      [
+        1114,
+        1364,
+        4
+      ],
+      [
+        1364,
+        1926,
+        5
+      ]
+    ],
+    "en|My teacher gives me good advice.": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        531,
+        1
+      ],
+      [
+        531,
+        697,
+        2
+      ],
+      [
+        697,
+        822,
+        3
+      ],
+      [
+        822,
+        1031,
+        4
+      ],
+      [
+        1031,
+        1719,
+        5
+      ]
+    ],
+    "en|There are many people in the market.": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        406,
+        1
+      ],
+      [
+        406,
+        572,
+        2
+      ],
+      [
+        572,
+        864,
+        3
+      ],
+      [
+        864,
+        947,
+        4
+      ],
+      [
+        947,
+        1072,
+        5
+      ],
+      [
+        1072,
+        1543,
+        6
+      ]
+    ],
+    "en|My mother cooks three potatoes.": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        531,
+        1
+      ],
+      [
+        531,
+        781,
+        2
+      ],
+      [
+        781,
+        1031,
+        3
+      ],
+      [
+        1031,
+        1752,
+        4
+      ]
+    ],
+    "en|The tree has many leaves.": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        447,
+        1
+      ],
+      [
+        447,
+        656,
+        2
+      ],
+      [
+        656,
+        1031,
+        3
+      ],
+      [
+        1031,
+        1641,
+        4
+      ]
+    ],
+    "en|We have two cats.": [
+      [
+        31,
+        156,
+        0
+      ],
+      [
+        156,
+        364,
+        1
+      ],
+      [
+        364,
+        531,
+        2
+      ],
+      [
+        531,
+        1141,
+        3
+      ]
+    ],
+    "en|The farm has ten sheep.": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        447,
+        1
+      ],
+      [
+        447,
+        697,
+        2
+      ],
+      [
+        697,
+        989,
+        3
+      ],
+      [
+        989,
+        1453,
+        4
+      ]
+    ],
+    "en|Many buses run in Dhaka.": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        697,
+        1
+      ],
+      [
+        697,
+        864,
+        2
+      ],
+      [
+        864,
+        947,
+        3
+      ],
+      [
+        947,
+        1553,
+        4
+      ]
+    ],
+    "en|I have one brother.": [
+      [
+        31,
+        114,
+        0
+      ],
+      [
+        114,
+        322,
+        1
+      ],
+      [
+        322,
+        489,
+        2
+      ],
+      [
+        489,
+        977,
+        3
+      ]
+    ],
+    "en|Type the right word for Mom's list.": [
+      [
+        72,
+        281,
+        0
+      ],
+      [
+        281,
+        406,
+        1
+      ],
+      [
+        406,
+        697,
+        2
+      ],
+      [
+        697,
+        989,
+        3
+      ],
+      [
+        989,
+        1114,
+        4
+      ],
+      [
+        1114,
+        1489,
+        5
+      ],
+      [
+        1489,
+        2011,
+        6
+      ]
+    ],
+    "en|three potatoes": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        968,
+        1
+      ]
+    ],
+    "en|two tomatoes": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        924,
+        1
+      ]
+    ],
+    "en|twelve eggs": [
+      [
+        31,
+        364,
+        0
+      ],
+      [
+        364,
+        934,
+        1
+      ]
+    ],
+    "en|six bananas": [
+      [
+        31,
+        406,
+        0
+      ],
+      [
+        406,
+        1196,
+        1
+      ]
+    ],
+    "en|seven onions": [
+      [
+        31,
+        489,
+        0
+      ],
+      [
+        489,
+        1075,
+        1
+      ]
+    ],
+    "en|five mangoes": [
+      [
+        31,
+        447,
+        0
+      ],
+      [
+        447,
+        1179,
+        1
+      ]
+    ],
+    "en|four fish": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        831,
+        1
+      ]
+    ],
+    "en|two knives": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        835,
+        1
+      ]
+    ],
+    "en|three dishes": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        827,
+        1
+      ]
+    ],
+    "en|one watermelon": [
+      [
+        31,
+        281,
+        0
+      ],
+      [
+        281,
+        938,
+        1
+      ]
+    ],
+    "en|one kilo of rice": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        531,
+        1
+      ],
+      [
+        531,
+        697,
+        2
+      ],
+      [
+        697,
+        1224,
+        3
+      ]
+    ],
+    "en|two litres of milk": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        531,
+        1
+      ],
+      [
+        531,
+        656,
+        2
+      ],
+      [
+        656,
+        1133,
+        3
+      ]
+    ],
+    "en|one bottle of water": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        614,
+        1
+      ],
+      [
+        614,
+        739,
+        2
+      ],
+      [
+        739,
+        1272,
+        3
+      ]
+    ],
+    "bn|ছবিগুলো গোনো। আগে সংখ্যা, তারপর সঠিক শব্দটি বেছে নাও।": [
+      [
+        80,
+        705,
+        0
+      ],
+      [
+        705,
+        2101,
+        1
+      ],
+      [
+        2101,
+        2460,
+        2
+      ],
+      [
+        2460,
+        3098,
+        3
+      ],
+      [
+        3098,
+        3763,
+        4
+      ],
+      [
+        3763,
+        4202,
+        5
+      ],
+      [
+        4202,
+        4747,
+        6
+      ],
+      [
+        4747,
+        5080,
+        7
+      ],
+      [
+        5080,
+        6251,
+        8
+      ]
+    ],
+    "bn|তিনটি টমেটো": [
+      [
+        53,
+        452,
+        0
+      ],
+      [
+        452,
+        1942,
+        1
+      ]
+    ],
+    "bn|দুটি আলু": [
+      [
+        120,
+        505,
+        0
+      ],
+      [
+        505,
+        1742,
+        1
+      ]
+    ],
+    "bn|চারটি পাতা": [
+      [
+        53,
+        585,
+        0
+      ],
+      [
+        585,
+        1915,
+        1
+      ]
+    ],
+    "bn|পাঁচটি ভেড়া": [
+      [
+        53,
+        545,
+        0
+      ],
+      [
+        545,
+        1848,
+        1
+      ]
+    ],
+    "bn|তিনটি মাছ": [
+      [
+        53,
+        465,
+        0
+      ],
+      [
+        465,
+        1849,
+        1
+      ]
+    ],
+    "bn|দুটি শিশু": [
+      [
+        120,
+        492,
+        0
+      ],
+      [
+        492,
+        1836,
+        1
+      ]
+    ],
+    "bn|চারটি দাঁত": [
+      [
+        53,
+        572,
+        0
+      ],
+      [
+        572,
+        1809,
+        1
+      ]
+    ],
+    "bn|তিনটি ইঁদুর": [
+      [
+        80,
+        505,
+        0
+      ],
+      [
+        505,
+        1849,
+        1
+      ]
+    ],
+    "bn|চারজন শিশু": [
+      [
+        53,
+        652,
+        0
+      ],
+      [
+        652,
+        2061,
+        1
+      ]
+    ],
+    "bn|তিনটি বাক্স": [
+      [
+        53,
+        452,
+        0
+      ],
+      [
+        452,
+        1928,
+        1
+      ]
+    ],
+    "bn|দুটি ঘড়ি": [
+      [
+        80,
+        426,
+        0
+      ],
+      [
+        426,
+        1703,
+        1
+      ]
+    ],
+    "bn|তিনটি চাবি": [
+      [
+        53,
+        439,
+        0
+      ],
+      [
+        439,
+        1849,
+        1
+      ]
+    ],
+    "bn|ছয়টি ডিম": [
+      [
+        120,
+        598,
+        0
+      ],
+      [
+        598,
+        1862,
+        1
+      ]
+    ],
+    "bn|একটি আপেল": [
+      [
+        120,
+        426,
+        0
+      ],
+      [
+        426,
+        1849,
+        1
+      ]
+    ],
+    "bn|শব্দটির Plural লেখো।": [
+      [
+        67,
+        731,
+        0
+      ],
+      [
+        731,
+        1130,
+        1
+      ],
+      [
+        1130,
+        2461,
+        2
+      ]
+    ],
+    "bn|কাপ": [
+      [
+        53,
+        1250,
+        0
+      ]
+    ],
+    "bn|বাস": [
+      [
+        120,
+        1596,
+        0
+      ]
+    ],
+    "bn|থালা": [
+      [
+        53,
+        1397,
+        0
+      ]
+    ],
+    "bn|ঘড়ি": [
+      [
+        67,
+        1397,
+        0
+      ]
+    ],
+    "bn|শহর": [
+      [
+        80,
+        1463,
+        0
+      ]
+    ],
+    "bn|পরিবার": [
+      [
+        53,
+        1410,
+        0
+      ]
+    ],
+    "bn|দিন": [
+      [
+        120,
+        1410,
+        0
+      ]
+    ],
+    "bn|খেলনা": [
+      [
+        67,
+        1490,
+        0
+      ]
+    ],
+    "bn|শিশু": [
+      [
+        120,
+        1490,
+        0
+      ]
+    ],
+    "bn|পুরুষ, লোক": [
+      [
+        53,
+        652,
+        0
+      ],
+      [
+        652,
+        2008,
+        1
+      ]
+    ],
+    "bn|মহিলা": [
+      [
+        120,
+        1543,
+        0
+      ]
+    ],
+    "bn|মানুষ": [
+      [
+        120,
+        1649,
+        0
+      ]
+    ],
+    "bn|পা": [
+      [
+        53,
+        1252,
+        0
+      ]
+    ],
+    "bn|ছুরি": [
+      [
+        93,
+        1397,
+        0
+      ]
+    ],
+    "bn|আলু": [
+      [
+        53,
+        1330,
+        0
+      ]
+    ],
+    "bn|ভেড়া": [
+      [
+        120,
+        1463,
+        0
+      ]
+    ],
+    "bn|মাছ": [
+      [
+        93,
+        1490,
+        0
+      ]
+    ],
+    "bn|ইংরেজি বাক্যের একটি শব্দ ভুল। সেটিতে ট্যাপ করো, তারপর ঠিক করো।": [
+      [
+        93,
+        612,
+        0
+      ],
+      [
+        612,
+        1077,
+        1
+      ],
+      [
+        1077,
+        1330,
+        2
+      ],
+      [
+        1330,
+        1755,
+        3
+      ],
+      [
+        1755,
+        3125,
+        4
+      ],
+      [
+        3125,
+        3644,
+        5
+      ],
+      [
+        3644,
+        3963,
+        6
+      ],
+      [
+        3963,
+        4375,
+        7
+      ],
+      [
+        4375,
+        5000,
+        8
+      ],
+      [
+        5000,
+        5266,
+        9
+      ],
+      [
+        5266,
+        6543,
+        10
+      ]
+    ],
+    "bn|আমার তিনটি বোন আছে।": [
+      [
+        53,
+        412,
+        0
+      ],
+      [
+        412,
+        851,
+        1
+      ],
+      [
+        851,
+        1130,
+        2
+      ],
+      [
+        1130,
+        2487,
+        3
+      ]
+    ],
+    "bn|আমাদের ক্লাসে চল্লিশজন ছাত্র আছে।": [
+      [
+        53,
+        452,
+        0
+      ],
+      [
+        452,
+        851,
+        1
+      ],
+      [
+        851,
+        1489,
+        2
+      ],
+      [
+        1489,
+        1928,
+        3
+      ],
+      [
+        1928,
+        3285,
+        4
+      ]
+    ],
+    "bn|শিশুরা মাঠে খেলে।": [
+      [
+        67,
+        598,
+        0
+      ],
+      [
+        598,
+        944,
+        1
+      ],
+      [
+        944,
+        2234,
+        2
+      ]
+    ],
+    "bn|আমার দাদার মাত্র দুটি দাঁত আছে।": [
+      [
+        80,
+        412,
+        0
+      ],
+      [
+        412,
+        798,
+        1
+      ],
+      [
+        798,
+        1170,
+        2
+      ],
+      [
+        1170,
+        1503,
+        3
+      ],
+      [
+        1503,
+        1848,
+        4
+      ],
+      [
+        1848,
+        3219,
+        5
+      ]
+    ],
+    "bn|আমার শিক্ষক আমাকে ভালো পরামর্শ দেন।": [
+      [
+        67,
+        426,
+        0
+      ],
+      [
+        426,
+        997,
+        1
+      ],
+      [
+        997,
+        1383,
+        2
+      ],
+      [
+        1383,
+        1715,
+        3
+      ],
+      [
+        1715,
+        2327,
+        4
+      ],
+      [
+        2327,
+        3604,
+        5
+      ]
+    ],
+    "bn|বাজারে অনেক মানুষ আছে।": [
+      [
+        93,
+        625,
+        0
+      ],
+      [
+        625,
+        1037,
+        1
+      ],
+      [
+        1037,
+        1423,
+        2
+      ],
+      [
+        1423,
+        2793,
+        3
+      ]
+    ],
+    "bn|আমার মা তিনটি আলু রান্না করেন।": [
+      [
+        53,
+        412,
+        0
+      ],
+      [
+        412,
+        598,
+        1
+      ],
+      [
+        598,
+        1077,
+        2
+      ],
+      [
+        1077,
+        1396,
+        3
+      ],
+      [
+        1396,
+        1729,
+        4
+      ],
+      [
+        1729,
+        3072,
+        5
+      ]
+    ],
+    "bn|গাছে অনেক পাতা আছে।": [
+      [
+        93,
+        545,
+        0
+      ],
+      [
+        545,
+        957,
+        1
+      ],
+      [
+        957,
+        1290,
+        2
+      ],
+      [
+        1290,
+        2660,
+        3
+      ]
+    ],
+    "bn|আমাদের দুটি বিড়াল আছে।": [
+      [
+        53,
+        492,
+        0
+      ],
+      [
+        492,
+        838,
+        1
+      ],
+      [
+        838,
+        1210,
+        2
+      ],
+      [
+        1210,
+        2553,
+        3
+      ]
+    ],
+    "bn|খামারে দশটি ভেড়া আছে।": [
+      [
+        53,
+        492,
+        0
+      ],
+      [
+        492,
+        931,
+        1
+      ],
+      [
+        931,
+        1277,
+        2
+      ],
+      [
+        1277,
+        2620,
+        3
+      ]
+    ],
+    "bn|ঢাকায় অনেক বাস চলে।": [
+      [
+        133,
+        678,
+        0
+      ],
+      [
+        678,
+        1064,
+        1
+      ],
+      [
+        1064,
+        1356,
+        2
+      ],
+      [
+        1356,
+        2620,
+        3
+      ]
+    ],
+    "bn|আমার একটি ভাই আছে।": [
+      [
+        53,
+        426,
+        0
+      ],
+      [
+        426,
+        705,
+        1
+      ],
+      [
+        705,
+        1051,
+        2
+      ],
+      [
+        1051,
+        2380,
+        3
+      ]
+    ],
+    "bn|মায়ের লিস্টের জন্য সঠিক শব্দটি লেখো।": [
+      [
+        106,
+        492,
+        0
+      ],
+      [
+        492,
+        931,
+        1
+      ],
+      [
+        931,
+        1290,
+        2
+      ],
+      [
+        1290,
+        1729,
+        3
+      ],
+      [
+        1729,
+        2274,
+        4
+      ],
+      [
+        2274,
+        3578,
+        5
+      ]
+    ],
+    "bn|৩টা আলু": [
+      [
+        53,
+        492,
+        0
+      ],
+      [
+        492,
+        1769,
+        1
+      ]
+    ],
+    "bn|২টা টমেটো": [
+      [
+        120,
+        585,
+        0
+      ],
+      [
+        585,
+        2048,
+        1
+      ]
+    ],
+    "bn|১২টা ডিম": [
+      [
+        120,
+        692,
+        0
+      ],
+      [
+        692,
+        1995,
+        1
+      ]
+    ],
+    "bn|৬টা কলা": [
+      [
+        67,
+        545,
+        0
+      ],
+      [
+        545,
+        1849,
+        1
+      ]
+    ],
+    "bn|৭টা পেঁয়াজ": [
+      [
+        106,
+        652,
+        0
+      ],
+      [
+        652,
+        2221,
+        1
+      ]
+    ],
+    "bn|৫টা আম": [
+      [
+        53,
+        665,
+        0
+      ],
+      [
+        665,
+        1835,
+        1
+      ]
+    ],
+    "bn|৪টা মাছ": [
+      [
+        53,
+        652,
+        0
+      ],
+      [
+        652,
+        2062,
+        1
+      ]
+    ],
+    "bn|২টা ছুরি": [
+      [
+        133,
+        585,
+        0
+      ],
+      [
+        585,
+        1836,
+        1
+      ]
+    ],
+    "bn|৩টা থালা": [
+      [
+        53,
+        479,
+        0
+      ],
+      [
+        479,
+        1809,
+        1
+      ]
+    ],
+    "bn|১টা তরমুজ": [
+      [
+        106,
+        465,
+        0
+      ],
+      [
+        465,
+        2115,
+        1
+      ]
+    ],
+    "bn|১ কেজি চাল": [
+      [
+        106,
+        306,
+        0
+      ],
+      [
+        306,
+        638,
+        1
+      ],
+      [
+        638,
+        1995,
+        2
+      ]
+    ],
+    "bn|২ লিটার দুধ": [
+      [
+        120,
+        426,
+        0
+      ],
+      [
+        426,
+        838,
+        1
+      ],
+      [
+        838,
+        2168,
+        2
+      ]
+    ],
+    "bn|১ বোতল পানি": [
+      [
+        106,
+        306,
+        0
+      ],
+      [
+        306,
+        692,
+        1
+      ],
+      [
+        692,
+        1982,
+        2
+      ]
+    ]
+  }
+}

@@ -55,7 +55,9 @@ function MissionMini({ card }: { card: MissionCard }) {
  * publicId is minted by GET /students/me.
  */
 export function MyGamlishHub() {
-  const { profile, loading: sessionLoading } = useStudentSession();
+  const { profile, loading: sessionLoading } = useStudentSession({
+    profile: true,
+  });
   const [data, setData] = useState<GamlishPublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showStoryInvite, setShowStoryInvite] = useState(false);
@@ -149,7 +151,7 @@ export function MyGamlishHub() {
       <div className="grid grid-cols-3 gap-3">
         <Stat
           icon={<Sparkles className="h-5 w-5 text-white" />}
-          label="Level"
+          label="Rank"
           value={stats?.level ?? 1}
           accent="from-violet-400 to-purple-600"
           big
@@ -232,6 +234,18 @@ export function MyGamlishHub() {
         </div>
       ) : null}
 
+      {profile?.isV2EarlyAdopter ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-indigo-400/30 bg-indigo-400/10 px-4 py-3">
+          <Sparkles className="h-5 w-5 text-indigo-600" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">Early Adopter · Gamlish v2</p>
+            <p className="text-xs text-muted-foreground">
+              Permanent badge · you joined Gamlish v2 in its early days.
+            </p>
+          </div>
+        </div>
+      ) : null}
+
       {profile?.isFirstWeekAdopter ? (
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-sky-400/30 bg-sky-400/10 px-4 py-3">
           <Sparkles className="h-5 w-5 text-sky-600" />
@@ -262,7 +276,7 @@ export function MyGamlishHub() {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-              <Star className="h-4 w-4 text-amber-500" /> Mission cards
+              <Star className="h-4 w-4 text-amber-500" /> Level cards
             </p>
             <span className="text-xs text-muted-foreground">
               {cards.filter((c) => c.state === "completed").length}/{cards.length}
@@ -310,7 +324,7 @@ export function MyGamlishHub() {
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Complete Mission 01 to unlock your first achievement and start collecting
+          Complete Level 01 to unlock your first achievement and start collecting
           cards.
         </p>
       )}

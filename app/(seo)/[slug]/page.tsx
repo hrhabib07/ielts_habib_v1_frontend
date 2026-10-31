@@ -40,8 +40,9 @@ export async function generateMetadata({
   }
   const canonical = gamlishCanonicalUrlForSlug(slug);
   const keywords = [...entry.keywords];
+  const isBangla = entry.lang === "bn";
   return {
-    title: entry.title,
+    title: { absolute: entry.title },
     description: entry.description,
     keywords,
     alternates: { canonical },
@@ -51,7 +52,7 @@ export async function generateMetadata({
       url: canonical,
       siteName: "Gamlish",
       type: "article",
-      locale: "en",
+      locale: isBangla ? "bn_BD" : "en",
     },
     twitter: {
       card: "summary_large_image",
@@ -63,13 +64,17 @@ export async function generateMetadata({
 }
 
 function SeoArticleBody({ page }: Readonly<{ page: ProgramSeoPage }>) {
+  const isBangla = page.lang === "bn";
   return (
-    <article className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+    <article
+      lang={isBangla ? "bn" : "en"}
+      className={`mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8${isBangla ? " font-bengali" : ""}`}
+    >
       <nav className="mb-8 text-sm text-muted-foreground">
         <ol className="flex flex-wrap items-center gap-2">
           <li>
             <Link href="/" className="text-primary underline-offset-4 hover:underline">
-              Home
+              {isBangla ? "হোম" : "Home"}
             </Link>
           </li>
           <li aria-hidden="true">/</li>
@@ -78,7 +83,7 @@ function SeoArticleBody({ page }: Readonly<{ page: ProgramSeoPage }>) {
               href="/directory"
               className="text-primary underline-offset-4 hover:underline"
             >
-              Directory
+              {isBangla ? "সব পাতা" : "Directory"}
             </Link>
           </li>
           <li aria-hidden="true">/</li>
@@ -87,7 +92,7 @@ function SeoArticleBody({ page }: Readonly<{ page: ProgramSeoPage }>) {
       </nav>
       <header className="mb-10 border-b border-border pb-8">
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Gamlish · English Foundations
+          {isBangla ? "Gamlish · ইংরেজির ভিত্তি" : "Gamlish · English Foundations"}
         </p>
         <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           {page.h1}
@@ -98,13 +103,15 @@ function SeoArticleBody({ page }: Readonly<{ page: ProgramSeoPage }>) {
           dangerouslySetInnerHTML={{ __html: page.intro }}
         />
       </header>
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
-        <h2 className="text-xl font-semibold text-foreground">Keywords we optimize for</h2>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {page.keywords.join(" · ")}
-        </p>
-      </div>
-      <div className="mt-10 space-y-10">
+      {isBangla ? null : (
+        <div className="prose prose-neutral dark:prose-invert max-w-none">
+          <h2 className="text-xl font-semibold text-foreground">Keywords we optimize for</h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {page.keywords.join(" · ")}
+          </p>
+        </div>
+      )}
+      <div className={`${isBangla ? "" : "mt-10 "}space-y-10`}>
         {page.sections.map((section, index) => {
           const sectionHeadingId = `seo-section-h-${index}`;
           return (
@@ -125,7 +132,9 @@ function SeoArticleBody({ page }: Readonly<{ page: ProgramSeoPage }>) {
         })}
       </div>
       <section className="mt-14 rounded-xl border border-border bg-muted/30 p-6 sm:p-8">
-        <h2 className="text-xl font-semibold text-foreground">Frequently asked questions</h2>
+        <h2 className="text-xl font-semibold text-foreground">
+          {isBangla ? "প্রায়শই জিজ্ঞাসিত প্রশ্ন" : "Frequently asked questions"}
+        </h2>
         <ul className="mt-6 list-none space-y-8 p-0">
           {page.faq.map((item, index) => {
             const faqHeadingId = `seo-faq-q-${index}`;
@@ -145,29 +154,51 @@ function SeoArticleBody({ page }: Readonly<{ page: ProgramSeoPage }>) {
         </ul>
       </section>
       <footer className="mt-12 border-t border-border pt-8 text-sm text-muted-foreground">
-        <p>
-          Explore all landing pages in the{" "}
-          <Link href="/directory" className="text-primary underline-offset-4 hover:underline">
-            HTML sitemap directory
-          </Link>
-          . Learn more on{" "}
-          <Link href="/about" className="text-primary underline-offset-4 hover:underline">
-            About
-          </Link>
-          {" · "}
-          <Link href="/pricing" className="text-primary underline-offset-4 hover:underline">
-            Pricing
-          </Link>
-          {" · "}
-          <Link href="/blog" className="text-primary underline-offset-4 hover:underline">
-            Blog
-          </Link>
-          {" · "}
-          <Link href="/llms.txt" className="text-primary underline-offset-4 hover:underline">
-            llms.txt
-          </Link>
-          .
-        </p>
+        {isBangla ? (
+          <p>
+            আরও দেখুন:{" "}
+            <Link href="/directory" className="text-primary underline-offset-4 hover:underline">
+              সব পাতা
+            </Link>
+            {" · "}
+            <Link href="/about" className="text-primary underline-offset-4 hover:underline">
+              আমাদের কথা
+            </Link>
+            {" · "}
+            <Link href="/pricing" className="text-primary underline-offset-4 hover:underline">
+              দাম
+            </Link>
+            {" · "}
+            <Link href="/blog" className="text-primary underline-offset-4 hover:underline">
+              ব্লগ
+            </Link>
+            .
+          </p>
+        ) : (
+          <p>
+            Explore all landing pages in the{" "}
+            <Link href="/directory" className="text-primary underline-offset-4 hover:underline">
+              HTML sitemap directory
+            </Link>
+            . Learn more on{" "}
+            <Link href="/about" className="text-primary underline-offset-4 hover:underline">
+              About
+            </Link>
+            {" · "}
+            <Link href="/pricing" className="text-primary underline-offset-4 hover:underline">
+              Pricing
+            </Link>
+            {" · "}
+            <Link href="/blog" className="text-primary underline-offset-4 hover:underline">
+              Blog
+            </Link>
+            {" · "}
+            <Link href="/llms.txt" className="text-primary underline-offset-4 hover:underline">
+              llms.txt
+            </Link>
+            .
+          </p>
+        )}
       </footer>
     </article>
   );
@@ -188,9 +219,13 @@ export default async function ProgrammaticSeoPage({
   }
   const url = gamlishCanonicalUrlForSlug(page.slug);
   const dateModified = page.lastModified ?? new Date().toISOString().slice(0, 10);
+  const isBangla = page.lang === "bn";
   const breadcrumbs = [
-    { name: "Home", url: GAMLISH_CANONICAL_ORIGIN },
-    { name: "Directory", url: gamlishDirectoryCanonicalUrl() },
+    { name: isBangla ? "হোম" : "Home", url: GAMLISH_CANONICAL_ORIGIN },
+    {
+      name: isBangla ? "সব পাতা" : "Directory",
+      url: gamlishDirectoryCanonicalUrl(),
+    },
     { name: page.h1, url },
   ] as const;
 
@@ -203,6 +238,7 @@ export default async function ProgrammaticSeoPage({
           name: page.title,
           description: page.description,
           dateModified,
+          inLanguage: isBangla ? "bn-BD" : "en",
         }}
         faq={page.faq}
         breadcrumbs={breadcrumbs}

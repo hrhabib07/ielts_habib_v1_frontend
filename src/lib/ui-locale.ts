@@ -79,11 +79,31 @@ export function formatUnlockedCamps(count: number, locale: UiLocale): string {
   return String(count);
 }
 
-/** e.g. "Mission 02" from API title or order. */
+/** e.g. "Level 02" from API title or order. Ids stay mission slugs. */
 export function formatMissionLabel(
   order: number | undefined,
-  fallback = "Mission 01",
+  fallback = "Level 01",
 ): string {
   if (!order || order < 1) return fallback;
-  return `Mission ${String(order).padStart(2, "0")}`;
+  return `Level ${String(order).padStart(2, "0")}`;
+}
+
+/**
+ * Learner-facing name for Fundamental English steps.
+ * Stored titles and slugs can still say Mission. Reading levels are not passed here.
+ */
+export function displayEnglishLevelTitle(title: string): string {
+  return title
+    .replace(/\bMissions\b/g, "Levels")
+    .replace(/\bmissions\b/g, "levels")
+    .replace(/\bMission\b/g, "Level")
+    .replace(/\bmission\b/g, "level")
+    .replace(/মিশন/g, "লেভেল");
+}
+
+/** Map node title: drop the "Level 01:" prefix and keep the topic name. */
+export function englishLevelShortTitle(title: string): string {
+  const labeled = displayEnglishLevelTitle(title);
+  const match = labeled.match(/^(?:Level|Mission)\s+\d+\s*(?:\[Inspection\])?\s*:\s*(.+)$/i);
+  return match?.[1]?.trim() ?? labeled;
 }

@@ -142,7 +142,9 @@ function StatTile({
 /** Client section: fetches and displays profile summary. */
 export function ProfileSummarySection() {
   const router = useRouter();
-  const { profileSummary, loading: sessionLoading } = useStudentSession();
+  const { profileSummary, loading: sessionLoading } = useStudentSession({
+    summary: true,
+  });
   const [weaknessAnalytics, setWeaknessAnalytics] = useState<WeaknessAnalyticsItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [redirecting, setRedirecting] = useState(false);
@@ -281,7 +283,7 @@ export function ProfileSummarySection() {
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {currentLevel
-                ? `Level ${currentLevel.levelNumber} · ${currentLevel.progressPercentage}% through current level`
+                ? `Reading Level ${currentLevel.levelNumber} · ${currentLevel.progressPercentage}% through this reading level`
                 : "Complete steps to unlock level progress."}
             </p>
           </div>
@@ -335,7 +337,7 @@ export function ProfileSummarySection() {
         />
         <StatTile
           icon={BookOpen}
-          label="Current level"
+          label="Reading level"
           value={
             currentLevel
               ? `L${currentLevel.levelNumber}`

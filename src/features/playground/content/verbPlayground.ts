@@ -1,0 +1,287 @@
+import type {
+  BinExtraItem,
+  BridgeItem,
+  CameraItem,
+  Playground,
+  SpotlightItem,
+} from "@/src/features/playground/types";
+
+const SPOTLIGHT: SpotlightItem[] = [
+  {
+    id: "mother-cooks",
+    words: ["My", "mother", "cooks", "rice."],
+    verb: 2,
+    bn: "আমার মা ভাত রান্না করেন।",
+    why: { en: "It tells what my mother does.", bn: "এটি বলে মা কী করেন।" },
+  },
+  {
+    id: "cook-makes-tea",
+    words: ["The", "cook", "makes", "tea."],
+    verb: 2,
+    bn: "রাঁধুনি চা বানান।",
+    why: { en: "Here “cook” is a person. The action is “makes”.", bn: "এখানে “cook” একজন মানুষ। কাজটি হলো “makes”।" },
+    traps: [{ index: 1, hint: { en: "Here “cook” is a person: the Subject. What does the cook do?", bn: "এখানে “cook” একজন মানুষ: Subject। রাঁধুনি কী করেন?" } }],
+  },
+  {
+    id: "we-play-cricket",
+    words: ["We", "play", "cricket", "after", "class."],
+    verb: 1,
+    bn: "আমরা ক্লাসের পর ক্রিকেট খেলি।",
+    why: { en: "It tells what we do.", bn: "এটি বলে আমরা কী করি।" },
+  },
+  {
+    id: "children-fly-kites",
+    words: ["The", "children", "in", "the", "village", "fly", "kites."],
+    verb: 5,
+    bn: "গ্রামের শিশুরা ঘুড়ি ওড়ায়।",
+    why: { en: "The Subject is long. The Verb comes right after it.", bn: "Subject লম্বা। Verb বসে ঠিক তার পরে।" },
+  },
+  {
+    id: "i-am-hungry",
+    words: ["I", "am", "hungry."],
+    verb: 1,
+    bn: "আমার খিদে পেয়েছে।",
+    why: { en: "“am” is a being Verb. It tells how I am.", bn: "“am” একটি being Verb। এটি বলে আমি কেমন আছি।" },
+  },
+  {
+    id: "shop-opens",
+    words: ["The", "shop", "opens", "at", "nine."],
+    verb: 2,
+    bn: "দোকানটি নয়টায় খোলে।",
+    why: { en: "It tells what the shop does.", bn: "এটি বলে দোকানটি কী করে।" },
+  },
+  {
+    id: "water-the-plants",
+    words: ["They", "water", "the", "plants."],
+    verb: 1,
+    bn: "তারা গাছে পানি দেয়।",
+    why: { en: "Here “water” is an action: giving water to plants.", bn: "এখানে “water” একটি কাজ: গাছে পানি দেওয়া।" },
+    traps: [{ index: 3, hint: { en: "Plants are things. What do they do to the plants?", bn: "গাছ একটি জিনিস। তারা গাছের সঙ্গে কী করে?" } }],
+  },
+  {
+    id: "phone-is-table",
+    words: ["My", "phone", "is", "on", "the", "table."],
+    verb: 2,
+    bn: "আমার ফোন টেবিলের ওপর।",
+    why: { en: "“is” is a being Verb. It tells where the phone is.", bn: "“is” একটি being Verb। এটি বলে ফোনটি কোথায়।" },
+  },
+  {
+    id: "birds-fly",
+    words: ["Birds", "fly", "in", "the", "sky."],
+    verb: 1,
+    bn: "পাখিরা আকাশে ওড়ে।",
+    why: { en: "It tells what birds do.", bn: "এটি বলে পাখিরা কী করে।" },
+  },
+  {
+    id: "rafi-drinks-water",
+    words: ["Rafi", "drinks", "water."],
+    verb: 1,
+    bn: "রাফি পানি পান করে।",
+    why: { en: "Here “water” is a thing. The action is “drinks”.", bn: "এখানে “water” একটি জিনিস। কাজটি হলো “drinks”।" },
+    traps: [{ index: 2, hint: { en: "Here “water” is a thing. What does Rafi do with it?", bn: "এখানে “water” একটি জিনিস। রাফি এটা দিয়ে কী করে?" } }],
+  },
+  {
+    id: "students-are-library",
+    words: ["The", "students", "are", "in", "the", "library."],
+    verb: 2,
+    bn: "শিক্ষার্থীরা লাইব্রেরিতে আছে।",
+    why: { en: "“are” is a being Verb. It tells where they are.", bn: "“are” একটি being Verb। এটি বলে তারা কোথায়।" },
+  },
+  {
+    id: "father-uncle-work",
+    words: ["My", "father", "and", "my", "uncle", "work", "in", "Dhaka."],
+    verb: 5,
+    bn: "আমার বাবা আর চাচা ঢাকায় কাজ করেন।",
+    why: { en: "The Subject is long. The Verb comes after it.", bn: "Subject লম্বা। Verb বসে তার পরে।" },
+  },
+];
+
+const YOU_ARE = { pick: "is" as const, hint: { en: "“You” always takes “are”, even for one person.", bn: "“You”-এর সঙ্গে সবসময় “are”, একজন হলেও।" } };
+const CHILDREN_ARE = { pick: "is" as const, hint: { en: "Children is already Plural.", bn: "Children আগে থেকেই Plural।" } };
+
+const BRIDGE: BridgeItem[] = [
+  { id: "student", bangla: "আমি ছাত্র।", before: "I", after: "a student.", answer: "am", why: { en: "I → am.", bn: "I → am।" } },
+  { id: "sister", bangla: "সে আমার বোন।", before: "She", after: "my sister.", answer: "is", why: { en: "One person → is.", bn: "একজন → is।" } },
+  { id: "ready", bangla: "আমরা প্রস্তুত।", before: "We", after: "ready.", answer: "are", why: { en: "We → are.", bn: "We → are।" } },
+  {
+    id: "friend",
+    bangla: "তুমি আমার বন্ধু।",
+    before: "You",
+    after: "my friend.",
+    answer: "are",
+    why: { en: "You → are, always.", bn: "You → সবসময় are।" },
+    trap: YOU_ARE,
+  },
+  { id: "rice-hot", bangla: "ভাতটা গরম।", before: "The rice", after: "hot.", answer: "is", why: { en: "One thing → is.", bn: "একটি জিনিস → is।" } },
+  {
+    id: "mangoes-sweet",
+    bangla: "আমগুলো মিষ্টি।",
+    before: "The mangoes",
+    after: "sweet.",
+    answer: "are",
+    why: { en: "More than one → are.", bn: "একাধিক → are।" },
+  },
+  { id: "rafi-sick", bangla: "রাফি অসুস্থ।", before: "Rafi", after: "sick.", answer: "is", why: { en: "One person → is.", bn: "একজন → is।" } },
+  {
+    id: "children-school",
+    bangla: "বাচ্চারা স্কুলে।",
+    before: "The children",
+    after: "at school.",
+    answer: "are",
+    why: { en: "Children is Plural → are.", bn: "Children হলো Plural → are।" },
+    trap: CHILDREN_ARE,
+  },
+  {
+    id: "father-farmer",
+    bangla: "আমার বাবা একজন কৃষক।",
+    before: "My father",
+    after: "a farmer.",
+    answer: "is",
+    why: { en: "One person → is.", bn: "একজন → is।" },
+  },
+  {
+    id: "brother-and-i",
+    bangla: "আমার ভাই আর আমি বাসায়।",
+    before: "My brother and I",
+    after: "at home.",
+    answer: "are",
+    why: { en: "Two people → are.", bn: "দুজন → are।" },
+    trap: { pick: "am", hint: { en: "The Subject is two people, not just I.", bn: "Subject দুজন, শুধু I নয়।" } },
+  },
+  { id: "door-open", bangla: "দরজাটা খোলা।", before: "The door", after: "open.", answer: "is", why: { en: "One thing → is.", bn: "একটি জিনিস → is।" } },
+  { id: "tired", bangla: "তারা ক্লান্ত।", before: "They", after: "tired.", answer: "are", why: { en: "They → are.", bn: "They → are।" } },
+];
+
+const NO_DO = { en: "করা is not “do”. One action word is enough.", bn: "“করা” মানে “do” নয়। একটি কাজের শব্দই যথেষ্ট।" };
+const ALREADY_FINE = { en: "Every word is needed. Nothing extra here.", bn: "প্রতিটি শব্দ দরকার। এখানে বাড়তি কিছু নেই।" };
+
+const BIN_EXTRA: BinExtraItem[] = [
+  { id: "clean-room", bangla: "আমরা ঘর পরিষ্কার করি।", words: ["We", "do", "clean", "our", "room."], extra: 1, fixed: "We clean our room.", why: NO_DO },
+  { id: "help-mother", bangla: "আমি মাকে সাহায্য করি।", words: ["I", "do", "help", "my", "mother."], extra: 1, fixed: "I help my mother.", why: NO_DO },
+  {
+    id: "wait-bus",
+    bangla: "তারা বাসের জন্য অপেক্ষা করে।",
+    words: ["They", "do", "wait", "for", "the", "bus."],
+    extra: 1,
+    fixed: "They wait for the bus.",
+    why: NO_DO,
+  },
+  { id: "study-daily", bangla: "আমি প্রতিদিন পড়াশোনা করি।", words: ["I", "study", "every", "day."], extra: null, fixed: "I study every day.", why: ALREADY_FINE },
+  { id: "cook-rice", bangla: "আমরা ভাত রান্না করি।", words: ["We", "do", "cook", "rice."], extra: 1, fixed: "We cook rice.", why: NO_DO },
+  {
+    id: "call-friend",
+    bangla: "আমি আমার বন্ধুকে ফোন করি।",
+    words: ["I", "make", "call", "my", "friend."],
+    extra: 1,
+    fixed: "I call my friend.",
+    why: { en: "ফোন করা = call. No “make”.", bn: "ফোন করা = call। “make” লাগবে না।" },
+  },
+  {
+    id: "practise-field",
+    bangla: "তারা মাঠে অনুশীলন করে।",
+    words: ["They", "practise", "in", "the", "field."],
+    extra: null,
+    fixed: "They practise in the field.",
+    why: ALREADY_FINE,
+  },
+  { id: "work-after-class", bangla: "আমরা ক্লাসের পর কাজ করি।", words: ["We", "do", "work", "after", "class."], extra: 1, fixed: "We work after class.", why: NO_DO },
+  { id: "i-try", bangla: "আমি চেষ্টা করি।", words: ["I", "try."], extra: null, fixed: "I try.", why: ALREADY_FINE },
+  {
+    id: "start-class",
+    bangla: "আমরা নয়টায় ক্লাস শুরু করি।",
+    words: ["We", "do", "start", "class", "at", "nine."],
+    extra: 1,
+    fixed: "We start class at nine.",
+    why: NO_DO,
+  },
+  { id: "use-computer", bangla: "আমি কম্পিউটার ব্যবহার করি।", words: ["I", "do", "use", "a", "computer."], extra: 1, fixed: "I use a computer.", why: NO_DO },
+  { id: "finish-work", bangla: "আমরা কাজটি শেষ করি।", words: ["We", "finish", "the", "work."], extra: null, fixed: "We finish the work.", why: ALREADY_FINE },
+];
+
+const CAMERA: CameraItem[] = [
+  { id: "cricket", emoji: "🏏", bangla: "আমরা ক্রিকেট খেলি।", before: "We", after: "cricket.", answer: "play" },
+  { id: "book", emoji: "📖", bangla: "আমি একটি বই পড়ি।", before: "I", after: "a book.", answer: "read" },
+  { id: "milk", emoji: "🥛", bangla: "তারা দুধ পান করে।", before: "They", after: "milk.", answer: "drink" },
+  { id: "letter", emoji: "✍️", bangla: "তুমি একটি চিঠি লেখো।", before: "You", after: "a letter.", answer: "write" },
+  { id: "eggs", emoji: "🍳", bangla: "আমরা নাশতায় ডিম রান্না করি।", before: "We", after: "eggs for breakfast.", answer: "cook", accepted: ["fry"] },
+  { id: "floor", emoji: "🧹", bangla: "তারা মেঝে পরিষ্কার করে।", before: "They", after: "the floor.", answer: "clean", accepted: ["sweep"] },
+  { id: "bicycle", emoji: "🚲", bangla: "আমি সাইকেল চালিয়ে স্কুলে যাই।", before: "I", after: "a bicycle to school.", answer: "ride" },
+  { id: "run-park", emoji: "🏃", bangla: "আমরা পার্কে দৌড়াই।", before: "We", after: "in the park.", answer: "run" },
+  { id: "babies-sleep", emoji: "😴", bangla: "বাচ্চারা ঘুমায়।", before: "The babies", after: ".", answer: "sleep" },
+  { id: "call-grandmother", emoji: "📞", bangla: "আমি দাদিকে ফোন করি।", before: "I", after: "my grandmother.", answer: "call" },
+  { id: "walk-school", emoji: "🚶", bangla: "তারা হেঁটে স্কুলে যায়।", before: "They", after: "to school.", answer: "walk" },
+  { id: "wash-hands", emoji: "🧼", bangla: "আমরা হাত ধুই।", before: "We", after: "our hands.", answer: "wash" },
+  { id: "eat-rice", emoji: "🍚", bangla: "আমরা ভাত খাই।", before: "We", after: "rice.", answer: "eat" },
+  { id: "water-plants", emoji: "🌱", bangla: "আমি গাছে পানি দিই।", before: "I", after: "the plants.", answer: "water" },
+];
+
+export const VERB_PLAYGROUND: Playground = {
+  id: "level-1-playground-verb",
+  afterStepId: "level-1-step-7-verb",
+  title: { en: "Verb Playground", bn: "ভার্ব প্লেগ্রাউন্ড" },
+  rounds: [
+    {
+      id: "verb-spotlight",
+      kind: "verb-spotlight",
+      title: { en: "Verb Spotlight", bn: "Verb-এ আলো ফেলুন" },
+      goal: {
+        en: "The Verb is the action word, or am, is, are. Careful: one word can be a thing or an action!",
+        bn: "Verb হলো কাজের শব্দ, অথবা am, is, are। সাবধান: একই শব্দ কখনো জিনিস, কখনো কাজ!",
+      },
+      instruction: { en: "Shine the spotlight on the Verb.", bn: "Verb-এর ওপর আলো ফেলুন।" },
+      pick: 6,
+      items: SPOTLIGHT,
+    },
+    {
+      id: "fix-bridge",
+      kind: "fix-bridge",
+      title: { en: "Fix the Bridge", bn: "সেতু মেরামত" },
+      goal: {
+        en: "Bangla can skip the Verb: আমি ছাত্র। English never can: I am a student.",
+        bn: "বাংলায় Verb বাদ দেওয়া যায়: আমি ছাত্র। ইংরেজিতে কখনো না: I am a student।",
+      },
+      instruction: { en: "Put the right plank in the gap: am, is or are.", bn: "ফাঁকে সঠিক তক্তাটি বসান: am, is নাকি are।" },
+      pick: 6,
+      items: BRIDGE,
+    },
+    {
+      id: "bin-extra",
+      kind: "bin-extra",
+      title: { en: "Bin the Extra", bn: "বাড়তিটা ফেলে দিন" },
+      goal: {
+        en: "Bangla করা is not “do”. Throw away the extra word, but only if there is one!",
+        bn: "বাংলা “করা” মানে “do” নয়। বাড়তি শব্দটি ফেলে দিন, তবে যদি থাকে তবেই!",
+      },
+      instruction: { en: "Tap the extra word, or say it looks correct.", bn: "বাড়তি শব্দে ট্যাপ করুন, অথবা বলুন সব ঠিক আছে।" },
+      pick: 5,
+      items: BIN_EXTRA,
+    },
+    {
+      id: "action-camera",
+      kind: "action-camera",
+      title: { en: "Action Camera", bn: "অ্যাকশন ক্যামেরা" },
+      goal: {
+        en: "{name}, look at the picture. What is happening? Type the action word.",
+        bn: "{name}, ছবিটি দেখুন। কী হচ্ছে? কাজের শব্দটি লিখুন।",
+      },
+      instruction: { en: "Type the Verb that the picture shows.", bn: "ছবিতে যে কাজটি দেখছেন, সেই Verb লিখুন।" },
+      pick: 5,
+      items: CAMERA,
+    },
+  ],
+  learned: [
+    { en: "The Verb tells the action, or am, is, are.", bn: "Verb কাজ বোঝায়, অথবা am, is, are।" },
+    { en: "English always needs a Verb: I am a student.", bn: "ইংরেজিতে Verb লাগবেই: I am a student।" },
+    { en: "I → am. One → is. You and more than one → are.", bn: "I → am। একজন → is। You এবং একাধিক → are।" },
+    { en: "করা is one English word: clean, help, cook. No extra do.", bn: "“করা” ইংরেজিতে একটি শব্দ: clean, help, cook। বাড়তি do নয়।" },
+  ],
+  realLifeTip: {
+    en: "{name}, before you send an English message, check: does every sentence have a Verb?",
+    bn: "{name}, ইংরেজিতে মেসেজ পাঠানোর আগে দেখুন: প্রতিটি বাক্যে কি Verb আছে?",
+  },
+  passMark: 0.8,
+  collection: {
+    title: { en: "My Sentences", bn: "আমার বাক্য" },
+    sub: { en: "Real English actions!", bn: "সত্যিকারের ইংরেজি কাজ!" },
+  },
+};

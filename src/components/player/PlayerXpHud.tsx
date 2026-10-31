@@ -21,13 +21,13 @@ export function PlayerXpHud({
   className,
   variant = "bar",
   missionNumber,
-  missionLabel = "Mission",
+  missionLabel = "Level",
 }: {
   className?: string;
   variant?: "bar" | "inline";
   /** Current mission number (e.g. 6) · replaces streak on stage screens. */
   missionNumber?: number;
-  /** Localized short label, e.g. "Mission" / "মিশন". */
+  /** Localized short label, e.g. "Level" / "লেভেল". */
   missionLabel?: string;
 }) {
   const [profile, setProfile] = useState<MyPlayerProfile | null>(null);

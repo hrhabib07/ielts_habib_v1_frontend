@@ -4,10 +4,10 @@ import {
   JOURNEY_OFFER_PRICE_BDT,
 } from "@/src/lib/journey-prices";
 
-/** One door: join, then play Mission 1. No price and no demo on this path. */
+/** One door: join, then play Level 1. No price and no demo on this path. */
 export const TEST_LANDING_PRIMARY_HREF =
   "/register?next=%2Fplayer%2Fmissions%2Fmission-01-word-order";
-export const TEST_LANDING_SECONDARY_HREF = TEST_LANDING_PRIMARY_HREF;
+export const TEST_LANDING_SECONDARY_HREF = "/register";
 
 export function formatTestLandingPrice(amount: number): string {
   return `৳${amount.toLocaleString("en-BD")}`;
@@ -38,10 +38,6 @@ export interface TestLandingCopy {
   readonly headlineLine2: string;
   readonly accentWords: readonly string[];
   readonly subheadline: string;
-  readonly heroStats: readonly {
-    readonly value: string;
-    readonly label: string;
-  }[];
   readonly proofLine: string;
   readonly priceWas: string;
   readonly priceNow: string;
@@ -49,7 +45,6 @@ export interface TestLandingCopy {
   readonly priceOff: string;
   readonly priceMeta: string;
   readonly ctaPrimary: string;
-  readonly ctaSecondary: string;
   readonly heroCompareAlt: string;
   readonly heroFoundationLabel: string;
   readonly heroCompareWithoutTitle: string;
@@ -157,28 +152,21 @@ export interface TestLandingCopy {
 export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
   bn: {
     testBanner: "",
-    navPrimary: "Mission 1 ফ্রি খেলুন",
-    navDemo: "Mission 1 ফ্রি খেলুন",
+    navPrimary: "ফ্রি ট্রায়াল শুরু করুন",
+    navDemo: "ফ্রি ট্রায়াল শুরু করুন",
     navHow: "কীভাবে শিখবেন",
-    eyebrow: "Gamlish · Fundamental English",
-    headlineLine1: "মাত্র 45 দিনে গেম খেলে গড়ুন",
-    headlineLine2: "মজবুত ইংরেজি ভিত্তি",
-    accentWords: ["গেম", "ভিত্তি"],
-    subheadline:
-      "IELTS নয়, Spoken নয়। ইংরেজির বেসিক শক্ত হলে, সঠিক বাক্য আপনি নিজেই লিখতে পারবেন।",
-    heroStats: [
-      { value: "4", label: "Camp" },
-      { value: "21", label: "Mission" },
-      { value: "45", label: "দিন" },
-    ],
-    proofLine: "শিক্ষার্থীরা ইতিমধ্যে এই গেম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।",
+    eyebrow: "Gamlish · The Game of English",
+    headlineLine1: "গেইম খেলুন,",
+    headlineLine2: "ইংরেজি শিখুন!",
+    accentWords: ["গেইম", "ইংরেজি"],
+    subheadline: "ইংরেজি শিখুন গেইমের মতো সহজ করে।",
+    proofLine: "শিক্ষার্থীরা ইতিমধ্যে এই গেইম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।",
     priceWas: "আগে",
     priceNow: "এখন",
     priceSave: `${TEST_LANDING_SAVE_PRICE} সাশ্রয়`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
-    priceMeta: "45 দিন · 21টি মিশন",
-    ctaPrimary: "Mission 1 ফ্রি খেলুন",
-    ctaSecondary: "Mission 1 ফ্রি খেলুন",
+    priceMeta: "45 দিন · 21টি লেভেল",
+    ctaPrimary: "ফ্রি ট্রায়াল শুরু করুন",
     heroCompareAlt:
       "Gamlish ছাড়া ইংরেজি দুর্বল ভিত্তির উপর দাঁড়ায়। Gamlish-এর সাথে একই ইংরেজি শক্ত ভিত্তির উপর মজবুত হয়।",
     heroFoundationLabel: "এখানে Gamlish কাজ করে",
@@ -186,8 +174,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "দুর্বল ভিত্তি",
     heroCompareWithTitle: "Gamlish নিয়ে",
     heroCompareWithSub: "শক্ত ভিত্তি",
-    stickyPrimary: "Mission 1 ফ্রি খেলুন",
-    stickySecondary: "Mission 1 ফ্রি খেলুন",
+    stickyPrimary: "ফ্রি ট্রায়াল শুরু করুন",
+    stickySecondary: "ফ্রি ট্রায়াল শুরু করুন",
     compareEyebrow: "কেন Gamlish",
     compareTitle: "গতানুগতিক ইংরেজি শেখা vs Gamlish",
     compareOld: "পুরনো নিয়ম",
@@ -195,11 +183,11 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     compareRows: [
       {
         old: "বোরিং বই আর লম্বা লেকচার",
-        neu: "গেম খেলে শেখা",
+        neu: "গেইম খেলে শেখা",
       },
       {
         old: "এলোমেলো কনটেন্ট, কোনো রোডম্যাপ নেই",
-        neu: "4টি Camp · 21টি সাজানো Mission",
+        neu: "4টি Camp · 21টি সাজানো Level",
       },
       {
         old: "হাজার হাজার টাকার কোচিং",
@@ -215,13 +203,13 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
     ],
     campsEyebrow: "কী শিখবেন",
-    campsTitle: "21টি মিশন শেষে আপনি কী করতে পারবেন?",
+    campsTitle: "21টি লেভেল শেষে আপনি কী করতে পারবেন?",
     campsSub:
-      "সিলেবাস মুখস্থ নয়। 4টি Camp, 21টি Mission। প্রতিটি ক্যাম্প আপনার ইংরেজির ভিত্তি আরও মজবুত করবে।",
-    campFreeNote: "Mission 1 ফ্রি",
+      "সিলেবাস মুখস্থ নয়। 4টি Camp, 21টি লেভেল। প্রতিটি ক্যাম্প আপনার ইংরেজির ভিত্তি আরও মজবুত করবে।",
+    campFreeNote: "লেভেল 1 ফ্রি",
     campStartHere: "এখান থেকে শুরু",
     campNextStep: "পরের ধাপ",
-    campPlayCta: "Mission 1 ফ্রি খেলুন",
+    campPlayCta: "লেভেল 1 ফ্রি খেলুন",
     camps: [
       {
         badge: "Camp 1",
@@ -264,10 +252,10 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
         ],
       },
     ],
-    howEyebrow: "মিশন লুপ",
+    howEyebrow: "লেভেল লুপ",
     howTitle: "বুঝুন। খেলুন। আনলক করুন।",
     howIntro:
-      "লম্বা লেকচার নেই। প্রতিটি মিশন একই গেম লুপ: ছোট লেসন, তারপর খেলা, তারপর পরীক্ষা। পাস করলেই পরের মিশন খুলবে।",
+      "লম্বা লেকচার নেই। প্রতিটি লেভেল একই গেইম লুপ: ছোট লেসন, তারপর খেলা, তারপর পরীক্ষা। পাস করলেই পরের লেভেল খুলবে।",
     howLoopHint: "এই লুপ 21 বার ঘুরলেই জার্নি শেষ",
     howSteps: [
       {
@@ -283,7 +271,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
       {
         stage: "Play",
-        title: "গেমে প্র্যাকটিস",
+        title: "গেইমে প্র্যাকটিস",
         hook: "লিখুন। সাথে সাথে শুধরে নিন।",
         points: [
           "বাক্য সাজান, ফাঁকা পূরণ করুন",
@@ -295,17 +283,17 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       {
         stage: "Unlock",
         title: "পরীক্ষা, তারপর আনলক",
-        hook: "পাস করলে পরের মিশন খুলবে।",
+        hook: "পাস করলে পরের লেভেল খুলবে।",
         points: [
           "ক্যাম্প exam দিয়ে প্রমাণ করুন",
-          "21টি মিশন একটা পথে",
+          "21টি লেভেল একটা পথে",
           "শেষে সার্টিফিকেট",
         ],
-        reward: "Next mission",
+        reward: "Next level",
       },
     ],
     howLessonMock: {
-      mission: "Mission 04",
+      mission: "Level 04",
       topic: "Be verb",
       duration: "90 সেকেন্ড",
       bangla: "আমি একজন ছাত্র।",
@@ -319,17 +307,17 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       correctAnswer: "I",
       wrongHint: "কে কাজটা করছে, সেটাই Subject.",
       winTitle: "সাবাশ! +10 XP",
-      winBody: "ভুল হলে সাথে সাথে শুধরে নেওয়া হয়। এটাই গেম।",
+      winBody: "ভুল হলে সাথে সাথে শুধরে নেওয়া হয়। এটাই গেইম।",
       tryAgain: "আবার চেষ্টা",
     },
     howUnlockMock: {
       exam: "Camp 1 Exam",
       score: "8/10",
       pass: "পাস",
-      next: "Mission 06 আনলক",
+      next: "Level 06 আনলক",
     },
     howFoot:
-      "Mission 1 ফ্রি খেলে এই লুপটা নিজে দেখুন। পছন্দ হলে 45 দিনের পুরো জার্নি আনলক করুন।",
+      "লেভেল 1 ফ্রি খেলে এই লুপটা নিজে দেখুন। পছন্দ হলে 45 দিনের পুরো জার্নি আনলক করুন।",
     storiesEyebrow: "শিক্ষার্থীদের গল্প",
     storiesTitle: "তারা শেষ করেছে। এবার আপনার পালা।",
     storiesSub:
@@ -337,12 +325,12 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     playingNowEyebrow: "এখন খেলছে",
     playingNowTitle: "জার্নির ভিতর থেকে কয়েকটি কথা",
     playingNowSub:
-      "Habib, Salman আর Abbas উপরে গ্র্যাজুয়েট। এরা এখনো মিশন খেলছে। সিলেক্টেড আসল ফিডব্যাক।",
+      "Habib, Salman আর Abbas উপরে গ্র্যাজুয়েট। এরা এখনো লেভেল খেলছে। সিলেক্টেড আসল ফিডব্যাক।",
     playingNowLive: "লাইভ",
     playingNowHook: `এরা এখন খেলছে। আজই ${TEST_LANDING_OFFER_PRICE}-তে জয়েন করুন।`,
     playingNowPrev: "আগের কথা",
     playingNowNext: "পরের কথা",
-    playingNowMissions: "মিশন",
+    playingNowMissions: "লেভেল",
     graduatesEyebrow: "গ্র্যাজুয়েট",
     graduatesTitle: "তারা Fundamental English শেষ করেছে",
     graduatesSub:
@@ -357,7 +345,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     graduatesVerified: "যাচাইকৃত গ্র্যাজুয়েট",
     graduatesYourTurn: "এবার আপনার পালা",
     graduatesYourTurnBody:
-      "21টি মিশন। মজবুত ইংরেজি ভিত্তি। একই গেম। 45 দিনে শেষ করতে পারেন।",
+      "21টি লেভেল। মজবুত ইংরেজি ভিত্তি। একই গেইম। 45 দিনে শেষ করতে পারেন।",
     graduatesPrev: "আগের গল্প",
     graduatesNext: "পরের গল্প",
     offerEyebrow: "আজকের জয়ের অফার",
@@ -365,22 +353,22 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     offerRegular: `রেগুলার প্রাইস ${TEST_LANDING_LIST_PRICE}`,
     offerNow: `এখন ${TEST_LANDING_OFFER_PRICE}`,
     offerItems: [
-      "4টি Camp · 21টি Mission",
+      "4টি Camp · 21টি লেভেল",
       "45 দিনের অ্যাক্সেস",
-      "গেম, প্র্যাকটিস, সাথে সাথে শুধরে নেওয়া",
+      "গেইম, প্র্যাকটিস, সাথে সাথে শুধরে নেওয়া",
       "ক্যাম্প পরীক্ষা + সার্টিফিকেট",
-      "Mission 1 ফ্রি",
+      "লেভেল 1 ফ্রি",
     ],
-    offerProof: "শিক্ষার্থীরা ইতিমধ্যে এই গেম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।",
+    offerProof: "শিক্ষার্থীরা ইতিমধ্যে এই গেইম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।",
     offerRisk:
       "হিডেন চার্জ নেই। পেমেন্ট bKash-এ। 45 দিনের অ্যাক্সেস, আজীবন নয়।",
-    offerCta: "Mission 1 ফ্রি খেলুন",
-    footerCtaTitle: "প্রথমে Mission 1 ফ্রি খেলুন",
+    offerCta: "লেভেল 1 ফ্রি খেলুন",
+    footerCtaTitle: "প্রথমে লেভেল 1 ফ্রি খেলুন",
     faqTitle: "প্রায়শই জিজ্ঞাসিত প্রশ্ন",
     faq: [
       {
         q: "Gamlish কী? এখানে আমি কী শিখব?",
-        a: "Gamlish একটি গেমভিত্তিক ইংরেজি শেখার ওয়েবসাইট। এটি IELTS কোর্স নয়, Spoken English ক্লাসও নয়। এখানে আপনি ইংরেজির মজবুত ভিত্তি গড়বেন: গ্রামার, বাক্য গঠন, আর নিজের বাংলা চিন্তা থেকে সঠিক ইংরেজি বাক্য লেখা। পুরো জার্নি সাজানো আছে 4টি Camp এবং 21টি Mission-এ। শুরু একদম বেসিক থেকে, শেষে Voice, Narration এবং বড় বাক্য পর্যন্ত।",
+        a: "Gamlish একটি গেইমভিত্তিক ইংরেজি শেখার ওয়েবসাইট। এটি IELTS কোর্স নয়, Spoken English ক্লাসও নয়। এখানে আপনি ইংরেজির মজবুত ভিত্তি গড়বেন: গ্রামার, বাক্য গঠন, আর নিজের বাংলা চিন্তা থেকে সঠিক ইংরেজি বাক্য লেখা। পুরো জার্নি সাজানো আছে 4টি Camp এবং 21টি লেভেল-এ। শুরু একদম বেসিক থেকে, শেষে Voice, Narration এবং বড় বাক্য পর্যন্ত।",
       },
       {
         q: "এটা কি IELTS প্রস্তুতি?",
@@ -392,7 +380,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
       {
         q: "আমার ইংরেজি খুব দুর্বল। আমি কি শুরু করতে পারব?",
-        a: "হ্যাঁ। Gamlish তৈরি হয়েছে একেবারে শূন্য থেকে শুরু করা বাংলাভাষী শিক্ষার্থীদের জন্য। প্রথম ক্যাম্পে আপনি শিখবেন বাংলা আর ইংরেজি বাক্যের word order-এর ফারাক, Subject-Verb, Be verb, Article এবং Preposition। কঠিন ইংরেজি সংজ্ঞা দিয়ে শুরু হয় না। সহজ বাংলায় বোঝানো হয়, তারপর গেমে প্র্যাকটিস করানো হয়।",
+        a: "হ্যাঁ। Gamlish তৈরি হয়েছে একেবারে শূন্য থেকে শুরু করা বাংলাভাষী শিক্ষার্থীদের জন্য। প্রথম ক্যাম্পে আপনি শিখবেন বাংলা আর ইংরেজি বাক্যের word order-এর ফারাক, Subject-Verb, Be verb, Article এবং Preposition। কঠিন ইংরেজি সংজ্ঞা দিয়ে শুরু হয় না। সহজ বাংলায় বোঝানো হয়, তারপর গেইমে প্র্যাকটিস করানো হয়।",
       },
       {
         q: "প্রতিদিন কত সময় দিতে হবে?",
@@ -400,38 +388,31 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
       {
         q: "পেমেন্ট করার আগে কি চেষ্টা করে দেখা যাবে?",
-        a: "হ্যাঁ। আগে Mission 1 ফ্রি খেলুন। অ্যাকাউন্ট খুলে Mission 1 শুরু করলেই বোঝা যাবে গেমটা কেমন, আর শেখার ধরন আপনার সাথে মিলবে কি না। শুধু প্রথম মিশন ফ্রি। পছন্দ হলে পুরো 45 দিনের জার্নি আনলক করতে পারবেন।",
+        a: "হ্যাঁ। আগে লেভেল 1 ফ্রি খেলুন। অ্যাকাউন্ট খুলে Level 1 শুরু করলেই বোঝা যাবে গেইমটা কেমন, আর শেখার ধরন আপনার সাথে মিলবে কি না। শুধু প্রথম লেভেল ফ্রি। পছন্দ হলে পুরো 45 দিনের জার্নি আনলক করতে পারবেন।",
       },
       {
         q: "সার্টিফিকেট কি পাওয়া যাবে?",
-        a: "হ্যাঁ। 21টি মিশন শেষ করলে আপনি Fundamental English-এর অফিসিয়াল সার্টিফিকেটের জন্য আবেদন করতে পারবেন। সার্টিফিকেটটা বোনাস। আসল জিনিস হলো, সার্টিফিকেট নেওয়ার আগে আপনি নিজে সঠিক ইংরেজি বাক্য লিখতে পারবেন কি না, সেটা পরীক্ষায় প্রমাণ করতে হবে।",
+        a: "হ্যাঁ। 21টি লেভেল শেষ করলে আপনি Fundamental English-এর অফিসিয়াল সার্টিফিকেটের জন্য আবেদন করতে পারবেন। সার্টিফিকেটটা বোনাস। আসল জিনিস হলো, সার্টিফিকেট নেওয়ার আগে আপনি নিজে সঠিক ইংরেজি বাক্য লিখতে পারবেন কি না, সেটা পরীক্ষায় প্রমাণ করতে হবে।",
       },
     ],
   },
   en: {
     testBanner: "",
-    navPrimary: "Play Mission 1 free",
-    navDemo: "Play Mission 1 free",
+    navPrimary: "Start free trial",
+    navDemo: "Start free trial",
     navHow: "How you learn",
-    eyebrow: "Gamlish · Fundamental English",
-    headlineLine1: "In just 45 days, build by playing",
-    headlineLine2: "a strong English foundation",
-    accentWords: ["playing", "foundation"],
-    subheadline:
-      "Not IELTS. Not spoken class. When your English basics get strong, you can write correct sentences yourself.",
-    heroStats: [
-      { value: "4", label: "Camps" },
-      { value: "21", label: "Missions" },
-      { value: "45", label: "Days" },
-    ],
+    eyebrow: "Gamlish · The Game of English",
+    headlineLine1: "Play games,",
+    headlineLine2: "learn English!",
+    accentWords: ["Play games", "English"],
+    subheadline: "Learn English as easy as a game.",
     proofLine: "Students have already started playing this game. Start now.",
     priceWas: "Was",
     priceNow: "Now",
     priceSave: `Save ${TEST_LANDING_SAVE_PRICE}`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
-    priceMeta: "45 days · 21 missions",
-    ctaPrimary: "Play Mission 1 free",
-    ctaSecondary: "Play Mission 1 free",
+    priceMeta: "45 days · 21 levels",
+    ctaPrimary: "Start free trial",
     heroCompareAlt:
       "Your English without Gamlish stands on a weak foundation. With Gamlish, the same English stands on a strong foundation.",
     heroFoundationLabel: "Gamlish works here",
@@ -439,8 +420,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "Weak foundation",
     heroCompareWithTitle: "With Gamlish",
     heroCompareWithSub: "Strong foundation",
-    stickyPrimary: "Play Mission 1 free",
-    stickySecondary: "Play Mission 1 free",
+    stickyPrimary: "Start free trial",
+    stickySecondary: "Start free trial",
     compareEyebrow: "Why Gamlish",
     compareTitle: "Traditional English learning vs Gamlish",
     compareOld: "Old way",
@@ -452,7 +433,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
       {
         old: "Random content with no roadmap",
-        neu: "4 camps · 21 organized missions",
+        neu: "4 camps · 21 organized levels",
       },
       {
         old: "Coaching that costs thousands",
@@ -468,13 +449,13 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
     ],
     campsEyebrow: "What you will learn",
-    campsTitle: "What will you be able to do after 21 missions?",
+    campsTitle: "What will you be able to do after 21 levels?",
     campsSub:
-      "Not a syllabus dump. 4 camps, 21 missions. Each camp makes your English foundation stronger.",
-    campFreeNote: "Mission 1 is free",
+      "Not a syllabus dump. 4 camps, 21 levels. Each camp makes your English foundation stronger.",
+    campFreeNote: "Level 1 is free",
     campStartHere: "Start here",
     campNextStep: "Next step",
-    campPlayCta: "Play Mission 1 free",
+    campPlayCta: "Play Level 1 free",
     camps: [
       {
         badge: "Camp 1",
@@ -517,10 +498,10 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
         ],
       },
     ],
-    howEyebrow: "Mission loop",
+    howEyebrow: "Level loop",
     howTitle: "Learn. Play. Unlock.",
     howIntro:
-      "No long lectures. Every mission is the same game loop: a short lesson, then play, then an exam. Pass, and the next mission opens.",
+      "No long lectures. Every level is the same game loop: a short lesson, then play, then an exam. Pass, and the next level opens.",
     howLoopHint: "Repeat this loop 21 times to finish the journey",
     howSteps: [
       {
@@ -548,17 +529,17 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       {
         stage: "Unlock",
         title: "Exam, then unlock",
-        hook: "Pass, and the next mission opens.",
+        hook: "Pass, and the next level opens.",
         points: [
           "Prove it in a camp exam",
-          "21 missions on one path",
+          "21 levels on one path",
           "Certificate at the end",
         ],
-        reward: "Next mission",
+        reward: "Next level",
       },
     ],
     howLessonMock: {
-      mission: "Mission 04",
+      mission: "Level 04",
       topic: "Be verb",
       duration: "90 seconds",
       bangla: "আমি একজন ছাত্র।",
@@ -579,10 +560,10 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       exam: "Camp 1 Exam",
       score: "8/10",
       pass: "Pass",
-      next: "Mission 06 unlocked",
+      next: "Level 06 unlocked",
     },
     howFoot:
-      "Play Mission 1 free and feel this loop yourself. If it fits, unlock the full 45-day journey.",
+      "Play Level 1 free and feel this loop yourself. If it fits, unlock the full 45-day journey.",
     storiesEyebrow: "Learner stories",
     storiesTitle: "They finished. Your turn is next.",
     storiesSub:
@@ -590,12 +571,12 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     playingNowEyebrow: "Playing now",
     playingNowTitle: "A few voices from inside the journey",
     playingNowSub:
-      "Habib, Salman and Abbas are the graduates above. These learners are still in the missions. Selected real feedback.",
+      "Habib, Salman and Abbas are the graduates above. These learners are still in the levels. Selected real feedback.",
     playingNowLive: "Live",
     playingNowHook: `They are playing now. Join today for ${TEST_LANDING_OFFER_PRICE}.`,
     playingNowPrev: "Previous voice",
     playingNowNext: "Next voice",
-    playingNowMissions: "missions",
+    playingNowMissions: "levels",
     graduatesEyebrow: "Graduates",
     graduatesTitle: "They finished Fundamental English",
     graduatesSub:
@@ -610,7 +591,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     graduatesVerified: "Verified graduate",
     graduatesYourTurn: "Now it is your turn",
     graduatesYourTurnBody:
-      "21 missions. A strong English foundation. The same game. You can finish in 45 days.",
+      "21 levels. A strong English foundation. The same game. You can finish in 45 days.",
     graduatesPrev: "Previous story",
     graduatesNext: "Next story",
     offerEyebrow: "Today's winning offer",
@@ -618,22 +599,22 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     offerRegular: `Regular price ${TEST_LANDING_LIST_PRICE}`,
     offerNow: `Now ${TEST_LANDING_OFFER_PRICE}`,
     offerItems: [
-      "4 camps · 21 missions",
+      "4 camps · 21 levels",
       "45 days of access",
       "Games, practice, instant correction",
       "Camp exams + certificate",
-      "Mission 1 is free",
+      "Level 1 is free",
     ],
     offerProof: "Students have already started playing this game. Start now.",
     offerRisk:
       "No hidden fee. Pay with bKash. 45-day access, not lifetime.",
-    offerCta: "Play Mission 1 free",
-    footerCtaTitle: "Play Mission 1 free first",
+    offerCta: "Play Level 1 free",
+    footerCtaTitle: "Play Level 1 free first",
     faqTitle: "Frequently asked questions",
     faq: [
       {
         q: "What is Gamlish? What will I learn?",
-        a: "Gamlish is a game-based English learning website. It is not an IELTS course and not a spoken English class. You learn Fundamental English: grammar, sentence building, and how to turn your Bangla thoughts into a correct English sentence. The journey is 4 camps and 21 missions. You start from the basics and finish with voice, narration, and longer sentences.",
+        a: "Gamlish is a game-based English learning website. It is not an IELTS course and not a spoken English class. You learn Fundamental English: grammar, sentence building, and how to turn your Bangla thoughts into a correct English sentence. The journey is 4 camps and 21 levels. You start from the basics and finish with voice, narration, and longer sentences.",
       },
       {
         q: "Is this IELTS preparation?",
@@ -653,11 +634,11 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
       {
         q: "Can I try before I pay?",
-        a: "Yes. Play Mission 1 free first. Create an account, start Mission 1, and feel how the game teaches. Only Mission 1 is free. If you like it, you can unlock the full 45-day journey.",
+        a: "Yes. Play Level 1 free first. Create an account, start Level 1, and feel how the game teaches. Only Level 1 is free. If you like it, you can unlock the full 45-day journey.",
       },
       {
         q: "Will I get a certificate?",
-        a: "Yes. After you finish all 21 missions you can apply for the official Fundamental English certificate. The certificate is a bonus. The real test is whether you can write a correct English sentence yourself before you claim it.",
+        a: "Yes. After you finish all 21 levels you can apply for the official Fundamental English certificate. The certificate is a bonus. The real test is whether you can write a correct English sentence yourself before you claim it.",
       },
     ],
   },

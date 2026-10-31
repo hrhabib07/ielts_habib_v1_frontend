@@ -22,7 +22,8 @@ function formatDate(date: string): string {
 }
 
 export function SubscriptionStatusCard() {
-  const { subscription, loading: sessionLoading, isFoundingMember } = useStudentSession();
+  const { subscription, loading: sessionLoading, isFoundingMember } =
+    useStudentSession({ profile: true, subscription: true });
   const [sub, setSub] = useState<ActiveSubscription | null | undefined>(undefined);
 
   useEffect(() => {

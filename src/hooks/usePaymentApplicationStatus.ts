@@ -6,15 +6,17 @@ import {
   type ActiveSubscription,
   type SubscriptionRequest,
 } from "@/src/lib/api/subscription";
-import { useStudentSession } from "@/src/contexts/StudentSessionContext";
+import { runWhenIdle, useStudentSession } from "@/src/contexts/StudentSessionContext";
 import {
   hasPurchasedSubscription,
   hasUsablePremiumAccess,
   isPreorderAwaitingAccess,
 } from "@/src/lib/subscription-access";
 
-export function usePaymentApplicationStatus(enabled: boolean) {
-  const { subscription, loading: sessionLoading } = useStudentSession();
+export function usePaymentApplicationStatus(enabled: boolean, defer = false) {
+  const { subscription, loading: sessionLoading } = useStudentSession(
+    enabled ? { subscription: true, defer } : undefined,
+  );
   const [latestRequest, setLatestRequest] =
     useState<SubscriptionRequest | null>(null);
   const [requestLoading, setRequestLoading] = useState(enabled);
@@ -38,8 +40,14 @@ export function usePaymentApplicationStatus(enabled: boolean) {
   }, [enabled]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    if (!enabled || !defer) {
+      void refresh();
+      return;
+    }
+    return runWhenIdle(() => {
+      void refresh();
+    });
+  }, [defer, enabled, refresh]);
 
   const activeSubscription: ActiveSubscription | null = enabled
     ? subscription

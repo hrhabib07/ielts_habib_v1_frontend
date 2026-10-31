@@ -25,8 +25,28 @@ export function PlayerSubscriptionGate({
 }) {
   const PLAYER_UI = usePlayerUiCopy();
   const { locale } = useUiLocale();
-  const { subscription } = useStudentSession();
+  const { subscription, loading } = useStudentSession({ subscription: true });
   const awaitingAccess = isPreorderAwaitingAccess(subscription);
+
+  if (loading) {
+    return (
+      <div className="mx-auto flex min-h-[60vh] max-w-md items-center justify-center px-4 py-12">
+        <div className="h-48 w-full animate-pulse rounded-[1.75rem] bg-muted/70" />
+      </div>
+    );
+  }
+
+  if (subscription?.status === "ACTIVE") {
+    return (
+      <div className="mx-auto flex min-h-[50vh] max-w-md flex-col items-center justify-center px-4 text-center">
+        <p className="text-lg font-bold text-foreground">আপনি ইতিমধ্যে পেমেন্ট করেছেন।</p>
+        <p className="mt-2 text-sm text-muted-foreground">পেমেন্ট স্ক্রিন আর দেখানো হবে না। লেভেল ম্যাপ থেকে খেলুন।</p>
+        <Button asChild className="mt-5 rounded-full">
+          <Link href="/player">লেভেল খুলুন</Link>
+        </Button>
+      </div>
+    );
+  }
 
   if (!awaitingAccess) {
     return <PaidMissionUnlockFlow onLater={() => undefined} />;
@@ -36,8 +56,8 @@ export function PlayerSubscriptionGate({
     locale === "bn" ? "আপনার অ্যাক্সেস শীঘ্রই খুলবে" : "Your access opens soon";
   const body =
     locale === "bn"
-      ? `পেমেন্ট ভেরিফাই হয়েছে। প্রিমিয়াম মিশন ${formatAccessDate(subscription!.startDate, "bn-BD")} থেকে খেলতে পারবেন। তার আগে Mission 01 ফ্রি খেলুন।`
-      : `Your payment is verified. Premium missions unlock on ${formatAccessDate(subscription!.startDate)}. Until then, Mission 01 stays free.`;
+      ? `পেমেন্ট ভেরিফাই হয়েছে। প্রিমিয়াম লেভেল ${formatAccessDate(subscription!.startDate, "bn-BD")} থেকে খেলতে পারবেন। তার আগে Level 01 ফ্রি খেলুন।`
+      : `Your payment is verified. Premium levels unlock on ${formatAccessDate(subscription!.startDate)}. Until then, Level 01 stays free.`;
 
   return (
     <div

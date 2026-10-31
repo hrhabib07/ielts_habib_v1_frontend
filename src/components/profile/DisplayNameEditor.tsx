@@ -30,7 +30,7 @@ export function DisplayNameEditor({
 }: Props) {
   const { locale } = useUiLocale();
   const bn = locale === "bn";
-  const { refresh, invalidate } = useStudentSession();
+  const { refresh, invalidate } = useStudentSession({ profile: true });
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(initialName);
   const [saving, setSaving] = useState(false);

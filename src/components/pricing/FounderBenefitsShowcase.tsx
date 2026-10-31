@@ -112,7 +112,10 @@ function TierSpot({
 export function FounderBenefitsShowcase({ className }: { className?: string }) {
   const copy = useFounderBenefitsCopy();
   const { locale } = useUiLocale();
-  const { profile, isFoundingMember } = useStudentSession();
+  const { profile, isFoundingMember } = useStudentSession({
+    profile: true,
+    subscription: true,
+  });
   const [open, setOpen] = useState(false);
   const [counter, setCounter] = useState<FounderLiveCounter | null>(null);
 

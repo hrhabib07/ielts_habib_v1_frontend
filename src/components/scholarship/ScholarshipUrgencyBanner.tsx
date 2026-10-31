@@ -18,7 +18,9 @@ import {
 export function ScholarshipUrgencyBanner() {
   const pathname = usePathname();
   const { status } = useScholarship();
-  const { subscription, loading: sessionLoading } = useStudentSession();
+  const { subscription, loading: sessionLoading } = useStudentSession({
+    subscription: true,
+  });
   const { isPendingReview, hasPurchased, loading: paymentLoading } =
     usePaymentApplicationStatus(true);
   const windowStart = resolveScholarshipWindowStart(status);

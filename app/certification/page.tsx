@@ -2,7 +2,7 @@ import { CertificationApplicationClient } from "@/src/components/certification/C
 
 export const metadata = {
   title: "Certification · Gamlish",
-  description: "Apply for your Fundamental English certificate after completing Mission 21.",
+  description: "Apply for your Fundamental English certificate after completing Level 21.",
 };
 
 export default function CertificationPage() {
