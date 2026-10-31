@@ -113,7 +113,6 @@ function StepScreen({ ctx, stepId }: { ctx: MissionShellContext; stepId: string 
     const existing = ctx.state.learner;
     return (
       <LearnerOnboarding
-        suggestedNameEn={ctx.state.suggestedNameEn}
         initial={
           existing
             ? {

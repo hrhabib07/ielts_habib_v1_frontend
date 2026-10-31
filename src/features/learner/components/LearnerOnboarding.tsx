@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Globe, MapPin, Search, SendHorizontal } from "lucide-react";
+import { Globe, MapPin, Search, SendHorizontal } from "lucide-react";
 import { GuideAvatarPreview, RichText } from "@/src/features/chat-lesson/components/ChatPrimitives";
 import { LanguageSwitch } from "@/src/features/chat-lesson/components/LessonChrome";
 import { setLessonLanguage, useLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
@@ -15,7 +15,7 @@ import { BD_DISTRICTS, districtLabel, NAME_BN_PATTERN, NAME_EN_PATTERN } from "@
 import { personalizeText, type Learner } from "@/src/features/learner/lib/personalize";
 import { cn } from "@/lib/utils";
 
-type Stage = "confirmName" | "nameEn" | "nameBn" | "address" | "place" | "country" | "saving" | "done";
+type Stage = "nameEn" | "nameBn" | "address" | "place" | "country" | "saving" | "done";
 
 type Entry = { id: number; from: "guide" | "me"; text: Bilingual };
 
@@ -51,27 +51,25 @@ function MyLine({ text, lang, learner }: { text: Bilingual; lang: LessonLanguage
 
 /**
  * The welcome chat before Start Here: nickname in English and Bangla, Bhaiya or Apu, and where the
- * learner lives. Nothing can be skipped; answers are saved to the learner profile.
+ * learner lives. Names are always typed by the learner (never suggested, never pre-filled), so a
+ * quick tap can never save the wrong name. Nothing can be skipped; answers are saved to the profile.
  */
 export function LearnerOnboarding({
-  suggestedNameEn,
   initial,
   onSave,
   onDone,
 }: {
-  suggestedNameEn: string | null;
-  /** Existing answers, offered as suggestions when the learner is asked again. */
+  /** Existing answers; only the country is pre-filled when the learner is asked again. */
   initial: Partial<ChatMissionProfileInput> | null;
   onSave: (input: ChatMissionProfileInput) => Promise<Learner>;
   onDone: () => void;
 }) {
   const lang = useLessonLanguage();
   const face = LANG_FACE[lang];
-  const suggestion = initial?.nicknameEn ?? suggestedNameEn;
-  const [stage, setStage] = useState<Stage>(suggestion ? "confirmName" : "nameEn");
+  const [stage, setStage] = useState<Stage>("nameEn");
   const [entries, setEntries] = useState<Entry[]>(() => [
     { id: 1, from: "guide", text: LEARNER_UI.hello },
-    { id: 2, from: "guide", text: suggestion ? LEARNER_UI.askSuggested(suggestion) : LEARNER_UI.askNameEn },
+    { id: 2, from: "guide", text: LEARNER_UI.askNameEn },
   ]);
   const [draft, setDraft] = useState("");
   const [answers, setAnswers] = useState<Partial<ChatMissionProfileInput>>({});
@@ -82,7 +80,7 @@ export function LearnerOnboarding({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const previewLearner: Learner = saved ?? {
-    nicknameEn: answers.nicknameEn ?? suggestion ?? "?",
+    nicknameEn: answers.nicknameEn ?? "?",
     nicknameBn: answers.nicknameBn ?? "",
     addressAs: answers.addressAs ?? "bhaiya",
     district: null,
@@ -103,21 +101,9 @@ export function LearnerOnboarding({
 
   const askBangla = (nicknameEn: string) => {
     setAnswers((a) => ({ ...a, nicknameEn }));
-    setDraft(initial?.nicknameBn ?? "");
+    setDraft("");
     setStage("nameBn");
     push({ from: "guide", text: LEARNER_UI.askNameBn });
-  };
-
-  const confirmSuggested = (yes: boolean) => {
-    if (!suggestion) return;
-    push({ from: "me", text: yes ? LEARNER_UI.yes : LEARNER_UI.changeIt });
-    if (yes) {
-      askBangla(suggestion);
-    } else {
-      setDraft("");
-      setStage("nameEn");
-      push({ from: "guide", text: LEARNER_UI.askNameEn });
-    }
   };
 
   const submitText = () => {
@@ -234,26 +220,6 @@ export function LearnerOnboarding({
       >
         <div className="mx-auto w-full max-w-2xl">
           {error ? <p className={cn(face, "mb-2 text-sm font-semibold text-rose-600")}>{pick(error, lang)}</p> : null}
-
-          {stage === "confirmName" ? (
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => confirmSuggested(true)}
-                className={cn(face, "flex h-12 items-center justify-center gap-1.5 rounded-2xl border-b-4 border-sky-700 bg-sky-500 font-extrabold text-white")}
-              >
-                <Check className="size-4" aria-hidden />
-                {pick(LEARNER_UI.yes, lang)}
-              </button>
-              <button
-                type="button"
-                onClick={() => confirmSuggested(false)}
-                className={cn(face, "h-12 rounded-2xl border-2 border-b-4 border-slate-200 bg-white font-bold text-slate-700")}
-              >
-                {pick(LEARNER_UI.changeIt, lang)}
-              </button>
-            </div>
-          ) : null}
 
           {textStage ? (
             <form

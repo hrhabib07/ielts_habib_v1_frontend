@@ -6,12 +6,6 @@ export const LEARNER_UI = {
     en: "Hello! Welcome to **Gamlish**. Before we start, I would love to know you a little.",
     bn: "হ্যালো! **Gamlish**-এ আপনাকে স্বাগতম। শুরু করার আগে আপনার সম্পর্কে একটু জানতে চাই।",
   },
-  askSuggested: (name: string): Bilingual => ({
-    en: `Should I call you **${name}**?`,
-    bn: `আমি কি আপনাকে **${name}** বলে ডাকব?`,
-  }),
-  yes: { en: "Yes", bn: "হ্যাঁ" },
-  changeIt: { en: "Change it", bn: "বদলাতে চাই" },
   askNameEn: {
     en: "What should I call you? Please type your **nickname in English** letters.",
     bn: "আপনাকে কী নামে ডাকব? আপনার **ডাকনাম ইংরেজি অক্ষরে** লিখুন।",
