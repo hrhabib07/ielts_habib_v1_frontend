@@ -43,6 +43,12 @@ export const LEARNER_UI = {
   typeBanglaLetters: { en: "Please use Bangla letters.", bn: "বাংলা অক্ষর ব্যবহার করুন।" },
   nameEnPlaceholder: { en: "e.g. Rahim", bn: "যেমন: Rahim" },
   nameBnPlaceholder: { en: "e.g. রহিম", bn: "যেমন: রহিম" },
+  replyCallMe: { en: "You should call me", bn: "আমাকে ডাকবেন" },
+  replyCallMeBn: { en: "In Bangla, call me", bn: "বাংলায় আমাকে ডাকবেন" },
+  replyLiveIn: { en: "I live in", bn: "আমি থাকি" },
+  callMeName: (name: string): Bilingual => ({ en: `Call me ${name}`, bn: `আমাকে ${name} ডাকবেন` }),
+  callMeBhaiya: { en: "Call me Bhaiya", bn: "আমাকে ভাইয়া ডাকবেন" },
+  callMeApu: { en: "Call me Apu", bn: "আমাকে আপু ডাকবেন" },
   continueLesson: { en: "Start the lesson", bn: "লেসন শুরু করুন" },
 
   photoTitle: { en: "Wow, {name}!", bn: "দারুণ, {name}!" },

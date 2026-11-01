@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FocusEvent, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Globe, MapPin, Search, SendHorizontal } from "lucide-react";
 import { GuideAvatarPreview, RichText } from "@/src/features/chat-lesson/components/ChatPrimitives";
@@ -20,6 +20,14 @@ type Stage = "nameEn" | "nameBn" | "address" | "place" | "country" | "saving" | 
 type Entry = { id: number; from: "guide" | "me"; text: Bilingual };
 
 const asIs = (text: string): Bilingual => ({ en: text, bn: text });
+
+const REPLY_IN = { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.2, duration: 0.25 } };
+
+/** Keeps the focused box visible above the phone keyboard. */
+function keepInView(event: FocusEvent<HTMLElement>) {
+  const target = event.currentTarget;
+  window.setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+}
 
 function GuideLine({ text, lang, showAvatar }: { text: Bilingual; lang: LessonLanguage; showAvatar: boolean }) {
   return (
@@ -49,10 +57,37 @@ function MyLine({ text, lang, learner }: { text: Bilingual; lang: LessonLanguage
   );
 }
 
+/** The learner's answer box, placed in the chat right under Gamlish's question. */
+function ReplyCard({
+  label,
+  lang,
+  learner,
+  error,
+  children,
+}: {
+  label: Bilingual;
+  lang: LessonLanguage;
+  learner: Learner;
+  error: Bilingual | null;
+  children: ReactNode;
+}) {
+  const face = LANG_FACE[lang];
+  return (
+    <motion.div className="flex items-start justify-end gap-2.5" {...REPLY_IN}>
+      <div className="w-full max-w-[85%] rounded-2xl rounded-tr-md border-2 border-sky-300 bg-white p-3 shadow-sm sm:max-w-md">
+        <p className={cn(face, "mb-2 text-xs font-black uppercase tracking-wider text-sky-700")}>{pick(label, lang)}</p>
+        {children}
+        {error ? <p className={cn(face, "mt-2 text-sm font-semibold text-rose-600")}>{pick(error, lang)}</p> : null}
+      </div>
+      <LearnerAvatarImage learner={learner} />
+    </motion.div>
+  );
+}
+
 /**
  * The welcome chat before Start Here: nickname in English and Bangla, Bhaiya or Apu, and where the
- * learner lives. Names are always typed by the learner (never suggested, never pre-filled), so a
- * quick tap can never save the wrong name. Nothing can be skipped; answers are saved to the profile.
+ * learner lives. Each answer box appears in the chat right under its question. Names are always
+ * typed by the learner (never suggested), so a quick tap can never save the wrong name.
  */
 export function LearnerOnboarding({
   initial,
@@ -89,22 +124,18 @@ export function LearnerOnboarding({
   };
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const timer = window.setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 250);
+    return () => window.clearTimeout(timer);
   }, [entries.length, stage]);
 
   useEffect(() => {
-    if (stage === "nameEn" || stage === "nameBn" || stage === "country") inputRef.current?.focus();
+    if (stage !== "nameEn" && stage !== "nameBn" && stage !== "country") return;
+    const timer = window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 350);
+    return () => window.clearTimeout(timer);
   }, [stage]);
 
   const push = (...items: Omit<Entry, "id">[]) =>
     setEntries((list) => [...list, ...items.map((item, i) => ({ ...item, id: list.length + i + 1 }))]);
-
-  const askBangla = (nicknameEn: string) => {
-    setAnswers((a) => ({ ...a, nicknameEn }));
-    setDraft("");
-    setStage("nameBn");
-    push({ from: "guide", text: LEARNER_UI.askNameBn });
-  };
 
   const submitText = () => {
     const value = draft.trim().replace(/\s+/g, " ");
@@ -112,15 +143,17 @@ export function LearnerOnboarding({
     if (stage === "nameEn") {
       if (!NAME_EN_PATTERN.test(value)) return setError(LEARNER_UI.typeEnglishLetters);
       setError(null);
-      push({ from: "me", text: asIs(value) });
-      askBangla(value);
+      setAnswers((a) => ({ ...a, nicknameEn: value }));
+      push({ from: "me", text: LEARNER_UI.callMeName(value) }, { from: "guide", text: LEARNER_UI.askNameBn });
+      setDraft("");
+      setStage("nameBn");
       return;
     }
     if (stage === "nameBn") {
       if (!NAME_BN_PATTERN.test(value)) return setError(LEARNER_UI.typeBanglaLetters);
       setError(null);
       setAnswers((a) => ({ ...a, nicknameBn: value }));
-      push({ from: "me", text: asIs(value) }, { from: "guide", text: LEARNER_UI.askAddress });
+      push({ from: "me", text: LEARNER_UI.callMeName(value) }, { from: "guide", text: LEARNER_UI.askAddress });
       setDraft("");
       setStage("address");
       return;
@@ -144,7 +177,7 @@ export function LearnerOnboarding({
       photoSrc: null,
     };
     push(
-      { from: "me", text: addressAs === "bhaiya" ? LEARNER_UI.bhaiya : LEARNER_UI.apu },
+      { from: "me", text: addressAs === "bhaiya" ? LEARNER_UI.callMeBhaiya : LEARNER_UI.callMeApu },
       { from: "guide", text: personalizeText(LEARNER_UI.askPlace, learner) },
     );
     setStage("place");
@@ -188,12 +221,13 @@ export function LearnerOnboarding({
   }, [search]);
 
   const textStage = stage === "nameEn" || stage === "nameBn" || stage === "country";
+  const textLabel = stage === "nameEn" ? LEARNER_UI.replyCallMe : stage === "nameBn" ? LEARNER_UI.replyCallMeBn : LEARNER_UI.replyLiveIn;
   const placeholder =
     stage === "nameEn" ? LEARNER_UI.nameEnPlaceholder : stage === "nameBn" ? LEARNER_UI.nameBnPlaceholder : LEARNER_UI.countryPlaceholder;
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-slate-50 bg-gradient-to-b from-sky-50 via-slate-50 to-slate-50">
-      <header className="shrink-0 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+      <header className="shrink-0 border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 py-3">
           <p className={cn(face, "text-base font-black text-slate-900")}>Gamlish</p>
           <LanguageSwitch lang={lang} onChange={setLessonLanguage} />
@@ -201,7 +235,7 @@ export function LearnerOnboarding({
       </header>
 
       <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <div className="mx-auto w-full max-w-2xl space-y-3 px-3 pb-6 pt-5 sm:px-4">
+        <div className="mx-auto w-full max-w-2xl space-y-3 px-3 pb-10 pt-5 sm:px-4">
           {entries.map((entry, i) =>
             entry.from === "guide" ? (
               <GuideLine key={entry.id} text={entry.text} lang={lang} showAvatar={entries[i - 1]?.from !== "guide"} />
@@ -209,77 +243,77 @@ export function LearnerOnboarding({
               <MyLine key={entry.id} text={entry.text} lang={lang} learner={previewLearner} />
             ),
           )}
-          <div ref={bottomRef} className="h-px" aria-hidden />
-        </div>
-      </main>
-
-      <motion.footer
-        className="shrink-0 border-t border-slate-200 bg-white px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-3"
-        initial={{ y: 40, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-      >
-        <div className="mx-auto w-full max-w-2xl">
-          {error ? <p className={cn(face, "mb-2 text-sm font-semibold text-rose-600")}>{pick(error, lang)}</p> : null}
 
           {textStage ? (
-            <form
-              className="flex items-center gap-2"
-              onSubmit={(event) => {
-                event.preventDefault();
-                submitText();
-              }}
-            >
-              <input
-                ref={inputRef}
-                value={draft}
-                onChange={(event) => setDraft(event.target.value.slice(0, stage === "country" ? 60 : 40))}
-                placeholder={pick(placeholder, lang)}
-                aria-label={pick(placeholder, lang)}
-                autoComplete="off"
-                className={cn(
-                  stage === "nameBn" ? "font-bengali" : "font-sans",
-                  "h-12 min-w-0 flex-1 rounded-2xl border-2 border-sky-200 bg-sky-50/60 px-4 text-lg font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white",
-                )}
-              />
-              <button
-                type="submit"
-                disabled={!draft.trim()}
-                aria-label={pick(LEARNER_UI.send, lang)}
-                className="flex size-12 shrink-0 items-center justify-center rounded-2xl border-b-4 border-sky-700 bg-sky-500 text-white disabled:opacity-40"
+            <ReplyCard key={stage} label={textLabel} lang={lang} learner={previewLearner} error={error}>
+              <form
+                className="flex items-center gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  submitText();
+                }}
               >
-                <SendHorizontal className="size-5" aria-hidden />
-              </button>
-            </form>
+                <input
+                  ref={inputRef}
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value.slice(0, stage === "country" ? 60 : 40))}
+                  onFocus={keepInView}
+                  placeholder={pick(placeholder, lang)}
+                  aria-label={pick(textLabel, lang)}
+                  autoComplete="off"
+                  enterKeyHint="send"
+                  className={cn(
+                    stage === "nameBn" ? "font-bengali" : "font-sans",
+                    "h-12 min-w-0 flex-1 rounded-xl border-2 border-sky-200 bg-sky-50/60 px-3.5 text-lg font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white",
+                  )}
+                />
+                <button
+                  type="submit"
+                  disabled={!draft.trim()}
+                  aria-label={pick(LEARNER_UI.send, lang)}
+                  className="flex size-12 shrink-0 items-center justify-center rounded-xl border-b-4 border-sky-700 bg-sky-500 text-white disabled:opacity-40"
+                >
+                  <SendHorizontal className="size-5" aria-hidden />
+                </button>
+              </form>
+            </ReplyCard>
           ) : null}
 
           {stage === "address" ? (
-            <div className="grid grid-cols-2 gap-2">
-              {(["bhaiya", "apu"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => chooseAddress(value)}
-                  className={cn(face, "h-14 rounded-2xl border-2 border-b-4 border-sky-200 bg-white text-lg font-black text-sky-700 hover:bg-sky-50")}
-                >
-                  {pick(value === "bhaiya" ? LEARNER_UI.bhaiya : LEARNER_UI.apu, lang)}
-                </button>
-              ))}
-            </div>
+            <motion.div className="flex items-start justify-end gap-2.5" {...REPLY_IN}>
+              <div className="flex w-full max-w-[85%] flex-col items-end gap-2 sm:max-w-md">
+                {(["bhaiya", "apu"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => chooseAddress(value)}
+                    className={cn(
+                      face,
+                      "w-full rounded-2xl rounded-tr-md border-2 border-b-4 border-sky-300 bg-white px-4 py-3 text-right text-base font-black text-sky-700 shadow-sm transition-colors hover:bg-sky-50 active:translate-y-0.5 active:border-b-2",
+                    )}
+                  >
+                    {pick(value === "bhaiya" ? LEARNER_UI.callMeBhaiya : LEARNER_UI.callMeApu, lang)}
+                  </button>
+                ))}
+              </div>
+              <LearnerAvatarImage learner={previewLearner} />
+            </motion.div>
           ) : null}
 
           {stage === "place" ? (
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-3">
-                <Search className="size-4 shrink-0 text-slate-400" aria-hidden />
+            <ReplyCard label={LEARNER_UI.replyLiveIn} lang={lang} learner={previewLearner} error={error}>
+              <label className="flex items-center gap-2 rounded-xl border-2 border-sky-200 bg-sky-50/60 px-3 focus-within:border-sky-500 focus-within:bg-white">
+                <Search className="size-4 shrink-0 text-sky-500" aria-hidden />
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
+                  onFocus={keepInView}
                   placeholder={pick(LEARNER_UI.searchDistrict, lang)}
                   aria-label={pick(LEARNER_UI.searchDistrict, lang)}
                   className={cn(face, "h-11 min-w-0 flex-1 bg-transparent text-[15px] font-semibold outline-none")}
                 />
               </label>
-              <div className="grid max-h-48 grid-cols-2 gap-1.5 overflow-y-auto pr-1 sm:grid-cols-3">
+              <div className="mt-2 grid max-h-64 grid-cols-2 gap-1.5 overflow-y-auto overscroll-contain pr-1">
                 {districts.map((district) => (
                   <button
                     key={district.en}
@@ -298,34 +332,38 @@ export function LearnerOnboarding({
               <button
                 type="button"
                 onClick={chooseOutside}
-                className={cn(face, "flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-slate-300 text-sm font-bold text-slate-600 hover:bg-slate-50")}
+                className={cn(face, "mt-2 flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-slate-300 text-sm font-bold text-slate-600 hover:bg-slate-50")}
               >
                 <Globe className="size-4" aria-hidden />
                 {pick(LEARNER_UI.outsideBd, lang)}
               </button>
-            </div>
+            </ReplyCard>
           ) : null}
 
           {stage === "saving" ? (
-            <p className={cn(face, "py-3 text-center text-sm font-semibold text-slate-500")}>{pick(LEARNER_UI.saving, lang)}</p>
+            <p className={cn(face, "py-2 text-right text-sm font-semibold text-slate-500")}>{pick(LEARNER_UI.saving, lang)}</p>
           ) : null}
 
           {stage === "done" ? (
-            <button
-              type="button"
-              onClick={onDone}
-              autoFocus
-              className={cn(
-                face,
-                "h-12 w-full rounded-2xl border-b-4 border-emerald-700 bg-emerald-500 text-base font-extrabold text-white",
-                lang === "en" && "uppercase tracking-wide",
-              )}
-            >
-              {pick(LEARNER_UI.continueLesson, lang)}
-            </button>
+            <motion.div {...REPLY_IN}>
+              <button
+                type="button"
+                onClick={onDone}
+                autoFocus
+                className={cn(
+                  face,
+                  "mt-2 h-13 w-full rounded-2xl border-b-4 border-emerald-700 bg-emerald-500 text-base font-extrabold text-white",
+                  lang === "en" && "uppercase tracking-wide",
+                )}
+              >
+                {pick(LEARNER_UI.continueLesson, lang)}
+              </button>
+            </motion.div>
           ) : null}
+
+          <div ref={bottomRef} className="h-px" aria-hidden />
         </div>
-      </motion.footer>
+      </main>
     </div>
   );
 }
