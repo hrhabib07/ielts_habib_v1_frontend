@@ -21,6 +21,35 @@ type Entry = { id: number; from: "guide" | "me"; text: Bilingual };
 
 const asIs = (text: string): Bilingual => ({ en: text, bn: text });
 
+const ADDRESS_OPTIONS: ReadonlyArray<{
+  value: AddressAs;
+  en: string;
+  bn: string;
+  callMe: Bilingual;
+  tile: string;
+  ring: string;
+  dot: string;
+}> = [
+  {
+    value: "bhaiya",
+    en: "Bhaiya",
+    bn: "ভাইয়া",
+    callMe: LEARNER_UI.callMeBhaiya,
+    tile: "border-sky-300 bg-sky-50 text-sky-800 hover:bg-sky-100",
+    ring: "border-sky-400",
+    dot: "bg-sky-500",
+  },
+  {
+    value: "apu",
+    en: "Apu",
+    bn: "আপু",
+    callMe: LEARNER_UI.callMeApu,
+    tile: "border-pink-300 bg-pink-50 text-pink-800 hover:bg-pink-100",
+    ring: "border-pink-400",
+    dot: "bg-pink-500",
+  },
+];
+
 const REPLY_IN = { initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.2, duration: 0.25 } };
 
 /** Keeps the focused box visible above the phone keyboard. */
@@ -280,24 +309,30 @@ export function LearnerOnboarding({
           ) : null}
 
           {stage === "address" ? (
-            <motion.div className="flex items-start justify-end gap-2.5" {...REPLY_IN}>
-              <div className="flex w-full max-w-[85%] flex-col items-end gap-2 sm:max-w-md">
-                {(["bhaiya", "apu"] as const).map((value) => (
+            <ReplyCard label={LEARNER_UI.pickOne} lang={lang} learner={previewLearner} error={null}>
+              <div className="grid grid-cols-2 gap-2.5" role="radiogroup" aria-label={pick(LEARNER_UI.askAddress, lang)}>
+                {ADDRESS_OPTIONS.map((option) => (
                   <button
-                    key={value}
+                    key={option.value}
                     type="button"
-                    onClick={() => chooseAddress(value)}
+                    role="radio"
+                    aria-checked={false}
+                    onClick={() => chooseAddress(option.value)}
                     className={cn(
-                      face,
-                      "w-full rounded-2xl rounded-tr-md border-2 border-b-4 border-sky-300 bg-white px-4 py-3 text-right text-base font-black text-sky-700 shadow-sm transition-colors hover:bg-sky-50 active:translate-y-0.5 active:border-b-2",
+                      "group flex flex-col items-center gap-1.5 rounded-2xl border-2 border-b-[5px] px-2 pb-3 pt-3.5 text-center shadow-sm transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2",
+                      option.tile,
                     )}
                   >
-                    {pick(value === "bhaiya" ? LEARNER_UI.callMeBhaiya : LEARNER_UI.callMeApu, lang)}
+                    <span className={cn("flex size-6 items-center justify-center rounded-full border-2 bg-white", option.ring)} aria-hidden>
+                      <span className={cn("size-2.5 rounded-full opacity-0 transition-opacity group-hover:opacity-100", option.dot)} />
+                    </span>
+                    <span className="font-sans text-xl font-black leading-none">{option.en}</span>
+                    <span className="font-bengali text-base font-bold leading-none opacity-80">{option.bn}</span>
+                    <span className={cn(face, "mt-1 text-[12px] font-semibold opacity-75")}>{pick(option.callMe, lang)}</span>
                   </button>
                 ))}
               </div>
-              <LearnerAvatarImage learner={previewLearner} />
-            </motion.div>
+            </ReplyCard>
           ) : null}
 
           {stage === "place" ? (

@@ -49,6 +49,7 @@ export const LEARNER_UI = {
   callMeName: (name: string): Bilingual => ({ en: `Call me ${name}`, bn: `আমাকে ${name} ডাকবেন` }),
   callMeBhaiya: { en: "Call me Bhaiya", bn: "আমাকে ভাইয়া ডাকবেন" },
   callMeApu: { en: "Call me Apu", bn: "আমাকে আপু ডাকবেন" },
+  pickOne: { en: "Pick one", bn: "একটি বেছে নিন" },
   continueLesson: { en: "Start the lesson", bn: "লেসন শুরু করুন" },
 
   photoTitle: { en: "Wow, {name}!", bn: "দারুণ, {name}!" },
