@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
@@ -84,20 +84,39 @@ export function TestLandingPlayingNow() {
 
   const count = items.length;
   const active = count > 0 ? items[index % count] : null;
+  const activeId = active?.id ?? null;
+  // Cleared on every story change, so the card always returns to its fixed height.
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const expanded = activeId !== null && expandedId === activeId;
+  const quoteRef = useRef<HTMLQuoteElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+
+  useEffect(() => {
+    const el = quoteRef.current;
+    if (!el || expanded) return;
+    const observer = new ResizeObserver(() => {
+      setOverflowing(el.scrollHeight > el.clientHeight + 1);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [activeId, expanded]);
 
   const go = useCallback(
     (delta: number) => {
       if (count < 2) return;
+      setExpandedId(null);
       setIndex((current) => (current + delta + count) % count);
     },
     [count],
   );
 
+  const holding = paused || expanded;
+
   useEffect(() => {
-    if (reduceMotion || paused || count < 2) return;
+    if (reduceMotion || holding || count < 2) return;
     const timer = window.setInterval(() => go(1), AUTO_MS);
     return () => window.clearInterval(timer);
-  }, [count, go, paused, reduceMotion]);
+  }, [count, go, holding, reduceMotion]);
 
   if (!active) return null;
 
@@ -160,8 +179,7 @@ export function TestLandingPlayingNow() {
         </div>
 
         <div className="mt-6 grid w-full min-w-0 items-stretch gap-4 sm:mt-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(17rem,0.7fr)] lg:gap-6">
-          <div className="relative w-full min-w-0 overflow-hidden rounded-[1.35rem] sm:rounded-[1.5rem] lg:min-h-[26rem] lg:rounded-[1.75rem]">
-            <AnimatePresence mode="wait">
+          <div className="relative flex w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] sm:rounded-[1.5rem] lg:rounded-[1.75rem]">
               <motion.figure
                 key={active.id}
                 drag={reduceMotion || count < 2 ? false : "x"}
@@ -177,18 +195,37 @@ export function TestLandingPlayingNow() {
                 }}
                 initial={reduceMotion ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
                 transition={{ duration: 0.32, ease: GUEST_EASE }}
-                className="relative flex w-full max-w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] border border-white/12 bg-white/[0.05] px-4 py-5 shadow-[0_30px_90px_-42px_rgba(56,189,248,0.65)] sm:rounded-[1.5rem] sm:px-8 sm:py-8 lg:absolute lg:inset-0 lg:rounded-[1.75rem] lg:px-9 lg:py-9"
+                className="relative flex w-full max-w-full min-w-0 flex-1 flex-col overflow-hidden rounded-[1.35rem] border border-white/12 bg-white/[0.05] px-4 py-5 shadow-[0_30px_90px_-42px_rgba(56,189,248,0.65)] sm:rounded-[1.5rem] sm:px-8 sm:py-8 lg:rounded-[1.75rem] lg:px-9 lg:py-9"
               >
                 <Quote
                   className="pointer-events-none absolute -right-1 -top-2 hidden h-24 w-24 text-sky-400/15 sm:block sm:h-28 sm:w-28"
                   aria-hidden
                 />
                 <Quote className="h-7 w-7 shrink-0 text-sky-300 sm:h-8 sm:w-8" aria-hidden />
-                <blockquote className="relative order-2 mt-4 max-w-full text-pretty break-words [overflow-wrap:anywhere] text-[1.5rem] font-semibold leading-[1.5] tracking-tight text-white sm:mt-5 sm:text-2xl sm:leading-snug md:text-[1.8rem] md:leading-[1.35] lg:order-none">
-                  {active.body.trim()}
-                </blockquote>
+                <div className="relative order-2 mt-4 sm:mt-5 lg:order-none">
+                  <blockquote
+                    ref={quoteRef}
+                    className={cn(
+                      "max-w-full min-h-[9em] text-pretty break-words [overflow-wrap:anywhere] text-[1.2rem] font-semibold leading-[1.5] tracking-tight text-white sm:text-xl md:text-2xl",
+                      !expanded && "line-clamp-6",
+                    )}
+                  >
+                    {active.body.trim()}
+                  </blockquote>
+                  <div className="mt-2 h-8">
+                    {overflowing || expanded ? (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedId(expanded ? null : active.id)}
+                        aria-expanded={expanded}
+                        className="text-sm font-bold text-sky-300 underline-offset-4 hover:text-sky-200 hover:underline sm:text-base"
+                      >
+                        {expanded ? copy.playingNowReadLess : copy.playingNowReadMore}
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
                 <figcaption className="relative order-1 mt-3 min-w-0 overflow-hidden rounded-2xl bg-white/[0.07] p-3 ring-1 ring-white/10 sm:mt-4 lg:order-none lg:hidden">
                   <div className="flex min-w-0 items-start gap-3">
                     <PlayerAvatar
@@ -200,27 +237,19 @@ export function TestLandingPlayingNow() {
                       {profileHref ? (
                         <Link
                           href={profileHref}
-                          className={cn(
-                            nameClass,
-                            "line-clamp-2 break-words text-[1.05rem] leading-snug [overflow-wrap:anywhere]",
-                          )}
+                          className={cn(nameClass, "truncate text-[1.05rem] leading-snug")}
                         >
                           {active.displayName}
                         </Link>
                       ) : (
-                        <span
-                          className={cn(
-                            nameClass,
-                            "line-clamp-2 break-words text-[1.05rem] leading-snug [overflow-wrap:anywhere]",
-                          )}
-                        >
+                        <span className={cn(nameClass, "truncate text-[1.05rem] leading-snug")}>
                           {active.displayName}
                         </span>
                       )}
-                      <span className="mt-1 block line-clamp-2 break-words text-[0.8rem] leading-snug text-sky-200/80 [overflow-wrap:anywhere]">
+                      <span className="mt-1 block h-[1.1rem] truncate text-[0.8rem] leading-snug text-sky-200/80">
                         {active.title}
                       </span>
-                      <span className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="mt-2 flex h-4 items-center gap-x-2">
                         <StarRow stars={stars} />
                         {missions > 0 ? (
                           <span className="num text-xs font-bold tabular-nums text-sky-100/85">
@@ -230,20 +259,17 @@ export function TestLandingPlayingNow() {
                       </span>
                     </div>
                   </div>
-                  {missions > 0 ? (
-                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-                      <motion.div
-                        key={active.id}
-                        className="h-full rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${missionPct}%` }}
-                        transition={{ duration: 0.55, ease: GUEST_EASE }}
-                      />
-                    </div>
-                  ) : null}
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
+                    <motion.div
+                      key={active.id}
+                      className="h-full rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${missionPct}%` }}
+                      transition={{ duration: 0.55, ease: GUEST_EASE }}
+                    />
+                  </div>
                 </figcaption>
               </motion.figure>
-            </AnimatePresence>
           </div>
 
           <aside className="hidden min-w-0 overflow-hidden rounded-[1.75rem] border border-white/12 bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-6 lg:flex lg:flex-col lg:justify-between">
@@ -320,7 +346,10 @@ export function TestLandingPlayingNow() {
                     <li key={item.id} className="shrink-0">
                       <button
                         type="button"
-                        onClick={() => setIndex(itemIndex)}
+                        onClick={() => {
+                          setExpandedId(null);
+                          setIndex(itemIndex);
+                        }}
                         aria-label={item.displayName}
                         aria-current={selected ? "true" : undefined}
                         className={cn(
@@ -360,12 +389,12 @@ export function TestLandingPlayingNow() {
             {!reduceMotion ? (
               <div className="h-0.5 w-28 overflow-hidden rounded-full bg-white/10 sm:w-40">
                 <motion.div
-                  key={`${active.id}-${paused ? "p" : "r"}`}
+                  key={`${active.id}-${holding ? "p" : "r"}`}
                   className="h-full origin-left bg-sky-400"
                   initial={{ scaleX: 0 }}
-                  animate={{ scaleX: paused ? 0 : 1 }}
+                  animate={{ scaleX: holding ? 0 : 1 }}
                   transition={{
-                    duration: paused ? 0 : AUTO_MS / 1000,
+                    duration: holding ? 0 : AUTO_MS / 1000,
                     ease: "linear",
                   }}
                 />

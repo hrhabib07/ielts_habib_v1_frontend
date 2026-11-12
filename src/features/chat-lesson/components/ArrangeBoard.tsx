@@ -41,7 +41,7 @@ export function ArrangeBoard({
     <div className="mt-4">
       <div
         aria-label="Your sentence"
-        className="flex min-h-15 flex-wrap items-center gap-2 rounded-2xl border-2 border-dashed border-sky-200 bg-sky-50/60 p-2.5"
+        className="flex min-h-15 flex-wrap items-center gap-2 rounded-2xl border-2 border-dashed border-accent/20 bg-accent/5 p-2.5"
       >
         {placed.length === 0 ? (
           <p className={cn(face, "px-1.5 text-sm font-semibold text-slate-400")}>
@@ -58,7 +58,7 @@ export function ArrangeBoard({
                 className={cn(
                   EN_FACE,
                   TILE,
-                  "animate-in fade-in zoom-in-95 border-sky-400 bg-white text-slate-900 shadow-[0_3px_0_0_#7dd3fc] hover:bg-sky-50",
+                  "animate-in fade-in zoom-in-95 border-accent/50 bg-white text-slate-900 shadow-[0_3px_0_0_rgba(30,58,138,0.3)] hover:bg-accent/5",
                 )}
               >
                 {option.text.en}
@@ -86,7 +86,7 @@ export function ArrangeBoard({
                   TILE,
                   used
                     ? "cursor-default border-slate-200 bg-slate-100 text-transparent shadow-none"
-                    : "border-slate-200 bg-white text-slate-800 shadow-[0_3px_0_0_#e2e8f0] hover:border-sky-300 hover:bg-sky-50/50",
+                    : "border-slate-200 bg-white text-slate-800 shadow-[0_3px_0_0_#e2e8f0] hover:border-accent/30 hover:bg-accent/5",
                 )}
               >
                 {option.text.en}

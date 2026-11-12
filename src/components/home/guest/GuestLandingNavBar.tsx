@@ -7,9 +7,14 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
+import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
-import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import {
+  LANDING_CTA_CLASS,
+  LANDING_NAV_SECONDARY_CTA_CLASS,
+} from "@/src/components/home/guest/guest-landing-theme";
+import { logLandingCtaClick } from "@/src/lib/micro-telemetry";
 import {
   TEST_LANDING_COPY,
   TEST_LANDING_PRIMARY_HREF,
@@ -40,16 +45,17 @@ export function GuestLandingNavBar({
   const isDemoFunnel =
     pathname === "/demo" || pathname.startsWith("/demo/");
 
-  const scrollToHowItWorks = () => {
+  const scrollToFaq = () => {
     setMenuOpen(false);
     document
-      .getElementById("how-you-learn")
+      .getElementById("faq")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const linkClass =
     "rounded-lg px-3 py-2.5 text-left text-base font-medium text-foreground hover:bg-muted/60";
 
+  const languageLabel = locale === "bn" ? "ভাষা" : "Language";
   const accountHref = isLoggedIn ? PRIMARY_STUDENT_HREF : "/login";
   const accountLabel = isLoggedIn ? shell.play : copy.navLogin;
 
@@ -74,6 +80,7 @@ export function GuestLandingNavBar({
         {isDemoFunnel ? null : (
           <>
             <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
+              <UiLanguageToggle variant="segmented" />
               <Link
                 href={accountHref}
                 className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:bg-muted/50 hover:text-foreground"
@@ -82,9 +89,14 @@ export function GuestLandingNavBar({
               </Link>
               <Link
                 href={isLoggedIn ? PRIMARY_STUDENT_HREF : TEST_LANDING_PRIMARY_HREF}
+                onClick={
+                  isConversionLanding ? () => logLandingCtaClick("nav") : undefined
+                }
                 className={cn(
-                  "rounded-lg px-3.5 py-2 text-sm font-bold text-white",
-                  LANDING_CTA_CLASS,
+                  "rounded-lg px-3.5 py-2 text-sm font-bold",
+                  isConversionLanding
+                    ? LANDING_NAV_SECONDARY_CTA_CLASS
+                    : cn("text-white", LANDING_CTA_CLASS),
                 )}
               >
                 {testCopy.navPrimary}
@@ -124,18 +136,18 @@ export function GuestLandingNavBar({
                       {isConversionLanding ? (
                         <button
                           type="button"
-                          onClick={scrollToHowItWorks}
+                          onClick={scrollToFaq}
                           className={linkClass}
                         >
-                          {testCopy.navHow}
+                          {testCopy.navFaq}
                         </button>
                       ) : (
                         <Link
-                          href="/#how-you-learn"
+                          href="/#faq"
                           onClick={() => setMenuOpen(false)}
                           className={linkClass}
                         >
-                          {testCopy.navHow}
+                          {testCopy.navFaq}
                         </Link>
                       )}
                       <Link
@@ -146,6 +158,10 @@ export function GuestLandingNavBar({
                         {accountLabel}
                       </Link>
                     </nav>
+                    <div className="space-y-2 border-t border-border/60 pt-5">
+                      <p className="px-1 text-xs font-semibold text-muted-foreground">{languageLabel}</p>
+                      <UiLanguageToggle variant="segmented" className="w-full justify-between [&>button]:flex-1" />
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>

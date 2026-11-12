@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { login, register, verifyOtp } from "./api";
-import { setAccessToken, syncAuthCookie } from "../lib/auth";
+import { persistSessionToken } from "../lib/auth-session-ready";
 import {
   clearDemoSessionId,
   readDemoSessionId,
@@ -20,10 +20,8 @@ export function useLogin() {
       const token = res.data.token;
       const role = res.data.user.role;
 
-      setAccessToken(token);
-
-      // Best-effort cookie sync  -  never block login if sync fails.
-      await syncAuthCookie(token);
+      // Never block login on cookie failure; SyncAuthCookie and /login recovery heal it.
+      await persistSessionToken(token, { attempts: 3, timeoutMs: 4000 });
 
       if (role === "ADMIN") {
         window.location.href = "/dashboard/admin";
@@ -157,8 +155,7 @@ export function useVerifyOtp() {
       const continuePath = res?.data?.continuePath;
 
       if (token) {
-        setAccessToken(token);
-        await syncAuthCookie(token);
+        await persistSessionToken(token, { attempts: 3, timeoutMs: 4000 });
       }
 
       if (continuePath) {

@@ -5,11 +5,13 @@
     "bn": "bn-IN-BashkarNeural"
   },
   "clips": {
+    "en|In Level 1, we will learn how to build a complete English sentence step by step. The first part of any sentence is the Subject, so that is exactly where we begin. After this lesson, you will play 4 short games to practice finding the Subject. Then we will move on to Number, Person, Verb, and Object. And finally, we will learn how to construct a correct sentence very easily.": "/audio/chat-lesson/level-1-step-3-subject/dab0f104aff0c0b4.mp3",
     "en|The Subject is the person or thing we talk about in a sentence.": "/audio/chat-lesson/level-1-step-3-subject/74c63a18435c3763.mp3",
     "en|To find it, ask yourself, Who or what are we talking about?": "/audio/chat-lesson/level-1-step-3-subject/1ba29c3f85b8f539.mp3",
+    "en|Ask Who for people, like Rafi, my mother, we. Ask What for things, like the bus, my phone.": "/audio/chat-lesson/level-1-step-3-subject/899d86410047a0af.mp3",
     "en|We learn English.": "/audio/chat-lesson/level-1-step-3-subject/245008857d135e3c.mp3",
     "en|Question: Who learns English? Answer: We So, We is the Subject.": "/audio/chat-lesson/level-1-step-3-subject/6e606c9fee12dc2b.mp3",
-    "en|Subject = Who or What?": "/audio/chat-lesson/level-1-step-3-subject/3a87d088732ca58d.mp3",
+    "en|Subject = Who (people) or What (things)?": "/audio/chat-lesson/level-1-step-3-subject/c5c4060f81ca1308.mp3",
     "en|Both Bangla and English sentences have a Subject. In Bangla, we usually call it কর্তা. In Gamlish, we only learn the Subject of English sentences, so we will say Subject, not কর্তা.": "/audio/chat-lesson/level-1-step-3-subject/e9ffb79149dd0bcf.mp3",
     "en|Find the Subject in this sentence. We play football.": "/audio/chat-lesson/level-1-step-3-subject/9ef7cf4d91add741.mp3",
     "en|Ask: Who plays football?": "/audio/chat-lesson/level-1-step-3-subject/99746367ece336f6.mp3",
@@ -64,6 +66,7 @@
     "en|In command sentences, the Subject you is usually understood but not written. A Compound Subject joins two or more people or things.": "/audio/chat-lesson/level-1-step-3-subject/34a1e48a186b8089.mp3",
     "en|Now, let's test your understanding!": "/audio/chat-lesson/level-1-step-3-subject/37bfd96ff44ab560.mp3",
     "en|What is a Subject?": "/audio/chat-lesson/level-1-step-3-subject/1d24b189540a086e.mp3",
+    "en|Subject = Who or What?": "/audio/chat-lesson/level-1-step-3-subject/3a87d088732ca58d.mp3",
     "en|The Subject tells us who or what the sentence is about.": "/audio/chat-lesson/level-1-step-3-subject/f00d37d8210a31ea.mp3",
     "en|What is the understood Subject in Close the window!?": "/audio/chat-lesson/level-1-step-3-subject/3cc93649d27ec761.mp3",
     "en|Who is being told to close the window?": "/audio/chat-lesson/level-1-step-3-subject/4fe60245b89bb3c5.mp3",
@@ -79,17 +82,19 @@
     "en|Which statement about a Subject is correct?": "/audio/chat-lesson/level-1-step-3-subject/b717084f00f24f4d.mp3",
     "en|Think of The boys in our school.": "/audio/chat-lesson/level-1-step-3-subject/eb45c64d6c1a81b4.mp3",
     "en|A Subject can be one word or a group of words.": "/audio/chat-lesson/level-1-step-3-subject/53cbf1bff168d3a8.mp3",
+    "bn|Level 1-এ আমরা ধাপে ধাপে একটি পূর্ণ ইংরেজি বাক্য তৈরি করা শিখব। যেকোনো বাক্যের প্রথম অংশই হলো Subject, তাই আমাদের শুরুটাও এখান থেকেই। এই লেসনটির পর 4টি ছোট গেইম খেলে Subject চেনার প্র্যাকটিস করবেন। এরপর একে একে আসবে Number, Person, Verb এবং Object। আর সব শেষে আমরা খুব সহজেই একটি সঠিক ইংরেজি বাক্য তৈরি করা শিখে যাব।": "/audio/chat-lesson/level-1-step-3-subject/6d7e3643ce11309a.mp3",
     "bn|বাক্যে যার সম্পর্কে কিছু বলা হয়, সে বা সেটিই হলো Subject।": "/audio/chat-lesson/level-1-step-3-subject/5704173e5a4f5c3c.mp3",
-    "bn|Subject খুঁজে বের করতে নিজেকে প্রশ্ন করো, কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে?": "/audio/chat-lesson/level-1-step-3-subject/1fd2d2f39d67df19.mp3",
+    "bn|Subject খুঁজে বের করতে নিজেকে প্রশ্ন করুন, কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে?": "/audio/chat-lesson/level-1-step-3-subject/62be22b9b54e1ec7.mp3",
+    "bn|মানুষ হলে প্রশ্ন করুন Who (কে), যেমন Rafi, my mother, we। জিনিস হলে প্রশ্ন করুন What (কী), যেমন the bus, my phone।": "/audio/chat-lesson/level-1-step-3-subject/6873c9a08ad4f6e5.mp3",
     "bn|আমরা ইংরেজি শিখি।": "/audio/chat-lesson/level-1-step-3-subject/05ad8b4a53c460c0.mp3",
     "bn|প্রশ্ন: কে ইংরেজি শেখে? উত্তর: We (আমরা) তাই, We হলো Subject।": "/audio/chat-lesson/level-1-step-3-subject/c1298ed5be88c091.mp3",
-    "bn|Subject = কে বা কী?": "/audio/chat-lesson/level-1-step-3-subject/8bac508106e6ce3b.mp3",
+    "bn|Subject = Who (কে, মানুষ) বা What (কী, জিনিস)?": "/audio/chat-lesson/level-1-step-3-subject/c63b983550761b9f.mp3",
     "bn|বাংলা ও ইংরেজি দুই ভাষার বাক্যেই Subject থাকে। বাংলায় আমরা একে সাধারণত কর্তা বলি। তবে Gamlish-এ আমরা শুধু ইংরেজি বাক্যের Subject নিয়ে শিখব। তাই বাংলা বাক্যেও আমরা Subject শব্দটিই ব্যবহার করব, কর্তা নয়।": "/audio/chat-lesson/level-1-step-3-subject/f6dacdb07a843951.mp3",
     "bn|এই বাক্যে Subject কোনটি? We play football.": "/audio/chat-lesson/level-1-step-3-subject/fdf2ea746cc42f48.mp3",
-    "bn|নিজেকে প্রশ্ন করো: কে ফুটবল খেলে?": "/audio/chat-lesson/level-1-step-3-subject/4aa24f4d659ff9f3.mp3",
+    "bn|নিজেকে প্রশ্ন করুন: কে ফুটবল খেলে?": "/audio/chat-lesson/level-1-step-3-subject/cf3aa9da50d9f191.mp3",
     "bn|কে ফুটবল খেলে? উত্তর হলো We (আমরা)। তাই We হলো Subject।": "/audio/chat-lesson/level-1-step-3-subject/816fbcf8ffd77da1.mp3",
     "bn|এই বাক্যে Subject কোনটি? My friends learn English.": "/audio/chat-lesson/level-1-step-3-subject/a83e8bc1605de33d.mp3",
-    "bn|নিজেকে প্রশ্ন করো: কে ইংরেজি শেখে? উত্তর একাধিক শব্দেরও হতে পারে।": "/audio/chat-lesson/level-1-step-3-subject/ad39b76e85669ceb.mp3",
+    "bn|নিজেকে প্রশ্ন করুন: কে ইংরেজি শেখে? উত্তর একাধিক শব্দেরও হতে পারে।": "/audio/chat-lesson/level-1-step-3-subject/18fd7d0df1d3d2eb.mp3",
     "bn|কে ইংরেজি শেখে? উত্তর হলো My friends (আমার বন্ধুরা)। তাই My friends হলো Subject।": "/audio/chat-lesson/level-1-step-3-subject/4fcc5e3f4988e8b8.mp3",
     "bn|বাক্যে কি Subject না-ও থাকতে পারে?": "/audio/chat-lesson/level-1-step-3-subject/c5b2624002b42eb6.mp3",
     "bn|দরজাটি খোলো!": "/audio/chat-lesson/level-1-step-3-subject/e298b25df3159d35.mp3",
@@ -97,13 +102,13 @@
     "bn|আমরা বুঝতে পারি, যাকে বলা হচ্ছে, সে দরজাটি খুলবে। তাই এখানে Subject হলো you (তুমি/তোমরা)। কিন্তু বাক্যে Subject-টি লেখা হয়নি।": "/audio/chat-lesson/level-1-step-3-subject/8b65dc60b1ca22a7.mp3",
     "bn|কাউকে আদেশ বা নির্দেশ দেওয়ার বাক্যে Subject you সাধারণত লেখা থাকে না, কিন্তু বোঝা যায়।": "/audio/chat-lesson/level-1-step-3-subject/b6fbc4159da20d3a.mp3",
     "bn|Open the door! (দরজাটি খোলো!) এখানে কে দরজা খুলবে?": "/audio/chat-lesson/level-1-step-3-subject/cff0509d26183019.mp3",
-    "bn|আদেশ দেওয়া হয় যার সঙ্গে কথা বলছ, তাকে।": "/audio/chat-lesson/level-1-step-3-subject/b4fb8d2c1b2d847a.mp3",
+    "bn|আদেশ দেওয়া হয় যার সঙ্গে কথা বলছেন, তাকে।": "/audio/chat-lesson/level-1-step-3-subject/d8b354c8ad4928d3.mp3",
     "bn|এখানে তুমি-কে দরজা খুলতে বলা হচ্ছে, কিন্তু Subject লেখা নেই।": "/audio/chat-lesson/level-1-step-3-subject/2981b37dfbe093a3.mp3",
     "bn|Sit down! (বসো!) এই বাক্যে কোন Subject-টি বোঝানো হয়েছে?": "/audio/chat-lesson/level-1-step-3-subject/fe6dc035edca78e0.mp3",
     "bn|কাকে বসতে বলা হচ্ছে?": "/audio/chat-lesson/level-1-step-3-subject/7e4d7d488428fff8.mp3",
     "bn|এখানে তুমি-কে বসতে বলা হচ্ছে। তাই Subject হলো you, যদিও এটি লেখা নেই।": "/audio/chat-lesson/level-1-step-3-subject/58ed8eb2f8dab5f0.mp3",
     "bn|কোন বাক্যে Subject লেখা নেই, কিন্তু তা বোঝা যায়?": "/audio/chat-lesson/level-1-step-3-subject/415f448db328cc5d.mp3",
-    "bn|যে বাক্যে কাউকে কিছু করতে বলা হচ্ছে, সেটি খোঁজো।": "/audio/chat-lesson/level-1-step-3-subject/9b9d18cf22cf8780.mp3",
+    "bn|যে বাক্যে কাউকে কিছু করতে বলা হচ্ছে, সেটি খুঁজুন।": "/audio/chat-lesson/level-1-step-3-subject/377e41a781f16621.mp3",
     "bn|আদেশ বা নির্দেশ দেওয়ার বাক্যে Subject you সাধারণত লেখা থাকে না, কিন্তু বোঝা যায়।": "/audio/chat-lesson/level-1-step-3-subject/39ca82e552233658.mp3",
     "bn|একটি বাক্যে কি দুটি Subject থাকতে পারে?": "/audio/chat-lesson/level-1-step-3-subject/f93570380d6fec37.mp3",
     "bn|রহিম ও করিম ফুটবল খেলে।": "/audio/chat-lesson/level-1-step-3-subject/c15139997c5ec935.mp3",
@@ -114,30 +119,31 @@
     "bn|কে ফুটবল খেলে? একজনের বেশি!": "/audio/chat-lesson/level-1-step-3-subject/79d45bc3573060b6.mp3",
     "bn|দুটি নাম একসঙ্গে মিলে একটি Subject তৈরি করেছে।": "/audio/chat-lesson/level-1-step-3-subject/91534cbd0f9ba8a3.mp3",
     "bn|কোন বাক্যে Compound Subject আছে?": "/audio/chat-lesson/level-1-step-3-subject/71777baecfb5090b.mp3",
-    "bn|and দিয়ে যুক্ত দুটি নাম খোঁজো।": "/audio/chat-lesson/level-1-step-3-subject/21a9fa264cff8e72.mp3",
+    "bn|and দিয়ে যুক্ত দুটি নাম খুঁজুন।": "/audio/chat-lesson/level-1-step-3-subject/4e15e65d8a672805.mp3",
     "bn|Mina and Rina একসঙ্গে মিলে একটি Compound Subject তৈরি করেছে।": "/audio/chat-lesson/level-1-step-3-subject/b565c8306e8ea844.mp3",
     "bn|My brother and I play cricket. (আমার ভাই ও আমি ক্রিকেট খেলি।) এখানে কতজন মিলে Subject তৈরি করেছে?": "/audio/chat-lesson/level-1-step-3-subject/d2da928ea2a435de.mp3",
-    "bn|My brother and I-এ প্রত্যেক মানুষকে গোনো।": "/audio/chat-lesson/level-1-step-3-subject/497cbf67c9ca00d1.mp3",
+    "bn|My brother and I-এ প্রত্যেক মানুষকে গুনুন।": "/audio/chat-lesson/level-1-step-3-subject/ccb55be9157182eb.mp3",
     "bn|My brother and I বলতে দুজনকে বোঝায়। তারা একসঙ্গে মিলে Subject তৈরি করেছে।": "/audio/chat-lesson/level-1-step-3-subject/99c9d9e18d667f04.mp3",
     "bn|একটি Subject-এ কি অনেকগুলো শব্দ থাকতে পারে?": "/audio/chat-lesson/level-1-step-3-subject/e7db5f717bc198b7.mp3",
     "bn|আমাদের ক্লাসের শিক্ষার্থীরা ইংরেজি শেখে।": "/audio/chat-lesson/level-1-step-3-subject/0bb9effa17e13603.mp3",
     "bn|এই বাক্যে কারা ইংরেজি শেখে? উত্তর হলো The students in our class (আমাদের ক্লাসের শিক্ষার্থীরা)।": "/audio/chat-lesson/level-1-step-3-subject/35998981b388a3b2.mp3",
-    "bn|লক্ষ্য করো, এখানে Subject শুধু একটি শব্দ নয়। কয়েকটি শব্দ একসঙ্গে মিলে Subject তৈরি করেছে।": "/audio/chat-lesson/level-1-step-3-subject/449d76629ec08145.mp3",
+    "bn|লক্ষ্য করুন, এখানে Subject শুধু একটি শব্দ নয়। কয়েকটি শব্দ একসঙ্গে মিলে Subject তৈরি করেছে।": "/audio/chat-lesson/level-1-step-3-subject/b2fb91edbbfea5d0.mp3",
     "bn|বাক্যে কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে, তা বোঝায় এমন সম্পূর্ণ শব্দগুচ্ছকে Complete Subject বলে।": "/audio/chat-lesson/level-1-step-3-subject/79a4598ea7a9448e.mp3",
-    "bn|Subject একটি শব্দেরও হতে পারে, আবার একাধিক শব্দেরও হতে পারে। বাক্যে কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে, তা বোঝায় এমন সম্পূর্ণ শব্দগুচ্ছ খুঁজে বের করবে।": "/audio/chat-lesson/level-1-step-3-subject/622b63d9eb8b1600.mp3",
+    "bn|Subject একটি শব্দেরও হতে পারে, আবার একাধিক শব্দেরও হতে পারে। বাক্যে কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে, তা বোঝায় এমন সম্পূর্ণ শব্দগুচ্ছ সবসময় খুঁজে বের করবেন।": "/audio/chat-lesson/level-1-step-3-subject/cbdb0f018c26adb2.mp3",
     "bn|The students in our class learn English. (আমাদের ক্লাসের শিক্ষার্থীরা ইংরেজি শেখে।) এখানে কোন শব্দগুলো মিলে Complete Subject তৈরি করেছে?": "/audio/chat-lesson/level-1-step-3-subject/c2ececb607addaea.mp3",
-    "bn|নিজেকে প্রশ্ন করো: কারা ইংরেজি শেখে? উত্তরের সব শব্দ রাখো।": "/audio/chat-lesson/level-1-step-3-subject/2a3bffd07622c4fa.mp3",
+    "bn|নিজেকে প্রশ্ন করুন: কারা ইংরেজি শেখে? উত্তরের সব শব্দ রাখুন।": "/audio/chat-lesson/level-1-step-3-subject/95f27912d7cb3db1.mp3",
     "bn|Complete Subject আমাদের জানায় কারা ইংরেজি শেখে।": "/audio/chat-lesson/level-1-step-3-subject/76bc671f30f805ff.mp3",
     "bn|The boys in the park play football. (পার্কের ছেলেরা ফুটবল খেলে।) এখানে কোন শব্দগুলো মিলে Complete Subject তৈরি করেছে?": "/audio/chat-lesson/level-1-step-3-subject/5c787576d133dd8b.mp3",
-    "bn|নিজেকে প্রশ্ন করো: কারা ফুটবল খেলে? এক শব্দে থেমো না।": "/audio/chat-lesson/level-1-step-3-subject/9167e1cf01111ea3.mp3",
+    "bn|নিজেকে প্রশ্ন করুন: কারা ফুটবল খেলে? এক শব্দে থামবেন না।": "/audio/chat-lesson/level-1-step-3-subject/3dfec99e32f630c1.mp3",
     "bn|The boys in the park আমাদের জানায় কারা ফুটবল খেলে।": "/audio/chat-lesson/level-1-step-3-subject/2772e0aae710299e.mp3",
     "bn|একটি Complete Subject কি একাধিক শব্দ নিয়ে গঠিত হতে পারে?": "/audio/chat-lesson/level-1-step-3-subject/c85c926924dfe796.mp3",
-    "bn|The students in our class মনে করো। সেখানে কয়টি শব্দ ছিল?": "/audio/chat-lesson/level-1-step-3-subject/3de7e5217456e784.mp3",
+    "bn|The students in our class মনে করুন। সেখানে কয়টি শব্দ ছিল?": "/audio/chat-lesson/level-1-step-3-subject/ff43f090a8c1b189.mp3",
     "bn|Complete Subject একটি শব্দেরও হতে পারে, আবার একাধিক শব্দেরও হতে পারে।": "/audio/chat-lesson/level-1-step-3-subject/292ec54ed36a299e.mp3",
     "bn|Subject আমাদের জানায় বাক্যে কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে। এটি একটি বা একাধিক শব্দ নিয়ে গঠিত হতে পারে।": "/audio/chat-lesson/level-1-step-3-subject/165d6398ba0c6e39.mp3",
     "bn|আদেশের বাক্যে Subject you সাধারণত লেখা থাকে না, কিন্তু বোঝা যায়। দুই বা তার বেশি ব্যক্তি বা বস্তু মিলে Compound Subject তৈরি করতে পারে।": "/audio/chat-lesson/level-1-step-3-subject/d6eb5737a6ea0a74.mp3",
-    "bn|চলো, এবার নিজের বোঝাপড়া যাচাই করি!": "/audio/chat-lesson/level-1-step-3-subject/8f515115f29d8a00.mp3",
+    "bn|চলুন, এবার নিজের বোঝাপড়া যাচাই করি!": "/audio/chat-lesson/level-1-step-3-subject/eed807df9298e94d.mp3",
     "bn|Subject কী?": "/audio/chat-lesson/level-1-step-3-subject/8383d4b0210bbdad.mp3",
+    "bn|Subject = কে বা কী?": "/audio/chat-lesson/level-1-step-3-subject/8bac508106e6ce3b.mp3",
     "bn|Subject আমাদের জানায় বাক্যে কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে।": "/audio/chat-lesson/level-1-step-3-subject/82aa43314b7335a7.mp3",
     "bn|Close the window! (জানালাটি বন্ধ করো!) বাক্যটিতে কোন Subject বোঝানো হয়েছে?": "/audio/chat-lesson/level-1-step-3-subject/b6fec562ad204d1f.mp3",
     "bn|কাকে জানালা বন্ধ করতে বলা হচ্ছে?": "/audio/chat-lesson/level-1-step-3-subject/f41854c42fb26d67.mp3",
@@ -145,16 +151,363 @@
     "bn|Compound Subject-এ and দিয়ে দুই বা তার বেশি জনকে যুক্ত করা হয়।": "/audio/chat-lesson/level-1-step-3-subject/7bc0fb8b136a8edc.mp3",
     "bn|Rahim and Karim একসঙ্গে মিলে একটি Subject তৈরি করেছে।": "/audio/chat-lesson/level-1-step-3-subject/7370dcae0ca678c5.mp3",
     "bn|The boys in our school play cricket. (আমাদের স্কুলের ছেলেরা ক্রিকেট খেলে।) এখানে Complete Subject কোনটি?": "/audio/chat-lesson/level-1-step-3-subject/c8abddec64be76ac.mp3",
-    "bn|নিজেকে প্রশ্ন করো: কারা ক্রিকেট খেলে? উত্তরের সব শব্দ রাখো।": "/audio/chat-lesson/level-1-step-3-subject/221a0df8a7c46390.mp3",
+    "bn|নিজেকে প্রশ্ন করুন: কারা ক্রিকেট খেলে? উত্তরের সব শব্দ রাখুন।": "/audio/chat-lesson/level-1-step-3-subject/d60f0375998bcd13.mp3",
     "bn|Complete Subject আমাদের জানায় কারা ক্রিকেট খেলে।": "/audio/chat-lesson/level-1-step-3-subject/694edad7282da9b9.mp3",
     "bn|We read books. (আমরা বই পড়ি।) এখানে Subject কোনটি?": "/audio/chat-lesson/level-1-step-3-subject/d8d37627299c7219.mp3",
-    "bn|নিজেকে প্রশ্ন করো: কারা বই পড়ে?": "/audio/chat-lesson/level-1-step-3-subject/19ceeb4f6326a268.mp3",
+    "bn|নিজেকে প্রশ্ন করুন: কারা বই পড়ে?": "/audio/chat-lesson/level-1-step-3-subject/52b45fd37a136ab7.mp3",
     "bn|We আমাদের জানায় কারা বই পড়ে।": "/audio/chat-lesson/level-1-step-3-subject/ed2cd8120c62cd63.mp3",
     "bn|Subject সম্পর্কে কোন কথাটি সঠিক?": "/audio/chat-lesson/level-1-step-3-subject/d2b16c5ba769d08d.mp3",
-    "bn|The boys in our school কথাটি মনে করো।": "/audio/chat-lesson/level-1-step-3-subject/3ff8c8550ca5fab3.mp3",
+    "bn|The boys in our school কথাটি মনে করুন।": "/audio/chat-lesson/level-1-step-3-subject/44796ef5f8680efc.mp3",
     "bn|Subject একটি শব্দ বা একাধিক শব্দের সমষ্টি হতে পারে।": "/audio/chat-lesson/level-1-step-3-subject/b9ddd968a0fe65b0.mp3"
   },
   "timings": {
+    "en|In Level 1, we will learn how to build a complete English sentence step by step. The first part of any sentence is the Subject, so that is exactly where we begin. After this lesson, you will play 4 short games to practice finding the Subject. Then we will move on to Number, Person, Verb, and Object. And finally, we will learn how to construct a correct sentence very easily.": [
+      [
+        31,
+        156,
+        0
+      ],
+      [
+        156,
+        906,
+        1
+      ],
+      [
+        906,
+        1031,
+        3
+      ],
+      [
+        1031,
+        1197,
+        4
+      ],
+      [
+        1197,
+        1406,
+        5
+      ],
+      [
+        1406,
+        1531,
+        6
+      ],
+      [
+        1531,
+        1614,
+        7
+      ],
+      [
+        1614,
+        1864,
+        8
+      ],
+      [
+        1864,
+        1906,
+        9
+      ],
+      [
+        1906,
+        2488,
+        10
+      ],
+      [
+        2488,
+        2864,
+        11
+      ],
+      [
+        2864,
+        3322,
+        12
+      ],
+      [
+        3322,
+        3656,
+        13
+      ],
+      [
+        3656,
+        3781,
+        14
+      ],
+      [
+        3781,
+        4656,
+        15
+      ],
+      [
+        4656,
+        4822,
+        16
+      ],
+      [
+        4822,
+        5114,
+        17
+      ],
+      [
+        5114,
+        5364,
+        18
+      ],
+      [
+        5364,
+        5531,
+        19
+      ],
+      [
+        5531,
+        5781,
+        20
+      ],
+      [
+        5781,
+        6364,
+        21
+      ],
+      [
+        6364,
+        6531,
+        22
+      ],
+      [
+        6531,
+        6656,
+        23
+      ],
+      [
+        6656,
+        7489,
+        24
+      ],
+      [
+        7489,
+        7656,
+        25
+      ],
+      [
+        7656,
+        7822,
+        26
+      ],
+      [
+        7822,
+        7906,
+        27
+      ],
+      [
+        7906,
+        8488,
+        28
+      ],
+      [
+        8488,
+        8697,
+        29
+      ],
+      [
+        8697,
+        8821,
+        30
+      ],
+      [
+        8821,
+        9656,
+        31
+      ],
+      [
+        9656,
+        9989,
+        32
+      ],
+      [
+        9989,
+        10197,
+        33
+      ],
+      [
+        10197,
+        10655,
+        34
+      ],
+      [
+        10655,
+        10821,
+        35
+      ],
+      [
+        10821,
+        10988,
+        36
+      ],
+      [
+        10988,
+        11197,
+        37
+      ],
+      [
+        11197,
+        11530,
+        38
+      ],
+      [
+        11530,
+        11863,
+        39
+      ],
+      [
+        11863,
+        12196,
+        40
+      ],
+      [
+        12196,
+        12364,
+        41
+      ],
+      [
+        12364,
+        12821,
+        42
+      ],
+      [
+        12821,
+        13197,
+        43
+      ],
+      [
+        13197,
+        13322,
+        44
+      ],
+      [
+        13322,
+        14173,
+        45
+      ],
+      [
+        14173,
+        14382,
+        46
+      ],
+      [
+        14382,
+        14465,
+        47
+      ],
+      [
+        14465,
+        14632,
+        48
+      ],
+      [
+        14632,
+        14840,
+        49
+      ],
+      [
+        14840,
+        15007,
+        50
+      ],
+      [
+        15007,
+        15173,
+        51
+      ],
+      [
+        15173,
+        16048,
+        52
+      ],
+      [
+        16048,
+        16839,
+        53
+      ],
+      [
+        16839,
+        17507,
+        54
+      ],
+      [
+        17507,
+        17632,
+        55
+      ],
+      [
+        17632,
+        18673,
+        56
+      ],
+      [
+        18673,
+        18840,
+        57
+      ],
+      [
+        18840,
+        19423,
+        58
+      ],
+      [
+        19423,
+        19548,
+        59
+      ],
+      [
+        19548,
+        19715,
+        60
+      ],
+      [
+        19715,
+        19923,
+        61
+      ],
+      [
+        19923,
+        20048,
+        62
+      ],
+      [
+        20048,
+        20132,
+        63
+      ],
+      [
+        20132,
+        20632,
+        64
+      ],
+      [
+        20632,
+        20757,
+        65
+      ],
+      [
+        20757,
+        21173,
+        66
+      ],
+      [
+        21173,
+        21715,
+        67
+      ],
+      [
+        21715,
+        22173,
+        68
+      ],
+      [
+        22173,
+        22695,
+        69
+      ]
+    ],
     "en|The Subject is the person or thing we talk about in a sentence.": [
       [
         72,
@@ -284,6 +637,98 @@
         11
       ]
     ],
+    "en|Ask Who for people, like Rafi, my mother, we. Ask What for things, like the bus, my phone.": [
+      [
+        31,
+        364,
+        0
+      ],
+      [
+        364,
+        572,
+        1
+      ],
+      [
+        572,
+        739,
+        2
+      ],
+      [
+        739,
+        1447,
+        3
+      ],
+      [
+        1447,
+        1739,
+        4
+      ],
+      [
+        1739,
+        2031,
+        5
+      ],
+      [
+        2031,
+        2488,
+        6
+      ],
+      [
+        2488,
+        3530,
+        7
+      ],
+      [
+        3530,
+        4656,
+        8
+      ],
+      [
+        4656,
+        5031,
+        9
+      ],
+      [
+        5031,
+        5281,
+        10
+      ],
+      [
+        5281,
+        5447,
+        11
+      ],
+      [
+        5447,
+        5739,
+        12
+      ],
+      [
+        5739,
+        5906,
+        13
+      ],
+      [
+        5906,
+        6031,
+        14
+      ],
+      [
+        6031,
+        6781,
+        15
+      ],
+      [
+        6781,
+        7072,
+        16
+      ],
+      [
+        7072,
+        7479,
+        17
+      ]
+    ],
     "en|We learn English.": [
       [
         72,
@@ -358,26 +803,36 @@
         10
       ]
     ],
-    "en|Subject = Who or What?": [
+    "en|Subject = Who (people) or What (things)?": [
       [
-        72,
-        1614,
+        31,
+        1197,
         0
       ],
       [
-        1614,
-        2614,
+        1197,
+        1322,
         2
       ],
       [
-        2614,
-        3656,
+        1322,
+        1614,
         3
       ],
       [
-        3656,
-        3990,
+        1614,
+        1739,
         4
+      ],
+      [
+        1739,
+        3488,
+        5
+      ],
+      [
+        3488,
+        4866,
+        6
       ]
     ],
     "en|Both Bangla and English sentences have a Subject. In Bangla, we usually call it কর্তা. In Gamlish, we only learn the Subject of English sentences, so we will say Subject, not কর্তা.": [
@@ -3733,6 +4188,28 @@
         3
       ]
     ],
+    "en|Subject = Who or What?": [
+      [
+        72,
+        1614,
+        0
+      ],
+      [
+        1614,
+        2614,
+        2
+      ],
+      [
+        2614,
+        3656,
+        3
+      ],
+      [
+        3656,
+        3990,
+        4
+      ]
+    ],
     "en|The Subject tells us who or what the sentence is about.": [
       [
         72,
@@ -4423,6 +4900,293 @@
         10
       ]
     ],
+    "bn|Level 1-এ আমরা ধাপে ধাপে একটি পূর্ণ ইংরেজি বাক্য তৈরি করা শিখব। যেকোনো বাক্যের প্রথম অংশই হলো Subject, তাই আমাদের শুরুটাও এখান থেকেই। এই লেসনটির পর 4টি ছোট গেইম খেলে Subject চেনার প্র্যাকটিস করবেন। এরপর একে একে আসবে Number, Person, Verb এবং Object। আর সব শেষে আমরা খুব সহজেই একটি সঠিক ইংরেজি বাক্য তৈরি করা শিখে যাব।": [
+      [
+        93,
+        572,
+        0
+      ],
+      [
+        572,
+        984,
+        1
+      ],
+      [
+        984,
+        1263,
+        2
+      ],
+      [
+        1263,
+        1649,
+        3
+      ],
+      [
+        1649,
+        2141,
+        4
+      ],
+      [
+        2141,
+        2354,
+        5
+      ],
+      [
+        2354,
+        2819,
+        6
+      ],
+      [
+        2819,
+        3311,
+        7
+      ],
+      [
+        3311,
+        3684,
+        8
+      ],
+      [
+        3684,
+        3989,
+        9
+      ],
+      [
+        3989,
+        4242,
+        10
+      ],
+      [
+        4242,
+        5652,
+        11
+      ],
+      [
+        5652,
+        6090,
+        12
+      ],
+      [
+        6090,
+        6529,
+        13
+      ],
+      [
+        6529,
+        6942,
+        14
+      ],
+      [
+        6942,
+        7394,
+        15
+      ],
+      [
+        7394,
+        7660,
+        16
+      ],
+      [
+        7660,
+        8231,
+        17
+      ],
+      [
+        8231,
+        8777,
+        18
+      ],
+      [
+        8777,
+        9149,
+        19
+      ],
+      [
+        9149,
+        9734,
+        20
+      ],
+      [
+        9734,
+        10053,
+        21
+      ],
+      [
+        10053,
+        11529,
+        22
+      ],
+      [
+        11529,
+        11676,
+        23
+      ],
+      [
+        11676,
+        12247,
+        24
+      ],
+      [
+        12247,
+        12527,
+        25
+      ],
+      [
+        12527,
+        13045,
+        26
+      ],
+      [
+        13045,
+        13431,
+        27
+      ],
+      [
+        13431,
+        13763,
+        28
+      ],
+      [
+        13763,
+        14136,
+        29
+      ],
+      [
+        14136,
+        14601,
+        30
+      ],
+      [
+        14601,
+        15000,
+        31
+      ],
+      [
+        15000,
+        15479,
+        32
+      ],
+      [
+        15479,
+        16942,
+        33
+      ],
+      [
+        16942,
+        17420,
+        34
+      ],
+      [
+        17420,
+        17806,
+        35
+      ],
+      [
+        17806,
+        18165,
+        36
+      ],
+      [
+        18165,
+        18537,
+        37
+      ],
+      [
+        18537,
+        19043,
+        38
+      ],
+      [
+        19043,
+        19840,
+        39
+      ],
+      [
+        19840,
+        20359,
+        40
+      ],
+      [
+        20359,
+        20678,
+        41
+      ],
+      [
+        20678,
+        22247,
+        42
+      ],
+      [
+        22247,
+        22434,
+        43
+      ],
+      [
+        22434,
+        22726,
+        44
+      ],
+      [
+        22726,
+        23218,
+        45
+      ],
+      [
+        23218,
+        23511,
+        46
+      ],
+      [
+        23511,
+        23817,
+        47
+      ],
+      [
+        23817,
+        24428,
+        48
+      ],
+      [
+        24428,
+        24734,
+        49
+      ],
+      [
+        24734,
+        25199,
+        50
+      ],
+      [
+        25199,
+        25731,
+        51
+      ],
+      [
+        25731,
+        26130,
+        52
+      ],
+      [
+        26130,
+        26463,
+        53
+      ],
+      [
+        26463,
+        26689,
+        54
+      ],
+      [
+        26689,
+        27008,
+        55
+      ],
+      [
+        27008,
+        28300,
+        56
+      ]
+    ],
     "bn|বাক্যে যার সম্পর্কে কিছু বলা হয়, সে বা সেটিই হলো Subject।": [
       [
         80,
@@ -4480,76 +5244,188 @@
         10
       ]
     ],
-    "bn|Subject খুঁজে বের করতে নিজেকে প্রশ্ন করো, কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে?": [
+    "bn|Subject খুঁজে বের করতে নিজেকে প্রশ্ন করুন, কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে?": [
       [
         53,
-        519,
+        545,
         0
       ],
       [
-        519,
-        878,
+        545,
+        918,
         1
       ],
       [
-        878,
-        1090,
+        918,
+        1117,
         2
       ],
       [
-        1090,
-        1489,
+        1117,
+        1503,
         3
       ],
       [
-        1489,
-        1928,
+        1503,
+        1915,
         4
       ],
       [
-        1928,
-        2327,
+        1915,
+        2287,
         5
       ],
       [
-        2327,
-        2806,
+        2287,
+        2819,
         6
       ],
       [
-        2806,
-        3178,
+        2819,
+        3324,
         7
       ],
       [
-        3178,
-        3763,
+        3324,
+        3910,
         8
       ],
       [
-        3763,
         3910,
+        4056,
         9
       ],
       [
-        3910,
-        4082,
+        4056,
+        4229,
         10
       ],
       [
-        4082,
-        4668,
+        4229,
+        4801,
         11
       ],
       [
-        4668,
-        4920,
+        4801,
+        5053,
         12
       ],
       [
-        4920,
-        6330,
+        5053,
+        6410,
         13
+      ]
+    ],
+    "bn|মানুষ হলে প্রশ্ন করুন Who (কে), যেমন Rafi, my mother, we। জিনিস হলে প্রশ্ন করুন What (কী), যেমন the bus, my phone।": [
+      [
+        120,
+        598,
+        0
+      ],
+      [
+        598,
+        851,
+        1
+      ],
+      [
+        851,
+        1290,
+        2
+      ],
+      [
+        1290,
+        1649,
+        3
+      ],
+      [
+        1649,
+        2061,
+        4
+      ],
+      [
+        2061,
+        2686,
+        5
+      ],
+      [
+        2686,
+        3165,
+        6
+      ],
+      [
+        3165,
+        3670,
+        7
+      ],
+      [
+        3670,
+        4003,
+        8
+      ],
+      [
+        4003,
+        4455,
+        9
+      ],
+      [
+        4455,
+        5758,
+        10
+      ],
+      [
+        5758,
+        6237,
+        11
+      ],
+      [
+        6237,
+        6503,
+        12
+      ],
+      [
+        6503,
+        6955,
+        13
+      ],
+      [
+        6955,
+        7314,
+        14
+      ],
+      [
+        7314,
+        7646,
+        15
+      ],
+      [
+        7646,
+        8245,
+        16
+      ],
+      [
+        8245,
+        8723,
+        17
+      ],
+      [
+        8723,
+        8803,
+        18
+      ],
+      [
+        8803,
+        9215,
+        19
+      ],
+      [
+        9215,
+        9442,
+        20
+      ],
+      [
+        9442,
+        10905,
+        21
       ]
     ],
     "bn|আমরা ইংরেজি শিখি।": [
@@ -4626,26 +5502,46 @@
         10
       ]
     ],
-    "bn|Subject = কে বা কী?": [
+    "bn|Subject = Who (কে, মানুষ) বা What (কী, জিনিস)?": [
       [
-        67,
-        559,
+        53,
+        612,
         0
       ],
       [
-        559,
-        731,
+        612,
+        984,
         2
       ],
       [
-        731,
-        891,
+        984,
+        1529,
         3
       ],
       [
-        891,
-        2128,
+        1529,
+        2327,
         4
+      ],
+      [
+        2327,
+        2686,
+        5
+      ],
+      [
+        2686,
+        2992,
+        6
+      ],
+      [
+        2992,
+        3511,
+        7
+      ],
+      [
+        3511,
+        5187,
+        8
       ]
     ],
     "bn|বাংলা ও ইংরেজি দুই ভাষার বাক্যেই Subject থাকে। বাংলায় আমরা একে সাধারণত কর্তা বলি। তবে Gamlish-এ আমরা শুধু ইংরেজি বাক্যের Subject নিয়ে শিখব। তাই বাংলা বাক্যেও আমরা Subject শব্দটিই ব্যবহার করব, কর্তা নয়।": [
@@ -4852,35 +5748,35 @@
         6
       ]
     ],
-    "bn|নিজেকে প্রশ্ন করো: কে ফুটবল খেলে?": [
+    "bn|নিজেকে প্রশ্ন করুন: কে ফুটবল খেলে?": [
       [
         133,
-        638,
+        625,
         0
       ],
       [
-        638,
-        1064,
+        625,
+        1037,
         1
       ],
       [
-        1064,
-        1503,
+        1037,
+        1569,
         2
       ],
       [
-        1503,
-        1862,
+        1569,
+        1928,
         3
       ],
       [
-        1862,
-        2367,
+        1928,
+        2420,
         4
       ],
       [
-        2367,
-        3711,
+        2420,
+        3777,
         5
       ]
     ],
@@ -4983,7 +5879,7 @@
         7
       ]
     ],
-    "bn|নিজেকে প্রশ্ন করো: কে ইংরেজি শেখে? উত্তর একাধিক শব্দেরও হতে পারে।": [
+    "bn|নিজেকে প্রশ্ন করুন: কে ইংরেজি শেখে? উত্তর একাধিক শব্দেরও হতে পারে।": [
       [
         80,
         585,
@@ -4996,47 +5892,47 @@
       ],
       [
         997,
-        1489,
+        1543,
         2
       ],
       [
-        1489,
-        1809,
+        1543,
+        1942,
         3
       ],
       [
-        1809,
-        2340,
+        1942,
+        2500,
         4
       ],
       [
-        2340,
-        3843,
+        2500,
+        3976,
         5
       ],
       [
-        3843,
-        4322,
+        3976,
+        4455,
         6
       ],
       [
-        4322,
-        4867,
+        4455,
+        5000,
         7
       ],
       [
-        4867,
-        5412,
+        5000,
+        5545,
         8
       ],
       [
-        5412,
-        5665,
+        5545,
+        5798,
         9
       ],
       [
-        5665,
-        6851,
+        5798,
+        6982,
         10
       ]
     ],
@@ -5484,7 +6380,7 @@
         8
       ]
     ],
-    "bn|আদেশ দেওয়া হয় যার সঙ্গে কথা বলছ, তাকে।": [
+    "bn|আদেশ দেওয়া হয় যার সঙ্গে কথা বলছেন, তাকে।": [
       [
         53,
         519,
@@ -5492,37 +6388,37 @@
       ],
       [
         519,
-        798,
+        811,
         1
       ],
       [
-        798,
-        1037,
+        811,
+        1051,
         2
       ],
       [
-        1037,
-        1263,
+        1051,
+        1277,
         3
       ],
       [
-        1263,
+        1277,
         1609,
         4
       ],
       [
         1609,
-        1955,
+        1915,
         5
       ],
       [
-        1955,
-        2447,
+        1915,
+        2567,
         6
       ],
       [
-        2447,
-        3737,
+        2567,
+        3937,
         7
       ]
     ],
@@ -5761,7 +6657,7 @@
         8
       ]
     ],
-    "bn|যে বাক্যে কাউকে কিছু করতে বলা হচ্ছে, সেটি খোঁজো।": [
+    "bn|যে বাক্যে কাউকে কিছু করতে বলা হচ্ছে, সেটি খুঁজুন।": [
       [
         80,
         332,
@@ -5774,37 +6670,37 @@
       ],
       [
         745,
-        1157,
+        1170,
         2
       ],
       [
-        1157,
-        1436,
+        1170,
+        1449,
         3
       ],
       [
-        1436,
-        1782,
+        1449,
+        1795,
         4
       ],
       [
-        1782,
-        2035,
+        1795,
+        2048,
         5
       ],
       [
-        2035,
-        2646,
+        2048,
+        2660,
         6
       ],
       [
-        2646,
-        3098,
+        2660,
+        3125,
         7
       ],
       [
-        3098,
-        4508,
+        3125,
+        4641,
         8
       ]
     ],
@@ -6468,7 +7364,7 @@
         4
       ]
     ],
-    "bn|and দিয়ে যুক্ত দুটি নাম খোঁজো।": [
+    "bn|and দিয়ে যুক্ত দুটি নাম খুঁজুন।": [
       [
         67,
         359,
@@ -6476,27 +7372,27 @@
       ],
       [
         359,
-        598,
+        585,
         1
       ],
       [
-        598,
-        984,
+        585,
+        971,
         2
       ],
       [
-        984,
-        1330,
+        971,
+        1317,
         3
       ],
       [
-        1330,
-        1596,
+        1317,
+        1582,
         4
       ],
       [
-        1596,
-        2939,
+        1582,
+        3046,
         5
       ]
     ],
@@ -6644,24 +7540,24 @@
         17
       ]
     ],
-    "bn|My brother and I-এ প্রত্যেক মানুষকে গোনো।": [
+    "bn|My brother and I-এ প্রত্যেক মানুষকে গুনুন।": [
       [
         80,
-        279,
+        293,
         0
       ],
       [
-        279,
-        652,
+        293,
+        678,
         1
       ],
       [
-        652,
-        997,
+        678,
+        1011,
         2
       ],
       [
-        997,
+        1011,
         1197,
         3
       ],
@@ -6677,7 +7573,7 @@
       ],
       [
         2194,
-        3471,
+        3604,
         6
       ]
     ],
@@ -6889,80 +7785,80 @@
         14
       ]
     ],
-    "bn|লক্ষ্য করো, এখানে Subject শুধু একটি শব্দ নয়। কয়েকটি শব্দ একসঙ্গে মিলে Subject তৈরি করেছে।": [
+    "bn|লক্ষ্য করুন, এখানে Subject শুধু একটি শব্দ নয়। কয়েকটি শব্দ একসঙ্গে মিলে Subject তৈরি করেছে।": [
       [
-        80,
-        479,
+        120,
+        519,
         0
       ],
       [
-        479,
-        878,
+        519,
+        984,
         1
       ],
       [
-        878,
-        1330,
+        984,
+        1423,
         2
       ],
       [
-        1330,
-        1809,
+        1423,
+        1902,
         3
       ],
       [
-        1809,
-        2114,
+        1902,
+        2207,
         4
       ],
       [
-        2114,
-        2380,
+        2207,
+        2487,
         5
       ],
       [
-        2380,
-        2779,
+        2487,
+        2899,
         6
       ],
       [
-        2779,
-        4096,
+        2899,
+        4162,
         7
       ],
       [
-        4096,
-        4521,
+        4162,
+        4588,
         8
       ],
       [
-        4521,
-        5000,
+        4588,
+        5067,
         9
       ],
       [
-        5000,
-        5572,
+        5067,
+        5638,
         10
       ],
       [
-        5572,
-        5851,
+        5638,
+        5918,
         11
       ],
       [
-        5851,
-        6370,
+        5918,
+        6436,
         12
       ],
       [
-        6370,
-        6689,
+        6436,
+        6755,
         13
       ],
       [
-        6689,
-        8219,
+        6755,
+        8286,
         14
       ]
     ],
@@ -7048,7 +7944,7 @@
         15
       ]
     ],
-    "bn|Subject একটি শব্দেরও হতে পারে, আবার একাধিক শব্দেরও হতে পারে। বাক্যে কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে, তা বোঝায় এমন সম্পূর্ণ শব্দগুচ্ছ খুঁজে বের করবে।": [
+    "bn|Subject একটি শব্দেরও হতে পারে, আবার একাধিক শব্দেরও হতে পারে। বাক্যে কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে, তা বোঝায় এমন সম্পূর্ণ শব্দগুচ্ছ সবসময় খুঁজে বের করবেন।": [
       [
         53,
         638,
@@ -7096,88 +7992,93 @@
       ],
       [
         4069,
-        5319,
+        5332,
         9
       ],
       [
-        5319,
+        5332,
         5798,
         10
       ],
       [
         5798,
-        6064,
+        6077,
         11
       ],
       [
-        6064,
-        6662,
+        6077,
+        6689,
         12
       ],
       [
-        6662,
-        6809,
+        6689,
+        6835,
         13
       ],
       [
-        6809,
-        6968,
+        6835,
+        6995,
         14
       ],
       [
-        6968,
-        7527,
+        6995,
+        7567,
         15
       ],
       [
-        7527,
-        7766,
+        7567,
+        7819,
         16
       ],
       [
-        7766,
-        8364,
+        7819,
+        8431,
         17
       ],
       [
-        8364,
-        8723,
+        8431,
+        8790,
         18
       ],
       [
-        8723,
-        9255,
+        8790,
+        9309,
         19
       ],
       [
-        9255,
-        9574,
+        9309,
+        9628,
         20
       ],
       [
-        9574,
-        10213,
+        9628,
+        10266,
         21
       ],
       [
-        10213,
-        10984,
+        10266,
+        11024,
         22
       ],
       [
-        10984,
-        11330,
+        11024,
+        11582,
         23
       ],
       [
-        11330,
-        11529,
+        11582,
+        11955,
         24
       ],
       [
-        11529,
-        12833,
+        11955,
+        12154,
         25
+      ],
+      [
+        12154,
+        13578,
+        26
       ]
     ],
     "bn|The students in our class learn English. (আমাদের ক্লাসের শিক্ষার্থীরা ইংরেজি শেখে।) এখানে কোন শব্দগুলো মিলে Complete Subject তৈরি করেছে?": [
@@ -7282,55 +8183,55 @@
         19
       ]
     ],
-    "bn|নিজেকে প্রশ্ন করো: কারা ইংরেজি শেখে? উত্তরের সব শব্দ রাখো।": [
+    "bn|নিজেকে প্রশ্ন করুন: কারা ইংরেজি শেখে? উত্তরের সব শব্দ রাখুন।": [
       [
-        67,
-        585,
+        120,
+        598,
         0
       ],
       [
-        585,
-        997,
+        598,
+        984,
         1
       ],
       [
-        997,
-        1489,
+        984,
+        1529,
         2
       ],
       [
-        1489,
-        1968,
+        1529,
+        2101,
         3
       ],
       [
-        1968,
-        2513,
+        2101,
+        2620,
         4
       ],
       [
-        2513,
-        4003,
+        2620,
+        4096,
         5
       ],
       [
-        4003,
-        4495,
+        4096,
+        4574,
         6
       ],
       [
-        4495,
-        4827,
+        4574,
+        4894,
         7
       ],
       [
-        4827,
-        5253,
+        4894,
+        5293,
         8
       ],
       [
-        5253,
-        6570,
+        5293,
+        6703,
         9
       ]
     ],
@@ -7468,55 +8369,55 @@
         18
       ]
     ],
-    "bn|নিজেকে প্রশ্ন করো: কারা ফুটবল খেলে? এক শব্দে থেমো না।": [
+    "bn|নিজেকে প্রশ্ন করুন: কারা ফুটবল খেলে? এক শব্দে থামবেন না।": [
       [
-        120,
-        612,
+        133,
+        638,
         0
       ],
       [
-        612,
-        1024,
+        638,
+        1037,
         1
       ],
       [
-        1024,
-        1476,
+        1037,
+        1609,
         2
       ],
       [
-        1476,
-        1955,
+        1609,
+        2114,
         3
       ],
       [
-        1955,
-        2447,
+        2114,
+        2620,
         4
       ],
       [
-        2447,
-        3883,
+        2620,
+        4056,
         5
       ],
       [
-        3883,
-        4109,
+        4056,
+        4295,
         6
       ],
       [
-        4109,
-        4521,
+        4295,
+        4694,
         7
       ],
       [
-        4521,
-        4854,
+        4694,
+        5146,
         8
       ],
       [
-        4854,
-        6000,
+        5146,
+        6263,
         9
       ]
     ],
@@ -7624,60 +8525,60 @@
         9
       ]
     ],
-    "bn|The students in our class মনে করো। সেখানে কয়টি শব্দ ছিল?": [
+    "bn|The students in our class মনে করুন। সেখানে কয়টি শব্দ ছিল?": [
       [
-        80,
+        93,
         199,
         0
       ],
       [
         199,
-        692,
+        705,
         1
       ],
       [
-        692,
-        798,
+        705,
+        811,
         2
       ],
       [
-        798,
+        811,
         918,
         3
       ],
       [
         918,
-        1263,
+        1277,
         4
       ],
       [
-        1263,
+        1277,
         1516,
         5
       ],
       [
         1516,
-        2793,
+        2872,
         6
       ],
       [
-        2793,
-        3311,
+        2872,
+        3391,
         7
       ],
       [
-        3311,
-        3684,
+        3391,
+        3763,
         8
       ],
       [
-        3684,
-        4109,
+        3763,
+        4189,
         9
       ],
       [
-        4109,
-        5482,
+        4189,
+        5561,
         10
       ]
     ],
@@ -7962,35 +8863,35 @@
         23
       ]
     ],
-    "bn|চলো, এবার নিজের বোঝাপড়া যাচাই করি!": [
+    "bn|চলুন, এবার নিজের বোঝাপড়া যাচাই করি!": [
       [
         53,
-        572,
+        612,
         0
       ],
       [
-        572,
-        918,
+        612,
+        997,
         1
       ],
       [
-        918,
-        1303,
+        997,
+        1370,
         2
       ],
       [
-        1303,
-        1848,
+        1370,
+        1915,
         3
       ],
       [
-        1848,
-        2234,
+        1915,
+        2314,
         4
       ],
       [
-        2234,
-        3445,
+        2314,
+        3524,
         5
       ]
     ],
@@ -8004,6 +8905,28 @@
         612,
         1822,
         1
+      ]
+    ],
+    "bn|Subject = কে বা কী?": [
+      [
+        67,
+        559,
+        0
+      ],
+      [
+        559,
+        731,
+        2
+      ],
+      [
+        731,
+        891,
+        3
+      ],
+      [
+        891,
+        2128,
+        4
       ]
     ],
     "bn|Subject আমাদের জানায় বাক্যে কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে।": [
@@ -8395,55 +9318,55 @@
         15
       ]
     ],
-    "bn|নিজেকে প্রশ্ন করো: কারা ক্রিকেট খেলে? উত্তরের সব শব্দ রাখো।": [
+    "bn|নিজেকে প্রশ্ন করুন: কারা ক্রিকেট খেলে? উত্তরের সব শব্দ রাখুন।": [
       [
         133,
-        638,
+        612,
         0
       ],
       [
-        638,
-        1064,
+        612,
+        1024,
         1
       ],
       [
-        1064,
-        1503,
+        1024,
+        1582,
         2
       ],
       [
-        1503,
-        2035,
+        1582,
+        2141,
         3
       ],
       [
-        2035,
-        2473,
+        2141,
+        2580,
         4
       ],
       [
-        2473,
-        3843,
+        2580,
+        3963,
         5
       ],
       [
-        3843,
-        4335,
+        3963,
+        4442,
         6
       ],
       [
-        4335,
-        4668,
+        4442,
+        4761,
         7
       ],
       [
-        4668,
-        5093,
+        4761,
+        5160,
         8
       ],
       [
-        5093,
-        6410,
+        5160,
+        6572,
         9
       ]
     ],
@@ -8531,7 +9454,7 @@
         8
       ]
     ],
-    "bn|নিজেকে প্রশ্ন করো: কারা বই পড়ে?": [
+    "bn|নিজেকে প্রশ্ন করুন: কারা বই পড়ে?": [
       [
         133,
         625,
@@ -8539,27 +9462,27 @@
       ],
       [
         625,
-        1051,
+        1037,
         1
       ],
       [
-        1051,
-        1489,
+        1037,
+        1582,
         2
       ],
       [
-        1489,
-        1981,
+        1582,
+        2101,
         3
       ],
       [
-        1981,
-        2261,
+        2101,
+        2380,
         4
       ],
       [
-        2261,
-        3564,
+        2380,
+        3671,
         5
       ]
     ],
@@ -8622,45 +9545,45 @@
         4
       ]
     ],
-    "bn|The boys in our school কথাটি মনে করো।": [
+    "bn|The boys in our school কথাটি মনে করুন।": [
       [
-        67,
-        160,
+        93,
+        199,
         0
       ],
       [
-        160,
-        505,
+        199,
+        559,
         1
       ],
       [
-        505,
-        638,
+        559,
+        705,
         2
       ],
       [
-        638,
-        745,
+        705,
+        811,
         3
       ],
       [
-        745,
-        1144,
+        811,
+        1210,
         4
       ],
       [
-        1144,
-        1622,
+        1210,
+        1662,
         5
       ],
       [
-        1622,
-        1888,
+        1662,
+        1902,
         6
       ],
       [
-        1888,
-        3125,
+        1902,
+        3205,
         7
       ]
     ],

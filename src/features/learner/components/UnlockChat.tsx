@@ -12,10 +12,11 @@ import { setLessonLanguage, useLessonLanguage } from "@/src/features/chat-lesson
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
 import type { MissionShellContext } from "@/src/features/learner/components/MissionShell";
-import { BANK_DETAILS, PAY_UI } from "@/src/features/learner/lib/copy";
+import { BANK_DETAILS, OFFER_UI, PAY_UI } from "@/src/features/learner/lib/copy";
+import { earnsLegacyBadge, isDoubleDuration, PERSON_TASTE_ID } from "@/src/features/learner/lib/offer";
 import { personalizeText, type Learner } from "@/src/features/learner/lib/personalize";
 import { resizeReceipt } from "@/src/features/learner/lib/resizeReceipt";
-import { claimChatMissionFreeAccess, submitChatMissionPayment } from "@/src/lib/api/chatMission";
+import { claimChatMissionFreeAccess, submitChatMissionPayment, type ChatMissionPayment } from "@/src/lib/api/chatMission";
 import { supportWhatsAppHrefWithText } from "@/src/lib/contact";
 import { cn } from "@/lib/utils";
 
@@ -65,16 +66,28 @@ function Bubble({ children, tone = "plain" }: { children: ReactNode; tone?: "pla
   );
 }
 
-function PriceCard({ priceBdt, accessDays, lang }: { priceBdt: number; accessDays: number; lang: LessonLanguage }) {
+function PriceCard({ payment, lang }: { payment: ChatMissionPayment; lang: LessonLanguage }) {
   const face = LANG_FACE[lang];
+  const double = isDoubleDuration(payment.offer);
+  const perks = double
+    ? [...PAY_UI.doublePerks, ...PAY_UI.perks]
+    : earnsLegacyBadge(payment.offer)
+      ? [PAY_UI.legacyPerk, ...PAY_UI.perks]
+      : PAY_UI.perks;
   return (
-    <div className="overflow-hidden rounded-2xl rounded-tl-md border-b-4 border-sky-700 bg-gradient-to-br from-sky-500 to-indigo-500 p-4 text-white shadow-md">
-      <p className={cn(face, "text-2xl font-black")}>{pick(PAY_UI.priceTitle(priceBdt, accessDays), lang)}</p>
-      <p className={cn(face, "mt-1 inline-flex rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold")}>
-        {pick(PAY_UI.noDiscount, lang)}
+    <div className="overflow-hidden rounded-2xl rounded-tl-md border-b-4 border-primary bg-gradient-to-br from-accent to-indigo-700 p-4 text-white shadow-md">
+      <p className={cn(face, "text-2xl font-black")}>{pick(PAY_UI.priceTitle(payment.priceBdt, payment.accessDays), lang)}</p>
+      <p
+        className={cn(
+          face,
+          "mt-1 inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold",
+          double ? "bg-amber-300 text-amber-950" : "bg-white/20",
+        )}
+      >
+        {pick(double ? OFFER_UI.name : PAY_UI.noDiscount, lang)}
       </p>
       <ul className="mt-3 space-y-2">
-        {PAY_UI.perks.map((perk) => (
+        {perks.map((perk) => (
           <li key={perk.en} className={cn(face, "flex items-start gap-2 text-[14.5px] font-semibold leading-snug")}>
             <Check className="mt-0.5 size-4 shrink-0" strokeWidth={3} aria-hidden />
             {pick(perk, lang)}
@@ -154,7 +167,7 @@ function openingScript(ctx: MissionShellContext): { entries: Omit<Entry, "id">[]
     return {
       entries: [
         { from: "guide", text: PAY_UI.freeHello },
-        { from: "guide", text: PAY_UI.freePrice(payment.priceBdt, payment.accessDays) },
+        { from: "guide", text: PAY_UI.freePrice(payment.priceBdt, payment.freeAccessDays) },
       ],
       stage: "free",
     };
@@ -163,14 +176,20 @@ function openingScript(ctx: MissionShellContext): { entries: Omit<Entry, "id">[]
     payment.latest?.status === "REJECTED" && payment.latest.rejectionReason
       ? [{ from: "guide" as const, text: PAY_UI.rejected(payment.latest.rejectionReason) }]
       : [];
+  const double = isDoubleDuration(payment.offer);
+  const wonTaste = Boolean(ctx.state.results[PERSON_TASTE_ID]);
   return {
     entries: [
       ...rejected,
-      { from: "guide", text: PAY_UI.trialDone },
+      { from: "guide", text: wonTaste ? PAY_UI.trialDone : PAY_UI.hello },
       { from: "guide", text: PAY_UI.ifYouLike },
       { from: "guide", card: "price" },
-      { from: "guide", text: PAY_UI.honest },
-      { from: "guide", text: PAY_UI.urgency },
+      { from: "guide", text: PAY_UI.honest(double) },
+      ...(double
+        ? [{ from: "guide" as const, text: PAY_UI.urgency }]
+        : earnsLegacyBadge(payment.offer)
+          ? [{ from: "guide" as const, text: PAY_UI.legacyUrgency }]
+          : []),
       { from: "guide", text: PAY_UI.askMethod },
     ],
     stage: "choose",
@@ -301,7 +320,7 @@ export function UnlockChat({ ctx, learner, backHref }: { ctx: MissionShellContex
   };
 
   const renderCard = (card: Card) => {
-    if (card === "price") return <PriceCard priceBdt={payment.priceBdt} accessDays={payment.accessDays} lang={lang} />;
+    if (card === "price") return <PriceCard payment={payment} lang={lang} />;
     if (card === "bkash") {
       return (
         <Bubble>
@@ -344,16 +363,16 @@ export function UnlockChat({ ctx, learner, backHref }: { ctx: MissionShellContex
 
   const inputClass = cn(
     EN_FACE,
-    "h-12 w-full rounded-2xl border-2 border-sky-200 bg-sky-50/60 px-4 text-lg font-semibold text-slate-900 outline-none focus:border-sky-500 focus:bg-white",
+    "h-12 w-full rounded-2xl border-2 border-accent/20 bg-accent/5 px-4 text-lg font-semibold text-slate-900 outline-none focus:border-accent focus:bg-white",
   );
   const primary = cn(
     face,
-    "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-b-4 border-sky-700 bg-sky-500 text-base font-extrabold text-white disabled:opacity-50",
+    "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-b-4 border-primary bg-accent text-base font-extrabold text-white transition-all hover:bg-accent/90 active:translate-y-0.5 active:border-b-2 disabled:opacity-50",
     lang === "en" && "uppercase tracking-wide",
   );
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-slate-50 bg-gradient-to-b from-sky-50 via-slate-50 to-slate-50">
+    <div className="fixed inset-0 z-40 flex flex-col bg-slate-50 bg-gradient-to-b from-accent/[0.06] via-slate-50 to-slate-50">
       <header className="shrink-0 border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 py-3">
           <Link
@@ -385,7 +404,7 @@ export function UnlockChat({ ctx, learner, backHref }: { ctx: MissionShellContex
                 {entry.card ? (
                   renderCard(entry.card)
                 ) : (
-                  <Bubble tone={entry.text === PAY_UI.honest ? "note" : "plain"}>
+                  <Bubble tone={entry.text && PAY_UI.honestNotes.includes(entry.text) ? "note" : "plain"}>
                     <p className={cn(face, "leading-relaxed text-slate-800", lang === "en" ? "text-[15.5px]" : "text-[16.5px]")}>
                       <RichText text={pick(fill(entry.text ?? asIs("")), lang)} />
                     </p>
@@ -422,7 +441,7 @@ export function UnlockChat({ ctx, learner, backHref }: { ctx: MissionShellContex
                   <button
                     type="button"
                     onClick={() => choose("bank")}
-                    className={cn(face, "flex h-14 items-center justify-center gap-2 rounded-2xl border-b-4 border-sky-700 bg-sky-500 px-2 text-sm font-black leading-tight text-white")}
+                    className={cn(face, "flex h-14 items-center justify-center gap-2 rounded-2xl border-b-4 border-primary bg-accent px-2 text-sm font-black leading-tight text-white active:translate-y-0.5 active:border-b-2")}
                   >
                     <Building2 className="size-5 shrink-0" aria-hidden />
                     {pick(PAY_UI.bank, lang)}

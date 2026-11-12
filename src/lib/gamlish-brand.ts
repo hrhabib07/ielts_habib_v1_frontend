@@ -6,7 +6,7 @@ export const GAMLISH_BRAND = {
   heroLine: "গ্যামলিশ: ইংরেজি শেখার গেইম।",
   metaTitle: "Gamlish · 45 দিনে মজবুত ইংরেজি ভিত্তি",
   metaDescription:
-    "Gamlish-এ খেলার ছলে ইংরেজির বেসিক গড়ুন. IELTS নয়, Spoken নয়. 21টি মিশন, 45 দিন, মাত্র ৳290.",
+    "Gamlish-এ খেলার ছলে ইংরেজির বেসিক গড়ুন. IELTS নয়, Spoken নয়. 21টি মিশন, 45 দিন। প্রথম গেমগুলো ফ্রি।",
   footerBlurb:
     "Gamlish · গ্যামিফাইড English Foundations। ক্যাম্প, মিশন আর দেখা যায় এমন অগ্রগতি।",
 } as const;

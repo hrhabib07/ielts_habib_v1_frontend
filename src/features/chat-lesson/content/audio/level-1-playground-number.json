@@ -5,7 +5,8 @@
     "bn": "bn-IN-BashkarNeural"
   },
   "clips": {
-    "en|Count the pictures. Pick the number, then the right word.": "/audio/chat-lesson/level-1-playground-number/d06ea8e6bf1b879b.mp3",
+    "en|Count, then pick the right word.": "/audio/chat-lesson/level-1-playground-number/8d642c303c7ef254.mp3",
+    "en|Many things: add -s. After s, sh, ch or x: add -es.": "/audio/chat-lesson/level-1-playground-number/7308e8def69af02c.mp3",
     "en|three tomatoes": "/audio/chat-lesson/level-1-playground-number/2b1acdea853afe63.mp3",
     "en|two potatoes": "/audio/chat-lesson/level-1-playground-number/819b8ef0adf83efb.mp3",
     "en|four leaves": "/audio/chat-lesson/level-1-playground-number/6d1f174444844764.mp3",
@@ -20,7 +21,8 @@
     "en|three keys": "/audio/chat-lesson/level-1-playground-number/af5023a17cb9708c.mp3",
     "en|six eggs": "/audio/chat-lesson/level-1-playground-number/35dcd022cdb59408.mp3",
     "en|one apple": "/audio/chat-lesson/level-1-playground-number/4687b0bb7625462b.mp3",
-    "en|Type the Plural of the word.": "/audio/chat-lesson/level-1-playground-number/e7528884331d99f6.mp3",
+    "en|Type this word for many.": "/audio/chat-lesson/level-1-playground-number/c87cd99d753a614f.mp3",
+    "en|Many: add -s or -es. Some words change: child, children.": "/audio/chat-lesson/level-1-playground-number/4457459ba0c4483e.mp3",
     "en|cup": "/audio/chat-lesson/level-1-playground-number/92fc8564e8da6cf8.mp3",
     "en|one cup, two cups": "/audio/chat-lesson/level-1-playground-number/5e71aa03a0e9968d.mp3",
     "en|bus": "/audio/chat-lesson/level-1-playground-number/bfe0da6da0491666.mp3",
@@ -55,7 +57,8 @@
     "en|one sheep, two sheep": "/audio/chat-lesson/level-1-playground-number/cec014a2ebc28539.mp3",
     "en|fish": "/audio/chat-lesson/level-1-playground-number/406ad7b267a56904.mp3",
     "en|one fish, two fish": "/audio/chat-lesson/level-1-playground-number/3738c6a514a2d6dd.mp3",
-    "en|One English word is wrong. Tap it, then fix it.": "/audio/chat-lesson/level-1-playground-number/b7d5098b45ac46c6.mp3",
+    "en|Tap the wrong word, then fix it.": "/audio/chat-lesson/level-1-playground-number/01ae33cef2a7488a.mp3",
+    "en|Bangla says দুই ভাই. English says two brothers. After a number, add -s.": "/audio/chat-lesson/level-1-playground-number/b972ec3f26233940.mp3",
     "en|I have three sisters.": "/audio/chat-lesson/level-1-playground-number/6530a259f46ad798.mp3",
     "en|There are forty students in our class.": "/audio/chat-lesson/level-1-playground-number/19728fd29b3fd72f.mp3",
     "en|The children play in the field.": "/audio/chat-lesson/level-1-playground-number/3787dcdb019516ed.mp3",
@@ -68,7 +71,8 @@
     "en|The farm has ten sheep.": "/audio/chat-lesson/level-1-playground-number/f603e4be8a2e01a3.mp3",
     "en|Many buses run in Dhaka.": "/audio/chat-lesson/level-1-playground-number/8896eedb84f6c74c.mp3",
     "en|I have one brother.": "/audio/chat-lesson/level-1-playground-number/decf77fa2f175e4c.mp3",
-    "en|Type the right word for Mom's list.": "/audio/chat-lesson/level-1-playground-number/ffca5a2e56869a73.mp3",
+    "en|Write the word for Mom's list.": "/audio/chat-lesson/level-1-playground-number/9aa962933ae3abdd.mp3",
+    "en|Some things can't be counted: rice, water, money. No -s.": "/audio/chat-lesson/level-1-playground-number/06a50385755c7022.mp3",
     "en|three potatoes": "/audio/chat-lesson/level-1-playground-number/975ca74fe26c6d94.mp3",
     "en|two tomatoes": "/audio/chat-lesson/level-1-playground-number/9140e95cefb38763.mp3",
     "en|twelve eggs": "/audio/chat-lesson/level-1-playground-number/69458fbeb78e63cf.mp3",
@@ -82,7 +86,8 @@
     "en|one kilo of rice": "/audio/chat-lesson/level-1-playground-number/dc9c3df1de760b72.mp3",
     "en|two litres of milk": "/audio/chat-lesson/level-1-playground-number/3d0eec8545a8f557.mp3",
     "en|one bottle of water": "/audio/chat-lesson/level-1-playground-number/79aef58a1f77c8dc.mp3",
-    "bn|ছবিগুলো গোনো। আগে সংখ্যা, তারপর সঠিক শব্দটি বেছে নাও।": "/audio/chat-lesson/level-1-playground-number/e50662cb28e627de.mp3",
+    "bn|গুনুন, তারপর সঠিক শব্দ বেছে নিন।": "/audio/chat-lesson/level-1-playground-number/6e5ec07a279fdca8.mp3",
+    "bn|অনেক হলে শেষে -s। শেষে s, sh, ch বা x থাকলে -es।": "/audio/chat-lesson/level-1-playground-number/b9eb15e197c3e61a.mp3",
     "bn|তিনটি টমেটো": "/audio/chat-lesson/level-1-playground-number/5b3ec2c734b0d006.mp3",
     "bn|দুটি আলু": "/audio/chat-lesson/level-1-playground-number/c88c8ca1e1a5d8aa.mp3",
     "bn|চারটি পাতা": "/audio/chat-lesson/level-1-playground-number/b5d9c78bd35814b7.mp3",
@@ -97,7 +102,8 @@
     "bn|তিনটি চাবি": "/audio/chat-lesson/level-1-playground-number/ece8da24a93c3de8.mp3",
     "bn|ছয়টি ডিম": "/audio/chat-lesson/level-1-playground-number/9df3234af6a3d2fa.mp3",
     "bn|একটি আপেল": "/audio/chat-lesson/level-1-playground-number/1453cbe23265a116.mp3",
-    "bn|শব্দটির Plural লেখো।": "/audio/chat-lesson/level-1-playground-number/347e285637cbc77f.mp3",
+    "bn|শব্দটিকে অনেক (Plural) করে লিখুন।": "/audio/chat-lesson/level-1-playground-number/9de4b57298432865.mp3",
+    "bn|অনেক হলে -s বা -es। কিছু শব্দ বদলে যায়: child হয় children।": "/audio/chat-lesson/level-1-playground-number/75e6f643e13c3b68.mp3",
     "bn|কাপ": "/audio/chat-lesson/level-1-playground-number/60d4b1cf86995531.mp3",
     "bn|বাস": "/audio/chat-lesson/level-1-playground-number/55eb0363122a86e2.mp3",
     "bn|থালা": "/audio/chat-lesson/level-1-playground-number/bd45b4d504f1ec1e.mp3",
@@ -115,7 +121,8 @@
     "bn|আলু": "/audio/chat-lesson/level-1-playground-number/c9a1826309a9e141.mp3",
     "bn|ভেড়া": "/audio/chat-lesson/level-1-playground-number/cf96059f224d82f0.mp3",
     "bn|মাছ": "/audio/chat-lesson/level-1-playground-number/76e7e3980067202c.mp3",
-    "bn|ইংরেজি বাক্যের একটি শব্দ ভুল। সেটিতে ট্যাপ করো, তারপর ঠিক করো।": "/audio/chat-lesson/level-1-playground-number/f55b278f28701d26.mp3",
+    "bn|ভুল শব্দে ট্যাপ করুন, তারপর ঠিক করুন।": "/audio/chat-lesson/level-1-playground-number/6b7afe1c168a73a9.mp3",
+    "bn|বাংলায় দুই ভাই, ইংরেজিতে two brothers। সংখ্যার পরে -s লাগে।": "/audio/chat-lesson/level-1-playground-number/02d8ca221c5280d0.mp3",
     "bn|আমার তিনটি বোন আছে।": "/audio/chat-lesson/level-1-playground-number/91f8a538477246a8.mp3",
     "bn|আমাদের ক্লাসে চল্লিশজন ছাত্র আছে।": "/audio/chat-lesson/level-1-playground-number/77d98846272f9380.mp3",
     "bn|শিশুরা মাঠে খেলে।": "/audio/chat-lesson/level-1-playground-number/6186b207f4ffcfaa.mp3",
@@ -128,7 +135,8 @@
     "bn|খামারে দশটি ভেড়া আছে।": "/audio/chat-lesson/level-1-playground-number/2578159e9bd09162.mp3",
     "bn|ঢাকায় অনেক বাস চলে।": "/audio/chat-lesson/level-1-playground-number/70e47a0e6ed8232c.mp3",
     "bn|আমার একটি ভাই আছে।": "/audio/chat-lesson/level-1-playground-number/9a8bb1c179bd035b.mp3",
-    "bn|মায়ের লিস্টের জন্য সঠিক শব্দটি লেখো।": "/audio/chat-lesson/level-1-playground-number/0550630a150458d1.mp3",
+    "bn|মায়ের লিস্টের শব্দটি লিখুন।": "/audio/chat-lesson/level-1-playground-number/02310b6f5eaab24f.mp3",
+    "bn|কিছু জিনিস গোনা যায় না: rice, water, money। এগুলোতে -s হয় না।": "/audio/chat-lesson/level-1-playground-number/d02c1cae596caf82.mp3",
     "bn|৩টা আলু": "/audio/chat-lesson/level-1-playground-number/95ecd20402e2f7e0.mp3",
     "bn|২টা টমেটো": "/audio/chat-lesson/level-1-playground-number/1bf347b40d4fd247.mp3",
     "bn|১২টা ডিম": "/audio/chat-lesson/level-1-playground-number/4ceef1dd60f27d77.mp3",
@@ -144,56 +152,98 @@
     "bn|১ বোতল পানি": "/audio/chat-lesson/level-1-playground-number/d969b4995ab432ac.mp3"
   },
   "timings": {
-    "en|Count the pictures. Pick the number, then the right word.": [
+    "en|Count, then pick the right word.": [
       [
         31,
-        239,
+        822,
         0
       ],
       [
-        239,
-        364,
+        822,
+        1072,
         1
       ],
       [
-        364,
-        1447,
+        1072,
+        1281,
         2
       ],
       [
-        1447,
-        1656,
+        1281,
+        1364,
         3
       ],
       [
-        1656,
-        1781,
+        1364,
+        1572,
         4
       ],
       [
+        1572,
+        2037,
+        5
+      ]
+    ],
+    "en|Many things: add -s. After s, sh, ch or x: add -es.": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        1114,
+        1
+      ],
+      [
+        1114,
+        1781,
+        2
+      ],
+      [
         1781,
         2530,
+        3
+      ],
+      [
+        2530,
+        3697,
+        4
+      ],
+      [
+        3697,
+        4531,
         5
       ],
       [
-        2530,
-        2739,
+        4531,
+        4947,
         6
       ],
       [
-        2739,
-        2864,
+        4947,
+        4989,
         7
       ],
       [
-        2864,
-        3071,
+        4989,
+        5072,
         8
       ],
       [
-        3071,
-        3523,
+        5072,
+        5114,
         9
+      ],
+      [
+        5114,
+        5489,
+        10
+      ],
+      [
+        5489,
+        9172,
+        11
       ]
     ],
     "en|three tomatoes": [
@@ -364,36 +414,83 @@
         1
       ]
     ],
-    "en|Type the Plural of the word.": [
+    "en|Type this word for many.": [
       [
         72,
-        364,
+        281,
         0
       ],
       [
-        364,
+        281,
         531,
         1
       ],
       [
         531,
-        989,
+        822,
         2
       ],
       [
+        822,
         989,
-        1072,
         3
       ],
       [
-        1072,
-        1197,
+        989,
+        1510,
+        4
+      ]
+    ],
+    "en|Many: add -s or -es. Some words change: child, children.": [
+      [
+        31,
+        739,
+        0
+      ],
+      [
+        739,
+        1156,
+        1
+      ],
+      [
+        1156,
+        1697,
+        2
+      ],
+      [
+        1697,
+        2281,
+        3
+      ],
+      [
+        2281,
+        3322,
         4
       ],
       [
-        1197,
-        1639,
+        3322,
+        3656,
         5
+      ],
+      [
+        3656,
+        3946,
+        6
+      ],
+      [
+        3946,
+        4739,
+        7
+      ],
+      [
+        4739,
+        5614,
+        8
+      ],
+      [
+        5614,
+        6241,
+        9
       ]
     ],
     "en|cup": [
@@ -889,7 +986,7 @@
         3
       ]
     ],
-    "en|One English word is wrong. Tap it, then fix it.": [
+    "en|Tap the wrong word, then fix it.": [
       [
         31,
         281,
@@ -897,48 +994,95 @@
       ],
       [
         281,
-        739,
+        406,
         1
       ],
       [
-        739,
-        989,
+        406,
+        697,
         2
       ],
       [
-        989,
-        1281,
+        697,
+        1447,
         3
       ],
       [
-        1281,
-        2197,
+        1447,
+        1614,
         4
       ],
       [
-        2197,
-        2530,
+        1614,
+        1864,
         5
       ],
       [
-        2530,
-        3030,
+        1864,
+        2056,
+        6
+      ]
+    ],
+    "en|Bangla says দুই ভাই. English says two brothers. After a number, add -s.": [
+      [
+        114,
+        781,
+        0
+      ],
+      [
+        781,
+        1322,
+        1
+      ],
+      [
+        1322,
+        1474,
+        2
+      ],
+      [
+        1474,
+        1890,
+        3
+      ],
+      [
+        1890,
+        2182,
+        5
+      ],
+      [
+        2182,
+        2390,
         6
       ],
       [
-        3030,
-        3239,
+        2390,
+        3765,
         7
       ],
       [
-        3239,
-        3530,
+        3765,
+        4140,
         8
       ],
       [
-        3530,
-        3742,
+        4140,
+        4182,
         9
+      ],
+      [
+        4182,
+        4849,
+        10
+      ],
+      [
+        4849,
+        5224,
+        11
+      ],
+      [
+        5224,
+        5661,
+        12
       ]
     ],
     "en|I have three sisters.": [
@@ -1285,41 +1429,88 @@
         3
       ]
     ],
-    "en|Type the right word for Mom's list.": [
+    "en|Write the word for Mom's list.": [
       [
-        72,
-        281,
+        31,
+        239,
         0
       ],
       [
-        281,
+        239,
         406,
         1
       ],
       [
         406,
-        697,
+        739,
         2
       ],
       [
-        697,
-        989,
+        739,
+        906,
         3
       ],
       [
-        989,
-        1114,
+        906,
+        1322,
         4
       ],
       [
+        1322,
+        1824,
+        5
+      ]
+    ],
+    "en|Some things can't be counted: rice, water, money. No -s.": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        656,
+        1
+      ],
+      [
+        656,
+        989,
+        2
+      ],
+      [
+        989,
         1114,
-        1489,
+        3
+      ],
+      [
+        1114,
+        1864,
+        4
+      ],
+      [
+        1864,
+        2697,
         5
       ],
       [
-        1489,
-        2011,
+        2697,
+        3656,
         6
+      ],
+      [
+        3656,
+        4739,
+        7
+      ],
+      [
+        4739,
+        5114,
+        8
+      ],
+      [
+        5114,
+        5447,
+        9
       ]
     ],
     "en|three potatoes": [
@@ -1508,51 +1699,98 @@
         3
       ]
     ],
-    "bn|ছবিগুলো গোনো। আগে সংখ্যা, তারপর সঠিক শব্দটি বেছে নাও।": [
+    "bn|গুনুন, তারপর সঠিক শব্দ বেছে নিন।": [
       [
-        80,
-        705,
+        106,
+        692,
         0
       ],
       [
-        705,
-        2101,
+        692,
+        1330,
         1
       ],
       [
-        2101,
-        2460,
+        1330,
+        1769,
         2
       ],
       [
-        2460,
-        3098,
+        1769,
+        2181,
         3
       ],
       [
-        3098,
-        3763,
+        2181,
+        2513,
         4
       ],
       [
-        3763,
-        4202,
+        2513,
+        3750,
+        5
+      ]
+    ],
+    "bn|অনেক হলে শেষে -s। শেষে s, sh, ch বা x থাকলে -es।": [
+      [
+        67,
+        439,
+        0
+      ],
+      [
+        439,
+        718,
+        1
+      ],
+      [
+        718,
+        1410,
+        2
+      ],
+      [
+        1410,
+        2686,
+        3
+      ],
+      [
+        2686,
+        3231,
+        4
+      ],
+      [
+        3231,
+        3617,
         5
       ],
       [
-        4202,
-        4747,
+        3617,
+        4003,
         6
       ],
       [
-        4747,
-        5080,
+        4003,
+        4309,
         7
       ],
       [
-        5080,
-        6251,
+        4309,
+        4481,
         8
+      ],
+      [
+        4481,
+        4588,
+        9
+      ],
+      [
+        4588,
+        5186,
+        10
+      ],
+      [
+        5186,
+        6543,
+        11
       ]
     ],
     "bn|তিনটি টমেটো": [
@@ -1723,21 +1961,93 @@
         1
       ]
     ],
-    "bn|শব্দটির Plural লেখো।": [
+    "bn|শব্দটিকে অনেক (Plural) করে লিখুন।": [
       [
         67,
-        731,
+        878,
         0
       ],
       [
-        731,
-        1130,
+        878,
+        1330,
         1
       ],
       [
-        1130,
-        2461,
+        1330,
+        1875,
         2
+      ],
+      [
+        1875,
+        2247,
+        3
+      ],
+      [
+        2247,
+        3644,
+        4
+      ]
+    ],
+    "bn|অনেক হলে -s বা -es। কিছু শব্দ বদলে যায়: child হয় children।": [
+      [
+        67,
+        439,
+        0
+      ],
+      [
+        439,
+        944,
+        1
+      ],
+      [
+        944,
+        1197,
+        2
+      ],
+      [
+        1197,
+        1609,
+        3
+      ],
+      [
+        1609,
+        3019,
+        4
+      ],
+      [
+        3019,
+        3351,
+        5
+      ],
+      [
+        3351,
+        3777,
+        6
+      ],
+      [
+        3777,
+        4176,
+        7
+      ],
+      [
+        4176,
+        4628,
+        8
+      ],
+      [
+        4628,
+        5160,
+        9
+      ],
+      [
+        5160,
+        5359,
+        10
+      ],
+      [
+        5359,
+        6783,
+        11
       ]
     ],
     "bn|কাপ": [
@@ -1864,61 +2174,93 @@
         0
       ]
     ],
-    "bn|ইংরেজি বাক্যের একটি শব্দ ভুল। সেটিতে ট্যাপ করো, তারপর ঠিক করো।": [
+    "bn|ভুল শব্দে ট্যাপ করুন, তারপর ঠিক করুন।": [
       [
-        93,
-        612,
+        133,
+        505,
         0
       ],
       [
-        612,
-        1077,
+        505,
+        931,
         1
       ],
       [
-        1077,
-        1330,
+        931,
+        1250,
         2
       ],
       [
-        1330,
+        1250,
         1755,
         3
       ],
       [
         1755,
-        3125,
+        2447,
         4
       ],
       [
-        3125,
-        3644,
+        2447,
+        2726,
         5
       ],
       [
-        3644,
-        3963,
+        2726,
+        4070,
+        6
+      ]
+    ],
+    "bn|বাংলায় দুই ভাই, ইংরেজিতে two brothers। সংখ্যার পরে -s লাগে।": [
+      [
+        93,
+        638,
+        0
+      ],
+      [
+        638,
+        891,
+        1
+      ],
+      [
+        891,
+        1370,
+        2
+      ],
+      [
+        1370,
+        2234,
+        3
+      ],
+      [
+        2234,
+        2420,
+        4
+      ],
+      [
+        2420,
+        4003,
+        5
+      ],
+      [
+        4003,
+        4574,
         6
       ],
       [
-        3963,
-        4375,
+        4574,
+        5093,
         7
       ],
       [
-        4375,
-        5000,
+        5093,
+        5359,
         8
       ],
       [
-        5000,
-        5266,
+        5359,
+        6650,
         9
-      ],
-      [
-        5266,
-        6543,
-        10
       ]
     ],
     "bn|আমার তিনটি বোন আছে।": [
@@ -2215,36 +2557,88 @@
         3
       ]
     ],
-    "bn|মায়ের লিস্টের জন্য সঠিক শব্দটি লেখো।": [
+    "bn|মায়ের লিস্টের শব্দটি লিখুন।": [
       [
-        106,
-        492,
+        120,
+        505,
         0
       ],
       [
-        492,
-        931,
+        505,
+        957,
         1
       ],
       [
-        931,
-        1290,
+        957,
+        1529,
         2
       ],
       [
-        1290,
-        1729,
+        1529,
+        2939,
+        3
+      ]
+    ],
+    "bn|কিছু জিনিস গোনা যায় না: rice, water, money। এগুলোতে -s হয় না।": [
+      [
+        67,
+        332,
+        0
+      ],
+      [
+        332,
+        745,
+        1
+      ],
+      [
+        745,
+        1051,
+        2
+      ],
+      [
+        1051,
+        1277,
         3
       ],
       [
-        1729,
-        2274,
+        1277,
+        1609,
         4
       ],
       [
-        2274,
-        3578,
+        1609,
+        2287,
         5
+      ],
+      [
+        2287,
+        2912,
+        6
+      ],
+      [
+        2912,
+        4322,
+        7
+      ],
+      [
+        4322,
+        5106,
+        8
+      ],
+      [
+        5106,
+        5372,
+        9
+      ],
+      [
+        5372,
+        5598,
+        10
+      ],
+      [
+        5598,
+        6756,
+        11
       ]
     ],
     "bn|৩টা আলু": [

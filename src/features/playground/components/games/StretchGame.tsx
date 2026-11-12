@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { GripVertical, Hand, Lightbulb } from "lucide-react";
 import { BN_FACE, EN_FACE } from "@/src/features/chat-lesson/components/ChatPrimitives";
 import { LANG_FACE, pick } from "@/src/features/chat-lesson/lib/uiCopy";
@@ -11,13 +11,18 @@ import {
   type ChipTone,
 } from "@/src/features/playground/components/PlaygroundParts";
 import { isDone, type GameProps } from "@/src/features/playground/components/games/gameProps";
+import { GuideHand } from "@/src/features/playground/components/GuideHand";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import { evaluateStretch, sentenceOf } from "@/src/features/playground/lib/evaluate";
 import type { StretchItem } from "@/src/features/playground/types";
 import { playUiClickSfx } from "@/src/lib/player-eval-sfx";
 import { cn } from "@/lib/utils";
 
-export function StretchGame({ item, itemKey, lang, status, attempt, onReady, onAnswer }: GameProps<StretchItem>) {
+/** One word per step while the guide hand drags, then a short hold on the full Subject. */
+const DRAG_STEP_MS = 560;
+const DRAG_HOLD_STEPS = 2;
+
+export function StretchGame({ item, itemKey, lang, status, attempt, onReady, onAnswer, guide = false }: GameProps<StretchItem>) {
   const [stretch, setStretch] = useState<{ attempt: number; end: number } | null>(null);
   const touched = stretch?.attempt === attempt;
   const end = touched && stretch ? stretch.end : 0;
@@ -25,6 +30,16 @@ export function StretchGame({ item, itemKey, lang, status, attempt, onReady, onA
   const done = isDone(status);
   const locked = status !== "answering";
   const spoken = useActiveWord(`${itemKey}:s:`);
+  const demoOn = guide && !touched && !locked;
+  const [demoStep, setDemoStep] = useState(0);
+  const demoEnd = Math.min(demoStep, item.subjectEnd);
+
+  useEffect(() => {
+    if (!demoOn) return;
+    const steps = item.subjectEnd + 1 + DRAG_HOLD_STEPS;
+    const timer = window.setInterval(() => setDemoStep((s) => (s + 1) % steps), DRAG_STEP_MS);
+    return () => window.clearInterval(timer);
+  }, [demoOn, item.subjectEnd]);
 
   const setEnd = (next: number) => {
     if (locked) return;
@@ -66,6 +81,7 @@ export function StretchGame({ item, itemKey, lang, status, attempt, onReady, onA
       return status === "revealed" && index <= end ? "wrong" : "dim";
     }
     if (status === "retry") return index <= end ? "wrong" : "dim";
+    if (demoOn) return index <= demoEnd ? "lit" : "idle";
     return index <= end ? "lit" : "idle";
   };
 
@@ -121,16 +137,19 @@ export function StretchGame({ item, itemKey, lang, status, attempt, onReady, onA
                   <GripVertical className="size-4" aria-hidden />
                 </span>
               ) : null}
+              {demoOn && i === demoEnd ? (
+                <GuideHand mode="drag" layoutId={`stretch-guide-${itemKey}`} placement="-right-5 top-1/2 -mt-[3px]" />
+              ) : null}
             </span>
           ))}
         </div>
       </SentenceCard>
 
       {done ? null : (
-        <p className="flex w-fit flex-wrap items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-sm font-semibold text-sky-800 ring-1 ring-sky-100">
-          <Lightbulb className="size-4 shrink-0 text-sky-500" aria-hidden />
+        <p className="flex w-fit flex-wrap items-center gap-1.5 rounded-full bg-accent/5 px-3 py-1 text-sm font-semibold text-accent ring-1 ring-accent/10">
+          <Lightbulb className="size-4 shrink-0 text-accent" aria-hidden />
           <span className={EN_FACE}>{item.question.en}</span>
-          {lang === "bn" ? <span className={cn(BN_FACE, "text-sky-700/80")}>({item.question.bn})</span> : null}
+          {lang === "bn" ? <span className={cn(BN_FACE, "text-accent/80")}>({item.question.bn})</span> : null}
         </p>
       )}
     </div>

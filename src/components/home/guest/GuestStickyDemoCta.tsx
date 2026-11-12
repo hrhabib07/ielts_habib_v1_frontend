@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
 /** Sticky mobile CTAs after scrolling past the hero: demo + VIP access. */
@@ -37,7 +38,7 @@ export function GuestStickyDemoCta() {
           )}
           asChild
         >
-          <Link href="/demo">{copy.stickyCta}</Link>
+          <Link href={FREE_PLAY_HREF}>{copy.stickyCta}</Link>
         </Button>
         <Button
           size="lg"

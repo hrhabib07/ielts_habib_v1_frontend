@@ -49,7 +49,7 @@ function SentenceLine({ sentence, verbChanged }: { sentence: BuiltSentence; verb
       </WordChip>
       <span className={cn(EN_FACE, "text-lg font-bold text-slate-800 sm:text-2xl")}>
         <motion.span
-          className={cn("inline-block rounded-lg", verbChanged && "bg-violet-100 px-1 text-violet-700")}
+          className={cn("inline-block rounded-lg", verbChanged && "bg-accent/10 px-1 text-accent")}
           initial={verbChanged ? { scale: 0.6, opacity: 0 } : false}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 380, damping: 14, delay: 0.25 }}
@@ -158,7 +158,7 @@ export function TalkGame({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="rounded-3xl border-2 border-b-[5px] border-violet-200 bg-gradient-to-br from-violet-50 to-white p-3.5 shadow-sm sm:p-6">
+      <div className="rounded-3xl border-2 border-b-[5px] border-accent/20 bg-accent/5 p-3.5 shadow-sm sm:p-6">
         <div className="flex items-start gap-2 sm:gap-3">
           <p className={cn(EN_FACE, "min-w-0 flex-1 text-xl font-black leading-snug text-slate-900 sm:text-3xl")}>
             {questionWords.map((word, i) => {
@@ -202,7 +202,7 @@ export function TalkGame({
               placeholder={pick(PG_UI.typeHere, lang)}
               className={cn(
                 EN_FACE,
-                "min-w-[9ch] max-w-full rounded-2xl border-2 border-b-4 border-dashed border-sky-300 bg-sky-50/70 px-3 py-1.5 text-lg font-bold sm:px-3.5 sm:py-2 text-sky-900 outline-none transition-colors [field-sizing:content] placeholder:font-semibold placeholder:text-sky-300 focus:border-solid focus:border-sky-500 focus:bg-white sm:text-2xl",
+                "min-w-[9ch] max-w-full rounded-2xl border-2 border-b-4 border-dashed border-accent/35 bg-accent/5 px-3 py-1.5 text-lg font-bold sm:px-3.5 sm:py-2 text-accent outline-none transition-colors [field-sizing:content] placeholder:font-semibold placeholder:text-accent/35 focus:border-solid focus:border-accent focus:bg-white sm:text-2xl",
                 status === "retry" && "border-solid border-orange-300 bg-orange-50 text-orange-800",
               )}
             />
@@ -228,7 +228,7 @@ export function TalkGame({
                 onClick={() => update(s)}
                 className={cn(
                   EN_FACE,
-                  "rounded-full bg-sky-100 px-3 py-1.5 text-sm font-bold text-sky-800 transition-colors hover:bg-sky-200",
+                  "rounded-full bg-accent/10 px-3 py-1.5 text-sm font-bold text-accent transition-colors hover:bg-accent/20",
                 )}
               >
                 {s}
@@ -246,7 +246,7 @@ export function TalkGame({
             disabled={locked}
             className={cn(
               LANG_FACE[lang],
-              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold text-violet-700 ring-1 ring-violet-200 transition-colors hover:bg-violet-50",
+              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold text-accent ring-1 ring-accent/20 transition-colors hover:bg-accent/5",
             )}
           >
             <HelpCircle className="size-4" aria-hidden />

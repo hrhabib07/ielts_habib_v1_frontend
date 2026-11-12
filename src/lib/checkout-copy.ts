@@ -46,6 +46,7 @@ export interface CheckoutCopy {
   readonly loginGateTitle: string;
   readonly loginGateBody: string;
   readonly loginGateCta: string;
+  readonly faqJump: string;
 }
 
 export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
@@ -100,6 +101,7 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     loginGateBody:
       "চেকআউট খোলা আছে। লগইন করুন, তারপর bKash TrxID সাবমিট করুন।",
     loginGateCta: "লগইন করুন",
+    faqJump: "পেমেন্টের আগে প্রশ্ন আছে? উত্তর দেখুন",
   },
   en: {
     statusLock: "Offer price can still be locked",
@@ -151,5 +153,6 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
     loginGateTitle: "Log in to finish payment",
     loginGateBody: "Checkout is ready. Log in, then submit your bKash TrxID.",
     loginGateCta: "Log in",
+    faqJump: "Questions before you pay? See answers",
   },
 };

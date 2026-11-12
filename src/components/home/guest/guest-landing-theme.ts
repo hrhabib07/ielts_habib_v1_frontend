@@ -1,10 +1,14 @@
 /**
- * Landing color roles (must match logo: cool blue, navy base).
- * Gold is reserved for reward moments only (XP, streak, badges).
- * Hero Mission CTA adds `.test-landing-cta-invite` for the richer animated fill.
+ * Landing color roles (must match logo and the game): navy for every button and action, sky blue
+ * for highlights only (eyebrows, accent words, chips). Gold is reserved for reward moments
+ * (XP, streak, badges). Hero Mission CTA adds `.test-landing-cta-invite` for the press effect.
  */
 export const LANDING_CTA_CLASS =
-  "bg-gradient-to-r from-sky-400 via-sky-500 to-blue-600 text-white shadow-[0_8px_18px_-10px_rgba(15,23,42,0.35)] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-px hover:shadow-[0_10px_20px_-10px_rgba(15,23,42,0.4)] active:translate-y-px active:scale-[0.985] active:shadow-[0_2px_8px_-4px_rgba(15,23,42,0.35)]";
+  "border-b-4 border-primary bg-accent text-white shadow-[0_10px_22px_-12px_rgba(30,58,138,0.6)] transition-[transform,box-shadow,background-color] duration-200 ease-out hover:-translate-y-px hover:bg-accent/90 active:translate-y-0.5 active:border-b-2 active:shadow-[0_2px_8px_-4px_rgba(15,23,42,0.35)]";
+
+/** Nav CTA on conversion landings: visible but quieter than the hero CTA. */
+export const LANDING_NAV_SECONDARY_CTA_CLASS =
+  "border border-sky-500/40 bg-sky-50 text-sky-700 transition-colors duration-200 hover:border-sky-500/60 hover:bg-sky-100 hover:text-sky-800 active:scale-[0.985] dark:border-sky-400/40 dark:bg-sky-400/10 dark:text-sky-100 dark:hover:bg-sky-400/20";
 
 export const LANDING_EYEBROW_CLASS =
   "inline-flex items-center rounded-full border border-sky-500/35 bg-sky-500/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-sky-900 dark:border-sky-400/40 dark:bg-sky-400/15 dark:text-sky-100";

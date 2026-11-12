@@ -39,13 +39,13 @@ export function LearnerAvatarImage({ learner, size = "sm" }: { learner: Learner;
   );
 }
 
-/** Chat-side avatar: opens the learner's profile card when there is one. */
-export function LearnerAvatarButton() {
+/** The learner's avatar anywhere in the app: tapping it opens their profile card (when they have an account). */
+export function LearnerAvatarButton({ size = "sm", className }: { size?: keyof typeof SIZES; className?: string }) {
   const { learner, actions, openProfile } = useLearnerContext();
   if (!actions) {
     return (
-      <span className="mt-0.5 shrink-0">
-        <LearnerAvatarImage learner={learner} />
+      <span className={cn("mt-0.5 shrink-0", className)}>
+        <LearnerAvatarImage learner={learner} size={size} />
       </span>
     );
   }
@@ -54,9 +54,13 @@ export function LearnerAvatarButton() {
       type="button"
       onClick={openProfile}
       aria-label={LEARNER_UI.profileOpen.en}
-      className="mt-0.5 shrink-0 rounded-full transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200"
+      title={LEARNER_UI.profileOpen.en}
+      className={cn(
+        "mt-0.5 shrink-0 cursor-pointer rounded-full transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-200",
+        className,
+      )}
     >
-      <LearnerAvatarImage learner={learner} />
+      <LearnerAvatarImage learner={learner} size={size} />
     </button>
   );
 }

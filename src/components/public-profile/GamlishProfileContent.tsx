@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SHOW_XP_LEADERBOARD } from "@/src/lib/platform-config";
 import { getAccessToken } from "@/src/lib/auth";
 import {
   toggleProfileClap,
@@ -475,19 +476,23 @@ export function GamlishProfileContent({
         <>
           {/* Core stats */}
           {stats ? (
-            <section className="mt-6 grid grid-cols-3 gap-3">
-              <StatCard
-                icon={<Sparkles className="h-4 w-4 text-white" />}
-                label="Rank"
-                value={stats.level}
-                accent="bg-gradient-to-br from-violet-400 to-purple-600"
-              />
-              <StatCard
-                icon={<Zap className="h-4 w-4 text-white" />}
-                label="XP"
-                value={stats.totalXp.toLocaleString("en-US")}
-                accent="bg-gradient-to-br from-sky-400 to-blue-600"
-              />
+            <section className={cn("mt-6 grid gap-3", SHOW_XP_LEADERBOARD ? "grid-cols-3" : "grid-cols-1 sm:max-w-xs")}>
+              {SHOW_XP_LEADERBOARD ? (
+                <>
+                  <StatCard
+                    icon={<Sparkles className="h-4 w-4 text-white" />}
+                    label="Rank"
+                    value={stats.level}
+                    accent="bg-gradient-to-br from-violet-400 to-purple-600"
+                  />
+                  <StatCard
+                    icon={<Zap className="h-4 w-4 text-white" />}
+                    label="XP"
+                    value={stats.totalXp.toLocaleString("en-US")}
+                    accent="bg-gradient-to-br from-sky-400 to-blue-600"
+                  />
+                </>
+              ) : null}
               <StatCard
                 icon={<Flame className="h-4 w-4 text-white" />}
                 label="Streak"
@@ -513,25 +518,27 @@ export function GamlishProfileContent({
                 username={identity.username}
                 profileHandle={identity.username || identity.publicId}
                 avatarUrl={identity.avatarUrl}
-                totalXp={stats?.totalXp}
+                totalXp={SHOW_XP_LEADERBOARD ? stats?.totalXp : undefined}
                 missionsCompleted={stats?.missionsCompleted}
                 interactive={false}
               />
             </section>
           ) : null}
 
-          <Link
-            href="/leaderboard"
-            className="mt-4 flex items-center justify-between rounded-2xl border border-amber-400/30 bg-gradient-to-r from-amber-400/10 via-card to-sky-500/10 px-4 py-3 transition hover:border-amber-400/50"
-          >
-            <span className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <Trophy className="h-4 w-4 text-amber-600" />
-              XP Leaderboard
-            </span>
-            <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
-              View ranks
-            </span>
-          </Link>
+          {SHOW_XP_LEADERBOARD ? (
+            <Link
+              href="/leaderboard"
+              className="mt-4 flex items-center justify-between rounded-2xl border border-amber-400/30 bg-gradient-to-r from-amber-400/10 via-card to-sky-500/10 px-4 py-3 transition hover:border-amber-400/50"
+            >
+              <span className="flex items-center gap-2 text-sm font-bold text-foreground">
+                <Trophy className="h-4 w-4 text-amber-600" />
+                XP Leaderboard
+              </span>
+              <span className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                View ranks
+              </span>
+            </Link>
+          ) : null}
 
           {/* Squad */}
           {squad ? (

@@ -4,21 +4,14 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Flame,
-  Lock,
-  Mail,
-  Sparkles,
-  Swords,
-  Trophy,
-  Zap,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Lock, Mail, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "@/src/auth/hooks";
+import { useLoginSessionRecovery } from "@/src/auth/useLoginSessionRecovery";
+import { AuthGamePanel } from "@/src/components/auth/AuthGamePanel";
+import { AUTH_INPUT_CLASS, AUTH_LABEL_CLASS } from "@/src/components/auth/authStyles";
 import {
   AuthMethodDivider,
   ContinueWithGoogleButton,
@@ -26,12 +19,6 @@ import {
 import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
-import {
-  LANDING_CTA_CLASS,
-  LANDING_EYEBROW_CLASS,
-  LANDING_REWARD_PILL_CLASS,
-} from "@/src/components/home/guest/guest-landing-theme";
-import { PaidLearnersProofBar } from "@/src/components/pricing/PaidLearnersProofChip";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_LOGIN_COPY } from "@/src/lib/auth-login-copy";
 import { formatAuthQueryError } from "@/src/lib/auth-oauth-errors";
@@ -46,73 +33,6 @@ const DevQuickLogin =
         { ssr: false },
       )
     : () => null;
-
-function LoginHeroPanel({ locale }: { locale: "en" | "bn" }) {
-  const copy = AUTH_LOGIN_COPY[locale];
-  const reduceMotion = useReducedMotion();
-
-  return (
-    <aside className="relative hidden w-[44%] shrink-0 flex-col justify-between overflow-hidden bg-slate-950 px-10 py-10 text-white xl:w-[48%] xl:px-12 xl:py-12 lg:flex">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_20%_0%,rgba(56,189,248,0.22),transparent_55%),radial-gradient(ellipse_55%_45%_at_95%_100%,rgba(30,58,138,0.45),transparent_52%)]"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-        aria-hidden
-      />
-
-      <Link href="/" className="relative z-10 inline-flex w-fit transition-opacity hover:opacity-90">
-        <GamlishNavBrand className="[&_span]:text-white" />
-      </Link>
-
-      <motion.div
-        className="relative z-10 max-w-lg space-y-7"
-        initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <p className={cn(LANDING_REWARD_PILL_CLASS, "w-fit gap-1.5")}>
-          <Flame className="h-3.5 w-3.5" aria-hidden />
-          {copy.continueHint}
-        </p>
-
-        <div className="space-y-3">
-          <h2 className="text-balance text-[2rem] font-bold leading-[1.12] tracking-tight xl:text-[2.35rem]">
-            {copy.heroTitle}
-          </h2>
-          <p className="max-w-md text-pretty text-[15px] leading-relaxed text-slate-300">
-            {copy.heroSubtitle}
-          </p>
-        </div>
-
-        <ul className="space-y-2.5">
-          {copy.heroBullets.map((item, idx) => (
-            <li key={item} className="flex items-center gap-3 text-sm text-slate-200">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 ring-1 ring-sky-400/25">
-                {idx === 0 ? (
-                  <Swords className="h-3.5 w-3.5 text-sky-300" />
-                ) : idx === 1 ? (
-                  <Trophy className="h-3.5 w-3.5 text-amber-300" />
-                ) : (
-                  <Zap className="h-3.5 w-3.5 text-sky-300" />
-                )}
-              </span>
-              {item}
-            </li>
-          ))}
-        </ul>
-      </motion.div>
-
-      <p className="relative z-10 text-sm text-slate-500">{copy.heroFootnote}</p>
-    </aside>
-  );
-}
 
 function LoginToolbar({ copy }: { copy: (typeof AUTH_LOGIN_COPY)["en"] }) {
   return (
@@ -155,93 +75,89 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
     setReturnTo(readAuthReturnPathFromSearch(params));
   }, [locale]);
 
-  const registerHref = returnTo
-    ? `/register?redirect=${encodeURIComponent(returnTo)}`
-    : "/register";
+  const recoveringSession = useLoginSessionRecovery();
+
+  const registerHref = returnTo ? `/register?redirect=${encodeURIComponent(returnTo)}` : "/register";
+
+  if (recoveringSession) {
+    return (
+      <div
+        className={cn(
+          "flex min-h-dvh w-full flex-col items-center justify-center gap-3 bg-background px-4 text-center",
+          locale === "bn" && "font-bengali",
+        )}
+        lang={locale === "bn" ? "bn" : "en"}
+        role="status"
+        aria-live="polite"
+      >
+        <Loader2 className="h-8 w-8 animate-spin text-accent" aria-hidden />
+        <p className="text-base font-semibold text-slate-800">
+          {locale === "bn" ? "আপনার সেশন ফিরিয়ে আনা হচ্ছে..." : "Restoring your session..."}
+        </p>
+      </div>
+    );
+  }
 
   const otpLoginLabel =
-    locale === "bn"
-      ? "পাসওয়ার্ড ভুলে গেছেন? SMS OTP দিয়ে লগইন করুন"
-      : "Forgot password? Log in with SMS OTP";
-  const otpHideLabel = locale === "bn" ? "পাসওয়ার্ড লগইন দেখান" : "Show password login";
-  const googleDivider =
-    locale === "bn" ? "অথবা Google" : "or Google";
+    locale === "bn" ? "পাসওয়ার্ড মনে নেই? SMS OTP দিয়ে লগইন করুন" : "Can't remember your password? Log in with SMS OTP";
+  const otpHideLabel = locale === "bn" ? "পাসওয়ার্ড দিয়ে লগইন" : "Log in with password";
 
   return (
     <div
-      className={cn(
-        "flex min-h-dvh w-full bg-background",
-        locale === "bn" && "font-bengali",
-      )}
+      className={cn("flex min-h-dvh w-full bg-background", locale === "bn" && "font-bengali")}
       lang={locale === "bn" ? "bn" : "en"}
     >
-      <LoginHeroPanel locale={locale} />
+      <AuthGamePanel locale={locale} />
 
       <div className="relative flex min-h-dvh min-w-0 flex-1 flex-col">
         <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_50%_-10%,rgba(56,189,248,0.12),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_45%_at_50%_-10%,rgba(56,189,248,0.08),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_50%_-10%,rgba(30,58,138,0.08),transparent_55%)]"
           aria-hidden
         />
 
         <LoginToolbar copy={copy} />
-        <PaidLearnersProofBar locale={locale} />
 
-        <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:px-10 xl:px-14">
+        <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-10 xl:px-14">
           <motion.div
             className="w-full max-w-[420px] space-y-5"
             initial={reduceMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="space-y-3">
-              <p className={LANDING_EYEBROW_CLASS}>
-                <Sparkles className="mr-1.5 inline h-3 w-3" aria-hidden />
+            <div className="space-y-3 text-center sm:text-left">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden />
                 {copy.eyebrow}
               </p>
-              <h1 className="text-[1.75rem] font-bold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="text-balance text-[1.75rem] font-black leading-tight tracking-tight text-slate-900 sm:text-3xl">
                 {copy.title}
               </h1>
-              <p className="text-pretty text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
-                {copy.subtitle}
-              </p>
+              <p className="text-pretty text-[15px] font-medium leading-relaxed text-slate-700">{copy.subtitle}</p>
             </div>
 
-            {/* Loud register path  -  above the form so new users cannot miss it */}
-            <Link
-              href={registerHref}
-              className="group flex items-center gap-3 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-3.5 transition-colors hover:border-sky-500/45 hover:bg-sky-500/15 dark:border-sky-400/25 dark:bg-sky-400/10 dark:hover:bg-sky-400/15"
-            >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/20 text-sky-700 dark:text-sky-300">
-                <Zap className="h-5 w-5" aria-hidden />
-              </span>
-              <span className="min-w-0 flex-1 text-left">
-                <span className="block text-sm font-bold text-foreground">
-                  {copy.newPlayerTitle}
-                </span>
-                <span className="mt-0.5 block text-xs text-muted-foreground sm:text-[13px]">
-                  {copy.newPlayerBody}
-                </span>
-              </span>
-              <span className="hidden shrink-0 text-xs font-bold text-sky-700 group-hover:underline sm:inline dark:text-sky-300">
-                {copy.newPlayerCta}
-              </span>
-              <ArrowRight className="h-4 w-4 shrink-0 text-sky-600 transition-transform group-hover:translate-x-0.5 dark:text-sky-400" />
-            </Link>
-
-            <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_16px_48px_rgba(15,23,42,0.07)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.28)]">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-[0_16px_48px_rgba(15,23,42,0.07)]">
               <div className="p-5 sm:p-6">
                 {resetSuccess ? (
                   <div
-                    className="mb-4 rounded-xl border border-sky-500/25 bg-sky-500/10 px-3 py-2.5 text-sm text-sky-900 dark:text-sky-200"
+                    className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-900"
                     role="status"
                   >
                     {copy.resetSuccess}
                   </div>
                 ) : null}
 
-                {oauthError ? (
-                  <AuthErrorAlert className="mb-4" message={oauthError} />
-                ) : null}
+                {oauthError ? <AuthErrorAlert className="mb-4" message={oauthError} /> : null}
+
+                <ContinueWithGoogleButton
+                  returnTo={returnTo}
+                  label={copy.googleCta}
+                  tone="primary"
+                  className={cn("h-13 rounded-2xl font-extrabold", locale === "bn" ? "text-[17px]" : "text-base")}
+                />
+
+                <div className="my-4">
+                  <AuthMethodDivider label={copy.formDivider} />
+                </div>
 
                 <DevQuickLogin setEmail={setEmail} setPassword={setPassword} />
 
@@ -253,11 +169,11 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
                   }}
                 >
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">
+                    <Label htmlFor="email" className={AUTH_LABEL_CLASS}>
                       {copy.emailLabel}
                     </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                       <Input
                         id="email"
                         type="text"
@@ -266,25 +182,22 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={copy.emailPlaceholder}
-                        className="h-11 rounded-xl border-border/80 bg-background pl-11"
+                        className={AUTH_INPUT_CLASS}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <Label htmlFor="password" className="text-sm font-medium">
+                      <Label htmlFor="password" className={AUTH_LABEL_CLASS}>
                         {copy.passwordLabel}
                       </Label>
-                      <Link
-                        href="/forgot-password"
-                        className="text-xs font-semibold text-sky-700 hover:underline dark:text-sky-300"
-                      >
+                      <Link href="/forgot-password" className="text-xs font-bold text-accent hover:underline">
                         {copy.forgotPassword}
                       </Link>
                     </div>
                     <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                      <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                       <Input
                         id="password"
                         type="password"
@@ -293,7 +206,7 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder={copy.passwordPlaceholder}
-                        className="h-11 rounded-xl border-border/80 bg-background pl-11"
+                        className={AUTH_INPUT_CLASS}
                       />
                     </div>
                   </div>
@@ -302,11 +215,9 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
 
                   <Button
                     type="submit"
+                    variant="outline"
                     disabled={loading}
-                    className={cn(
-                      "h-11 w-full rounded-xl text-[15px] font-semibold",
-                      LANDING_CTA_CLASS,
-                    )}
+                    className="h-12 w-full rounded-2xl border-2 border-slate-300 text-[15px] font-bold text-slate-800"
                     size="lg"
                   >
                     {loading ? (
@@ -320,30 +231,25 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
                   </Button>
                 </form>
 
-                <div className="mt-4 space-y-3">
-                  <AuthMethodDivider label={googleDivider} />
-                  <ContinueWithGoogleButton returnTo={returnTo} />
-                </div>
-
-                <div className="mt-4 border-t border-border/50 pt-4">
+                <div className="mt-4">
                   {!showOtpLogin ? (
                     <button
                       type="button"
                       onClick={() => setShowOtpLogin(true)}
-                      className="w-full text-center text-[12px] font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                      className="w-full text-center text-[13px] font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
                     >
                       {otpLoginLabel}
                     </button>
                   ) : (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-[12px] font-semibold text-foreground">
+                        <p className="text-[13px] font-semibold text-slate-800">
                           {locale === "bn" ? "SMS OTP লগইন" : "SMS OTP login"}
                         </p>
                         <button
                           type="button"
                           onClick={() => setShowOtpLogin(false)}
-                          className="text-[11px] font-medium text-muted-foreground underline-offset-2 hover:underline"
+                          className="text-xs font-medium text-slate-600 underline-offset-2 hover:underline"
                         >
                           {otpHideLabel}
                         </button>
@@ -353,11 +259,13 @@ export function LoginForm({ resetSuccess = false }: { resetSuccess?: boolean }) 
                   )}
                 </div>
 
-                <div className="mt-5 border-t border-border/50 pt-4 sm:hidden">
-                  <Button asChild variant="outline" className="h-11 w-full rounded-xl font-semibold">
-                    <Link href={registerHref}>{copy.newPlayerCta}</Link>
-                  </Button>
-                </div>
+                <p className="mt-5 border-t border-border/50 pt-4 text-center text-sm">
+                  <span className="text-slate-600">{copy.newPlayer} </span>
+                  <Link href={registerHref} className="inline-flex items-center gap-1 font-bold text-accent hover:underline">
+                    {copy.newPlayerCta}
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </Link>
+                </p>
               </div>
             </div>
           </motion.div>

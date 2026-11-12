@@ -1,106 +1,74 @@
 import type { UiLocale } from "@/src/lib/ui-locale";
-import { FOUNDER_LAUNCH_COPY } from "@/src/lib/founder-launch-copy";
-import { JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT } from "@/src/lib/journey-prices";
 
 export interface AuthRegisterCopy {
   readonly eyebrow: string;
   readonly title: string;
   readonly subtitle: string;
-  readonly belief: string;
+  readonly chips: readonly string[];
+  /** Shown when this browser has guest wins: they move into the new account. */
+  readonly savedWins: (wins: number, topic: string) => string;
   readonly missionChip: string;
   readonly formLead: string;
   readonly googleCta: string;
+  readonly otherWays: string;
+  readonly hideOtherWays: string;
+  readonly phoneDivider: string;
+  readonly emailDivider: string;
   readonly emailLabel: string;
   readonly emailPlaceholder: string;
   readonly submit: string;
   readonly submitting: string;
   readonly hasAccount: string;
   readonly signIn: string;
-  readonly heroTitle: string;
-  readonly heroSubtitle: string;
-  readonly heroBullets: readonly string[];
-  readonly heroFootnote: string;
-  readonly promoTitle: string;
-  readonly promoBody: string;
-  readonly promoLink: string;
-  readonly promoCompact: string;
   readonly backHome: string;
-  readonly trustOtp: string;
-  readonly trustFree: string;
-  readonly trustSecure: string;
 }
 
 function buildAuthRegisterCopy(locale: UiLocale): AuthRegisterCopy {
-  const founder = FOUNDER_LAUNCH_COPY[locale];
   if (locale === "bn") {
     return {
-      eyebrow: "আমরা আপনার জন্য অপেক্ষায় আছি",
-      title: "Level 1 ফ্রি খেলুন",
-      subtitle:
-        "ইংরেজি শেখা কঠিন নয়। এটা একটা গেম। খেলতে খেলতেই ইংরেজি শেখা হবে।",
-      belief: "আমরা বিশ্বাস করি আপনি ইংরেজি শেখার এই গেমে জিততে পারবেন।",
-      missionChip: "Level 01 · Word Order · সম্পূর্ণ ফ্রি",
-      formLead:
-        "ইমেইল লিখুন। আমরা একটি কোড পাঠাব। কোড দিলে অ্যাকাউন্ট খুলবে এবং Level 1 শুরু হবে।",
-      googleCta: "Google দিয়ে Level 1 শুরু",
+      eyebrow: "Gamlish আপনার অপেক্ষায় 👋",
+      title: "খেলতে খেলতে ইংরেজি শিখুন",
+      subtitle: "নিয়ম মুখস্থ নয়। ছোট ছোট গেমে, সবচেয়ে সহজ পথে আমরা আপনাকে ইংরেজি শেখাব।",
+      chips: ["প্রথম গেমগুলো ফ্রি", "নিজের সময়ে, নিজের গতিতে", "শুরু করতে কোনো পেমেন্ট লাগবে না"],
+      savedWins: (wins, topic) =>
+        `আপনার ${wins}টি জয় এই ব্রাউজারে সেভ আছে। অ্যাকাউন্ট খুললেই ${topic}-এর গেম ${wins + 1} খুলে যাবে।`,
+      missionChip: "লেভেল 1 · শুরু Subject দিয়ে",
+      formLead: "মাত্র 1 মিনিটেই শুরু করুন",
+      googleCta: "Google দিয়ে শুরু করুন",
+      otherWays: "অন্যভাবে খুলুন: ফোন বা ইমেইল",
+      hideOtherWays: "শুধু Google দেখান",
+      phoneDivider: "ফোন নম্বর দিয়ে",
+      emailDivider: "অথবা ইমেইল দিয়ে",
       emailLabel: "ইমেইল ঠিকানা",
       emailPlaceholder: "you@example.com",
-      submit: "কোড নিন · Level 1 খুলুন",
+      submit: "কোড নিন, অ্যাকাউন্ট খুলুন",
       submitting: "কোড পাঠানো হচ্ছে…",
       hasAccount: "আগে থেকেই অ্যাকাউন্ট আছে?",
       signIn: "লগইন করুন",
-      heroTitle: "ইংরেজি শেখা কঠিন নয়। এটা একটা গেম।",
-      heroSubtitle:
-        "কঠিন বইয়ের চাপ নয়। খেলতে খেলতে শিখুন। আমরা বিশ্বাস করি আপনি জিততে পারবেন।",
-      heroBullets: [
-        "এখন কোনো টাকা লাগে না",
-        "Level 1 পুরোটা ফ্রি খেলুন",
-        "জিতলেই পরের লেভেল খুলবে",
-      ],
-      heroFootnote: "শুধু খেলুন। জেতাই শেখা।",
-      promoTitle: founder.eyebrow,
-      promoBody: `${founder.intro} ${founder.scarcity(JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT)}`,
-      promoLink: "Founder Launch মূল্য দেখুন",
-      promoCompact: "Founder Launch · বিশেষ প্রাথমিক সদস্য মূল্য",
       backHome: "হোমে ফিরে যান",
-      trustOtp: "এখন কোনো টাকা লাগে না",
-      trustFree: "Level 1 পুরোটা ফ্রি",
-      trustSecure: "৩০ সেকেন্ডে শুরু",
     };
   }
   return {
-    eyebrow: "We are waiting for you",
-    title: "Play Level 1 free",
-    subtitle:
-      "Learning English isn't hard. It's a game. You learn English by playing.",
-    belief: "We believe you can win this English-learning game.",
-    missionChip: "Level 01 · Word Order · fully free",
-    formLead:
-      "Type your email. We send a code. The code opens your account and starts Level 1.",
-    googleCta: "Start Level 1 with Google",
+    eyebrow: "Gamlish is waiting for you 👋",
+    title: "Learn English while you play",
+    subtitle: "No rules to memorise. Through short, simple games, we'll teach you English the easiest way.",
+    chips: ["First games are free", "On your own time, at your own pace", "No payment needed to start"],
+    savedWins: (wins, topic) =>
+      `Your ${wins} ${wins === 1 ? "win is" : "wins are"} saved in this browser. Create your account and ${topic} Game ${wins + 1} opens for you.`,
+    missionChip: "Level 1 · starts with Subject",
+    formLead: "Get started in just 1 minute",
+    googleCta: "Start with Google",
+    otherWays: "Other ways: phone or email",
+    hideOtherWays: "Show Google only",
+    phoneDivider: "With your phone number",
+    emailDivider: "or with email",
     emailLabel: "Email address",
     emailPlaceholder: "you@example.com",
-    submit: "Get the code · Open Level 1",
+    submit: "Get the code and create account",
     submitting: "Sending code…",
     hasAccount: "Already have an account?",
-    signIn: "Sign in",
-    heroTitle: "Learning English isn't hard. It's just a game.",
-    heroSubtitle:
-      "No heavy books. Learn by playing. We believe you can win.",
-    heroBullets: [
-      "No payment needed right now",
-      "Play all of Level 1 free",
-      "Win it, and the next mission opens",
-    ],
-    heroFootnote: "Just play. Winning is learning.",
-    promoTitle: founder.eyebrow,
-    promoBody: `${founder.intro} ${founder.scarcity(JOURNEY_LIST_PRICE_BDT, JOURNEY_OFFER_PRICE_BDT)}`,
-    promoLink: "See Founder Launch pricing",
-    promoCompact: "Founder Launch · special early-member price on /pricing",
+    signIn: "Log in",
     backHome: "Back to home",
-    trustOtp: "No payment right now",
-    trustFree: "All of Level 1 is free",
-    trustSecure: "Start in 30 seconds",
   };
 }
 

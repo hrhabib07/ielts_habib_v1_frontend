@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -45,6 +45,8 @@ import {
 } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual, ChatLessonLevel, LevelNode, LevelNodeIcon } from "@/src/features/chat-lesson/types";
 import { resetFinalTestRecord } from "@/src/features/final-test/hooks/useFinalTestRecord";
+import { LazyNotesSheet } from "@/src/features/notes/components/LazyNotesSheet";
+import { NOTES_UI } from "@/src/features/notes/copy";
 import { playCorrectEvalSfx, playSoftNotifySfx } from "@/src/lib/player-eval-sfx";
 import { cn } from "@/lib/utils";
 
@@ -178,6 +180,15 @@ function buildPath(
 
     const result = results[node.stepId];
     const done = Boolean(result) || proven.has(node.stepId);
+
+    // Game first: lessons are help, open as soon as their topic opens, and never hold back the games.
+    const isLesson = summary.kind !== "playground" && summary.kind !== "test" && node.icon !== "playground" && node.icon !== "test";
+    if (isLesson) {
+      if (!done && isPaywalled(node.stepId)) return { node, state: "locked", summary, previousTitle, paywalled: true };
+      const open = unlockAll || previousDone;
+      return { node, state: done ? "done" : open ? "open" : "locked", summary, result, previousTitle };
+    }
+
     if (!done && isPaywalled(node.stepId)) {
       everythingDone = false;
       if (!node.optional) previousDone = false;
@@ -232,7 +243,17 @@ function stopParts(stop: Stop): PathItem[] {
   return [stop.test, stop.lesson, ...stop.games].filter((item): item is PathItem => item !== undefined);
 }
 
-/** The single "current" stop is the first unlocked one that is not finished. */
+/** A fresh topic recommends its lesson first; once any game is played, the games lead. */
+function lessonFirst(stop: Stop): boolean {
+  return isOpen(stop.lesson) && !isDone(stop.lesson) && stop.games.length > 0 && !stop.games.some(isDone);
+}
+
+/** The first game of the topic the learner can open right now. */
+function playableGameHref(stop: Stop): string | null {
+  return stop.games.find((game) => isOpen(game) && !game.paywalled)?.summary?.href ?? null;
+}
+
+/** The single "current" stop is the first unlocked one with a game (or test) still to win. */
 function stopStatuses(stops: readonly Stop[]): StopStatus[] {
   let currentAssigned = false;
   return stops.map((stop) => {
@@ -240,6 +261,7 @@ function stopStatuses(stops: readonly Stop[]): StopStatus[] {
     const entry = stop.test ?? stop.lesson ?? stop.games[0];
     if (!isOpen(entry)) return "locked";
     if (parts.every(isDone)) return "complete";
+    if (!stop.test && stop.games.length === 0) return "open";
     if (!currentAssigned) {
       currentAssigned = true;
       return "current";
@@ -286,7 +308,7 @@ function ringSegments(stop: Stop): RingSegment[] | null {
       key: "learn",
       from: 180 + RING_GAP,
       to: 360 - RING_GAP,
-      className: isDone(stop.lesson) ? "stroke-sky-500" : "stroke-slate-200",
+      className: isDone(stop.lesson) ? "stroke-slate-400" : "stroke-slate-200",
     },
   ];
   const span = 180 / stop.games.length;
@@ -295,7 +317,7 @@ function ringSegments(stop: Stop): RingSegment[] | null {
       key: game.node.id,
       from: i * span + RING_GAP,
       to: (i + 1) * span - RING_GAP,
-      className: isDone(game) ? "stroke-violet-500" : "stroke-slate-200",
+      className: isDone(game) ? "stroke-accent" : "stroke-slate-200",
     });
   });
   return segments;
@@ -334,8 +356,8 @@ function ProgressRing({ stop }: { stop: Stop }) {
 /** One palette for the whole map: blue = to do, gold = finished, grey = locked. */
 const BUTTON_TONE: Record<StopStatus, string> = {
   complete: "border-amber-500 bg-amber-400 text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.35)]",
-  current: "border-sky-600 bg-sky-500 text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]",
-  open: "border-sky-600 bg-sky-500 text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]",
+  current: "border-primary bg-accent text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]",
+  open: "border-primary bg-accent text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.3)]",
   locked: "border-slate-300 bg-slate-200 text-slate-400",
 };
 
@@ -358,7 +380,7 @@ function StopNode({
   const locked = status === "locked";
   const isTest = Boolean(stop.test);
   const inProgress = status === "current" || status === "open";
-  const nextIsPlay = Boolean(stop.lesson && isDone(stop.lesson) && stop.games.some((game) => !isDone(game)));
+  const nextIsPlay = !lessonFirst(stop) && stop.games.some((game) => !isDone(game));
   const partlyDone = stopParts(stop).some(isDone);
   const helper = titleHelper(stop.title, lang);
   const stars = status === "complete" && !isTest ? topicStars(stop) : null;
@@ -371,7 +393,7 @@ function StopNode({
             className={cn(
               LANG_FACE[lang],
               "relative block animate-bounce whitespace-nowrap rounded-xl border-2 border-slate-200 bg-white px-3 py-1 text-xs font-black shadow-sm",
-              nextIsPlay ? "text-violet-600" : "text-sky-600",
+              nextIsPlay ? "text-accent" : "text-slate-500",
               lang === "en" && "uppercase tracking-wider",
             )}
           >
@@ -406,7 +428,7 @@ function StopNode({
           aria-expanded={selected}
           aria-label={`${stop.title.en}${helper ? ` (${helper})` : ""}`}
           className={cn(
-            "relative flex items-center justify-center rounded-full border-b-[5px] transition-[colors,transform] duration-200 active:translate-y-1 active:border-b-[1px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-200",
+            "relative flex items-center justify-center rounded-full border-b-[5px] transition-[colors,transform] duration-200 active:translate-y-1 active:border-b-[1px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/20",
             isTest ? "size-[76px]" : "size-16",
             isTest && !locked
               ? "border-amber-600 bg-gradient-to-b from-amber-300 to-amber-500 text-white shadow-[inset_0_2px_0_rgba(255,255,255,0.4)]"
@@ -476,22 +498,24 @@ function PartRow({
   label,
   detail,
   tone,
-  lockedText,
   isNext,
   lang,
   onClose,
+  checkoutHref = null,
 }: {
   number: number;
   item: PathItem;
   label: Bilingual;
   detail: Bilingual;
   tone: "learn" | "play" | "test";
-  lockedText?: Bilingual;
   /** The one part to do next: highlighted, with the main button. */
   isNext: boolean;
   lang: LessonLanguage;
   onClose: () => void;
+  /** Paid parts say why they are locked and link to the unlock step. */
+  checkoutHref?: string | null;
 }) {
+  const unlockHref = item.paywalled && !isDone(item) ? checkoutHref : null;
   const face = LANG_FACE[lang];
   const open = isOpen(item);
   const done = isDone(item);
@@ -507,11 +531,11 @@ function PartRow({
         done
           ? "bg-emerald-50/70 ring-1 ring-emerald-100"
           : tone === "learn"
-            ? "bg-sky-50 ring-1 ring-sky-100"
+            ? "bg-slate-50 ring-1 ring-slate-200"
             : tone === "play"
-              ? "bg-violet-50 ring-1 ring-violet-100"
+              ? "bg-accent/5 ring-1 ring-accent/15"
               : "bg-amber-50 ring-1 ring-amber-100",
-        isNext && (tone === "play" ? "ring-2 ring-violet-400" : tone === "learn" ? "ring-2 ring-sky-400" : "ring-2 ring-amber-400"),
+        isNext && (tone === "play" ? "ring-2 ring-accent" : tone === "learn" ? "ring-2 ring-slate-300" : "ring-2 ring-amber-400"),
       )}
     >
       <span
@@ -522,9 +546,9 @@ function PartRow({
             : !open
               ? "bg-slate-300"
               : tone === "learn"
-                ? "bg-sky-500"
+                ? "bg-slate-400"
                 : tone === "play"
-                  ? "bg-violet-500"
+                  ? "bg-accent"
                   : "bg-amber-400",
         )}
       >
@@ -543,7 +567,7 @@ function PartRow({
             <span
               className={cn(
                 "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] text-white",
-                tone === "play" ? "bg-violet-500" : tone === "learn" ? "bg-sky-500" : "bg-amber-500",
+                tone === "play" ? "bg-accent" : tone === "learn" ? "bg-slate-500" : "bg-amber-500",
               )}
             >
               {pick(UI.nextTag, lang)}
@@ -551,6 +575,12 @@ function PartRow({
           ) : null}
         </p>
         <p className={cn(face, "truncate text-sm font-bold text-slate-800")}>{pick(detail, lang)}</p>
+        {unlockHref ? (
+          <p className={cn(face, "mt-0.5 flex items-center gap-1 text-[11px] font-bold text-amber-700")}>
+            <Lock className="size-3" aria-hidden />
+            {pick(UI.inFullGame, lang)}
+          </p>
+        ) : null}
         {item.result ? (
           <span className="mt-0.5 flex items-center gap-1.5">
             <Stars result={item.result} />
@@ -572,16 +602,27 @@ function PartRow({
               ? "bg-white px-3 py-1.5 font-bold text-slate-500 ring-1 ring-slate-200 hover:bg-slate-50"
               : cn(
                   "border-b-4 px-3.5 py-2 font-extrabold text-white active:border-b-2",
-                  tone === "learn" ? "border-sky-700 bg-sky-500" : tone === "play" ? "border-violet-700 bg-violet-500" : "border-amber-600 bg-amber-400",
+                  tone === "learn" ? "border-slate-600 bg-slate-500" : tone === "play" ? "border-primary bg-accent" : "border-amber-600 bg-amber-400",
                 ),
           )}
         >
           {pick(action, lang)}
         </Link>
+      ) : unlockHref ? (
+        <Link
+          href={unlockHref}
+          onClick={onClose}
+          className={cn(
+            face,
+            "shrink-0 rounded-xl border-b-4 border-amber-600 bg-amber-400 px-3 py-2 text-xs font-extrabold text-white transition-transform active:translate-y-0.5 active:border-b-2",
+            lang === "en" && "uppercase tracking-wide",
+          )}
+        >
+          {pick(UI.unlock, lang)}
+        </Link>
       ) : (
-        <span className={cn(face, "flex shrink-0 items-center gap-1 text-[11px] font-bold text-slate-400")}>
+        <span className="flex shrink-0 items-center text-slate-400">
           <Lock className="size-3.5" aria-hidden />
-          {lockedText ? pick(lockedText, lang) : null}
         </span>
       )}
     </div>
@@ -601,9 +642,9 @@ function PaywallBlock({
   const { paymentPending } = useMissionStore();
   if (paymentPending) {
     return (
-      <div className="rounded-2xl bg-sky-50 p-3.5 ring-1 ring-sky-200">
-        <p className={cn(face, "text-sm font-black text-sky-900")}>{pick(PAY_UI.pendingChip, lang)}</p>
-        <p className={cn(face, "mt-1 text-xs font-semibold leading-relaxed text-sky-800")}>
+      <div className="rounded-2xl bg-accent/5 p-3.5 ring-1 ring-accent/20">
+        <p className={cn(face, "text-sm font-black text-accent")}>{pick(PAY_UI.pendingChip, lang)}</p>
+        <p className={cn(face, "mt-1 text-xs font-semibold leading-relaxed text-slate-700")}>
           {pick(personalizeText(PAY_UI.pending, learner), lang)}
         </p>
       </div>
@@ -693,6 +734,7 @@ function StopCard({
   checkoutHref,
   onClose,
   onOpenStop,
+  onOpenNotes,
 }: {
   stop: Stop;
   status: StopStatus;
@@ -702,15 +744,18 @@ function StopCard({
   checkoutHref: string | null;
   onClose: () => void;
   onOpenStop: (id: string) => void;
+  onOpenNotes: (stepId: string, playHref: string | null) => void;
 }) {
   const face = LANG_FACE[lang];
   const helper = titleHelper(stop.title, lang);
   const parts = stopParts(stop);
   const doneCount = parts.filter(isDone).length;
   const entry = stop.test ?? stop.lesson ?? stop.games[0];
-  const lessonDone = !stop.lesson || isDone(stop.lesson);
   const paywalled = Boolean(entry?.paywalled);
-  const nextPart = parts.find((item) => isOpen(item) && !isDone(item));
+  const nextPart = (lessonFirst(stop) ? [stop.lesson] : [stop.test, ...stop.games, stop.lesson]).find(
+    (item): item is PathItem => item !== undefined && isOpen(item) && !isDone(item),
+  );
+  const notesStepId = stop.lesson && isOpen(stop.lesson) ? stop.lesson.node.stepId : undefined;
   let number = 0;
 
   return (
@@ -768,7 +813,7 @@ function StopCard({
           <PartRow
             number={++number}
             item={stop.lesson}
-            label={UI.partLearn}
+            label={stop.games.length > 0 && !isDone(stop.lesson) ? UI.partLearnFirst : UI.partLearn}
             detail={UI.learnInfo(stop.lesson.summary.parts, stop.lesson.summary.questions)}
             tone="learn"
             isNext={nextPart === stop.lesson}
@@ -791,12 +836,26 @@ function StopCard({
               detail={UI.playInfo(game.summary.parts, game.summary.questions, Math.round((game.summary.passMark ?? 0.8) * 100))}
               tone="play"
               isNext={nextPart === game}
-              lockedText={lessonDone ? undefined : UI.finishLessonFirst}
               lang={lang}
               onClose={onClose}
+              checkoutHref={checkoutHref}
             />
           ) : null,
         )}
+
+        {notesStepId ? (
+          <button
+            type="button"
+            onClick={() => onOpenNotes(notesStepId, playableGameHref(stop))}
+            className={cn(
+              face,
+              "flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-accent ring-1 ring-accent/20 transition-colors hover:bg-accent/5",
+            )}
+          >
+            <BookOpen className="size-3.5" aria-hidden />
+            {pick(UI.quickNotes, lang)}
+          </button>
+        ) : null}
 
         {stop.games.length > 0 && status !== "locked" ? (
           <p className={cn(face, "px-1 text-[11px] font-semibold text-slate-400")}>{pick(UI.neededForTest, lang)}</p>
@@ -829,17 +888,17 @@ function LevelBanner({
   const pct = total === 0 ? 0 : Math.round(((doneLessons + doneGames) / total) * 100);
 
   return (
-    <section className="sticky top-2 z-20 overflow-hidden rounded-2xl border-b-4 border-sky-600 bg-sky-500 px-4 pb-3 pt-3 text-white shadow-lg shadow-sky-900/10">
+    <section className="sticky top-2 z-20 overflow-hidden rounded-2xl border-b-4 border-primary bg-accent px-4 pb-3 pt-3 text-white shadow-lg shadow-primary/10">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className={cn(face, "text-[11px] font-black uppercase tracking-[0.16em] text-sky-100")}>
+          <p className={cn(face, "text-[11px] font-black uppercase tracking-[0.16em] text-accent-foreground/80")}>
             {localizeLabel(level.label, lang)}
           </p>
           <h1 className={cn(face, "mt-0.5 truncate text-lg font-black leading-snug")}>{level.title[lang]}</h1>
         </div>
         <span className={cn(EN_FACE, "shrink-0 rounded-full bg-white/20 px-2.5 py-1 text-xs font-black")}>{pct}%</span>
       </div>
-      <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-sky-700/40">
+      <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-primary/40">
         <motion.div
           className="h-full rounded-full bg-amber-300"
           initial={false}
@@ -847,13 +906,13 @@ function LevelBanner({
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>
-      <div className={cn(face, "mt-2 flex items-center gap-4 text-[11px] font-bold text-sky-50")}>
+      <div className={cn(face, "mt-2 flex items-center gap-4 text-[11px] font-bold text-accent-foreground")}>
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-white" aria-hidden />
           {pick(UI.partLearn, lang)} {doneLessons}/{lessons.length}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-violet-300" aria-hidden />
+          <span className="size-2 rounded-full bg-amber-300" aria-hidden />
           {pick(UI.partPlay, lang)} {doneGames}/{games.length}
         </span>
       </div>
@@ -901,7 +960,7 @@ function Mascot({
         {pick(addressed(line, learner), lang)}
         <span className="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rotate-45 bg-white ring-1 ring-slate-200 [clip-path:polygon(100%_0,100%_100%,0_100%)]" />
       </span>
-      <span className="scale-[1.35] transition-transform group-hover:scale-[1.45] group-active:scale-125 group-focus-visible:ring-4 group-focus-visible:ring-sky-200">
+      <span className="scale-[1.35] transition-transform group-hover:scale-[1.45] group-active:scale-125 group-focus-visible:ring-4 group-focus-visible:ring-accent/20">
         <GuideAvatarPreview />
       </span>
     </button>
@@ -916,6 +975,8 @@ type LevelMapProps = {
   contentSource: "database" | "built-in";
   /** Logged-in route: a back link to the main game. */
   backHref?: string;
+  /** The My Notes page (every topic's notes, without questions). */
+  notesHref?: string;
 };
 
 /** The flags provider lets the guide on the map open the same Gamlish profile as in lessons. */
@@ -945,7 +1006,7 @@ function GuideSheets({ level, lang }: { level: ChatLessonLevel; lang: LessonLang
   );
 }
 
-function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, backHref }: LevelMapProps) {
+function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, backHref, notesHref }: LevelMapProps) {
   const router = useRouter();
   const pathname = usePathname();
   const store = useMissionStore();
@@ -953,6 +1014,9 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
   const lang = useLessonLanguage();
   const face = LANG_FACE[lang];
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<{ stepId: string; playHref: string | null } | null>(null);
+  const closeNotes = useCallback(() => setNotes(null), []);
+  const notesPlayHref = notes?.playHref ?? null;
 
   const path = useMemo(
     () => buildPath(level, summaries, store.results, store.unlockAll, store.isPaywalled),
@@ -1014,7 +1078,7 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
   }, [celebrateStepId, celebrateStopId, nextStopId, pathname, router]);
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-sky-50 via-white to-white">
+    <div className="min-h-dvh bg-background">
       <AnimatePresence>
         {toast ? (
           <motion.div
@@ -1049,7 +1113,21 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
               Demo
             </span>
           )}
-          <LanguageSwitch lang={lang} onChange={setLessonLanguage} />
+          <div className="flex items-center gap-2">
+            {notesHref ? (
+              <Link
+                href={notesHref}
+                className={cn(
+                  face,
+                  "flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-accent shadow-sm ring-1 ring-accent/30 transition-colors hover:bg-accent/5",
+                )}
+              >
+                <BookOpen className="size-3.5" aria-hidden />
+                {pick(UI.myNotes, lang)}
+              </Link>
+            ) : null}
+            <LanguageSwitch lang={lang} onChange={setLessonLanguage} />
+          </div>
         </div>
 
         <LevelBanner level={level} path={path} lang={lang} />
@@ -1083,6 +1161,7 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
                 onSelect={() => setSelectedId((id) => (id === stop.id ? null : stop.id))}
                 onClose={() => setSelectedId(null)}
                 onOpenStop={openStop}
+                onOpenNotes={(stepId, playHref) => setNotes({ stepId, playHref })}
               />
             );
           })}
@@ -1091,6 +1170,13 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
         {store.testingTools ? <TestingTools unlockAll={store.unlockAll} contentSource={contentSource} /> : null}
       </div>
       <GuideSheets level={level} lang={lang} />
+      {notes ? (
+        <LazyNotesSheet
+          stepId={notes.stepId}
+          onClose={closeNotes}
+          action={notesPlayHref ? { label: NOTES_UI.playGame, onClick: () => router.push(notesPlayHref) } : undefined}
+        />
+      ) : null}
     </div>
   );
 }
@@ -1109,6 +1195,7 @@ function StopRow({
   onSelect,
   onClose,
   onOpenStop,
+  onOpenNotes,
 }: {
   stop: Stop;
   status: StopStatus;
@@ -1123,6 +1210,7 @@ function StopRow({
   onSelect: () => void;
   onClose: () => void;
   onOpenStop: (id: string) => void;
+  onOpenNotes: (stepId: string, playHref: string | null) => void;
 }) {
   return (
     <>
@@ -1142,6 +1230,7 @@ function StopRow({
           checkoutHref={checkoutHref}
           onClose={onClose}
           onOpenStop={onOpenStop}
+          onOpenNotes={onOpenNotes}
         />
       ) : null}
     </>
@@ -1171,7 +1260,7 @@ function TestingTools({ unlockAll, contentSource }: { unlockAll: boolean; conten
           className={cn(
             EN_FACE,
             "rounded-full px-3 py-1.5 text-xs font-bold ring-1 transition-colors",
-            unlockAll ? "bg-sky-500 text-white ring-sky-500" : "bg-white text-slate-600 ring-slate-300",
+            unlockAll ? "bg-accent text-white ring-accent" : "bg-white text-slate-600 ring-slate-300",
           )}
         >
           {unlockAll ? "All steps unlocked" : "Unlock all steps"}

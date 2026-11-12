@@ -6,6 +6,8 @@ import { BN_FACE, EN_FACE } from "@/src/features/chat-lesson/components/ChatPrim
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
 import type { ChipTone } from "@/src/features/playground/components/PlaygroundParts";
+import { GuideHand } from "@/src/features/playground/components/GuideHand";
+import { useNudge } from "@/src/features/playground/hooks/useNudge";
 import type { PlayStatus } from "@/src/features/playground/hooks/usePlaygroundSession";
 import { cn } from "@/lib/utils";
 
@@ -71,7 +73,7 @@ export function GameFrame({
       className={cn(
         "rounded-3xl border-2 border-b-[5px] bg-gradient-to-b p-3.5 shadow-sm transition-[border-color,box-shadow] duration-300 sm:p-6",
         FRAME_TONES[tone],
-        active ? "border-sky-300 ring-4 ring-sky-100" : "border-slate-200",
+        active ? "border-accent/35 ring-4 ring-accent/10" : "border-slate-200",
         className,
       )}
     >
@@ -82,10 +84,10 @@ export function GameFrame({
 }
 
 const BIG_TONES: Record<ChipTone, string> = {
-  idle: "border-slate-200 border-b-slate-300 bg-white text-slate-800 hover:border-sky-300 hover:bg-sky-50",
-  selected: "border-sky-400 border-b-sky-500 bg-sky-100 text-sky-900",
+  idle: "border-slate-300 border-b-slate-400 bg-white text-slate-800 shadow-sm enabled:hover:-translate-y-0.5 enabled:hover:border-accent/50 enabled:hover:bg-accent/5 enabled:cursor-pointer",
+  selected: "border-accent/70 border-b-accent bg-accent/10 text-accent",
   lit: "border-amber-400 border-b-amber-500 bg-amber-200 text-amber-950",
-  subject: "border-sky-600 border-b-sky-700 bg-sky-500 text-white",
+  subject: "border-accent border-b-primary bg-accent text-white",
   wrong: "border-orange-300 border-b-orange-400 bg-orange-50 text-orange-700",
   dim: "border-slate-200 border-b-slate-200 bg-white/70 text-slate-400",
 };
@@ -99,6 +101,8 @@ export function BigChoice({
   lang,
   icon,
   shakeKey,
+  nudgeIndex = 0,
+  guide = false,
   onClick,
   className,
 }: {
@@ -109,12 +113,17 @@ export function BigChoice({
   lang: LessonLanguage;
   icon?: ReactNode;
   shakeKey?: number;
+  nudgeIndex?: number;
+  /** Practice question: the pointing hand taps this option. */
+  guide?: boolean;
   onClick: () => void;
   className?: string;
 }) {
   const reduceMotion = useReducedMotion();
+  const nudgeRef = useNudge<HTMLButtonElement>(!disabled && tone === "idle", nudgeIndex);
   return (
     <motion.button
+      ref={nudgeRef}
       type="button"
       key={tone === "wrong" ? `wrong-${shakeKey ?? 0}` : undefined}
       disabled={disabled}
@@ -122,12 +131,14 @@ export function BigChoice({
       animate={tone === "wrong" && !reduceMotion ? { x: [0, -7, 7, -5, 5, 0] } : { x: 0 }}
       transition={{ duration: 0.4 }}
       className={cn(
-        "flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-2xl border-2 border-b-4 px-3 py-2 text-center transition-colors duration-150",
+        "relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-2xl border-2 border-b-[5px] px-3 py-2 text-center transition-[color,background-color,border-color,translate] duration-150",
         "enabled:active:translate-y-0.5 enabled:active:border-b-2 disabled:cursor-default",
         BIG_TONES[tone],
+        guide && "ring-4 ring-amber-300/70",
         className,
       )}
     >
+      {guide ? <GuideHand /> : null}
       <span className={cn(EN_FACE, "flex items-center gap-1.5 text-base font-black leading-tight sm:text-lg")}>
         {icon}
         {label}
@@ -137,7 +148,7 @@ export function BigChoice({
           className={cn(
             LANG_FACE[lang],
             "text-[11.5px] font-semibold leading-tight sm:text-xs",
-            tone === "subject" ? "text-sky-50" : "text-slate-500",
+            tone === "subject" ? "text-accent-foreground" : "text-slate-500",
           )}
         >
           {pick(sub, lang)}
@@ -196,7 +207,7 @@ export function BlankSlot({ value, tone }: { value: string | null; tone: ChipTon
       className={cn(
         EN_FACE,
         "inline-flex min-w-[4.5rem] items-center justify-center rounded-xl border-2 border-b-4 px-3 py-1 text-lg font-black sm:min-w-24 sm:text-2xl",
-        value ? BIG_TONES[tone] : "border-dashed border-sky-300 bg-sky-50/70 text-sky-300",
+        value ? BIG_TONES[tone] : "border-dashed border-accent/35 bg-accent/5 text-accent/35",
       )}
     >
       {value ?? "?"}

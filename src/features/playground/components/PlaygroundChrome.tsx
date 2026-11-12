@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Flame, Lightbulb, RotateCcw, Sparkles, Volume2, VolumeX, X, Zap } from "lucide-react";
+import { BookOpen, Check, Flame, Lightbulb, Lock, RotateCcw, Sparkles, X, Zap } from "lucide-react";
 import { EN_FACE } from "@/src/features/chat-lesson/components/ChatPrimitives";
-import { LanguageSwitch } from "@/src/features/chat-lesson/components/LessonChrome";
-import { setLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
+import { GameSettingsMenu, ICON_BUTTON } from "@/src/features/playground/components/GameSettingsMenu";
 import { FeedbackText } from "@/src/features/playground/components/PlaygroundParts";
-import { setAutoVoice } from "@/src/features/playground/hooks/useAutoVoice";
 import type { Feedback, PlayStatus } from "@/src/features/playground/hooks/usePlaygroundSession";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import type { SessionRound } from "@/src/features/playground/types";
@@ -19,89 +17,112 @@ import { cn } from "@/lib/utils";
 
 const POP = { type: "spring", stiffness: 420, damping: 18 } as const;
 
-export function VoiceToggle({ on, lang }: { on: boolean; lang: LessonLanguage }) {
-  const label = pick(on ? PG_UI.autoVoiceOn : PG_UI.autoVoiceOff, lang);
+/** The topic's notes, next to the game title for the whole game. */
+export function NotesButton({ lang, onOpen }: { lang: LessonLanguage; onOpen: () => void }) {
   return (
     <button
       type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      title={label}
-      onClick={() => setAutoVoice(!on)}
+      aria-label={pick(PG_UI.openNotes, lang)}
+      title={pick(PG_UI.openNotes, lang)}
+      onClick={onOpen}
       className={cn(
         LANG_FACE[lang],
-        "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-sm ring-1 transition-colors active:scale-95",
-        on ? "bg-sky-500 text-white ring-sky-500" : "bg-white text-slate-500 ring-slate-200 hover:bg-slate-50",
+        "flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-sm font-bold text-accent shadow-sm ring-1 ring-accent/30 transition-colors hover:bg-accent/5 active:scale-95",
       )}
     >
-      {on ? <Volume2 className="size-3.5" aria-hidden /> : <VolumeX className="size-3.5" aria-hidden />}
-      <span className="hidden sm:inline">{label}</span>
+      <BookOpen className="size-4" aria-hidden />
+      {pick(PG_UI.notes, lang)}
     </button>
+  );
+}
+
+function ProgressSegment({ fill, review }: { fill: number; review: boolean }) {
+  return (
+    <div
+      className={cn(
+        "h-3 flex-1 overflow-hidden rounded-full ring-1 sm:h-3.5",
+        review ? "bg-amber-100 ring-amber-200" : "bg-slate-100 ring-slate-200/70",
+      )}
+    >
+      <motion.div
+        className={cn("h-full rounded-full", review ? "bg-amber-400" : "bg-accent")}
+        initial={false}
+        animate={{ width: `${Math.round(fill * 100)}%` }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      />
+    </div>
   );
 }
 
 export function PlaygroundHeader({
   backHref,
+  onExit,
   rounds,
+  lockedRounds = 0,
   roundIndex,
   answeredInRound,
-  roundTitle,
   streak,
   xp,
   autoVoice,
   lang,
+  onHelp,
+  onNotes,
 }: {
   backHref?: string;
+  /** Used instead of `backHref` where leaving is a screen change, not a page (the guest welcome). */
+  onExit?: () => void;
   rounds: readonly SessionRound[];
+  /** Games after these that need an account; shown as locked segments. */
+  lockedRounds?: number;
   roundIndex: number;
   answeredInRound: number;
-  roundTitle: Bilingual | null;
   streak: number;
   xp: number;
   autoVoice: boolean;
   lang: LessonLanguage;
+  onHelp?: (origin: { x: number; y: number }) => void;
+  onNotes?: () => void;
 }) {
-  const segments = rounds.length > 0 ? rounds : [null];
+  const indexed = rounds.map((round, i) => ({ round, i }));
+  const games = indexed.filter(({ round }) => round.kind !== "review");
+  const reviews = indexed.filter(({ round }) => round.kind === "review");
+  const fillOf = (round: SessionRound, i: number) =>
+    i < roundIndex ? 1 : i === roundIndex ? answeredInRound / Math.max(round.items.length, 1) : 0;
+  const exitLabel = pick(onExit ? PG_UI.exitToStart : PG_UI.close, lang);
   return (
-    <header className="shrink-0 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex w-full max-w-3xl items-center gap-2.5 px-3 pt-2 sm:gap-3 sm:px-4 sm:pt-3">
+    <header className="shrink-0 border-b border-slate-200/80 bg-white">
+      <div className="mx-auto flex w-full max-w-3xl items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5">
         {backHref ? (
-          <Link
-            href={backHref}
-            aria-label={pick(PG_UI.close, lang)}
-            className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
-          >
+          <Link href={backHref} aria-label={exitLabel} title={exitLabel} className={ICON_BUTTON}>
             <X className="size-5" aria-hidden />
           </Link>
+        ) : onExit ? (
+          <button type="button" onClick={onExit} aria-label={exitLabel} title={exitLabel} className={ICON_BUTTON}>
+            <X className="size-5" aria-hidden />
+          </button>
         ) : null}
 
-        <div className="flex flex-1 gap-1.5" role="progressbar" aria-valuenow={roundIndex + 1} aria-valuemax={segments.length}>
-          {segments.map((round, i) => {
-            const total = round?.items.length ?? 1;
-            const fill = i < roundIndex ? 1 : i === roundIndex ? answeredInRound / total : 0;
-            return (
-              <div
-                key={round?.id ?? i}
-                className={cn(
-                  "h-3 flex-1 overflow-hidden rounded-full ring-1 sm:h-3.5",
-                  round?.kind === "review" ? "bg-amber-100 ring-amber-200" : "bg-slate-100 ring-slate-200/70",
-                )}
-              >
-                <motion.div
-                  className={cn(
-                    "h-full rounded-full",
-                    round?.kind === "review"
-                      ? "bg-amber-400"
-                      : "bg-gradient-to-r from-violet-400 via-sky-400 to-emerald-400",
-                  )}
-                  initial={false}
-                  animate={{ width: `${Math.round(fill * 100)}%` }}
-                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                />
-              </div>
-            );
-          })}
+        <div
+          className="flex flex-1 items-center gap-1.5"
+          role="progressbar"
+          aria-valuenow={Math.min(roundIndex + 1, games.length)}
+          aria-valuemax={games.length + lockedRounds}
+        >
+          {games.map(({ round, i }) => (
+            <ProgressSegment key={round.id} fill={fillOf(round, i)} review={false} />
+          ))}
+          {Array.from({ length: lockedRounds }, (_, i) => (
+            <div
+              key={`locked-${i}`}
+              title={pick(PG_UI.lockedRound, lang)}
+              className="flex h-3 flex-1 items-center justify-center rounded-full border border-dashed border-slate-300 bg-slate-50 sm:h-3.5"
+            >
+              <Lock className="size-2.5 text-slate-400" aria-hidden />
+            </div>
+          ))}
+          {reviews.map(({ round, i }) => (
+            <ProgressSegment key={round.id} fill={fillOf(round, i)} review />
+          ))}
         </div>
 
         <AnimatePresence>
@@ -128,30 +149,14 @@ export function PlaygroundHeader({
           transition={POP}
           className={cn(
             EN_FACE,
-            "flex shrink-0 items-center gap-1 rounded-full bg-violet-50 px-2.5 py-1 text-sm font-black text-violet-700 ring-1 ring-violet-200",
+            "flex shrink-0 items-center gap-1 rounded-full bg-accent/5 px-2.5 py-1 text-sm font-black text-accent ring-1 ring-accent/20",
           )}
         >
-          <Zap className="size-4 fill-violet-400 text-violet-500" aria-hidden />
+          <Zap className="size-4 fill-accent/70 text-accent" aria-hidden />
           {xp}
         </motion.span>
-      </div>
 
-      <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-3 pb-2 pt-1.5 sm:px-4 sm:pb-2.5 sm:pt-2">
-        <p className={cn(LANG_FACE[lang], "flex min-w-0 items-center gap-2 text-xs font-semibold text-slate-500")}>
-          <span
-            className={cn(
-              EN_FACE,
-              "shrink-0 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-violet-700",
-            )}
-          >
-            {PG_UI.badge.en}
-          </span>
-          {roundTitle ? <span className="truncate">{pick(roundTitle, lang)}</span> : null}
-        </p>
-        <div className="flex shrink-0 items-center gap-2">
-          <VoiceToggle on={autoVoice} lang={lang} />
-          <LanguageSwitch lang={lang} onChange={setLessonLanguage} />
-        </div>
+        <GameSettingsMenu lang={lang} autoVoice={autoVoice} onNotes={onNotes} onHelp={onHelp} />
       </div>
     </header>
   );
@@ -173,16 +178,16 @@ const SHEET_TONE = {
     button: "border-orange-600 bg-orange-400 hover:bg-orange-400/90",
   },
   revealed: {
-    panel: "border-sky-200 bg-sky-50",
-    icon: "bg-sky-500",
-    title: "text-sky-700",
+    panel: "border-accent/20 bg-accent/5",
+    icon: "bg-accent",
+    title: "text-accent",
     body: "text-slate-800",
-    button: "border-sky-700 bg-sky-500 hover:bg-sky-500/90",
+    button: "border-primary bg-accent hover:bg-accent/90",
   },
 } as const;
 
 const BUTTON =
-  "flex h-12 w-full items-center justify-center rounded-2xl border-b-4 text-base font-extrabold text-white transition-all active:translate-y-0.5 active:border-b-2 sm:h-13 sm:w-52";
+  "flex h-12 w-full items-center justify-center rounded-2xl border-b-4 text-base font-extrabold text-white transition-all active:translate-y-0.5 active:border-b-2 sm:h-13";
 
 export function PlaygroundFooter({
   status,
@@ -193,6 +198,9 @@ export function PlaygroundFooter({
   onCheck,
   onRetry,
   onNext,
+  practice = false,
+  lastInGame = false,
+  onNotes,
 }: {
   status: PlayStatus;
   ready: boolean;
@@ -202,6 +210,12 @@ export function PlaygroundFooter({
   onCheck: () => void;
   onRetry: () => void;
   onNext: () => void;
+  /** The guided first question: after it, tell the learner the real questions start. */
+  practice?: boolean;
+  /** Last question of this game: Continue becomes Finish game. */
+  lastInGame?: boolean;
+  /** Set while the learner keeps missing: offers the topic notes under a wrong answer. */
+  onNotes?: () => void;
 }) {
   const learner = useLearner();
   const face = LANG_FACE[lang];
@@ -211,25 +225,33 @@ export function PlaygroundFooter({
     const checking = status === "checking";
     const disabled = !ready || checking;
     return (
-      <div className="shrink-0 border-t-2 border-slate-200/80 bg-white pb-[max(env(safe-area-inset-bottom),0.625rem)] pt-2.5 sm:pt-3">
-        <div className="mx-auto flex w-full max-w-3xl justify-end px-3 sm:px-4">
-          <button
+      <motion.div
+        className="shrink-0 border-t-2 border-slate-200/80 bg-white pb-[max(env(safe-area-inset-bottom),0.625rem)] pt-2.5 sm:pt-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: 0.18, ease: "easeOut" } }}
+      >
+        <div className="mx-auto flex w-full max-w-3xl px-3 sm:px-6">
+          <motion.button
+            key={disabled ? "off" : "on"}
             type="button"
             onClick={onCheck}
             disabled={disabled}
+            initial={disabled ? false : { scale: 0.96 }}
+            animate={disabled ? undefined : { scale: [0.96, 1.03, 1] }}
+            transition={{ duration: 0.35 }}
             className={cn(
               face,
               BUTTON,
               caps,
               disabled
                 ? "cursor-not-allowed border-slate-300 bg-slate-200 text-slate-400"
-                : "border-sky-700 bg-sky-500 hover:bg-sky-500/90",
+                : "border-primary bg-accent shadow-lg shadow-accent/25 hover:bg-accent/90",
             )}
           >
-            {pick(checking ? PG_UI.checking : PG_UI.check, lang)}
-          </button>
+            {pick(checking ? PG_UI.checking : disabled ? PG_UI.answerFirst : PG_UI.check, lang)}
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -242,7 +264,14 @@ export function PlaygroundFooter({
         : PG_UI.revealTitle;
   const Icon = feedback.tone === "correct" ? Check : feedback.tone === "retry" ? RotateCcw : Lightbulb;
   const action = feedback.tone === "retry" ? onRetry : onNext;
-  const label = feedback.tone === "retry" ? PG_UI.tryAgain : feedback.tone === "correct" ? PG_UI.continue : PG_UI.gotIt;
+  const moveOn = feedback.tone !== "retry";
+  const label = !moveOn
+    ? PG_UI.tryAgain
+    : lastInGame
+      ? PG_UI.finishGame
+      : feedback.tone === "correct"
+        ? PG_UI.continue
+        : PG_UI.gotIt;
 
   return (
     <motion.div
@@ -250,11 +279,10 @@ export function PlaygroundFooter({
       role="status"
       aria-live="polite"
       className={cn("shrink-0 border-t-2 pb-[max(env(safe-area-inset-bottom),0.625rem)] pt-3 sm:pt-4", tone.panel)}
-      initial={{ y: 60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      initial={{ y: 16, opacity: 0.6 }}
+      animate={{ y: 0, opacity: 1, transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] } }}
     >
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-2.5 px-3 sm:flex-row sm:items-center sm:gap-4 sm:px-4">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-2.5 px-3 sm:gap-3 sm:px-6">
         <div className="flex min-w-0 flex-1 items-start gap-3">
           <motion.span
             className={cn("mt-0.5 hidden size-12 shrink-0 items-center justify-center rounded-full text-white sm:flex", tone.icon)}
@@ -268,13 +296,18 @@ export function PlaygroundFooter({
             <div className="flex flex-wrap items-center gap-2">
               <p className={cn(face, "text-lg font-black sm:text-xl", tone.title)}>{pick(title, lang)}</p>
               {feedback.xp > 0 ? (
-                <span className={cn(EN_FACE, "rounded-full bg-violet-500 px-2 py-0.5 text-xs font-black text-white")}>
+                <motion.span
+                  className={cn(EN_FACE, "rounded-full bg-accent px-2 py-0.5 text-xs font-black text-white")}
+                  initial={{ scale: 0.7, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ ...POP, delay: 0.05 }}
+                >
                   {pick(PG_UI.xp(feedback.xp), lang)}
-                </span>
+                </motion.span>
               ) : null}
               {feedback.brave ? (
                 <span
-                  className={cn(face, "flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-xs font-black text-violet-700")}
+                  className={cn(face, "flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-xs font-black text-accent")}
                 >
                   <Sparkles className="size-3.5" aria-hidden />
                   {pick(PG_UI.brave, lang)}
@@ -291,7 +324,34 @@ export function PlaygroundFooter({
             </div>
             <FeedbackText text={feedback.body} lang={lang} className={cn("mt-0.5 text-sm sm:mt-1 sm:text-base", tone.body)} />
             {feedback.note ? (
-              <FeedbackText text={feedback.note} lang={lang} className="mt-1 text-xs font-semibold text-violet-700 sm:text-sm" />
+              <FeedbackText text={feedback.note} lang={lang} className="mt-1 text-xs font-semibold text-accent sm:text-sm" />
+            ) : null}
+            {practice && moveOn ? (
+              <motion.p
+                className={cn(face, "mt-2 inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-xs font-black text-accent shadow-sm ring-1 ring-accent/20 sm:text-sm")}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Sparkles className="size-3.5" aria-hidden />
+                {pick(PG_UI.practiceDone, lang)}
+              </motion.p>
+            ) : null}
+            {onNotes && feedback.tone !== "correct" ? (
+              <motion.button
+                type="button"
+                onClick={onNotes}
+                className={cn(
+                  face,
+                  "mt-2 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-black text-accent shadow-sm ring-1 ring-accent/30 transition-colors hover:bg-accent/5 sm:text-sm",
+                )}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <BookOpen className="size-3.5" aria-hidden />
+                {pick(PG_UI.stuckNotes, lang)}
+              </motion.button>
             ) : null}
           </div>
         </div>

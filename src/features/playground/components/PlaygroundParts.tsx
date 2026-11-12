@@ -8,6 +8,8 @@ import { useLessonSpeech } from "@/src/features/chat-lesson/hooks/useLessonSpeec
 import { spokenWords } from "@/src/features/chat-lesson/lib/speechText";
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
+import { GuideHand } from "@/src/features/playground/components/GuideHand";
+import { useNudge } from "@/src/features/playground/hooks/useNudge";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import { cn } from "@/lib/utils";
 
@@ -34,10 +36,10 @@ export function chunkAt(words: readonly string[], wordIndex: number | null): num
 export type ChipTone = "idle" | "selected" | "lit" | "subject" | "wrong" | "dim";
 
 const CHIP_TONES: Record<ChipTone, string> = {
-  idle: "border-slate-200 border-b-slate-300 bg-white text-slate-800 hover:border-sky-300 hover:bg-sky-50",
-  selected: "border-sky-400 border-b-sky-500 bg-sky-100 text-sky-900",
+  idle: "border-slate-300 border-b-slate-400 bg-white text-slate-800 shadow-sm enabled:hover:-translate-y-0.5 enabled:hover:border-accent/50 enabled:hover:bg-accent/5 enabled:cursor-pointer",
+  selected: "border-accent/70 border-b-accent bg-accent/10 text-accent",
   lit: "border-amber-400 border-b-amber-500 bg-amber-200 text-amber-950",
-  subject: "border-sky-600 border-b-sky-700 bg-sky-500 text-white",
+  subject: "border-accent border-b-primary bg-accent text-white",
   wrong: "border-orange-300 border-b-orange-400 bg-orange-50 text-orange-700",
   dim: "border-slate-200 border-b-slate-200 bg-white/70 text-slate-500",
 };
@@ -49,6 +51,8 @@ export function WordChip({
   disabled = false,
   shakeKey,
   tag,
+  nudgeIndex = 0,
+  guide = false,
   onClick,
   className,
 }: {
@@ -59,12 +63,18 @@ export function WordChip({
   /** Changing this replays the shake (used for wrong answers). */
   shakeKey?: string | number;
   tag?: string;
+  /** Order in the idle bounce, so a row of chips ripples left to right. */
+  nudgeIndex?: number;
+  /** Practice question: the pointing hand taps this chip. */
+  guide?: boolean;
   onClick?: () => void;
   className?: string;
 }) {
   const reduceMotion = useReducedMotion();
+  const nudgeRef = useNudge<HTMLButtonElement>(!disabled && tone === "idle", nudgeIndex);
   return (
     <motion.button
+      ref={nudgeRef}
       type="button"
       key={tone === "wrong" ? `wrong-${shakeKey ?? ""}` : undefined}
       onClick={onClick}
@@ -73,25 +83,28 @@ export function WordChip({
         tone === "wrong" && !reduceMotion
           ? { x: [0, -7, 7, -5, 5, 0] }
           : tone === "subject" && !reduceMotion
-            ? { scale: [1, 1.08, 1] }
-            : { x: 0, scale: 1 }
+            ? { boxShadow: ["0 0 0 0 rgba(30,58,138,0.35)", "0 0 0 8px rgba(30,58,138,0)"] }
+            : { x: 0 }
       }
-      transition={{ duration: 0.4 }}
+      transition={{ duration: tone === "subject" ? 0.6 : 0.4, ease: "easeOut" }}
       className={cn(
         EN_FACE,
-        "relative rounded-xl border-2 border-b-4 px-2.5 py-1.5 text-base font-bold leading-snug transition-colors duration-150 sm:rounded-2xl sm:px-4 sm:py-2.5 sm:text-xl",
+        "relative rounded-xl border-2 border-b-[5px] px-3 py-1.5 text-base font-bold leading-snug sm:rounded-2xl sm:px-4 sm:py-2.5 sm:text-xl",
+        tone !== "subject" && "transition-[color,background-color,border-color,translate] duration-150",
         "enabled:active:translate-y-0.5 enabled:active:border-b-2 disabled:cursor-default",
         CHIP_TONES[tone],
         spoken && "ring-4 ring-amber-200",
+        guide && "ring-4 ring-amber-300/70",
         className,
       )}
     >
+      {guide ? <GuideHand /> : null}
       {tag ? (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-sky-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-sm">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-sm">
           {tag}
         </span>
       ) : null}
-      {children}
+      <span className={cn("relative", tone === "subject" && "text-white")}>{children}</span>
     </motion.button>
   );
 }
@@ -120,8 +133,8 @@ function RoundIconButton({
         "flex size-9 shrink-0 items-center justify-center rounded-xl border-2 border-b-4 transition-all active:translate-y-0.5 active:border-b-2 sm:size-11 sm:rounded-2xl",
         tone === "sky"
           ? active
-            ? "border-sky-600 bg-sky-500 text-white"
-            : "border-sky-200 border-b-sky-300 bg-white text-sky-600 hover:bg-sky-50"
+            ? "border-accent bg-accent text-white"
+            : "border-accent/20 border-b-accent/35 bg-white text-accent hover:bg-accent/5"
           : active
             ? "border-emerald-600 bg-emerald-500 text-white"
             : "border-emerald-200 border-b-emerald-300 bg-white text-emerald-600 hover:bg-emerald-50",
@@ -235,7 +248,7 @@ export function SentenceCard({
     <div
       className={cn(
         "rounded-3xl border-2 border-b-[5px] bg-white p-3.5 shadow-sm transition-[border-color,box-shadow] duration-300 sm:p-6",
-        active ? "border-sky-300 ring-4 ring-sky-100" : "border-slate-200",
+        active ? "border-accent/35 ring-4 ring-accent/10" : "border-slate-200",
       )}
     >
       <div className="flex min-h-9 items-center justify-between gap-2">
@@ -255,7 +268,7 @@ export function SentenceCard({
 export function FeedbackText({ text, lang, className }: { text: Bilingual; lang: LessonLanguage; className?: string }) {
   return (
     <p className={cn(LANG_FACE[lang], "leading-relaxed", className)}>
-      <RichText text={pick(text, lang)} strongClassName="text-sky-700" />
+      <RichText text={pick(text, lang)} strongClassName="text-accent" />
     </p>
   );
 }
@@ -267,7 +280,7 @@ export function StepPill({ text, lang, tone }: { text: Bilingual; lang: LessonLa
       className={cn(
         LANG_FACE[lang],
         "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-black",
-        tone === "now" ? "bg-sky-100 text-sky-700" : "bg-emerald-100 text-emerald-700",
+        tone === "now" ? "bg-accent/10 text-accent" : "bg-emerald-100 text-emerald-700",
       )}
     >
       {tone === "done" ? <Check className="size-3.5" strokeWidth={3} aria-hidden /> : null}
@@ -306,7 +319,7 @@ export const TypedField = forwardRef<
       placeholder={placeholder}
       className={cn(
         EN_FACE,
-        "min-w-[8ch] max-w-full rounded-2xl border-2 border-b-4 border-dashed border-sky-300 bg-sky-50/70 px-3 py-1.5 text-lg font-bold text-sky-900 outline-none transition-colors [field-sizing:content] placeholder:font-semibold placeholder:text-sky-300 focus:border-solid focus:border-sky-500 focus:bg-white sm:px-3.5 sm:py-2 sm:text-2xl",
+        "min-w-[8ch] max-w-full rounded-2xl border-2 border-b-4 border-dashed border-accent/35 bg-accent/5 px-3 py-1.5 text-lg font-bold text-accent outline-none transition-colors [field-sizing:content] placeholder:font-semibold placeholder:text-accent/35 focus:border-solid focus:border-accent focus:bg-white sm:px-3.5 sm:py-2 sm:text-2xl",
         retry && "border-solid border-orange-300 bg-orange-50 text-orange-800",
         className,
       )}

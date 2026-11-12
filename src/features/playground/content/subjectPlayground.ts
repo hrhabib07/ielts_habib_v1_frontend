@@ -593,6 +593,7 @@ export const SUBJECT_PLAYGROUND: Playground = {
   id: "level-1-playground-subject",
   afterStepId: "level-1-step-3-subject",
   title: { en: "Subject Playground", bn: "সাবজেক্ট প্লেগ্রাউন্ড" },
+  topic: { en: "Subject", bn: "Subject" },
   rounds: [
     {
       id: "ask-first",
@@ -602,9 +603,15 @@ export const SUBJECT_PLAYGROUND: Playground = {
         en: "{name}, find the Subject with one question: Who or What?",
         bn: "{name}, একটি প্রশ্নেই Subject খুঁজে বের করুন: কে, নাকি কী?",
       },
-      instruction: {
-        en: "Who or What? Pick one. Then tap the Subject.",
-        bn: "কে, নাকি কী? একটি বেছে নিন। তারপর Subject-এ ট্যাপ করুন।",
+      instruction: { en: "Who or What? Then tap the Subject.", bn: "কে, নাকি কী? তারপর Subject-এ ট্যাপ করুন।" },
+      steps: [
+        { en: "Which question finds the Subject: Who or What?", bn: "কে, নাকি কী দিয়ে প্রশ্ন করলে Subject পাওয়া যাবে?" },
+        { en: "Now tap the answer in the sentence. That's the Subject.", bn: "এবার বাক্যে উত্তরটা খুঁজে ট্যাপ করুন। উত্তরটাই Subject।" },
+      ],
+      rule: {
+        text: { en: "The Subject does the action. Ask Who for people, What for things.", bn: "কাজটি যে করে, সে-ই Subject। মানুষ হলে Who (কে), জিনিস হলে What (কী)।" },
+        example: "Rafi plays cricket.",
+        mark: "Rafi",
       },
       pick: 5,
       items: ASK_FIRST,
@@ -617,9 +624,11 @@ export const SUBJECT_PLAYGROUND: Playground = {
         en: "A Subject can be many words. Catch all of them!",
         bn: "Subject অনেকগুলো শব্দেরও হতে পারে। সবগুলো ধরুন!",
       },
-      instruction: {
-        en: "Stretch the light over the whole Subject.",
-        bn: "আলোটি টেনে পুরো Subject-এর ওপর ছড়িয়ে দিন।",
+      instruction: { en: "Tap the last word of the Subject.", bn: "Subject-এর শেষ শব্দে ট্যাপ করুন।" },
+      rule: {
+        text: { en: "A Subject can be many words. Take all of them.", bn: "Subject অনেকগুলো শব্দেরও হতে পারে। সবগুলো নিন।" },
+        example: "The boys in the park play cricket.",
+        mark: "The boys in the park",
       },
       pick: 5,
       items: STRETCH,
@@ -632,9 +641,11 @@ export const SUBJECT_PLAYGROUND: Playground = {
         en: "Commands hide their Subject. Can you find it?",
         bn: "আদেশের বাক্যে Subject লুকিয়ে থাকে। খুঁজে পাবেন?",
       },
-      instruction: {
-        en: "Find the Subject. Can't see it? Tap the hidden You.",
-        bn: "Subject খুঁজে বের করুন। দেখা যাচ্ছে না? লুকানো You-তে ট্যাপ করুন।",
+      instruction: { en: "Tap the Subject. Hidden? Tap You.", bn: "Subject-এ ট্যাপ করুন। লুকানো থাকলে You-তে ট্যাপ করুন।" },
+      rule: {
+        text: { en: "Orders hide the Subject. It is always You.", bn: "আদেশের বাক্যে Subject লুকানো থাকে। সেটি সবসময় You।" },
+        example: "(You) Open your books!",
+        mark: "(You)",
       },
       pick: 5,
       items: HIDDEN_YOU,
@@ -647,9 +658,11 @@ export const SUBJECT_PLAYGROUND: Playground = {
         en: "Make real sentences about your own life.",
         bn: "নিজের জীবন নিয়ে সত্যিকারের বাক্য বানান।",
       },
-      instruction: {
-        en: "Answer about your life. Type the Subject.",
-        bn: "নিজের জীবন নিয়ে উত্তর দিন। Subject লিখুন।",
+      instruction: { en: "Type only the Subject.", bn: "শুধু Subject লিখুন।" },
+      rule: {
+        text: { en: "The Subject is who or what does the action. Type only that part.", bn: "কাজটি যে করে সে-ই Subject। শুধু সেই অংশটি লিখুন।" },
+        example: "My mother cooks at home.",
+        mark: "My mother",
       },
       pick: 4,
       items: TALK,

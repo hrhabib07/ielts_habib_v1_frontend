@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { BN_FACE, EN_FACE, SpeakButton } from "@/src/features/chat-lesson/components/ChatPrimitives";
 import { LANG_FACE, pick } from "@/src/features/chat-lesson/lib/uiCopy";
@@ -38,6 +38,8 @@ export function CountBuildGame({
   onReady,
   onAnswer,
   onMistake,
+  onStep,
+  guide = false,
 }: GameProps<CountBuildItem> & { onMistake: () => void }) {
   const reduceMotion = useReducedMotion();
   const [numberPicked, setNumberPicked] = useState(false);
@@ -46,6 +48,11 @@ export function CountBuildGame({
   const selected = choice?.attempt === attempt ? choice.form : null;
   const done = isDone(status);
   const locked = status !== "answering";
+  const guideOn = guide && !locked && selected === null;
+
+  useEffect(() => {
+    onStep?.(numberPicked ? 1 : 0);
+  }, [numberPicked, onStep]);
   const phrase = countPhrase(item);
 
   const chooseNumber = (value: string) => {
@@ -81,7 +88,7 @@ export function CountBuildGame({
       <div
         className={cn(
           "rounded-3xl border-2 border-b-[5px] bg-white p-3.5 shadow-sm transition-[border-color,box-shadow] duration-300 sm:p-6",
-          !locked ? "border-sky-300 ring-4 ring-sky-100" : "border-slate-200",
+          !locked ? "border-accent/35 ring-4 ring-accent/10" : "border-slate-200",
         )}
       >
         <div className="flex min-h-9 items-center justify-between gap-2">
@@ -125,9 +132,9 @@ export function CountBuildGame({
               EN_FACE,
               "min-w-[6rem] rounded-xl border-2 border-dashed px-3 py-1.5 text-center text-lg font-bold sm:text-xl",
               done
-                ? "border-solid border-sky-600 bg-sky-500 text-white"
+                ? "border-solid border-accent bg-accent text-white"
                 : shownWord
-                  ? "border-solid border-sky-300 bg-sky-50 text-sky-900"
+                  ? "border-solid border-accent/35 bg-accent/5 text-accent"
                   : "border-slate-300 text-slate-300",
             )}
           >
@@ -143,12 +150,14 @@ export function CountBuildGame({
       {numberPicked ? (
         done ? null : (
           <div className="flex flex-wrap justify-center gap-2.5">
-            {item.forms.map((form) => (
+            {item.forms.map((form, i) => (
               <WordChip
                 key={form}
                 tone={formTone(form)}
                 disabled={locked}
                 shakeKey={attempt}
+                nudgeIndex={i}
+                guide={guideOn && form === item.answer}
                 onClick={() => chooseForm(form)}
               >
                 {form}
@@ -159,11 +168,13 @@ export function CountBuildGame({
       ) : (
         <div className="space-y-2.5">
           <div className="flex flex-wrap justify-center gap-2.5">
-            {item.numberOptions.map((value) => (
+            {item.numberOptions.map((value, i) => (
               <WordChip
                 key={`${value}-${wrongNumber?.value === value ? wrongNumber.tries : 0}`}
                 tone={wrongNumber?.value === value ? "wrong" : "idle"}
                 shakeKey={wrongNumber?.tries}
+                nudgeIndex={i}
+                guide={guideOn && value === item.numberWord}
                 onClick={() => chooseNumber(value)}
               >
                 {value}

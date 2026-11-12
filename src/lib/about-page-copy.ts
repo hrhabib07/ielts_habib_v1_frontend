@@ -1,4 +1,5 @@
-﻿import type { UiLocale } from "@/src/lib/ui-locale";
+﻿import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
+import type { UiLocale } from "@/src/lib/ui-locale";
 
 export interface AboutFaqItem {
   readonly question: string;
@@ -96,7 +97,7 @@ export const ABOUT_PAGE_COPY: Record<UiLocale, AboutPageCopy> = {
     camps: [
       {
         title: "Camp 01: The Foundation",
-        href: "/demo",
+        href: FREE_PLAY_HREF,
         body: "Master sentence structure, English word order vs. Bengali, subject-verb agreement, Be verbs, articles, and essential prepositions.",
       },
       {
@@ -259,7 +260,7 @@ export const ABOUT_PAGE_COPY: Record<UiLocale, AboutPageCopy> = {
     camps: [
       {
         title: "Camp 01: The Foundation",
-        href: "/demo",
+        href: FREE_PLAY_HREF,
         body: "বাংলা ও ইংরেজি বাক্যের Word Order, Subject-Verb Agreement, Be Verb, Articles এবং Prepositions এর সঠিক ব্যবহার।",
       },
       {

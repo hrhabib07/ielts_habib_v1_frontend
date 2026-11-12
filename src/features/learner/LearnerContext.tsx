@@ -3,7 +3,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import type { ChatMissionProfileInput } from "@/src/lib/api/chatMission";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
-import { DEMO_LEARNER, type Learner } from "@/src/features/learner/lib/personalize";
+import { NAMELESS_LEARNER, type Learner } from "@/src/features/learner/lib/personalize";
 
 export type LearnerProgress = {
   /** The level the learner is in, and the first map stop they have not finished (null when all are done). */
@@ -13,9 +13,13 @@ export type LearnerProgress = {
   gamesDone: number;
   gamesTotal: number;
   finalTestScore: { score: number; max: number } | null;
-  /** Early Adopter · Gamlish v2 badge. */
+  /** Legacy Learner badge (stored as `isV2EarlyAdopter`). */
   earlyAdopter: boolean;
+  /** Permanent once all 21 levels are done; pending until `deadline`. */
+  legacy: LegacyStatus;
 };
+
+export type LegacyStatus = { state: "permanent" | "pending" | "none"; deadline: number | null };
 
 /** Present only for real (logged-in) learners. */
 export type LearnerActions = {
@@ -61,7 +65,7 @@ export function LearnerProvider({
 }
 
 const LAB_VALUE: LearnerContextValue = {
-  learner: DEMO_LEARNER,
+  learner: NAMELESS_LEARNER,
   actions: null,
   progress: null,
   profileOpen: false,
@@ -69,7 +73,7 @@ const LAB_VALUE: LearnerContextValue = {
   closeProfile: () => undefined,
 };
 
-/** Outside a provider (the lab) this is the sample learner. */
+/** Outside a provider (guests, the lab, admin previews) Gamlish talks without a name. */
 export function useLearnerContext(): LearnerContextValue {
   return useContext(LearnerContext) ?? LAB_VALUE;
 }

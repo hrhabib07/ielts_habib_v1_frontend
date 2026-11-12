@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SHOW_XP_LEADERBOARD } from "@/src/lib/platform-config";
 
 interface RankClimbSheetProps {
   isOpen: boolean;
@@ -15,7 +16,11 @@ interface RankClimbSheetProps {
 /**
  * Soft post-mission sheet only. Never mounts mid-stage.
  */
-export function RankClimbSheet({
+export function RankClimbSheet(props: RankClimbSheetProps) {
+  return SHOW_XP_LEADERBOARD ? <RankClimbSheetView {...props} /> : null;
+}
+
+function RankClimbSheetView({
   isOpen,
   fromRank,
   toRank,

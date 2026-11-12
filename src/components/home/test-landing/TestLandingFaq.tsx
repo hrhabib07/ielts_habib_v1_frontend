@@ -11,10 +11,12 @@ export function TestLandingFaq() {
   const copy = useTestLandingCopy().copy;
   const reduceMotion = useReducedMotion();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [now] = useState(() => Date.now());
 
   return (
     <section
-      className="relative border-t border-border/40 py-12 sm:py-20 md:py-24"
+      id="faq"
+      className="relative scroll-mt-20 border-t border-border/40 py-12 sm:py-20 md:py-24"
       aria-labelledby="test-landing-faq-title"
     >
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -71,7 +73,9 @@ export function TestLandingFaq() {
                       className="overflow-hidden"
                     >
                       <p className="px-4 pb-5 text-base leading-relaxed text-foreground/80 sm:px-5 sm:text-lg">
-                        {item.a}
+                        {item.timed && now < item.timed.endsAt
+                          ? `${item.a} ${item.timed.text}`
+                          : item.a}
                       </p>
                     </motion.div>
                   ) : null}

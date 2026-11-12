@@ -21,6 +21,7 @@ export interface SiteShellCopy {
   readonly profileSettings: string;
   readonly subscriptionPlans: string;
   readonly logOut: string;
+  readonly language: string;
   readonly foundersWall: string;
   readonly termsPolicies: string;
   readonly footerBlurb: string;
@@ -56,12 +57,13 @@ export const SITE_SHELL_COPY: Record<UiLocale, SiteShellCopy> = {
     profileSettings: "প্রোফাইল সেটিংস",
     subscriptionPlans: "সাবস্ক্রিপশন প্ল্যান",
     logOut: "লগ আউট",
+    language: "ভাষা",
     foundersWall: "Founders' Wall",
     termsPolicies: "শর্তাবলি ও নীতিমালা",
     footerBlurb:
       "Gamlish · গ্যামিফাইড English Foundations। ক্যাম্প, মিশন আর দেখা যায় এমন অগ্রগতি।",
     footerTagline: "খেলার ছলেই ইংরেজি শিখি!",
-    footerRights: (year) => `© ${year} Gamlish। সর্বস্বত্ব সংরক্ষিত।`,
+    footerRights: (year) => `© ${year} Gamlish. সকল অধিকার সংরক্ষিত।`,
     footerSupport:
       "অ্যাক্সেস, পেমেন্ট বা Gamlish নিয়ে প্রশ্ন? WhatsApp এ লিখুন।",
     footerSupportReading:
@@ -92,6 +94,7 @@ export const SITE_SHELL_COPY: Record<UiLocale, SiteShellCopy> = {
     profileSettings: "Profile settings",
     subscriptionPlans: "Subscription plans",
     logOut: "Log out",
+    language: "Language",
     foundersWall: "Founders' Wall",
     termsPolicies: "Terms & policies",
     footerBlurb:

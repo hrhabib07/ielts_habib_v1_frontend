@@ -9,15 +9,27 @@ export const AUTH_TOKEN_COOKIE = "ielts_habib_token";
 /** Legacy flag from an earlier logout fix · always expire; do not gate routes on it. */
 export const FORCE_LOGOUT_COOKIE = "gamlish_force_logout";
 
-export function authCookieBaseOptions(
-  isProd: boolean = process.env.NODE_ENV === "production",
-) {
+/**
+ * Derived from the request, not NODE_ENV: a `.gamlish.com` domain or Secure flag
+ * on localhost / preview hosts makes the browser silently drop the cookie.
+ */
+export function authCookieBaseOptions(request: {
+  nextUrl: { hostname: string; protocol: string };
+  headers: Headers;
+}) {
+  const hostname = request.nextUrl.hostname.toLowerCase();
+  const onGamlishDomain =
+    hostname === "gamlish.com" || hostname.endsWith(".gamlish.com");
+  const isHttps =
+    request.nextUrl.protocol === "https:" ||
+    request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() === "https";
+
   return {
     path: "/",
     httpOnly: true,
     sameSite: "lax" as const,
-    secure: isProd,
-    ...(isProd ? { domain: ".gamlish.com" as const } : {}),
+    secure: isHttps,
+    ...(onGamlishDomain ? { domain: ".gamlish.com" as const } : {}),
   };
 }
 

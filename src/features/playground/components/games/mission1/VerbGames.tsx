@@ -148,7 +148,7 @@ export function FixBridgeGame({ item, itemKey, lang, status, attempt, onReady, o
             <BlankSlot value={slotValue} tone={slotTone} />
             <PlainWords text={item.after} />
           </div>
-          <div className="mt-1 h-4 rounded-full bg-gradient-to-r from-sky-300 via-sky-400 to-sky-300 opacity-70" aria-hidden />
+          <div className="mt-1 h-4 rounded-full bg-accent/40" aria-hidden />
         </div>
       </GameFrame>
 
@@ -231,7 +231,7 @@ export function BinExtraGame({ item, itemKey, lang, status, attempt, onReady, on
           </span>
         </div>
         {done ? (
-          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-sky-500 px-3.5 py-2.5 text-white">
+          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-accent px-3.5 py-2.5 text-white">
             <p className={cn(EN_FACE, "min-w-0 flex-1 text-lg font-black sm:text-xl")}>{item.fixed}</p>
             <ListenButtons idPrefix={`${itemKey}:s:`} text={item.fixed} lang={lang} />
           </div>
@@ -288,7 +288,7 @@ export function ActionCameraGame({ item, itemKey, lang, status, attempt, onReady
 
   return (
     <div className="space-y-3 sm:space-y-5">
-      <div className={cn("rounded-3xl border-2 border-b-[5px] border-slate-800 bg-slate-800 p-3 shadow-lg sm:p-4", !locked && "ring-4 ring-sky-100")}>
+      <div className={cn("rounded-3xl border-2 border-b-[5px] border-slate-800 bg-slate-800 p-3 shadow-lg sm:p-4", !locked && "ring-4 ring-accent/10")}>
         <div className="relative flex h-36 items-center justify-center rounded-2xl bg-gradient-to-b from-slate-700 to-slate-900 sm:h-44">
           {["left-2 top-2 border-l-4 border-t-4", "right-2 top-2 border-r-4 border-t-4", "bottom-2 left-2 border-b-4 border-l-4", "bottom-2 right-2 border-b-4 border-r-4"].map(
             (corner) => (
@@ -324,7 +324,7 @@ export function ActionCameraGame({ item, itemKey, lang, status, attempt, onReady
         <div className="flex flex-wrap items-center justify-center gap-2">
           <PlainWords text={item.before} />
           {done ? (
-            <span className={cn(EN_FACE, "rounded-xl bg-sky-500 px-3 py-1 text-lg font-black text-white sm:text-2xl")}>{item.answer}</span>
+            <span className={cn(EN_FACE, "rounded-xl bg-accent px-3 py-1 text-lg font-black text-white sm:text-2xl")}>{item.answer}</span>
           ) : (
             <TypedField
               ref={inputRef}

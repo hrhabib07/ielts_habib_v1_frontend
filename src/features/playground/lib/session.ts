@@ -24,10 +24,10 @@ function shuffle<T>(items: readonly T[]): T[] {
 type BankItem = { id: string; group?: string };
 
 /** Random items, honouring the round's balanced `mix` (e.g. at least one "no plural" trap). */
-function draw(round: PlaygroundRound, items: readonly BankItem[]): BankItem[] {
+function draw(round: PlaygroundRound, items: readonly BankItem[], pick: number): BankItem[] {
   let chosen: BankItem[];
   if (!round.mix?.length) {
-    chosen = shuffle(items).slice(0, round.pick);
+    chosen = shuffle(items).slice(0, pick);
   } else {
     const grouped: BankItem[] = [];
     for (const { group, count } of round.mix) {
@@ -35,17 +35,29 @@ function draw(round: PlaygroundRound, items: readonly BankItem[]): BankItem[] {
     }
     const rest = shuffle(items.filter((item) => !grouped.includes(item))).slice(
       0,
-      Math.max(0, round.pick - grouped.length),
+      Math.max(0, pick - grouped.length),
     );
     chosen = shuffle([...grouped, ...rest]);
   }
   return round.ordered ? chosen.sort((a, b) => items.indexOf(a) - items.indexOf(b)) : chosen;
 }
 
+/**
+ * The first question is a guided practice (a hand shows what to tap, no points). An extra question is
+ * drawn for it when the bank has one, so the number of scored questions stays the same.
+ */
 function roundItems(round: PlaygroundRound): SessionItem[] {
-  const base = { instruction: round.instruction, review: false };
-  return draw(round, round.items).map(
-    (item) => ({ ...base, kind: round.kind, item, key: `${round.id}:${item.id}` }) as SessionItem,
+  const base = { instruction: round.instruction, steps: round.steps, review: false };
+  const withPractice = round.items.length > round.pick;
+  return draw(round, round.items, withPractice ? round.pick + 1 : round.pick).map(
+    (item, index) =>
+      ({
+        ...base,
+        kind: round.kind,
+        item,
+        key: `${round.id}:${item.id}`,
+        practice: withPractice && index === 0,
+      }) as SessionItem,
   );
 }
 
@@ -56,6 +68,8 @@ export function buildSession(playground: Playground): SessionRound[] {
     kind: round.kind,
     title: round.title,
     goal: round.goal,
+    instruction: round.instruction,
+    rule: round.rule,
     items: roundItems(round),
   }));
 }
@@ -64,11 +78,28 @@ export function buildSession(playground: Playground): SessionRound[] {
 export function buildReviewRound(rounds: readonly SessionRound[], points: Readonly<Record<string, number>>): SessionRound | null {
   const missed = rounds
     .flatMap((round) => round.items)
-    .filter((item) => !item.review && (points[item.key] ?? 0) < 1)
+    .filter((item) => !item.review && !item.practice && (points[item.key] ?? 0) < 1)
     .slice(0, REVIEW_LIMIT)
-    .map((item): SessionItem => ({ ...item, key: `review:${item.key}`, review: true }));
+    .map((item): SessionItem => ({ ...item, key: `review:${item.key}`, review: true, practice: false }));
   if (missed.length === 0) return null;
   return { id: "review", kind: "review", title: PG_UI.reviewTitle, goal: PG_UI.reviewGoal, items: missed };
+}
+
+/** Where a half-played playground continues: the first unfinished game, with the finished games' scores carried in. */
+export type ResumePoint = { from: number; score: number; max: number };
+
+export function resumePoint(
+  rounds: readonly { id: string }[],
+  done: Readonly<Record<string, { score: number; max: number }>>,
+): ResumePoint | null {
+  const from = rounds.findIndex((round) => !done[round.id]);
+  if (from <= 0) return null;
+  const finished = rounds.slice(0, from).map((round) => done[round.id]);
+  return {
+    from,
+    score: finished.reduce((sum, r) => sum + (r?.score ?? 0), 0),
+    max: finished.reduce((sum, r) => sum + (r?.max ?? 0), 0),
+  };
 }
 
 export function scoredItemCount(playground: Playground): number {

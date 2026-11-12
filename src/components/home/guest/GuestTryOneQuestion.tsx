@@ -10,6 +10,7 @@ import {
 } from "@/src/components/home/guest/GuestLandingLocale";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 import { Sparkles, Zap } from "lucide-react";
 
@@ -84,7 +85,7 @@ export function GuestTryOneQuestion({ className }: { className?: string }) {
                 )}
                 asChild
               >
-                <Link href="/demo">{tryOne.winCta}</Link>
+                <Link href={FREE_PLAY_HREF}>{tryOne.winCta}</Link>
               </Button>
             </motion.div>
           ) : (

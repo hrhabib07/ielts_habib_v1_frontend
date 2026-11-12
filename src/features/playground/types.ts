@@ -381,11 +381,22 @@ export type DiaryItem = {
   hint: Bilingual;
 };
 
+/** The one idea a round teaches, shown before it starts: the rule, and an English example with the answer marked. */
+export type RoundRule = {
+  text: Bilingual;
+  example: string;
+  /** Part of `example` to underline, e.g. the Subject. */
+  mark?: string;
+};
+
 type RoundBase = {
   id: string;
   title: Bilingual;
   goal: Bilingual;
   instruction: Bilingual;
+  /** For two-step games: the title shows one step at a time instead of the whole instruction. */
+  steps?: readonly Bilingual[];
+  rule?: RoundRule;
   /** How many items one play draws from the bank. */
   pick: number;
   /** Balanced draw: this many items from each `group` (the rest of `pick` is drawn freely). */
@@ -431,6 +442,8 @@ export type Playground = {
   /** The lesson step this playground practises; it appears right after it on the level map. */
   afterStepId: string;
   title: Bilingual;
+  /** The Level 1 topic these games teach, shown on the rule screen and the guest welcome. */
+  topic?: Bilingual;
   rounds: readonly PlaygroundRound[];
   learned: readonly Bilingual[];
   realLifeTip: Bilingual;
@@ -448,8 +461,11 @@ export type PlayItem = {
 export type SessionItem = PlayItem & {
   key: string;
   instruction: Bilingual;
+  steps?: readonly Bilingual[];
   /** Second chance at a missed item: no points, just practice. */
   review: boolean;
+  /** First question of a round: a hand shows what to tap, and it does not count in the score. */
+  practice?: boolean;
 };
 
 export type SessionRound = {
@@ -457,6 +473,8 @@ export type SessionRound = {
   kind: PlaygroundRoundKind | "review";
   title: Bilingual;
   goal: Bilingual;
+  instruction?: Bilingual;
+  rule?: RoundRule;
   items: SessionItem[];
 };
 

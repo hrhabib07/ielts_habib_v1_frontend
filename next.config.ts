@@ -51,6 +51,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Retired Mission Zero demo: every entry point opens the free playground (signed-in users go on to Mission 1).
+      { source: "/demo", destination: "/play", permanent: false },
+      { source: "/demo/:path*", destination: "/play", permanent: false },
+      { source: "/player/mission-zero", destination: "/play", permanent: false },
+      { source: "/player/mission-zero-test", destination: "/play", permanent: false },
       {
         source: "/score-guarantee",
         destination: "/",
@@ -63,7 +68,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/how-it-works",
-        destination: "/#how-you-learn",
+        destination: "/about",
         permanent: true,
       },
       {

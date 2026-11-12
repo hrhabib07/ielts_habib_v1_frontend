@@ -1,6 +1,7 @@
 import type { ChatMissionState } from "@/src/lib/api/chatMission";
 
-const STORAGE_KEY = "gamlish-chat-mission-v1";
+/** Bump when the state shape changes, so an old copy is never read as the new shape. */
+const STORAGE_KEY = "gamlish-chat-mission-v2";
 
 type Entry = { userId: string; state: ChatMissionState };
 

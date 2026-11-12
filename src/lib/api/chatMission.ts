@@ -7,7 +7,7 @@ export type AddressAs = "bhaiya" | "apu";
 export type ChatMissionLearner = {
   nicknameEn: string;
   nicknameBn: string;
-  addressAs: AddressAs;
+  addressAs: AddressAs | null;
   district: string | null;
   country: string | null;
   /** API path such as `/chat-mission/photos/<key>`, or null. */
@@ -16,6 +16,11 @@ export type ChatMissionLearner = {
 };
 
 export type ChatMissionStepResult = { score: number; max: number; completedAt: number };
+
+export type RoundScore = { score: number; max: number };
+
+/** Games finished inside a playground that is not complete yet, by playground id, then game (round) id. */
+export type ChatMissionPartials = Record<string, Record<string, RoundScore>>;
 
 export type ChatMissionFinalTestResult = {
   score: number;
@@ -41,13 +46,28 @@ export type ChatMissionPaymentStatus = {
   rejectionReason: string | null;
 };
 
+/**
+ * Double Duration: 90 days ending on a fixed date (`accessUntil`), until `endsAt`.
+ * Standard: `accessDays` counted from the day the payment is approved.
+ */
+export type ChatMissionOffer = {
+  kind: "double" | "standard";
+  endsAt: number | null;
+  accessUntil: number | null;
+  /** Payments submitted before this still earn the Legacy Learner badge; null once closed. */
+  legacyBadgeUntil?: number | null;
+};
+
 export type ChatMissionPayment = {
   priceBdt: number;
   accessDays: number;
+  offer: ChatMissionOffer;
+  /** Days of free v2 access for learners who paid before v2. */
+  freeAccessDays: number;
   bkashNumber: string;
   /** Open request (under review or rejected), or null. */
   latest: ChatMissionPaymentStatus | null;
-  /** Paid before Gamlish v2 and has not used the free 90 days yet. */
+  /** Paid before Gamlish v2 and has not used the free access yet. */
   freeClaimable: boolean;
   freeAccessUntil: number | null;
 };
@@ -65,9 +85,12 @@ export type ChatMissionState =
       accountAvatarUrl: string | null;
       hasPaidAccess: boolean;
       earlyAdopter: boolean;
+      /** Older cached states may not have it yet. */
+      legacy?: { state: "permanent" | "pending" | "none"; deadline: number | null };
       payment: ChatMissionPayment;
       freeStepIds: string[];
       results: Record<string, ChatMissionStepResult>;
+      partials: ChatMissionPartials;
       finalTest: {
         official: ChatMissionFinalTestResult | null;
         inProgress: ChatMissionFinalTestAttempt | null;
@@ -76,12 +99,13 @@ export type ChatMissionState =
       };
     };
 
+/** Only the fields sent are saved: sign-up sends the name alone, Bhaiya or Apu comes later. */
 export type ChatMissionProfileInput = {
-  nicknameEn: string;
-  nicknameBn: string;
-  addressAs: AddressAs;
-  district: string | null;
-  country: string | null;
+  nicknameEn?: string;
+  nicknameBn?: string;
+  addressAs?: AddressAs | null;
+  district?: string | null;
+  country?: string | null;
 };
 
 const BASE = "/chat-mission";
@@ -121,6 +145,19 @@ export async function saveChatMissionResult(
     score,
     max,
   });
+  return res.data.data;
+}
+
+export type ClaimedGuestProgress = {
+  results: Record<string, ChatMissionStepResult>;
+  partials: ChatMissionPartials;
+};
+
+export async function claimChatMissionGuestResults(input: {
+  results: Record<string, RoundScore>;
+  partials: ChatMissionPartials;
+}): Promise<ClaimedGuestProgress> {
+  const res = await apiClient.post<ApiResponse<ClaimedGuestProgress>>(`${BASE}/me/claim-guest`, input);
   return res.data.data;
 }
 

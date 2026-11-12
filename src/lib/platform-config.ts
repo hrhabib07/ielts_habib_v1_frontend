@@ -5,9 +5,19 @@
 export const ENABLE_READING =
   process.env.NEXT_PUBLIC_ENABLE_READING === "true";
 
+/**
+ * XP totals, ranks and leaderboards from the old missions are hidden until old and new XP are merged.
+ * Set NEXT_PUBLIC_SHOW_XP_LEADERBOARD=true to show them again. In-game XP for the current play is unaffected.
+ */
+export const SHOW_XP_LEADERBOARD =
+  process.env.NEXT_PUBLIC_SHOW_XP_LEADERBOARD === "true";
+
 export const PRIMARY_STUDENT_HREF = ENABLE_READING ? "/profile/reading" : "/player";
 
 export const PRIMARY_STUDENT_LABEL = ENABLE_READING ? "Reading" : "খেলা";
+
+/** The free guest playground (Subject games). Signed-in learners are sent on to Mission 1 from there. */
+export const FREE_PLAY_HREF = "/play";
 
 export const ENGLISH_COURSE_SLUG = "english-foundations";
 

@@ -43,10 +43,11 @@ function judge(correct: boolean, body: Bilingual, hint: Bilingual): AnswerResult
   return correct ? { correct: true, body } : { correct: false, hint, reveal: body };
 }
 
-export function GroupChatGame({ item, itemKey, lang, status, attempt, onReady, onAnswer }: GameProps<GroupChatItem>) {
+export function GroupChatGame({ item, itemKey, lang, status, attempt, onReady, onAnswer, guide = false }: GameProps<GroupChatItem>) {
   const [selected, setSelected] = useAttemptChoice<PersonKey>(attempt);
   const done = isDone(status);
   const locked = status !== "answering";
+  const guideOn = guide && !locked && selected === null;
   const sentence = item.words.join(" ");
 
   const choose = (key: PersonKey) => {
@@ -62,7 +63,7 @@ export function GroupChatGame({ item, itemKey, lang, status, attempt, onReady, o
       <div
         className={cn(
           "mx-auto max-w-md overflow-hidden rounded-[2rem] border-[6px] border-slate-800 bg-slate-100 shadow-lg transition-shadow",
-          !locked && "ring-4 ring-sky-100",
+          !locked && "ring-4 ring-accent/10",
         )}
       >
         <div className="flex items-center gap-2.5 bg-emerald-600 px-4 py-2.5 text-white">
@@ -88,7 +89,7 @@ export function GroupChatGame({ item, itemKey, lang, status, attempt, onReady, o
                     <mark
                       className={cn(
                         "rounded-lg px-1.5 py-0.5 font-black",
-                        done ? "bg-sky-500 text-white" : "bg-amber-200 text-amber-950",
+                        done ? "bg-accent text-white" : "bg-amber-200 text-amber-950",
                       )}
                     >
                       {word}
@@ -106,7 +107,7 @@ export function GroupChatGame({ item, itemKey, lang, status, attempt, onReady, o
 
       <p className={cn(LANG_FACE[lang], "text-center text-sm font-bold text-slate-500")}>{pick(M1_UI.whichPerson, lang)}</p>
       <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        {PERSON_KEYS.map((key) => (
+        {PERSON_KEYS.map((key, i) => (
           <BigChoice
             key={key}
             label={PERSON_LABEL[key].en}
@@ -115,6 +116,8 @@ export function GroupChatGame({ item, itemKey, lang, status, attempt, onReady, o
             disabled={locked}
             lang={lang}
             shakeKey={attempt}
+            nudgeIndex={i}
+            guide={guideOn && key === item.answer}
             onClick={() => choose(key)}
           />
         ))}
@@ -222,7 +225,7 @@ export function RespectTrapGame({ item, itemKey, lang, status, attempt, onReady,
           </div>
         </div>
         {done ? (
-          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-sky-500 px-3.5 py-2.5 text-white">
+          <div className="mt-3 flex items-center gap-2 rounded-2xl bg-accent px-3.5 py-2.5 text-white">
             <p className={cn(EN_FACE, "min-w-0 flex-1 text-lg font-black sm:text-xl")}>{item.en}</p>
             <SpeakButton id={`${itemKey}:s:tap`} text={item.en} lang="en" className="size-9 text-white" />
           </div>
@@ -310,18 +313,18 @@ export function TeamUpGame({
         <div className="flex flex-wrap items-center justify-center gap-2">
           {item.members.map((member, i) => (
             <span key={member} className="flex items-center gap-2">
-              {i > 0 ? <Plus className="size-4 text-violet-400" aria-hidden /> : null}
-              <span className={cn(EN_FACE, "rounded-2xl border-2 border-b-4 border-violet-200 bg-white px-3 py-1.5 text-lg font-black text-slate-800 sm:text-xl")}>
+              {i > 0 ? <Plus className="size-4 text-accent/70" aria-hidden /> : null}
+              <span className={cn(EN_FACE, "rounded-2xl border-2 border-b-4 border-accent/20 bg-white px-3 py-1.5 text-lg font-black text-slate-800 sm:text-xl")}>
                 {member}
               </span>
             </span>
           ))}
-          <ArrowRight className="mx-1 size-5 text-violet-400" aria-hidden />
+          <ArrowRight className="mx-1 size-5 text-accent/70" aria-hidden />
           <span
             className={cn(
               EN_FACE,
               "flex min-w-16 items-center justify-center rounded-full border-2 border-b-4 px-4 py-1.5 text-lg font-black sm:text-xl",
-              done ? "border-sky-600 bg-sky-500 text-white" : "border-dashed border-violet-300 bg-violet-50 text-violet-300",
+              done ? "border-accent bg-accent text-white" : "border-dashed border-accent/35 bg-accent/5 text-accent/35",
             )}
           >
             {done ? item.pronoun : "?"}

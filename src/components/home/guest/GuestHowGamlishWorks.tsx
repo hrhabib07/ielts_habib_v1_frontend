@@ -9,6 +9,7 @@ import { GuestCampShowcase } from "@/src/components/home/guest/GuestCampShowcase
 import type { GuestHowItWorksStepIcon } from "@/src/lib/guest-how-it-works-types";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
 const STEP_ICONS: Record<
@@ -98,7 +99,7 @@ export function GuestHowGamlishWorks() {
               )}
               asChild
             >
-              <Link href="/demo">{copy.ctaPrimary}</Link>
+              <Link href={FREE_PLAY_HREF}>{copy.ctaPrimary}</Link>
             </Button>
             <p className="mt-2 text-xs text-muted-foreground">{copy.ctaPrimarySub}</p>
             <Button

@@ -188,7 +188,11 @@ export const UI = {
   partPlay: { en: "Play", bn: "খেলুন" },
   partLesson: { en: "Lesson", bn: "লেসন" },
   partGames: { en: "Games", bn: "গেম" },
-  finishLessonFirst: { en: "Finish the lesson first", bn: "আগে লেসনটি শেষ করুন" },
+  partLearnFirst: { en: "Learn first (recommended)", bn: "আগে শিখুন (আমাদের পরামর্শ)" },
+  inFullGame: { en: "In the full game", bn: "পুরো গেমে আছে" },
+  unlock: { en: "Unlock", bn: "আনলক করুন" },
+  quickNotes: { en: "Quick notes · no questions", bn: "ছোট নোট · কোনো প্রশ্ন নেই" },
+  myNotes: { en: "My Notes", bn: "আমার নোট" },
   stopDone: { en: "Done", bn: "শেষ" },
   stopProgress: (done: number, total: number): Bilingual => ({
     en: `${done} of ${total} parts done`,

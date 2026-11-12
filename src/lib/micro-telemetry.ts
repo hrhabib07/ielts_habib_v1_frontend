@@ -12,7 +12,10 @@ export type MicroTelemetryEventName =
   | "rage_click"
   | "input_hesitation"
   | "language_switched"
-  | "page_exit";
+  | "page_exit"
+  | "landing_cta_click";
+
+export type LandingCtaSource = "hero_visual" | "hero_button" | "nav" | "footer";
 
 const VIEW_DWELL_MS = 1000;
 const RAGE_WINDOW_MS = 1500;
@@ -350,6 +353,11 @@ function observePageExit(pageEnteredAt: number): Teardown {
     document.removeEventListener("visibilitychange", onVisibility);
     window.removeEventListener("pagehide", sendExit);
   };
+}
+
+/** Beacon so the event survives the navigation the click triggers. */
+export function logLandingCtaClick(source: LandingCtaSource): void {
+  logMicroEvent("landing_cta_click", { cta_source: source }, { beacon: true });
 }
 
 let languageHooked = false;

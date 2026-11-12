@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { GamlishLogo } from "@/src/components/shared/GamlishLogo";
@@ -18,12 +19,16 @@ import { cn } from "@/lib/utils";
  */
 export function GuestLandingFooter({
   closing,
+  children,
 }: {
   closing?: {
     title: string;
-    label: string;
-    href: string;
+    label?: string;
+    href?: string;
+    /** Replaces the default button, so pages can reuse their own primary CTA. */
+    action?: ReactNode;
   };
+  children?: ReactNode;
 } = {}) {
   const shell = useSiteShellCopy();
   const { locale } = useUiLocale();
@@ -72,13 +77,19 @@ export function GuestLandingFooter({
 
         <div className="mt-8 rounded-2xl border border-border/60 bg-muted/40 p-5 text-center">
           <p className="text-base font-bold text-foreground">{closingTitle}</p>
-          <Link
-            href={closingHref}
-            className="mt-3 inline-flex h-12 w-full max-w-xs items-center justify-center rounded-2xl bg-foreground px-6 text-base font-bold text-background transition-opacity hover:opacity-90"
-          >
-            {closingLabel}
-          </Link>
+          {closing?.action ? (
+            <div className="mt-4">{closing.action}</div>
+          ) : (
+            <Link
+              href={closingHref}
+              className="mt-3 inline-flex h-12 w-full max-w-xs items-center justify-center rounded-2xl bg-foreground px-6 text-base font-bold text-background transition-opacity hover:opacity-90"
+            >
+              {closingLabel}
+            </Link>
+          )}
         </div>
+
+        {children}
 
         <div className="mt-10 flex flex-col gap-3 border-t border-border/50 pt-6 text-xs text-foreground/65 sm:flex-row sm:items-center sm:justify-between sm:text-sm">
           <p>{shell.footerRights(year)}</p>

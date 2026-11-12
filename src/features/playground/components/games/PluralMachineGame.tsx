@@ -8,6 +8,7 @@ import { LANG_FACE, pick } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
 import { ListenButtons, TypedField } from "@/src/features/playground/components/PlaygroundParts";
 import { isDone, type GameProps } from "@/src/features/playground/components/games/gameProps";
+import { GuideHand } from "@/src/features/playground/components/GuideHand";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import { checkTypedPlural, RULE_NOTES } from "@/src/features/playground/lib/plural";
 import { pluralPair } from "@/src/features/playground/lib/speech";
@@ -35,13 +36,13 @@ function Card({ label, word, tone }: { label: string; word: string; tone: "in" |
     <div
       className={cn(
         "flex flex-col items-center rounded-2xl border-2 border-b-4 px-5 py-2 sm:px-7 sm:py-3",
-        tone === "in" ? "border-amber-300 bg-amber-50" : "border-sky-600 bg-sky-500 text-white",
+        tone === "in" ? "border-amber-300 bg-amber-50" : "border-accent bg-accent text-white",
       )}
     >
       <span
         className={cn(
           "text-[10px] font-black uppercase tracking-[0.14em]",
-          tone === "in" ? "text-amber-700" : "text-sky-100",
+          tone === "in" ? "text-amber-700" : "text-accent-foreground/80",
         )}
       >
         {label}
@@ -51,7 +52,7 @@ function Card({ label, word, tone }: { label: string; word: string; tone: "in" |
   );
 }
 
-export function PluralMachineGame({ item, itemKey, lang, status, attempt, onReady, onAnswer }: GameProps<PluralMachineItem>) {
+export function PluralMachineGame({ item, itemKey, lang, status, attempt, onReady, onAnswer, guide = false }: GameProps<PluralMachineItem>) {
   const reduceMotion = useReducedMotion();
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -76,7 +77,7 @@ export function PluralMachineGame({ item, itemKey, lang, status, attempt, onRead
       <div
         className={cn(
           "rounded-3xl border-2 border-b-[5px] bg-gradient-to-b from-slate-50 to-white p-3.5 shadow-sm sm:p-6",
-          !locked ? "border-sky-300 ring-4 ring-sky-100" : "border-slate-200",
+          !locked ? "border-accent/35 ring-4 ring-accent/10" : "border-slate-200",
         )}
       >
         <div className="flex items-start justify-between gap-2">
@@ -103,7 +104,7 @@ export function PluralMachineGame({ item, itemKey, lang, status, attempt, onRead
               transition={spinning ? { repeat: Infinity, duration: 1.2, ease: "linear" } : { duration: 0.3 }}
               className="flex"
             >
-              <Cog className="size-4 text-sky-300" aria-hidden />
+              <Cog className="size-4 text-accent/35" aria-hidden />
             </motion.span>
           </span>
           <ArrowDown className="size-5" aria-hidden />
@@ -121,15 +122,18 @@ export function PluralMachineGame({ item, itemKey, lang, status, attempt, onRead
               <SpeakButton id={`${itemKey}:s:out`} text={pluralPair(item)} lang="en" className="size-9" />
             </motion.div>
           ) : (
-            <TypedField
-              ref={inputRef}
-              value={text}
-              placeholder={pick(PG_UI.typePlural, lang)}
-              disabled={locked}
-              retry={status === "retry"}
-              onChange={update}
-              label={pick(PG_UI.typePlural, lang)}
-            />
+            <span className="relative inline-flex">
+              <TypedField
+                ref={inputRef}
+                value={text}
+                placeholder={guide ? item.answer : pick(PG_UI.typePlural, lang)}
+                disabled={locked}
+                retry={status === "retry"}
+                onChange={update}
+                label={pick(PG_UI.typePlural, lang)}
+              />
+              {guide && !text && !locked ? <GuideHand /> : null}
+            </span>
           )}
         </div>
       </div>

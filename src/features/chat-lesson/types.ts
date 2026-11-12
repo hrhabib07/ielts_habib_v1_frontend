@@ -95,6 +95,8 @@ export type ChatLessonStep = {
   stepLabel: string;
   title: Bilingual;
   guideName: string;
+  /** Opens the notes: why this topic comes now and what the learner does after reading. */
+  intro?: { title: Bilingual; text: Bilingual };
   chunks: LessonChunk[];
   /** Drafts are stored but not playable (e.g. lessons still waiting for questions). */
   status?: "draft" | "published";

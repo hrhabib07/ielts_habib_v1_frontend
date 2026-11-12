@@ -73,34 +73,43 @@ export function TestLandingGraduates() {
           </p>
         </div>
 
-        <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {TEST_LANDING_GRADUATES.map((graduate, index) => (
-            <li key={graduate.id}>
-              <motion.div
-                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.08,
-                  ease: GUEST_EASE,
-                }}
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5, ease: GUEST_EASE }}
+          className="test-landing-graduates-viewport relative mt-10 -mx-4 sm:-mx-6 lg:mx-0"
+        >
+          <div className="test-landing-graduates-track flex w-max py-3">
+            {[0, 1].map((copyIndex) => (
+              <ul
+                key={copyIndex}
+                className="flex shrink-0"
+                aria-hidden={copyIndex === 1 ? true : undefined}
               >
-                <GraduateCard
-                  graduate={graduate}
-                  seeMore={copy.graduatesSeeMore}
-                  program={copy.graduatesProgram}
-                  quote={
-                    locale === "bn"
-                      ? graduate.cardQuoteBn
-                      : graduate.storyMessage
-                  }
-                  onSeeMore={() => setOpenId(graduate.id)}
-                />
-              </motion.div>
-            </li>
-          ))}
-        </ul>
+                {TEST_LANDING_GRADUATES.map((graduate) => (
+                  <li
+                    key={graduate.id}
+                    className="w-[17rem] shrink-0 pl-5 sm:w-[19rem] lg:w-[20rem]"
+                  >
+                    <GraduateCard
+                      graduate={graduate}
+                      seeMore={copy.graduatesSeeMore}
+                      program={copy.graduatesProgram}
+                      quote={
+                        locale === "bn"
+                          ? graduate.cardQuoteBn
+                          : graduate.storyMessage
+                      }
+                      onSeeMore={() => setOpenId(graduate.id)}
+                      loopCopy={copyIndex === 1}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </motion.div>
       </div>
 
       <Sheet
@@ -139,12 +148,15 @@ function GraduateCard({
   program,
   quote,
   onSeeMore,
+  loopCopy = false,
 }: {
   graduate: TestLandingGraduate;
   seeMore: string;
   program: string;
   quote: string;
   onSeeMore: () => void;
+  /** The second copy that keeps the marquee seamless: clickable, but skipped by keyboard and screen readers. */
+  loopCopy?: boolean;
 }) {
   const excerpt = excerptGraduateMessage(quote);
 
@@ -153,8 +165,9 @@ function GraduateCard({
       <button
         type="button"
         onClick={onSeeMore}
+        tabIndex={loopCopy ? -1 : undefined}
         className={cn(
-          "group relative block w-full overflow-hidden rounded-[1.6rem] text-left",
+          "group relative flex h-full w-full flex-col overflow-hidden rounded-[1.6rem] bg-slate-950 text-left",
           "outline outline-2 outline-sky-400/55",
           "shadow-[0_22px_60px_-28px_rgba(14,165,233,0.55)]",
           "transition-[transform,box-shadow] duration-300 ease-out",
@@ -163,29 +176,31 @@ function GraduateCard({
           "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400",
         )}
       >
-        <TestLandingMedia
-          src={graduate.imageUrl}
-          alt={`${graduate.fullName}, Gamlish Fundamental English graduate`}
-          variant="card"
-          sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, calc(100vw - 2.5rem)"
-        />
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950 from-10% via-slate-950/75 via-40% to-transparent"
-          aria-hidden
-        />
-        <div className="absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-sky-200">
+        <div className="relative shrink-0">
+          <TestLandingMedia
+            src={graduate.imageUrl}
+            alt={`${graduate.fullName}, Gamlish Fundamental English graduate`}
+            variant="card"
+            sizes="(min-width: 1024px) 20rem, (min-width: 640px) 19rem, 17rem"
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-slate-950 to-transparent"
+            aria-hidden
+          />
+        </div>
+        <div className="relative z-10 -mt-3 flex flex-1 flex-col px-4 pb-4 sm:px-5 sm:pb-5">
+          <p className="truncate text-[11px] font-bold uppercase tracking-[0.16em] text-sky-200">
             {graduate.district} · {program}
           </p>
-          <h3 className="mt-1 text-2xl font-bold tracking-tight text-white">
+          <h3 className="mt-1 line-clamp-2 text-xl font-bold leading-tight tracking-tight text-white sm:text-2xl">
             {graduate.fullName}
           </h3>
-          <blockquote className="mt-2.5">
+          <blockquote className="mt-2">
             <p className="line-clamp-2 text-[15px] leading-relaxed text-white/90">
               {excerpt}
             </p>
           </blockquote>
-          <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-sky-200 transition-colors group-hover:text-white">
+          <span className="mt-auto inline-flex items-center gap-1.5 pt-3 text-sm font-bold text-sky-200 transition-colors group-hover:text-white">
             {seeMore}
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </span>

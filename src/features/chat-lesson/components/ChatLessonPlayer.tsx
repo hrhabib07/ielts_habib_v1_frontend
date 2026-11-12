@@ -172,7 +172,7 @@ function ChatLessonScreen({ step, backHref, onComplete }: ScreenProps) {
   }, [trayAction, phase, activeQuestion, actions, flagMode, sheetOpen]);
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-slate-50 bg-gradient-to-b from-sky-50 via-slate-50 to-slate-50">
+    <div className="fixed inset-0 z-40 flex flex-col bg-slate-50 bg-gradient-to-b from-accent/[0.06] via-slate-50 to-slate-50">
       <LessonHeader
         title={step.title[lang]}
         missionLabel={step.missionLabel}

@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   const res = NextResponse.json({ ok: true, role: verified.role });
   applyClearedForceLogoutCookie(res);
   res.cookies.set(AUTH_TOKEN_COOKIE, token, {
-    ...authCookieBaseOptions(),
+    ...authCookieBaseOptions(request),
     maxAge: cookieMaxAgeFromJwt(token),
   });
 

@@ -6,7 +6,10 @@ import {
   pickLearnerProofPhotos,
   type SocialProofPhoto,
 } from "@/src/lib/social-proof-photos";
-import { playersPlayingProofLine } from "@/src/lib/monthly-offer-copy";
+import {
+  playersPlayingProofLine,
+  playersPlayingProofParts,
+} from "@/src/lib/monthly-offer-copy";
 import {
   PLAYERS_PLAYING_PROOF_FLOOR,
   resolvePlayersPlayingCount,
@@ -21,6 +24,11 @@ type Props = {
   className?: string;
   /** Override when the page locale is not UiLocaleContext (rare). */
   locale?: UiLocale;
+  /**
+   * `stacked`: larger avatars with a bold count over a muted second line, in a card.
+   * `plain`: the same without the card, so it never competes with a nearby button.
+   */
+  variant?: "inline" | "stacked" | "plain";
 };
 
 let cachedRegisteredStudents: number | null = null;
@@ -89,7 +97,11 @@ export function PaidLearnersProofBar({
   );
 }
 
-export function PaidLearnersProofChip({ className, locale: localeProp }: Props) {
+export function PaidLearnersProofChip({
+  className,
+  locale: localeProp,
+  variant = "inline",
+}: Props) {
   const { locale: ctxLocale } = useUiLocale();
   const locale = localeProp ?? ctxLocale;
   const [count, setCount] = useState<number>(() =>
@@ -111,6 +123,49 @@ export function PaidLearnersProofChip({ className, locale: localeProp }: Props) 
       alive = false;
     };
   }, []);
+
+  if (variant === "stacked" || variant === "plain") {
+    const { lead, rest } = playersPlayingProofParts(count, locale);
+    return (
+      <div
+        className={cn(
+          "inline-flex max-w-full items-center gap-3",
+          variant === "stacked" &&
+            "rounded-2xl border border-sky-500/20 bg-background/80 py-2 pl-2 pr-4 shadow-[0_8px_24px_-18px_rgba(15,23,42,0.45)] backdrop-blur-sm dark:border-sky-400/25",
+          locale === "bn" && "font-bengali",
+          className,
+        )}
+        role="status"
+      >
+        <div className="flex shrink-0 -space-x-2.5" aria-hidden>
+          {photos.map((photo) => (
+            <span
+              key={photo.src}
+              className="inline-flex h-9 w-9 overflow-hidden rounded-full bg-sky-800 ring-2 ring-background"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={photo.src}
+                alt=""
+                width={36}
+                height={36}
+                className="h-full w-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            </span>
+          ))}
+        </div>
+        <p className="min-w-0 text-left leading-tight">
+          <span className="block text-sm font-black text-foreground sm:text-[15px]">
+            {lead}
+          </span>
+          <span className="mt-0.5 block text-xs font-medium text-muted-foreground sm:text-[13px]">
+            {rest}
+          </span>
+        </p>
+      </div>
+    );
+  }
 
   const line = playersPlayingProofLine(count, locale);
 

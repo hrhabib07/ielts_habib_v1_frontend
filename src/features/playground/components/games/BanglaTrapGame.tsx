@@ -31,6 +31,7 @@ export function BanglaTrapGame({
   onReady,
   onAnswer,
   onMistake,
+  guide = false,
 }: GameProps<BanglaTrapItem> & { onMistake: () => void }) {
   const [found, setFound] = useState(false);
   const [missTap, setMissTap] = useState<{ index: number; tries: number } | null>(null);
@@ -38,6 +39,7 @@ export function BanglaTrapGame({
   const selected = choice?.attempt === attempt ? choice.fix : null;
   const done = isDone(status);
   const locked = status !== "answering";
+  const guideOn = guide && !locked && selected === null;
 
   const tapWord = (index: number) => {
     if (found || locked) return;
@@ -78,7 +80,7 @@ export function BanglaTrapGame({
       <div
         className={cn(
           "rounded-3xl border-2 border-b-[5px] bg-white p-3.5 shadow-sm transition-[border-color,box-shadow] duration-300 sm:p-6",
-          !locked ? "border-sky-300 ring-4 ring-sky-100" : "border-slate-200",
+          !locked ? "border-accent/35 ring-4 ring-accent/10" : "border-slate-200",
         )}
       >
         <div className="flex min-h-9 items-center justify-between gap-2">
@@ -104,6 +106,8 @@ export function BanglaTrapGame({
               tone={wordTone(i)}
               disabled={found || locked}
               shakeKey={missTap?.tries}
+              nudgeIndex={i}
+              guide={guideOn && !found && i === item.wrong}
               className={cn(i === item.wrong && found && !done && "line-through decoration-2")}
               onClick={() => tapWord(i)}
             >
@@ -126,8 +130,16 @@ export function BanglaTrapGame({
 
       {found && !done ? (
         <div className="flex flex-wrap justify-center gap-2.5">
-          {item.fixes.map((fix) => (
-            <WordChip key={fix} tone={fixTone(fix)} disabled={locked} shakeKey={attempt} onClick={() => chooseFix(fix)}>
+          {item.fixes.map((fix, i) => (
+            <WordChip
+              key={fix}
+              tone={fixTone(fix)}
+              disabled={locked}
+              shakeKey={attempt}
+              nudgeIndex={i}
+              guide={guideOn && fix === item.fix}
+              onClick={() => chooseFix(fix)}
+            >
               {fix}
             </WordChip>
           ))}

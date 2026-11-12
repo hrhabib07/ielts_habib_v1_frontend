@@ -13,18 +13,24 @@ import {
  * Phone OTP previously raced past sync and let users open checkout before the
  * cookie was ready  -  submit failed for ~30-90s, then worked on retry.
  */
-export async function persistSessionToken(token: string): Promise<{
+export async function persistSessionToken(
+  token: string,
+  options?: { attempts?: number; timeoutMs?: number },
+): Promise<{
   ok: boolean;
   code?: string;
 }> {
   const trimmed = token.trim();
   if (!trimmed) return { ok: false, code: "EMPTY_TOKEN" };
 
+  const attempts = Math.max(1, options?.attempts ?? 4);
+  const timeoutMs = options?.timeoutMs ?? 5000;
+
   setAccessToken(trimmed);
 
   let lastCode: string | undefined;
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    const synced = await syncAuthCookie(trimmed, { timeoutMs: 5000 });
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const synced = await syncAuthCookie(trimmed, { timeoutMs });
     if (synced.ok) {
       // Confirm cookie round-trip works (mobile Safari / FB in-app quirks).
       const fromCookie = await hydrateAccessTokenFromCookie();
@@ -35,8 +41,9 @@ export async function persistSessionToken(token: string): Promise<{
       lastCode = "COOKIE_ROUNDTRIP_FAILED";
     } else {
       lastCode = synced.code ?? "SYNC_FAILED";
+      if (lastCode === "TOKEN_REJECTED" || lastCode === "LOGOUT") break;
     }
-    await sleep(400 * (attempt + 1));
+    if (attempt < attempts - 1) await sleep(400 * (attempt + 1));
   }
 
   return { ok: false, code: lastCode ?? "SYNC_FAILED" };

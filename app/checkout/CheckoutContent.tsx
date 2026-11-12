@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
 import { BkashCheckoutForm } from "@/src/components/pricing/BkashCheckoutForm";
+import { PricingFaqSection } from "@/src/components/pricing/PricingFaqSection";
 import {
   hasBlockingPaymentStatus,
   PaymentApplicationStatusCard,
@@ -258,6 +259,12 @@ export function CheckoutContent({
           <p className="text-pretty text-sm text-muted-foreground sm:text-[15px]">
             {copy.pageSub}
           </p>
+          <a
+            href="#checkout-faq"
+            className="inline-block pt-1 text-sm font-semibold text-pink-700 underline-offset-4 hover:underline dark:text-pink-300"
+          >
+            {copy.faqJump}
+          </a>
           {forceCheckoutForm && isTestPending ? (
             <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">
               QA test mode: you can submit again. This will not create a real Founder purchase.
@@ -290,6 +297,8 @@ export function CheckoutContent({
             />
           </div>
         </div>
+
+        <PricingFaqSection id="checkout-faq" className="pt-4" />
       </div>
     </div>
   );

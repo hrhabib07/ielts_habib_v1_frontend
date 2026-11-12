@@ -24,6 +24,7 @@ import { getLearnerFeedbackInvite } from "@/src/lib/api/learnerFeedback";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { CampGraduationsSection } from "@/src/components/profile/CampGraduationsSection";
 import { LEARNER_FEEDBACK_REWARD_XP } from "@/src/lib/learner-feedback";
+import { SHOW_XP_LEADERBOARD } from "@/src/lib/platform-config";
 
 function MissionMini({ card }: { card: MissionCard }) {
   const n = String(card.order).padStart(2, "0");
@@ -131,39 +132,47 @@ export function MyGamlishHub() {
             Your rewards
           </h2>
           <p className="text-sm text-muted-foreground">
-            Level, XP and streak  -  the dopamine loop. Keep playing to grow them.
+            {SHOW_XP_LEADERBOARD
+              ? "Level, XP and streak  -  the dopamine loop. Keep playing to grow them."
+              : "Keep your streak going. Play a little every day."}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm" className="rounded-full">
             <Link href={`/u/${handle}`}>Open public profile</Link>
           </Button>
-          <Button
-            asChild
-            size="sm"
-            className="rounded-full bg-amber-500 text-amber-950 hover:bg-amber-400"
-          >
-            <Link href="/leaderboard">XP Leaderboard</Link>
-          </Button>
+          {SHOW_XP_LEADERBOARD ? (
+            <Button
+              asChild
+              size="sm"
+              className="rounded-full bg-amber-500 text-amber-950 hover:bg-amber-400"
+            >
+              <Link href="/leaderboard">XP Leaderboard</Link>
+            </Button>
+          ) : null}
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <Stat
-          icon={<Sparkles className="h-5 w-5 text-white" />}
-          label="Rank"
-          value={stats?.level ?? 1}
-          accent="from-violet-400 to-purple-600"
-          big
-        />
-        <Stat
-          icon={<Zap className="h-5 w-5 text-white" />}
-          label="XP"
-          value={(stats?.totalXp ?? 0).toLocaleString("en-US")}
-          accent="from-sky-400 to-blue-600"
-          big
-          highlight
-        />
+      <div className={cn("grid gap-3", SHOW_XP_LEADERBOARD ? "grid-cols-3" : "grid-cols-1 sm:max-w-xs")}>
+        {SHOW_XP_LEADERBOARD ? (
+          <>
+            <Stat
+              icon={<Sparkles className="h-5 w-5 text-white" />}
+              label="Rank"
+              value={stats?.level ?? 1}
+              accent="from-violet-400 to-purple-600"
+              big
+            />
+            <Stat
+              icon={<Zap className="h-5 w-5 text-white" />}
+              label="XP"
+              value={(stats?.totalXp ?? 0).toLocaleString("en-US")}
+              accent="from-sky-400 to-blue-600"
+              big
+              highlight
+            />
+          </>
+        ) : null}
         <Stat
           icon={<Flame className="h-5 w-5 text-white" />}
           label="Streak"
@@ -200,7 +209,7 @@ export function MyGamlishHub() {
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-bold text-foreground">
-              বোনাস চ্যালেঞ্জ · +{LEARNER_FEEDBACK_REWARD_XP} XP
+              {SHOW_XP_LEADERBOARD ? `বোনাস চ্যালেঞ্জ · +${LEARNER_FEEDBACK_REWARD_XP} XP` : "বোনাস চ্যালেঞ্জ"}
             </span>
             <span className="block text-xs text-muted-foreground">
               মাত্র 2 মিনিট · একবারই · পাঠানোর পর এই অপশন চলে যাবে
@@ -238,9 +247,9 @@ export function MyGamlishHub() {
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-indigo-400/30 bg-indigo-400/10 px-4 py-3">
           <Sparkles className="h-5 w-5 text-indigo-600" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">Early Adopter · Gamlish v2</p>
+            <p className="text-sm font-semibold text-foreground">Legacy Learner</p>
             <p className="text-xs text-muted-foreground">
-              Permanent badge · you joined Gamlish v2 in its early days.
+              Permanent badge · you joined Gamlish before 20 November 2026.
             </p>
           </div>
         </div>

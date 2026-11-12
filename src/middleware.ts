@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   decodeJwtUser,
   getJwtSecret,
+  validateTokenWithApi,
   verifyJwtToken,
 } from "@/src/lib/jwt-verify";
 import {
@@ -11,6 +12,7 @@ import {
   applyClearedForceLogoutCookie,
 } from "@/src/lib/auth-cookie";
 import { resolveHomeEntryRedirect } from "@/src/lib/home-entry-redirect";
+import { readAuthReturnPathFromSearch } from "@/src/lib/auth-redirects";
 
 const AUTH_ROUTES = [
   "/login",
@@ -35,11 +37,27 @@ function clearTokenCookie(response: NextResponse): void {
   applyClearedAuthCookies(response);
 }
 
+/**
+ * Local HS256 verify first. If that fails on an unexpired token, ask the API
+ * before treating the session as dead, matching /api/auth/sync so a cookie it
+ * accepted is never rejected here.
+ */
 async function resolveMiddlewareUser(token: string) {
-  if (getJwtSecret()) {
-    return verifyJwtToken(token);
-  }
-  return decodeJwtUser(token);
+  if (!getJwtSecret()) return decodeJwtUser(token);
+
+  const verified = await verifyJwtToken(token);
+  if (verified) return verified;
+
+  const claims = decodeJwtUser(token);
+  if (!claims) return null;
+  return (await validateTokenWithApi(token)) ? claims : null;
+}
+
+function loginRedirect(request: NextRequest): NextResponse {
+  const url = new URL("/login", request.url);
+  const { pathname, search } = request.nextUrl;
+  url.searchParams.set("next", `${pathname}${search}`);
+  return NextResponse.redirect(url);
 }
 
 const DISABLE_AUTH_REDIRECT =
@@ -101,7 +119,11 @@ export async function middleware(request: NextRequest) {
     }
 
     if (verifiedUser) {
-      const redirectPath = getRedirectPathForRole(verifiedUser.role);
+      const returnPath = readAuthReturnPathFromSearch(request.nextUrl.searchParams);
+      const redirectPath =
+        returnPath && !AUTH_ROUTES.some((route) => returnPath.startsWith(route))
+          ? returnPath
+          : getRedirectPathForRole(verifiedUser.role);
       return attachLegacyCleanup(
         NextResponse.redirect(new URL(redirectPath, request.url)),
       );
@@ -114,10 +136,10 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/onboarding")) {
     if (!token) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return loginRedirect(request);
     }
     if (!verifiedUser) {
-      const res = NextResponse.redirect(new URL("/login", request.url));
+      const res = loginRedirect(request);
       clearTokenCookie(res);
       return attachLegacyCleanup(res);
     }
@@ -126,10 +148,10 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/profile") || pathname.startsWith("/certification")) {
     if (!token) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return loginRedirect(request);
     }
     if (!verifiedUser) {
-      const res = NextResponse.redirect(new URL("/login", request.url));
+      const res = loginRedirect(request);
       clearTokenCookie(res);
       return attachLegacyCleanup(res);
     }
@@ -138,10 +160,10 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/dashboard")) {
     if (!token) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return loginRedirect(request);
     }
     if (!verifiedUser) {
-      const res = NextResponse.redirect(new URL("/login", request.url));
+      const res = loginRedirect(request);
       clearTokenCookie(res);
       return attachLegacyCleanup(res);
     }

@@ -3,22 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  Mail,
-  ShieldCheck,
-  Sparkles,
-  Swords,
-  Trophy,
-  Zap,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Mail, Sparkles, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister } from "@/src/auth/hooks";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
+import { AuthGamePanel } from "@/src/components/auth/AuthGamePanel";
 import {
   AuthMethodDivider,
   ContinueWithGoogleButton,
@@ -26,88 +17,13 @@ import {
 import { PhoneOtpAuthPanel } from "@/src/components/auth/PhoneOtpAuthPanel";
 import { AuthErrorAlert } from "@/src/components/auth/AuthErrorAlert";
 import { PaidLearnersProofBar } from "@/src/components/pricing/PaidLearnersProofChip";
-import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { guestPath, useGuestWins } from "@/src/features/guest/guestPath";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { AUTH_REGISTER_COPY } from "@/src/lib/auth-register-copy";
 import { readAuthReturnPathFromSearch } from "@/src/lib/auth-redirects";
 import { writeDemoSessionId } from "@/src/lib/demo-session";
+import { AUTH_INPUT_CLASS, AUTH_LABEL_CLASS } from "@/src/components/auth/authStyles";
 import { cn } from "@/lib/utils";
-
-function RegisterHeroPanel({ locale }: { locale: "en" | "bn" }) {
-  const copy = AUTH_REGISTER_COPY[locale];
-  const reduceMotion = useReducedMotion();
-
-  return (
-    <aside className="relative hidden w-[44%] shrink-0 flex-col justify-between overflow-hidden bg-slate-950 px-10 py-10 text-white xl:w-[48%] xl:px-12 xl:py-12 lg:flex">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_15%_0%,rgba(15,23,42,0.55),transparent_58%),radial-gradient(ellipse_55%_45%_at_95%_100%,rgba(30,58,138,0.35),transparent_52%)]"
-        aria-hidden
-      />
-
-      <Link href="/" className="relative z-10 inline-flex w-fit transition-opacity hover:opacity-90">
-        <GamlishNavBrand className="[&_span]:text-white" />
-      </Link>
-
-      <motion.div
-        className="relative z-10 max-w-lg space-y-7"
-        initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <p className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/85">
-          <Sparkles className="h-3.5 w-3.5 text-white/90" aria-hidden />
-          {locale === "bn" ? "4 ক্যাম্প · 21 লেভেল" : "4 camps · 21 levels"}
-        </p>
-
-        <div className="space-y-3">
-          <h2 className="text-balance text-[2rem] font-bold leading-[1.12] tracking-tight xl:text-[2.35rem]">
-            {copy.heroTitle}
-          </h2>
-          <p className="max-w-md text-pretty text-[15px] leading-relaxed text-slate-300">
-            {copy.heroSubtitle}
-          </p>
-        </div>
-
-        <ul className="space-y-2.5">
-          {copy.heroBullets.map((item, idx) => (
-            <li key={item} className="flex items-center gap-3 text-sm text-slate-200">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/12">
-                {idx === 0 ? (
-                  <Trophy className="h-3.5 w-3.5 text-white/90" />
-                ) : idx === 1 ? (
-                  <Swords className="h-3.5 w-3.5 text-white/80" />
-                ) : (
-                  <Zap className="h-3.5 w-3.5 text-white/75" />
-                )}
-              </span>
-              {item}
-            </li>
-          ))}
-        </ul>
-
-        <div className="grid max-w-sm grid-cols-3 gap-2">
-          {[
-            { label: locale === "bn" ? "ক্যাম্প" : "Camps", value: "4" },
-            { label: locale === "bn" ? "লেভেল" : "Levels", value: "21" },
-            { label: locale === "bn" ? "ফ্রি" : "Free", value: "M01" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-xl border border-white/10 bg-white/5 px-2 py-2.5 text-center backdrop-blur-sm"
-            >
-              <p className="text-lg font-bold tabular-nums">{stat.value}</p>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-      <p className="relative z-10 text-sm text-slate-500">{copy.heroFootnote}</p>
-    </aside>
-  );
-}
 
 function RegisterToolbar({ copy }: { copy: (typeof AUTH_REGISTER_COPY)["en"] }) {
   return (
@@ -132,9 +48,12 @@ export function RegisterForm() {
   const { handleRegister, loading, error } = useRegister();
   const [email, setEmail] = useState("");
   const [returnTo, setReturnTo] = useState<string | null>(null);
+  const [otherWays, setOtherWays] = useState(false);
   const { locale } = useGuestLandingLocaleState();
   const copy = AUTH_REGISTER_COPY[locale];
   const reduceMotion = useReducedMotion();
+  const wins = useGuestWins();
+  const topic = guestPath(wins).topic;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -144,27 +63,22 @@ export function RegisterForm() {
     setReturnTo(readAuthReturnPathFromSearch(params));
   }, []);
 
-  const loginHref = returnTo
-    ? `/login?redirect=${encodeURIComponent(returnTo)}`
-    : "/login";
+  const loginHref = returnTo ? `/login?redirect=${encodeURIComponent(returnTo)}` : "/login";
 
   return (
     <div
-      className={cn(
-        "flex min-h-dvh w-full bg-background",
-        locale === "bn" && "font-bengali",
-      )}
+      className={cn("flex min-h-dvh w-full bg-background", locale === "bn" && "font-bengali")}
       lang={locale === "bn" ? "bn" : "en"}
     >
-      <RegisterHeroPanel locale={locale} />
+      <AuthGamePanel locale={locale} />
 
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
         <RegisterToolbar copy={copy} />
         <PaidLearnersProofBar locale={locale} />
 
-        <div className="relative flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:px-10 xl:px-14">
+        <div className="relative flex flex-1 items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-10 xl:px-14">
           <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(56,189,248,0.14),transparent_58%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(30,58,138,0.08),transparent_58%)]"
             aria-hidden
           />
           <motion.div
@@ -174,118 +88,121 @@ export function RegisterForm() {
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="space-y-3 text-center sm:text-left">
-              <p className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-sky-800 dark:text-sky-200">
+              <p className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-bold text-accent">
                 <Sparkles className="h-3.5 w-3.5" aria-hidden />
                 {copy.eyebrow}
               </p>
-              <h1 className="text-balance text-[1.85rem] font-black tracking-tight text-foreground sm:text-[2.1rem]">
+              <h1 className="text-balance text-[1.85rem] font-black leading-tight tracking-tight text-slate-900 sm:text-[2.1rem]">
                 {copy.title}
               </h1>
-              <p className="text-pretty text-[15px] font-medium leading-relaxed text-foreground/85 sm:text-base">
+              <p className="text-pretty text-[15px] font-medium leading-relaxed text-slate-700 sm:text-base">
                 {copy.subtitle}
               </p>
-              <p className="text-pretty text-sm font-semibold leading-relaxed text-sky-700 dark:text-sky-300">
-                {copy.belief}
-              </p>
+              <ul className="flex flex-wrap justify-center gap-1.5 sm:justify-start">
+                {copy.chips.map((chip) => (
+                  <li
+                    key={chip}
+                    className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm ring-1 ring-slate-200"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+                    {chip}
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="overflow-hidden rounded-[1.35rem] border border-sky-500/25 bg-card shadow-[0_20px_50px_-28px_rgba(14,165,233,0.55)]">
-              <div className="flex items-center gap-2 border-b border-sky-500/15 bg-gradient-to-r from-sky-500/12 to-transparent px-4 py-3 sm:px-5">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500 text-white shadow-md shadow-sky-500/35">
+            {wins > 0 ? (
+              <p className="flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold leading-snug text-emerald-900">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+                {copy.savedWins(wins, topic.en)}
+              </p>
+            ) : null}
+
+            <div className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-card shadow-[0_20px_50px_-30px_rgba(30,58,138,0.45)]">
+              <div className="flex items-center gap-2 border-b border-slate-100 bg-accent/[0.04] px-4 py-3 sm:px-5">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white shadow-sm">
                   <Swords className="h-4 w-4" aria-hidden />
                 </span>
-                <p className="text-sm font-bold text-sky-950 dark:text-sky-100">
-                  {copy.missionChip}
-                </p>
+                <p className="text-sm font-bold text-slate-900">{copy.missionChip}</p>
               </div>
 
               <div className="p-5 sm:p-6">
-                <p className="mb-4 text-sm font-medium leading-relaxed text-foreground/80">
-                  {copy.formLead}
-                </p>
+                <p className="mb-3 text-sm font-semibold text-slate-700">{copy.formLead}</p>
 
-                <div className="mb-4 space-y-3">
-                  <ContinueWithGoogleButton
-                    returnTo={returnTo}
-                    label={copy.googleCta}
-                    className="h-12 rounded-full border-sky-500/30 bg-background text-[15px] font-bold shadow-sm hover:border-sky-500/50 hover:bg-sky-500/5"
-                  />
-                  <AuthMethodDivider
-                    label={locale === "bn" ? "অথবা মোবাইল OTP" : "or mobile OTP"}
-                  />
-                  <PhoneOtpAuthPanel locale={locale} compact />
-                  <AuthMethodDivider
-                    label={locale === "bn" ? "অথবা ইমেইল" : "or email"}
-                  />
-                </div>
+                <ContinueWithGoogleButton
+                  returnTo={returnTo}
+                  label={copy.googleCta}
+                  tone="primary"
+                  className={cn("h-13 rounded-2xl font-extrabold", locale === "bn" ? "text-[17px]" : "text-base")}
+                />
 
-                <form
-                  className="space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleRegister(email);
-                  }}
+                <button
+                  type="button"
+                  onClick={() => setOtherWays((open) => !open)}
+                  aria-expanded={otherWays}
+                  className="mx-auto mt-3 flex items-center gap-1 text-sm font-semibold text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
                 >
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">
-                      {copy.emailLabel}
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        type="email"
-                        data-telemetry-field="email"
-                        required
-                        autoComplete="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder={copy.emailPlaceholder}
-                        className="h-11 rounded-xl border-border/80 bg-background pl-11"
-                      />
-                    </div>
+                  {otherWays ? copy.hideOtherWays : copy.otherWays}
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", otherWays && "rotate-180")} aria-hidden />
+                </button>
+
+                {otherWays ? (
+                  <div className="mt-4 space-y-4">
+                    <AuthMethodDivider label={copy.phoneDivider} />
+                    <PhoneOtpAuthPanel locale={locale} compact />
+                    <AuthMethodDivider label={copy.emailDivider} />
+                    <form
+                      className="space-y-4"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleRegister(email);
+                      }}
+                    >
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className={AUTH_LABEL_CLASS}>
+                          {copy.emailLabel}
+                        </Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                          <Input
+                            id="email"
+                            type="email"
+                            data-telemetry-field="email"
+                            required
+                            autoComplete="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder={copy.emailPlaceholder}
+                            className={AUTH_INPUT_CLASS}
+                          />
+                        </div>
+                      </div>
+
+                      {error ? <AuthErrorAlert message={error} /> : null}
+
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        disabled={loading}
+                        className="h-12 w-full rounded-2xl border-2 border-slate-300 text-[15px] font-bold text-slate-800"
+                        size="lg"
+                      >
+                        {loading ? (
+                          copy.submitting
+                        ) : (
+                          <>
+                            {copy.submit}
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    </form>
                   </div>
+                ) : null}
 
-                  {error ? <AuthErrorAlert message={error} /> : null}
-
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className={cn(
-                      "h-12 w-full rounded-full text-[15px] font-black tracking-tight",
-                      LANDING_CTA_CLASS,
-                    )}
-                    size="lg"
-                  >
-                    {loading ? (
-                      copy.submitting
-                    ) : (
-                      <>
-                        {copy.submit}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-
-                <div className="mt-5 grid gap-2.5 border-t border-border/50 pt-4 text-[12px] font-semibold text-foreground/75 sm:grid-cols-3">
-                  <span className="inline-flex items-center gap-1.5">
-                    <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-sky-600" />
-                    {copy.trustOtp}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-sky-600" />
-                    {copy.trustFree}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Zap className="h-3.5 w-3.5 shrink-0 text-sky-600" />
-                    {copy.trustSecure}
-                  </span>
-                </div>
-
-                <p className="mt-4 text-center text-sm">
-                  <span className="text-muted-foreground">{copy.hasAccount} </span>
-                  <Link href={loginHref} className="font-semibold text-sky-700 hover:underline dark:text-sky-300">
+                <p className="mt-5 border-t border-border/50 pt-4 text-center text-sm">
+                  <span className="text-slate-600">{copy.hasAccount} </span>
+                  <Link href={loginHref} className="font-bold text-accent hover:underline">
                     {copy.signIn}
                   </Link>
                 </p>

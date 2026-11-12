@@ -60,15 +60,15 @@ export function QuestionCard({
       <section
         aria-label="Question"
         className={cn(
-          "w-full max-w-[96%] rounded-3xl border-2 bg-white p-4 shadow-xl shadow-sky-900/5 sm:max-w-[82%] sm:p-5",
-          lastTry ? "border-amber-300" : "border-sky-200",
+          "w-full max-w-[96%] rounded-3xl border-2 bg-white p-4 shadow-xl shadow-slate-900/5 sm:max-w-[82%] sm:p-5",
+          lastTry ? "border-amber-300" : "border-accent/20",
         )}
       >
         <div className="flex items-center justify-between gap-3">
           <p
             className={cn(
               face,
-              "text-[11px] font-black uppercase tracking-[0.14em] text-sky-700",
+              "text-[11px] font-black uppercase tracking-[0.14em] text-accent",
             )}
           >
             {question.title ? question.title[lang] : pick(UI.askingYou, lang)}
@@ -119,7 +119,7 @@ export function QuestionCard({
             <p
               className={cn(
                 EN_FACE,
-                "mt-3 whitespace-pre-line rounded-2xl border-2 border-dashed border-sky-200 bg-sky-50 px-4 py-3 text-center text-lg font-bold text-slate-900",
+                "mt-3 whitespace-pre-line rounded-2xl border-2 border-dashed border-accent/20 bg-accent/5 px-4 py-3 text-center text-lg font-bold text-slate-900",
               )}
             >
               <SpokenText
@@ -165,7 +165,7 @@ export function QuestionCard({
           onClick={onReread}
           className={cn(
             face,
-            "mt-4 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-semibold text-slate-500 transition-colors hover:bg-sky-50 hover:text-sky-700",
+            "mt-4 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-semibold text-slate-500 transition-colors hover:bg-accent/5 hover:text-accent",
           )}
         >
           <BookOpen className="size-3.5" aria-hidden />
@@ -221,7 +221,7 @@ function TypeAnswer({
         enterKeyHint="done"
         className={cn(
           EN_FACE,
-          "w-full rounded-2xl border-2 border-dashed border-sky-300 bg-sky-50/60 px-4 py-3 text-lg font-semibold text-slate-900 outline-none transition-colors placeholder:font-medium placeholder:text-sky-300 focus:border-solid focus:border-sky-500 focus:bg-white",
+          "w-full rounded-2xl border-2 border-dashed border-accent/30 bg-accent/5 px-4 py-3 text-lg font-semibold text-slate-900 outline-none transition-colors placeholder:font-medium placeholder:text-accent/40 focus:border-solid focus:border-accent focus:bg-white",
           attempt === 2 && "border-solid border-amber-300 bg-amber-50/60",
         )}
       />
@@ -265,8 +265,8 @@ function ChoiceOptions({
               className={cn(
                 "flex w-full items-center gap-3 rounded-2xl border-2 px-3 py-3 text-left transition-all duration-150 active:translate-y-0.5",
                 selected
-                  ? "border-sky-500 bg-sky-50 shadow-[0_3px_0_0_#0ea5e9]"
-                  : "border-slate-200 bg-white shadow-[0_3px_0_0_#e2e8f0] hover:border-sky-300 hover:bg-sky-50/50",
+                  ? "border-accent bg-accent/5 shadow-[0_3px_0_0_var(--accent)]"
+                  : "border-slate-200 bg-white shadow-[0_3px_0_0_#e2e8f0] hover:border-accent/30 hover:bg-accent/5",
                 eliminated &&
                   "cursor-not-allowed border-slate-200 bg-slate-50 opacity-55 shadow-none hover:border-slate-200 hover:bg-slate-50",
               )}
@@ -276,7 +276,7 @@ function ChoiceOptions({
                   EN_FACE,
                   "flex size-9 shrink-0 items-center justify-center rounded-xl text-sm font-black transition-colors",
                   selected
-                    ? "bg-sky-500 text-white"
+                    ? "bg-accent text-white"
                     : "bg-slate-100 text-slate-600",
                   eliminated && "bg-rose-100 text-rose-500",
                 )}

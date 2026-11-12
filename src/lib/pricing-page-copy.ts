@@ -48,14 +48,14 @@ export const PRICING_PAGE_COPY: Record<
     priceSave: (saveLabel) => `${saveLabel} সাশ্রয়`,
     priceMeta: "45 দিন · 21টি মিশন",
     cta: "45 দিনের অ্যাক্সেস নিন",
-    ctaDemo: "আগে ফ্রি ডেমো খেলুন",
+    ctaDemo: "আগে ফ্রি গেম খেলুন",
     legal: "হিডেন চার্জ নেই। পেমেন্ট bKash-এ। 45 দিনের অ্যাক্সেস, আজীবন নয়।",
     includesTitle: "এই পেমেন্টে যা খুলবে",
     includes: [
       "4টি Camp · 21টি Mission",
       "গেম খেলে প্র্যাকটিস, সাথে সাথে শুধরে নেওয়া",
       "ক্যাম্প পরীক্ষা + সার্টিফিকেট",
-      "Mission 1 ফ্রি ডেমো আগেই খেলা যায়",
+      "প্রথম গেমগুলো ফ্রি, সাইন-আপ ছাড়াই খেলা যায়",
     ],
     stepsTitle: "পেমেন্ট 3 ধাপে",
     steps: [
@@ -63,7 +63,7 @@ export const PRICING_PAGE_COPY: Record<
       { n: "2", text: "bKash-এ Send Money করুন" },
       { n: "3", text: "TrxID সাবমিট করুন, অ্যাক্সেস খুলবে" },
     ],
-    valueTitle: "290 টাকায় আপনি কী পারবেন",
+    valueTitle: "এই পেমেন্টে আপনি কী পারবেন",
     valueItems: [
       {
         title: "বাক্যের ভিত",
@@ -86,7 +86,7 @@ export const PRICING_PAGE_COPY: Record<
     compareOld: "পুরনো নিয়ম",
     compareNew: "Gamlish",
     compareRows: [
-      { old: "হাজার হাজার টাকার কোচিং", neu: "একবার 290 টাকা" },
+      { old: "হাজার হাজার টাকার কোচিং", neu: "একবারের পেমেন্ট, কোচিংয়ের চেয়ে অনেক কম" },
       { old: "বোরিং বই আর লম্বা লেকচার", neu: "গেম খেলে শেখা" },
       { old: "কোনো পরিষ্কার শেষ নেই", neu: "45 দিনে 21টি মিশন" },
     ],
@@ -109,14 +109,14 @@ export const PRICING_PAGE_COPY: Record<
     priceSave: (saveLabel) => `Save ${saveLabel}`,
     priceMeta: "45 days · 21 missions",
     cta: "Get 45-day access",
-    ctaDemo: "Play the free demo first",
+    ctaDemo: "Play the free games first",
     legal: "No hidden fee. Pay with bKash. 45-day access, not lifetime.",
     includesTitle: "What this payment unlocks",
     includes: [
       "4 camps · 21 missions",
       "Game practice with instant correction",
       "Camp exams + certificate",
-      "Mission 1 is free to try first",
+      "The first games are free to play, no sign-up",
     ],
     stepsTitle: "Pay in 3 steps",
     steps: [
@@ -124,7 +124,7 @@ export const PRICING_PAGE_COPY: Record<
       { n: "2", text: "Send Money on bKash" },
       { n: "3", text: "Submit your TrxID. Access opens." },
     ],
-    valueTitle: "What 290 BDT lets you do",
+    valueTitle: "What this payment lets you do",
     valueItems: [
       {
         title: "Sentence foundation",
@@ -147,7 +147,7 @@ export const PRICING_PAGE_COPY: Record<
     compareOld: "Old way",
     compareNew: "Gamlish",
     compareRows: [
-      { old: "Coaching that costs thousands", neu: "290 BDT, one payment" },
+      { old: "Coaching that costs thousands", neu: "One payment, far less than coaching" },
       { old: "Boring books and long lectures", neu: "Learn by playing games" },
       { old: "No clear ending", neu: "21 missions in 45 days" },
     ],

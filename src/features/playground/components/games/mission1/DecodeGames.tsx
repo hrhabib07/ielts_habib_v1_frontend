@@ -96,7 +96,7 @@ export function SixBoxGame({ item, itemKey, lang, status, attempt, onReady, onAn
           animate={{ x: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 22 }}
         >
-          <span className={cn(EN_FACE, "rounded-2xl border-2 border-b-[5px] border-indigo-300 bg-white px-5 py-2.5 text-2xl font-black text-slate-900 shadow-sm sm:text-3xl")}>
+          <span className={cn(EN_FACE, "rounded-2xl border-2 border-b-[5px] border-accent/35 bg-white px-5 py-2.5 text-2xl font-black text-slate-900 shadow-sm sm:text-3xl")}>
             {item.card}
           </span>
         </motion.div>
@@ -397,7 +397,7 @@ export function BuildOrderGame({ item, itemKey, lang, status, onReady, onAnswer 
           {built.length === 0 && !done ? (
             <span className={cn(LANG_FACE[lang], "px-1 text-sm font-semibold text-slate-400")}>{pick(M1_UI.buildEmpty, lang)}</span>
           ) : done ? (
-            <span className={cn(EN_FACE, "rounded-xl bg-sky-500 px-3 py-1.5 text-xl font-black text-white")}>{shown}</span>
+            <span className={cn(EN_FACE, "rounded-xl bg-accent px-3 py-1.5 text-xl font-black text-white")}>{shown}</span>
           ) : (
             built.map((tileIndex, position) => (
               <WordChip

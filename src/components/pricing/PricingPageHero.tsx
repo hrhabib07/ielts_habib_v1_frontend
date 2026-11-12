@@ -8,6 +8,7 @@ import { PRICING_PAGE_COPY } from "@/src/lib/pricing-page-copy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { MonthlyOfferStory } from "@/src/components/pricing/MonthlyOfferStory";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
 function taka(amount: number): string {
@@ -99,7 +100,7 @@ export function PricingPageHero({
           {copy.cta}
         </Button>
         <Link
-          href="/demo"
+          href={FREE_PLAY_HREF}
           className="mt-3 block text-center text-base font-semibold text-foreground/75 underline-offset-4 hover:underline"
         >
           {copy.ctaDemo}

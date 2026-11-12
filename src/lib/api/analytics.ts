@@ -21,6 +21,7 @@ export type FunnelEventName =
   | "input_hesitation"
   | "language_switched"
   | "page_exit"
+  | "landing_cta_click"
   | "phone_otp_method_selected"
   | "phone_otp_send_clicked"
   | "phone_otp_sent_success"

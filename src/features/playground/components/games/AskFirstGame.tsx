@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Box, UserRound, Volume2, type LucideIcon } from "lucide-react";
+import { ChevronRight, Volume2 } from "lucide-react";
 import {
   BN_FACE,
   EN_FACE,
@@ -27,7 +27,9 @@ import {
   isDone,
   type GameProps,
 } from "@/src/features/playground/components/games/gameProps";
+import { GuideHand } from "@/src/features/playground/components/GuideHand";
 import { useAutoVoice } from "@/src/features/playground/hooks/useAutoVoice";
+import { useNudge } from "@/src/features/playground/hooks/useNudge";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import {
   evaluateAskFirst,
@@ -44,61 +46,75 @@ const KINDS: {
   id: AskFirstItem["kind"];
   label: Bilingual;
   sub: Bilingual;
-  icon: LucideIcon;
+  emoji: string;
+  tone: string;
+  badge: string;
 }[] = [
-  { id: "who", label: PG_UI.who, sub: PG_UI.whoSub, icon: UserRound },
-  { id: "what", label: PG_UI.what, sub: PG_UI.whatSub, icon: Box },
+  {
+    id: "who",
+    label: PG_UI.who,
+    sub: PG_UI.whoSub,
+    emoji: "🙋",
+    tone: "border-sky-300 border-b-sky-500 bg-gradient-to-b from-sky-50 to-sky-100/70 hover:from-sky-100",
+    badge: "bg-white ring-sky-200",
+  },
+  {
+    id: "what",
+    label: PG_UI.what,
+    sub: PG_UI.whatSub,
+    emoji: "📦",
+    tone: "border-amber-300 border-b-amber-500 bg-gradient-to-b from-amber-50 to-amber-100/70 hover:from-amber-100",
+    badge: "bg-white ring-amber-200",
+  },
 ];
 
 function KindButton({
-  label,
-  sub,
-  icon: Icon,
+  kind,
+  index,
   wrong,
+  guide,
   lang,
   onClick,
 }: {
-  label: Bilingual;
-  sub: Bilingual;
-  icon: LucideIcon;
+  kind: (typeof KINDS)[number];
+  index: number;
   wrong: boolean;
+  guide: boolean;
   lang: LessonLanguage;
   onClick: () => void;
 }) {
+  const nudgeRef = useNudge<HTMLButtonElement>(!wrong, index);
   return (
     <motion.button
+      ref={nudgeRef}
       type="button"
       onClick={onClick}
       animate={wrong ? { x: [0, -7, 7, -5, 5, 0] } : { x: 0 }}
       transition={{ duration: 0.4 }}
+      whileTap={{ scale: 0.97 }}
       className={cn(
-        "flex min-w-0 flex-1 items-center gap-2.5 rounded-2xl border-2 border-b-4 px-3 py-2.5 text-left transition-colors active:translate-y-0.5 active:border-b-2 sm:gap-3 sm:px-4 sm:py-3",
-        wrong
-          ? "border-orange-300 border-b-orange-400 bg-orange-50"
-          : "border-slate-200 border-b-slate-300 bg-white hover:border-sky-300 hover:bg-sky-50",
+        "relative flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-2xl border-2 border-b-[6px] px-3 py-3 text-left shadow-md shadow-slate-900/5 transition-[background-color,border-color,translate] hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 sm:gap-3 sm:px-4 sm:py-3.5",
+        wrong ? "border-orange-300 border-b-orange-500 bg-orange-50" : kind.tone,
+        guide && "ring-4 ring-accent/25",
       )}
     >
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600 sm:size-10">
-        <Icon className="size-5" aria-hidden />
+      {guide ? <GuideHand placement="left-7 top-1/2 sm:left-9" /> : null}
+      <span
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-xl text-2xl shadow-sm ring-2 sm:size-12 sm:text-3xl",
+          kind.badge,
+        )}
+        aria-hidden
+      >
+        {kind.emoji}
       </span>
-      <span className="min-w-0">
-        <span
-          className={cn(
-            lang === "bn" ? BN_FACE : EN_FACE,
-            "block text-base font-black text-slate-800 sm:text-lg",
-          )}
-        >
-          {pick(label, lang)}
+      <span className="min-w-0 flex-1">
+        <span className={cn(lang === "bn" ? BN_FACE : EN_FACE, "block text-lg font-black text-slate-900 sm:text-xl")}>
+          {pick(kind.label, lang)}
         </span>
-        <span
-          className={cn(
-            LANG_FACE[lang],
-            "block text-xs font-semibold text-slate-500",
-          )}
-        >
-          {pick(sub, lang)}
-        </span>
+        <span className={cn(LANG_FACE[lang], "block text-xs font-bold text-slate-500")}>{pick(kind.sub, lang)}</span>
       </span>
+      <ChevronRight className="size-5 shrink-0 text-slate-400 max-sm:hidden" aria-hidden />
     </motion.button>
   );
 }
@@ -111,6 +127,8 @@ export function AskFirstGame({
   attempt,
   onReady,
   onAnswer,
+  onStep,
+  guide = false,
   onMistake,
 }: GameProps<AskFirstItem> & { onMistake: () => void }) {
   const autoVoice = useAutoVoice();
@@ -129,6 +147,13 @@ export function AskFirstGame({
   const locked = status !== "answering";
   const spoken = chunkAt(item.words, useActiveWord(`${itemKey}:s:`));
   const questionId = `${itemKey}:q`;
+
+  useEffect(() => {
+    onStep?.(kindPicked ? 1 : 0);
+  }, [kindPicked, onStep]);
+
+  const guideKind = guide && !kindPicked && !locked;
+  const guideTile = guide && kindPicked && !locked && selected === null;
 
   const chooseKind = (kind: AskFirstItem["kind"]) => {
     if (kindPicked || locked) return;
@@ -196,16 +221,6 @@ export function AskFirstGame({
             </span>
           ) : null}
         </p>
-        {done ? null : (
-          <p
-            className={cn(
-              LANG_FACE[lang],
-              "text-xs font-semibold text-emerald-700",
-            )}
-          >
-            {pick(PG_UI.answerIsSubject, lang)}
-          </p>
-        )}
       </div>
       {canSpeak(item.question.en, "en") ? (
         <button
@@ -244,11 +259,9 @@ export function AskFirstGame({
             spoken={spoken === i}
             disabled={!kindPicked || locked}
             shakeKey={attempt}
-            tag={
-              done && i === item.subject
-                ? pick(PG_UI.subjectTag, lang)
-                : undefined
-            }
+            nudgeIndex={i}
+            guide={guideTile && i === item.subject}
+            tag={done && i === item.subject ? pick(PG_UI.subjectTag, lang) : undefined}
             onClick={() => choose(i)}
           >
             {word}
@@ -259,13 +272,13 @@ export function AskFirstGame({
       {kindPicked ? null : (
         <div className="space-y-2.5">
           <div className="flex gap-2.5">
-            {KINDS.map((kind) => (
+            {KINDS.map((kind, index) => (
               <KindButton
                 key={`${kind.id}-${wrongKind?.kind === kind.id ? wrongKind.tries : 0}`}
-                label={kind.label}
-                sub={kind.sub}
-                icon={kind.icon}
+                kind={kind}
+                index={index}
                 wrong={wrongKind?.kind === kind.id}
+                guide={guideKind && kind.id === item.kind}
                 lang={lang}
                 onClick={() => chooseKind(kind.id)}
               />

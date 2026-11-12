@@ -1,5 +1,5 @@
 /**
- * Homepage cards for the Bangla answer pages.
+ * Homepage footer links for the Bangla answer pages.
  * Full article copy lives in `lib/seo-data.ts` and must use these slug, h1, and description fields.
  */
 export const BANGLA_ANSWER_LINKS = [

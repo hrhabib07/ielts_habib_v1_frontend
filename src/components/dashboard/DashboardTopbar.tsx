@@ -22,6 +22,8 @@ const DASHBOARD_TITLES: Record<string, string> = {
 
 function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/dashboard/admin/english/missions/")) return "Edit Mission";
+  if (pathname.startsWith("/dashboard/admin/english/games")) return "Level games";
+  if (pathname.startsWith("/dashboard/admin/english/learning")) return "Learning tracker";
   if (DASHBOARD_TITLES[pathname]) return DASHBOARD_TITLES[pathname];
   const instructorTitle = getInstructorPageTitle(pathname);
   if (instructorTitle !== "Instructor") return instructorTitle;

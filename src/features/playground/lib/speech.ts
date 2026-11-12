@@ -202,6 +202,8 @@ function roundPlays(round: Playground["rounds"][number]): PlayItem[] {
 export function playgroundSpokenLines(playground: Playground, lang: Lang): string[] {
   const lines = playground.rounds.flatMap((round) => [
     round.instruction[lang],
+    ...(round.steps ?? []).map((step) => step[lang]),
+    ...(round.rule ? [round.rule.text[lang]] : []),
     ...roundPlays(round).flatMap((play) => itemLines(play, lang)),
   ]);
   // Lines with the learner's name are filled in per learner, so they never get a recorded clip.

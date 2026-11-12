@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import { getPublicPricing, type PublicPricing } from "@/src/lib/api/pricing";
 import { PricingPageHero } from "@/src/components/pricing/PricingPageHero";
+import { PricingFaqSection } from "@/src/components/pricing/PricingFaqSection";
 import {
   hasBlockingPaymentStatus,
   PaymentApplicationStatusCard,
@@ -144,11 +145,14 @@ export function PricingContent({
         ) : null}
 
         {!hasPurchased && !blocked ? (
-          <PricingPageHero
-            pricing={pricing}
-            onUpgrade={handleUpgrade}
-            disabled={blocked}
-          />
+          <>
+            <PricingPageHero
+              pricing={pricing}
+              onUpgrade={handleUpgrade}
+              disabled={blocked}
+            />
+            <PricingFaqSection id="pricing-faq" className="pt-4" />
+          </>
         ) : hasActiveAccess ? (
           <div className={cn("rounded-3xl border p-8 text-center", brandStatus.success.card)}>
             <h2 className="text-xl font-bold text-foreground">

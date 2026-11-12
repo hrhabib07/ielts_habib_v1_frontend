@@ -52,8 +52,8 @@ export function SpeakButton({
   const tone =
     lang === "en"
       ? active
-        ? "bg-sky-500 text-white"
-        : "text-sky-600 hover:bg-sky-100"
+        ? "bg-accent text-white"
+        : "text-accent hover:bg-accent/10"
       : active
         ? "bg-emerald-500 text-white"
         : "text-emerald-600 hover:bg-emerald-100";
@@ -84,7 +84,7 @@ function renderTokens(tokens: RichToken[], active: number | null, strongClassNam
         key={i}
         className={cn(
           "rounded-[4px] transition-[background-color,box-shadow,color] duration-100",
-          token.strong && cn("font-bold text-sky-700", strongClassName),
+          token.strong && cn("font-bold text-accent", strongClassName),
           lit && "bg-amber-200 text-slate-900 shadow-[0_0_0_2px_#fde68a]",
         )}
       >
@@ -135,8 +135,8 @@ function GlossWord({ id, meaning, children }: { id: string; meaning: string; chi
         }}
         aria-expanded={open}
         className={cn(
-          "cursor-pointer rounded-[4px] underline decoration-sky-400 decoration-dotted decoration-2 underline-offset-[5px] transition-colors hover:bg-sky-100/70",
-          open && "bg-sky-100 decoration-sky-600",
+          "cursor-pointer rounded-[4px] underline decoration-accent/40 decoration-dotted decoration-2 underline-offset-[5px] transition-colors hover:bg-accent/10",
+          open && "bg-accent/10 decoration-accent",
         )}
       >
         {children}
@@ -205,7 +205,7 @@ export function RichText({ text, strongClassName }: { text: string; strongClassN
     <>
       {parseRichText(text).map((seg, i) =>
         seg.strong ? (
-          <strong key={i} className={cn("font-bold text-sky-700", strongClassName)}>
+          <strong key={i} className={cn("font-bold text-accent", strongClassName)}>
             {seg.text}
           </strong>
         ) : (
@@ -273,7 +273,7 @@ function GuideAvatar({ hidden, active = false }: { hidden?: boolean; active?: bo
         flags.openProfile({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
       }}
       aria-label={pick(FEEDBACK_UI.openProfile, lang)}
-      className="mt-0.5 shrink-0 rounded-full transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-200"
+      className="mt-0.5 shrink-0 rounded-full transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/20"
     >
       <GuideAvatarPreview active={active} />
     </button>
@@ -329,7 +329,7 @@ export function UserRow({ children }: { children: ReactNode }) {
 
 const BUBBLE_TONE = {
   plain: "border-slate-200/80 bg-white",
-  example: "border-sky-200 bg-sky-50",
+  example: "border-accent/20 bg-accent/5",
   remember: "border-amber-200 bg-amber-50",
 } as const;
 
@@ -340,7 +340,7 @@ function BubbleTag({ variant, lang }: { variant: "example" | "remember"; lang: L
       className={cn(
         LANG_FACE[lang],
         "mb-1.5 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.14em]",
-        variant === "example" ? "text-sky-700" : "text-amber-700",
+        variant === "example" ? "text-accent" : "text-amber-700",
       )}
     >
       <Icon className="size-3.5" aria-hidden />
@@ -355,7 +355,7 @@ function TermList({ items, lang }: { items: LessonListItem[]; lang: LessonLangua
     <ul className="mt-2.5 space-y-2">
       {items.map((item) => (
         <li key={item.term} className="rounded-xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
-          <p className={cn(EN_FACE, "text-[15px] font-black leading-snug text-sky-700")}>
+          <p className={cn(EN_FACE, "text-[15px] font-black leading-snug text-accent")}>
             {item.term}
             {lang === "bn" && item.termBn ? (
               <span className={cn(BN_FACE, "ml-1.5 text-[13.5px] font-semibold text-slate-500")}>
@@ -408,7 +408,7 @@ function LessonTableView({ table, lang }: { table: LessonTable; lang: LessonLang
                     wrong.has(c)
                       ? "text-rose-500 line-through decoration-2"
                       : c === 0
-                        ? "font-bold text-sky-700"
+                        ? "font-bold text-accent"
                         : "text-slate-700",
                   )}
                 >
@@ -445,7 +445,7 @@ export function GuideMessageBubble({
         <div className="flex items-center justify-between gap-2 pr-1.5">
           <BubbleTag variant="example" lang={lang} />
           {message.glosses?.length ? (
-            <span className={cn(LANG_FACE[lang], "mb-1.5 text-[11px] font-semibold text-sky-600/80")}>
+            <span className={cn(LANG_FACE[lang], "mb-1.5 text-[11px] font-semibold text-accent/70")}>
               {pick(UI.tapWord, lang)}
             </span>
           ) : null}
@@ -497,8 +497,8 @@ export function GuideMessageBubble({
 export type UserBubbleTone = "brand" | "pending" | "correct" | "wrong";
 
 const USER_TONES: Record<UserBubbleTone, string> = {
-  brand: "bg-sky-500 text-white",
-  pending: "bg-sky-500/85 text-white",
+  brand: "bg-accent text-white",
+  pending: "bg-accent/85 text-white",
   correct: "bg-emerald-500 text-white",
   wrong: "bg-rose-500 text-white",
 };

@@ -7,6 +7,7 @@ import { LANG_FACE, pick } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
 import { TypedField } from "@/src/features/playground/components/PlaygroundParts";
 import { isDone, type GameProps } from "@/src/features/playground/components/games/gameProps";
+import { GuideHand } from "@/src/features/playground/components/GuideHand";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import { checkTypedPlural, RULE_NOTES } from "@/src/features/playground/lib/plural";
 import { bazarLine } from "@/src/features/playground/lib/speech";
@@ -40,6 +41,7 @@ export function BazarListGame({
   onReady,
   onAnswer,
   listSoFar,
+  guide = false,
 }: GameProps<BazarItem> & { listSoFar: readonly CollectedLine[] }) {
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -93,21 +95,24 @@ export function BazarListGame({
                 <span
                   className={cn(
                     EN_FACE,
-                    "rounded-xl border-2 border-b-4 border-sky-600 bg-sky-500 px-3 py-1 text-lg font-bold text-white sm:text-2xl",
+                    "rounded-xl border-2 border-b-4 border-accent bg-accent px-3 py-1 text-lg font-bold text-white sm:text-2xl",
                   )}
                 >
                   {item.answer}
                 </span>
               ) : (
-                <TypedField
-                  ref={inputRef}
-                  value={text}
-                  placeholder={pick(PG_UI.typeWord, lang)}
-                  disabled={locked}
-                  retry={status === "retry"}
-                  onChange={update}
-                  label={`${item.before} (${item.clue})`}
-                />
+                <span className="relative inline-flex">
+                  <TypedField
+                    ref={inputRef}
+                    value={text}
+                    placeholder={guide ? item.answer : pick(PG_UI.typeWord, lang)}
+                    disabled={locked}
+                    retry={status === "retry"}
+                    onChange={update}
+                    label={`${item.before} (${item.clue})`}
+                  />
+                  {guide && !text && !locked ? <GuideHand /> : null}
+                </span>
               )}
               {done ? (
                 <SpeakButton id={`${itemKey}:s:tap`} text={bazarLine(item)} lang="en" className="size-9" />

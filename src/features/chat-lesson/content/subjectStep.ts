@@ -21,6 +21,13 @@ export const SUBJECT_STEP: ChatLessonStep = {
   stepLabel: "Lesson 2",
   title: { en: "Subject", bn: "সাবজেক্ট" },
   guideName: "Gamlish Guide",
+  intro: {
+    title: { en: "Why are we starting with the Subject?", bn: "শুরুতেই Subject কেন শিখছি?" },
+    text: {
+      en: "In Level 1, we will learn how to build a complete English sentence step by step. The first part of any sentence is the Subject, so that is exactly where we begin. After this lesson, you will play 4 short games to practice finding the Subject. Then we will move on to Number, Person, Verb, and Object. And finally, we will learn how to construct a correct sentence very easily.",
+      bn: "Level 1-এ আমরা ধাপে ধাপে একটি পূর্ণ ইংরেজি বাক্য তৈরি করা শিখব। যেকোনো বাক্যের প্রথম অংশই হলো Subject, তাই আমাদের শুরুটাও এখান থেকেই। এই লেসনটির পর 4টি ছোট গেইম খেলে Subject চেনার প্র্যাকটিস করবেন। এরপর একে একে আসবে Number, Person, Verb এবং Object। আর সব শেষে আমরা খুব সহজেই একটি সঠিক ইংরেজি বাক্য তৈরি করা শিখে যাব।",
+    },
+  },
   chunks: [
     {
       id: "what-is-subject",
@@ -33,6 +40,10 @@ export const SUBJECT_STEP: ChatLessonStep = {
         {
           en: "To find it, ask yourself, “**Who or what** are we talking about?”",
           bn: "Subject খুঁজে বের করতে নিজেকে প্রশ্ন করুন, “কার সম্পর্কে বা কী সম্পর্কে বলা হচ্ছে?”",
+        },
+        {
+          en: "Ask **Who** for people, like Rafi, my mother, we. Ask **What** for things, like the bus, my phone.",
+          bn: "মানুষ হলে প্রশ্ন করুন Who (কে), যেমন Rafi, my mother, we। জিনিস হলে প্রশ্ন করুন What (কী), যেমন the bus, my phone।",
         },
         {
           variant: "example",
@@ -48,7 +59,11 @@ export const SUBJECT_STEP: ChatLessonStep = {
           en: "Question: Who learns English?\nAnswer: **We**\nSo, **We** is the Subject.",
           bn: "প্রশ্ন: কে ইংরেজি শেখে?\nউত্তর: We (আমরা)\nতাই, We হলো Subject।",
         },
-        { variant: "remember", en: "Subject = **Who** or **What**?", bn: "Subject = কে বা কী?" },
+        {
+          variant: "remember",
+          en: "Subject = **Who** (people) or **What** (things)?",
+          bn: "Subject = Who (কে, মানুষ) বা What (কী, জিনিস)?",
+        },
         {
           en: "Both Bangla and English sentences have a Subject. In Bangla, we usually call it কর্তা. In Gamlish, we only learn the Subject of English sentences, so we will say **Subject**, not কর্তা.",
           bn: "বাংলা ও ইংরেজি দুই ভাষার বাক্যেই Subject থাকে। বাংলায় আমরা একে সাধারণত কর্তা বলি। তবে Gamlish-এ আমরা শুধু ইংরেজি বাক্যের Subject নিয়ে শিখব। তাই বাংলা বাক্যেও আমরা Subject শব্দটিই ব্যবহার করব, কর্তা নয়।",

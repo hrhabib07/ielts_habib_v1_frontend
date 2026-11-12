@@ -11,7 +11,9 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { clipKey, spokenWords } from "@/src/features/chat-lesson/lib/speechText";
+import { clipKey, namelessLine, spokenWords } from "@/src/features/chat-lesson/lib/speechText";
+import { useLearner } from "@/src/features/learner/LearnerContext";
+import { callName } from "@/src/features/learner/lib/personalize";
 import {
   pickVoice,
   toSpeechChunks,
@@ -69,6 +71,7 @@ function subscribeVoices(onChange: () => void): () => void {
 const serverVoices = () => NO_VOICES;
 
 const RATE: Record<SpeechLang, number> = { en: 0.95, bn: 0.92 };
+const PRELOAD_LIMIT = 12;
 
 /** [startMs, endMs, wordIndex] for one clip, sorted by start. */
 export type ClipWordTimings = readonly (readonly number[])[];
@@ -109,6 +112,8 @@ type LessonSpeech = {
   stop: () => void;
   /** Call from a tap handler before any automatic playback. */
   unlock: () => void;
+  /** Starts downloading recorded clips that will be needed soon, so they play without a wait. */
+  preload: (lines: readonly { text: string; lang: SpeechLang }[]) => void;
   speakingId: string | null;
   /** Index (per `spokenWords`) of the word being spoken in `speakingId`'s text. */
   activeWord: number | null;
@@ -137,6 +142,25 @@ export function LessonSpeechProvider({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const frameRef = useRef<number | null>(null);
   const { clips, timings } = audio;
+  const learner = useLearner();
+  const names = useMemo(() => {
+    const call = callName(learner);
+    return [call.en, call.bn, learner.nicknameEn, learner.nicknameBn]
+      .filter((name) => name.trim().length > 0)
+      .sort((a, b) => b.length - a.length);
+  }, [learner]);
+
+  /** The clip for this text, or the nameless recording of a line that shows the learner's name. */
+  const clipFor = useCallback(
+    (text: string, lang: SpeechLang): { key: string; exact: boolean } | null => {
+      const key = clipKey(text, lang);
+      if (clips[key]) return { key, exact: true };
+      const nameless = namelessLine(text, names);
+      const fallback = nameless ? clipKey(nameless, lang) : null;
+      return fallback && clips[fallback] ? { key: fallback, exact: false } : null;
+    },
+    [clips, names],
+  );
 
   const voiceFor = useMemo(
     () => ({ en: pickVoice(voices, "en"), bn: pickVoice(voices, "bn") }),
@@ -175,12 +199,12 @@ export function LessonSpeechProvider({
         setActiveWord(null);
       };
 
-      const key = clipKey(text, lang);
-      const clip = clips[key];
-      if (clip) {
+      const found = clipFor(text, lang);
+      const clip = found ? clips[found.key] : undefined;
+      if (found && clip) {
         audioRef.current ??= new Audio();
         const player = audioRef.current;
-        const words = timings?.[key];
+        const words = found.exact ? timings?.[found.key] : undefined;
         setSpeakingId(id);
         playClip(player, clip, rate, finish);
         if (words?.length) {
@@ -222,7 +246,7 @@ export function LessonSpeechProvider({
         engine.speak(utterance);
       });
     },
-    [clips, timings, voiceFor, speakingId, silence, stopTracking, clipsOnly],
+    [clips, clipFor, timings, voiceFor, speakingId, silence, stopTracking, clipsOnly],
   );
 
   const unlock = useCallback(() => {
@@ -233,19 +257,40 @@ export function LessonSpeechProvider({
     void player.play().catch(() => undefined);
   }, []);
 
+  const preloadedRef = useRef(new Map<string, HTMLAudioElement>());
+  const preload = useCallback(
+    (lines: readonly { text: string; lang: SpeechLang }[]) => {
+      const cache = preloadedRef.current;
+      for (const { text, lang } of lines) {
+        const found = clipFor(text, lang);
+        const src = found ? clips[found.key] : undefined;
+        if (!src || cache.has(src)) continue;
+        const audio = new Audio();
+        audio.preload = "auto";
+        audio.src = src;
+        cache.set(src, audio);
+        if (cache.size > PRELOAD_LIMIT) {
+          const oldest = cache.keys().next().value;
+          if (oldest !== undefined) cache.delete(oldest);
+        }
+      }
+    },
+    [clips, clipFor],
+  );
+
   useEffect(() => silence, [silence]);
 
   const value = useMemo<LessonSpeech>(
     () => ({
-      canSpeak: (text, lang) =>
-        Boolean(clips[clipKey(text, lang)]) || (!clipsOnly && voiceFor[lang] !== null),
+      canSpeak: (text, lang) => clipFor(text, lang) !== null || (!clipsOnly && voiceFor[lang] !== null),
       speak,
       stop,
       unlock,
+      preload,
       speakingId,
       activeWord,
     }),
-    [clips, voiceFor, clipsOnly, speak, stop, unlock, speakingId, activeWord],
+    [clipFor, voiceFor, clipsOnly, speak, stop, unlock, preload, speakingId, activeWord],
   );
 
   return <LessonSpeechContext.Provider value={value}>{children}</LessonSpeechContext.Provider>;

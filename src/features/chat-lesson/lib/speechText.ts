@@ -45,6 +45,28 @@ export function spokenWords(text: string): string[] {
   return text.replace(/\*\*/g, "").split(/\s+/).filter(Boolean);
 }
 
+/** "{name}, find the Subject" becomes "Find the Subject"; "Try again, {name}!" becomes "Try again!". */
+export function dropName(text: string): string {
+  const leading = /^\s*\{name\}\s*,?\s*/u.test(text);
+  const out = text
+    .replace(/^\s*\{name\}\s*,?\s*/u, "")
+    .replace(/([.!?।]\s+)\{name\}\s*,\s*(\S)/gu, (_match, end: string, next: string) => end + next.toUpperCase())
+    .replace(/\s*,?\s*\{name\}(?=\s*[!?.।,]|$)/gu, "")
+    .replace(/\{name\}\s*/gu, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return leading ? out.charAt(0).toUpperCase() + out.slice(1) : out;
+}
+
+/**
+ * The same line as a nameless learner sees it, so one recording serves everyone: the learner's
+ * name is swapped back to the token and dropped.
+ */
+export function namelessLine(text: string, names: readonly string[]): string | null {
+  const name = names.find((n) => n && text.includes(n));
+  return name ? dropName(text.split(name).join("{name}")) : null;
+}
+
 /** Stable lookup key for a pre-generated clip of this exact lesson text. */
 export function clipKey(text: string, lang: SpeechLang): string {
   return `${lang}|${toSpokenText(text, lang)}`;
@@ -69,6 +91,7 @@ export function questionSpeech(question: SpokenQuestion, lang: SpeechLang): stri
 }
 
 type SpokenStep = {
+  intro?: { title: { en: string; bn: string }; text: { en: string; bn: string } };
   chunks: {
     messages: SpokenMessage[];
     questions: (SpokenQuestion & { hint: { en: string; bn: string }; explanation: { en: string; bn: string } })[];
@@ -76,18 +99,16 @@ type SpokenStep = {
 };
 
 /**
- * Lines that carry the learner's name are filled in per learner, so they can never have a
- * pre-recorded clip (the lesson player reads them with the device voice instead).
+ * Every line a step can speak; must mirror what the player's speaker buttons pass to `clipKey`.
+ * Lines with the learner's name are recorded once without it (see `namelessLine`).
  */
-const isPersonal = (line: string) => line.includes("{name}");
-
-/** Every line a step can speak; must mirror what the player's speaker buttons pass to `clipKey`. */
 export function stepSpokenLines(step: SpokenStep, lang: SpeechLang): string[] {
-  return stepLines(step, lang).filter((line) => !isPersonal(line));
+  return stepLines(step, lang).map((line) => (line.includes("{name}") ? dropName(line) : line));
 }
 
 function stepLines(step: SpokenStep, lang: SpeechLang): string[] {
-  return step.chunks.flatMap((chunk) => [
+  const intro = step.intro ? [step.intro.text[lang]] : [];
+  return intro.concat(step.chunks.flatMap((chunk) => [
     ...chunk.messages.map((message) => messageSpeech(message, lang)),
     ...chunk.questions.flatMap((q) => [
       questionSpeech(q, lang),
@@ -95,7 +116,7 @@ function stepLines(step: SpokenStep, lang: SpeechLang): string[] {
       q.explanation[lang],
       ...(lang === "bn" && q.sourceBn ? [q.sourceBn] : []),
     ]),
-  ]);
+  ]));
 }
 
 export function stepClipKeys(step: SpokenStep): string[] {

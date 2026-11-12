@@ -41,7 +41,7 @@ export function PartDivider({
       <span
         className={cn(
           face,
-          "rounded-full bg-sky-100 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-sky-700",
+          "rounded-full bg-accent/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-accent",
         )}
       >
         {pick(UI.partOf(partNumber, partCount), lang)}
@@ -69,7 +69,7 @@ export function LessonHiddenCard({
         onClick={onReread}
         className={cn(
           "group block w-full rounded-2xl rounded-tl-md border-2 border-dashed border-slate-300 bg-slate-50/80 px-4 py-3 text-left transition-colors",
-          canReread && "hover:border-sky-300 hover:bg-sky-50/60",
+          canReread && "hover:border-accent/30 hover:bg-accent/5",
         )}
       >
         <span className={cn(face, "flex items-center gap-2 text-sm font-bold text-slate-600")}>
@@ -80,7 +80,7 @@ export function LessonHiddenCard({
           <span
             className={cn(
               face,
-              "mt-2 ml-6 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-sky-700 ring-1 ring-sky-200 group-hover:ring-sky-300",
+              "mt-2 ml-6 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-accent ring-1 ring-accent/20 group-hover:ring-accent/40",
             )}
           >
             <BookOpen className="size-3.5" aria-hidden />

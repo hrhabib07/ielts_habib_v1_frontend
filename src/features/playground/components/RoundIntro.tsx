@@ -2,9 +2,10 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
-import { Check, Cog, Heart, Pointer, RotateCcw, type LucideIcon } from "lucide-react";
+import { Check, Cog, Heart, Lock, Pointer, RotateCcw, type LucideIcon } from "lucide-react";
 import { BN_FACE, EN_FACE } from "@/src/features/chat-lesson/components/ChatPrimitives";
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
+import type { Bilingual } from "@/src/features/chat-lesson/types";
 import { ROUND_ICONS } from "@/src/features/playground/components/roundIcons";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import type { SessionRound } from "@/src/features/playground/types";
@@ -52,7 +53,7 @@ function DemoChip({
         "relative rounded-xl border-2 border-b-4 px-2.5 py-1 text-sm font-bold transition-colors duration-300",
         tone === "idle" && "border-slate-200 bg-white text-slate-700",
         tone === "lit" && "border-amber-400 bg-amber-200 text-amber-950",
-        tone === "subject" && "border-sky-600 bg-sky-500 text-white",
+        tone === "subject" && "border-accent bg-accent text-white",
         tone === "picked" && "border-emerald-500 bg-emerald-50 text-emerald-800",
         dashed && tone === "idle" && "border-dashed text-slate-400 italic",
       )}
@@ -136,7 +137,7 @@ function TalkDemo({ step }: { step: number }) {
       <div className="flex flex-wrap items-center justify-center gap-2">
         <DemoChip tone={finished ? "subject" : "idle"} dashed={!typed}>
           {typed || "type here"}
-          {!finished ? <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-sky-500 align-middle" /> : null}
+          {!finished ? <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-accent align-middle" /> : null}
         </DemoChip>
         <span className={cn(EN_FACE, "text-sm font-bold text-slate-700")}>cooks at home.</span>
       </div>
@@ -173,7 +174,7 @@ function PluralMachineDemo({ step }: { step: number }) {
       <Cog className={cn("size-5 text-slate-400", finished && "animate-spin")} aria-hidden />
       <DemoChip tone={finished ? "subject" : "idle"} dashed={!typed}>
         {typed || "type the Plural"}
-        {!finished ? <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-sky-500 align-middle" /> : null}
+        {!finished ? <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-accent align-middle" /> : null}
       </DemoChip>
     </div>
   );
@@ -207,7 +208,7 @@ function BazarDemo({ step }: { step: number }) {
         <span className={cn(EN_FACE, "text-sm font-bold text-slate-700")}>three</span>
         <DemoChip tone={finished ? "subject" : "idle"} dashed={!typed}>
           {typed || "type the word"}
-          {!finished ? <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-sky-500 align-middle" /> : null}
+          {!finished ? <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-accent align-middle" /> : null}
         </DemoChip>
       </div>
     </div>
@@ -332,25 +333,178 @@ function RoundDemo({ kind }: { kind: SessionRound["kind"] }) {
   );
 }
 
+/** "The boys in the park play cricket." with the marked part underlined in navy. */
+function MarkedExample({ example, mark }: { example: string; mark?: string }) {
+  const at = mark ? example.indexOf(mark) : -1;
+  if (!mark || at === -1) return <>{example}</>;
+  return (
+    <>
+      {example.slice(0, at)}
+      <span className="text-accent underline decoration-accent decoration-[3px] underline-offset-[6px]">{mark}</span>
+      {example.slice(at + mark.length)}
+    </>
+  );
+}
+
+const PRIMARY_BUTTON =
+  "mt-5 flex h-12 w-full max-w-sm items-center justify-center rounded-2xl border-b-4 border-primary bg-accent text-lg font-extrabold text-white transition-all hover:bg-accent/90 active:translate-y-0.5 active:border-b-2 sm:mt-8 sm:h-14";
+
+/** One game of the playground on the intro's game path. */
+export type PlanStep = { id: string; title: Bilingual; status: "done" | "now" | "next" | "locked" };
+
+const PLAN_TONE: Record<PlanStep["status"], string> = {
+  done: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  now: "border-accent bg-accent text-white shadow-md shadow-accent/20",
+  next: "border-slate-200 bg-white text-slate-500",
+  locked: "border-dashed border-slate-300 bg-slate-50 text-slate-400",
+};
+
+/** Every game of the topic in order, so each game reads as one step of learning the same idea. */
+function GamePlan({ plan, lang }: { plan: readonly PlanStep[]; lang: LessonLanguage }) {
+  return (
+    <ol
+      className={cn(
+        "mt-3 grid w-full max-w-md gap-1.5",
+        plan.length === 4 ? "grid-cols-4" : plan.length === 3 ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4",
+      )}
+    >
+      {plan.map((step, i) => (
+        <li
+          key={step.id}
+          aria-current={step.status === "now" ? "step" : undefined}
+          className={cn(
+            LANG_FACE[lang],
+            "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl border-2 px-1 py-1 text-center text-[11px] font-black leading-tight sm:text-xs",
+            PLAN_TONE[step.status],
+          )}
+        >
+          <span className="flex items-center gap-1">
+            {step.status === "done" ? <Check className="size-3" strokeWidth={3.5} aria-hidden /> : null}
+            {step.status === "locked" ? <Lock className="size-3" aria-hidden /> : null}
+            <span className={EN_FACE}>{i + 1}</span>
+          </span>
+          <span className="line-clamp-2">{pick(step.title, lang)}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** The rule line with the topic word ("Subject") in navy, so the idea of the game stands out. */
+function TopicWords({ text, word }: { text: string; word?: string }) {
+  if (!word || !text.includes(word)) return <>{text}</>;
+  const parts = text.split(word);
+  return (
+    <>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part}
+          {i < parts.length - 1 ? <span className={cn(EN_FACE, "text-accent")}>{word}</span> : null}
+        </span>
+      ))}
+    </>
+  );
+}
+
+/** Which topic and game this is: "Level 1 · Topic: Subject", "Game 1 of 4 · Ask First", then the game path. */
+function IntroHeading({
+  topicLine,
+  heading,
+  plan,
+  lang,
+}: {
+  topicLine: Bilingual | null;
+  heading: Bilingual;
+  plan: readonly PlanStep[];
+  lang: LessonLanguage;
+}) {
+  const face = LANG_FACE[lang];
+  return (
+    <div className="flex w-full flex-col items-center">
+      {topicLine ? (
+        <p className={cn(face, "text-xs font-black text-accent", lang === "en" && "uppercase tracking-[0.14em]")}>{pick(topicLine, lang)}</p>
+      ) : null}
+      <h2 className={cn(face, "mt-1 text-xl font-black leading-snug text-slate-900 sm:text-2xl")}>{pick(heading, lang)}</h2>
+      {plan.length > 1 ? <GamePlan plan={plan} lang={lang} /> : null}
+    </div>
+  );
+}
+
+/**
+ * Before each round: first the one rule it teaches (with a marked example), then a short animated
+ * demo with the instruction under it, so nobody has to guess what to do or read a long lesson.
+ */
 export function RoundIntro({
   round,
   number,
   total,
   lang,
+  topic,
+  level,
+  plan,
   onStart,
 }: {
   round: SessionRound;
   number: number;
   total: number;
   lang: LessonLanguage;
+  topic?: Bilingual;
+  level: number;
+  plan: readonly PlanStep[];
   onStart: () => void;
 }) {
   const face = LANG_FACE[lang];
   const Icon: LucideIcon = round.kind === "review" ? RotateCcw : ROUND_ICONS[round.kind];
   const bonus = round.kind === "review";
+  const topicLine = topic ? PG_UI.levelTopic(level, topic) : null;
+
+  if (round.rule) {
+    return (
+      <motion.div
+        key="intro"
+        className="flex min-h-full flex-col items-center px-4 pb-4 pt-4 text-center sm:justify-center sm:px-5 sm:py-8"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      >
+        <IntroHeading topicLine={topicLine} heading={PG_UI.gameTitle(number, total, round.title)} plan={plan} lang={lang} />
+        <div className="mt-4 w-full max-w-md overflow-hidden rounded-3xl border-2 border-b-[5px] border-accent/30 bg-white text-left sm:mt-6">
+          <div className="p-4 sm:p-5">
+            <span className={cn(face, "inline-block rounded-full bg-accent px-2.5 py-0.5 text-[11px] font-black text-white")}>
+              {pick(PG_UI.ruleTag, lang)}
+            </span>
+            <p className={cn(face, "mt-2 text-base font-black leading-snug text-slate-900 sm:text-lg")}>
+              <TopicWords text={pick(round.rule.text, lang)} word={topic?.en} />
+            </p>
+            <p className={cn(EN_FACE, "mt-3 rounded-2xl bg-accent/5 px-3.5 py-2.5 text-base font-bold text-slate-800 sm:text-lg")}>
+              <MarkedExample example={round.rule.example} mark={round.rule.mark} />
+            </p>
+          </div>
+          <div className="border-t-2 border-dashed border-slate-100 bg-slate-50/60 px-3 pb-4 pt-3 text-center sm:px-4">
+            <p className={cn(face, "mb-3 text-[11px] font-black text-slate-400", lang === "en" && "uppercase tracking-[0.14em]")}>
+              {pick(PG_UI.watchMe, lang)}
+            </p>
+            <RoundDemo kind={round.kind} />
+            {round.instruction ? (
+              <p className={cn(face, "mt-5 text-[15px] font-bold text-slate-800")}>{pick(round.instruction, lang)}</p>
+            ) : null}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onStart}
+          autoFocus
+          className={cn(face, PRIMARY_BUTTON, "mt-4 sm:mt-6", lang === "en" && "uppercase tracking-wide")}
+        >
+          {pick(PG_UI.letsPlay, lang)}
+        </button>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
+      key="demo"
       className="flex min-h-full flex-col items-center justify-center px-4 py-4 text-center sm:px-5 sm:py-8"
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -359,7 +513,7 @@ export function RoundIntro({
       <motion.span
         className={cn(
           "flex size-14 items-center justify-center rounded-2xl border-b-[5px] text-white shadow-lg sm:size-20 sm:rounded-3xl sm:border-b-[6px]",
-          bonus ? "border-amber-600 bg-amber-400" : "border-violet-700 bg-violet-500",
+          bonus ? "border-amber-600 bg-amber-400" : "border-primary bg-accent",
         )}
         initial={{ scale: 0, rotate: -20 }}
         animate={{ scale: 1, rotate: 0 }}
@@ -370,24 +524,28 @@ export function RoundIntro({
       <p
         className={cn(
           face,
-          "mt-3 text-xs font-black text-violet-600 sm:mt-5",
+          "mt-3 text-xs font-black text-accent sm:mt-5",
           lang === "en" && "uppercase tracking-[0.16em]",
           bonus && "text-amber-600",
         )}
       >
-        {pick(bonus ? PG_UI.bonusRound : PG_UI.roundOf(number, total), lang)}
+        {pick(bonus ? PG_UI.bonusRound : PG_UI.roundDoneLabel(number, total), lang)}
       </p>
       <h2 className={cn(face, "mt-0.5 text-2xl font-black text-slate-900 sm:mt-1 sm:text-4xl")}>{pick(round.title, lang)}</h2>
       <p className={cn(face, "mt-1.5 max-w-md text-sm font-semibold text-slate-600 sm:mt-2 sm:text-lg")}>
         {pick(round.goal, lang)}
       </p>
+      {!bonus && plan.length > 1 ? <GamePlan plan={plan} lang={lang} /> : null}
 
       {bonus ? null : (
-        <div className="mt-4 w-full max-w-sm rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white px-3 pb-6 pt-3 shadow-sm sm:mt-7 sm:px-4 sm:pb-7 sm:pt-4">
+        <div className="mt-4 w-full max-w-sm rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white px-3 pb-5 pt-3 shadow-sm sm:mt-7 sm:px-4 sm:pb-6 sm:pt-4">
           <p className={cn(face, "mb-3 text-[11px] font-black text-slate-400 sm:mb-4", lang === "en" && "uppercase tracking-[0.14em]")}>
             {pick(PG_UI.howToPlay, lang)}
           </p>
           <RoundDemo kind={round.kind} />
+          {round.instruction ? (
+            <p className={cn(face, "mt-6 text-base font-bold text-slate-800")}>{pick(round.instruction, lang)}</p>
+          ) : null}
         </div>
       )}
 
@@ -395,11 +553,7 @@ export function RoundIntro({
         type="button"
         onClick={onStart}
         autoFocus
-        className={cn(
-          face,
-          "mt-5 flex h-12 w-full max-w-sm items-center justify-center rounded-2xl border-b-4 border-violet-700 bg-violet-500 text-lg font-extrabold text-white transition-all hover:bg-violet-500/90 active:translate-y-0.5 active:border-b-2 sm:mt-8 sm:h-14",
-          lang === "en" && "uppercase tracking-wide",
-        )}
+        className={cn(face, PRIMARY_BUTTON, lang === "en" && "uppercase tracking-wide")}
       >
         {pick(PG_UI.letsPlay, lang)}
       </button>

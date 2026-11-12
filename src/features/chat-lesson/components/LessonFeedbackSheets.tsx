@@ -110,7 +110,7 @@ export function GamlishProfileCard({
         exit={collapsed}
         transition={PROFILE_SPRING}
       >
-        <div className="relative h-28 overflow-hidden bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-600">
+        <div className="relative h-28 overflow-hidden bg-accent">
           <span className="absolute -right-8 -top-10 size-36 rounded-full bg-white/15" aria-hidden />
           <span className="absolute -left-6 bottom-[-46px] size-28 rounded-full bg-white/10" aria-hidden />
           <button
@@ -151,7 +151,7 @@ export function GamlishProfileCard({
 
           <h2 className="mt-3 flex items-center gap-1.5 font-sans text-2xl font-black tracking-tight text-slate-900">
             {pick(FEEDBACK_UI.name, lang)}
-            <BadgeCheck className="size-6 fill-sky-500 text-white" aria-label="Official" />
+            <BadgeCheck className="size-6 fill-accent text-white" aria-label="Official" />
           </h2>
           <p className={cn(face, "text-sm font-semibold text-slate-400")}>{pick(FEEDBACK_UI.handle, lang)}</p>
 
@@ -175,7 +175,7 @@ export function GamlishProfileCard({
           <motion.p
             className={cn(
               face,
-              "relative mt-4 rounded-2xl rounded-tl-md bg-sky-50 px-4 py-3 text-[15px] font-semibold text-sky-900 ring-1 ring-sky-100",
+              "relative mt-4 rounded-2xl rounded-tl-md bg-accent/5 px-4 py-3 text-[15px] font-semibold text-accent ring-1 ring-accent/10",
             )}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -233,7 +233,7 @@ function ProfileAction({
         "flex flex-col items-center rounded-2xl border-b-4 px-3 py-3 text-center transition-all active:translate-y-0.5 active:border-b-2",
         tone === "orange"
           ? "border-orange-700 bg-orange-500 text-white hover:bg-orange-500/90"
-          : "border-sky-200 bg-white text-sky-700 ring-2 ring-inset ring-sky-200 hover:bg-sky-50",
+          : "border-accent/20 bg-white text-accent ring-2 ring-inset ring-accent/20 hover:bg-accent/5",
       )}
     >
       <span className={cn(LANG_FACE[lang], "flex items-center gap-1.5 text-[15px] font-black")}>
@@ -515,8 +515,8 @@ export function LessonFeedbackSheet({
                       face,
                       "rounded-full border-2 px-3.5 py-1.5 text-sm font-bold transition-all active:scale-95",
                       on
-                        ? "border-sky-500 bg-sky-500 text-white shadow-sm"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-sky-300",
+                        ? "border-accent bg-accent text-white shadow-sm"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-accent/35",
                     )}
                   >
                     {pick(FEEDBACK_UI.categories[category], lang)}
@@ -533,7 +533,7 @@ export function LessonFeedbackSheet({
               placeholder={pick(FEEDBACK_UI.commentPlaceholder, lang)}
               className={cn(
                 face,
-                "mt-4 w-full resize-none rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-[15px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-100",
+                "mt-4 w-full resize-none rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-[15px] text-slate-800 outline-none placeholder:text-slate-400 focus:border-accent/70 focus:bg-white focus:ring-2 focus:ring-accent/10",
               )}
             />
 
@@ -542,14 +542,14 @@ export function LessonFeedbackSheet({
             ) : null}
 
             {!isLoading && !isAuthenticated ? (
-              <div className="mt-4 rounded-2xl bg-sky-50 p-4 text-center ring-1 ring-sky-100">
+              <div className="mt-4 rounded-2xl bg-accent/5 p-4 text-center ring-1 ring-accent/10">
                 <p className={cn(face, "font-black text-slate-900")}>{pick(FEEDBACK_UI.loginTitle, lang)}</p>
                 <p className={cn(face, "text-sm text-slate-500")}>{pick(FEEDBACK_UI.loginSub, lang)}</p>
                 <Link
                   href="/login"
                   className={cn(
                     face,
-                    "mt-3 inline-flex h-11 items-center justify-center rounded-xl border-b-4 border-sky-700 bg-sky-500 px-6 text-sm font-extrabold text-white",
+                    "mt-3 inline-flex h-11 items-center justify-center rounded-xl border-b-4 border-primary bg-accent px-6 text-sm font-extrabold text-white",
                   )}
                 >
                   {pick(FEEDBACK_UI.loginCta, lang)}

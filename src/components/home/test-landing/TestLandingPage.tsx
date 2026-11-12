@@ -6,8 +6,8 @@ import { GuestLandingLocaleProvider } from "@/src/components/home/guest/GuestLan
 import { BanglaAnswerLinks } from "@/src/components/home/test-landing/BanglaAnswerLinks";
 import { TestLandingHero } from "@/src/components/home/test-landing/TestLandingHero";
 import { TestLandingStickyCta } from "@/src/components/home/test-landing/TestLandingStickyCta";
+import { TestLandingCtas } from "@/src/components/home/test-landing/TestLandingCtas";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
-import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
 
 const GuestLandingAmbient = dynamic(
   () =>
@@ -15,18 +15,6 @@ const GuestLandingAmbient = dynamic(
       (m) => m.GuestLandingAmbient,
     ),
   { ssr: false },
-);
-
-const TestLandingCamps = dynamic(() =>
-  import("@/src/components/home/test-landing/TestLandingCamps").then(
-    (m) => m.TestLandingCamps,
-  ),
-);
-
-const TestLandingHowYouLearn = dynamic(() =>
-  import("@/src/components/home/test-landing/TestLandingHowYouLearn").then(
-    (m) => m.TestLandingHowYouLearn,
-  ),
 );
 
 const TestLandingGraduates = dynamic(() =>
@@ -70,19 +58,17 @@ function TestLandingSurface() {
       </div>
       <div className="relative">
         <TestLandingHero />
-        <TestLandingCamps />
-        <TestLandingHowYouLearn />
         <TestLandingGraduates />
         <TestLandingPlayingNow />
         <TestLandingFaq />
-        <BanglaAnswerLinks />
         <GuestLandingFooter
           closing={{
             title: copy.footerCtaTitle,
-            label: copy.offerCta,
-            href: TEST_LANDING_PRIMARY_HREF,
+            action: <TestLandingCtas copy={copy} size="block" source="footer" />,
           }}
-        />
+        >
+          <BanglaAnswerLinks />
+        </GuestLandingFooter>
       </div>
       <TestLandingStickyCta />
     </div>

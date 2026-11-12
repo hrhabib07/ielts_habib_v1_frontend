@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { usePrefersReducedMotion } from "@/src/hooks/usePrefersReducedMotion";
 import { TestLandingMedia } from "@/src/components/home/test-landing/TestLandingMedia";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
+import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
+import { logLandingCtaClick } from "@/src/lib/micro-telemetry";
 import { cn } from "@/lib/utils";
 
 export const TEST_LANDING_HERO_COMPARE_IMAGE =
@@ -27,9 +30,12 @@ export function TestLandingHeroCompareVisual({
   const { copy } = useTestLandingCopy();
 
   return (
-    <div
+    <Link
+      href={TEST_LANDING_PRIMARY_HREF}
+      onClick={() => logLandingCtaClick("hero_visual")}
+      aria-label={copy.ctaPrimary}
       className={cn(
-        "relative mx-auto w-full max-w-xl overflow-hidden rounded-[1.5rem] shadow-[0_24px_80px_-36px_rgba(15,23,42,0.45)] lg:max-w-none",
+        "test-landing-hero-visual-link relative mx-auto block w-full max-w-xl touch-manipulation overflow-hidden rounded-[1.5rem] shadow-[0_24px_80px_-36px_rgba(15,23,42,0.45)] hover:shadow-[0_30px_80px_-32px_rgba(37,99,235,0.5)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:max-w-none",
         className,
       )}
     >
@@ -45,31 +51,31 @@ export function TestLandingHeroCompareVisual({
 
       <div className="pointer-events-none absolute inset-0">
         <div
-          className="absolute left-0 right-1/2 top-0 h-[20%] bg-gradient-to-b from-[#efe6d8] from-55% to-transparent"
+          className="absolute left-0 right-1/2 top-0 h-[22%] bg-gradient-to-b from-[#efe6d8] from-55% to-transparent"
           aria-hidden
         />
         <div
-          className="absolute left-1/2 right-0 top-0 h-[20%] bg-gradient-to-b from-[#dff3fb] from-55% to-transparent"
+          className="absolute left-1/2 right-0 top-0 h-[22%] bg-gradient-to-b from-[#dff3fb] from-55% to-transparent"
           aria-hidden
         />
 
-        <div className="absolute left-[3%] right-[51.5%] top-[1%] sm:left-[3.5%] sm:right-[52%] sm:top-[1.2%]">
-          <div className="rounded-xl border border-stone-300/80 bg-[#f3ebe0] px-2 py-1 text-center shadow-[0_10px_24px_-16px_rgba(28,25,23,0.55)] sm:px-2.5 sm:py-1.5">
-            <p className="text-[10px] font-black leading-tight tracking-tight text-stone-700 sm:text-xs">
+        <div className="absolute left-[3%] right-[51.5%] top-[1.5%] sm:left-[3.5%] sm:right-[52%] sm:top-[1.8%]">
+          <div className="rounded-xl border border-stone-300/80 bg-[#f3ebe0] px-2 py-1.5 text-center shadow-[0_10px_24px_-16px_rgba(28,25,23,0.55)] sm:px-3 sm:py-2">
+            <p className="text-[13px] font-black leading-tight tracking-tight text-stone-800 sm:text-sm">
               {copy.heroCompareWithoutTitle}
             </p>
-            <p className="mt-0.5 text-[9px] font-semibold leading-tight text-stone-500 sm:text-[10px]">
+            <p className="mt-0.5 text-[11px] font-semibold leading-tight text-stone-600 sm:text-xs">
               {copy.heroCompareWithoutSub}
             </p>
           </div>
         </div>
 
-        <div className="absolute left-[51.5%] right-[3%] top-[1%] sm:left-[52%] sm:right-[3.5%] sm:top-[1.2%]">
-          <div className="rounded-xl border border-sky-300/80 bg-sky-50 px-2 py-1 text-center shadow-[0_10px_24px_-14px_rgba(14,165,233,0.7)] sm:px-2.5 sm:py-1.5">
-            <p className="text-[10px] font-black leading-tight tracking-tight text-sky-800 sm:text-xs">
+        <div className="absolute left-[51.5%] right-[3%] top-[1.5%] sm:left-[52%] sm:right-[3.5%] sm:top-[1.8%]">
+          <div className="rounded-xl border border-sky-300/80 bg-sky-50 px-2 py-1.5 text-center shadow-[0_10px_24px_-14px_rgba(14,165,233,0.7)] sm:px-3 sm:py-2">
+            <p className="text-[13px] font-black leading-tight tracking-tight text-sky-900 sm:text-sm">
               {copy.heroCompareWithTitle}
             </p>
-            <p className="mt-0.5 text-[9px] font-semibold leading-tight text-sky-600 sm:text-[10px]">
+            <p className="mt-0.5 text-[11px] font-semibold leading-tight text-sky-700 sm:text-xs">
               {copy.heroCompareWithSub}
             </p>
           </div>
@@ -123,16 +129,16 @@ export function TestLandingHeroCompareVisual({
 
             <p
               className={cn(
-                "relative z-[1] mb-1.5 flex w-[calc(100%-0.65rem)] items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-sky-400 to-blue-600 px-2 py-1.5 text-center text-[10px] font-black leading-none text-white sm:mb-2.5 sm:gap-1.5 sm:px-2.5 sm:text-[11px]",
+                "relative z-[1] mb-1.5 flex w-[calc(100%-0.5rem)] items-center justify-center gap-1 rounded-xl bg-accent px-1.5 py-1.5 text-center text-xs font-black leading-tight text-white shadow-[0_8px_18px_-10px_rgba(30,58,138,0.8)] sm:mb-2.5 sm:gap-1.5 sm:px-2.5 sm:py-2 sm:text-[13px]",
                 !reduceMotion && "test-landing-foundation-badge",
               )}
             >
-              <Sparkles className="h-3 w-3 shrink-0 text-white" aria-hidden />
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-white" aria-hidden />
               {copy.heroFoundationLabel}
             </p>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

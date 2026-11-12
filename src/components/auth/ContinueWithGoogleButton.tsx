@@ -47,6 +47,7 @@ export function ContinueWithGoogleButton({
   returnTo,
   label: labelOverride,
   onNavigate,
+  tone = "outline",
 }: {
   className?: string;
   variant?: "continue" | "save";
@@ -55,6 +56,8 @@ export function ContinueWithGoogleButton({
   /** Optional override for bilingual CTAs (e.g. Mission Zero). */
   label?: string;
   onNavigate?: () => void;
+  /** `primary`: the solid brand button, where Google is the main way in. */
+  tone?: "outline" | "primary";
 }) {
   const { locale } = useUiLocale();
   const label = labelOverride ?? COPY[locale][variant];
@@ -74,11 +77,20 @@ export function ContinueWithGoogleButton({
       data-telemetry={variant === "save" ? "save-btn" : "google-auth-btn"}
       data-telemetry-cta="true"
       className={cn(
-        "inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl border border-border/80 bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-muted/50",
+        "inline-flex h-11 w-full items-center justify-center gap-2.5 rounded-xl px-4 text-sm font-semibold shadow-sm transition-colors",
+        tone === "primary"
+          ? "border-b-4 border-primary bg-accent text-white shadow-lg shadow-accent/25 hover:bg-accent/90 active:translate-y-0.5 active:border-b-2"
+          : "border border-border/80 bg-background text-foreground hover:bg-muted/50",
         className,
       )}
     >
-      <GoogleGlyph className="h-5 w-5 shrink-0" />
+      {tone === "primary" ? (
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white">
+          <GoogleGlyph className="h-4 w-4" />
+        </span>
+      ) : (
+        <GoogleGlyph className="h-5 w-5 shrink-0" />
+      )}
       {label}
     </a>
   );

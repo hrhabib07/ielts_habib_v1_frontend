@@ -1,24 +1,25 @@
+import { dropName } from "@/src/features/chat-lesson/lib/speechText";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
 
 export type AddressAs = "bhaiya" | "apu";
 
-/** Who Gamlish is talking to: nickname in both languages plus Bhaiya or Apu. */
+/** Who Gamlish is talking to: nickname in both languages plus Bhaiya or Apu (null until they choose). */
 export type Learner = {
   nicknameEn: string;
   nicknameBn: string;
-  addressAs: AddressAs;
+  addressAs: AddressAs | null;
   district: string | null;
   country: string | null;
   /** Ready-to-use image src, or null for the letter avatar. */
   photoSrc: string | null;
 };
 
-/** The lab has no login, so it speaks to a sample learner. */
-export const DEMO_LEARNER: Learner = {
-  nicknameEn: "Rahim",
-  nicknameBn: "রহিম",
-  addressAs: "bhaiya",
-  district: "Dhaka",
+/** Anyone without an account (guests, previews): Gamlish talks to them without a name. */
+export const NAMELESS_LEARNER: Learner = {
+  nicknameEn: "",
+  nicknameBn: "",
+  addressAs: null,
+  district: null,
   country: null,
   photoSrc: null,
 };
@@ -30,17 +31,25 @@ const HONORIFIC: Record<AddressAs, Bilingual> = {
   apu: { en: "Apu", bn: "আপু" },
 };
 
-/** "Rahim Bhaiya" / "রহিম ভাইয়া". */
+const NO_HONORIFIC: Bilingual = { en: "", bn: "" };
+
+/** "Rahim Bhaiya" / "রহিম ভাইয়া", or just "Rahim" before they pick Bhaiya or Apu. */
 export function callName(learner: Learner): Bilingual {
-  const honorific = HONORIFIC[learner.addressAs];
-  return { en: `${learner.nicknameEn} ${honorific.en}`, bn: `${learner.nicknameBn} ${honorific.bn}` };
+  const honorific = honorificOf(learner);
+  return {
+    en: `${learner.nicknameEn} ${honorific.en}`.trim(),
+    bn: `${learner.nicknameBn || learner.nicknameEn} ${honorific.bn}`.trim(),
+  };
 }
 
 export function honorificOf(learner: Learner): Bilingual {
-  return HONORIFIC[learner.addressAs];
+  return learner.addressAs ? HONORIFIC[learner.addressAs] : NO_HONORIFIC;
 }
 
-const fill = (text: string, name: string) => (text.includes(NAME_TOKEN) ? text.split(NAME_TOKEN).join(name) : text);
+const fill = (text: string, name: string) => {
+  if (!text.includes(NAME_TOKEN)) return text;
+  return name ? text.split(NAME_TOKEN).join(name) : dropName(text);
+};
 
 export function personalizeText(text: Bilingual, learner: Learner): Bilingual {
   const name = callName(learner);
@@ -77,6 +86,7 @@ export function personalizeDeep<T>(value: T, learner: Learner): T {
 /** "Correct!" becomes "Correct, Rahim Bhaiya!" (the name goes before the final punctuation). */
 export function addressed(text: Bilingual, learner: Learner): Bilingual {
   const name = callName(learner);
+  if (!name.en) return text;
   const place = (line: string, who: string) => {
     if (line.includes(who)) return line;
     const match = /^(.*?)([!.?।]+)$/.exec(line.trim());

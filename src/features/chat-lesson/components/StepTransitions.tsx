@@ -48,13 +48,13 @@ export function StepIntroSplash({
       type="button"
       onClick={onDone}
       aria-label={pick(UI.tapToStart, lang)}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-sky-500 to-sky-600 px-6 text-center text-white"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-accent to-indigo-900 px-6 text-center text-white"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 0.35 } }}
     >
       <motion.span
-        className="flex size-24 items-center justify-center rounded-full bg-white shadow-xl ring-8 ring-sky-400/40"
+        className="flex size-24 items-center justify-center rounded-full bg-white shadow-xl ring-8 ring-white/20"
         initial={{ scale: 0, rotate: -20 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ ...POP, delay: 0.05 }}
@@ -62,7 +62,7 @@ export function StepIntroSplash({
         <Image src="/brand/gamlish-logo.png" alt="" width={64} height={64} className="size-16 object-contain" />
       </motion.span>
       <motion.p
-        className={cn(face, "mt-6 text-xs font-black uppercase tracking-[0.18em] text-sky-100")}
+        className={cn(face, "mt-6 text-xs font-black uppercase tracking-[0.18em] text-white/80")}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -78,7 +78,7 @@ export function StepIntroSplash({
         {step.title[lang]}
       </motion.h1>
       <motion.p
-        className={cn(face, "mt-2 text-sm font-semibold text-sky-100")}
+        className={cn(face, "mt-2 text-sm font-semibold text-white/80")}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.45 }}
@@ -94,7 +94,7 @@ export function StepIntroSplash({
         {pick(addressed({ en: "Ready?", bn: "প্রস্তুত?" }, learner), lang)}
       </motion.p>
       <motion.span
-        className="mt-8 h-1.5 w-40 overflow-hidden rounded-full bg-sky-400/50"
+        className="mt-8 h-1.5 w-40 overflow-hidden rounded-full bg-white/20"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.45 }}
@@ -202,9 +202,9 @@ export function StepCompleteScreen({
       icon: Clock,
       value: seconds,
       format: formatClock,
-      frame: "border-sky-400",
-      head: "bg-sky-400",
-      text: "text-sky-500",
+      frame: "border-accent/60",
+      head: "bg-accent",
+      text: "text-accent",
     },
   ];
 

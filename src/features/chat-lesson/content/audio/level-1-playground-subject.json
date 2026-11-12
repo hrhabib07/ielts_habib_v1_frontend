@@ -5,7 +5,10 @@
     "bn": "bn-IN-BashkarNeural"
   },
   "clips": {
-    "en|Who or What? Pick one. Then tap the Subject.": "/audio/chat-lesson/level-1-playground-subject/5b1b1195cb53fca0.mp3",
+    "en|Who or What? Then tap the Subject.": "/audio/chat-lesson/level-1-playground-subject/5aa00d048ba523d5.mp3",
+    "en|Which question finds the Subject: Who or What?": "/audio/chat-lesson/level-1-playground-subject/21e261cb67308c65.mp3",
+    "en|Now tap the answer in the sentence. That's the Subject.": "/audio/chat-lesson/level-1-playground-subject/58134dfe877c5b18.mp3",
+    "en|The Subject does the action. Ask Who for people, What for things.": "/audio/chat-lesson/level-1-playground-subject/0d22e703a6a4e5b1.mp3",
     "en|Rafi plays cricket.": "/audio/chat-lesson/level-1-playground-subject/08d446d3191997fc.mp3",
     "en|Who plays cricket?": "/audio/chat-lesson/level-1-playground-subject/d302d620c16acbf9.mp3",
     "en|The bus stops here.": "/audio/chat-lesson/level-1-playground-subject/bcdc054b3c9f6ba5.mp3",
@@ -34,7 +37,8 @@
     "en|What makes a noise?": "/audio/chat-lesson/level-1-playground-subject/8976ee42e4354875.mp3",
     "en|They play football after class.": "/audio/chat-lesson/level-1-playground-subject/ae1825deb22ce3d1.mp3",
     "en|Who plays football after class?": "/audio/chat-lesson/level-1-playground-subject/d4625d7ecf5b9e6a.mp3",
-    "en|Stretch the light over the whole Subject.": "/audio/chat-lesson/level-1-playground-subject/8113730240b26349.mp3",
+    "en|Tap the last word of the Subject.": "/audio/chat-lesson/level-1-playground-subject/b337a0e0a7975413.mp3",
+    "en|A Subject can be many words. Take all of them.": "/audio/chat-lesson/level-1-playground-subject/48804751abe7e134.mp3",
     "en|My little brother goes to school.": "/audio/chat-lesson/level-1-playground-subject/fc6898d9a505e054.mp3",
     "en|Rahim and Karim play football.": "/audio/chat-lesson/level-1-playground-subject/c6e2f3b5f57df7ab.mp3",
     "en|The girl in the red dress reads.": "/audio/chat-lesson/level-1-playground-subject/3c42ec5232e13fe3.mp3",
@@ -47,7 +51,8 @@
     "en|The bus to Dhaka leaves at noon.": "/audio/chat-lesson/level-1-playground-subject/59318777f2ee9e81.mp3",
     "en|The new teacher at our school speaks English.": "/audio/chat-lesson/level-1-playground-subject/1eaa99c2193dd543.mp3",
     "en|My best friend and her sister walk to school.": "/audio/chat-lesson/level-1-playground-subject/bdb5413cc4273bc5.mp3",
-    "en|Find the Subject. Can't see it? Tap the hidden You.": "/audio/chat-lesson/level-1-playground-subject/2d16db5c5880f287.mp3",
+    "en|Tap the Subject. Hidden? Tap You.": "/audio/chat-lesson/level-1-playground-subject/50b4f00c187269f6.mp3",
+    "en|Orders hide the Subject. It is always You.": "/audio/chat-lesson/level-1-playground-subject/473306c9d8a313b4.mp3",
     "en|Eat your rice!": "/audio/chat-lesson/level-1-playground-subject/1ebb5fc637637b76.mp3",
     "en|Open your books!": "/audio/chat-lesson/level-1-playground-subject/75c03e04df5fe28c.mp3",
     "en|Rafi plays cricket every day.": "/audio/chat-lesson/level-1-playground-subject/6ed7e8022e500be5.mp3",
@@ -63,7 +68,8 @@
     "en|The bus comes at eight.": "/audio/chat-lesson/level-1-playground-subject/ccdfe1ba8c63b440.mp3",
     "en|Your uncle calls every Friday.": "/audio/chat-lesson/level-1-playground-subject/bbc6c01b01d2560c.mp3",
     "en|Finish your homework first!": "/audio/chat-lesson/level-1-playground-subject/c43ccd880c946467.mp3",
-    "en|Answer about your life. Type the Subject.": "/audio/chat-lesson/level-1-playground-subject/d7d87e6ac25342bc.mp3",
+    "en|Type only the Subject.": "/audio/chat-lesson/level-1-playground-subject/765133429d0ea229.mp3",
+    "en|The Subject is who or what does the action. Type only that part.": "/audio/chat-lesson/level-1-playground-subject/44f03ca38eda86df.mp3",
     "en|Who cooks in your home?": "/audio/chat-lesson/level-1-playground-subject/2fdaeefe050c6f5a.mp3",
     "en|Who helps you study?": "/audio/chat-lesson/level-1-playground-subject/e6b78451dac392c9.mp3",
     "en|What wakes you up in the morning?": "/audio/chat-lesson/level-1-playground-subject/5d904e03ce763652.mp3",
@@ -74,7 +80,10 @@
     "en|Who calls you the most?": "/audio/chat-lesson/level-1-playground-subject/e92e22690ba83c38.mp3",
     "en|Who makes tea in your home?": "/audio/chat-lesson/level-1-playground-subject/1e2dee0f27f7dbd6.mp3",
     "en|What makes you happy?": "/audio/chat-lesson/level-1-playground-subject/38d0c0a21d68ff45.mp3",
-    "bn|কে, নাকি কী? একটি বেছে নাও। তারপর Subject-এ ট্যাপ করো।": "/audio/chat-lesson/level-1-playground-subject/ff13ac4d284c4011.mp3",
+    "bn|কে, নাকি কী? তারপর Subject-এ ট্যাপ করুন।": "/audio/chat-lesson/level-1-playground-subject/c134757b5135dd9b.mp3",
+    "bn|কে, নাকি কী দিয়ে প্রশ্ন করলে Subject পাওয়া যাবে?": "/audio/chat-lesson/level-1-playground-subject/ad0096cabcb32c0a.mp3",
+    "bn|এবার বাক্যে উত্তরটা খুঁজে ট্যাপ করুন। উত্তরটাই Subject।": "/audio/chat-lesson/level-1-playground-subject/aa96882e90500f5f.mp3",
+    "bn|কাজটি যে করে, সে-ই Subject। মানুষ হলে Who (কে), জিনিস হলে What (কী)।": "/audio/chat-lesson/level-1-playground-subject/fd1bc801b3ff79ff.mp3",
     "bn|রাফি ক্রিকেট খেলে।": "/audio/chat-lesson/level-1-playground-subject/82a3bf1a4991fe53.mp3",
     "bn|কে ক্রিকেট খেলে?": "/audio/chat-lesson/level-1-playground-subject/96c4f30dec1270d5.mp3",
     "bn|বাসটি এখানে থামে।": "/audio/chat-lesson/level-1-playground-subject/95050faa6871fbaf.mp3",
@@ -103,7 +112,8 @@
     "bn|কী শব্দ করে?": "/audio/chat-lesson/level-1-playground-subject/912518a4da7e1d6c.mp3",
     "bn|তারা ক্লাসের পরে ফুটবল খেলে।": "/audio/chat-lesson/level-1-playground-subject/a432a59768c8494d.mp3",
     "bn|কারা ক্লাসের পরে ফুটবল খেলে?": "/audio/chat-lesson/level-1-playground-subject/0f71726594460dab.mp3",
-    "bn|আলোটি টেনে পুরো Subject-এর ওপর ছড়িয়ে দাও।": "/audio/chat-lesson/level-1-playground-subject/eef0cf9cc7fa779d.mp3",
+    "bn|Subject-এর শেষ শব্দে ট্যাপ করুন।": "/audio/chat-lesson/level-1-playground-subject/b637f9c4c5e20a49.mp3",
+    "bn|Subject অনেকগুলো শব্দেরও হতে পারে। সবগুলো নিন।": "/audio/chat-lesson/level-1-playground-subject/6e236c1082fe2024.mp3",
     "bn|আমার ছোট ভাই স্কুলে যায়।": "/audio/chat-lesson/level-1-playground-subject/8d4ab1acba43d51e.mp3",
     "bn|রহিম ও করিম ফুটবল খেলে।": "/audio/chat-lesson/level-1-playground-subject/c15139997c5ec935.mp3",
     "bn|লাল জামা পরা মেয়েটি পড়ে।": "/audio/chat-lesson/level-1-playground-subject/bf53bb800684f59f.mp3",
@@ -116,7 +126,8 @@
     "bn|ঢাকার বাসটি দুপুরে ছাড়ে।": "/audio/chat-lesson/level-1-playground-subject/630115fbafa554af.mp3",
     "bn|আমাদের স্কুলের নতুন শিক্ষক ইংরেজিতে কথা বলেন।": "/audio/chat-lesson/level-1-playground-subject/437456fd208fc583.mp3",
     "bn|আমার সবচেয়ে কাছের বন্ধু ও তার বোন হেঁটে স্কুলে যায়।": "/audio/chat-lesson/level-1-playground-subject/daa5c7a1ae7aa306.mp3",
-    "bn|Subject খুঁজে বের করো। দেখা যাচ্ছে না? লুকানো You-তে ট্যাপ করো।": "/audio/chat-lesson/level-1-playground-subject/c175dc974e7b70e1.mp3",
+    "bn|Subject-এ ট্যাপ করুন। লুকানো থাকলে You-তে ট্যাপ করুন।": "/audio/chat-lesson/level-1-playground-subject/118e13f063585272.mp3",
+    "bn|আদেশের বাক্যে Subject লুকানো থাকে। সেটি সবসময় You।": "/audio/chat-lesson/level-1-playground-subject/b99536cb20ddd6a3.mp3",
     "bn|ভাত খাও!": "/audio/chat-lesson/level-1-playground-subject/a30278257154f50a.mp3",
     "bn|তোমাদের বই খোলো!": "/audio/chat-lesson/level-1-playground-subject/06312cf95420925d.mp3",
     "bn|রাফি প্রতিদিন ক্রিকেট খেলে।": "/audio/chat-lesson/level-1-playground-subject/c2c0e653b57d8b28.mp3",
@@ -132,64 +143,211 @@
     "bn|বাসটি আটটায় আসে।": "/audio/chat-lesson/level-1-playground-subject/49bc9e100b278a87.mp3",
     "bn|তোমার চাচা প্রতি শুক্রবার ফোন করেন।": "/audio/chat-lesson/level-1-playground-subject/3744b80029195657.mp3",
     "bn|আগে তোমার হোমওয়ার্ক শেষ করো!": "/audio/chat-lesson/level-1-playground-subject/62743ae84a26b1a4.mp3",
-    "bn|নিজের জীবন নিয়ে উত্তর দাও। Subject লেখো।": "/audio/chat-lesson/level-1-playground-subject/fd2f055288d4c945.mp3",
-    "bn|তোমার বাসায় কে রান্না করে?": "/audio/chat-lesson/level-1-playground-subject/b52e2a13c4140096.mp3",
-    "bn|পড়াশোনায় কে তোমাকে সাহায্য করে?": "/audio/chat-lesson/level-1-playground-subject/0a9d19a330696c40.mp3",
-    "bn|সকালে কী তোমার ঘুম ভাঙায়?": "/audio/chat-lesson/level-1-playground-subject/793dc11beac14fe6.mp3",
-    "bn|তুমি কার সঙ্গে খেলো?": "/audio/chat-lesson/level-1-playground-subject/7938d547341c79f8.mp3",
-    "bn|ক্লাসে তোমার পাশে কে বসে?": "/audio/chat-lesson/level-1-playground-subject/3d11463794c58cd9.mp3",
-    "bn|তোমার পরিবারের জন্য কে বাজার করে?": "/audio/chat-lesson/level-1-playground-subject/f59700e3b68d6fae.mp3",
-    "bn|তোমার বাসার কাছে কী অনেক শব্দ করে?": "/audio/chat-lesson/level-1-playground-subject/f7b35bfe732db5a7.mp3",
-    "bn|কে তোমাকে সবচেয়ে বেশি ফোন করে?": "/audio/chat-lesson/level-1-playground-subject/29c570c90b54ca07.mp3",
-    "bn|তোমার বাসায় কে চা বানায়?": "/audio/chat-lesson/level-1-playground-subject/c83e16501360d188.mp3",
-    "bn|কী তোমাকে খুশি করে?": "/audio/chat-lesson/level-1-playground-subject/bc750376cfdcbb57.mp3"
+    "bn|শুধু Subject লিখুন।": "/audio/chat-lesson/level-1-playground-subject/35e317d4dcc876de.mp3",
+    "bn|কাজটি যে করে সে-ই Subject। শুধু সেই অংশটি লিখুন।": "/audio/chat-lesson/level-1-playground-subject/554a1f5de4bc6a75.mp3",
+    "bn|আপনার বাসায় কে রান্না করে?": "/audio/chat-lesson/level-1-playground-subject/dc61bb1b661f9ef3.mp3",
+    "bn|পড়াশোনায় কে আপনাকে সাহায্য করে?": "/audio/chat-lesson/level-1-playground-subject/2316eaebd8642add.mp3",
+    "bn|সকালে কী আপনার ঘুম ভাঙায়?": "/audio/chat-lesson/level-1-playground-subject/601a4105e315b4d8.mp3",
+    "bn|আপনি কার সঙ্গে খেলেন?": "/audio/chat-lesson/level-1-playground-subject/572c8f8d5e62fbd9.mp3",
+    "bn|ক্লাসে আপনার পাশে কে বসে?": "/audio/chat-lesson/level-1-playground-subject/954e1fc063e2bf32.mp3",
+    "bn|আপনার পরিবারের জন্য কে বাজার করে?": "/audio/chat-lesson/level-1-playground-subject/902efdfec6595424.mp3",
+    "bn|আপনার বাসার কাছে কী অনেক শব্দ করে?": "/audio/chat-lesson/level-1-playground-subject/acee6afbc552c679.mp3",
+    "bn|কে আপনাকে সবচেয়ে বেশি ফোন করে?": "/audio/chat-lesson/level-1-playground-subject/5c76ac4c11c7ba1b.mp3",
+    "bn|আপনার বাসায় কে চা বানায়?": "/audio/chat-lesson/level-1-playground-subject/01bc27c080eceb50.mp3",
+    "bn|কী আপনাকে খুশি করে?": "/audio/chat-lesson/level-1-playground-subject/6ba5f24b4df65d41.mp3"
   },
   "timings": {
-    "en|Who or What? Pick one. Then tap the Subject.": [
+    "en|Who or What? Then tap the Subject.": [
       [
-        72,
-        697,
+        31,
+        156,
         0
       ],
       [
-        697,
-        989,
+        156,
+        614,
         1
       ],
       [
-        989,
-        1989,
+        614,
+        1447,
         2
       ],
       [
-        1989,
-        2239,
+        1447,
+        1739,
         3
       ],
       [
-        2239,
-        3030,
+        1739,
+        1989,
         4
       ],
       [
-        3030,
-        3281,
+        1989,
+        2113,
         5
       ],
       [
-        3281,
-        3530,
+        2113,
+        2738,
+        6
+      ]
+    ],
+    "en|Which question finds the Subject: Who or What?": [
+      [
+        31,
+        322,
+        0
+      ],
+      [
+        322,
+        739,
+        1
+      ],
+      [
+        739,
+        1114,
+        2
+      ],
+      [
+        1114,
+        1239,
+        3
+      ],
+      [
+        1239,
+        2072,
+        4
+      ],
+      [
+        2072,
+        2281,
+        5
+      ],
+      [
+        2281,
+        3030,
         6
       ],
       [
-        3530,
-        3656,
+        3030,
+        3472,
+        7
+      ]
+    ],
+    "en|Now tap the answer in the sentence. That's the Subject.": [
+      [
+        31,
+        489,
+        0
+      ],
+      [
+        489,
+        781,
+        1
+      ],
+      [
+        781,
+        989,
+        2
+      ],
+      [
+        989,
+        1406,
+        3
+      ],
+      [
+        1406,
+        1531,
+        4
+      ],
+      [
+        1531,
+        1656,
+        5
+      ],
+      [
+        1656,
+        2697,
+        6
+      ],
+      [
+        2697,
+        3113,
         7
       ],
       [
-        3656,
-        4202,
+        3113,
+        3239,
         8
+      ],
+      [
+        3239,
+        3779,
+        9
+      ]
+    ],
+    "en|The Subject does the action. Ask Who for people, What for things.": [
+      [
+        31,
+        239,
+        0
+      ],
+      [
+        239,
+        864,
+        1
+      ],
+      [
+        864,
+        1114,
+        2
+      ],
+      [
+        1114,
+        1281,
+        3
+      ],
+      [
+        1281,
+        2156,
+        4
+      ],
+      [
+        2156,
+        2571,
+        5
+      ],
+      [
+        2571,
+        2822,
+        6
+      ],
+      [
+        2822,
+        2988,
+        7
+      ],
+      [
+        2988,
+        3822,
+        8
+      ],
+      [
+        3822,
+        4071,
+        9
+      ],
+      [
+        4071,
+        4364,
+        10
+      ],
+      [
+        4364,
+        4994,
+        11
       ]
     ],
     "en|Rafi plays cricket.": [
@@ -828,41 +986,93 @@
         4
       ]
     ],
-    "en|Stretch the light over the whole Subject.": [
+    "en|Tap the last word of the Subject.": [
       [
-        72,
-        447,
+        31,
+        239,
         0
       ],
       [
-        447,
-        572,
+        239,
+        406,
         1
       ],
       [
-        572,
-        906,
+        406,
+        739,
         2
       ],
       [
+        739,
         906,
-        1114,
         3
       ],
       [
-        1114,
-        1281,
+        906,
+        989,
         4
       ],
       [
-        1281,
-        1572,
+        989,
+        1114,
         5
       ],
       [
-        1572,
-        2168,
+        1114,
+        1593,
         6
+      ]
+    ],
+    "en|A Subject can be many words. Take all of them.": [
+      [
+        72,
+        156,
+        0
+      ],
+      [
+        156,
+        614,
+        1
+      ],
+      [
+        614,
+        781,
+        2
+      ],
+      [
+        781,
+        947,
+        3
+      ],
+      [
+        947,
+        1322,
+        4
+      ],
+      [
+        1322,
+        2239,
+        5
+      ],
+      [
+        2239,
+        2530,
+        6
+      ],
+      [
+        2530,
+        2739,
+        7
+      ],
+      [
+        2739,
+        2864,
+        8
+      ],
+      [
+        2864,
+        3213,
+        9
       ]
     ],
     "en|My little brother goes to school.": [
@@ -1309,56 +1519,78 @@
         8
       ]
     ],
-    "en|Find the Subject. Can't see it? Tap the hidden You.": [
+    "en|Tap the Subject. Hidden? Tap You.": [
       [
-        72,
-        322,
+        31,
+        239,
         0
       ],
       [
-        322,
-        447,
+        239,
+        364,
         1
       ],
       [
-        447,
-        1656,
+        364,
+        1364,
         2
       ],
       [
-        1656,
-        1947,
+        1364,
+        2322,
         3
       ],
       [
-        1947,
-        2364,
+        2322,
+        2571,
         4
       ],
       [
-        2364,
-        2905,
+        2571,
+        2978,
+        5
+      ]
+    ],
+    "en|Orders hide the Subject. It is always You.": [
+      [
+        31,
+        447,
+        0
+      ],
+      [
+        447,
+        739,
+        1
+      ],
+      [
+        739,
+        864,
+        2
+      ],
+      [
+        864,
+        1906,
+        3
+      ],
+      [
+        1906,
+        2072,
+        4
+      ],
+      [
+        2072,
+        2239,
         5
       ],
       [
-        2905,
-        3197,
+        2239,
+        2946,
         6
       ],
       [
-        3197,
-        3322,
+        2946,
+        3593,
         7
-      ],
-      [
-        3322,
-        3613,
-        8
-      ],
-      [
-        3613,
-        4041,
-        9
       ]
     ],
     "en|Eat your rice!": [
@@ -1666,41 +1898,93 @@
         3
       ]
     ],
-    "en|Answer about your life. Type the Subject.": [
+    "en|Type only the Subject.": [
       [
-        72,
-        447,
+        31,
+        531,
         0
       ],
       [
-        447,
-        739,
+        531,
+        864,
         1
       ],
       [
-        739,
-        906,
+        864,
+        989,
         2
       ],
       [
-        906,
-        1656,
+        989,
+        1616,
+        3
+      ]
+    ],
+    "en|The Subject is who or what does the action. Type only that part.": [
+      [
+        31,
+        197,
+        0
+      ],
+      [
+        197,
+        656,
+        1
+      ],
+      [
+        656,
+        1031,
+        2
+      ],
+      [
+        1031,
+        1239,
         3
       ],
       [
-        1656,
-        1989,
+        1239,
+        1739,
         4
       ],
       [
-        1989,
+        1739,
         2113,
         5
       ],
       [
         2113,
-        2769,
+        2322,
         6
+      ],
+      [
+        2322,
+        2488,
+        7
+      ],
+      [
+        2488,
+        3406,
+        8
+      ],
+      [
+        3406,
+        3781,
+        9
+      ],
+      [
+        3781,
+        4071,
+        10
+      ],
+      [
+        4071,
+        4322,
+        11
+      ],
+      [
+        4322,
+        4778,
+        12
       ]
     ],
     "en|Who cooks in your home?": [
@@ -2013,7 +2297,7 @@
         3
       ]
     ],
-    "bn|কে, নাকি কী? একটি বেছে নাও। তারপর Subject-এ ট্যাপ করো।": [
+    "bn|কে, নাকি কী? তারপর Subject-এ ট্যাপ করুন।": [
       [
         53,
         519,
@@ -2026,43 +2310,184 @@
       ],
       [
         997,
-        2340,
+        2287,
         2
       ],
       [
-        2340,
-        2606,
+        2287,
+        2753,
         3
       ],
       [
-        2606,
-        2965,
+        2753,
+        3298,
         4
       ],
       [
-        2965,
-        4229,
+        3298,
+        3604,
         5
       ],
       [
-        4229,
-        4694,
+        3604,
+        4948,
+        6
+      ]
+    ],
+    "bn|কে, নাকি কী দিয়ে প্রশ্ন করলে Subject পাওয়া যাবে?": [
+      [
+        53,
+        492,
+        0
+      ],
+      [
+        492,
+        1037,
+        1
+      ],
+      [
+        1037,
+        1210,
+        2
+      ],
+      [
+        1210,
+        1476,
+        3
+      ],
+      [
+        1476,
+        1888,
+        4
+      ],
+      [
+        1888,
+        2261,
+        5
+      ],
+      [
+        2261,
+        2739,
         6
       ],
       [
-        4694,
-        5253,
+        2739,
+        2992,
         7
       ],
       [
-        5253,
-        5545,
+        2992,
+        4322,
+        8
+      ]
+    ],
+    "bn|এবার বাক্যে উত্তরটা খুঁজে ট্যাপ করুন। উত্তরটাই Subject।": [
+      [
+        93,
+        426,
+        0
+      ],
+      [
+        426,
+        851,
+        1
+      ],
+      [
+        851,
+        1410,
+        2
+      ],
+      [
+        1410,
+        1809,
+        3
+      ],
+      [
+        1809,
+        2101,
+        4
+      ],
+      [
+        2101,
+        3471,
+        5
+      ],
+      [
+        3471,
+        4069,
+        6
+      ],
+      [
+        4069,
+        5654,
+        7
+      ]
+    ],
+    "bn|কাজটি যে করে, সে-ই Subject। মানুষ হলে Who (কে), জিনিস হলে What (কী)।": [
+      [
+        53,
+        505,
+        0
+      ],
+      [
+        505,
+        705,
+        1
+      ],
+      [
+        705,
+        1237,
+        2
+      ],
+      [
+        1237,
+        1582,
+        3
+      ],
+      [
+        1582,
+        3298,
+        4
+      ],
+      [
+        3298,
+        3790,
+        5
+      ],
+      [
+        3790,
+        4056,
+        6
+      ],
+      [
+        4056,
+        4481,
+        7
+      ],
+      [
+        4481,
+        5013,
         8
       ],
       [
-        5545,
-        6770,
+        5013,
+        5625,
         9
+      ],
+      [
+        5625,
+        5891,
+        10
+      ],
+      [
+        5891,
+        6184,
+        11
+      ],
+      [
+        6184,
+        7501,
+        12
       ]
     ],
     "bn|রাফি ক্রিকেট খেলে।": [
@@ -2636,7 +3061,34 @@
         4
       ]
     ],
-    "bn|আলোটি টেনে পুরো Subject-এর ওপর ছড়িয়ে দাও।": [
+    "bn|Subject-এর শেষ শব্দে ট্যাপ করুন।": [
+      [
+        80,
+        758,
+        0
+      ],
+      [
+        758,
+        1064,
+        1
+      ],
+      [
+        1064,
+        1463,
+        2
+      ],
+      [
+        1463,
+        1782,
+        3
+      ],
+      [
+        1782,
+        3138,
+        4
+      ]
+    ],
+    "bn|Subject অনেকগুলো শব্দেরও হতে পারে। সবগুলো নিন।": [
       [
         53,
         572,
@@ -2644,32 +3096,32 @@
       ],
       [
         572,
-        931,
+        1184,
         1
       ],
       [
-        931,
-        1263,
+        1184,
+        1702,
         2
       ],
       [
-        1263,
-        1902,
+        1702,
+        1968,
         3
       ],
       [
-        1902,
-        2194,
+        1968,
+        3258,
         4
       ],
       [
-        2194,
-        2606,
+        3258,
+        3830,
         5
       ],
       [
-        2606,
-        3804,
+        3830,
+        5054,
         6
       ]
     ],
@@ -3077,61 +3529,88 @@
         9
       ]
     ],
-    "bn|Subject খুঁজে বের করো। দেখা যাচ্ছে না? লুকানো You-তে ট্যাপ করো।": [
+    "bn|Subject-এ ট্যাপ করুন। লুকানো থাকলে You-তে ট্যাপ করুন।": [
       [
-        53,
-        532,
+        80,
+        678,
         0
       ],
       [
-        532,
-        904,
+        678,
+        971,
         1
       ],
       [
-        904,
-        1117,
+        971,
+        2447,
         2
       ],
       [
-        1117,
-        2460,
+        2447,
+        2872,
         3
       ],
       [
-        2460,
-        2819,
+        2872,
+        3324,
         4
       ],
       [
-        2819,
-        3205,
+        3324,
+        3630,
         5
       ],
       [
-        3205,
-        4468,
+        3630,
+        3949,
         6
       ],
       [
-        4468,
-        4960,
+        3949,
+        5293,
         7
+      ]
+    ],
+    "bn|আদেশের বাক্যে Subject লুকানো থাকে। সেটি সবসময় You।": [
+      [
+        67,
+        572,
+        0
       ],
       [
-        4960,
-        5266,
-        8
+        572,
+        944,
+        1
       ],
       [
-        5266,
-        5559,
-        9
+        944,
+        1476,
+        2
       ],
       [
-        5559,
-        6783,
-        10
+        1476,
+        1888,
+        3
+      ],
+      [
+        1888,
+        3271,
+        4
+      ],
+      [
+        3271,
+        3644,
+        5
+      ],
+      [
+        3644,
+        4269,
+        6
+      ],
+      [
+        4269,
+        5493,
+        7
       ]
     ],
     "bn|ভাত খাও!": [
@@ -3444,98 +3923,125 @@
         4
       ]
     ],
-    "bn|নিজের জীবন নিয়ে উত্তর দাও। Subject লেখো।": [
+    "bn|শুধু Subject লিখুন।": [
       [
-        133,
-        545,
+        67,
+        426,
         0
       ],
       [
-        545,
-        971,
+        426,
+        944,
         1
       ],
       [
-        971,
-        1277,
+        944,
+        2341,
+        2
+      ]
+    ],
+    "bn|কাজটি যে করে সে-ই Subject। শুধু সেই অংশটি লিখুন।": [
+      [
+        53,
+        505,
+        0
+      ],
+      [
+        505,
+        705,
+        1
+      ],
+      [
+        705,
+        1024,
         2
       ],
       [
-        1277,
-        1729,
+        1024,
+        1250,
         3
       ],
       [
-        1729,
-        3005,
+        1250,
+        2872,
         4
       ],
       [
-        3005,
-        3551,
+        2872,
+        3258,
         5
       ],
       [
-        3551,
-        4894,
+        3258,
+        3604,
         6
+      ],
+      [
+        3604,
+        4149,
+        7
+      ],
+      [
+        4149,
+        5545,
+        8
       ]
     ],
-    "bn|তোমার বাসায় কে রান্না করে?": [
+    "bn|আপনার বাসায় কে রান্না করে?": [
       [
         53,
-        412,
+        479,
         0
       ],
       [
-        412,
-        811,
+        479,
+        878,
         1
       ],
       [
-        811,
-        997,
+        878,
+        1051,
         2
       ],
       [
-        997,
-        1330,
+        1051,
+        1383,
         3
       ],
       [
-        1330,
-        2567,
+        1383,
+        2620,
         4
       ]
     ],
-    "bn|পড়াশোনায় কে তোমাকে সাহায্য করে?": [
+    "bn|পড়াশোনায় কে আপনাকে সাহায্য করে?": [
       [
         53,
-        731,
+        705,
         0
       ],
       [
-        731,
+        705,
         918,
         1
       ],
       [
         918,
-        1317,
+        1370,
         2
       ],
       [
-        1317,
-        1795,
+        1370,
+        1835,
         3
       ],
       [
-        1795,
-        3034,
+        1835,
+        3059,
         4
       ]
     ],
-    "bn|সকালে কী তোমার ঘুম ভাঙায়?": [
+    "bn|সকালে কী আপনার ঘুম ভাঙায়?": [
       [
         67,
         598,
@@ -3543,48 +4049,48 @@
       ],
       [
         598,
-        798,
+        824,
         1
       ],
       [
-        798,
-        1130,
+        824,
+        1210,
         2
       ],
       [
-        1130,
-        1449,
+        1210,
+        1516,
         3
       ],
       [
-        1449,
-        2833,
+        1516,
+        2899,
         4
       ]
     ],
-    "bn|তুমি কার সঙ্গে খেলো?": [
+    "bn|আপনি কার সঙ্গে খেলেন?": [
       [
-        53,
-        319,
+        93,
+        426,
         0
       ],
       [
-        319,
-        585,
+        426,
+        692,
         1
       ],
       [
-        585,
-        931,
+        692,
+        1037,
         2
       ],
       [
-        931,
-        2301,
+        1037,
+        2447,
         3
       ]
     ],
-    "bn|ক্লাসে তোমার পাশে কে বসে?": [
+    "bn|ক্লাসে আপনার পাশে কে বসে?": [
       [
         53,
         492,
@@ -3592,172 +4098,172 @@
       ],
       [
         492,
-        838,
+        891,
         1
       ],
       [
-        838,
+        891,
+        1250,
+        2
+      ],
+      [
+        1250,
+        1463,
+        3
+      ],
+      [
+        1463,
+        2793,
+        4
+      ]
+    ],
+    "bn|আপনার পরিবারের জন্য কে বাজার করে?": [
+      [
+        80,
+        492,
+        0
+      ],
+      [
+        492,
+        1011,
+        1
+      ],
+      [
+        1011,
+        1383,
+        2
+      ],
+      [
+        1383,
+        1582,
+        3
+      ],
+      [
+        1582,
+        1942,
+        4
+      ],
+      [
+        1942,
+        3165,
+        5
+      ]
+    ],
+    "bn|আপনার বাসার কাছে কী অনেক শব্দ করে?": [
+      [
+        93,
+        505,
+        0
+      ],
+      [
+        505,
+        878,
+        1
+      ],
+      [
+        878,
         1197,
         2
       ],
       [
         1197,
-        1396,
+        1449,
         3
       ],
       [
-        1396,
-        2726,
-        4
-      ]
-    ],
-    "bn|তোমার পরিবারের জন্য কে বাজার করে?": [
-      [
-        53,
-        399,
-        0
-      ],
-      [
-        399,
-        931,
-        1
-      ],
-      [
-        931,
-        1303,
-        2
-      ],
-      [
-        1303,
-        1503,
-        3
-      ],
-      [
-        1503,
-        1888,
+        1449,
+        1809,
         4
       ],
       [
-        1888,
-        3099,
-        5
-      ]
-    ],
-    "bn|তোমার বাসার কাছে কী অনেক শব্দ করে?": [
-      [
-        53,
-        412,
-        0
-      ],
-      [
-        412,
-        811,
-        1
-      ],
-      [
-        811,
-        1130,
-        2
-      ],
-      [
-        1130,
-        1383,
-        3
-      ],
-      [
-        1383,
-        1729,
-        4
-      ],
-      [
-        1729,
-        2101,
+        1809,
+        2194,
         5
       ],
       [
-        2101,
-        3352,
+        2194,
+        3445,
         6
       ]
     ],
-    "bn|কে তোমাকে সবচেয়ে বেশি ফোন করে?": [
+    "bn|কে আপনাকে সবচেয়ে বেশি ফোন করে?": [
       [
         53,
-        253,
+        306,
         0
       ],
       [
-        253,
-        678,
+        306,
+        758,
         1
       ],
       [
-        678,
-        1157,
+        758,
+        1237,
         2
       ],
       [
-        1157,
-        1449,
+        1237,
+        1543,
         3
       ],
       [
-        1449,
-        1729,
+        1543,
+        1809,
         4
       ],
       [
-        1729,
-        2992,
+        1809,
+        3059,
         5
       ]
     ],
-    "bn|তোমার বাসায় কে চা বানায়?": [
+    "bn|আপনার বাসায় কে চা বানায়?": [
       [
-        53,
-        412,
+        80,
+        492,
         0
       ],
       [
-        412,
-        798,
+        492,
+        878,
         1
       ],
       [
-        798,
-        971,
+        878,
+        1037,
         2
       ],
       [
-        971,
-        1197,
+        1037,
+        1277,
         3
       ],
       [
-        1197,
-        2540,
+        1277,
+        2580,
         4
       ]
     ],
-    "bn|কী তোমাকে খুশি করে?": [
+    "bn|কী আপনাকে খুশি করে?": [
       [
         53,
-        253,
+        306,
         0
       ],
       [
-        253,
-        718,
+        306,
+        798,
         1
       ],
       [
-        718,
-        1090,
+        798,
+        1157,
         2
       ],
       [
-        1090,
-        2303,
+        1157,
+        2367,
         3
       ]
     ]

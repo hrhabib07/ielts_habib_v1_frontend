@@ -53,6 +53,7 @@ export interface GamlishProfileSocial {
   canClap: boolean;
   isFollowing: boolean;
   isOwnProfile: boolean;
+  viewerLoggedIn?: boolean;
   totalViews: number;
   followerCount?: number;
 }
@@ -117,6 +118,22 @@ export interface GamlishPublicProfile {
     body: string;
     createdAt: string | null;
   } | null;
+  /** Gamlish v2: the learner's game identity and Level 1 progress. Null if they never started it. */
+  learner?: {
+    nicknameEn: string;
+    nicknameBn: string;
+    photoUrl: string | null;
+    district: string | null;
+    country: string | null;
+    legacyLearner: boolean;
+    doneStepIds: string[];
+    finalTest: { score: number; max: number } | null;
+    lastActiveAt: string | null;
+  } | null;
+  /** Legacy Learner: permanent once all 21 levels are done, pending until `deadline`. */
+  legacy?: { state: "permanent" | "pending" | "none"; deadline: string | null };
+  /** The first version of Gamlish (21 levels). Null if they never played it. */
+  v1?: { levelsCompleted: number; totalLevels: number; completed: boolean; completedAt: string | null } | null;
 }
 
 export interface UsernameState {

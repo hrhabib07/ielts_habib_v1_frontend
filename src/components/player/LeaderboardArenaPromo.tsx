@@ -4,13 +4,18 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Trophy, Zap } from "lucide-react";
 import { getXpLeaderboard } from "@/src/lib/api/xpLeaderboard";
+import { SHOW_XP_LEADERBOARD } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 
 /**
  * Always-visible but non-blocking arena promo for the player map.
  */
-export function LeaderboardArenaPromo({ className }: { className?: string }) {
+export function LeaderboardArenaPromo(props: { className?: string }) {
+  return SHOW_XP_LEADERBOARD ? <LeaderboardArenaPromoView {...props} /> : null;
+}
+
+function LeaderboardArenaPromoView({ className }: { className?: string }) {
   const { locale } = useUiLocale();
   const bn = locale === "bn";
   const [rank, setRank] = useState<number | null>(null);

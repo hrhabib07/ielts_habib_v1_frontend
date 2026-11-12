@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   clearAuth,
   getDecodedTokenClient,
@@ -9,9 +9,19 @@ import {
   hasUsableClientToken,
   hydrateAccessTokenFromCookie,
   isLogoutLocked,
-  syncAuthCookie,
 } from "@/src/lib/auth";
+import { persistSessionToken } from "@/src/lib/auth-session-ready";
 import type { CurrentUser } from "@/src/lib/auth-server";
+
+const AUTH_PATH_PREFIXES = [
+  "/login",
+  "/register",
+  "/verify-otp",
+  "/forgot-password",
+  "/verify-reset-otp",
+  "/reset-password",
+  "/auth/",
+];
 
 function isClientTokenUsable(): boolean {
   const decoded = getDecodedTokenClient();
@@ -21,22 +31,27 @@ function isClientTokenUsable(): boolean {
 
 /**
  * Keeps localStorage Bearer and httpOnly cookie in sync after login / tab return.
- * 1) Client token, no server user → sync cookie + refresh
+ * 1) Client token, no server user → sync cookie (with retries) + refresh
  * 2) Server user, no client token → hydrate Bearer from cookie
  * 3) Expired client token → clear both stores
+ * Re-runs on navigation until the cookie is confirmed, so a missed sync at
+ * login does not lock the user out of cookie-gated routes like /profile.
  */
 export function SyncAuthCookie({ initialUser }: { initialUser: CurrentUser | null }) {
   const router = useRouter();
-  const ran = useRef(false);
+  const pathname = usePathname();
+  const inFlight = useRef(false);
+  const settledToken = useRef<string | null>(null);
+  const hydrated = useRef(false);
 
   useEffect(() => {
-    if (ran.current) return;
-    ran.current = true;
-
-    let cancelled = false;
+    if (inFlight.current) return;
 
     async function alignSession() {
       if (isLogoutLocked()) return;
+      // /login owns recovery (useLoginSessionRecovery); a parallel refresh here
+      // would race it and drop the ?next= destination.
+      if (AUTH_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return;
 
       const clientToken = getTokenFromClient();
 
@@ -51,16 +66,25 @@ export function SyncAuthCookie({ initialUser }: { initialUser: CurrentUser | nul
       }
 
       if (initialUser == null && hasUsableClientToken() && clientToken) {
-        const synced = await syncAuthCookie(clientToken);
-        if (!cancelled && synced.ok) {
+        if (settledToken.current === clientToken) return;
+        const synced = await persistSessionToken(clientToken, {
+          attempts: 3,
+          timeoutMs: 5000,
+        });
+        if (synced.ok) {
+          settledToken.current = clientToken;
           router.refresh();
+        } else if (synced.code === "TOKEN_REJECTED") {
+          settledToken.current = clientToken;
         }
         return;
       }
 
       if (initialUser != null && !hasUsableClientToken()) {
+        if (hydrated.current) return;
+        hydrated.current = true;
         const token = await hydrateAccessTokenFromCookie();
-        if (!cancelled && !token) {
+        if (!token) {
           // Server thought we were logged in but cookie is invalid
           await fetch("/api/auth/logout", {
             method: "POST",
@@ -72,11 +96,11 @@ export function SyncAuthCookie({ initialUser }: { initialUser: CurrentUser | nul
       }
     }
 
-    void alignSession();
-    return () => {
-      cancelled = true;
-    };
-  }, [initialUser, router]);
+    inFlight.current = true;
+    void alignSession().finally(() => {
+      inFlight.current = false;
+    });
+  }, [initialUser, router, pathname]);
 
   return null;
 }

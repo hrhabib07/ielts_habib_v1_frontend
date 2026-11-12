@@ -9,6 +9,8 @@ import { saveStepResult, useLabProgress, type StepResult } from "@/src/features/
  */
 export type MissionStore = {
   results: Record<string, StepResult>;
+  /** Games finished inside unfinished playgrounds (e.g. a guest's free games), by playground id then round id. */
+  partials: Readonly<Record<string, Readonly<Record<string, { score: number; max: number }>>>>;
   unlockAll: boolean;
   saveResult: (stepId: string, score: number, max: number) => void;
   /** True for steps that need payment the learner has not made. */
@@ -27,6 +29,7 @@ export function MissionStoreProvider({ store, children }: { store: MissionStore;
 }
 
 const neverPaywalled = () => false;
+const NO_PARTIALS = {};
 
 export function useMissionStore(): MissionStore {
   const store = useContext(MissionStoreContext);
@@ -34,6 +37,7 @@ export function useMissionStore(): MissionStore {
   const labStore = useMemo<MissionStore>(
     () => ({
       results: lab.results,
+      partials: NO_PARTIALS,
       unlockAll: lab.unlockAll,
       saveResult: saveStepResult,
       isPaywalled: neverPaywalled,

@@ -258,7 +258,7 @@ export function MirrorWordsGame({ item, itemKey, lang, status, attempt, onReady,
           <span className="flex flex-col items-center gap-1">
             <BlankSlot value={done ? item.answer : selected} tone={slotTone} />
             {done ? (
-              <span className={cn(LANG_FACE[lang], "text-[11px] font-black text-violet-600")}>
+              <span className={cn(LANG_FACE[lang], "text-[11px] font-black text-accent")}>
                 {pick(item.side === "subject" ? M1_UI.mirrorBefore : M1_UI.mirrorAfter, lang)}
               </span>
             ) : null}

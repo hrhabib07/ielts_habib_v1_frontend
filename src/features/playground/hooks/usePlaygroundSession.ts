@@ -39,14 +39,22 @@ export type PlaygroundState = {
   streak: number;
   bestStreak: number;
   xp: number;
+  /** XP when the current round began, so a finished round can show what it earned. */
+  roundStartXp: number;
   collected: CollectedLine[];
   reviewAdded: boolean;
   startedAt: number | null;
   finishedAt: number | null;
+  /** First round played in this session; earlier rounds were finished before (a resumed playground). */
+  firstRound: number;
+  /** Score of the rounds finished before this session. */
+  carried: { score: number; max: number };
 };
 
+export type SessionStart = { from: number; score: number; max: number };
+
 type Action =
-  | { type: "start"; rounds: SessionRound[]; at: number }
+  | { type: "start"; rounds: SessionRound[]; at: number; resume: SessionStart | null }
   | { type: "begin-round" }
   | { type: "checking" }
   | { type: "mistake" }
@@ -74,10 +82,13 @@ const INITIAL: PlaygroundState = {
   streak: 0,
   bestStreak: 0,
   xp: 0,
+  roundStartXp: 0,
   collected: [],
   reviewAdded: false,
   startedAt: null,
   finishedAt: null,
+  firstRound: 0,
+  carried: { score: 0, max: 0 },
 };
 
 function currentItem(state: PlaygroundState): SessionItem | null {
@@ -91,11 +102,21 @@ function freshItem(state: PlaygroundState): PlaygroundState {
 function reducer(state: PlaygroundState, action: Action): PlaygroundState {
   const item = currentItem(state);
   switch (action.type) {
-    case "start":
-      return { ...INITIAL, screen: "intro", rounds: action.rounds, startedAt: action.at };
+    case "start": {
+      const from = action.resume && action.resume.from < action.rounds.length ? action.resume.from : 0;
+      return {
+        ...INITIAL,
+        screen: "intro",
+        rounds: action.rounds,
+        round: from,
+        firstRound: from,
+        carried: from > 0 && action.resume ? { score: action.resume.score, max: action.resume.max } : INITIAL.carried,
+        startedAt: action.at,
+      };
+    }
 
     case "begin-round":
-      return freshItem({ ...state, screen: "play", index: 0 });
+      return freshItem({ ...state, screen: "play", index: 0, roundStartXp: state.xp });
 
     case "checking":
       return state.status === "answering" ? { ...state, status: "checking" } : state;
@@ -106,20 +127,21 @@ function reducer(state: PlaygroundState, action: Action): PlaygroundState {
     case "answer": {
       if (!item || (state.status !== "answering" && state.status !== "checking")) return state;
       const { result } = action;
+      const unscored = item.review || item.practice === true;
       if (result.correct) {
         const firstTry = state.mistakes === 0 && state.slips === 0;
-        const brave = Boolean(result.brave) && !item.review;
+        const brave = Boolean(result.brave) && !unscored;
         const xp =
-          (item.review ? XP_REVIEW : firstTry ? XP_FIRST_TRY : XP_SECOND_TRY) + (brave ? XP_BRAVE : 0);
+          (unscored ? XP_REVIEW : firstTry ? XP_FIRST_TRY : XP_SECOND_TRY) + (brave ? XP_BRAVE : 0);
         const streak = state.streak + 1;
         return {
           ...state,
           status: "correct",
-          points: item.review ? state.points : { ...state.points, [item.key]: firstTry ? 1 : 0.5 },
+          points: unscored ? state.points : { ...state.points, [item.key]: firstTry ? 1 : 0.5 },
           streak,
           bestStreak: Math.max(state.bestStreak, streak),
           xp: state.xp + xp,
-          collected: result.collect && !item.review ? [...state.collected, result.collect] : state.collected,
+          collected: result.collect && !unscored ? [...state.collected, result.collect] : state.collected,
           feedback: { tone: "correct", body: result.body, note: result.note, xp, brave, streak },
         };
       }
@@ -130,7 +152,7 @@ function reducer(state: PlaygroundState, action: Action): PlaygroundState {
         status: revealed ? "revealed" : "retry",
         mistakes,
         streak: 0,
-        points: revealed && !item.review ? { ...state.points, [item.key]: 0 } : state.points,
+        points: revealed && !unscored ? { ...state.points, [item.key]: 0 } : state.points,
         feedback: {
           tone: revealed ? "revealed" : "retry",
           body: revealed ? result.reveal : result.hint,
@@ -156,7 +178,7 @@ function reducer(state: PlaygroundState, action: Action): PlaygroundState {
       const isLast = state.round + 1 >= rounds.length;
       if (isLast && !reviewAdded) {
         reviewAdded = true;
-        const review = buildReviewRound(rounds, state.points);
+        const review = buildReviewRound(rounds.slice(state.firstRound), state.points);
         if (review) rounds = [...rounds, review];
       }
       if (state.round + 1 < rounds.length) {
@@ -167,12 +189,43 @@ function reducer(state: PlaygroundState, action: Action): PlaygroundState {
   }
 }
 
+export type RoundSummary = {
+  correct: number;
+  firstTry: number;
+  total: number;
+  xp: number;
+  stars: 1 | 2 | 3;
+};
+
+/** First-try points of one played round (practice and review items do not count). */
+export function roundScore(state: PlaygroundState, index: number): { score: number; max: number } {
+  const scored = (state.rounds[index]?.items ?? []).filter((i) => !i.practice && !i.review);
+  return { score: scored.reduce((sum, i) => sum + (state.points[i.key] ?? 0), 0), max: scored.length };
+}
+
+/** The round that just ended, while the next round's intro is waiting. */
+export function finishedRoundSummary(state: PlaygroundState): RoundSummary | null {
+  const round = state.screen === "intro" && state.round - 1 >= state.firstRound ? state.rounds[state.round - 1] : undefined;
+  if (!round || round.kind === "review") return null;
+  const scored = round.items.filter((i) => !i.practice && !i.review);
+  const points = scored.map((i) => state.points[i.key] ?? 0);
+  const ratio = scored.length === 0 ? 1 : points.reduce((sum, p) => sum + p, 0) / scored.length;
+  return {
+    correct: points.filter((p) => p > 0).length,
+    firstTry: points.filter((p) => p === 1).length,
+    total: scored.length,
+    xp: state.xp - state.roundStartXp,
+    stars: ratio >= 0.9 ? 3 : ratio >= 0.6 ? 2 : 1,
+  };
+}
+
 export function usePlaygroundSession() {
   const [state, dispatch] = useReducer(reducer, INITIAL);
 
   const actions = useMemo(
     () => ({
-      start: (rounds: SessionRound[]) => dispatch({ type: "start", rounds, at: Date.now() }),
+      start: (rounds: SessionRound[], resume: SessionStart | null = null) =>
+        dispatch({ type: "start", rounds, at: Date.now(), resume }),
       beginRound: () => dispatch({ type: "begin-round" }),
       checking: () => dispatch({ type: "checking" }),
       mistake: () => dispatch({ type: "mistake" }),
@@ -184,8 +237,11 @@ export function usePlaygroundSession() {
   );
 
   const item = currentItem(state);
-  const scored = state.rounds.flatMap((round) => round.items).filter((i) => !i.review);
-  const score = scored.reduce((sum, i) => sum + (state.points[i.key] ?? 0), 0);
+  const scored = state.rounds
+    .slice(state.firstRound)
+    .flatMap((round) => round.items)
+    .filter((i) => !i.review && !i.practice);
+  const score = state.carried.score + scored.reduce((sum, i) => sum + (state.points[i.key] ?? 0), 0);
 
-  return { state, item, actions, score, maxScore: scored.length };
+  return { state, item, actions, score, maxScore: state.carried.max + scored.length };
 }

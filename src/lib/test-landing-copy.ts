@@ -3,11 +3,14 @@ import {
   JOURNEY_LIST_PRICE_BDT,
   JOURNEY_OFFER_PRICE_BDT,
 } from "@/src/lib/journey-prices";
+import {
+  DOUBLE_DURATION_ENDS_AT,
+  LEGACY_BADGE_ENDS_AT,
+} from "@/src/features/learner/lib/offer";
 
-/** One door: join, then play Level 1. No price and no demo on this path. */
-export const TEST_LANDING_PRIMARY_HREF =
-  "/register?next=%2Fplayer%2Fmissions%2Fmission-01-word-order";
-export const TEST_LANDING_SECONDARY_HREF = "/register";
+/** One door: play Level 1 right away as a guest; saving with Google comes after the first games. */
+export const TEST_LANDING_PRIMARY_HREF = "/play";
+export const TEST_LANDING_SECONDARY_HREF = "/play";
 
 export function formatTestLandingPrice(amount: number): string {
   return `৳${amount.toLocaleString("en-BD")}`;
@@ -28,11 +31,18 @@ export const TEST_LANDING_OFF_PERCENT = Math.round(
   (TEST_LANDING_SAVE_BDT / JOURNEY_LIST_PRICE_BDT) * 100,
 );
 
+export interface TestLandingFaqItem {
+  readonly q: string;
+  readonly a: string;
+  /** Offer sentence appended to the answer only until `endsAt` (ms). */
+  readonly timed?: { readonly text: string; readonly endsAt: number };
+}
+
 export interface TestLandingCopy {
   readonly testBanner: string;
   readonly navPrimary: string;
   readonly navDemo: string;
-  readonly navHow: string;
+  readonly navFaq: string;
   readonly eyebrow: string;
   readonly headlineLine1: string;
   readonly headlineLine2: string;
@@ -45,6 +55,7 @@ export interface TestLandingCopy {
   readonly priceOff: string;
   readonly priceMeta: string;
   readonly ctaPrimary: string;
+  readonly ctaTrust: string;
   readonly heroCompareAlt: string;
   readonly heroFoundationLabel: string;
   readonly heroCompareWithoutTitle: string;
@@ -61,55 +72,6 @@ export interface TestLandingCopy {
     readonly old: string;
     readonly neu: string;
   }[];
-  readonly campsEyebrow: string;
-  readonly campsTitle: string;
-  readonly campsSub: string;
-  readonly campFreeNote: string;
-  readonly campStartHere: string;
-  readonly campNextStep: string;
-  readonly campPlayCta: string;
-  readonly camps: readonly {
-    readonly badge: string;
-    readonly title: string;
-    readonly body: string;
-    readonly chips: readonly string[];
-  }[];
-  readonly howEyebrow: string;
-  readonly howTitle: string;
-  readonly howIntro: string;
-  readonly howLoopHint: string;
-  readonly howSteps: readonly {
-    readonly stage: string;
-    readonly title: string;
-    readonly hook: string;
-    readonly points: readonly string[];
-    readonly reward: string;
-  }[];
-  readonly howLessonMock: {
-    readonly mission: string;
-    readonly topic: string;
-    readonly duration: string;
-    readonly bangla: string;
-    readonly english: string;
-  };
-  readonly howPlayDemo: {
-    readonly eyebrow: string;
-    readonly prompt: string;
-    readonly sentence: string;
-    readonly options: readonly string[];
-    readonly correctAnswer: string;
-    readonly wrongHint: string;
-    readonly winTitle: string;
-    readonly winBody: string;
-    readonly tryAgain: string;
-  };
-  readonly howUnlockMock: {
-    readonly exam: string;
-    readonly score: string;
-    readonly pass: string;
-    readonly next: string;
-  };
-  readonly howFoot: string;
   readonly storiesEyebrow: string;
   readonly storiesTitle: string;
   readonly storiesSub: string;
@@ -121,6 +83,8 @@ export interface TestLandingCopy {
   readonly playingNowPrev: string;
   readonly playingNowNext: string;
   readonly playingNowMissions: string;
+  readonly playingNowReadMore: string;
+  readonly playingNowReadLess: string;
   readonly graduatesEyebrow: string;
   readonly graduatesTitle: string;
   readonly graduatesSub: string;
@@ -146,27 +110,28 @@ export interface TestLandingCopy {
   readonly offerCta: string;
   readonly footerCtaTitle: string;
   readonly faqTitle: string;
-  readonly faq: readonly { readonly q: string; readonly a: string }[];
+  readonly faq: readonly TestLandingFaqItem[];
 }
 
 export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
   bn: {
     testBanner: "",
-    navPrimary: "ফ্রি ট্রায়াল শুরু করুন",
-    navDemo: "ফ্রি ট্রায়াল শুরু করুন",
-    navHow: "কীভাবে শিখবেন",
+    navPrimary: "এখনই ফ্রিতে খেলুন",
+    navDemo: "এখনই ফ্রিতে খেলুন",
+    navFaq: "প্রশ্ন ও উত্তর",
     eyebrow: "Gamlish · The Game of English",
     headlineLine1: "গেইম খেলুন,",
     headlineLine2: "ইংরেজি শিখুন!",
     accentWords: ["গেইম", "ইংরেজি"],
-    subheadline: "ইংরেজি শিখুন গেইমের মতো সহজ করে।",
+    subheadline: "মাত্র ৪৫ দিনে ইংরেজির বেসিক শিখুন গেইম খেলার মতো সহজ করে।",
     proofLine: "শিক্ষার্থীরা ইতিমধ্যে এই গেইম খেলা শুরু করেছে। আপনিও এখনই শুরু করুন।",
     priceWas: "আগে",
     priceNow: "এখন",
     priceSave: `${TEST_LANDING_SAVE_PRICE} সাশ্রয়`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
     priceMeta: "45 দিন · 21টি লেভেল",
-    ctaPrimary: "ফ্রি ট্রায়াল শুরু করুন",
+    ctaPrimary: "এখনই ফ্রিতে খেলুন",
+    ctaTrust: "সাইন আপ ছাড়াই খেলা শুরু করুন। কোনো পেমেন্ট লাগবে না।",
     heroCompareAlt:
       "Gamlish ছাড়া ইংরেজি দুর্বল ভিত্তির উপর দাঁড়ায়। Gamlish-এর সাথে একই ইংরেজি শক্ত ভিত্তির উপর মজবুত হয়।",
     heroFoundationLabel: "এখানে Gamlish কাজ করে",
@@ -174,8 +139,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "দুর্বল ভিত্তি",
     heroCompareWithTitle: "Gamlish নিয়ে",
     heroCompareWithSub: "শক্ত ভিত্তি",
-    stickyPrimary: "ফ্রি ট্রায়াল শুরু করুন",
-    stickySecondary: "ফ্রি ট্রায়াল শুরু করুন",
+    stickyPrimary: "এখনই ফ্রিতে খেলুন",
+    stickySecondary: "এখনই ফ্রিতে খেলুন",
     compareEyebrow: "কেন Gamlish",
     compareTitle: "গতানুগতিক ইংরেজি শেখা vs Gamlish",
     compareOld: "পুরনো নিয়ম",
@@ -202,122 +167,6 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
         neu: "লিখা, সাথে সাথে শুধরে নেওয়া, পরীক্ষা আর সার্টিফিকেট",
       },
     ],
-    campsEyebrow: "কী শিখবেন",
-    campsTitle: "21টি লেভেল শেষে আপনি কী করতে পারবেন?",
-    campsSub:
-      "সিলেবাস মুখস্থ নয়। 4টি Camp, 21টি লেভেল। প্রতিটি ক্যাম্প আপনার ইংরেজির ভিত্তি আরও মজবুত করবে।",
-    campFreeNote: "লেভেল 1 ফ্রি",
-    campStartHere: "এখান থেকে শুরু",
-    campNextStep: "পরের ধাপ",
-    campPlayCta: "লেভেল 1 ফ্রি খেলুন",
-    camps: [
-      {
-        badge: "Camp 1",
-        title: "বাক্যের ভিত",
-        body: "এক লাইনের সঠিক ইংরেজি বাক্য লিখতে পারবেন। বাংলা আর ইংরেজি বাক্যের word order-এর ফারাক বুঝবেন, তারপর Subject, Verb, Be verb, Article এবং Preposition ঠিকমতো ব্যবহার করবেন।",
-        chips: [
-          "Word order",
-          "Subject / Verb",
-          "Be verb",
-          "Article",
-          "Preposition",
-        ],
-      },
-      {
-        badge: "Camp 2",
-        title: "কাজ ও প্রশ্ন",
-        body: "না বলতে, প্রশ্ন করতে, আর Simple tense-এ দৈনন্দিন বাক্য লিখতে পারবেন। Verb-এর রূপ গুলিয়ে ফেলার ভয় কমবে।",
-        chips: ["Verb forms", "Simple tenses", "Negative", "Questions"],
-      },
-      {
-        badge: "Camp 3",
-        title: "সময় ঠিকমতো",
-        body: "কোন পরিস্থিতিতে কোন tense লাগে, সেটা বুঝে লিখতে পারবেন। Continuous আর Perfect tense আর মুখস্থ ফর্মুলা থাকবে না।",
-        chips: [
-          "Continuous",
-          "Perfect",
-          "কখন কোন tense",
-          "Tense পার্থক্য",
-        ],
-      },
-      {
-        badge: "Camp 4",
-        title: "আসল ইংরেজি",
-        body: "Voice, Narration এবং বড় বাক্য লিখতে পারবেন। শেষে ফাইনাল পরীক্ষা দিয়ে Fundamental English-এর সার্টিফিকেটের জন্য আবেদন করতে পারবেন।",
-        chips: [
-          "Perfect continuous",
-          "Active / Passive",
-          "Direct / Indirect",
-          "Simple-Complex-Compound",
-        ],
-      },
-    ],
-    howEyebrow: "লেভেল লুপ",
-    howTitle: "বুঝুন। খেলুন। আনলক করুন।",
-    howIntro:
-      "লম্বা লেকচার নেই। প্রতিটি লেভেল একই গেইম লুপ: ছোট লেসন, তারপর খেলা, তারপর পরীক্ষা। পাস করলেই পরের লেভেল খুলবে।",
-    howLoopHint: "এই লুপ 21 বার ঘুরলেই জার্নি শেষ",
-    howSteps: [
-      {
-        stage: "Lesson",
-        title: "ছোট লেসন",
-        hook: "একবারে একটি নিয়ম। সহজ বাংলায়।",
-        points: [
-          "ছোট ভিডিও + পরিষ্কার টেক্সট",
-          "কঠিন গ্রামার সংজ্ঞা নয়",
-          "বাংলা আর ইংরেজি বাক্যের ফারাক",
-        ],
-        reward: "1 কনসেপ্ট",
-      },
-      {
-        stage: "Play",
-        title: "গেইমে প্র্যাকটিস",
-        hook: "লিখুন। সাথে সাথে শুধরে নিন।",
-        points: [
-          "বাক্য সাজান, ফাঁকা পূরণ করুন",
-          "সঠিক উত্তরে XP",
-          "ভুল হলে কেন ভুল, সেটাই দেখাবে",
-        ],
-        reward: "+10 XP",
-      },
-      {
-        stage: "Unlock",
-        title: "পরীক্ষা, তারপর আনলক",
-        hook: "পাস করলে পরের লেভেল খুলবে।",
-        points: [
-          "ক্যাম্প exam দিয়ে প্রমাণ করুন",
-          "21টি লেভেল একটা পথে",
-          "শেষে সার্টিফিকেট",
-        ],
-        reward: "Next level",
-      },
-    ],
-    howLessonMock: {
-      mission: "Level 04",
-      topic: "Be verb",
-      duration: "90 সেকেন্ড",
-      bangla: "আমি একজন ছাত্র।",
-      english: "I am a student.",
-    },
-    howPlayDemo: {
-      eyebrow: "এখনই খেলুন",
-      prompt: "Subject কোন শব্দ?",
-      sentence: "I am a student.",
-      options: ["am", "student", "I"],
-      correctAnswer: "I",
-      wrongHint: "কে কাজটা করছে, সেটাই Subject.",
-      winTitle: "সাবাশ! +10 XP",
-      winBody: "ভুল হলে সাথে সাথে শুধরে নেওয়া হয়। এটাই গেইম।",
-      tryAgain: "আবার চেষ্টা",
-    },
-    howUnlockMock: {
-      exam: "Camp 1 Exam",
-      score: "8/10",
-      pass: "পাস",
-      next: "Level 06 আনলক",
-    },
-    howFoot:
-      "লেভেল 1 ফ্রি খেলে এই লুপটা নিজে দেখুন। পছন্দ হলে 45 দিনের পুরো জার্নি আনলক করুন।",
     storiesEyebrow: "শিক্ষার্থীদের গল্প",
     storiesTitle: "তারা শেষ করেছে। এবার আপনার পালা।",
     storiesSub:
@@ -325,16 +174,18 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     playingNowEyebrow: "এখন খেলছে",
     playingNowTitle: "জার্নির ভিতর থেকে কয়েকটি কথা",
     playingNowSub:
-      "Habib, Salman আর Abbas উপরে গ্র্যাজুয়েট। এরা এখনো লেভেল খেলছে। সিলেক্টেড আসল ফিডব্যাক।",
+      "Habib, Salman, Abbas আর Ambia উপরে গ্র্যাজুয়েট। এরা এখনো লেভেল খেলছে। সিলেক্টেড আসল ফিডব্যাক।",
     playingNowLive: "লাইভ",
     playingNowHook: `এরা এখন খেলছে। আজই ${TEST_LANDING_OFFER_PRICE}-তে জয়েন করুন।`,
     playingNowPrev: "আগের কথা",
     playingNowNext: "পরের কথা",
     playingNowMissions: "লেভেল",
+    playingNowReadMore: "আরও পড়ুন",
+    playingNowReadLess: "কম দেখুন",
     graduatesEyebrow: "গ্র্যাজুয়েট",
     graduatesTitle: "তারা Fundamental English শেষ করেছে",
     graduatesSub:
-      "তিনজন আসল শিক্ষার্থী। তাদের অভিনন্দন কার্ড, নাম, আর অন্য লার্নারদের জন্য ছোট বার্তা।",
+      "আসল শিক্ষার্থী। তাদের অভিনন্দন কার্ড, নাম, আর অন্য লার্নারদের জন্য ছোট বার্তা।",
     graduatesSeeMore: "পুরো গল্প",
     graduatesMessage: "আপনাকে তার কথা",
     graduatesBefore: "আগে",
@@ -363,44 +214,48 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     offerRisk:
       "হিডেন চার্জ নেই। পেমেন্ট bKash-এ। 45 দিনের অ্যাক্সেস, আজীবন নয়।",
     offerCta: "লেভেল 1 ফ্রি খেলুন",
-    footerCtaTitle: "প্রথমে লেভেল 1 ফ্রি খেলুন",
+    footerCtaTitle: "সাইন আপ ছাড়াই প্রথম 3টি গেম ফ্রি",
     faqTitle: "প্রায়শই জিজ্ঞাসিত প্রশ্ন",
     faq: [
       {
-        q: "Gamlish কী? এখানে আমি কী শিখব?",
-        a: "Gamlish একটি গেইমভিত্তিক ইংরেজি শেখার ওয়েবসাইট। এটি IELTS কোর্স নয়, Spoken English ক্লাসও নয়। এখানে আপনি ইংরেজির মজবুত ভিত্তি গড়বেন: গ্রামার, বাক্য গঠন, আর নিজের বাংলা চিন্তা থেকে সঠিক ইংরেজি বাক্য লেখা। পুরো জার্নি সাজানো আছে 4টি Camp এবং 21টি লেভেল-এ। শুরু একদম বেসিক থেকে, শেষে Voice, Narration এবং বড় বাক্য পর্যন্ত।",
+        q: "Gamlish করে আমার আসলে কী লাভ হবে? আমি ঠিক কী শিখব এখানে?",
+        a: "এখানে আপনি Fundamental English শিখবেন, যা সঠিক ইংরেজি লেখা এবং কথা বলার মূল ভিত্তি। Gamlish আগে থেকেই চালু ছিল, এখন আমরা নতুন ভার্সনে পুরো কোর্সটি আরও সহজ আর গোছানোভাবে নতুন করে সাজাচ্ছি। Subject থেকে শুরু করে Voice আর Narration পর্যন্ত দরকারি সব গ্রামার টপিক 21টি Level-এ সহজ থেকে কঠিন করে সাজানো হচ্ছে। নতুন ভার্সনে এখন Level 1 খোলা আছে, বাকি Level তৈরি হলেই একে একে যোগ হচ্ছে। ইনশাআল্লাহ ভবিষ্যতে Speaking, Writing, Reading, Listening আর Vocabulary-ও আসবে।",
       },
       {
-        q: "এটা কি IELTS প্রস্তুতি?",
-        a: "না। Gamlish সরাসরি IELTS Reading, Listening, Speaking বা Writing band শেখায় না। IELTS শুরু করার আগে যে শক্ত ভিত্তি দরকার, সেটাই আমরা শেখাই: নির্ভুল বাক্য, সঠিক tense, আর নিজের ভুল নিজে ধরার ক্ষমতা। আপনি যদি এখনো একটি সাধারণ ইংরেজি বাক্য লিখতে গিয়ে থমকে যান, আগে Gamlish করুন। IELTS কোচিং পরে।",
+        q: "আমার ইংরেজি একদম দুর্বল, গ্রামার ভয় পাই। আমি কি পারব?",
+        a: "অবশ্যই পারবেন। গেইমটি একদম বেসিক থেকেই শুরু হয়েছে, তাই ভয় পাওয়ার কিছু নেই। Level 1-এ Subject, Number, Person এবং Word Order-এর মতো সহজ বিষয়গুলো সহজ বাংলায় বোঝানো হয়। প্রতিটি লেসনের পর গেইম খেলে প্র্যাকটিস করবেন এবং ভুল হলে সাথে সাথে কারণ জানতে পারবেন।",
       },
       {
-        q: "এটা কি Spoken English ক্লাস?",
-        a: "না। এখানে লাইভ শিক্ষক, ভয়েস কল বা স্পিকিং প্র্যাকটিস নেই। ফোকাস একটাই: লেখার ইংরেজি। চাকরির আবেদন, ইমেইল, অ্যাসাইনমেন্ট বা দৈনন্দিন লেখায় সঠিক বাক্য তৈরি করতে পারবেন। কথা বলতে শিখতে চাইলে সেটা এই কোর্সের পরের ধাপ। Spoken-এর আগেও এই ভিত্তিটা লাগে।",
+        q: "ইউটিউবে ফ্রি ভিডিও বা ChatGPT তো আছেই, তাহলে Gamlish কেন আলাদা?",
+        a: "ইউটিউবে হাজারো ভিডিও বা ChatGPT-তে সব উত্তর থাকলেও, কোথা থেকে শেখা শুরু করবেন তা বোঝা কঠিন। Gamlish-এ আপনি হারিয়ে যাবেন না। এখানে Level-গুলো একদম সহজ থেকে কঠিনে ধাপে ধাপে সাজানো। প্রতিটি টপিকে আপনি লেসন পড়বেন, গেইমে প্র্যাকটিস করবেন এবং টেস্ট দিয়ে পরের ধাপে যাবেন।",
       },
       {
-        q: "আমার ইংরেজি খুব দুর্বল। আমি কি শুরু করতে পারব?",
-        a: "হ্যাঁ। Gamlish তৈরি হয়েছে একেবারে শূন্য থেকে শুরু করা বাংলাভাষী শিক্ষার্থীদের জন্য। প্রথম ক্যাম্পে আপনি শিখবেন বাংলা আর ইংরেজি বাক্যের word order-এর ফারাক, Subject-Verb, Be verb, Article এবং Preposition। কঠিন ইংরেজি সংজ্ঞা দিয়ে শুরু হয় না। সহজ বাংলায় বোঝানো হয়, তারপর গেইমে প্র্যাকটিস করানো হয়।",
+        q: "এটা কি Spoken English বা IELTS কোর্স?",
+        a: "না, এটি সরাসরি কোনো Spoken English বা IELTS কোর্স নয়। এখানে কোনো লাইভ ক্লাস বা স্পিকিং প্র্যাকটিস নেই। তবে স্পিকিং বা IELTS শুরু করার আগে নির্ভুল বাক্য তৈরির যে শক্ত গ্রামার ভিত্তি আপনার দরকার, Gamlish ঠিক সেটাই তৈরি করে দেবে।",
       },
       {
-        q: "প্রতিদিন কত সময় দিতে হবে?",
-        a: "এটা আপনার টার্গেটের উপর নির্ভর করে। 45 দিনের অ্যাক্সেসের মধ্যে জার্নিটা শেষ করতে চাইলে প্রতিদিন প্রায় 45 থেকে 60 মিনিট দিন। আরামে 3 থেকে 4 মাস ধরে শিখতে চাইলে প্রতিদিন কম সময় দিয়েও এগোতে পারবেন। কোনো ফিক্সড ক্লাসের সময় নেই। মোবাইল বা কম্পিউটার থেকে নিজের সুবিধামতো খেলতে পারবেন।",
+        q: "প্রতিদিন কত সময় দিতে হবে? অ্যাক্সেস কতদিনের?",
+        a: "কোনো নির্দিষ্ট ক্লাসের সময় নেই। মোবাইল বা কম্পিউটার থেকে নিজের সুবিধামতো শিখবেন, প্রতিদিন 45 থেকে 60 মিনিট দিলে ভালোভাবে এগোবেন। সাধারণ অ্যাক্সেস 45 দিনের।",
+        timed: {
+          text: "20 November রাত 11:59-এর মধ্যে যুক্ত হলে Double Duration অফারে একই দামে পাবেন 90 দিন, 20 November থেকে 18 February 2027 পর্যন্ত।",
+          endsAt: DOUBLE_DURATION_ENDS_AT,
+        },
       },
       {
-        q: "পেমেন্ট করার আগে কি চেষ্টা করে দেখা যাবে?",
-        a: "হ্যাঁ। আগে লেভেল 1 ফ্রি খেলুন। অ্যাকাউন্ট খুলে Level 1 শুরু করলেই বোঝা যাবে গেইমটা কেমন, আর শেখার ধরন আপনার সাথে মিলবে কি না। শুধু প্রথম লেভেল ফ্রি। পছন্দ হলে পুরো 45 দিনের জার্নি আনলক করতে পারবেন।",
-      },
-      {
-        q: "সার্টিফিকেট কি পাওয়া যাবে?",
-        a: "হ্যাঁ। 21টি লেভেল শেষ করলে আপনি Fundamental English-এর অফিসিয়াল সার্টিফিকেটের জন্য আবেদন করতে পারবেন। সার্টিফিকেটটা বোনাস। আসল জিনিস হলো, সার্টিফিকেট নেওয়ার আগে আপনি নিজে সঠিক ইংরেজি বাক্য লিখতে পারবেন কি না, সেটা পরীক্ষায় প্রমাণ করতে হবে।",
+        q: "টাকা দেওয়ার আগে ফ্রিতে দেখা যাবে? খরচ কত?",
+        a: `হ্যাঁ। সাইন-আপ ছাড়াই প্রথম 3টি গেম খেলতে পারবেন। Google দিয়ে সাইন-ইন করলে Subject, Number আর Person-এর প্রথম গেম পর্যন্ত ফ্রি। পুরো গেমের দাম ${TEST_LANDING_LIST_PRICE}, bKash বা ব্যাংক ট্রান্সফারে (NPSB) দিতে পারবেন।`,
+        timed: {
+          text: "31 December 2026-এর মধ্যে যুক্ত হলে প্রোফাইলে পাবেন Legacy Learner ব্যাজ।",
+          endsAt: LEGACY_BADGE_ENDS_AT,
+        },
       },
     ],
   },
   en: {
     testBanner: "",
-    navPrimary: "Start free trial",
-    navDemo: "Start free trial",
-    navHow: "How you learn",
+    navPrimary: "Play now, free",
+    navDemo: "Play now, free",
+    navFaq: "FAQ",
     eyebrow: "Gamlish · The Game of English",
     headlineLine1: "Play games,",
     headlineLine2: "learn English!",
@@ -412,7 +267,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     priceSave: `Save ${TEST_LANDING_SAVE_PRICE}`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
     priceMeta: "45 days · 21 levels",
-    ctaPrimary: "Start free trial",
+    ctaPrimary: "Play now, free",
+    ctaTrust: "Start playing without signing up. No payment needed.",
     heroCompareAlt:
       "Your English without Gamlish stands on a weak foundation. With Gamlish, the same English stands on a strong foundation.",
     heroFoundationLabel: "Gamlish works here",
@@ -420,8 +276,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "Weak foundation",
     heroCompareWithTitle: "With Gamlish",
     heroCompareWithSub: "Strong foundation",
-    stickyPrimary: "Start free trial",
-    stickySecondary: "Start free trial",
+    stickyPrimary: "Play now, free",
+    stickySecondary: "Play now, free",
     compareEyebrow: "Why Gamlish",
     compareTitle: "Traditional English learning vs Gamlish",
     compareOld: "Old way",
@@ -448,122 +304,6 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
         neu: "Write, get instant correction, take exams, earn a certificate",
       },
     ],
-    campsEyebrow: "What you will learn",
-    campsTitle: "What will you be able to do after 21 levels?",
-    campsSub:
-      "Not a syllabus dump. 4 camps, 21 levels. Each camp makes your English foundation stronger.",
-    campFreeNote: "Level 1 is free",
-    campStartHere: "Start here",
-    campNextStep: "Next step",
-    campPlayCta: "Play Level 1 free",
-    camps: [
-      {
-        badge: "Camp 1",
-        title: "Sentence foundation",
-        body: "You will write a correct one-line English sentence. You will see how Bangla and English word order differ, then use subject, verb, Be verb, articles, and prepositions the right way.",
-        chips: [
-          "Word order",
-          "Subject / Verb",
-          "Be verb",
-          "Article",
-          "Preposition",
-        ],
-      },
-      {
-        badge: "Camp 2",
-        title: "Actions and questions",
-        body: "You will say no, ask questions, and write everyday sentences in the simple tenses. Verb forms will stop feeling random.",
-        chips: ["Verb forms", "Simple tenses", "Negatives", "Questions"],
-      },
-      {
-        badge: "Camp 3",
-        title: "Time, used correctly",
-        body: "You will choose the right tense for the situation. Continuous and perfect tenses become tools, not formulas to memorize.",
-        chips: [
-          "Continuous",
-          "Perfect",
-          "When to use which tense",
-          "Tense differences",
-        ],
-      },
-      {
-        badge: "Camp 4",
-        title: "Real English",
-        body: "You will write voice, narration, and longer sentences. Then you take the final exam and can apply for the Fundamental English certificate.",
-        chips: [
-          "Perfect continuous",
-          "Active / Passive",
-          "Direct / Indirect",
-          "Simple-complex-compound",
-        ],
-      },
-    ],
-    howEyebrow: "Level loop",
-    howTitle: "Learn. Play. Unlock.",
-    howIntro:
-      "No long lectures. Every level is the same game loop: a short lesson, then play, then an exam. Pass, and the next level opens.",
-    howLoopHint: "Repeat this loop 21 times to finish the journey",
-    howSteps: [
-      {
-        stage: "Lesson",
-        title: "A short lesson",
-        hook: "One rule at a time. In simple Bangla.",
-        points: [
-          "Short video + clear text",
-          "No heavy grammar definitions",
-          "Bangla vs English word order",
-        ],
-        reward: "1 concept",
-      },
-      {
-        stage: "Play",
-        title: "Practice in the game",
-        hook: "Write. Get instant correction.",
-        points: [
-          "Build sentences, fill the gaps",
-          "Correct answers earn XP",
-          "Wrong answers show why, right away",
-        ],
-        reward: "+10 XP",
-      },
-      {
-        stage: "Unlock",
-        title: "Exam, then unlock",
-        hook: "Pass, and the next level opens.",
-        points: [
-          "Prove it in a camp exam",
-          "21 levels on one path",
-          "Certificate at the end",
-        ],
-        reward: "Next level",
-      },
-    ],
-    howLessonMock: {
-      mission: "Level 04",
-      topic: "Be verb",
-      duration: "90 seconds",
-      bangla: "আমি একজন ছাত্র।",
-      english: "I am a student.",
-    },
-    howPlayDemo: {
-      eyebrow: "Play now",
-      prompt: "Which word is the Subject?",
-      sentence: "I am a student.",
-      options: ["am", "student", "I"],
-      correctAnswer: "I",
-      wrongHint: "Who is doing the action? That is the Subject.",
-      winTitle: "Nice! +10 XP",
-      winBody: "Wrong answers get instant correction. That is the game.",
-      tryAgain: "Try again",
-    },
-    howUnlockMock: {
-      exam: "Camp 1 Exam",
-      score: "8/10",
-      pass: "Pass",
-      next: "Level 06 unlocked",
-    },
-    howFoot:
-      "Play Level 1 free and feel this loop yourself. If it fits, unlock the full 45-day journey.",
     storiesEyebrow: "Learner stories",
     storiesTitle: "They finished. Your turn is next.",
     storiesSub:
@@ -571,16 +311,18 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     playingNowEyebrow: "Playing now",
     playingNowTitle: "A few voices from inside the journey",
     playingNowSub:
-      "Habib, Salman and Abbas are the graduates above. These learners are still in the levels. Selected real feedback.",
+      "Habib, Salman, Abbas and Ambia are the graduates above. These learners are still in the levels. Selected real feedback.",
     playingNowLive: "Live",
     playingNowHook: `They are playing now. Join today for ${TEST_LANDING_OFFER_PRICE}.`,
     playingNowPrev: "Previous voice",
     playingNowNext: "Next voice",
     playingNowMissions: "levels",
+    playingNowReadMore: "Read more",
+    playingNowReadLess: "Show less",
     graduatesEyebrow: "Graduates",
     graduatesTitle: "They finished Fundamental English",
     graduatesSub:
-      "Three real learners. Their graduation cards, full names, and a short message to the next student.",
+      "Real learners. Their graduation cards, full names, and a short message to the next student.",
     graduatesSeeMore: "Read the story",
     graduatesMessage: "A word for you",
     graduatesBefore: "Before",
@@ -609,36 +351,40 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     offerRisk:
       "No hidden fee. Pay with bKash. 45-day access, not lifetime.",
     offerCta: "Play Level 1 free",
-    footerCtaTitle: "Play Level 1 free first",
+    footerCtaTitle: "Your first 3 games are free, no sign-up",
     faqTitle: "Frequently asked questions",
     faq: [
       {
-        q: "What is Gamlish? What will I learn?",
-        a: "Gamlish is a game-based English learning website. It is not an IELTS course and not a spoken English class. You learn Fundamental English: grammar, sentence building, and how to turn your Bangla thoughts into a correct English sentence. The journey is 4 camps and 21 levels. You start from the basics and finish with voice, narration, and longer sentences.",
+        q: "What will I actually gain from Gamlish? What exactly will I learn?",
+        a: "You learn Fundamental English, the base for writing and speaking English correctly. Gamlish has been running for a while, and we are now rebuilding the whole course as a new version that is simpler and better organised. All the important grammar topics, from Subject to Voice and Narration, are being arranged from easy to hard across 21 levels. In the new version, Level 1 is open now, and the other levels are added as we finish them. In sha Allah, speaking, writing, reading, listening and vocabulary will come later.",
       },
       {
-        q: "Is this IELTS preparation?",
-        a: "No. Gamlish does not teach IELTS reading, listening, speaking, or writing band scores. It builds the foundation you need before IELTS: correct sentences, the right tense, and the ability to catch your own mistakes. If you still freeze on a simple English sentence, do Gamlish first. IELTS coaching comes after.",
+        q: "My English is very weak and grammar scares me. Can I do this?",
+        a: "Absolutely. The game starts from the absolute basics, so there is nothing to fear. In Level 1, we explain simple topics like Subject, Number, Person, and Word Order in easy Bangla. After each lesson, you practise by playing a game and instantly see the reason for any mistake.",
       },
       {
-        q: "Is this a spoken English class?",
-        a: "No. There is no live teacher, voice call, or speaking practice. The focus is written English. You will be able to write correct sentences for job applications, emails, assignments, and everyday writing. Speaking is the next step after this. You still need this foundation before spoken class.",
+        q: "There are free YouTube videos and ChatGPT, so why is Gamlish different?",
+        a: "YouTube has lots of videos and ChatGPT can give answers, but finding a proper step-by-step learning path is hard. On Gamlish, you will never feel lost. The levels are arranged step by step from easy to hard. You read a lesson, practise in a game, and take a test to unlock the next step.",
       },
       {
-        q: "My English is very weak. Can I start?",
-        a: "Yes. Gamlish is built for Bangla-speaking beginners who are starting from zero. Camp 1 teaches the difference between Bangla and English word order, then subject-verb, Be verbs, articles, and prepositions. We do not start with hard English definitions. We explain in simple Bangla, then you practice in the game.",
+        q: "Is this a spoken English or IELTS course?",
+        a: "No, this is not a direct spoken English or IELTS course. There are no live classes or speaking practice sessions. But Gamlish builds the strong grammar foundation you need to make correct sentences before you start speaking practice or IELTS preparation.",
       },
       {
-        q: "How much time do I need every day?",
-        a: "It depends on your goal. If you want to finish inside the 45-day access window, plan about 45 to 60 minutes a day. If you prefer 3 to 4 months, you can spend less time each day and still move forward. There is no fixed class time. You can play on a phone or a computer when it suits you.",
+        q: "How much time do I need each day? How long is access?",
+        a: "There is no fixed class time. Learn on your phone or computer whenever it suits you. 45 to 60 minutes a day keeps you moving well. Standard access is 45 days.",
+        timed: {
+          text: "Join by 11:59 PM on 20 November and the Double Duration offer gives you 90 days for the same price, from 20 November to 18 February 2027.",
+          endsAt: DOUBLE_DURATION_ENDS_AT,
+        },
       },
       {
-        q: "Can I try before I pay?",
-        a: "Yes. Play Level 1 free first. Create an account, start Level 1, and feel how the game teaches. Only Level 1 is free. If you like it, you can unlock the full 45-day journey.",
-      },
-      {
-        q: "Will I get a certificate?",
-        a: "Yes. After you finish all 21 levels you can apply for the official Fundamental English certificate. The certificate is a bonus. The real test is whether you can write a correct English sentence yourself before you claim it.",
+        q: "Can I try it free before paying? How much does it cost?",
+        a: `Yes. You can play the first 3 games without signing up. Sign in with Google and everything up to Subject, Number and the first Person game is free. The full game costs ${TEST_LANDING_LIST_PRICE}, paid by bKash or bank transfer (NPSB).`,
+        timed: {
+          text: "Join by 31 December 2026 and you also get the Legacy Learner badge on your profile.",
+          endsAt: LEGACY_BADGE_ENDS_AT,
+        },
       },
     ],
   },

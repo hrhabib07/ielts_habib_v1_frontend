@@ -44,7 +44,7 @@ type Role = "s" | "o" | "v";
 
 const ROLE_TAG: Record<Role, string> = { s: M1_UI.roleSubject, v: M1_UI.roleVerb, o: M1_UI.roleObject };
 const ROLE_TONE: Record<Role, string> = {
-  s: "border-sky-400 border-b-sky-500 bg-sky-50 text-sky-900",
+  s: "border-accent/70 border-b-accent bg-accent/5 text-accent",
   v: "border-emerald-400 border-b-emerald-500 bg-emerald-50 text-emerald-900",
   o: "border-orange-300 border-b-orange-400 bg-orange-50 text-orange-900",
 };
@@ -123,7 +123,7 @@ export function BanglaFlipGame({ item, itemKey, lang, status, onReady, onAnswer 
                 className={cn(
                   EN_FACE,
                   "relative rounded-2xl border-2 border-b-4 px-3 py-2 text-lg font-black transition-colors sm:px-4 sm:text-2xl",
-                  done ? "border-sky-600 border-b-sky-700 bg-sky-500 text-white" : ROLE_TONE[role],
+                  done ? "border-accent border-b-primary bg-accent text-white" : ROLE_TONE[role],
                   lifted === role && "-translate-y-2 ring-4 ring-emerald-200",
                 )}
               >
@@ -319,7 +319,7 @@ export function SentenceDoctorGame({
               className={cn(
                 EN_FACE,
                 "text-xl font-black leading-snug sm:text-2xl",
-                done ? "text-sky-700" : "text-slate-900 underline decoration-rose-400 decoration-wavy decoration-2 underline-offset-4",
+                done ? "text-accent" : "text-slate-900 underline decoration-rose-400 decoration-wavy decoration-2 underline-offset-4",
               )}
             >
               {done ? item.cure : item.sick}
@@ -428,7 +428,7 @@ export function MyDiaryGame({ item, itemKey, lang, status, attempt, onReady, onA
         </div>
         <div className="mt-4">
           {done ? (
-            <p className={cn(EN_FACE, "rounded-2xl bg-sky-500 px-4 py-2.5 text-lg font-black text-white sm:text-2xl")}>
+            <p className={cn(EN_FACE, "rounded-2xl bg-accent px-4 py-2.5 text-lg font-black text-white sm:text-2xl")}>
               {status === "correct" ? (item.accepted.find((a) => normalizeTyped(a) === normalizeTyped(text)) ?? item.accepted[0]) : item.accepted[0]}
             </p>
           ) : (

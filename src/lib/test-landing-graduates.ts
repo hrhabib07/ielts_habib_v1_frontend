@@ -71,6 +71,25 @@ export const TEST_LANDING_GRADUATES: readonly TestLandingGraduate[] = [
     cardQuoteBn:
       "বেসিক থেকে ইংরেজি শিখতে চাইলে আপনার Gamlish লাগবে।",
   },
+  {
+    id: "manzurul-ambia",
+    fullName: "Sheik Md Manzurul Ambia",
+    district: "Sylhet",
+    imageUrl:
+      "https://res.cloudinary.com/daqvhd097/image/upload/v1794292147/Ambia_bhai_s_success_story_post_facebook_rbno1j.png",
+    certificateId: "GML-CERT-FE-2026-SQPEAS",
+    username: "manzurulambia",
+    storyBefore:
+      "My concepts were clear, but I often made mistakes in small details.",
+    storyJourney:
+      "I enjoyed the platform, and I made my fundamentals even stronger.",
+    storyTransformation:
+      "I revisited all the fundamentals and fixed the small mistakes I used to make.",
+    storyMessage:
+      "Gamlish covers every area of English. If you want to build a strong English base, Gamlish is the best option.",
+    cardQuoteBn:
+      "শক্ত ইংরেজি বেস বানাতে চাইলে Gamlish সেরা অপশন।",
+  },
 ];
 
 export function excerptGraduateMessage(

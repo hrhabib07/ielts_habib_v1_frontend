@@ -1,12 +1,17 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, BookOpen, Lock, PartyPopper, Sparkles } from "lucide-react";
 import { GuideAvatarPreview } from "@/src/features/chat-lesson/components/ChatPrimitives";
 import { useLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
 import { LANG_FACE, pick } from "@/src/features/chat-lesson/lib/uiCopy";
-import { LearnerAvatarImage } from "@/src/features/learner/components/LearnerAvatar";
+import { LearnerAvatarButton } from "@/src/features/learner/components/LearnerAvatar";
+import { LearnerProfileHost } from "@/src/features/learner/components/LearnerProfileCard";
+import { LearnerProvider, type LearnerActions } from "@/src/features/learner/LearnerContext";
+import { learnerProgressOf } from "@/src/features/learner/lib/learnerProgress";
+import { resizePhoto } from "@/src/features/learner/lib/resizePhoto";
 import { NextLevelSoon } from "@/src/features/learner/components/NextLevelSoon";
 import { HOME_UI } from "@/src/features/learner/lib/copy";
 import { toLearner } from "@/src/features/learner/lib/fromApi";
@@ -17,9 +22,14 @@ import {
   LEVEL_ONE_TOPICS,
   UPCOMING_CAMPS,
 } from "@/src/features/learner/lib/levels";
-import { personalizeText } from "@/src/features/learner/lib/personalize";
+import { personalizeText, type Learner } from "@/src/features/learner/lib/personalize";
 import { MISSION_BASE } from "@/src/features/learner/lib/routes";
-import type { ChatMissionState } from "@/src/lib/api/chatMission";
+import {
+  saveChatMissionProfile,
+  uploadChatMissionPhoto,
+  type ChatMissionLearner,
+  type ChatMissionState,
+} from "@/src/lib/api/chatMission";
 import { cn } from "@/lib/utils";
 
 type EnabledState = Extract<ChatMissionState, { enabled: true }>;
@@ -66,11 +76,33 @@ export function LevelsHomeSkeleton() {
   );
 }
 
+/** The /player home. The avatar opens the same profile card as in the game, with editing. */
 export function LevelsHome({ state }: { state: EnabledState }) {
+  const [saved, setSaved] = useState<ChatMissionLearner | null>(null);
+  const learnerData = saved ?? state.learner;
+  const learner = useMemo(() => toLearner(learnerData), [learnerData]);
+  const progress = useMemo(() => learnerProgressOf(state), [state]);
+  const actions = useMemo<LearnerActions>(
+    () => ({
+      saveProfile: async (input) => setSaved(await saveChatMissionProfile(input)),
+      uploadPhoto: async (file) => setSaved(await uploadChatMissionPhoto(await resizePhoto(file))),
+    }),
+    [],
+  );
+
+  if (!learner) return <LevelsHomeView state={state} learner={null} />;
+  return (
+    <LearnerProvider learner={learner} actions={actions} progress={progress}>
+      <LevelsHomeView state={state} learner={learner} />
+      <LearnerProfileHost />
+    </LearnerProvider>
+  );
+}
+
+function LevelsHomeView({ state, learner }: { state: EnabledState; learner: Learner | null }) {
   const lang = useLessonLanguage();
   const face = LANG_FACE[lang];
   const reduceMotion = useReducedMotion();
-  const learner = toLearner(state.learner);
   const { done, next } = levelOneProgress(state);
   const total = LEVEL_ONE_TOPICS.length;
   const pct = Math.round((done / total) * 100);
@@ -88,7 +120,7 @@ export function LevelsHome({ state }: { state: EnabledState }) {
     <div className="min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-sky-50 via-white to-white">
       <div className="mx-auto w-full max-w-md px-4 pb-16 pt-5">
         <motion.header className="flex items-start gap-3" {...enter(0)}>
-          {learner ? <LearnerAvatarImage learner={learner} size="md" /> : <GuideAvatarPreview />}
+          {learner ? <LearnerAvatarButton size="md" className="mt-0" /> : <GuideAvatarPreview />}
           <div className="min-w-0 flex-1 pt-0.5">
             <h1 className={cn(face, "text-[1.35rem] font-black leading-snug text-slate-900")}>{pick(greeting, lang)}</h1>
             <p className={cn(face, "mt-0.5 text-sm font-semibold leading-snug text-slate-500")}>{pick(HOME_UI.sub, lang)}</p>

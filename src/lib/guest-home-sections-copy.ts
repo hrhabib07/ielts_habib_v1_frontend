@@ -95,7 +95,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       whyNow:
         "You can start today. Build the English skill you actually need.",
       ctaPrimary: "You can do this too · Start now",
-      ctaSecondary: "Play Free Demo",
+      ctaSecondary: "Play Free Games",
     },
     problemBadge: "The Real Problem",
     problemTitle: "Why do we still freeze when writing a simple English sentence?",
@@ -294,7 +294,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       whyNow:
         "আজই শুরু করতে পারেন। যে ইংরেজি দক্ষতা আপনার সত্যিই দরকার, সেটাই গড়ুন।",
       ctaPrimary: "আপনিও পারবেন · এখনই শুরু করুন",
-      ctaSecondary: "ফ্রি ডেমো খেলুন",
+      ctaSecondary: "ফ্রি গেম খেলুন",
     },
     problemBadge: "আসল সমস্যা",
     problemTitle:

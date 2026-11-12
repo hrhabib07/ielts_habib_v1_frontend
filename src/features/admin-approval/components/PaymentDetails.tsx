@@ -37,8 +37,13 @@ export function PaymentDetails({ request }: { request: SubscriptionRequestItem }
           {isBank ? "Bank (NPSB)" : "bKash"}
         </span>
         {request.offerCohort === "v2_early" ? (
+          <span className="rounded-full bg-amber-400/20 px-2 py-0.5 font-semibold text-amber-800">
+            Double Duration · until 18 Feb 2027 · Legacy Learner
+          </span>
+        ) : null}
+        {request.offerCohort === "v2_standard" ? (
           <span className="rounded-full bg-indigo-500/15 px-2 py-0.5 font-semibold text-indigo-700">
-            v2 · {request.durationDaysApplied ?? 90} days
+            v2 · {request.durationDaysApplied ?? 45} days from approval
           </span>
         ) : null}
       </div>

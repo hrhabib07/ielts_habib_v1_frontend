@@ -33,13 +33,13 @@ import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
 import { shouldUseGuestLandingNav } from "@/src/lib/guest-nav-paths";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
-import { LanguageSwitch } from "@/src/features/chat-lesson/components/LessonChrome";
-import { setLessonLanguage, useLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
+import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 
 import {
   ENABLE_READING,
   PRIMARY_STUDENT_HREF,
   PRIMARY_STUDENT_LABEL,
+  SHOW_XP_LEADERBOARD,
 } from "@/src/lib/platform-config";
 
 const STUDENT_LINKS_READING = [
@@ -53,7 +53,9 @@ const STUDENT_LINKS_PLAYER = [
   { href: "/profile", labelKey: "myProfile" as const },
 ] as const;
 
-const STUDENT_LINKS = ENABLE_READING ? STUDENT_LINKS_READING : STUDENT_LINKS_PLAYER;
+const STUDENT_LINKS = (ENABLE_READING ? STUDENT_LINKS_READING : STUDENT_LINKS_PLAYER).filter(
+  (link) => SHOW_XP_LEADERBOARD || link.href !== "/leaderboard",
+);
 
 export function SiteNavBar(props: {
   initialUser?: CurrentUser | null;
@@ -62,7 +64,6 @@ export function SiteNavBar(props: {
 }) {
   const { initialUser = null, className, embedded = false } = props;
   const pathname = usePathname() ?? "";
-  const lessonLang = useLessonLanguage();
   const [clientUser, setClientUser] = useState<{ role: UserRole; userId: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -259,7 +260,7 @@ export function SiteNavBar(props: {
             navBrandCompact && "gap-1.5",
           )}
         >
-          {isPlayerArea ? <LanguageSwitch lang={lessonLang} onChange={setLessonLanguage} /> : null}
+          <UiLanguageToggle variant="segmented" className="hidden lg:inline-flex" />
 
           {isStudent && streak && (
             <div

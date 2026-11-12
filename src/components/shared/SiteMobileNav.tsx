@@ -13,27 +13,30 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { readingPathPremium } from "@/src/lib/readingPathPremium";
 import { TOTAL_READING_PATH_LEVELS } from "@/src/lib/readingPathZones";
 import { logout } from "@/src/lib/auth";
 import type { CurrentUser } from "@/src/lib/auth-server";
 import type { UserRole } from "@/src/lib/constants";
-import { ENABLE_READING } from "@/src/lib/platform-config";
+import { ENABLE_READING, SHOW_XP_LEADERBOARD } from "@/src/lib/platform-config";
 import type { SiteShellCopy } from "@/src/lib/site-shell-copy";
 import { cn } from "@/lib/utils";
 
 type NavUser = CurrentUser | { role: UserRole; userId: string } | null;
 
-const STUDENT_LINKS = ENABLE_READING
-  ? ([
-      { href: "/profile/reading", labelKey: "reading" as const },
-      { href: "/profile", labelKey: "myProfile" as const },
-    ] as const)
-  : ([
-      { href: "/player", labelKey: "play" as const },
-      { href: "/leaderboard", labelKey: "leaderboard" as const },
-      { href: "/profile", labelKey: "myProfile" as const },
-    ] as const);
+const STUDENT_LINKS = (
+  ENABLE_READING
+    ? ([
+        { href: "/profile/reading", labelKey: "reading" as const },
+        { href: "/profile", labelKey: "myProfile" as const },
+      ] as const)
+    : ([
+        { href: "/player", labelKey: "play" as const },
+        { href: "/leaderboard", labelKey: "leaderboard" as const },
+        { href: "/profile", labelKey: "myProfile" as const },
+      ] as const)
+).filter((link) => SHOW_XP_LEADERBOARD || link.href !== "/leaderboard");
 
 function mobileLinkClass(active: boolean) {
   return cn(
@@ -248,6 +251,11 @@ export function SiteMobileNav(props: {
                 </button>
               </div>
             )}
+
+            <div className="mt-4 space-y-2 border-t border-border/60 px-1 pt-4">
+              <p className="text-xs font-semibold text-muted-foreground">{shell.language}</p>
+              <UiLanguageToggle variant="segmented" className="w-full justify-between [&>button]:flex-1" />
+            </div>
 
             {!user && (
               <div className="mt-6 space-y-3 border-t border-border/60 pt-6">

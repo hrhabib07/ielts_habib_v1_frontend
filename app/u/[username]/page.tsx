@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getApiBaseUrl } from "@/src/lib/api-base-url";
 import { getBearerTokenFromCookie } from "@/src/lib/auth-server";
 import type { GamlishPublicProfile } from "@/src/lib/api/gamlish";
-import { GamlishProfileContent } from "@/src/components/public-profile/GamlishProfileContent";
+import { LearnerPublicProfile } from "@/src/components/public-profile/LearnerPublicProfile";
 
 async function fetchGamlishProfile(
   handle: string,
@@ -39,8 +39,9 @@ export async function generateMetadata({
   }
   const { identity } = profile;
   const handle = identity.username ?? profile.canonicalHandle;
+  const name = profile.learner?.nicknameEn ?? identity.displayName;
   return {
-    title: `${identity.displayName} (@${handle}) · Gamlish`,
+    title: `${name} (@${handle}) · Gamlish`,
     description: identity.isFoundingMember
       ? `${identity.displayName} is a Gamlish Founding Member  -  Founder #${identity.founderNumber}.`
       : `${identity.displayName}'s Gamlish learning profile.`,
@@ -65,5 +66,5 @@ export default async function PublicProfilePage({
     redirect(`/u/${profile.canonicalHandle}`);
   }
 
-  return <GamlishProfileContent initialProfile={profile} handle={handle} />;
+  return <LearnerPublicProfile initialProfile={profile} handle={handle} />;
 }

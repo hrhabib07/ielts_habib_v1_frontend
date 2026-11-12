@@ -6,20 +6,21 @@ import { usePathname, useRouter } from "next/navigation";
 import { MissionStoreProvider, type MissionStore } from "@/src/features/chat-lesson/hooks/useMissionStore";
 import type { StepResult } from "@/src/features/chat-lesson/hooks/useLabProgress";
 import { useLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
-import { FINAL_TEST_NODE_ID, LESSON_STEPS, LEVEL_1 } from "@/src/features/chat-lesson/content/level1";
 import { LANG_FACE, pick } from "@/src/features/chat-lesson/lib/uiCopy";
 import { MISSION_1_FINAL_TEST } from "@/src/features/final-test/content/mission1FinalTest";
 import { FinalTestStoreProvider, type FinalTestStore } from "@/src/features/final-test/hooks/useFinalTestStore";
 import type { FinalTestResult } from "@/src/features/final-test/types";
 import { LearnerProvider, type LearnerActions, type LearnerProgress } from "@/src/features/learner/LearnerContext";
 import { LEARNER_UI } from "@/src/features/learner/lib/copy";
+import { learnerProgressOf } from "@/src/features/learner/lib/learnerProgress";
 import { toLearner } from "@/src/features/learner/lib/fromApi";
 import { readMissionState, writeMissionState } from "@/src/features/learner/lib/stateCache";
 import type { Learner } from "@/src/features/learner/lib/personalize";
 import { resizePhoto } from "@/src/features/learner/lib/resizePhoto";
-import { ALL_PLAYGROUNDS } from "@/src/features/playground/content";
 import { getDecodedTokenClient, hydrateAccessTokenFromCookie } from "@/src/lib/auth";
+import { clearGuestProgress, guestProgress } from "@/src/features/guest/guestProgress";
 import {
+  claimChatMissionGuestResults,
   getChatMissionState,
   saveChatMissionFinalTestAnswers,
   saveChatMissionProfile,
@@ -32,6 +33,7 @@ import {
   type ChatMissionProfileInput,
   type ChatMissionState,
 } from "@/src/lib/api/chatMission";
+import { PERSON_GAME_ID, PERSON_TASTE_ID } from "@/src/features/learner/lib/offer";
 import { UNLOCK_HREF } from "@/src/features/learner/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -48,21 +50,20 @@ export type MissionShellContext = {
   dismissPhotoPrompt: () => Promise<void>;
   paymentSubmitted: (latest: ChatMissionPaymentStatus | null) => void;
   freeClaimed: (freeAccessUntil: number) => void;
+  /** A playground the learner started as a guest: right after sign-up the map opens it at the next game. */
+  resumeStepId: string | null;
+  clearResume: () => void;
 };
 
 /** Only shown during onboarding, before the learner has told us their name. */
 const NOT_YET_KNOWN: Learner = {
   nicknameEn: "",
   nicknameBn: "",
-  addressAs: "bhaiya",
+  addressAs: null,
   district: null,
   country: null,
   photoSrc: null,
 };
-
-const LESSON_IDS = Object.keys(LESSON_STEPS);
-const LEVEL_NUMBER = Number(/\d+/.exec(LEVEL_1.id)?.[0] ?? 1);
-const GAME_IDS = ALL_PLAYGROUNDS.map((p) => p.id);
 
 /** Waits for a pause in typing before saving Final Test answers. */
 function createDebouncer(ms: number) {
@@ -91,7 +92,14 @@ function Centered({ children }: { children: ReactNode }) {
  * Logged-in shell for the new Mission 1: checks the rollout switch, loads the learner, and connects
  * progress, the Final Test and the profile to the server.
  */
-export function MissionShell({ children }: { children: (ctx: MissionShellContext) => ReactNode }) {
+export function MissionShell({
+  children,
+  fallback,
+}: {
+  children: (ctx: MissionShellContext) => ReactNode;
+  /** Shown instead of "Coming soon" when the new Mission 1 is not open for this account. */
+  fallback?: ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const lang = useLessonLanguage();
@@ -99,6 +107,7 @@ export function MissionShell({ children }: { children: (ctx: MissionShellContext
   const [state, setState] = useState<ChatMissionState | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [fresh, setFresh] = useState(false);
   const [retry, setRetry] = useState(0);
   const [answerSaver] = useState(() => createDebouncer(ANSWER_SAVE_DELAY_MS));
 
@@ -123,6 +132,7 @@ export function MissionShell({ children }: { children: (ctx: MissionShellContext
         if (!cancelled) {
           setState(data);
           setFailed(false);
+          setFresh(true);
         }
       } catch {
         if (!cancelled && !cached) setFailed(true);
@@ -136,6 +146,26 @@ export function MissionShell({ children }: { children: (ctx: MissionShellContext
   useEffect(() => {
     if (userId && state) writeMissionState(userId, state);
   }, [userId, state]);
+
+  const serverLoaded = fresh && state?.enabled === true;
+  const [resumeStepId, setResumeStepId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!serverLoaded) return;
+    const progress = guestProgress();
+    const partials = Object.fromEntries(Object.entries(progress).map(([id, p]) => [id, p.rounds]));
+    if (Object.keys(partials).length === 0) return;
+    clearGuestProgress();
+    void claimChatMissionGuestResults({ results: {}, partials })
+      .then((saved) => {
+        setState((current) =>
+          current?.enabled ? { ...current, results: saved.results, partials: saved.partials } : current,
+        );
+        const next = Object.keys(saved.partials).find((id) => !saved.results[id] && partials[id]);
+        if (next) setResumeStepId(next);
+      })
+      .catch(() => undefined);
+  }, [serverLoaded]);
+  const clearResume = useCallback(() => setResumeStepId(null), []);
 
   useEffect(() => () => answerSaver.cancel(), [answerSaver]);
 
@@ -187,6 +217,7 @@ export function MissionShell({ children }: { children: (ctx: MissionShellContext
         ...current,
         hasPaidAccess: true,
         earlyAdopter: true,
+        legacy: current.legacy?.state === "permanent" ? current.legacy : { state: "pending", deadline: freeAccessUntil },
         payment: { ...current.payment, latest: null, freeClaimable: false, freeAccessUntil },
       })),
     [patch],
@@ -198,16 +229,25 @@ export function MissionShell({ children }: { children: (ctx: MissionShellContext
     const results: Record<string, StepResult> = enabled.results;
     return {
       results,
+      partials: enabled.partials ?? {},
       unlockAll: false,
       testingTools: false,
       checkoutHref: UNLOCK_HREF,
       paymentPending: enabled.payment.latest?.status === "PENDING",
-      isPaywalled: (stepId) => !enabled.hasPaidAccess && !free.has(stepId),
+      isPaywalled: (stepId) => {
+        if (enabled.hasPaidAccess || free.has(stepId)) return false;
+        return stepId !== PERSON_GAME_ID || Boolean(enabled.results[PERSON_TASTE_ID]);
+      },
       saveResult: (stepId, score, max) => {
         patch((current) => {
+          const { [stepId]: finishedPartial, ...partials } = current.partials ?? {};
           const previous = current.results[stepId];
-          if (previous && previous.score >= score) return current;
-          return { ...current, results: { ...current.results, [stepId]: { score, max, completedAt: Date.now() } } };
+          if (previous && previous.score >= score) return finishedPartial ? { ...current, partials } : current;
+          return {
+            ...current,
+            partials,
+            results: { ...current.results, [stepId]: { score, max, completedAt: Date.now() } },
+          };
         });
         void saveChatMissionResult(stepId, score, max)
           .then((saved) => patch((current) => ({ ...current, results: saved })))
@@ -290,27 +330,7 @@ export function MissionShell({ children }: { children: (ctx: MissionShellContext
     };
   }, [enabled, patch, answerSaver]);
 
-  const progress = useMemo<LearnerProgress | null>(() => {
-    if (!enabled) return null;
-    const official = enabled.finalTest.official;
-    const stops = LEVEL_1.nodes;
-    const current = stops.findIndex((node) =>
-      node.id === FINAL_TEST_NODE_ID ? !official : !(node.stepId && enabled.results[node.stepId]),
-    );
-    const currentStop = current === -1 ? undefined : stops[current];
-    return {
-      level: {
-        number: LEVEL_NUMBER,
-        stop: currentStop ? { index: current + 1, total: stops.length, title: currentStop.title } : null,
-      },
-      lessonsDone: LESSON_IDS.filter((id) => enabled.results[id]).length,
-      lessonsTotal: LESSON_IDS.length,
-      gamesDone: GAME_IDS.filter((id) => enabled.results[id]).length,
-      gamesTotal: GAME_IDS.length,
-      finalTestScore: official ? { score: official.score, max: official.max } : null,
-      earlyAdopter: enabled.earlyAdopter,
-    };
-  }, [enabled]);
+  const progress = useMemo<LearnerProgress | null>(() => (enabled ? learnerProgressOf(enabled) : null), [enabled]);
 
   const actions = useMemo<LearnerActions>(() => ({ uploadPhoto, saveProfile: async (input) => void (await saveProfile(input)) }), [
     uploadPhoto,
@@ -341,6 +361,7 @@ export function MissionShell({ children }: { children: (ctx: MissionShellContext
   }
 
   if (!enabled || !missionStore || !finalTestStore) {
+    if (fallback && state.enabled === false) return fallback;
     return (
       <Centered>
         <h1 className={cn(face, "text-2xl font-black text-slate-900")}>{pick(LEARNER_UI.notOpenTitle, lang)}</h1>
@@ -360,6 +381,8 @@ export function MissionShell({ children }: { children: (ctx: MissionShellContext
     dismissPhotoPrompt,
     paymentSubmitted,
     freeClaimed,
+    resumeStepId,
+    clearResume,
   };
 
   return (

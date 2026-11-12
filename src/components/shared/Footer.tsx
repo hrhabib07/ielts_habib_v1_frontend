@@ -86,7 +86,7 @@ export function Footer({ initialUser = null }: FooterProps) {
               </li>
               <li>
                 <Link
-                  href="/#how-you-learn"
+                  href="/about"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {shell.howItWorks}

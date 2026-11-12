@@ -60,7 +60,7 @@ export function LessonHeader({
           aria-label="Questions answered"
         >
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"
+            className="h-full rounded-full bg-gradient-to-r from-accent to-emerald-500"
             initial={false}
             animate={{ width: `${Math.max(pct, 4)}%` }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -134,7 +134,7 @@ export function LanguageSwitch({
       aria-label={target.aria}
       title={target.aria}
       className={cn(
-        "flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-sky-700 shadow-sm ring-1 ring-sky-200 transition-colors hover:bg-sky-50 active:scale-95",
+        "flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-accent shadow-sm ring-1 ring-accent/20 transition-colors hover:bg-accent/5 active:scale-95",
         className,
       )}
     >
@@ -154,7 +154,7 @@ export type TrayAction = {
 };
 
 const TRAY_TONES: Record<TrayTone, string> = {
-  brand: "bg-sky-500 text-white border-sky-700 hover:bg-sky-500/90",
+  brand: "bg-accent text-white border-primary hover:bg-accent/90",
   success: "bg-emerald-500 text-white border-emerald-700 hover:bg-emerald-500/90",
   muted: "bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200/70 hover:text-slate-700",
 };

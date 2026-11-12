@@ -56,9 +56,9 @@ function SegmentedToggle({
 }) {
   const buttonClass = (code: UiLocale, active: boolean) =>
     cn(
-      "rounded-md px-2.5 py-1 transition-colors",
+      "rounded-full px-3 py-1.5 transition-colors",
       active
-        ? "bg-foreground text-background shadow-sm"
+        ? "bg-accent text-white shadow-sm"
         : "text-foreground/70 hover:text-foreground",
       code === "bn" && "font-bengali",
     );
@@ -80,9 +80,6 @@ function SegmentedToggle({
       >
         বাংলা
       </button>
-      <span className="select-none px-0.5 text-xs text-muted-foreground" aria-hidden>
-        |
-      </span>
       <button
         type="button"
         onClick={() => setLocale("en")}

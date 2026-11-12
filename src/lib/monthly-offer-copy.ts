@@ -21,18 +21,25 @@ export function lifetimePaidProofLine(locale: UiLocale): string {
 }
 
 /** Live registered players. Pass the real student count from /demo/stats. */
-export function playersPlayingProofLine(
+export function playersPlayingProofParts(
   registeredStudents: number | null | undefined,
   locale: UiLocale,
-): string {
+): { readonly lead: string; readonly rest: string } {
   const count = resolvePlayersPlayingCount(
     registeredStudents,
     PLAYERS_PLAYING_PROOF_FLOOR,
   );
-  const label = localizeDigits(count, locale);
   return locale === "bn"
-    ? `${label}+ জন শিক্ষার্থী ইতিমধ্যে জয়েন করেছে`
-    : `${count}+ students have already joined`;
+    ? { lead: `${localizeDigits(count, locale)}+ জন শিক্ষার্থী`, rest: "ইতিমধ্যে জয়েন করেছে" }
+    : { lead: `${count}+ students`, rest: "have already joined" };
+}
+
+export function playersPlayingProofLine(
+  registeredStudents: number | null | undefined,
+  locale: UiLocale,
+): string {
+  const { lead, rest } = playersPlayingProofParts(registeredStudents, locale);
+  return `${lead} ${rest}`;
 }
 
 export function monthLabelFromPricing(
@@ -65,11 +72,11 @@ export function monthlyOfferCopy(locale: UiLocale) {
         : "The best price for the first 100 is filling up.",
     closedTitle: (month: string | null) => {
       if (locale === "bn") {
-        return `${month ?? "এই"} মাসের প্রথম ${localizeDigits(100, locale)} জনের 290 টাকার অফার সম্পন্ন`;
+        return `${month ?? "এই"} মাসের প্রথম ${localizeDigits(100, locale)} জনের অফার সম্পন্ন`;
       }
       return month
-        ? `${month}'s first 100 at 290 BDT are complete`
-        : "This month's first 100 at 290 BDT are complete";
+        ? `${month}'s first-100 offer is complete`
+        : "This month's first-100 offer is complete";
     },
     closedBody: (offerLabel: string, listLabel: string) =>
       locale === "bn"

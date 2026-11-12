@@ -13,6 +13,7 @@ import {
 } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
 import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
+import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 
 export function GuestLandingHero() {
   const reduceMotion = useReducedMotion();
@@ -84,7 +85,7 @@ export function GuestLandingHero() {
               )}
               asChild
             >
-              <Link href="/demo">{copy.ctaPrimary}</Link>
+              <Link href={FREE_PLAY_HREF}>{copy.ctaPrimary}</Link>
             </Button>
             <p className="text-sm text-foreground/75">
               {copy.ctaPrimarySub}

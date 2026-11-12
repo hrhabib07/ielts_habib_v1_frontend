@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Trophy } from "lucide-react";
+import { SHOW_XP_LEADERBOARD } from "@/src/lib/platform-config";
 
 interface LeaderboardMissionNudgeProps {
   isVisible: boolean;
@@ -12,7 +13,11 @@ interface LeaderboardMissionNudgeProps {
  * Soft post-mission strip · never a blocking modal.
  * Shows when learner finished a mission but did not get a rank-climb sheet.
  */
-export function LeaderboardMissionNudge({
+export function LeaderboardMissionNudge(props: LeaderboardMissionNudgeProps) {
+  return SHOW_XP_LEADERBOARD ? <LeaderboardMissionNudgeView {...props} /> : null;
+}
+
+function LeaderboardMissionNudgeView({
   isVisible,
   rank,
 }: LeaderboardMissionNudgeProps) {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Crown, Trophy, Zap } from "lucide-react";
 import { getXpLeaderboard, type XpLeaderboardEntry } from "@/src/lib/api/xpLeaderboard";
+import { FREE_PLAY_HREF, SHOW_XP_LEADERBOARD } from "@/src/lib/platform-config";
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,10 @@ import { cn } from "@/lib/utils";
  * Guest FOMO strip · public top players + join CTA.
  */
 export function GuestLeaderboardTeaser() {
+  return SHOW_XP_LEADERBOARD ? <GuestLeaderboardTeaserView /> : null;
+}
+
+function GuestLeaderboardTeaserView() {
   const { locale } = useGuestLandingLocale();
   const bn = locale === "bn";
   const [rows, setRows] = useState<XpLeaderboardEntry[]>([]);
@@ -108,7 +113,7 @@ export function GuestLeaderboardTeaser() {
 
         <div className="mt-6 flex flex-col items-stretch gap-3">
           <Link
-            href="/demo"
+            href={FREE_PLAY_HREF}
             className={cn(
               "group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 py-3.5 text-sm font-black transition active:scale-[0.99]",
               LANDING_CTA_CLASS,

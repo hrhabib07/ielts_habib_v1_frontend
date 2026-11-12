@@ -8,20 +8,23 @@ import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson
 import type { AddressAs } from "@/src/lib/api/chatMission";
 import { LearnerAvatarImage } from "@/src/features/learner/components/LearnerAvatar";
 import { useLearnerContext, type LearnerActions, type LearnerProgress } from "@/src/features/learner/LearnerContext";
-import { EarlyAdopterV2Badge } from "@/src/components/profile/EarlyAdopterV2Badge";
-import { LEARNER_UI } from "@/src/features/learner/lib/copy";
+import { LegacyLearnerBadge } from "@/src/components/profile/LegacyLearnerBadge";
+import { LEARNER_UI, LEGACY_BADGE } from "@/src/features/learner/lib/copy";
+import { GUEST_UI } from "@/src/features/guest/copy";
 import { BD_DISTRICTS, districtLabel, NAME_BN_PATTERN, NAME_EN_PATTERN } from "@/src/features/learner/lib/districts";
 import { callName, personalizeText, type Learner } from "@/src/features/learner/lib/personalize";
 import { cn } from "@/lib/utils";
 
 const OUTSIDE = "__outside__";
+const NOT_SET = "__not_set__";
 
-function placeLabel(learner: Learner, lang: LessonLanguage): string {
+function placeLabel(learner: Learner, lang: LessonLanguage): string | null {
   if (learner.district) return districtLabel(learner.district, lang);
-  return learner.country ?? pick(LEARNER_UI.outsideBdShort, lang);
+  return learner.country;
 }
 
-function EditForm({
+/** Name, Bhaiya or Apu, and district (or a country outside Bangladesh). Used in the card and on /profile. */
+export function LearnerEditForm({
   learner,
   actions,
   lang,
@@ -33,16 +36,22 @@ function EditForm({
   onDone: () => void;
 }) {
   const face = LANG_FACE[lang];
+  const [districtQuery, setDistrictQuery] = useState("");
   const [nicknameEn, setNicknameEn] = useState(learner.nicknameEn);
-  const [nicknameBn, setNicknameBn] = useState(learner.nicknameBn);
-  const [addressAs, setAddressAs] = useState<AddressAs>(learner.addressAs);
-  const [place, setPlace] = useState(learner.district ?? OUTSIDE);
+  // Sign-up only asks the English name; the Bangla one starts as a copy of it until the learner adds it.
+  const [nicknameBn, setNicknameBn] = useState(learner.nicknameBn === learner.nicknameEn ? "" : learner.nicknameBn);
+  const [addressAs, setAddressAs] = useState<AddressAs | null>(learner.addressAs);
+  const [place, setPlace] = useState(learner.district ?? (learner.country ? OUTSIDE : NOT_SET));
   const [country, setCountry] = useState(learner.country ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const query = districtQuery.trim().toLowerCase();
+  const districts = query
+    ? BD_DISTRICTS.filter((d) => d.en.toLowerCase().includes(query) || d.bn.includes(query) || d.en === place)
+    : BD_DISTRICTS;
   const validEn = NAME_EN_PATTERN.test(nicknameEn.trim());
-  const validBn = NAME_BN_PATTERN.test(nicknameBn.trim());
+  const validBn = !nicknameBn.trim() || NAME_BN_PATTERN.test(nicknameBn.trim());
   const validPlace = place !== OUTSIDE || country.trim().length >= 2;
 
   const save = async () => {
@@ -52,9 +61,9 @@ function EditForm({
     try {
       await actions.saveProfile({
         nicknameEn: nicknameEn.trim(),
-        nicknameBn: nicknameBn.trim(),
-        addressAs,
-        district: place === OUTSIDE ? null : place,
+        nicknameBn: nicknameBn.trim() || nicknameEn.trim(),
+        ...(addressAs ? { addressAs } : {}),
+        district: place === OUTSIDE || place === NOT_SET ? null : place,
         country: place === OUTSIDE ? country.trim() : null,
       });
       onDone();
@@ -98,13 +107,21 @@ function EditForm({
       </div>
       <label className="block">
         <span className={cn(face, "text-xs font-bold text-slate-500")}>{pick(LEARNER_UI.districtLabel, lang)}</span>
-        <select value={place} onChange={(e) => setPlace(e.target.value)} className={cn(field, "mt-1", face)}>
-          {BD_DISTRICTS.map((district) => (
+        <input
+          value={districtQuery}
+          onChange={(e) => setDistrictQuery(e.target.value.slice(0, 30))}
+          placeholder={pick(LEARNER_UI.searchDistrict, lang)}
+          aria-label={pick(LEARNER_UI.searchDistrict, lang)}
+          className={cn(field, "mt-1 py-1.5 text-sm", face)}
+        />
+        <select value={place} onChange={(e) => setPlace(e.target.value)} className={cn(field, "mt-1.5", face)}>
+          {districts.map((district) => (
             <option key={district.en} value={district.en}>
               {lang === "bn" ? `${district.bn} (${district.en})` : district.en}
             </option>
           ))}
           <option value={OUTSIDE}>{pick(LEARNER_UI.outsideBdShort, lang)}</option>
+          <option value={NOT_SET}>{pick(GUEST_UI.placeNotSet, lang)}</option>
         </select>
       </label>
       {place === OUTSIDE ? (
@@ -262,10 +279,12 @@ export function LearnerProfileHost() {
                     </button>
                   ) : null}
                 </span>
-                <span className={cn(face, "mb-1 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700 ring-1 ring-orange-200")}>
-                  <MapPin className="size-3.5" aria-hidden />
-                  {placeLabel(learner, lang)}
-                </span>
+                {placeLabel(learner, lang) ? (
+                  <span className={cn(face, "mb-1 inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700 ring-1 ring-orange-200")}>
+                    <MapPin className="size-3.5" aria-hidden />
+                    {placeLabel(learner, lang)}
+                  </span>
+                ) : null}
               </div>
               <input
                 ref={fileRef}
@@ -283,7 +302,17 @@ export function LearnerProfileHost() {
               <p className={cn(face, "mt-0.5 text-xs font-bold uppercase tracking-wider text-orange-500")}>
                 {pick(LEARNER_UI.profileLearner, lang)}
               </p>
-              {progress?.earlyAdopter ? <EarlyAdopterV2Badge className="mt-2" /> : null}
+              {progress ? (
+                <div className="mt-2 flex flex-col items-center gap-1">
+                  <LegacyLearnerBadge
+                    view={{ viewer: "self", state: progress.legacy.state, deadline: progress.legacy.deadline }}
+                    locked={progress.legacy.state === "none"}
+                  />
+                  {progress.legacy.state !== "none" ? (
+                    <p className={cn(face, "text-[11px] font-semibold text-slate-500")}>{pick(LEGACY_BADGE.caption, lang)}</p>
+                  ) : null}
+                </div>
+              ) : null}
               {uploading ? <p className={cn(face, "mt-2 text-xs font-semibold text-slate-500")}>{pick(LEARNER_UI.uploading, lang)}</p> : null}
               {photoError ? <p className={cn(face, "mt-2 text-xs font-semibold text-rose-600")}>{pick(LEARNER_UI.photoFailed, lang)}</p> : null}
 
@@ -310,7 +339,7 @@ export function LearnerProfileHost() {
               ) : null}
 
               {actions && editing ? (
-                <EditForm learner={learner} actions={actions} lang={lang} onDone={() => setEditing(false)} />
+                <LearnerEditForm learner={learner} actions={actions} lang={lang} onDone={() => setEditing(false)} />
               ) : actions ? (
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <button

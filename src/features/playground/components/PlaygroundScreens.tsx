@@ -3,14 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Check, Clock, Flame, Gamepad2, Globe2, RotateCcw, Star, Target, X, Zap, type LucideIcon } from "lucide-react";
+import { BookOpen, Check, Clock, Flame, Gamepad2, Globe2, RotateCcw, Star, Target, X, Zap, type LucideIcon } from "lucide-react";
 import { MissionZeroConfetti } from "@/src/components/demo/MissionZeroFx";
 import { EN_FACE } from "@/src/features/chat-lesson/components/ChatPrimitives";
-import { LanguageSwitch } from "@/src/features/chat-lesson/components/LessonChrome";
-import { setLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
 import { formatPoints, starCount } from "@/src/features/chat-lesson/lib/format";
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
-import { VoiceToggle } from "@/src/features/playground/components/PlaygroundChrome";
+import { GamlishMascot } from "@/src/features/playground/components/GamlishMascot";
+import { GameSettingsMenu } from "@/src/features/playground/components/GameSettingsMenu";
 import { ROUND_ICONS } from "@/src/features/playground/components/roundIcons";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import type { CollectedLine, Playground } from "@/src/features/playground/types";
@@ -26,6 +25,8 @@ export function PlaygroundStart({
   autoVoice,
   lang,
   backHref,
+  resumeFrom = 0,
+  onNotes,
   onStart,
 }: {
   playground: Playground;
@@ -33,11 +34,17 @@ export function PlaygroundStart({
   autoVoice: boolean;
   lang: LessonLanguage;
   backHref?: string;
+  /** Games already finished (e.g. as a guest): they show ticked and play starts at the next one. */
+  resumeFrom?: number;
+  onNotes?: () => void;
   onStart: () => void;
 }) {
   const face = LANG_FACE[lang];
+  const learner = useLearner();
+  const resuming = resumeFrom > 0 && resumeFrom < playground.rounds.length;
+  const total = playground.rounds.length;
   return (
-    <div className="fixed inset-0 z-40 flex flex-col overflow-y-auto bg-gradient-to-b from-violet-100 via-sky-50 to-white">
+    <div className="fixed inset-0 z-40 flex flex-col overflow-y-auto bg-background">
       <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 pt-3">
         {backHref ? (
           <Link
@@ -50,32 +57,29 @@ export function PlaygroundStart({
         ) : (
           <span />
         )}
-        <div className="flex items-center gap-2">
-          <VoiceToggle on={autoVoice} lang={lang} />
-          <LanguageSwitch lang={lang} onChange={setLessonLanguage} />
-        </div>
+        <GameSettingsMenu lang={lang} autoVoice={autoVoice} onNotes={onNotes} />
       </div>
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-4 py-4 text-center sm:px-5 sm:py-8">
         <motion.span
-          className="relative flex size-16 items-center justify-center rounded-3xl border-b-[5px] border-violet-700 bg-violet-500 text-white shadow-xl sm:size-24 sm:rounded-[2rem] sm:border-b-[6px]"
+          className="relative flex size-16 items-center justify-center rounded-3xl border-b-[5px] border-primary bg-accent text-white shadow-xl sm:size-24 sm:rounded-[2rem] sm:border-b-[6px]"
           initial={{ scale: 0, rotate: -15 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ ...POP, delay: 0.05 }}
         >
           <Gamepad2 className="size-8 sm:size-12" strokeWidth={2.2} aria-hidden />
-          <span className="absolute -bottom-2 -right-2 flex size-8 items-center justify-center rounded-full bg-white shadow-md ring-4 ring-violet-100 sm:size-10">
+          <span className="absolute -bottom-2 -right-2 flex size-8 items-center justify-center rounded-full bg-white shadow-md ring-4 ring-accent/10 sm:size-10">
             <Image src="/brand/gamlish-logo.png" alt="" width={28} height={28} className="size-5 object-contain sm:size-7" />
           </span>
         </motion.span>
 
         <motion.p
-          className={cn(face, "mt-4 text-xs font-black text-violet-600 sm:mt-6", lang === "en" && "uppercase tracking-[0.16em]")}
+          className={cn(face, "mt-4 text-xs font-black text-accent sm:mt-6", lang === "en" && "uppercase tracking-[0.16em]")}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          {pick(PG_UI.startTitle, lang)}
+          {pick(resuming ? addressed(PG_UI.welcome, learner) : PG_UI.startTitle, lang)}
         </motion.p>
         <motion.h1
           className={cn(face, "mt-0.5 text-2xl font-black text-slate-900 sm:mt-1 sm:text-4xl")}
@@ -86,7 +90,12 @@ export function PlaygroundStart({
           {pick(playground.title, lang)}
         </motion.h1>
         <p className={cn(face, "mt-1 text-sm font-semibold text-slate-500 sm:mt-2")}>
-          {pick(PG_UI.startSub(playground.rounds.length, minutes), lang)}
+          {pick(
+            resuming
+              ? PG_UI.resumeSub(playground.topic ?? playground.title, resumeFrom + 1, total)
+              : PG_UI.startSub(total, minutes),
+            lang,
+          )}
         </p>
         <p
           className={cn(
@@ -100,21 +109,34 @@ export function PlaygroundStart({
 
         <ol className="mt-4 grid w-full grid-cols-2 gap-2 text-left sm:mt-7 sm:grid-cols-1 sm:gap-2.5">
           {playground.rounds.map((round, i) => {
-            const Icon = ROUND_ICONS[round.kind];
+            const done = resuming && i < resumeFrom;
+            const Icon = done ? Check : ROUND_ICONS[round.kind];
             return (
               <motion.li
                 key={round.id}
-                className="flex items-center gap-2 rounded-2xl border-2 border-b-4 border-slate-200 bg-white px-2.5 py-2 sm:gap-3 sm:px-3.5 sm:py-3"
+                className={cn(
+                  "flex items-center gap-2 rounded-2xl border-2 border-b-4 px-2.5 py-2 sm:gap-3 sm:px-3.5 sm:py-3",
+                  done
+                    ? "border-emerald-200 bg-emerald-50"
+                    : resuming && i === resumeFrom
+                      ? "border-accent/40 bg-white ring-4 ring-accent/10"
+                      : "border-slate-200 bg-white",
+                )}
                 initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.25 + i * 0.08, type: "spring", stiffness: 300, damping: 24 }}
               >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 sm:size-10">
-                  <Icon className="size-4 sm:size-5" aria-hidden />
+                <span
+                  className={cn(
+                    "flex size-8 shrink-0 items-center justify-center rounded-xl sm:size-10",
+                    done ? "bg-emerald-500 text-white" : "bg-accent/10 text-accent",
+                  )}
+                >
+                  <Icon className="size-4 sm:size-5" strokeWidth={done ? 3 : 2} aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className={cn(face, "block text-[10px] font-black text-slate-400 sm:text-[11px]", lang === "en" && "uppercase tracking-wider")}>
-                    {pick(PG_UI.roundShort(i + 1), lang)}
+                    {pick(PG_UI.roundDoneLabel(i + 1, total), lang)}
                   </span>
                   <span className={cn(face, "block text-sm font-black leading-tight text-slate-800 sm:text-base")}>
                     {pick(round.title, lang)}
@@ -126,7 +148,7 @@ export function PlaygroundStart({
         </ol>
 
         <p className={cn(face, "mt-4 flex items-center gap-2 text-left text-xs font-semibold text-slate-500 sm:mt-6")}>
-          <Globe2 className="size-4 shrink-0 text-sky-500" aria-hidden />
+          <Globe2 className="size-4 shrink-0 text-accent" aria-hidden />
           {pick(PG_UI.startNote, lang)}
         </p>
       </div>
@@ -139,11 +161,11 @@ export function PlaygroundStart({
             autoFocus
             className={cn(
               face,
-              "flex h-12 w-full items-center justify-center rounded-2xl border-b-4 border-violet-700 bg-violet-500 text-lg font-extrabold text-white transition-all hover:bg-violet-500/90 active:translate-y-0.5 active:border-b-2 sm:h-14",
+              "flex h-12 w-full items-center justify-center rounded-2xl border-b-4 border-primary bg-accent text-lg font-extrabold text-white transition-all hover:bg-accent/90 active:translate-y-0.5 active:border-b-2 sm:h-14",
               lang === "en" && "uppercase tracking-wide",
             )}
           >
-            {pick(PG_UI.startCta, lang)}
+            {pick(resuming ? PG_UI.startGame(resumeFrom + 1) : PG_UI.startCta, lang)}
           </button>
         </div>
       </div>
@@ -165,6 +187,7 @@ export function PlaygroundComplete({
   lang,
   onContinue,
   onReplay,
+  onNotes,
 }: {
   playground: Playground;
   score: number;
@@ -177,6 +200,8 @@ export function PlaygroundComplete({
   lang: LessonLanguage;
   onContinue: () => void;
   onReplay: () => void;
+  /** Not passed: the notes come first, then the replay. */
+  onNotes?: () => void;
 }) {
   const learner = useLearner();
   const face = LANG_FACE[lang];
@@ -188,9 +213,9 @@ export function PlaygroundComplete({
       label: pick(PG_UI.statXp, lang),
       icon: Zap,
       value: String(xp),
-      frame: "border-violet-400",
-      head: "bg-violet-400",
-      text: "text-violet-600",
+      frame: "border-accent/70",
+      head: "bg-accent/70",
+      text: "text-accent",
     },
     {
       label: pick(PG_UI.statAccuracy, lang),
@@ -204,9 +229,9 @@ export function PlaygroundComplete({
       label: pick(PG_UI.statTime, lang),
       icon: Clock,
       value: `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`,
-      frame: "border-sky-400",
-      head: "bg-sky-400",
-      text: "text-sky-600",
+      frame: "border-accent/70",
+      head: "bg-accent/70",
+      text: "text-accent",
     },
     {
       label: pick(PG_UI.statStreak, lang),
@@ -220,25 +245,17 @@ export function PlaygroundComplete({
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-gradient-to-b from-violet-50 via-white to-white"
+      className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-background"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <MissionZeroConfetti active={passed} />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto flex w-full max-w-2xl flex-col items-center px-5 py-8 text-center">
-          <motion.span
-            className={cn(
-              "flex size-24 items-center justify-center rounded-[2rem] border-b-[6px] text-white shadow-xl",
-              passed ? "border-amber-600 bg-amber-400" : "border-sky-700 bg-sky-500",
-            )}
-            initial={{ scale: 0, rotate: -15 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ ...POP, delay: 0.1 }}
-          >
-            {passed ? <Gamepad2 className="size-12" aria-hidden /> : <RotateCcw className="size-12" aria-hidden />}
+          <motion.span initial={{ scale: 0, rotate: -15 }} animate={{ scale: 1, rotate: 0 }} transition={{ ...POP, delay: 0.1 }}>
+            <GamlishMascot mood={passed ? "happy" : "oops"} size="lg" />
           </motion.span>
-          <h1 className={cn(face, "mt-5 text-3xl font-black sm:text-4xl", passed ? "text-violet-600" : "text-sky-700")}>
+          <h1 className={cn(face, "mt-5 text-3xl font-black sm:text-4xl", passed ? "text-accent" : "text-accent")}>
             {pick(passed ? PG_UI.passedTitle : PG_UI.notPassedTitle, lang)}
           </h1>
           <p className={cn(face, "mt-1 text-base font-bold text-slate-600 sm:text-lg")}>
@@ -293,18 +310,18 @@ export function PlaygroundComplete({
 
           {lines.length > 0 ? (
             <motion.section
-              className="mt-6 w-full rounded-3xl border-2 border-b-[5px] border-violet-200 bg-white p-5 text-left"
+              className="mt-6 w-full rounded-3xl border-2 border-b-[5px] border-accent/20 bg-white p-5 text-left"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4 }}
             >
-              <h2 className={cn(face, "text-lg font-black text-violet-700")}>{pick(playground.collection.title, lang)}</h2>
+              <h2 className={cn(face, "text-lg font-black text-accent")}>{pick(playground.collection.title, lang)}</h2>
               <p className={cn(face, "text-sm font-semibold text-slate-500")}>{pick(playground.collection.sub, lang)}</p>
               <ul className="mt-3 space-y-2">
                 {lines.map((line, i) => (
                   <li key={i} className={cn(EN_FACE, "rounded-2xl bg-slate-50 px-3.5 py-2.5 text-lg font-bold text-slate-800")}>
                     {line.before ? `${line.before} ` : null}
-                    <span className="rounded-lg bg-sky-500 px-1.5 py-0.5 text-white">{line.highlight}</span>
+                    <span className="rounded-lg bg-accent px-1.5 py-0.5 text-white">{line.highlight}</span>
                     {line.after ? ` ${line.after}` : null}
                   </li>
                 ))}
@@ -340,35 +357,76 @@ export function PlaygroundComplete({
       </div>
 
       <div className="shrink-0 border-t-2 border-slate-200/80 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3">
-        <div className="mx-auto w-full max-w-2xl space-y-2">
-          <button
-            type="button"
-            onClick={passed ? onContinue : onReplay}
-            autoFocus
-            className={cn(
-              face,
-              "flex h-13 w-full items-center justify-center gap-2 rounded-2xl border-b-4 text-base font-extrabold text-white transition-all active:translate-y-0.5 active:border-b-2",
-              passed
-                ? "border-emerald-700 bg-emerald-500 hover:bg-emerald-500/90"
-                : "border-violet-700 bg-violet-500 hover:bg-violet-500/90",
-              lang === "en" ? "uppercase tracking-wide" : "text-[17px]",
-            )}
-          >
-            {passed ? null : <RotateCcw className="size-5" aria-hidden />}
-            {pick(passed ? PG_UI.continue : PG_UI.playAgain, lang)}
-          </button>
-          <button
-            type="button"
-            onClick={passed ? onReplay : onContinue}
-            className={cn(
-              face,
-              "mx-auto flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-100",
-            )}
-          >
-            {passed ? <RotateCcw className="size-4" aria-hidden /> : null}
-            {pick(passed ? PG_UI.playAgain : PG_UI.backToMap, lang)}
-          </button>
-        </div>
+        {!passed && onNotes ? (
+          <div className="mx-auto w-full max-w-2xl space-y-2">
+            <button
+              type="button"
+              onClick={onNotes}
+              autoFocus
+              className={cn(
+                face,
+                "flex h-13 w-full items-center justify-center gap-2 rounded-2xl border-b-4 border-primary bg-accent text-base font-extrabold text-white transition-all hover:bg-accent/90 active:translate-y-0.5 active:border-b-2",
+                lang === "en" ? "uppercase tracking-wide" : "text-[17px]",
+              )}
+            >
+              <BookOpen className="size-5" aria-hidden />
+              {pick(PG_UI.readNotesRetry, lang)}
+            </button>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={onReplay}
+                className={cn(
+                  face,
+                  "flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold text-accent transition-colors hover:bg-accent/5",
+                )}
+              >
+                <RotateCcw className="size-4" aria-hidden />
+                {pick(PG_UI.playAgain, lang)}
+              </button>
+              <button
+                type="button"
+                onClick={onContinue}
+                className={cn(
+                  face,
+                  "flex items-center justify-center rounded-full px-3 py-1.5 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-100",
+                )}
+              >
+                {pick(PG_UI.backToMap, lang)}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mx-auto w-full max-w-2xl space-y-2">
+            <button
+              type="button"
+              onClick={passed ? onContinue : onReplay}
+              autoFocus
+              className={cn(
+                face,
+                "flex h-13 w-full items-center justify-center gap-2 rounded-2xl border-b-4 text-base font-extrabold text-white transition-all active:translate-y-0.5 active:border-b-2",
+                passed
+                  ? "border-emerald-700 bg-emerald-500 hover:bg-emerald-500/90"
+                  : "border-primary bg-accent hover:bg-accent/90",
+                lang === "en" ? "uppercase tracking-wide" : "text-[17px]",
+              )}
+            >
+              {passed ? null : <RotateCcw className="size-5" aria-hidden />}
+              {pick(passed ? PG_UI.continue : PG_UI.playAgain, lang)}
+            </button>
+            <button
+              type="button"
+              onClick={passed ? onReplay : onContinue}
+              className={cn(
+                face,
+                "mx-auto flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-100",
+              )}
+            >
+              {passed ? <RotateCcw className="size-4" aria-hidden /> : null}
+              {pick(passed ? PG_UI.playAgain : PG_UI.backToMap, lang)}
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

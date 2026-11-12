@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Flag, Flame, Trophy, Zap } from "lucide-react";
+import { SHOW_XP_LEADERBOARD } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 import {
   getMyPlayerProfile,
@@ -17,7 +18,11 @@ import { rememberXpRankBaseline } from "@/src/lib/xp-rank-session";
  * `variant="inline"` drops the bar chrome so it can sit inside another header.
  * Pass `missionNumber` on stage screens to show the mission badge instead of streak.
  */
-export function PlayerXpHud({
+export function PlayerXpHud(props: Parameters<typeof PlayerXpHudView>[0]) {
+  return SHOW_XP_LEADERBOARD ? <PlayerXpHudView {...props} /> : null;
+}
+
+function PlayerXpHudView({
   className,
   variant = "bar",
   missionNumber,

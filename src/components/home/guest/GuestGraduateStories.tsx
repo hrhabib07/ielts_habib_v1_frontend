@@ -13,6 +13,7 @@ import {
   LANDING_REWARD_PILL_CLASS,
 } from "@/src/components/home/guest/guest-landing-theme";
 import { getPublicGraduateStories, type PublicGraduateStory } from "@/src/lib/api/certification";
+import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
 const COPY = {
@@ -116,7 +117,7 @@ function CtaPair({
         className="h-12 w-full rounded-2xl border-2 text-base font-bold sm:w-auto sm:min-w-[12rem]"
         asChild
       >
-        <Link href="/demo">{demo}</Link>
+        <Link href={FREE_PLAY_HREF}>{demo}</Link>
       </Button>
     </div>
   );

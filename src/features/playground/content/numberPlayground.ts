@@ -439,15 +439,18 @@ export const NUMBER_PLAYGROUND: Playground = {
   id: "level-1-playground-number",
   afterStepId: "level-1-step-4-number",
   title: { en: "Number Playground", bn: "নাম্বার প্লেগ্রাউন্ড" },
+  topic: { en: "Number", bn: "Number" },
   rounds: [
     {
       id: "count-build",
       kind: "count-build",
       title: { en: "Count & Build", bn: "গুনে বানান" },
       goal: { en: "See how many, then build the right word.", bn: "কয়টি আছে দেখুন, তারপর সঠিক শব্দ বানান।" },
-      instruction: {
-        en: "Count the pictures. Pick the number, then the right word.",
-        bn: "ছবিগুলো গুনুন। আগে সংখ্যা, তারপর সঠিক শব্দটি বেছে নিন।",
+      instruction: { en: "Count, then pick the right word.", bn: "গুনুন, তারপর সঠিক শব্দ বেছে নিন।" },
+      rule: {
+        text: { en: "Many things: add -s. After s, sh, ch or x: add -es.", bn: "অনেক হলে শেষে -s। শেষে s, sh, ch বা x থাকলে -es।" },
+        example: "one box, two boxes",
+        mark: "boxes",
       },
       pick: 6,
       items: COUNT_BUILD,
@@ -457,7 +460,12 @@ export const NUMBER_PLAYGROUND: Playground = {
       kind: "plural-machine",
       title: { en: "Plural Machine", bn: "প্লুরাল মেশিন" },
       goal: { en: "Type the Plural yourself. No choices this time!", bn: "এবার নিজেই Plural লিখুন। কোনো অপশন নেই!" },
-      instruction: { en: "Type the Plural of the word.", bn: "শব্দটির Plural লিখুন।" },
+      instruction: { en: "Type this word for many.", bn: "শব্দটিকে অনেক (Plural) করে লিখুন।" },
+      rule: {
+        text: { en: "Many: add -s or -es. Some words change: child, children.", bn: "অনেক হলে -s বা -es। কিছু শব্দ বদলে যায়: child হয় children।" },
+        example: "one child, three children",
+        mark: "children",
+      },
       pick: 6,
       mix: [
         { group: "regular", count: 1 },
@@ -476,9 +484,11 @@ export const NUMBER_PLAYGROUND: Playground = {
         en: "Catch the mistakes Bangla speakers often make.",
         bn: "বাংলাভাষীরা প্রায়ই যে ভুলগুলো করে, সেগুলো ধরুন।",
       },
-      instruction: {
-        en: "One English word is wrong. Tap it, then fix it.",
-        bn: "ইংরেজি বাক্যের একটি শব্দ ভুল। সেটিতে ট্যাপ করুন, তারপর ঠিক করুন।",
+      instruction: { en: "Tap the wrong word, then fix it.", bn: "ভুল শব্দে ট্যাপ করুন, তারপর ঠিক করুন।" },
+      rule: {
+        text: { en: "Bangla says দুই ভাই. English says two brothers. After a number, add -s.", bn: "বাংলায় দুই ভাই, ইংরেজিতে two brothers। সংখ্যার পরে -s লাগে।" },
+        example: "I have two brothers.",
+        mark: "brothers",
       },
       pick: 5,
       items: BANGLA_TRAP,
@@ -491,7 +501,12 @@ export const NUMBER_PLAYGROUND: Playground = {
         en: "{name}, help Mom write her shopping list in English.",
         bn: "{name}, মাকে বাজারের লিস্ট ইংরেজিতে লিখতে সাহায্য করুন।",
       },
-      instruction: { en: "Type the right word for Mom's list.", bn: "মায়ের লিস্টের জন্য সঠিক শব্দটি লিখুন।" },
+      instruction: { en: "Write the word for Mom's list.", bn: "মায়ের লিস্টের শব্দটি লিখুন।" },
+      rule: {
+        text: { en: "Some things can't be counted: rice, water, money. No -s.", bn: "কিছু জিনিস গোনা যায় না: rice, water, money। এগুলোতে -s হয় না।" },
+        example: "two kilos of rice",
+        mark: "rice",
+      },
       pick: 6,
       mix: [
         { group: "count", count: 4 },

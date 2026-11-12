@@ -23,6 +23,7 @@ export function isImmersivePlayerPath(pathname: string | null): boolean {
   if (!pathname) return false;
   return (
     pathname.startsWith("/lab/") ||
+    pathname === "/play" ||
     pathname === "/player/mission-1" ||
     pathname.startsWith("/player/mission-1/") ||
     pathname === "/player/mission-one-lab" ||

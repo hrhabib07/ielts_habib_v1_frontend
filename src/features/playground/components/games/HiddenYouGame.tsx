@@ -45,11 +45,12 @@ const SPEAKERS: Record<SpeakerKind, { icon: LucideIcon; tone: string }> = {
   doctor: { icon: Stethoscope, tone: "bg-teal-100 text-teal-700" },
 };
 
-export function HiddenYouGame({ item, itemKey, lang, status, attempt, onReady, onAnswer }: GameProps<HiddenYouItem>) {
+export function HiddenYouGame({ item, itemKey, lang, status, attempt, onReady, onAnswer, guide = false }: GameProps<HiddenYouItem>) {
   const [choice, setChoice] = useState<{ attempt: number; pick: HiddenYouPick } | null>(null);
   const selected = choice?.attempt === attempt ? choice.pick : null;
   const done = isDone(status);
   const locked = status !== "answering";
+  const guideOn = guide && !locked && selected === null;
   const spoken = chunkAt(item.words, useActiveWord(`${itemKey}:s:`));
   const speaker = SPEAKERS[item.speaker];
   const SpeakerIcon = speaker.icon;
@@ -95,9 +96,10 @@ export function HiddenYouGame({ item, itemKey, lang, status, attempt, onReady, o
         disabled={locked}
         shakeKey={attempt}
         tag={done && isCommand ? pick(PG_UI.subjectTag, lang) : undefined}
+        guide={guideOn && isCommand}
         onClick={() => choose(HIDDEN)}
         className={cn(
-          youGhost && "border-dashed border-slate-300 bg-slate-50/60 text-slate-400 italic hover:text-sky-600",
+          youGhost && "border-dashed border-slate-300 bg-slate-50/60 text-slate-400 italic hover:text-accent",
         )}
       >
         <span className={EN_FACE}>{done && isCommand ? "(You)" : pick(PG_UI.hiddenYou, lang)}</span>
@@ -110,6 +112,8 @@ export function HiddenYouGame({ item, itemKey, lang, status, attempt, onReady, o
           disabled={locked}
           shakeKey={attempt}
           tag={done && i === item.subject ? pick(PG_UI.subjectTag, lang) : undefined}
+          guide={guideOn && !isCommand && i === item.subject}
+          nudgeIndex={i + 1}
           onClick={() => choose(i)}
         >
           {word}

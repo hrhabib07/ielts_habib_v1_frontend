@@ -11,6 +11,10 @@ export type GameProps<T> = {
   /** Hands the player the function its Check button should run, or null while nothing is chosen. */
   onReady: (check: (() => void) | null) => void;
   onAnswer: (result: AnswerResult) => void;
+  /** Two-step games report the step they are on, so the title shows only that step. */
+  onStep?: (step: number) => void;
+  /** Practice question: point the hand at what to tap next. */
+  guide?: boolean;
 };
 
 export function isDone(status: PlayStatus): boolean {
