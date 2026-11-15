@@ -6,6 +6,7 @@ import { StickySiteChrome } from "@/src/components/shared/StickySiteChrome";
 import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard";
 import { ScholarshipAppShell } from "@/src/components/scholarship/ScholarshipAppShell";
 import { FunnelPageTracker } from "@/src/components/analytics/FunnelPageTracker";
+import { ConversionFunnelBoot } from "@/src/components/analytics/ConversionFunnelBoot";
 import { MetaPageViewTracker } from "@/src/components/analytics/MetaPageViewTracker";
 import { MetaPurchaseFlusher } from "@/src/components/analytics/MetaPurchaseFlusher";
 import { MicroTelemetryBoot } from "@/src/components/analytics/MicroTelemetryBoot";
@@ -36,6 +37,9 @@ export async function AppShellWithAuth({
           <Footer initialUser={initialUser} />
         </div>
       </ScholarshipAppShell>
+      <Suspense fallback={null}>
+        <ConversionFunnelBoot />
+      </Suspense>
       <Suspense fallback={null}>
         <FunnelPageTracker />
       </Suspense>

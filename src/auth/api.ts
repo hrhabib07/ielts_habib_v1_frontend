@@ -30,9 +30,12 @@ export async function register(
 export async function verifyOtp(
   payload: VerifyOtpRequest,
 ): Promise<VerifyOtpResponse> {
+  const { attributionPayloadForAuth } = await import(
+    "@/src/lib/api/conversionFunnel"
+  );
   const { data } = await apiClient.post<VerifyOtpResponse>(
     "/auth/verify-otp",
-    payload,
+    { ...payload, ...attributionPayloadForAuth() },
   );
   return data;
 }
@@ -108,9 +111,12 @@ export async function requestPhoneOtp(
 export async function verifyPhoneOtp(
   payload: VerifyPhoneOtpRequest,
 ): Promise<VerifyPhoneOtpResponse> {
+  const { attributionPayloadForAuth } = await import(
+    "@/src/lib/api/conversionFunnel"
+  );
   const { data } = await apiClient.post<VerifyPhoneOtpResponse>(
     "/auth/phone/verify-otp",
-    payload,
+    { ...payload, ...attributionPayloadForAuth() },
   );
   return data;
 }
