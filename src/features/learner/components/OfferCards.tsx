@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 /** Bold words on the navy offer card ("Legacy Learner"): bright enough to read. */
 const LEGACY_TEXT = "font-black text-amber-200";
 
-/** What the learner gets for ৳1590 right now: Double Duration until 20 November, then 45 days. */
+/** What the learner gets for ৳1590 right now: Double Duration until 30 November, then 45 days. */
 export function OfferBox({ payment, lang }: { payment: ChatMissionPayment; lang: LessonLanguage }) {
   const face = LANG_FACE[lang];
   const [now] = useState(() => Date.now());

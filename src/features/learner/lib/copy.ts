@@ -103,7 +103,7 @@ export const LEARNER_UI = {
   retry: { en: "Try again", bn: "আবার চেষ্টা করুন" },
 } as const;
 
-/** Double Duration (until 20 November 11:59 PM, Dhaka), the lock after Person Game 1, and payment approved. */
+/** Double Duration (until 30 November 11:59 PM, Dhaka), the lock after Person Game 1, and payment approved. */
 export const OFFER_UI = {
   name: { en: "Double Duration", bn: "ডাবল ডিউরেশন" },
   headline: { en: "90 days instead of 45", bn: "45 দিনের বদলে 90 দিন" },
@@ -116,13 +116,13 @@ export const OFFER_UI = {
     bn: "সঙ্গে প্রোফাইলে চিরদিনের **Legacy Learner** ব্যাজ।",
   },
   startLine: {
-    en: "Play the full Level 1 right away. Your 90 days are counted from 20 November.",
-    bn: "এখনই পুরো লেভেল 1 খেলুন। আপনার 90 দিন গোনা হবে 20 নভেম্বর থেকে।",
+    en: "Play the full Level 1 right away. Your 90 days are counted from 30 November.",
+    bn: "এখনই পুরো লেভেল 1 খেলুন। আপনার 90 দিন গোনা হবে 30 নভেম্বর থেকে।",
   },
   deadline: (daysLeft: number): Bilingual =>
     daysLeft <= 1
       ? { en: "Last day · the offer ends tonight at 11:59 PM", bn: "আজই শেষ দিন · অফার শেষ রাত 11:59-এ" }
-      : { en: `Offer ends on 20 November · ${daysLeft} days left`, bn: `অফার শেষ 20 নভেম্বর · আর ${daysLeft} দিন বাকি` },
+      : { en: `Offer ends on 30 November · ${daysLeft} days left`, bn: `অফার শেষ 30 নভেম্বর · আর ${daysLeft} দিন বাকি` },
   cta: { en: "Get Double Duration", bn: "ডাবল ডিউরেশন নিন" },
   notNow: { en: "Not now", bn: "এখন না" },
 
@@ -131,7 +131,7 @@ export const OFFER_UI = {
     en: `Unlock all of Level 1, the Final Test and every new level. Your ${days} days start the day we approve your payment.`,
     bn: `পুরো লেভেল 1, ফাইনাল টেস্ট আর প্রতিটি নতুন লেভেল খুলুন। পেমেন্ট অনুমোদনের দিন থেকে আপনার ${days} দিন শুরু হবে।`,
   }),
-  standardCta: { en: "Unlock the full game", bn: "পুরো গেম আনলক করুন" },
+  standardCta: { en: "Unlock the full game", bn: "পুরো গেইম আনলক করুন" },
   legacyDeadline: {
     en: "Legacy Learner badge until 31 December",
     bn: "Legacy Learner ব্যাজ 31 ডিসেম্বর পর্যন্ত",
@@ -250,8 +250,8 @@ export const PAY_UI = {
   honestNotes: [HONEST_DOUBLE, HONEST_STANDARD] as readonly Bilingual[],
   honest: (double: boolean): Bilingual => (double ? HONEST_DOUBLE : HONEST_STANDARD),
   urgency: {
-    en: "Double Duration ends on 20 November at 11:59 PM. From 21 November, ৳1590 gets 45 days instead of 90.",
-    bn: "ডাবল ডিউরেশন শেষ হবে 20 নভেম্বর রাত 11:59-এ। 21 নভেম্বর থেকে ৳1590-এ মিলবে 90 দিনের বদলে 45 দিন।",
+    en: "Double Duration ends on 30 November at 11:59 PM. From 1 December, ৳1590 gets 45 days instead of 90.",
+    bn: "ডাবল ডিউরেশন শেষ হবে 30 নভেম্বর রাত 11:59-এ। 1 ডিসেম্বর থেকে ৳1590-এ মিলবে 90 দিনের বদলে 45 দিন।",
   },
   legacyUrgency: {
     en: "The **Legacy Learner** badge is only for learners who join by 31 December 2026. From 1 January, it is gone for good.",

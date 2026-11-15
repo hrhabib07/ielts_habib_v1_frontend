@@ -263,6 +263,11 @@ export function PhoneOtpAuthPanel({
       }
       track("phone_session_sync_success", { isNewUser });
 
+      if (isNewUser) {
+        const { fireCompleteRegistration } = await import("@/src/lib/meta-registration");
+        fireCompleteRegistration(res.data.metaCompleteRegistrationEventId);
+      }
+
       if (continuePath) clearDemoSessionId();
 
       if (role === "ADMIN") {

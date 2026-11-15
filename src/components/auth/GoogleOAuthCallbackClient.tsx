@@ -78,6 +78,8 @@ export function GoogleOAuthCallbackClient() {
       const continuePath = sanitizeInternalPath(searchParams.get("continuePath"));
       const returnTo = sanitizeInternalPath(searchParams.get("returnTo"));
       const destination = resolveDestination(token, continuePath, returnTo);
+      const isNewUser = searchParams.get("isNewUser") === "1";
+      const regEventId = searchParams.get("regEventId")?.trim() || undefined;
 
       setAccessToken(token);
 
@@ -90,6 +92,11 @@ export function GoogleOAuthCallbackClient() {
       await syncAuthCookie(token, { timeoutMs: 1500 });
 
       if (cancelled) return;
+
+      if (isNewUser) {
+        const { fireCompleteRegistration } = await import("@/src/lib/meta-registration");
+        fireCompleteRegistration(regEventId);
+      }
 
       try {
         window.history.replaceState({}, "", destination);

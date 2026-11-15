@@ -42,6 +42,8 @@ export interface VerifyOtpResponse {
   data: {
     token: string;
     continuePath?: string | null;
+    /** Server-minted event_id for Meta CompleteRegistration (CAPI dedupe). */
+    metaCompleteRegistrationEventId?: string;
     user: {
       id: string;
       email: string | null;
@@ -76,6 +78,7 @@ export interface VerifyPhoneOtpResponse {
     continuePath?: string | null;
     isNewUser?: boolean;
     hasPassword?: boolean;
+    metaCompleteRegistrationEventId?: string;
     user: {
       id: string;
       email: string | null;

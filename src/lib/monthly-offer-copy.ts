@@ -58,34 +58,30 @@ export function monthlyOfferCopy(locale: UiLocale) {
     limitedBadge: locale === "bn" ? "এই মাসের বিশেষ অফার" : "This month's special offer",
     onePayment: locale === "bn" ? "একবারের পেমেন্ট" : "one payment",
     lifetimePaid: () => lifetimePaidProofLine(locale),
-    firstHundred: (month: string | null) =>
+    firstHundred: (_month: string | null) =>
       locale === "bn"
-        ? `${month ?? "এই"} মাসের প্রথম ${localizeDigits(100, locale)} জন পেইড শিক্ষার্থীর জন্য।`
-        : `For the first 100 paid learners of ${month ?? "this month"}.`,
+        ? `৩০ নভেম্বরের মধ্যে ভর্তি হলে ৳১,৫৯০-তে ৯০ দিন + Legacy Learner ব্যাজ।`
+        : `Join by 30 November: ৳1,590 for 90 days + Legacy Learner badge.`,
     seatMeter: (filled: number, cap: number) =>
       locale === "bn"
         ? `এই মাসে ${localizeDigits(filled, locale)} জন / ${localizeDigits(cap, locale)} জন`
         : `${filled} of ${cap} this month`,
     seatMeterHint:
       locale === "bn"
-        ? "প্রথম 100 জনের সেরা মূল্য শেষ হয়ে যাচ্ছে।"
-        : "The best price for the first 100 is filling up.",
-    closedTitle: (month: string | null) => {
-      if (locale === "bn") {
-        return `${month ?? "এই"} মাসের প্রথম ${localizeDigits(100, locale)} জনের অফার সম্পন্ন`;
-      }
-      return month
-        ? `${month}'s first-100 offer is complete`
-        : "This month's first-100 offer is complete";
-    },
+        ? "Double Duration অফার ৩০ নভেম্বর রাত 11:59-এ শেষ। এরপর 45 দিন।"
+        : "Double Duration ends 30 November at 11:59 PM. Then 45 days.",
+    closedTitle: (_month: string | null) =>
+      locale === "bn"
+        ? "Double Duration অফার শেষ · এখন 45 দিন"
+        : "Double Duration closed · now 45 days",
     closedBody: (offerLabel: string, listLabel: string) =>
       locale === "bn"
-        ? `এখনো বিশেষ অফারে যোগ দিতে পারেন: ${listLabel}-এর বদলে ${offerLabel}।`
-        : `You can still join today for ${offerLabel} instead of ${listLabel}.`,
+        ? `এখনো যোগ দিতে পারেন: ${listLabel}-এর বদলে ${offerLabel} (45 দিন)।`
+        : `You can still join today for ${offerLabel} instead of ${listLabel} (45 days).`,
     closedSoft:
       locale === "bn"
-        ? "Gamlish বড় হলে বিশেষ অফার বদলাতে পারে।"
-        : "Special offers may change as Gamlish grows.",
+        ? "Legacy Learner ব্যাজ ৩১ ডিসেম্বর 2026 পর্যন্ত পাওয়া যাবে।"
+        : "Legacy Learner badge is available until 31 December 2026.",
     saveWin: (saveLabel: string) =>
       locale === "bn" ? `বাঁচবে ${saveLabel}` : `You save ${saveLabel}`,
     joinNow: locale === "bn" ? "আজই যোগ দিন" : "Join now",

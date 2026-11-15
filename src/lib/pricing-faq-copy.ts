@@ -139,7 +139,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
             {
               label: "Timeline",
               them: "A long path with no fixed end",
-              us: "21 levels, fully completed within 45 days",
+              us: "21 levels, fully completed within 90 days (Double Duration until 30 November)",
             },
             {
               label: "How you learn",
@@ -171,7 +171,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Nope! It is just a simple, one-time bKash payment. There are no monthly fees and absolutely no auto-renewals. You get full access for 45 days. This is plenty of time to comfortably finish all 21 levels.",
+            "Nope! It is just a simple, one-time bKash payment. There are no monthly fees and absolutely no auto-renewals. Join by 30 November and you get 90 days (Double Duration) plus the Legacy Learner badge. From 1 December it is 45 days. Plenty of time to finish all 21 levels.",
         },
       },
       {
@@ -179,7 +179,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "Just about 30 to 45 minutes! If you play one level a day, you will easily finish the whole journey in about three weeks. This leaves you with plenty of extra time before your 45 days are up.",
+            "Just about 30 to 45 minutes! If you play one level a day, you will easily finish the whole journey in about three weeks. With Double Duration (90 days until 30 November) you have plenty of extra time.",
         },
       },
       {
@@ -253,7 +253,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "আপনি পুরো 21টি লেভেলই পাবেন! একবার পেমেন্ট করলেই আপনার পুরো Gamlish জার্নি আনলক হয়ে যাবে। এর মধ্যে থাকছে সব লেভেল, পরীক্ষা এবং আপনার সার্টিফিকেট। এখানে কোনো লুকানো চার্জ নেই। এই গেমটি শেষ করতে আপনাকে আর কখনো নতুন করে টাকা দিতে হবে না।",
+            "আপনি পুরো 21টি লেভেলই পাবেন! একবার পেমেন্ট করলেই আপনার পুরো Gamlish জার্নি আনলক হয়ে যাবে। এর মধ্যে থাকছে সব লেভেল, পরীক্ষা এবং আপনার সার্টিফিকেট। এখানে কোনো লুকানো চার্জ নেই। এই গেইমটি শেষ করতে আপনাকে আর কখনো নতুন করে টাকা দিতে হবে না।",
         },
       },
       {
@@ -261,7 +261,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "list",
           intro:
-            "দৈনন্দিন জীবনে কথা বলতে বা লিখতে আপনার ঠিক যতটুকু গ্রামার প্রয়োজন, তার পুরোটাই আপনি শিখবেন। আমরা শুধু নিয়ম মুখস্থ করাই না। আপনি একটি নিয়ম শিখবেন, গেম খেলে প্র্যাকটিস করবেন এবং তারপর সেটা বাস্তব জীবনের বাক্যে ব্যবহার করবেন। যা যা থাকছে:",
+            "দৈনন্দিন জীবনে কথা বলতে বা লিখতে আপনার ঠিক যতটুকু গ্রামার প্রয়োজন, তার পুরোটাই আপনি শিখবেন। আমরা শুধু নিয়ম মুখস্থ করাই না। আপনি একটি নিয়ম শিখবেন, গেইম খেলে প্র্যাকটিস করবেন এবং তারপর সেটা বাস্তব জীবনের বাক্যে ব্যবহার করবেন। যা যা থাকছে:",
           items: [
             {
               label: "বাক্য তৈরি:",
@@ -313,7 +313,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
             },
             {
               label: "খেলতে খেলতে শেখা।",
-              text: "ছোট ছোট গেম Level আর সাথে সাথে ফিডব্যাক, তাই প্র্যাকটিস মনে হবে অগ্রগতি, হোমওয়ার্ক নয়।",
+              text: "ছোট ছোট গেইম Level আর সাথে সাথে ফিডব্যাক, তাই প্র্যাকটিস মনে হবে অগ্রগতি, হোমওয়ার্ক নয়।",
             },
           ],
         },
@@ -335,12 +335,12 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
             {
               label: "সময়",
               them: "লম্বা পথ, শেষ হওয়ার নির্দিষ্ট কোনো সময় নেই",
-              us: "21টি লেভেল, মাত্র 45 দিনের মধ্যেই শেষ",
+              us: "21টি লেভেল, Double Duration-এ 90 দিনে শেষ (৩০ নভেম্বর পর্যন্ত)",
             },
             {
               label: "শেখার ধরন",
               them: "মূলত বারবার একই জিনিস রিপিট করা",
-              us: "আগে নিয়ম শেখা, তারপর গেম খেলা এবং সাথে সাথে ভুল শুধরে নেওয়া",
+              us: "আগে নিয়ম শেখা, তারপর গেইম খেলা এবং সাথে সাথে ভুল শুধরে নেওয়া",
             },
             {
               label: "কার জন্য",
@@ -367,7 +367,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "একদমই না! এটি শুধু একবারের bKash পেমেন্ট। কোনো মাসিক ফি নেই এবং অটোমেটিক টাকাও কাটবে না। আপনি 45 দিনের জন্য পুরো অ্যাক্সেস পাবেন। 21টি লেভেল শেষ করার জন্য এই সময়টা যথেষ্টের চেয়েও বেশি।",
+            "একদমই না! এটি শুধু একবারের bKash পেমেন্ট। কোনো মাসিক ফি নেই এবং অটোমেটিক টাকাও কাটবে না। ৩০ নভেম্বরের মধ্যে ভর্তি হলে পাবেন 90 দিন (Double Duration) + Legacy Learner ব্যাজ। 1 ডিসেম্বর থেকে 45 দিন। 21টি লেভেল শেষ করার জন্য সময় যথেষ্ট।",
         },
       },
       {
@@ -375,7 +375,7 @@ export const PRICING_FAQ_COPY: Record<PricingFaqLocale, PricingFaqCopy> = {
         answer: {
           kind: "plain",
           text:
-            "দিনে মাত্র 30 থেকে 45 মিনিট! প্রতিদিন একটি করে লেভেল খেললে মাত্র তিন সপ্তাহেই আপনার পুরো জার্নি শেষ হয়ে যাবে। 45 দিনের মেয়াদ শেষ হওয়ার আগেই আপনি খুব আরামে সবকিছু শেষ করতে পারবেন।",
+            "দিনে মাত্র 30 থেকে 45 মিনিট! প্রতিদিন একটি করে লেভেল খেললে মাত্র তিন সপ্তাহেই আপনার পুরো জার্নি শেষ হয়ে যাবে। Double Duration (৩০ নভেম্বর পর্যন্ত 90 দিন) থাকলে সময় আরও আরাম।",
         },
       },
       {

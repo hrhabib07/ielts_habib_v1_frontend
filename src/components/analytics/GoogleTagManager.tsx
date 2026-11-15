@@ -2,7 +2,13 @@
 
 import { useEffect } from "react";
 
-/** Google Tag Manager container ID (gamlish.com: GTM-5QCTC26K). */
+/**
+ * Google Tag Manager container ID (gamlish.com: GTM-5QCTC26K).
+ *
+ * Meta Pixel now loads from app code (MetaPixelHead), not GTM.
+ * In GTM: pause or delete every Meta Pixel / Facebook tag (base + events),
+ * or PageView and conversions will fire twice.
+ */
 export const GTM_ID = "GTM-5QCTC26K";
 
 type DataLayerWindow = Window & {

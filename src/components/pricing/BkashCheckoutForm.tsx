@@ -25,6 +25,7 @@ import { getAccessToken } from "@/src/lib/auth";
 import { waitForClientAuthReady } from "@/src/lib/auth-session-ready";
 import { trackFunnelEvent } from "@/src/lib/api/analytics";
 import { getOrCreateVisitorId } from "@/src/lib/analytics-visitor";
+import { trackInitiateCheckout } from "@/src/lib/meta-pixel";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 import { cn } from "@/lib/utils";
 
@@ -231,6 +232,7 @@ export function BkashCheckoutForm({
           throw firstErr;
         }
       }
+      trackInitiateCheckout({ value: payableAmount });
       void trackFunnelEvent({
         event: "payment_submit_success",
         path: "/checkout",

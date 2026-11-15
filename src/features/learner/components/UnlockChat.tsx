@@ -18,6 +18,7 @@ import { personalizeText, type Learner } from "@/src/features/learner/lib/person
 import { resizeReceipt } from "@/src/features/learner/lib/resizeReceipt";
 import { claimChatMissionFreeAccess, submitChatMissionPayment, type ChatMissionPayment } from "@/src/lib/api/chatMission";
 import { supportWhatsAppHrefWithText } from "@/src/lib/contact";
+import { trackInitiateCheckout } from "@/src/lib/meta-pixel";
 import { cn } from "@/lib/utils";
 
 type Card = "price" | "bkash" | "bank";
@@ -293,6 +294,9 @@ export function UnlockChat({ ctx, learner, backHref }: { ctx: MissionShellContex
           ? { method, senderNumber: sender, transactionId: trx }
           : { method, proofDataUrl: proof ?? "", note: note.trim() },
       );
+      if (method === "bkash") {
+        trackInitiateCheckout({ value: payment.priceBdt });
+      }
       ctx.paymentSubmitted(latest);
       say(
         { from: "me", text: method === "bkash" ? asIs(`bKash · ${trx.replace(/\s+/g, "").toUpperCase()}`) : PAY_UI.bank },

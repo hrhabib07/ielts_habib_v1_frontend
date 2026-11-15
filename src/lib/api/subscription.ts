@@ -72,6 +72,10 @@ export interface SubscriptionRequest {
   reviewedAt?: string | null;
   /** QA / Meta ads allowlist  -  never a real Founder purchase. */
   isTest?: boolean;
+  /** Admin approved · browser Purchase still needs to fire once. */
+  purchasePendingPixel?: boolean;
+  /** Same id used for browser Purchase + Conversions API dedupe. */
+  metaPurchaseEventId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -150,4 +154,22 @@ export async function cancelMyTestCheckoutRequests(): Promise<{
     data: { deletedCount: number; cleared: boolean };
   }>("/subscription-requests/me/cancel-test", {});
   return res.data.data;
+}
+
+/** After browser Purchase fires once for an approved order. */
+export async function ackMetaPurchasePixel(
+  orderId: string,
+): Promise<{ cleared: boolean }> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: { cleared: boolean };
+  }>("/subscription-requests/me/meta-purchase-ack", { orderId });
+  return res.data.data;
+}
+
+/** Persist CompleteRegistration event_id for later Conversions API dedupe. */
+export async function saveMetaRegistrationEventId(
+  eventId: string,
+): Promise<void> {
+  await apiClient.post("/auth/meta-registration-event", { eventId });
 }

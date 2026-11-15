@@ -15,6 +15,10 @@ import {
   DeferredGoogleTagManager,
   GoogleTagManagerBody,
 } from "@/src/components/analytics/GoogleTagManager";
+import {
+  MetaPixelBody,
+  MetaPixelHead,
+} from "@/src/components/analytics/MetaPixel";
 
 const siteOrigin = getAppOrigin();
 
@@ -139,10 +143,12 @@ export default function RootLayout({
           href="/product.json"
           title="Gamlish product profile"
         />
+        <MetaPixelHead />
       </head>
       <body className="antialiased font-bengali">
         <DeferredGoogleTagManager />
         <GoogleTagManagerBody />
+        <MetaPixelBody />
         <ThemeProvider>
           <UiLocaleProvider>
             <Suspense fallback={<AppShellFallback />}>

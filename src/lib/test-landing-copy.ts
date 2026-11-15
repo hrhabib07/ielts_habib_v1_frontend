@@ -237,7 +237,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
         q: "প্রতিদিন কত সময় দিতে হবে? অ্যাক্সেস কতদিনের?",
         a: "কোনো নির্দিষ্ট ক্লাসের সময় নেই। মোবাইল বা কম্পিউটার থেকে নিজের সুবিধামতো শিখবেন, প্রতিদিন 45 থেকে 60 মিনিট দিলে ভালোভাবে এগোবেন। সাধারণ অ্যাক্সেস 45 দিনের।",
         timed: {
-          text: "20 November রাত 11:59-এর মধ্যে যুক্ত হলে Double Duration অফারে একই দামে পাবেন 90 দিন, 20 November থেকে 18 February 2027 পর্যন্ত।",
+          text: "30 November রাত 11:59-এর মধ্যে যুক্ত হলে Double Duration অফারে একই দামে পাবেন 90 দিন, 30 November থেকে 28 February 2027 পর্যন্ত।",
           endsAt: DOUBLE_DURATION_ENDS_AT,
         },
       },
@@ -374,7 +374,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
         q: "How much time do I need each day? How long is access?",
         a: "There is no fixed class time. Learn on your phone or computer whenever it suits you. 45 to 60 minutes a day keeps you moving well. Standard access is 45 days.",
         timed: {
-          text: "Join by 11:59 PM on 20 November and the Double Duration offer gives you 90 days for the same price, from 20 November to 18 February 2027.",
+          text: "Join by 11:59 PM on 30 November and the Double Duration offer gives you 90 days for the same price, from 30 November to 28 February 2027.",
           endsAt: DOUBLE_DURATION_ENDS_AT,
         },
       },

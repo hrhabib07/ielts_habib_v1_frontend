@@ -20,8 +20,8 @@ import { PRIMARY_STUDENT_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
 /**
- * Distinct URL for Meta Pixel / ad conversion matching.
- * Fires after bKash TrxID submit (PENDING verification).
+ * Confirmation after bKash TrxID submit (PENDING verification).
+ * Meta Purchase is not fired here (only after admin approve).
  */
 export function PaymentConfirmationContent() {
   const router = useRouter();
@@ -44,18 +44,8 @@ export function PaymentConfirmationContent() {
     if (sessionStorage.getItem(key) === "1") return;
     sessionStorage.setItem(key, "1");
 
-    // Single source for Meta Purchase: GTM listens to this dataLayer event.
-    // Do NOT also call fbq('track','Purchase') here  -  that double-counts in Events Manager.
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      event: "purchase",
-      ecommerce: {
-        currency: "BDT",
-        items: [{ item_name: "Gamlish VIP Access" }],
-      },
-      payment_status: "PENDING",
-      is_test: isTest,
-    });
+    // Meta Purchase is owned by MetaPurchaseFlusher + CAPI after admin approve.
+    // Do NOT push dataLayer "purchase" here: old GTM Meta tags would double-fire.
     window.dispatchEvent(
       new CustomEvent("gamlish:payment_submitted", {
         detail: {
@@ -194,8 +184,3 @@ export function PaymentConfirmationContent() {
   );
 }
 
-declare global {
-  interface Window {
-    dataLayer?: Record<string, unknown>[];
-  }
-}

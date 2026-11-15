@@ -162,6 +162,10 @@ export function useVerifyOtp() {
         clearDemoSessionId();
       }
 
+      // Email OTP verify always creates a new account on success.
+      const { fireCompleteRegistration } = await import("@/src/lib/meta-registration");
+      fireCompleteRegistration(res?.data?.metaCompleteRegistrationEventId);
+
       if (role === "ADMIN") {
         window.location.href = "/dashboard/admin";
       } else if (role === "INSTRUCTOR") {
