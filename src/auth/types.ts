@@ -42,6 +42,7 @@ export interface VerifyOtpResponse {
   data: {
     token: string;
     continuePath?: string | null;
+    isNewUser?: boolean;
     /** Server-minted event_id for Meta CompleteRegistration (CAPI dedupe). */
     metaCompleteRegistrationEventId?: string;
     user: {

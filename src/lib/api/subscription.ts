@@ -167,9 +167,25 @@ export async function ackMetaPurchasePixel(
   return res.data.data;
 }
 
-/** Persist CompleteRegistration event_id for later Conversions API dedupe. */
+function readCookie(name: string): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`),
+  );
+  return match?.[1] ? decodeURIComponent(match[1]) : undefined;
+}
+
+/** Persist CompleteRegistration event_id and fire server Conversions API (dedupe). */
 export async function saveMetaRegistrationEventId(
   eventId: string,
 ): Promise<void> {
-  await apiClient.post("/auth/meta-registration-event", { eventId });
+  const fbp = readCookie("_fbp");
+  const fbc = readCookie("_fbc");
+  await apiClient.post("/auth/meta-registration-event", {
+    eventId,
+    eventSourceUrl:
+      typeof window !== "undefined" ? window.location.href : undefined,
+    fbp: fbp || undefined,
+    fbc: fbc || undefined,
+  });
 }

@@ -95,8 +95,10 @@ export function GoogleOAuthCallbackClient() {
 
       if (isNewUser) {
         const { fireCompleteRegistration } = await import("@/src/lib/meta-registration");
-        fireCompleteRegistration(regEventId);
+        await fireCompleteRegistration(regEventId);
       }
+
+      if (cancelled) return;
 
       try {
         window.history.replaceState({}, "", destination);

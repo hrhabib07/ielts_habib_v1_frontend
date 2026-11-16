@@ -265,7 +265,7 @@ export function PhoneOtpAuthPanel({
 
       if (isNewUser) {
         const { fireCompleteRegistration } = await import("@/src/lib/meta-registration");
-        fireCompleteRegistration(res.data.metaCompleteRegistrationEventId);
+        await fireCompleteRegistration(res.data.metaCompleteRegistrationEventId);
       }
 
       if (continuePath) clearDemoSessionId();
