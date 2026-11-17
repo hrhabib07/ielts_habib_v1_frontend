@@ -128,3 +128,24 @@ export async function unlockAdminStudentEnglishAccess(
   );
   return res.data?.data ?? null;
 }
+
+export interface AdminDeleteStudentResult {
+  deletedUserId: string;
+  email: string | null;
+  phone: string | null;
+}
+
+/** Permanently delete a student. Requires the signed-in admin's password. */
+export async function deleteAdminStudent(
+  userId: string,
+  adminPassword: string,
+): Promise<AdminDeleteStudentResult> {
+  const res = await apiClient.post<ApiResponse<AdminDeleteStudentResult>>(
+    `/admin/users/${userId}/delete`,
+    { adminPassword },
+  );
+  if (!res.data?.data) {
+    throw new Error(res.data?.message || "Delete failed");
+  }
+  return res.data.data;
+}

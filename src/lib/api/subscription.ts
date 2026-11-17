@@ -128,12 +128,12 @@ export async function getFoundingMembersWall(): Promise<FoundingMembersWall> {
 /** Student: submit payment proof for a plan */
 export async function submitSubscriptionRequest(
   payload: SubmitRequestPayload,
-): Promise<unknown> {
-  const res = await apiClient.post<{ success: boolean; data: unknown }>(
-    "/subscription-requests",
-    payload,
-  );
-  return res.data?.data;
+): Promise<{ _id?: string } | null> {
+  const res = await apiClient.post<{
+    success: boolean;
+    data: { _id?: string } | null;
+  }>("/subscription-requests", payload);
+  return res.data?.data ?? null;
 }
 
 /** Student: latest payment application */
@@ -167,25 +167,16 @@ export async function ackMetaPurchasePixel(
   return res.data.data;
 }
 
-function readCookie(name: string): string | undefined {
-  if (typeof document === "undefined") return undefined;
-  const match = document.cookie.match(
-    new RegExp(`(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`),
-  );
-  return match?.[1] ? decodeURIComponent(match[1]) : undefined;
-}
-
 /** Persist CompleteRegistration event_id and fire server Conversions API (dedupe). */
 export async function saveMetaRegistrationEventId(
   eventId: string,
 ): Promise<void> {
-  const fbp = readCookie("_fbp");
-  const fbc = readCookie("_fbc");
+  const { metaClickPayloadForAuth } = await import("@/src/lib/meta-attribution");
+  const clicks = metaClickPayloadForAuth();
   await apiClient.post("/auth/meta-registration-event", {
     eventId,
     eventSourceUrl:
       typeof window !== "undefined" ? window.location.href : undefined,
-    fbp: fbp || undefined,
-    fbc: fbc || undefined,
+    ...clicks,
   });
 }

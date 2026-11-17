@@ -4,6 +4,7 @@ import {
   captureConversionAttribution,
   getOrCreateFunnelSessionId,
 } from "@/src/lib/conversion-funnel-attribution";
+import { metaClickPayloadForAuth } from "@/src/lib/meta-attribution";
 
 export type ConversionFunnelEventName =
   | "visit"
@@ -54,6 +55,8 @@ export function attributionPayloadForAuth(): {
   utmCampaign: string | null;
   utmContent: string | null;
   referrer: string | null;
+  fbp?: string;
+  fbc?: string;
 } {
   const attr = captureConversionAttribution();
   return {
@@ -63,6 +66,7 @@ export function attributionPayloadForAuth(): {
     utmCampaign: attr.utmCampaign,
     utmContent: attr.utmContent,
     referrer: attr.referrer,
+    ...metaClickPayloadForAuth(),
   };
 }
 

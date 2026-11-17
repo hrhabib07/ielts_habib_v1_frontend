@@ -215,8 +215,9 @@ export function BkashCheckoutForm({
           visitorId: getOrCreateVisitorId(),
         });
 
+      let created: { _id?: string } | null = null;
       try {
-        await submitOnce();
+        created = await submitOnce();
       } catch (firstErr: unknown) {
         const first = readApiError(firstErr);
         // One automatic retry for flaky mobile networks after auth recovery.
@@ -227,12 +228,15 @@ export function BkashCheckoutForm({
           first.status === 503
         ) {
           await waitForClientAuthReady({ timeoutMs: 5_000 });
-          await submitOnce();
+          created = await submitOnce();
         } else {
           throw firstErr;
         }
       }
-      trackInitiateCheckout({ value: payableAmount });
+      trackInitiateCheckout({
+        value: payableAmount,
+        eventId: created?._id,
+      });
       void trackFunnelEvent({
         event: "payment_submit_success",
         path: "/checkout",

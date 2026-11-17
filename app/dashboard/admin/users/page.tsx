@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  deleteAdminStudent,
   getAdminStudentEnglishProgress,
   listAdminEnglishStudents,
   unlockAdminStudentEnglishAccess,
@@ -21,11 +22,32 @@ import {
   CheckCircle2,
   Lock,
   Search,
+  Trash2,
   Unlock,
   User,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function extractApiError(err: unknown): string {
+  if (err && typeof err === "object" && "response" in err) {
+    const ax = err as {
+      response?: {
+        data?: {
+          message?: string;
+          errorSources?: { message?: string }[];
+        };
+      };
+    };
+    return (
+      ax.response?.data?.message ||
+      ax.response?.data?.errorSources?.[0]?.message ||
+      "Request failed"
+    );
+  }
+  if (err instanceof Error) return err.message;
+  return "Request failed";
+}
 
 function paymentDisplay(label: AdminPaymentLabel | string | undefined) {
   switch (label) {
@@ -94,6 +116,10 @@ export default function AdminUsersPage() {
   const [detail, setDetail] = useState<AdminStudentEnglishProgress | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const loadList = useCallback(
     async (nextPage = page, nextQuery = query) => {
@@ -127,6 +153,9 @@ export default function AdminUsersPage() {
     setSelectedId(userId);
     setLoadingDetail(true);
     setError(null);
+    setDeleteOpen(false);
+    setAdminPassword("");
+    setDeleteError(null);
     try {
       const data = await getAdminStudentEnglishProgress(userId);
       setDetail(data);
@@ -149,6 +178,28 @@ export default function AdminUsersPage() {
       setError("Could not unlock premium access. Try again.");
     } finally {
       setUnlocking(false);
+    }
+  };
+
+  const confirmDeleteStudent = async () => {
+    if (!selectedId || deleting) return;
+    if (!adminPassword.trim()) {
+      setDeleteError("Enter your admin password to confirm.");
+      return;
+    }
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAdminStudent(selectedId, adminPassword);
+      setSelectedId(null);
+      setDetail(null);
+      setDeleteOpen(false);
+      setAdminPassword("");
+      await loadList(page, query);
+    } catch (err) {
+      setDeleteError(extractApiError(err));
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -246,6 +297,101 @@ export default function AdminUsersPage() {
                   </Button>
                 </div>
               ) : null}
+
+              <div className="rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-4">
+                {!deleteOpen ? (
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">
+                        Delete this account
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Permanently removes the student so you can register the
+                        same email or phone again (e.g. Meta CompleteRegistration QA).
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="shrink-0 gap-2"
+                      onClick={() => {
+                        setDeleteOpen(true);
+                        setDeleteError(null);
+                        setAdminPassword("");
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete account
+                    </Button>
+                  </div>
+                ) : (
+                  <form
+                    className="space-y-3"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      void confirmDeleteStudent();
+                    }}
+                  >
+                    <p className="text-sm font-semibold text-foreground">
+                      Confirm delete
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      This cannot be undone. Related progress, subscriptions, and
+                      OTPs are removed. Re-enter your admin password to continue.
+                    </p>
+                    {detail.user.hasPurchased ||
+                    detail.access?.paymentLabel === "paid" ? (
+                      <p className="text-xs font-medium text-amber-800 dark:text-amber-200">
+                        This student has purchase history. Delete only if you
+                        intend to wipe the account for testing.
+                      </p>
+                    ) : null}
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-delete-password">
+                        Your admin password
+                      </Label>
+                      <Input
+                        id="admin-delete-password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={adminPassword}
+                        onChange={(e) => setAdminPassword(e.target.value)}
+                        placeholder="Admin password"
+                        disabled={deleting}
+                      />
+                    </div>
+                    {deleteError ? (
+                      <p className="text-sm text-destructive">{deleteError}</p>
+                    ) : null}
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="submit"
+                        variant="destructive"
+                        size="sm"
+                        className="gap-2"
+                        disabled={deleting}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        {deleting ? "Deleting…" : "Yes, delete permanently"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={deleting}
+                        onClick={() => {
+                          setDeleteOpen(false);
+                          setAdminPassword("");
+                          setDeleteError(null);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                )}
+              </div>
 
               {error ? (
                 <p className="text-sm text-destructive">{error}</p>
