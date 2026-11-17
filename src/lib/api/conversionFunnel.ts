@@ -105,9 +105,25 @@ export async function syncConversionFunnelDay(date: string): Promise<{
   date: string;
   reason?: string;
 }> {
-  const res = await apiClient.post<{
-    success: boolean;
-    data: { synced: boolean; rows: number; date: string; reason?: string };
-  }>("/conversion-funnel/sync", { date });
-  return res.data.data;
+  try {
+    const res = await apiClient.post<{
+      success: boolean;
+      message?: string;
+      data: { synced: boolean; rows: number; date: string; reason?: string };
+    }>("/conversion-funnel/sync", { date });
+    return res.data.data;
+  } catch (err) {
+    // Re-throw with server message so the admin UI can show Google's code/message.
+    if (err && typeof err === "object" && "response" in err) {
+      const ax = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      const serverMsg = ax.response?.data?.message;
+      if (serverMsg) {
+        throw new Error(serverMsg);
+      }
+    }
+    throw err;
+  }
 }

@@ -80,8 +80,29 @@ export function ConversionFunnelAdminClient() {
             ? "Sheets not configured. Set GOOGLE_SHEETS_CLIENT_EMAIL and GOOGLE_SHEETS_PRIVATE_KEY on Railway."
             : "Sync skipped.",
       );
-    } catch {
-      setSyncMsg("Sync failed. Check Sheets credentials and Editor access.");
+    } catch (err) {
+      const ax =
+        err && typeof err === "object" && "response" in err
+          ? (err as {
+              response?: {
+                data?: {
+                  message?: string;
+                  errorSources?: { message?: string }[];
+                };
+              };
+            })
+          : null;
+      const apiMessage =
+        ax?.response?.data?.message ||
+        ax?.response?.data?.errorSources?.[0]?.message ||
+        (err instanceof Error ? err.message : null);
+      setSyncMsg(
+        apiMessage
+          ? apiMessage.startsWith("Sync failed")
+            ? apiMessage
+            : `Sync failed: ${apiMessage}`
+          : "Sync failed. Check Sheets credentials and Editor access.",
+      );
     } finally {
       setSyncing(false);
     }
