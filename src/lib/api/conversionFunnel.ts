@@ -8,7 +8,18 @@ import { metaClickPayloadForAuth } from "@/src/lib/meta-attribution";
 
 export type ConversionFunnelEventName =
   | "visit"
+  | "play_start"
+  | "note_opened"
+  | "note_finished"
+  | "quiz_finished"
+  | "game_finished"
+  | "signup_prompt_view"
+  | "signup_started"
   | "signup"
+  | "name_saved"
+  | "offer_viewed"
+  | "offer_dismissed"
+  | "unlock_opened"
   | "trial_finished"
   | "pricing_viewed"
   | "trxid_submitted"
@@ -78,11 +89,18 @@ export interface ConversionFunnelStepRow {
   isBiggestDrop: boolean;
 }
 
+export interface ConversionFunnelBranch {
+  steps: ConversionFunnelStepRow[];
+  biggestLeak: string | null;
+}
+
 export interface ConversionFunnelDashboard {
   from: string;
   to: string;
   source: ConversionFunnelSource;
   steps: ConversionFunnelStepRow[];
+  preReg: ConversionFunnelBranch;
+  postReg: ConversionFunnelBranch;
   levelCompleted: number;
 }
 
@@ -113,7 +131,6 @@ export async function syncConversionFunnelDay(date: string): Promise<{
     }>("/conversion-funnel/sync", { date });
     return res.data.data;
   } catch (err) {
-    // Re-throw with server message so the admin UI can show Google's code/message.
     if (err && typeof err === "object" && "response" in err) {
       const ax = err as {
         response?: { data?: { message?: string } };

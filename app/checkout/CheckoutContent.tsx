@@ -34,6 +34,7 @@ export function CheckoutContent({
   const forceCheckoutForm = searchParams.get("again") === "1";
   const copy = useCheckoutCopy();
   const { locale } = useUiLocale();
+  const bn = locale === "bn";
   const [pricing, setPricing] = useState<PublicPricing | null>(initialPricing);
   const [pricingError, setPricingError] = useState<string | null>(null);
   const [pricingLoading, setPricingLoading] = useState(!initialPricing);
@@ -53,27 +54,30 @@ export function CheckoutContent({
   const isTestPending =
     isPendingReview && Boolean(payment.latestRequest?.isTest);
 
-  const loadPricing = useCallback(async (silent = false) => {
-    if (!silent) {
-      setPricingLoading(true);
-      setPricingError(null);
-    }
-    try {
-      const data = await getPublicPricing();
-      setPricing(data);
-      setPricingError(null);
-    } catch {
+  const loadPricing = useCallback(
+    async (silent = false) => {
       if (!silent) {
-        setPricingError(
-          locale === "bn"
-            ? "মূল্য লোড করা যায়নি। ব্যাকএন্ড চালু আছে কিনা দেখুন, তারপর আবার চেষ্টা করুন।"
-            : "Could not load pricing. Check the backend is running, then try again.",
-        );
+        setPricingLoading(true);
+        setPricingError(null);
       }
-    } finally {
-      if (!silent) setPricingLoading(false);
-    }
-  }, [locale]);
+      try {
+        const data = await getPublicPricing();
+        setPricing(data);
+        setPricingError(null);
+      } catch {
+        if (!silent) {
+          setPricingError(
+            bn
+              ? "মূল্য লোড করা যায়নি। ব্যাকএন্ড চালু আছে কিনা দেখুন, তারপর আবার চেষ্টা করুন।"
+              : "Could not load pricing. Check the backend is running, then try again.",
+          );
+        }
+      } finally {
+        if (!silent) setPricingLoading(false);
+      }
+    },
+    [bn],
+  );
 
   useEffect(() => {
     if (initialPricing) {
@@ -83,7 +87,6 @@ export function CheckoutContent({
     void loadPricing(false);
   }, [initialPricing, loadPricing]);
 
-  /** Cookie can lag behind phone OTP. Wait on this page instead of bouncing to login. */
   useEffect(() => {
     if (initialUser) {
       setSessionReady(true);
@@ -107,12 +110,13 @@ export function CheckoutContent({
       setPaymentWaitExpired(false);
       return;
     }
-    const timer = window.setTimeout(() => setPaymentWaitExpired(true), PAYMENT_BOOT_WAIT_MS);
+    const timer = window.setTimeout(
+      () => setPaymentWaitExpired(true),
+      PAYMENT_BOOT_WAIT_MS,
+    );
     return () => window.clearTimeout(timer);
   }, [payment.loading]);
 
-  /** Pending real submission: confirmation URL for ad tracking.
-   *  Test QA can force the form with ?again=1 to resubmit. */
   useEffect(() => {
     if (payment.loading) return;
     if (forceCheckoutForm && isTestPending) return;
@@ -128,9 +132,9 @@ export function CheckoutContent({
   ]);
 
   const bootLoading =
-    sessionChecking ||
     pricingLoading ||
-    (hasSession && payment.loading && !paymentWaitExpired);
+    (hasSession &&
+      (sessionChecking || (payment.loading && !paymentWaitExpired)));
 
   if (bootLoading) {
     return (
@@ -140,51 +144,22 @@ export function CheckoutContent({
     );
   }
 
-  if (!hasSession) {
-    return (
-      <div
-        className={cn(
-          "mx-auto max-w-lg px-4 py-16 text-center",
-          locale === "bn" && "font-bengali",
-        )}
-      >
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-pink-700 dark:text-pink-300">
-          {copy.pageEyebrow}
-        </p>
-        <h1 className="mt-3 text-2xl font-black tracking-tight text-foreground">
-          {copy.loginGateTitle}
-        </h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          {copy.loginGateBody}
-        </p>
-        <Button asChild className="mt-6 rounded-xl">
-          <Link href={`/login?redirect=${encodeURIComponent("/checkout")}`}>
-            {copy.loginGateCta}
-          </Link>
-        </Button>
-        <Link
-          href="/pricing"
-          className="mt-4 block text-sm font-semibold text-foreground/70 underline-offset-4 hover:underline"
-        >
-          {copy.back}
-        </Link>
-      </div>
-    );
-  }
-
   if (pricingError || !pricing) {
     return (
       <div
         className={cn(
           "mx-auto max-w-lg px-4 py-16 text-center",
-          locale === "bn" && "font-bengali",
+          bn && "font-bengali",
         )}
       >
         <p className="text-destructive">
-          {pricingError ?? (locale === "bn" ? "মূল্য পাওয়া যায়নি" : "Pricing unavailable")}
+          {pricingError ?? (bn ? "মূল্য পাওয়া যায়নি" : "Pricing unavailable")}
         </p>
-        <Button className="mt-4 rounded-xl" onClick={() => void loadPricing(false)}>
-          {locale === "bn" ? "আবার চেষ্টা করুন" : "Try again"}
+        <Button
+          className="mt-4 rounded-xl"
+          onClick={() => void loadPricing(false)}
+        >
+          {bn ? "আবার চেষ্টা করুন" : "Try again"}
         </Button>
       </div>
     );
@@ -195,7 +170,7 @@ export function CheckoutContent({
       <div
         className={cn(
           "mx-auto max-w-3xl space-y-6 px-4 py-8 md:py-12",
-          locale === "bn" && "font-bengali",
+          bn && "font-bengali",
         )}
       >
         <PaymentApplicationStatusCard
@@ -203,13 +178,18 @@ export function CheckoutContent({
           latestRequest={payment.latestRequest}
         />
         {hasActiveAccess ? (
-          <div className={cn("rounded-3xl border p-8 text-center", brandStatus.success.card)}>
+          <div
+            className={cn(
+              "rounded-3xl border p-8 text-center",
+              brandStatus.success.card,
+            )}
+          >
             <h2 className="text-xl font-bold text-foreground">
-              {locale === "bn" ? "প্রিমিয়াম অ্যাক্সেস সক্রিয়" : "Premium access is active"}
+              {bn ? "প্রিমিয়াম অ্যাক্সেস সক্রিয়" : "Premium access is active"}
             </h2>
             <Button asChild className="mt-4 rounded-xl">
               <Link href="/player">
-                {locale === "bn" ? "খেলা চালিয়ে যান" : "Continue playing"}
+                {bn ? "খেলা চালিয়ে যান" : "Continue playing"}
               </Link>
             </Button>
           </div>
@@ -223,7 +203,7 @@ export function CheckoutContent({
       <div
         className={cn(
           "mx-auto max-w-lg px-4 py-16 text-center",
-          locale === "bn" && "font-bengali",
+          bn && "font-bengali",
         )}
       >
         <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
@@ -238,39 +218,22 @@ export function CheckoutContent({
   return (
     <div
       className={cn(
-        "relative isolate overflow-x-hidden",
-        locale === "bn" && "font-bengali",
+        "relative isolate overflow-x-hidden bg-[radial-gradient(120%_80%_at_50%_-10%,#dbeafe_0%,transparent_42%)]",
+        bn && "font-bengali",
       )}
       lang={locale}
     >
       <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(236,72,153,0.14),transparent_55%),linear-gradient(180deg,hsl(var(--background))_0%,hsl(var(--muted)/0.45)_45%,hsl(var(--background))_100%)]"
         aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:28px_28px] opacity-50"
       />
 
-      <div className="mx-auto max-w-xl space-y-5 px-3 py-6 sm:max-w-2xl sm:px-6 sm:py-10">
-        <div className="space-y-1.5 text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-pink-700 dark:text-pink-300">
-            {copy.pageEyebrow}
+      <div className="mx-auto max-w-xl space-y-5 px-4 py-6 sm:max-w-2xl sm:px-6 sm:py-10">
+        {forceCheckoutForm && isTestPending ? (
+          <p className="text-center text-xs font-semibold text-amber-700 dark:text-amber-300">
+            QA test mode: you can submit again. This will not create a real Founder purchase.
           </p>
-          <h1 className="text-balance text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-            {copy.pageTitle}
-          </h1>
-          <p className="text-pretty text-sm text-muted-foreground sm:text-[15px]">
-            {copy.pageSub}
-          </p>
-          <a
-            href="#checkout-faq"
-            className="inline-block pt-1 text-sm font-semibold text-pink-700 underline-offset-4 hover:underline dark:text-pink-300"
-          >
-            {copy.faqJump}
-          </a>
-          {forceCheckoutForm && isTestPending ? (
-            <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">
-              QA test mode: you can submit again. This will not create a real Founder purchase.
-            </p>
-          ) : null}
-        </div>
+        ) : null}
 
         {payment.latestRequest?.status === "REJECTED" ? (
           <PaymentApplicationStatusCard
@@ -281,24 +244,18 @@ export function CheckoutContent({
 
         <div
           id="bkash-checkout"
-          className="scroll-mt-24 overflow-hidden rounded-[1.5rem] border border-pink-500/20 bg-card/95 shadow-[0_16px_40px_-20px_rgba(236,72,153,0.35)] backdrop-blur-sm sm:rounded-[1.75rem]"
+          className="scroll-mt-24 overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 p-4 shadow-[0_24px_60px_-36px_rgba(15,23,42,0.35)] sm:p-6 dark:border-slate-700 dark:bg-slate-900/90"
         >
-          <div
-            className="h-1.5 w-full bg-gradient-to-r from-pink-400 via-rose-500 to-fuchsia-500"
-            aria-hidden
+          <BkashCheckoutForm
+            pricing={pricing}
+            onClose={() => router.push("/pricing")}
+            onSubmitted={() => {
+              router.push("/payment/confirmation");
+            }}
           />
-          <div className="p-3.5 sm:p-6">
-            <BkashCheckoutForm
-              pricing={pricing}
-              onClose={() => router.push("/pricing")}
-              onSubmitted={() => {
-                router.push("/payment/confirmation");
-              }}
-            />
-          </div>
         </div>
 
-        <PricingFaqSection id="checkout-faq" className="pt-4" />
+        <PricingFaqSection id="checkout-faq" className="pt-2" />
       </div>
     </div>
   );

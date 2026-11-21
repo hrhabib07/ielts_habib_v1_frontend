@@ -40,15 +40,15 @@ export function isTelemetryPathBlacklisted(pathname: string): boolean {
   return BLACKLIST_SEGMENT_RE.test(path);
 }
 
-/** Landing, demo, dashboard, player, auth entry  -  never payment. */
+/** Landing, dashboard, player, auth entry · never payment. */
 export function isTelemetryPathAllowed(pathname: string): boolean {
   if (isTelemetryPathBlacklisted(pathname)) return false;
   const p = pathname.toLowerCase();
   if (p === "/" || p === "" || p === "/test-landing") return true;
   return (
-    p.startsWith("/demo") ||
     p.startsWith("/dashboard") ||
     p.startsWith("/player") ||
+    p.startsWith("/play") ||
     p.startsWith("/register") ||
     p.startsWith("/login") ||
     p.startsWith("/pricing") ||

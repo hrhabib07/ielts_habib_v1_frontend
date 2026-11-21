@@ -13,9 +13,6 @@ const GUEST_NAV_PATHS = new Set([
   "/privacy",
   "/privacy-policy",
   "/instructor-request",
-  "/demo",
-  "/demo/play",
-  "/demo/complete",
   "/test-landing",
 ]);
 
@@ -31,15 +28,14 @@ export function shouldUseGuestLandingNav(
   pathname: string,
   hasUser: boolean,
 ): boolean {
-  if (pathname === "/demo" || pathname.startsWith("/demo/")) return true;
   if (MARKETING_NAV_ALWAYS.has(pathname)) return true;
   if (hasUser) return false;
   return GUEST_NAV_PATHS.has(pathname);
 }
 
 /**
- * Same live player-count chip on every public guest page. Hidden during live demo play
- * and on the homepage, where the hero already renders the chip beside the CTA.
+ * Same live player-count chip on every public guest page.
+ * Hidden on the homepage, where the hero already renders the chip beside the CTA.
  */
 export function shouldShowGuestPaidProof(
   pathname: string,
@@ -48,8 +44,5 @@ export function shouldShowGuestPaidProof(
   if (hasUser) return false;
   if (pathname === "/") return false;
   if (pathname.startsWith("/dashboard")) return false;
-  if (pathname === "/demo/play" || pathname.startsWith("/demo/play/")) {
-    return false;
-  }
   return true;
 }

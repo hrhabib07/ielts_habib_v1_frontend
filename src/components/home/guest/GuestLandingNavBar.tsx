@@ -41,9 +41,6 @@ export function GuestLandingNavBar({
   const isConversionLanding = isHome || pathname === "/test-landing";
   const testCopy = TEST_LANDING_COPY[locale];
   const isLoggedIn = Boolean(user);
-  /** Demo funnel: keep only brand + language so users stay on the save path. */
-  const isDemoFunnel =
-    pathname === "/demo" || pathname.startsWith("/demo/");
 
   const scrollToFaq = () => {
     setMenuOpen(false);
@@ -77,97 +74,93 @@ export function GuestLandingNavBar({
           <GamlishNavBrand showTagline={false} />
         </Link>
 
-        {isDemoFunnel ? null : (
-          <>
-            <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
-              <UiLanguageToggle variant="segmented" />
-              <Link
-                href={accountHref}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:bg-muted/50 hover:text-foreground"
-              >
-                {accountLabel}
-              </Link>
-              <Link
-                href={isLoggedIn ? PRIMARY_STUDENT_HREF : TEST_LANDING_PRIMARY_HREF}
-                onClick={
-                  isConversionLanding ? () => logLandingCtaClick("nav") : undefined
-                }
-                className={cn(
-                  "rounded-lg px-3.5 py-2 text-sm font-bold",
-                  isConversionLanding
-                    ? LANDING_NAV_SECONDARY_CTA_CLASS
-                    : cn("text-white", LANDING_CTA_CLASS),
-                )}
-              >
-                {testCopy.navPrimary}
-              </Link>
-            </div>
+        <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
+          <UiLanguageToggle variant="segmented" />
+          <Link
+            href={accountHref}
+            className="rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:bg-muted/50 hover:text-foreground"
+          >
+            {accountLabel}
+          </Link>
+          <Link
+            href={isLoggedIn ? PRIMARY_STUDENT_HREF : TEST_LANDING_PRIMARY_HREF}
+            onClick={
+              isConversionLanding ? () => logLandingCtaClick("nav") : undefined
+            }
+            className={cn(
+              "rounded-lg px-3.5 py-2 text-sm font-bold",
+              isConversionLanding
+                ? LANDING_NAV_SECONDARY_CTA_CLASS
+                : cn("text-white", LANDING_CTA_CLASS),
+            )}
+          >
+            {testCopy.navPrimary}
+          </Link>
+        </div>
 
-            <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5 lg:hidden">
-              <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-9 w-9 shrink-0 rounded-full border-border/60"
-                    aria-label={copy.navMenu}
+        <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-1.5 lg:hidden">
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 shrink-0 rounded-full border-border/60"
+                aria-label={copy.navMenu}
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="flex w-[min(100vw,20rem)] flex-col gap-0 p-0 sm:max-w-xs"
+            >
+              <SheetTitle className="sr-only">{copy.navMenu}</SheetTitle>
+              <div className="flex flex-col gap-6 px-5 pb-8 pt-14">
+                <nav className="flex flex-col gap-2" aria-label={copy.navMenu}>
+                  <Link
+                    href={isLoggedIn ? PRIMARY_STUDENT_HREF : TEST_LANDING_PRIMARY_HREF}
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(
+                      "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
+                      LANDING_CTA_CLASS,
+                    )}
                   >
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="flex w-[min(100vw,20rem)] flex-col gap-0 p-0 sm:max-w-xs"
-                >
-                  <SheetTitle className="sr-only">{copy.navMenu}</SheetTitle>
-                  <div className="flex flex-col gap-6 px-5 pb-8 pt-14">
-                    <nav className="flex flex-col gap-2" aria-label={copy.navMenu}>
-                      <Link
-                        href={isLoggedIn ? PRIMARY_STUDENT_HREF : TEST_LANDING_PRIMARY_HREF}
-                        onClick={() => setMenuOpen(false)}
-                        className={cn(
-                          "rounded-xl px-4 py-3.5 text-center text-base font-bold text-white",
-                          LANDING_CTA_CLASS,
-                        )}
-                      >
-                        {testCopy.navPrimary}
-                      </Link>
-                      {isConversionLanding ? (
-                        <button
-                          type="button"
-                          onClick={scrollToFaq}
-                          className={linkClass}
-                        >
-                          {testCopy.navFaq}
-                        </button>
-                      ) : (
-                        <Link
-                          href="/#faq"
-                          onClick={() => setMenuOpen(false)}
-                          className={linkClass}
-                        >
-                          {testCopy.navFaq}
-                        </Link>
-                      )}
-                      <Link
-                        href={accountHref}
-                        onClick={() => setMenuOpen(false)}
-                        className={linkClass}
-                      >
-                        {accountLabel}
-                      </Link>
-                    </nav>
-                    <div className="space-y-2 border-t border-border/60 pt-5">
-                      <p className="px-1 text-xs font-semibold text-muted-foreground">{languageLabel}</p>
-                      <UiLanguageToggle variant="segmented" className="w-full justify-between [&>button]:flex-1" />
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-          </>
-        )}
+                    {testCopy.navPrimary}
+                  </Link>
+                  {isConversionLanding ? (
+                    <button
+                      type="button"
+                      onClick={scrollToFaq}
+                      className={linkClass}
+                    >
+                      {testCopy.navFaq}
+                    </button>
+                  ) : (
+                    <Link
+                      href="/#faq"
+                      onClick={() => setMenuOpen(false)}
+                      className={linkClass}
+                    >
+                      {testCopy.navFaq}
+                    </Link>
+                  )}
+                  <Link
+                    href={accountHref}
+                    onClick={() => setMenuOpen(false)}
+                    className={linkClass}
+                  >
+                    {accountLabel}
+                  </Link>
+                </nav>
+                <div className="space-y-2 border-t border-border/60 pt-5">
+                  <p className="px-1 text-xs font-semibold text-muted-foreground">{languageLabel}</p>
+                  <UiLanguageToggle variant="segmented" className="w-full justify-between [&>button]:flex-1" />
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );

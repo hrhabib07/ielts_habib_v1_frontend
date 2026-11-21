@@ -118,7 +118,7 @@ const OPEN_CARD_MS = 2200;
 const CLEAR_CELEBRATION_MS = 4800;
 
 /** Shown instead of "Finish <previous step>" when a node needs everything before it. */
-const FINAL_TEST_LOCKED: Bilingual = { en: "every lesson and game", bn: "সব লেসন আর গেম" };
+const FINAL_TEST_LOCKED: Bilingual = { en: "every lesson and game", bn: "সব লেসন আর গেইম" };
 
 const isDone = (item: PathItem | undefined) => item?.state === "done";
 const isOpen = (item: PathItem | undefined) => item !== undefined && item.state !== "locked" && item.state !== "soon";
@@ -248,8 +248,9 @@ function lessonFirst(stop: Stop): boolean {
   return isOpen(stop.lesson) && !isDone(stop.lesson) && stop.games.length > 0 && !stop.games.some(isDone);
 }
 
-/** The first game of the topic the learner can open right now. */
+/** The first game of the topic the learner can open right now (only after Learn is done). */
 function playableGameHref(stop: Stop): string | null {
+  if (stop.lesson && isOpen(stop.lesson) && !isDone(stop.lesson)) return null;
   return stop.games.find((game) => isOpen(game) && !game.paywalled)?.summary?.href ?? null;
 }
 
@@ -502,6 +503,7 @@ function PartRow({
   lang,
   onClose,
   checkoutHref = null,
+  learnHref = null,
 }: {
   number: number;
   item: PathItem;
@@ -514,15 +516,30 @@ function PartRow({
   onClose: () => void;
   /** Paid parts say why they are locked and link to the unlock step. */
   checkoutHref?: string | null;
+  /** When set on a Play row, Learn is not done yet: Play routes to the lesson instead. */
+  learnHref?: string | null;
 }) {
   const unlockHref = item.paywalled && !isDone(item) ? checkoutHref : null;
   const face = LANG_FACE[lang];
   const open = isOpen(item);
   const done = isDone(item);
+  const needsLearn = Boolean(tone === "play" && learnHref && !done);
   const Icon = tone === "learn" ? BookOpen : tone === "play" ? Gamepad2 : Trophy;
-  const action: Bilingual =
-    tone === "learn" ? (done ? UI.readAgain : UI.start) : tone === "play" ? (done ? UI.playAgain : UI.play) : done ? UI.viewResult : UI.start;
+  const action: Bilingual = needsLearn
+    ? UI.partLearnFirst
+    : tone === "learn"
+      ? done
+        ? UI.readAgain
+        : UI.start
+      : tone === "play"
+        ? done
+          ? UI.playAgain
+          : UI.play
+        : done
+          ? UI.viewResult
+          : UI.start;
   const quiet = done && tone !== "test";
+  const href = needsLearn ? learnHref : item.summary?.href;
 
   return (
     <div
@@ -543,7 +560,7 @@ function PartRow({
           "flex size-10 shrink-0 items-center justify-center rounded-xl text-white",
           done
             ? "bg-emerald-500"
-            : !open
+            : !open || needsLearn
               ? "bg-slate-300"
               : tone === "learn"
                 ? "bg-slate-400"
@@ -575,6 +592,12 @@ function PartRow({
           ) : null}
         </p>
         <p className={cn(face, "truncate text-sm font-bold text-slate-800")}>{pick(detail, lang)}</p>
+        {needsLearn ? (
+          <p className={cn(face, "mt-0.5 flex items-center gap-1 text-[11px] font-bold text-accent")}>
+            <BookOpen className="size-3" aria-hidden />
+            {pick(UI.learnThenPlay, lang)}
+          </p>
+        ) : null}
         {unlockHref ? (
           <p className={cn(face, "mt-0.5 flex items-center gap-1 text-[11px] font-bold text-amber-700")}>
             <Lock className="size-3" aria-hidden />
@@ -590,9 +613,9 @@ function PartRow({
           </span>
         ) : null}
       </div>
-      {open && item.summary ? (
+      {open && href ? (
         <Link
-          href={item.summary.href}
+          href={href}
           onClick={onClose}
           className={cn(
             face,
@@ -600,10 +623,12 @@ function PartRow({
             lang === "en" && "uppercase tracking-wide",
             quiet
               ? "bg-white px-3 py-1.5 font-bold text-slate-500 ring-1 ring-slate-200 hover:bg-slate-50"
-              : cn(
-                  "border-b-4 px-3.5 py-2 font-extrabold text-white active:border-b-2",
-                  tone === "learn" ? "border-slate-600 bg-slate-500" : tone === "play" ? "border-primary bg-accent" : "border-amber-600 bg-amber-400",
-                ),
+              : needsLearn
+                ? "border-b-4 border-slate-600 bg-slate-500 px-3.5 py-2 font-extrabold text-white active:border-b-2"
+                : cn(
+                    "border-b-4 px-3.5 py-2 font-extrabold text-white active:border-b-2",
+                    tone === "learn" ? "border-slate-600 bg-slate-500" : tone === "play" ? "border-primary bg-accent" : "border-amber-600 bg-amber-400",
+                  ),
           )}
         >
           {pick(action, lang)}
@@ -822,6 +847,16 @@ function StopCard({
           />
         ) : null}
 
+        {stop.lesson &&
+        stop.games.length > 0 &&
+        isDone(stop.lesson) &&
+        stop.games.some((game) => !isDone(game)) &&
+        status !== "locked" ? (
+          <p className={cn(face, "rounded-2xl bg-accent/5 px-3 py-2 text-center text-xs font-bold text-accent ring-1 ring-accent/15")}>
+            {pick(UI.learnThenPlay, lang)}
+          </p>
+        ) : null}
+
         {stop.games.map((game) =>
           game.summary ? (
             <PartRow
@@ -839,6 +874,9 @@ function StopCard({
               lang={lang}
               onClose={onClose}
               checkoutHref={checkoutHref}
+              learnHref={
+                stop.lesson && !isDone(stop.lesson) ? stop.lesson.summary?.href ?? null : null
+              }
             />
           ) : null,
         )}

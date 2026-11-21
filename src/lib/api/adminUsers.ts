@@ -3,6 +3,22 @@ import type { ApiResponse } from "./types";
 
 export type AdminPaymentLabel = "unpaid" | "pending" | "paid";
 export type AdminPremiumLabel = "live" | "preorder" | "free";
+export type AdminStudentListFilter =
+  | "all"
+  | "active"
+  | "idle"
+  | "paid"
+  | "pending"
+  | "unpaid"
+  | "new";
+export type AdminStudentCondition =
+  | "new"
+  | "on_track"
+  | "slow"
+  | "stuck"
+  | "churn_risk"
+  | "pending_pay";
+export type AdminStudentSort = "activity" | "joined";
 
 export interface AdminStudentAccessSummary {
   hasPurchased: boolean;
@@ -17,7 +33,8 @@ export interface AdminStudentAccessSummary {
 
 export interface AdminStudentListItem {
   _id: string;
-  email: string;
+  email: string | null;
+  phone?: string | null;
   username: string | null;
   displayName: string | null;
   signupIp: string | null;
@@ -25,6 +42,10 @@ export interface AdminStudentListItem {
   paymentLabel?: AdminPaymentLabel;
   premiumLabel?: AdminPremiumLabel;
   createdAt: string;
+  lastActiveAt?: string;
+  idleDays?: number;
+  condition?: AdminStudentCondition;
+  hasPendingPayment?: boolean;
   progress: {
     completedMissions: number;
     totalMissions: number;
@@ -32,6 +53,7 @@ export interface AdminStudentListItem {
     currentMissionSlug: string | null;
     currentMissionTitle: string | null;
     currentMissionOrder: number | null;
+    currentStatus?: "in_progress" | "available" | "completed" | "not_started";
   };
 }
 
@@ -54,6 +76,89 @@ export interface AdminMissionState {
   currentStageOrder: number | null;
   completedStageOrders: number[];
   status: "locked" | "available" | "in_progress" | "completed";
+}
+
+export type AdminQuestionAttemptStatus =
+  | "correct"
+  | "wrong"
+  | "in_progress"
+  | "unattempted";
+
+export type AdminStageProgressStatus =
+  | "completed"
+  | "current"
+  | "upcoming"
+  | "locked";
+
+export interface AdminInspectionPart {
+  index: number;
+  prompt: string;
+}
+
+export interface AdminInspectionQuestion {
+  id: string;
+  index: number;
+  label: string;
+  prompt: string | null;
+  status: AdminQuestionAttemptStatus;
+  attempts: number;
+  parts: AdminInspectionPart[];
+  lastAnswer: string | null;
+}
+
+export interface AdminInspectionStage {
+  order: number;
+  title: string;
+  kind: string;
+  evalType: string | null;
+  status: AdminStageProgressStatus;
+  scorePercent: number | null;
+  questionTotal: number;
+  questionCorrect: number;
+  questionAttempted: number;
+  questions: AdminInspectionQuestion[];
+}
+
+export interface AdminInspectionMission {
+  id: string;
+  slug: string;
+  order: number;
+  title: string;
+  status: AdminMissionState["status"];
+  accessTier: string;
+  isInspection: boolean;
+  xpEarned: number;
+  bestScorePercent: number | null;
+  currentStageOrder: number | null;
+  completedStageOrders: number[];
+  updatedAt: string | null;
+  stages: AdminInspectionStage[];
+}
+
+export interface AdminInspectionFocus {
+  missionOrder: number;
+  missionSlug: string;
+  missionTitle: string;
+  missionStatus: AdminMissionState["status"];
+  stageOrder: number;
+  stageTitle: string;
+  stageKind: string;
+  evalType: string | null;
+  questionIndex: number | null;
+  questionTotal: number;
+  questionId: string | null;
+  questionLabel: string | null;
+  locationLabel: string;
+  questionsCorrect: number;
+  questionsAttempted: number;
+  xpEarned: number;
+  updatedAt: string | null;
+}
+
+export interface AdminEnglishInspection {
+  lastActiveAt: string | null;
+  focus: AdminInspectionFocus | null;
+  missions: AdminInspectionMission[];
 }
 
 export interface AdminStudentEnglishProgress {
@@ -90,12 +195,15 @@ export interface AdminStudentEnglishProgress {
     totalMissions: number;
     percent: number;
   };
+  inspection?: AdminEnglishInspection;
 }
 
 export async function listAdminEnglishStudents(params?: {
   q?: string;
   page?: number;
   limit?: number;
+  filter?: AdminStudentListFilter;
+  sort?: AdminStudentSort;
 }): Promise<AdminEnglishStudentsPage> {
   const res = await apiClient.get<ApiResponse<AdminEnglishStudentsPage>>(
     "/admin/users/english",

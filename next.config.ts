@@ -51,11 +51,25 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // Retired Mission Zero demo: every entry point opens the free playground (signed-in users go on to Mission 1).
+      // Retired test/demo funnels → live guest play / checkout.
       { source: "/demo", destination: "/play", permanent: false },
       { source: "/demo/:path*", destination: "/play", permanent: false },
+      { source: "/pricing/demo", destination: "/pricing", permanent: false },
+      { source: "/pricing/demo/:path*", destination: "/pricing", permanent: false },
+      { source: "/checkout/demo", destination: "/checkout", permanent: false },
+      { source: "/checkout/demo/:path*", destination: "/checkout", permanent: false },
       { source: "/player/mission-zero", destination: "/play", permanent: false },
       { source: "/player/mission-zero-test", destination: "/play", permanent: false },
+      {
+        source: "/dashboard/admin/demo-feedback",
+        destination: "/dashboard/admin/conversion-funnel",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/admin/demo-conversion",
+        destination: "/dashboard/admin/conversion-funnel",
+        permanent: false,
+      },
       {
         source: "/score-guarantee",
         destination: "/",

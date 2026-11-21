@@ -52,6 +52,8 @@ type ScreenProps = {
   step: ChatLessonStep;
   /** Level map. After finishing, Continue returns here with `?completed=<step id>`. */
   backHref?: string;
+  /** When set, Continue opens this playground (Learn → গেইম) instead of only the map. */
+  nextPlayHref?: string | null;
   onComplete?: (score: number, max: number) => void;
 };
 
@@ -65,7 +67,7 @@ export function ChatLessonPlayer({ audio, ...screen }: ScreenProps & { audio?: S
   );
 }
 
-function ChatLessonScreen({ step, backHref, onComplete }: ScreenProps) {
+function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenProps) {
   const router = useRouter();
   const { state, chunk, activeQuestion, totals, chunkScore, actions } = useChatLesson(step);
   const { stop: stopSpeech } = useLessonSpeech();
@@ -110,6 +112,10 @@ function ChatLessonScreen({ step, backHref, onComplete }: ScreenProps) {
   }, [entries.length, phase.name, revealedCount, chunkIndex, rereading, reduceMotion]);
 
   const finishStep = () => {
+    if (nextPlayHref) {
+      router.push(nextPlayHref);
+      return;
+    }
     if (backHref) router.push(`${backHref}?completed=${encodeURIComponent(step.id)}`);
     else actions.restart();
   };
@@ -340,7 +346,7 @@ function ChatLessonScreen({ step, backHref, onComplete }: ScreenProps) {
               : 0
           }
           lang={lang}
-          continueLabel={pick(UI.trayContinue, lang)}
+          continueLabel={pick(nextPlayHref ? UI.learnThenPlay : UI.trayContinue, lang)}
           onContinue={finishStep}
           onReplay={actions.restart}
         />

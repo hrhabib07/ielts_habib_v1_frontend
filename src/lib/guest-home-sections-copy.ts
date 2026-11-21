@@ -294,7 +294,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       whyNow:
         "আজই শুরু করতে পারেন। যে ইংরেজি দক্ষতা আপনার সত্যিই দরকার, সেটাই গড়ুন।",
       ctaPrimary: "আপনিও পারবেন · এখনই শুরু করুন",
-      ctaSecondary: "ফ্রি গেম খেলুন",
+      ctaSecondary: "ফ্রি শুরু করুন",
     },
     problemBadge: "আসল সমস্যা",
     problemTitle:

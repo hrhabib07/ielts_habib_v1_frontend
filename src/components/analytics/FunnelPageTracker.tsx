@@ -8,7 +8,6 @@ import { captureAndReadUtmAttribution } from "@/src/lib/funnel-attribution";
 const TRACKED_PATHS = new Set([
   "/",
   "/test-landing",
-  "/demo",
   "/pricing",
   "/register",
   "/login",
@@ -37,11 +36,9 @@ export function FunnelPageTracker() {
           ? "landing_home"
           : pathname === "/test-landing"
             ? "landing_test"
-            : pathname === "/demo"
-              ? "demo_enter"
-              : pathname === "/checkout"
-                ? "checkout"
-                : pathname.replace(/^\//, "") || "home",
+            : pathname === "/checkout"
+              ? "checkout"
+              : pathname.replace(/^\//, "") || "home",
     });
   }, [pathname]);
 

@@ -18,7 +18,8 @@ import { readMissionState, writeMissionState } from "@/src/features/learner/lib/
 import type { Learner } from "@/src/features/learner/lib/personalize";
 import { resizePhoto } from "@/src/features/learner/lib/resizePhoto";
 import { getDecodedTokenClient, hydrateAccessTokenFromCookie } from "@/src/lib/auth";
-import { clearGuestProgress, guestProgress } from "@/src/features/guest/guestProgress";
+import { clearGuestProgress, guestFunnel, guestProgress } from "@/src/features/guest/guestProgress";
+import { GUEST_LESSON_CLAIM_ID } from "@/src/features/guest/guestPath";
 import {
   claimChatMissionGuestResults,
   getChatMissionState,
@@ -152,10 +153,16 @@ export function MissionShell({
   useEffect(() => {
     if (!serverLoaded) return;
     const progress = guestProgress();
+    const funnel = guestFunnel();
     const partials = Object.fromEntries(Object.entries(progress).map(([id, p]) => [id, p.rounds]));
-    if (Object.keys(partials).length === 0) return;
+    const results: Record<string, { score: number; max: number }> = {};
+    // Mini-lesson note + quiz count as the Subject lesson so Learn-first is satisfied after signup.
+    if (funnel.noteDone && funnel.quizDone) {
+      results[GUEST_LESSON_CLAIM_ID] = { score: 2, max: 2 };
+    }
+    if (Object.keys(partials).length === 0 && Object.keys(results).length === 0) return;
     clearGuestProgress();
-    void claimChatMissionGuestResults({ results: {}, partials })
+    void claimChatMissionGuestResults({ results, partials })
       .then((saved) => {
         setState((current) =>
           current?.enabled ? { ...current, results: saved.results, partials: saved.partials } : current,

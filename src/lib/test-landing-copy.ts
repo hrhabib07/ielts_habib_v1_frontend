@@ -116,8 +116,8 @@ export interface TestLandingCopy {
 export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
   bn: {
     testBanner: "",
-    navPrimary: "এখনই ফ্রিতে খেলুন",
-    navDemo: "এখনই ফ্রিতে খেলুন",
+    navPrimary: "ফ্রি শুরু করুন",
+    navDemo: "ফ্রি শুরু করুন",
     navFaq: "প্রশ্ন ও উত্তর",
     eyebrow: "Gamlish · The Game of English",
     headlineLine1: "গেইম খেলুন,",
@@ -130,8 +130,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     priceSave: `${TEST_LANDING_SAVE_PRICE} সাশ্রয়`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
     priceMeta: "45 দিন · 21টি লেভেল",
-    ctaPrimary: "এখনই ফ্রিতে খেলুন",
-    ctaTrust: "সাইন আপ ছাড়াই খেলা শুরু করুন। কোনো পেমেন্ট লাগবে না।",
+    ctaPrimary: "ফ্রি শুরু করুন",
+    ctaTrust: "আগে ছোট নোট, তারপর গেইম। সাইন আপ ছাড়াই শুরু। কোনো পেমেন্ট লাগবে না।",
     heroCompareAlt:
       "Gamlish ছাড়া ইংরেজি দুর্বল ভিত্তির উপর দাঁড়ায়। Gamlish-এর সাথে একই ইংরেজি শক্ত ভিত্তির উপর মজবুত হয়।",
     heroFoundationLabel: "এখানে Gamlish কাজ করে",
@@ -139,8 +139,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "দুর্বল ভিত্তি",
     heroCompareWithTitle: "Gamlish নিয়ে",
     heroCompareWithSub: "শক্ত ভিত্তি",
-    stickyPrimary: "এখনই ফ্রিতে খেলুন",
-    stickySecondary: "এখনই ফ্রিতে খেলুন",
+    stickyPrimary: "ফ্রি শুরু করুন",
+    stickySecondary: "ফ্রি শুরু করুন",
     compareEyebrow: "কেন Gamlish",
     compareTitle: "গতানুগতিক ইংরেজি শেখা vs Gamlish",
     compareOld: "পুরনো নিয়ম",
@@ -214,7 +214,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     offerRisk:
       "হিডেন চার্জ নেই। পেমেন্ট bKash-এ। 45 দিনের অ্যাক্সেস, আজীবন নয়।",
     offerCta: "লেভেল 1 ফ্রি খেলুন",
-    footerCtaTitle: "সাইন আপ ছাড়াই প্রথম 3টি গেম ফ্রি",
+    footerCtaTitle: "সাইন আপ ছাড়াই একটি ছোট নোট + গেইম ফ্রি",
     faqTitle: "প্রায়শই জিজ্ঞাসিত প্রশ্ন",
     faq: [
       {
@@ -243,7 +243,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
       {
         q: "টাকা দেওয়ার আগে ফ্রিতে দেখা যাবে? খরচ কত?",
-        a: `হ্যাঁ। সাইন-আপ ছাড়াই প্রথম 3টি গেম খেলতে পারবেন। Google দিয়ে সাইন-ইন করলে Subject, Number আর Person-এর প্রথম গেম পর্যন্ত ফ্রি। পুরো গেমের দাম ${TEST_LANDING_LIST_PRICE}, bKash বা ব্যাংক ট্রান্সফারে (NPSB) দিতে পারবেন।`,
+        a: `হ্যাঁ। সাইন-আপ ছাড়াই একটি ছোট Subject নোট, 1-2টি প্রশ্ন আর একটি গেইম খেলতে পারবেন। Google দিয়ে সাইন-ইন করলে Subject, Number আর Person-এর প্রথম গেইম পর্যন্ত ফ্রি। পুরো গেইমের দাম ${TEST_LANDING_LIST_PRICE}, bKash বা ব্যাংক ট্রান্সফারে (NPSB) দিতে পারবেন।`,
         timed: {
           text: "31 December 2026-এর মধ্যে যুক্ত হলে প্রোফাইলে পাবেন Legacy Learner ব্যাজ।",
           endsAt: LEGACY_BADGE_ENDS_AT,
@@ -253,8 +253,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
   },
   en: {
     testBanner: "",
-    navPrimary: "Play now, free",
-    navDemo: "Play now, free",
+    navPrimary: "Start free",
+    navDemo: "Start free",
     navFaq: "FAQ",
     eyebrow: "Gamlish · The Game of English",
     headlineLine1: "Play games,",
@@ -267,8 +267,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     priceSave: `Save ${TEST_LANDING_SAVE_PRICE}`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
     priceMeta: "45 days · 21 levels",
-    ctaPrimary: "Play now, free",
-    ctaTrust: "Start playing without signing up. No payment needed.",
+    ctaPrimary: "Start free",
+    ctaTrust: "A short note, then a game. Start without signing up. No payment needed.",
     heroCompareAlt:
       "Your English without Gamlish stands on a weak foundation. With Gamlish, the same English stands on a strong foundation.",
     heroFoundationLabel: "Gamlish works here",
@@ -276,8 +276,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "Weak foundation",
     heroCompareWithTitle: "With Gamlish",
     heroCompareWithSub: "Strong foundation",
-    stickyPrimary: "Play now, free",
-    stickySecondary: "Play now, free",
+    stickyPrimary: "Start free",
+    stickySecondary: "Start free",
     compareEyebrow: "Why Gamlish",
     compareTitle: "Traditional English learning vs Gamlish",
     compareOld: "Old way",
@@ -351,7 +351,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     offerRisk:
       "No hidden fee. Pay with bKash. 45-day access, not lifetime.",
     offerCta: "Play Level 1 free",
-    footerCtaTitle: "Your first 3 games are free, no sign-up",
+    footerCtaTitle: "One short note + game free, no sign-up",
     faqTitle: "Frequently asked questions",
     faq: [
       {
@@ -380,7 +380,7 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
       },
       {
         q: "Can I try it free before paying? How much does it cost?",
-        a: `Yes. You can play the first 3 games without signing up. Sign in with Google and everything up to Subject, Number and the first Person game is free. The full game costs ${TEST_LANDING_LIST_PRICE}, paid by bKash or bank transfer (NPSB).`,
+        a: `Yes. Without signing up you get one short Subject note, 1-2 checks, and one game. Sign in with Google and everything up to Subject, Number and the first Person game is free. The full game costs ${TEST_LANDING_LIST_PRICE}, paid by bKash or bank transfer (NPSB).`,
         timed: {
           text: "Join by 31 December 2026 and you also get the Legacy Learner badge on your profile.",
           endsAt: LEGACY_BADGE_ENDS_AT,

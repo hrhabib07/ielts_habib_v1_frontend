@@ -55,7 +55,7 @@ export const LEARNER_UI = {
   photoTitle: { en: "Wow, {name}!", bn: "দারুণ, {name}!" },
   photoBody: {
     en: "You passed your first game. Add your photo so I can see you while we learn together!",
-    bn: "আপনি প্রথম গেমটি পাস করেছেন। একটি ছবি দিন, যাতে একসঙ্গে শেখার সময় আমি আপনাকে দেখতে পাই!",
+    bn: "আপনি প্রথম গেইমটি পাস করেছেন। একটি ছবি দিন, যাতে একসঙ্গে শেখার সময় আমি আপনাকে দেখতে পাই!",
   },
   choosePhoto: { en: "Choose a photo", bn: "ছবি বেছে নিন" },
   changePhoto: { en: "Change photo", bn: "ছবি বদলান" },
@@ -72,7 +72,7 @@ export const LEARNER_UI = {
   levelComplete: { en: "Level complete!", bn: "লেভেল শেষ!" },
   levelCompleteSub: { en: "Every stop is done.", bn: "সব ধাপ শেষ হয়েছে।" },
   lessons: { en: "Lessons", bn: "লেসন" },
-  games: { en: "Games", bn: "গেম" },
+  games: { en: "Games", bn: "গেইম" },
   finalTest: { en: "Final Test", bn: "ফাইনাল টেস্ট" },
   notYet: { en: "Not yet", bn: "এখনো নয়" },
   editDetails: { en: "Edit details", bn: "তথ্য বদলান" },
@@ -89,9 +89,9 @@ export const LEARNER_UI = {
   paywallTitle: { en: "{name}, the rest of Level 1 is waiting!", bn: "{name}, লেভেল 1-এর বাকি অংশ অপেক্ষা করছে!" },
   paywallBody: {
     en: "You finished the free part. Unlock the full game to continue with Person, Verb, Object, Word Order and the Final Test.",
-    bn: "আপনি ফ্রি অংশ শেষ করেছেন। Person, Verb, Object, Word Order আর ফাইনাল টেস্ট চালিয়ে যেতে পুরো গেম আনলক করুন।",
+    bn: "আপনি ফ্রি অংশ শেষ করেছেন। Person, Verb, Object, Word Order আর ফাইনাল টেস্ট চালিয়ে যেতে পুরো গেইম আনলক করুন।",
   },
-  paywallCta: { en: "Unlock the full game", bn: "পুরো গেম আনলক করুন" },
+  paywallCta: { en: "Unlock the full game", bn: "পুরো গেইম আনলক করুন" },
 
   notOpenTitle: { en: "Coming soon", bn: "শিগগিরই আসছে" },
   notOpenBody: {
@@ -124,7 +124,7 @@ export const OFFER_UI = {
       ? { en: "Last day · the offer ends tonight at 11:59 PM", bn: "আজই শেষ দিন · অফার শেষ রাত 11:59-এ" }
       : { en: `Offer ends on 30 November · ${daysLeft} days left`, bn: `অফার শেষ 30 নভেম্বর · আর ${daysLeft} দিন বাকি` },
   cta: { en: "Get Double Duration", bn: "ডাবল ডিউরেশন নিন" },
-  notNow: { en: "Not now", bn: "এখন না" },
+  notNow: { en: "Continue free steps first", bn: "আগে ফ্রি ধাপগুলো শেষ করি" },
 
   standardHeadline: (price: number, days: number): Bilingual => ({ en: `৳${price} for ${days} days`, bn: `৳${price}-এ ${days} দিন` }),
   standardLine: (days: number): Bilingual => ({
@@ -137,17 +137,20 @@ export const OFFER_UI = {
     bn: "Legacy Learner ব্যাজ 31 ডিসেম্বর পর্যন্ত",
   },
 
-  welcomeKicker: { en: "Your progress is saved", bn: "আপনার অগ্রগতি সেভ হয়েছে" },
+  welcomeKicker: {
+    en: "Keep going · unlock with ৳1590 for 90 days + Legacy Learner",
+    bn: "চালিয়ে যান · ৳1590-এ 90 দিন + Legacy Learner",
+  },
   reminderKicker: { en: "You finished Number!", bn: "Number শেষ করেছেন!" },
 
-  lockWonTitle: { en: "You won Person Game 1!", bn: "Person গেম 1 জিতেছেন!" },
-  lockTitle: { en: "This part is in the full game", bn: "এই অংশটি পুরো গেমে আছে" },
+  lockWonTitle: { en: "You won Person Game 1!", bn: "Person গেইম 1 জিতেছেন!" },
+  lockTitle: { en: "This part is in the full game", bn: "এই অংশটি পুরো গেইমে আছে" },
   lockLine: {
     en: "Unlock the rest of Level 1, the Final Test and your certificate.",
-    bn: "লেভেল 1-এর বাকি গেম, ফাইনাল টেস্ট আর সার্টিফিকেট খুলুন।",
+    bn: "লেভেল 1-এর বাকি গেইম, ফাইনাল টেস্ট আর সার্টিফিকেট খুলুন।",
   },
   payAndContinue: { en: "Pay and continue", bn: "পেমেন্ট করে চালিয়ে যান" },
-  replayFree: { en: "Replay free games", bn: "ফ্রি গেম আবার খেলি" },
+  replayFree: { en: "Replay free games", bn: "ফ্রি গেইম আবার খেলি" },
 
   approvedTitle: { en: "Payment approved!", bn: "পেমেন্ট অনুমোদিত হয়েছে!" },
   approvedLegacy: {
@@ -226,15 +229,15 @@ const HONEST_STANDARD: Bilingual = {
 export const PAY_UI = {
   trialDone: {
     en: "{name}, you won **Person Game 1**! That was the free part: **Subject**, **Number** and the first Person game.",
-    bn: "{name}, আপনি **Person গেম 1** জিতেছেন! ফ্রি অংশ এখানেই শেষ: **Subject**, **Number** আর Person-এর প্রথম গেম।",
+    bn: "{name}, আপনি **Person গেইম 1** জিতেছেন! ফ্রি অংশ এখানেই শেষ: **Subject**, **Number** আর Person-এর প্রথম গেইম।",
   },
   hello: {
     en: "{name}, here is how to unlock the full game.",
-    bn: "{name}, পুরো গেম কীভাবে আনলক করবেন, দেখে নিন।",
+    bn: "{name}, পুরো গেইম কীভাবে আনলক করবেন, দেখে নিন।",
   },
   ifYouLike: {
     en: "Unlock the full game to keep going: the rest of **Person**, then **Verb, Object, Word Order** and the **Level 1 Final Test**.",
-    bn: "পুরো গেম আনলক করে এগিয়ে চলুন: **Person**-এর বাকি অংশ, তারপর **Verb, Object, Word Order** আর **লেভেল 1 ফাইনাল টেস্ট**।",
+    bn: "পুরো গেইম আনলক করে এগিয়ে চলুন: **Person**-এর বাকি অংশ, তারপর **Verb, Object, Word Order** আর **লেভেল 1 ফাইনাল টেস্ট**।",
   },
   priceTitle: (price: number, days: number): Bilingual => ({
     en: `${price} BDT · ${days} days`,
@@ -382,7 +385,7 @@ export const PROFILE_UI = {
   daysLeft: (n: number): Bilingual => ({ en: `${n} days left`, bn: `আর ${n} দিন বাকি` }),
   freePart: {
     en: "Subject, Number and Person Game 1 are free.",
-    bn: "Subject, Number আর Person গেম 1 ফ্রি।",
+    bn: "Subject, Number আর Person গেইম 1 ফ্রি।",
   },
   login: { en: "Login & security", bn: "লগইন ও নিরাপত্তা" },
   accountName: { en: "Account name", bn: "অ্যাকাউন্টের নাম" },
@@ -426,7 +429,7 @@ export const PUBLIC_UI = {
   joined: (date: string): Bilingual => ({ en: `Joined ${date}`, bn: `যোগ দিয়েছেন ${date}` }),
   levelTitle: { en: "Level 1 · English Fundamentals", bn: "লেভেল 1 · ইংরেজির ভিত্তি" },
   topicsDone: (done: number, total: number): Bilingual => ({ en: `${done} of ${total} done`, bn: `${total}টির মধ্যে ${done}টি শেষ` }),
-  gamesWon: { en: "Games won", bn: "জেতা গেম" },
+  gamesWon: { en: "Games won", bn: "জেতা গেইম" },
   streak: { en: "Day streak", bn: "টানা দিন" },
   finalTest: { en: "Final Test", bn: "ফাইনাল টেস্ট" },
   notYet: { en: "Not yet", bn: "এখনো নয়" },

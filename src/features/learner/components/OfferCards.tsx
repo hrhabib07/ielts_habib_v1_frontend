@@ -86,7 +86,7 @@ function ctaLabel(payment: ChatMissionPayment): Bilingual {
   return isDoubleDuration(payment.offer) ? OFFER_UI.cta : OFFER_UI.standardCta;
 }
 
-/** A soft, dismissable offer: right after sign-in, and again after the Number game. */
+/** Strong purchase sheet: after sign-in, and again after Subject / Number celebrations. */
 export function OfferSheet({
   payment,
   lang,
@@ -111,9 +111,15 @@ export function OfferSheet({
         <OfferBox payment={payment} lang={lang} />
       </div>
       <div className="mt-4 flex w-full flex-col gap-2">
-        <button type="button" onClick={onGet} className={cn(face, PRIMARY_BUTTON, lang === "en" && "uppercase tracking-wide")}>
+        <motion.button
+          type="button"
+          onClick={onGet}
+          className={cn(face, PRIMARY_BUTTON, "shadow-lg shadow-accent/20", lang === "en" && "uppercase tracking-wide")}
+          animate={{ scale: [1, 1.02, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        >
           {pick(ctaLabel(payment), lang)}
-        </button>
+        </motion.button>
         <button type="button" onClick={onClose} className={cn(face, "py-2 text-sm font-bold text-slate-500")}>
           {pick(OFFER_UI.notNow, lang)}
         </button>

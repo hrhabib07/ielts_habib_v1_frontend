@@ -77,15 +77,40 @@ function emptyAttr(): ConversionAttribution {
   };
 }
 
-/** Capture first-touch UTM/referrer into a cookie; later visits keep the first touch. */
+function hasUtm(attr: Pick<ConversionAttribution, "utmSource" | "utmMedium" | "utmCampaign" | "utmContent">): boolean {
+  return Boolean(attr.utmSource || attr.utmMedium || attr.utmCampaign || attr.utmContent);
+}
+
+function readUrlAttribution(): ConversionAttribution {
+  const params = new URLSearchParams(window.location.search);
+  const utmSource = params.get("utm_source")?.trim() || null;
+  const utmMedium = params.get("utm_medium")?.trim() || null;
+  const utmCampaign = params.get("utm_campaign")?.trim() || null;
+  const utmContent = params.get("utm_content")?.trim() || null;
+  const referrer = document.referrer || null;
+  return {
+    utmSource,
+    utmMedium,
+    utmCampaign,
+    utmContent,
+    referrer,
+    source: classifySource(utmSource, utmMedium, referrer),
+  };
+}
+
+/**
+ * Capture first-touch UTM/referrer into a cookie; later visits keep the first touch.
+ * If the first touch had no UTM (direct /play), a later visit with real utm_* can overwrite it.
+ */
 export function captureConversionAttribution(): ConversionAttribution {
   if (typeof window === "undefined") return emptyAttr();
 
   try {
+    const fromUrl = readUrlAttribution();
     const existingRaw = readCookie(COOKIE_NAME);
     if (existingRaw) {
       const parsed = JSON.parse(existingRaw) as Partial<ConversionAttribution>;
-      return {
+      const existing: ConversionAttribution = {
         utmSource: parsed.utmSource ?? null,
         utmMedium: parsed.utmMedium ?? null,
         utmCampaign: parsed.utmCampaign ?? null,
@@ -95,24 +120,20 @@ export function captureConversionAttribution(): ConversionAttribution {
           parsed.source ??
           classifySource(parsed.utmSource ?? null, parsed.utmMedium ?? null, parsed.referrer ?? null),
       };
+      if (!hasUtm(existing) && hasUtm(fromUrl)) {
+        const upgraded: ConversionAttribution = {
+          ...fromUrl,
+          referrer: existing.referrer || fromUrl.referrer,
+          source: classifySource(fromUrl.utmSource, fromUrl.utmMedium, existing.referrer || fromUrl.referrer),
+        };
+        writeCookie(COOKIE_NAME, JSON.stringify(upgraded), COOKIE_DAYS);
+        return upgraded;
+      }
+      return existing;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const utmSource = params.get("utm_source")?.trim() || null;
-    const utmMedium = params.get("utm_medium")?.trim() || null;
-    const utmCampaign = params.get("utm_campaign")?.trim() || null;
-    const utmContent = params.get("utm_content")?.trim() || null;
-    const referrer = document.referrer || null;
-    const next: ConversionAttribution = {
-      utmSource,
-      utmMedium,
-      utmCampaign,
-      utmContent,
-      referrer,
-      source: classifySource(utmSource, utmMedium, referrer),
-    };
-    writeCookie(COOKIE_NAME, JSON.stringify(next), COOKIE_DAYS);
-    return next;
+    writeCookie(COOKIE_NAME, JSON.stringify(fromUrl), COOKIE_DAYS);
+    return fromUrl;
   } catch {
     return emptyAttr();
   }

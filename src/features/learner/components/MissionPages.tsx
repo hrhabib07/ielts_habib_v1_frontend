@@ -24,14 +24,15 @@ import { NOTES_HREF, UNLOCK_HREF } from "@/src/features/learner/lib/routes";
 import { NotesLibrary } from "@/src/features/notes/components/NotesLibrary";
 import { LabPlaygroundPlayer } from "@/src/features/playground/components/LabPlaygroundPlayer";
 import { PLAYGROUNDS } from "@/src/features/playground/content";
+import { logConversionFunnelEvent } from "@/src/lib/api/conversionFunnel";
 
 const PHOTO_PROMPT_DELAY_MS = 2800;
 const ADDRESS_PROMPT_DELAY_MS = 1600;
 const MAX_PHOTO_PROMPTS = 2;
-/** The soft offer comes back once the Number game's celebration has played. */
-const REMINDER_GAME_ID = "level-1-playground-number";
+/** Soft offer again after these playground celebrations (Subject guest resume or Number). */
+const REMINDER_GAME_IDS = new Set(["level-1-playground-subject", "level-1-playground-number"]);
 const REMINDER_DELAY_MS = 3400;
-const WELCOME_OFFER_DELAY_MS = 1200;
+const WELCOME_OFFER_DELAY_MS = 800;
 const APPROVED_DELAY_MS = 600;
 
 function Redirect({ href }: { href: string }) {
@@ -51,6 +52,7 @@ function NameGate({ ctx }: { ctx: MissionShellContext }) {
       suggested={ctx.state.suggestedNameEn}
       onSave={async (nicknameEn) => {
         await ctx.saveProfile({ nicknameEn });
+        void logConversionFunnelEvent({ eventName: "name_saved" });
       }}
     />
   );
@@ -74,7 +76,7 @@ function MapScreen({ ctx }: { ctx: MissionShellContext }) {
   const { hasPaidAccess } = ctx.state;
   const pending = ctx.state.payment.latest?.status === "PENDING";
   const canOffer = Boolean(learnerData) && !hasPaidAccess && !pending && !offerClosed;
-  const wantsReminder = canOffer && celebrateStepId === REMINDER_GAME_ID;
+  const wantsReminder = canOffer && Boolean(celebrateStepId && REMINDER_GAME_IDS.has(celebrateStepId));
   const wantsWelcome = canOffer && !welcomeSeen && !wantsReminder;
   /** Other prompts wait until the offer has been shown and closed. */
   const offerBusy = offer !== null || wantsWelcome || wantsReminder;
@@ -97,11 +99,17 @@ function MapScreen({ ctx }: { ctx: MissionShellContext }) {
     return () => window.clearTimeout(timer);
   }, [wantsWelcome, wantsReminder]);
 
+  useEffect(() => {
+    if (!offer) return;
+    void logConversionFunnelEvent({ eventName: "offer_viewed" });
+  }, [offer]);
+
   const closeOffer = () => {
     writeFlag(DEVICE_FLAGS.welcomeOfferSeen, true);
     setWelcomeSeen(true);
     setOfferClosed(true);
     setOffer(null);
+    void logConversionFunnelEvent({ eventName: "offer_dismissed" });
   };
 
   useEffect(() => {
@@ -167,7 +175,11 @@ function MapScreen({ ctx }: { ctx: MissionShellContext }) {
           lang={lang}
           kicker={offer === "reminder" ? OFFER_UI.reminderKicker : OFFER_UI.welcomeKicker}
           onGet={() => {
-            closeOffer();
+            writeFlag(DEVICE_FLAGS.welcomeOfferSeen, true);
+            setWelcomeSeen(true);
+            setOfferClosed(true);
+            setOffer(null);
+            void logConversionFunnelEvent({ eventName: "unlock_opened" });
             router.push(UNLOCK_HREF);
           }}
           onClose={closeOffer}
@@ -202,6 +214,11 @@ function MapScreen({ ctx }: { ctx: MissionShellContext }) {
 function UnlockScreen({ ctx }: { ctx: MissionShellContext }) {
   // Decided once: claiming free access mid-chat must not bounce the learner away from the reply.
   const [alreadyUnlocked] = useState(ctx.state.hasPaidAccess);
+  useEffect(() => {
+    if (alreadyUnlocked) return;
+    void logConversionFunnelEvent({ eventName: "unlock_opened" });
+    void logConversionFunnelEvent({ eventName: "pricing_viewed" });
+  }, [alreadyUnlocked]);
   if (!ctx.learner) return <NameGate ctx={ctx} />;
   if (alreadyUnlocked) return <Redirect href={MISSION_BASE} />;
   return <UnlockChat ctx={ctx} learner={ctx.learner} backHref={MISSION_BASE} />;
@@ -236,6 +253,16 @@ function StepScreen({ ctx, stepId }: { ctx: MissionShellContext; stepId: string 
 
   if (!ctx.learner) return <NameGate ctx={ctx} />;
   if (justWon) return <PaywallScreen ctx={ctx} won />;
+
+  const playground = PLAYGROUNDS[stepId];
+  if (playground) {
+    const lessonId = playground.playground.afterStepId;
+    // Learn-first: open the matching lesson before any playground URL (deep links included).
+    if (lessonId && !ctx.state.results[lessonId]) {
+      return <Redirect href={missionHref(lessonId)} />;
+    }
+  }
+
   if (taste) {
     return (
       <LabPlaygroundPlayer
@@ -252,7 +279,9 @@ function StepScreen({ ctx, stepId }: { ctx: MissionShellContext; stepId: string 
   }
   if (isPaywalled(stepId)) return <PaywallScreen ctx={ctx} won={false} />;
 
-  if (PLAYGROUNDS[stepId]) return <LabPlaygroundPlayer playgroundId={stepId} levelHref={MISSION_BASE} trackAnswers />;
+  if (playground) {
+    return <LabPlaygroundPlayer playgroundId={stepId} levelHref={MISSION_BASE} trackAnswers />;
+  }
 
   if (stepId === MISSION_1_FINAL_TEST.id) {
     return <FinalTestPlayer test={MISSION_1_FINAL_TEST} backHref={MISSION_BASE} practiceHref={missionHref} />;

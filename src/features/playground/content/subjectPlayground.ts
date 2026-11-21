@@ -227,7 +227,7 @@ const STRETCH: StretchItem[] = [
     compound: true,
     shortHint: {
       en: "I cook too! Take My mother and I.",
-      bn: "আমিও রান্না করি! My mother and I পুরোটা নিন।",
+      bn: "আমিও রান্না করি! পুরো Subject নিন: My mother and I।",
     },
   },
   {
@@ -619,14 +619,14 @@ export const SUBJECT_PLAYGROUND: Playground = {
     {
       id: "stretch",
       kind: "stretch",
-      title: { en: "Stretch It", bn: "পুরোটা ধরুন" },
+      title: { en: "Full Subject", bn: "পুরো Subject" },
       goal: {
-        en: "A Subject can be many words. Catch all of them!",
-        bn: "Subject অনেকগুলো শব্দেরও হতে পারে। সবগুলো ধরুন!",
+        en: "A Subject can be many words. Select the whole Subject!",
+        bn: "Subject অনেকগুলো শব্দেরও হতে পারে। পুরো Subject সিলেক্ট করুন!",
       },
       instruction: { en: "Tap the last word of the Subject.", bn: "Subject-এর শেষ শব্দে ট্যাপ করুন।" },
       rule: {
-        text: { en: "A Subject can be many words. Take all of them.", bn: "Subject অনেকগুলো শব্দেরও হতে পারে। সবগুলো নিন।" },
+        text: { en: "A Subject can be many words. Take the whole Subject.", bn: "Subject অনেকগুলো শব্দেরও হতে পারে। পুরো Subject নিন।" },
         example: "The boys in the park play cricket.",
         mark: "The boys in the park",
       },

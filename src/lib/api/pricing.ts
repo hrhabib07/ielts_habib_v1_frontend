@@ -16,7 +16,9 @@ export interface PublicPricing {
     | "first_week"
     | "first_month"
     | "standard_q4"
-    | "standard";
+    | "standard"
+    | "v2_early"
+    | "v2_standard";
   offerLabelEn?: string;
   offerLabelBn?: string;
   offerEndsAt?: string | null;

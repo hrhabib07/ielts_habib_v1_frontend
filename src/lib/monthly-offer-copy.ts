@@ -20,7 +20,7 @@ export function lifetimePaidProofLine(locale: UiLocale): string {
     : `${LIFETIME_PAID_PROOF_FLOOR}+ learners have already paid for the full journey.`;
 }
 
-/** Live registered players. Pass the real student count from /demo/stats. */
+/** Live registered players. Pass the real student count from stats. */
 export function playersPlayingProofParts(
   registeredStudents: number | null | undefined,
   locale: UiLocale,

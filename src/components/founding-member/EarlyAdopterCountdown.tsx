@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Saved countdown strip. Live pages do not mount this.
- * Preview: /demo/countdown-test
+ * Visual QA for countdown presentation.
  */
 export function EarlyAdopterCountdown(props: {
   className?: string;

@@ -11,7 +11,6 @@ const DASHBOARD_TITLES: Record<string, string> = {
   "/dashboard/admin": "Admin",
   "/dashboard/admin/english": "English Content",
   "/dashboard/admin/users": "Students",
-  "/dashboard/admin/demo-feedback": "Demo feedback",
   "/dashboard/admin/levels": "Level Management",
   "/dashboard/admin/levels/new": "New Level",
   "/dashboard/admin/content": "Content",

@@ -140,7 +140,7 @@ export function EnglishAdminHome() {
           </Card>
         </Link>
 
-        <Link href="/dashboard/admin/demo-conversion">
+        <Link href="/dashboard/admin/conversion-funnel">
           <Card className="h-full p-5 transition-shadow hover:shadow-md">
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-sky-500/10">
@@ -149,7 +149,7 @@ export function EnglishAdminHome() {
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-foreground">Conversion funnel</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
-                  Why users leave after the demo  -  phone OTP & Google drop-off
+                  Signup and checkout drop-off · phone OTP & Google
                 </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
@@ -201,23 +201,6 @@ export function EnglishAdminHome() {
                 <p className="font-semibold text-foreground">Students</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   View all learners, emails, and English mission progress
-                </p>
-              </div>
-              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
-            </div>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/admin/demo-feedback">
-          <Card className="h-full p-5 transition-shadow hover:shadow-md">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                <MessageSquareHeart className="h-5 w-5 text-amber-700 dark:text-amber-300" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-foreground">Demo funnel</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">
-                  Visits, drop-offs, signup conversion, and ratings
                 </p>
               </div>
               <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />

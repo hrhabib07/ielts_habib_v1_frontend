@@ -73,7 +73,59 @@ export function clearGuestProgress(): void {
   try {
     window.localStorage.removeItem(KEY);
     window.localStorage.removeItem(LEGACY_KEY);
+    window.localStorage.removeItem(FUNNEL_KEY);
   } catch {
     return;
   }
+}
+
+const FUNNEL_KEY = "gamlish-guest-funnel-v1";
+
+/** Note → quiz milestones before the free Subject round (claimed with rounds after sign-up). */
+export type GuestFunnel = { noteDone: boolean; quizDone: boolean; updatedAt: number };
+
+const EMPTY_FUNNEL: GuestFunnel = { noteDone: false, quizDone: false, updatedAt: 0 };
+
+function readFunnel(): GuestFunnel {
+  if (typeof window === "undefined") return EMPTY_FUNNEL;
+  try {
+    const raw = window.localStorage.getItem(FUNNEL_KEY);
+    if (!raw) return EMPTY_FUNNEL;
+    const parsed = JSON.parse(raw) as GuestFunnel;
+    if (Date.now() - (parsed.updatedAt || 0) >= MAX_AGE_MS) {
+      window.localStorage.removeItem(FUNNEL_KEY);
+      return EMPTY_FUNNEL;
+    }
+    return {
+      noteDone: Boolean(parsed.noteDone),
+      quizDone: Boolean(parsed.quizDone),
+      updatedAt: parsed.updatedAt || 0,
+    };
+  } catch {
+    return EMPTY_FUNNEL;
+  }
+}
+
+function writeFunnel(next: GuestFunnel): void {
+  try {
+    window.localStorage.setItem(FUNNEL_KEY, JSON.stringify(next));
+  } catch {
+    return;
+  }
+}
+
+export function guestFunnel(): GuestFunnel {
+  return readFunnel();
+}
+
+export function markGuestNoteDone(): void {
+  const current = readFunnel();
+  if (current.noteDone) return;
+  writeFunnel({ ...current, noteDone: true, updatedAt: Date.now() });
+}
+
+export function markGuestQuizDone(): void {
+  const current = readFunnel();
+  if (current.quizDone) return;
+  writeFunnel({ noteDone: true, quizDone: true, updatedAt: Date.now() });
 }

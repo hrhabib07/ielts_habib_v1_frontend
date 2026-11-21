@@ -181,15 +181,19 @@ export const UI = {
   }),
   playInfo: (games: number, challenges: number, pass: number): Bilingual => ({
     en: `${games} games · ${challenges} challenges · Pass ${pass}%`,
-    bn: `${games}টি গেম · ${challenges}টি চ্যালেঞ্জ · পাস ${pass}%`,
+    bn: `${games}টি গেইম · ${challenges}টি চ্যালেঞ্জ · পাস ${pass}%`,
   }),
   neededForTest: { en: "Needed for the Final Test", bn: "ফাইনাল টেস্টের জন্য দরকার" },
   partLearn: { en: "Learn", bn: "শিখুন" },
   partPlay: { en: "Play", bn: "খেলুন" },
   partLesson: { en: "Lesson", bn: "লেসন" },
-  partGames: { en: "Games", bn: "গেম" },
+  partGames: { en: "Games", bn: "গেইম" },
   partLearnFirst: { en: "Learn first (recommended)", bn: "আগে শিখুন (আমাদের পরামর্শ)" },
-  inFullGame: { en: "In the full game", bn: "পুরো গেমে আছে" },
+  learnThenPlay: {
+    en: "You just learned it · now play it!",
+    bn: "এইমাত্র শিখলেন · এবার practically খেলে দেখুন!",
+  },
+  inFullGame: { en: "In the full game", bn: "পুরো গেইমে আছে" },
   unlock: { en: "Unlock", bn: "আনলক করুন" },
   quickNotes: { en: "Quick notes · no questions", bn: "ছোট নোট · কোনো প্রশ্ন নেই" },
   myNotes: { en: "My Notes", bn: "আমার নোট" },
@@ -198,7 +202,7 @@ export const UI = {
     en: `${done} of ${total} parts done`,
     bn: `${total}টির মধ্যে ${done}টি পার্ট শেষ`,
   }),
-  gamesCount: (done: number, total: number): Bilingual => ({ en: `Games ${done}/${total}`, bn: `গেম ${done}/${total}` }),
+  gamesCount: (done: number, total: number): Bilingual => ({ en: `Games ${done}/${total}`, bn: `গেইম ${done}/${total}` }),
   startLesson: { en: "Start lesson", bn: "লেসন শুরু করুন" },
   readAgain: { en: "Read again", bn: "আবার পড়ুন" },
   play: { en: "Play", bn: "খেলুন" },
@@ -239,10 +243,10 @@ export const UI = {
   nextTopic: (topic: string): Bilingual => ({ en: `Next up: ${topic}`, bn: `এবার: ${topic}` }),
   goToTopic: (topic: string): Bilingual => ({ en: `Go to ${topic}`, bn: `${topic}-এ যান` }),
   lessonDoneToast: { en: "Lesson done!", bn: "লেসন শেষ!" },
-  gameDoneToast: { en: "Game done!", bn: "গেম শেষ!" },
+  gameDoneToast: { en: "Game done!", bn: "গেইম শেষ!" },
   playToFinish: (topic: string): Bilingual => ({
     en: `Now play the games to finish ${topic}.`,
-    bn: `এবার গেম খেলে ${topic} শেষ করুন।`,
+    bn: `এবার গেইম খেলে ${topic} শেষ করুন।`,
   }),
   learnToFinish: (topic: string): Bilingual => ({
     en: `Now finish the lesson to complete ${topic}.`,
@@ -255,7 +259,7 @@ export const UI = {
 export const FEEDBACK_UI = {
   openProfile: { en: "Open Gamlish profile", bn: "Gamlish প্রোফাইল দেখুন" },
   name: { en: "Gamlish", bn: "Gamlish" },
-  handle: { en: "@gamlish · The Game of English", bn: "@gamlish · ইংরেজি শেখার গেম" },
+  handle: { en: "@gamlish · The Game of English", bn: "@gamlish · ইংরেজি শেখার গেইম" },
   status: { en: "Active 24/7", bn: "24/7 অ্যাক্টিভ" },
   bio: {
     en: "Hey! I'm Gamlish. I help you learn English by playing, and I'm here 24/7.",

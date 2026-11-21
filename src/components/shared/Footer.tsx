@@ -41,12 +41,7 @@ export function Footer({ initialUser = null }: FooterProps) {
     return null;
   }
 
-  if (
-    pathname === "/demo" ||
-    pathname.startsWith("/demo/") ||
-    pathname === "/player" ||
-    pathname === "/player/mission-zero"
-  ) {
+  if (pathname === "/player") {
     return null;
   }
 

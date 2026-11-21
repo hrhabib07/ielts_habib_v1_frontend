@@ -7,15 +7,27 @@ import { Button } from "@/components/ui/button";
 import {
   getConversionFunnelDashboard,
   syncConversionFunnelDay,
+  type ConversionFunnelBranch,
   type ConversionFunnelDashboard,
   type ConversionFunnelSource,
 } from "@/src/lib/api/conversionFunnel";
 import { cn } from "@/lib/utils";
 
 const STEP_LABELS: Record<string, string> = {
-  visit: "Visit",
-  signup: "Signup",
-  trial_finished: "Trial finished",
+  visit: "1. Visit (landing)",
+  play_start: "2. Opened /play",
+  note_opened: "3. Note opened",
+  note_finished: "4. Note finished",
+  quiz_finished: "5. Quiz finished",
+  game_finished: "6. Game finished",
+  signup_prompt_view: "7. Signup prompt shown",
+  signup_started: "8. Tapped signup",
+  signup: "9. Account created",
+  name_saved: "Name saved",
+  offer_viewed: "Offer (1590) shown",
+  offer_dismissed: "Offer dismissed",
+  unlock_opened: "Unlock / pay opened",
+  trial_finished: "Free trial finished",
   pricing_viewed: "Pricing viewed",
   trxid_submitted: "TrxID submitted",
   paid: "Paid",
@@ -31,12 +43,65 @@ const SOURCES: ConversionFunnelSource[] = [
 ];
 
 type Preset = "today" | "yesterday" | "last_7_days" | "custom";
+type Tab = "pre" | "post";
+
+function FunnelTable({ branch, topLabel }: { branch: ConversionFunnelBranch; topLabel: string }) {
+  return (
+    <div className="space-y-3">
+      {branch.biggestLeak ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm">
+          <p className="text-xs font-black uppercase tracking-wide text-rose-700">Biggest leak · work here</p>
+          <p className="mt-1 font-bold text-rose-950">{branch.biggestLeak}</p>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">Not enough drop between steps yet to flag a leak.</p>
+      )}
+      <div className="overflow-hidden rounded-2xl border border-border">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+            <tr>
+              <th className="px-4 py-3">Step</th>
+              <th className="px-4 py-3">People</th>
+              <th className="px-4 py-3">% from previous</th>
+              <th className="px-4 py-3">% from {topLabel}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {branch.steps.map((step) => (
+              <tr
+                key={step.eventName}
+                className={cn("border-t border-border", step.isBiggestDrop && "bg-rose-500/10")}
+              >
+                <td className="px-4 py-3 font-semibold">
+                  {STEP_LABELS[step.eventName] ?? step.eventName}
+                  {step.isBiggestDrop ? (
+                    <span className="ml-2 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-black uppercase text-white">
+                      Biggest drop
+                    </span>
+                  ) : null}
+                </td>
+                <td className="px-4 py-3 tabular-nums">{step.uniqueUsers}</td>
+                <td className="px-4 py-3 tabular-nums">
+                  {step.pctFromPrevious == null ? "-" : `${step.pctFromPrevious}%`}
+                </td>
+                <td className="px-4 py-3 tabular-nums">
+                  {step.pctFromVisit == null ? "-" : `${step.pctFromVisit}%`}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 export function ConversionFunnelAdminClient() {
   const [preset, setPreset] = useState<Preset>("last_7_days");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [source, setSource] = useState<ConversionFunnelSource>("all");
+  const [tab, setTab] = useState<Tab>("pre");
   const [data, setData] = useState<ConversionFunnelDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -108,6 +173,9 @@ export function ConversionFunnelAdminClient() {
     }
   };
 
+  const preReg = data?.preReg ?? { steps: data?.steps ?? [], biggestLeak: null };
+  const postReg = data?.postReg ?? { steps: [], biggestLeak: null };
+
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -118,9 +186,9 @@ export function ConversionFunnelAdminClient() {
           >
             <ArrowLeft className="h-4 w-4" /> Admin home
           </Link>
-          <h1 className="mt-2 text-2xl font-black text-foreground">Conversion funnel</h1>
+          <h1 className="mt-2 text-2xl font-black text-foreground">Where people drop</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Visit → signup → trial finished → pricing → TrxID → paid
+            Pre-registration mini-lesson and post-registration path to payment. Red row = fix that step.
           </p>
         </div>
         <Button type="button" variant="outline" onClick={() => void load()} disabled={loading}>
@@ -198,6 +266,27 @@ export function ConversionFunnelAdminClient() {
         ))}
       </div>
 
+      <div className="flex gap-2 rounded-2xl bg-muted/60 p-1">
+        {(
+          [
+            ["pre", "Before registration"],
+            ["post", "After registration → pay"],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setTab(value)}
+            className={cn(
+              "flex-1 rounded-xl px-3 py-2 text-sm font-bold",
+              tab === value ? "bg-white text-foreground shadow-sm" : "text-muted-foreground",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {loading && !data ? (
@@ -207,45 +296,11 @@ export function ConversionFunnelAdminClient() {
           <p className="text-xs font-medium text-muted-foreground">
             {data.from} → {data.to} · source: {data.source}
           </p>
-          <div className="overflow-hidden rounded-2xl border border-border">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Step</th>
-                  <th className="px-4 py-3">Unique users</th>
-                  <th className="px-4 py-3">% from previous</th>
-                  <th className="px-4 py-3">% from visit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.steps.map((step) => (
-                  <tr
-                    key={step.eventName}
-                    className={cn(
-                      "border-t border-border",
-                      step.isBiggestDrop && "bg-rose-500/10",
-                    )}
-                  >
-                    <td className="px-4 py-3 font-semibold">
-                      {STEP_LABELS[step.eventName] ?? step.eventName}
-                      {step.isBiggestDrop ? (
-                        <span className="ml-2 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-black uppercase text-white">
-                          Biggest drop
-                        </span>
-                      ) : null}
-                    </td>
-                    <td className="px-4 py-3 tabular-nums">{step.uniqueUsers}</td>
-                    <td className="px-4 py-3 tabular-nums">
-                      {step.pctFromPrevious == null ? "-" : `${step.pctFromPrevious}%`}
-                    </td>
-                    <td className="px-4 py-3 tabular-nums">
-                      {step.pctFromVisit == null ? "-" : `${step.pctFromVisit}%`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {tab === "pre" ? (
+            <FunnelTable branch={preReg} topLabel="visit" />
+          ) : (
+            <FunnelTable branch={postReg} topLabel="signup" />
+          )}
           <p className="text-sm text-muted-foreground">
             Level completed (paid retention):{" "}
             <span className="font-bold text-foreground">{data.levelCompleted}</span>
@@ -259,7 +314,7 @@ export function ConversionFunnelAdminClient() {
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
           Nightly at 00:30 Asia/Dhaka for the previous day. Sync now replaces that date&apos;s rows
-          (counts only, no personal data).
+          (summary counts only: visit → paid). Detailed steps live on this page.
         </p>
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <label className="text-xs font-semibold">

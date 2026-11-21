@@ -7,8 +7,12 @@ import type { GuestPath } from "./components/GuestScreens";
 import { guestRounds } from "./guestProgress";
 
 export const GUEST_GAME_ID = "level-1-playground-subject";
-/** Guests play the first rounds; the typing round about their own life needs an account. */
-export const GUEST_ROUND_LIMIT = 3;
+/** Guests play one easy Subject round after a short note + check questions; the rest needs an account. */
+export const GUEST_ROUND_LIMIT = 1;
+/** First Subject note chunk shown before the guest quiz (what a Subject is). */
+export const GUEST_NOTE_CHUNK_ID = "what-is-subject";
+/** Subject lesson id claimed after guest note + quiz so Learn-first is satisfied post-signup. */
+export const GUEST_LESSON_CLAIM_ID = "level-1-step-3-subject";
 export const SHIPPED_GUEST_GAME: Playground | null = PLAYGROUNDS[GUEST_GAME_ID]?.playground ?? null;
 
 const FALLBACK_TOPIC: Bilingual = { en: "Subject", bn: "Subject" };

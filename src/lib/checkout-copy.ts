@@ -14,6 +14,22 @@ export interface CheckoutCopy {
   readonly step1: string;
   readonly step2: string;
   readonly step3: string;
+  readonly step4: string;
+  readonly accountTitle: string;
+  readonly accountBody: string;
+  readonly nameLabel: string;
+  readonly nameHint: string;
+  readonly phoneLabel: string;
+  readonly phoneHint: string;
+  readonly sendOtp: string;
+  readonly resendOtp: string;
+  readonly otpLabel: string;
+  readonly otpHint: string;
+  readonly verifyOtp: string;
+  readonly phoneVerified: string;
+  readonly invalidPhone: string;
+  readonly invalidName: string;
+  readonly otpRequired: string;
   readonly bkashNumberLabel: string;
   readonly copy: string;
   readonly copied: string;
@@ -52,19 +68,36 @@ export interface CheckoutCopy {
 export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
   bn: {
     statusLock: "অফার মূল্য এখনো লক করা যায়",
-    statusNext: "bKash Send Money → TrxID সাবমিট",
+    statusNext: "bKash → TrxID → ফোন OTP → সাবমিট",
     urgencyEyebrow: "শেষ ধাপ",
-    urgencyTitle: "চারটা ঘর: টাকার পরিমাণ, bKash নম্বর, TrxID, তারপর আমরা পেয়েছি।",
+    urgencyTitle: "আগে bKash-এ পাঠান, তারপর TrxID ও ফোন ভেরিফাই করুন।",
     urgencyBody:
-      "bKash অ্যাপে Send Money করুন। নিচের পরিমাণ, আমাদের নম্বর, তারপর আপনার নম্বর আর TrxID দিন। সাবমিট করলেই লেখা আসবে: পেমেন্ট পেয়েছি।",
+      "bKash অ্যাপে Send Money করুন। নিচের পরিমাণ ও নম্বরে পাঠান, TrxID দিন, ফোন OTP দিয়ে নিজেকে ভেরিফাই করুন, তারপর সাবমিট করুন।",
     amountLabel: "পাঠাতে হবে",
     regularPriceLabel: "রেগুলার মূল্য",
     founderPriceLabel: "অফার মূল্য",
     youSaveLabel: "বাঁচবে",
-    stepsTitle: "3 ধাপে শেষ করুন",
+    stepsTitle: "4 ধাপে শেষ করুন",
     step1: "ধাপ 1: bKash অ্যাপে Send Money খুলুন",
     step2: "ধাপ 2: নিচের নম্বরে ঠিক এই পরিমাণ পাঠান",
-    step3: "ধাপ 3: আপনার নম্বর + TrxID দিয়ে সাবমিট করুন",
+    step3: "ধাপ 3: আপনার bKash নম্বর + TrxID দিন",
+    step4: "ধাপ 4: ফোন OTP ভেরিফাই করে সাবমিট করুন",
+    accountTitle: "অ্যাকাউন্ট লক করুন (ফোন ভেরিফাই)",
+    accountBody:
+      "পেমেন্ট ম্যাচ করতে ও আপনাকে কল করতে যাচাইকৃত ফোন নম্বর লাগবে। পাসওয়ার্ড লাগবে না।",
+    nameLabel: "আপনার নাম",
+    nameHint: "প্রোফাইলে যে নাম দেখাবে।",
+    phoneLabel: "মোবাইল নম্বর",
+    phoneHint: "OTP যাবে এই নম্বরে। bKash নম্বরের সাথে এক হলে ভালো।",
+    sendOtp: "OTP পাঠান",
+    resendOtp: "আবার OTP পাঠান",
+    otpLabel: "OTP কোড",
+    otpHint: "SMS-এ পাওয়া 4-6 ডিজিটের কোড।",
+    verifyOtp: "OTP ভেরিফাই করুন",
+    phoneVerified: "ফোন ভেরিফাই হয়েছে · এখন সাবমিট করতে পারবেন",
+    invalidPhone: "সঠিক মোবাইল নম্বর দিন (01XXXXXXXXX)",
+    invalidName: "আপনার নাম লিখুন",
+    otpRequired: "আগে ফোন OTP ভেরিফাই করুন",
     bkashNumberLabel: "আমাদের bKash নম্বর",
     copy: "কপি",
     copied: "কপি হয়েছে",
@@ -105,19 +138,36 @@ export const CHECKOUT_COPY: Record<UiLocale, CheckoutCopy> = {
   },
   en: {
     statusLock: "Offer price can still be locked",
-    statusNext: "bKash Send Money → submit TrxID",
+    statusNext: "bKash → TrxID → phone OTP → submit",
     urgencyEyebrow: "Final step",
-    urgencyTitle: "Access does not start until payment is submitted!",
+    urgencyTitle: "Pay on bKash first, then verify your phone and submit.",
     urgencyBody:
-      "Send Money on bKash now to lock this price. After verification, you get 45 days of Full Journey Access from activation. Regular 1,590 BDT. Special offer if you join now.",
+      "Send Money on bKash for this amount. Enter TrxID, verify your phone with OTP, then submit. Access starts after we verify payment.",
     amountLabel: "Amount to send",
     regularPriceLabel: "Regular price",
     founderPriceLabel: "Offer price",
     youSaveLabel: "You save",
-    stepsTitle: "Finish in 3 steps",
+    stepsTitle: "Finish in 4 steps",
     step1: "Step 1: Open Send Money in the bKash app",
     step2: "Step 2: Send exactly this amount to the number below",
-    step3: "Step 3: Submit your number + TrxID",
+    step3: "Step 3: Enter your bKash number + TrxID",
+    step4: "Step 4: Verify phone OTP, then submit",
+    accountTitle: "Lock your account (phone verify)",
+    accountBody:
+      "We need a verified phone to match payment and call you if needed. No password required.",
+    nameLabel: "Your name",
+    nameHint: "Shown on your profile.",
+    phoneLabel: "Mobile number",
+    phoneHint: "OTP goes here. Same as bKash is best.",
+    sendOtp: "Send OTP",
+    resendOtp: "Resend OTP",
+    otpLabel: "OTP code",
+    otpHint: "4-6 digit code from SMS.",
+    verifyOtp: "Verify OTP",
+    phoneVerified: "Phone verified · you can submit now",
+    invalidPhone: "Enter a valid mobile number (01XXXXXXXXX)",
+    invalidName: "Enter your name",
+    otpRequired: "Verify phone OTP first",
     bkashNumberLabel: "Our bKash number",
     copy: "Copy",
     copied: "Copied",

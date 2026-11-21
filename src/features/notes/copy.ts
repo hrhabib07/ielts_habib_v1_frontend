@@ -10,10 +10,17 @@ export const NOTES_UI = {
   loading: { en: "Opening the notes", bn: "নোট খুলছে" },
   empty: { en: "Notes for this topic are coming soon.", bn: "এই টপিকের নোট শিগগিরই আসছে।" },
   playNow: { en: "Play now", bn: "খেলা শুরু করুন" },
+  checkNow: { en: "Check what you learned", bn: "যা শিখেছেন, প্রশ্ন দিয়ে দেখুন" },
   backToGame: { en: "Back to the game", bn: "খেলায় ফিরে যান" },
   tryAgain: { en: "Try again", bn: "আবার চেষ্টা করুন" },
-  playGame: { en: "Play the game", bn: "গেম খেলুন" },
+  playGame: { en: "Play the game", bn: "গেইম খেলুন" },
   done: { en: "Done", bn: "শেষ" },
+  guestReadTime: {
+    en: "About 1 min · first idea only",
+    bn: "প্রায় 1 মিনিট · শুধু প্রথম ধারণা",
+  },
+  keepReading: { en: "Keep reading…", bn: "আরেকটু পড়ুন…" },
+  showAll: { en: "Show all", bn: "সব দেখুন" },
   libraryTitle: { en: "My Notes", bn: "আমার নোট" },
   librarySub: {
     en: "Every rule and example from your lessons, without the questions. Read them anytime.",

@@ -22,7 +22,7 @@ export interface AuthLoginCopy {
 function buildAuthLoginCopy(locale: UiLocale): AuthLoginCopy {
   if (locale === "bn") {
     return {
-      eyebrow: "আপনার গেম সেভ করা আছে",
+      eyebrow: "আপনার গেইম সেভ করা আছে",
       title: "আপনাকে আবার দেখে ভালো লাগছে! 👋",
       subtitle: "চলুন, যেখানে থেমেছিলেন সেখান থেকেই আবার শেখার মজার যাত্রা শুরু করি।",
       googleCta: "Google দিয়ে চালিয়ে যান",

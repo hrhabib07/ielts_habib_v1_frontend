@@ -26,7 +26,7 @@ type Props = {
 
 /**
  * Saved one-line HH:MM:SS timer. Live pages do not mount this.
- * Preview: /demo/countdown-test
+ * Visual QA for countdown presentation.
  */
 export function InlineOfferCountdown({ endsAt, className }: Props) {
   const { locale } = useUiLocale();

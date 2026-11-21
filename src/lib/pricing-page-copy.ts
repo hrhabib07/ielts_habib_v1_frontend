@@ -58,11 +58,12 @@ export const PRICING_PAGE_COPY: Record<
       "শুরুর কয়েকটা ধাপ ফ্রি, সাইন-আপ ছাড়াই খেলা যায়",
       "প্রোফাইলে Legacy Learner ব্যাজ (৩১ ডিসেম্বর পর্যন্ত ভর্তি)",
     ],
-    stepsTitle: "পেমেন্ট 3 ধাপে",
+    stepsTitle: "পেমেন্ট 4 ধাপে",
     steps: [
-      { n: "1", text: "লগইন করুন" },
-      { n: "2", text: "bKash-এ Send Money করুন" },
-      { n: "3", text: "TrxID সাবমিট করুন, অ্যাক্সেস খুলবে" },
+      { n: "1", text: "bKash-এ Send Money করুন" },
+      { n: "2", text: "TrxID দিন" },
+      { n: "3", text: "ফোন OTP দিয়ে ভেরিফাই করুন" },
+      { n: "4", text: "সাবমিট করুন · অ্যাক্সেস খুলবে" },
     ],
     valueTitle: "এই পেমেন্টে আপনি কী পারবেন",
     valueItems: [
@@ -120,11 +121,12 @@ export const PRICING_PAGE_COPY: Record<
       "The first few steps are free to play, no sign-up",
       "Legacy Learner badge on your profile (join by 31 December)",
     ],
-    stepsTitle: "Pay in 3 steps",
+    stepsTitle: "Pay in 4 steps",
     steps: [
-      { n: "1", text: "Log in" },
-      { n: "2", text: "Send Money on bKash" },
-      { n: "3", text: "Submit your TrxID. Access opens." },
+      { n: "1", text: "Send Money on bKash" },
+      { n: "2", text: "Enter your TrxID" },
+      { n: "3", text: "Verify your phone with OTP" },
+      { n: "4", text: "Submit · access opens after verify" },
     ],
     valueTitle: "What this payment lets you do",
     valueItems: [

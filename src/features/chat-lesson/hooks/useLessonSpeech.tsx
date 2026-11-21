@@ -178,6 +178,11 @@ export function LessonSpeechProvider({
     audioRef.current?.pause();
   }, [stopTracking]);
 
+  const speakingIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    speakingIdRef.current = speakingId;
+  }, [speakingId]);
+
   const stop = useCallback(() => {
     silence();
     setSpeakingId(null);
@@ -187,12 +192,17 @@ export function LessonSpeechProvider({
   const speak = useCallback(
     (id: string, text: string, lang: SpeechLang, options?: SpeakOptions) => {
       const rate = options?.rate ?? 1;
-      silence();
-      setActiveWord(null);
-      if (speakingId === id) {
+      // Same id again = toggle off (use ref so `speak` stays stable for effects).
+      if (speakingIdRef.current === id) {
+        silence();
         setSpeakingId(null);
+        setActiveWord(null);
         return;
       }
+
+      silence();
+      setActiveWord(null);
+
       const finish = () => {
         stopTracking();
         setSpeakingId((current) => (current === id ? null : current));
@@ -206,9 +216,15 @@ export function LessonSpeechProvider({
         const player = audioRef.current;
         const words = found.exact ? timings?.[found.key] : undefined;
         setSpeakingId(id);
+        speakingIdRef.current = id;
         playClip(player, clip, rate, finish);
         if (words?.length) {
+          stopTracking();
           const tick = () => {
+            if (player.paused || player.ended) {
+              stopTracking();
+              return;
+            }
             const next = wordAt(words, player.currentTime * 1000);
             setActiveWord((current) => (current === next ? current : next));
             frameRef.current = requestAnimationFrame(tick);
@@ -220,6 +236,7 @@ export function LessonSpeechProvider({
 
       if (clipsOnly) {
         setSpeakingId(null);
+        speakingIdRef.current = null;
         return;
       }
       const engine = synth();
@@ -228,6 +245,7 @@ export function LessonSpeechProvider({
       const chunks = toSpeechChunks(text, lang);
       if (!chunks.length) return;
       setSpeakingId(id);
+      speakingIdRef.current = id;
       let wordOffset = 0;
       chunks.forEach((chunk, index) => {
         const offset = wordOffset;
@@ -246,7 +264,7 @@ export function LessonSpeechProvider({
         engine.speak(utterance);
       });
     },
-    [clips, clipFor, timings, voiceFor, speakingId, silence, stopTracking, clipsOnly],
+    [clips, clipFor, timings, voiceFor, silence, stopTracking, clipsOnly],
   );
 
   const unlock = useCallback(() => {
