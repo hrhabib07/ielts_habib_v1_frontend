@@ -63,3 +63,48 @@ export function saveLessonPosition(step: ChatLessonStep, state: ChatLessonState)
     // Storage blocked or full: the lesson still works, it just cannot resume.
   }
 }
+
+/**
+ * After an interleaved game, park the learner on the next note (or mark complete).
+ * Keeps answered points from `base` when provided.
+ */
+export function seedLessonAfterChunk(
+  step: ChatLessonStep,
+  finishedChunkIndex: number,
+  base?: ChatLessonState | null,
+): void {
+  const nextChunkIndex = finishedChunkIndex + 1;
+  const startedAt = base?.startedAt ?? Date.now();
+  const points = base?.points ?? {};
+  const nextEntryId = base?.nextEntryId ?? 1;
+  if (nextChunkIndex >= step.chunks.length) {
+    saveLessonPosition(step, {
+      ...(base ?? {
+        entries: [],
+        points: {},
+        chunkIndex: 0,
+        startedAt: null,
+        finishedAt: null,
+        nextEntryId: 1,
+        phase: { name: "reading", revealed: 0 },
+      }),
+      startedAt,
+      points,
+      nextEntryId,
+      chunkIndex: finishedChunkIndex,
+      entries: [],
+      phase: { name: "complete" },
+      finishedAt: Date.now(),
+    });
+    return;
+  }
+  saveLessonPosition(step, {
+    entries: [],
+    points,
+    nextEntryId,
+    chunkIndex: nextChunkIndex,
+    startedAt,
+    finishedAt: null,
+    phase: { name: "reading", revealed: 0 },
+  });
+}

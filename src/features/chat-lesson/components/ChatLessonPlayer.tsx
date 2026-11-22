@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, useReducedMotion } from "framer-motion";
 import {
@@ -45,15 +45,38 @@ import {
   useLessonSpeech,
   type StepAudio,
 } from "@/src/features/chat-lesson/hooks/useLessonSpeech";
-import { pick, UI } from "@/src/features/chat-lesson/lib/uiCopy";
+import type { ChatLessonState } from "@/src/features/chat-lesson/lib/chatLessonReducer";
+import { LANG_FACE, pick, UI } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { ChatLessonStep } from "@/src/features/chat-lesson/types";
+import { clearDemoSubjectContinue, readDemoSubjectContinue } from "@/src/features/guest/guestProgress";
+import { notesUntilNextGame } from "@/src/features/learner/lib/interleave";
+import { LEARNER_UI } from "@/src/features/learner/lib/copy";
+import { cn } from "@/lib/utils";
+
+const SUBJECT_LESSON_ID = "level-1-step-3-subject";
 
 type ScreenProps = {
   step: ChatLessonStep;
   /** Level map. After finishing, Continue returns here with `?completed=<step id>`. */
   backHref?: string;
+  /** Close without a route (guest demo). Used when `backHref` is omitted. */
+  onBack?: () => void;
   /** When set, Continue opens this playground (Learn → গেইম) instead of only the map. */
   nextPlayHref?: string | null;
+  /**
+   * After finishing a note chunk, return a playground URL to play the matching round.
+   * Null keeps the normal next-note flow.
+   */
+  playAfterChunk?: (chunkId: string) => string | null;
+  /** Called just before leaving a chunk for an interleaved game (so resume lands on the next note). */
+  onLeaveChunkForPlay?: (chunkIndex: number, lessonState: ChatLessonState) => void;
+  /**
+   * When set, used instead of `router.push` for `playAfterChunk` / finish Continue.
+   * Guest `/play` stays on one page and swaps to the free game.
+   */
+  onOpenPlayHref?: (href: string) => void;
+  /** Finish Continue when there is no `nextPlayHref` / `backHref` (guest taste → game). */
+  onContinue?: () => void;
   onComplete?: (score: number, max: number) => void;
 };
 
@@ -67,12 +90,23 @@ export function ChatLessonPlayer({ audio, ...screen }: ScreenProps & { audio?: S
   );
 }
 
-function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenProps) {
+function ChatLessonScreen({
+  step,
+  backHref,
+  onBack,
+  nextPlayHref,
+  playAfterChunk,
+  onLeaveChunkForPlay,
+  onOpenPlayHref,
+  onContinue,
+  onComplete,
+}: ScreenProps) {
   const router = useRouter();
   const { state, chunk, activeQuestion, totals, chunkScore, actions } = useChatLesson(step);
   const { stop: stopSpeech } = useLessonSpeech();
   const { testingTools } = useMissionStore();
   const lang = useLessonLanguage();
+  const face = LANG_FACE[lang];
   const flags = useLessonFlags();
   const flagMode = flags?.flagMode ?? false;
   const sheetOpen = Boolean(flags?.sheet);
@@ -80,6 +114,9 @@ function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenPr
   const reduceMotion = useReducedMotion();
   const bottomRef = useRef<HTMLDivElement>(null);
   const lessonRef = useRef<HTMLDivElement>(null);
+  const [demoContinue, setDemoContinue] = useState(
+    () => step.id === SUBJECT_LESSON_ID && Boolean(readDemoSubjectContinue()?.notePreviewDone),
+  );
 
   const { phase, entries, chunkIndex } = state;
   const isComplete = phase.name === "complete";
@@ -88,6 +125,11 @@ function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenPr
   const revealedCount = phase.name === "reading" ? phase.revealed : chunk.messages.length;
   const selectedOptionId = phase.name === "answering" ? phase.selectedOptionId : null;
   const completedParts = isComplete ? 0 : chunkIndex;
+  const chunkIds = useMemo(() => step.chunks.map((item) => item.id), [step.chunks]);
+  const gameInNotes = useMemo(
+    () => notesUntilNextGame(step.id, chunkIds, chunkIndex),
+    [step.id, chunkIds, chunkIndex],
+  );
 
   useEffect(() => {
     if (!lessonVisible) stopSpeech();
@@ -111,13 +153,42 @@ function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenPr
     bottomRef.current?.scrollIntoView({ behavior, block: "end" });
   }, [entries.length, phase.name, revealedCount, chunkIndex, rereading, reduceMotion]);
 
+  const openHref = (href: string) => {
+    if (onOpenPlayHref) onOpenPlayHref(href);
+    else router.push(href);
+  };
+
   const finishStep = () => {
     if (nextPlayHref) {
-      router.push(nextPlayHref);
+      openHref(nextPlayHref);
+      return;
+    }
+    if (onContinue) {
+      onContinue();
       return;
     }
     if (backHref) router.push(`${backHref}?completed=${encodeURIComponent(step.id)}`);
     else actions.restart();
+  };
+
+  const leaveChunkForPlayIfNeeded = (): boolean => {
+    const href = playAfterChunk?.(chunk.id) ?? null;
+    if (!href) return false;
+    onLeaveChunkForPlay?.(state.chunkIndex, state);
+    openHref(href);
+    return true;
+  };
+
+  const continueAfterFeedback = () => {
+    const isLastQuestion =
+      phase.name === "feedback" && phase.questionIndex >= chunk.questions.length - 1;
+    if (isLastQuestion && leaveChunkForPlayIfNeeded()) return;
+    actions.advance();
+  };
+
+  const continueAfterReadyNoQuestions = () => {
+    if (leaveChunkForPlayIfNeeded()) return;
+    actions.nextPart();
   };
 
   const trayAction: TrayAction = (() => {
@@ -126,7 +197,11 @@ function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenPr
         return { label: pick(UI.trayShowAll, lang), tone: "muted", onClick: actions.revealAll };
       case "ready":
         if (chunk.questions.length === 0) {
-          return { label: pick(UI.trayContinue, lang), tone: "success", onClick: actions.nextPart };
+          return {
+            label: pick(UI.trayContinue, lang),
+            tone: "success",
+            onClick: continueAfterReadyNoQuestions,
+          };
         }
         return {
           label: pick(phase.resume ? UI.trayBackToQuestion : UI.trayAsk, lang),
@@ -142,10 +217,20 @@ function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenPr
         };
       case "evaluating":
         return { label: pick(UI.trayChecking, lang), tone: "brand", disabled: true };
-      case "feedback":
-        return phase.result === "revealed"
-          ? { label: pick(UI.trayGotIt, lang), tone: "brand", onClick: actions.advance }
-          : { label: pick(UI.trayContinue, lang), tone: "success", onClick: actions.advance };
+      case "feedback": {
+        const isLastQuestion = phase.questionIndex >= chunk.questions.length - 1;
+        const playHref = isLastQuestion ? playAfterChunk?.(chunk.id) ?? null : null;
+        const label = playHref
+          ? pick(UI.learnThenPlay, lang)
+          : phase.result === "revealed"
+            ? pick(UI.trayGotIt, lang)
+            : pick(UI.trayContinue, lang);
+        return {
+          label,
+          tone: playHref || phase.result !== "revealed" ? "success" : "brand",
+          onClick: continueAfterFeedback,
+        };
+      }
       case "complete":
         return { label: pick(UI.trayContinue, lang), tone: "success", onClick: finishStep };
     }
@@ -190,6 +275,7 @@ function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenPr
         onLanguageChange={setLessonLanguage}
         onRestart={actions.restart}
         backHref={backHref}
+        onBack={onBack}
         demo={testingTools}
       />
 
@@ -199,6 +285,29 @@ function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenPr
         aria-relevant="additions"
       >
         <div className="mx-auto w-full max-w-2xl space-y-4 px-3 pb-8 pt-5 sm:px-4">
+          {demoContinue ? (
+            <div className="rounded-2xl bg-sky-50 px-4 py-3 ring-1 ring-sky-200">
+              <p className={cn(face, "text-sm font-black text-sky-900")}>
+                {pick(LEARNER_UI.demoContinueTitle, lang)}
+              </p>
+              <p className={cn(face, "mt-1 text-xs font-semibold text-sky-800")}>
+                {pick(LEARNER_UI.demoContinueBody, lang)}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  clearDemoSubjectContinue();
+                  setDemoContinue(false);
+                }}
+                className={cn(
+                  face,
+                  "mt-3 inline-flex h-9 items-center justify-center rounded-full bg-accent px-4 text-xs font-bold text-white",
+                )}
+              >
+                {pick(LEARNER_UI.demoContinueCta, lang)}
+              </button>
+            </div>
+          ) : null}
           {step.chunks.slice(0, completedParts).map((done, i) => {
             const s = chunkScore(i);
             return (
@@ -221,6 +330,7 @@ function ChatLessonScreen({ step, backHref, nextPlayHref, onComplete }: ScreenPr
                 partNumber={chunkIndex + 1}
                 partCount={step.chunks.length}
                 lang={lang}
+                gameInNotes={gameInNotes}
               />
 
               <div ref={lessonRef} className="scroll-mt-4 space-y-2.5">

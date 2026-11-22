@@ -1,9 +1,13 @@
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
+
 /** Gamlish brand  -  Bangladesh-first; product name stays Latin, voice stays Bangla. */
 export const GAMLISH_BRAND = {
   name: "Gamlish",
   taglineLine1: "ইংরেজি শেখার গেইম",
   taglineLine2: "খেলার ছলেই ইংরেজি শিখি!",
   heroLine: "গ্যামলিশ: ইংরেজি শেখার গেইম।",
+  /** Primary start-play CTA (same voice as Rokomari’s soft “একটু … দেখুন”). */
+  playCta: PLAY_A_LITTLE,
   metaTitle: "Gamlish · 45 দিনে মজবুত ইংরেজি ভিত্তি",
   metaDescription:
     "Gamlish-এ খেলার ছলে ইংরেজির বেসিক গড়ুন. IELTS নয়, Spoken নয়. 21টি মিশন, 45 দিন। প্রথম গেইমগুলো ফ্রি।",

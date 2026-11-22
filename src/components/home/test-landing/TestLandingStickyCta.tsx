@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Play } from "lucide-react";
 import { usePrefersReducedMotion } from "@/src/hooks/usePrefersReducedMotion";
 import { Button } from "@/components/ui/button";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
 import { cn } from "@/lib/utils";
@@ -65,10 +65,7 @@ export function TestLandingStickyCta() {
           asChild
         >
           <Link href={TEST_LANDING_PRIMARY_HREF} onPointerDown={onPointerDown}>
-            <span className="relative z-10 inline-flex items-center justify-center gap-2">
-              <Play className="size-3.5 fill-current" aria-hidden />
-              <span>{copy.stickyPrimary}</span>
-            </span>
+            <PlayALittleCtaContent label={copy.stickyPrimary} size="sm" badge={false} />
           </Link>
         </Button>
       </div>

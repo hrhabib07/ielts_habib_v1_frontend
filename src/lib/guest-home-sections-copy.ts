@@ -1,4 +1,5 @@
 import type { GuestLandingLocale } from "@/src/lib/guest-landing-copy";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 
 export interface GuestHomeSectionsCopy {
   readonly joinOffer: {
@@ -95,7 +96,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       whyNow:
         "You can start today. Build the English skill you actually need.",
       ctaPrimary: "You can do this too · Start now",
-      ctaSecondary: "Play Free Games",
+      ctaSecondary: PLAY_A_LITTLE.en,
     },
     problemBadge: "The Real Problem",
     problemTitle: "Why do we still freeze when writing a simple English sentence?",
@@ -294,7 +295,7 @@ export const GUEST_HOME_SECTIONS_COPY: Record<
       whyNow:
         "আজই শুরু করতে পারেন। যে ইংরেজি দক্ষতা আপনার সত্যিই দরকার, সেটাই গড়ুন।",
       ctaPrimary: "আপনিও পারবেন · এখনই শুরু করুন",
-      ctaSecondary: "ফ্রি শুরু করুন",
+      ctaSecondary: PLAY_A_LITTLE.bn,
     },
     problemBadge: "আসল সমস্যা",
     problemTitle:

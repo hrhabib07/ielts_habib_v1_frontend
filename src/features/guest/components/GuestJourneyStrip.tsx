@@ -1,13 +1,13 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { BookOpen, Check, Gamepad2, HelpCircle } from "lucide-react";
+import { BookOpen, Check, Gamepad2 } from "lucide-react";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
 import { GUEST_UI } from "@/src/features/guest/copy";
 import { cn } from "@/lib/utils";
 
-export type GuestJourneyStep = "note" | "quiz" | "game";
+export type GuestJourneyStep = "note" | "game";
 
 const STEPS: readonly {
   id: GuestJourneyStep;
@@ -15,18 +15,13 @@ const STEPS: readonly {
   Icon: typeof BookOpen;
 }[] = [
   { id: "note", label: GUEST_UI.miniPathNote, Icon: BookOpen },
-  { id: "quiz", label: GUEST_UI.miniPathCheck, Icon: HelpCircle },
   { id: "game", label: GUEST_UI.miniPathGame, Icon: Gamepad2 },
 ];
 
 const HINT: Record<GuestJourneyStep, { en: string; bn: string }> = {
   note: {
-    en: "Game coming soon · finish this short note first",
-    bn: "গেইম আসছে · আগে এই ছোট নোট শেষ করুন",
-  },
-  quiz: {
-    en: "Almost there · then you play the game",
-    bn: "প্রায় হয়ে গেছে · এরপর গেইম খেলবেন",
+    en: "Same as the real lesson · note, then questions in chat",
+    bn: "আসল লেসনের মতো · নোট, তারপর চ্যাটেই প্রশ্ন",
   },
   game: {
     en: "Your turn · play what you just learned",
@@ -34,11 +29,8 @@ const HINT: Record<GuestJourneyStep, { en: string; bn: string }> = {
   },
 };
 
-function stepState(
-  id: GuestJourneyStep,
-  current: GuestJourneyStep,
-): "done" | "current" | "soon" {
-  const order: GuestJourneyStep[] = ["note", "quiz", "game"];
+function stepState(id: GuestJourneyStep, current: GuestJourneyStep): "done" | "current" | "soon" {
+  const order: GuestJourneyStep[] = ["note", "game"];
   const here = order.indexOf(id);
   const now = order.indexOf(current);
   if (here < now) return "done";
@@ -46,7 +38,7 @@ function stepState(
   return "soon";
 }
 
-/** Sticky Note → Check → Game path so guests feel the game coming while they learn. */
+/** Sticky Note → Game path (questions live inside the note chat, like the real app). */
 export function GuestJourneyStrip({
   lang,
   current,
@@ -69,8 +61,8 @@ export function GuestJourneyStrip({
       <p className={cn(face, "text-center text-[11px] font-black text-accent")}>
         {pick(HINT[current], lang)}
       </p>
-      <div className="relative mt-2.5 flex items-start justify-between px-1">
-        <span aria-hidden className="absolute inset-x-6 top-4 border-t-2 border-dashed border-accent/25" />
+      <div className="relative mt-2.5 flex items-start justify-center gap-16 px-1">
+        <span aria-hidden className="absolute inset-x-16 top-4 border-t-2 border-dashed border-accent/25" />
         {STEPS.map((step) => {
           const state = stepState(step.id, current);
           const Icon = step.Icon;

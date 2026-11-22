@@ -1,4 +1,5 @@
 import type { Bilingual } from "@/src/features/chat-lesson/types";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 
 export const PG_UI = {
   badge: { en: "Playground", bn: "প্লেগ্রাউন্ড" },
@@ -7,7 +8,7 @@ export const PG_UI = {
     en: `${rounds} quick rounds · about ${minutes} minutes`,
     bn: `${rounds}টি ছোট রাউন্ড · প্রায় ${minutes} মিনিট`,
   }),
-  startCta: { en: "Start Playground", bn: "খেলা শুরু করুন" },
+  startCta: { ...PLAY_A_LITTLE },
   startNote: {
     en: "Turn your sound on. Gamlish reads every question in English.",
     bn: "সাউন্ড চালু রাখুন। Gamlish প্রতিটি প্রশ্ন ইংরেজিতে পড়ে শোনাবে।",
@@ -127,8 +128,21 @@ export const PG_UI = {
   },
   momsList: { en: "Mom's bazar list", bn: "মায়ের বাজারের লিস্ট" },
   inEnglish: { en: "In English", bn: "ইংরেজিতে" },
-  passedTitle: { en: "Playground passed!", bn: "প্লেগ্রাউন্ড পাস!" },
+  passedTitle: { en: "Games done · keep going!", bn: "গেম শেষ · এগিয়ে যান!" },
+  topicCleared: (topic: string): Bilingual => ({
+    en: `${topic} cleared!`,
+    bn: `${topic} শেষ!`,
+  }),
   notPassedTitle: { en: "Not passed yet", bn: "এখনো পাস হয়নি" },
+  startNextTopic: (topic: string): Bilingual => ({
+    en: `Start ${topic}`,
+    bn: `${topic} শুরু করুন`,
+  }),
+  topicsProgress: (done: number, total: number): Bilingual => ({
+    en: `${done} of ${total} topics done`,
+    bn: `${done} / ${total} টপিক শেষ`,
+  }),
+  autoNextHint: { en: "Starting next game…", bn: "পরের গেম শুরু হচ্ছে…" },
   passNeed: (pct: number): Bilingual => ({
     en: `You need ${pct}% to pass. Play again, you can do it!`,
     bn: `পাস করতে ${pct}% লাগবে। আবার খেলুন, আপনি পারবেন!`,

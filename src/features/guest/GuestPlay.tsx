@@ -2,36 +2,39 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
+import { ChatLessonPlayer } from "@/src/features/chat-lesson/components/ChatLessonPlayer";
 import { SUBJECT_STEP } from "@/src/features/chat-lesson/content/subjectStep";
+import type { StepAudio } from "@/src/features/chat-lesson/hooks/useLessonSpeech";
 import { useLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
+import type { ChatLessonStep } from "@/src/features/chat-lesson/types";
 import { NAMELESS_LEARNER, personalizeDeep } from "@/src/features/learner/lib/personalize";
-import { LazyNotesSheet, preloadNotesSheet } from "@/src/features/notes/components/LazyNotesSheet";
-import { NOTES_UI } from "@/src/features/notes/copy";
+import { MISSION_BASE } from "@/src/features/learner/lib/routes";
+import { loadNoteAudio } from "@/src/features/notes/lib/noteAudio";
 import { GameLoading } from "@/src/features/playground/components/GameLoading";
 import { PlaygroundPlayer } from "@/src/features/playground/components/PlaygroundPlayer";
 import { usePlaygroundEntry } from "@/src/features/playground/hooks/usePlaygroundEntry";
 import { resumePoint } from "@/src/features/playground/lib/session";
 import type { Playground } from "@/src/features/playground/types";
-import { MISSION_BASE } from "@/src/features/learner/lib/routes";
 import { getDecodedTokenClient } from "@/src/lib/auth";
 import { logConversionFunnelEvent } from "@/src/lib/api/conversionFunnel";
 import { trackCustomOnce } from "@/src/lib/meta-pixel";
 import {
   guestFunnel,
   guestRounds,
-  markGuestNoteDone,
+  markDemoSubjectContinue,
   markGuestQuizDone,
   saveGuestRound,
 } from "./guestProgress";
 import { DevResetButton } from "./components/DevResetButton";
-import { GuestJourneyStrip } from "./components/GuestJourneyStrip";
-import { GuestCheckQuiz, GuestValueCard, WelcomeCard, type GuestPath } from "./components/GuestScreens";
+import { GuestValueCard, WelcomeCard, type GuestPath } from "./components/GuestScreens";
 import { GUEST_GAME_ID, GUEST_NOTE_CHUNK_ID, GUEST_ROUND_LIMIT, guestPath, SHIPPED_GUEST_GAME as SHIPPED } from "./guestPath";
 
 const RETURN_TO = MISSION_BASE;
 const GUEST_LESSON_ID = SHIPPED?.afterStepId ?? SUBJECT_STEP.id;
+/** In-page handoff from the taste lesson into the free Subject round. */
+const GUEST_PLAY_HANDOFF = "guest://subject-game";
 
-type Stage = "welcome" | "note" | "quiz" | "game" | "value";
+type Stage = "welcome" | "note" | "game" | "value";
 
 const noSubscribe = () => () => undefined;
 const readDone = () => JSON.stringify(guestRounds(GUEST_GAME_ID));
@@ -39,22 +42,26 @@ const readFunnel = () => JSON.stringify(guestFunnel());
 const NOTHING_DONE = "{}";
 const EMPTY_FUNNEL = JSON.stringify({ noteDone: false, quizDone: false, updatedAt: 0 });
 
-const CHECK_QUESTIONS = (SUBJECT_STEP.chunks.find((chunk) => chunk.id === GUEST_NOTE_CHUNK_ID)?.questions ?? [])
-  .slice(0, 2)
-  .map((question) => ({
-    id: question.id,
-    prompt: question.prompt,
-    sentence: question.sentence,
-    options: question.options.map((option) => ({ id: option.id, text: option.text })),
-    correctOptionId: question.correctOptionId,
-    hint: question.hint,
-    englishOptions: question.englishOptions,
-  }));
+/** Guest game: first round only, capped at 3 items. */
+const GUEST_ROUND_PICK = 3;
 
-function defaultStage(allFreeDone: boolean, noteDone: boolean, quizDone: boolean): Stage {
+/** Same chat lesson UX as the real app: first Subject part + its in-chat questions. */
+function guestTasteStep(): ChatLessonStep {
+  const chunk = SUBJECT_STEP.chunks.find((item) => item.id === GUEST_NOTE_CHUNK_ID);
+  if (!chunk) return { ...SUBJECT_STEP, chunks: SUBJECT_STEP.chunks.slice(0, 1) };
+  return {
+    ...SUBJECT_STEP,
+    // Separate resume key so a guest taste does not collide with the full logged-in lesson.
+    id: "guest-subject-taste",
+    stepLabel: "Free taste",
+    intro: undefined,
+    chunks: [chunk],
+  };
+}
+
+function defaultStage(allFreeDone: boolean, lessonDone: boolean): Stage {
   if (allFreeDone) return "value";
-  if (quizDone) return "game";
-  if (noteDone) return "quiz";
+  if (lessonDone) return "game";
   return "welcome";
 }
 
@@ -83,16 +90,21 @@ function GuestPlayScreen() {
     [funnelJson],
   );
   const [chosen, setChosen] = useState<Stage | null>(null);
+  const [lessonAudio, setLessonAudio] = useState<StepAudio | undefined>(undefined);
 
   const full = useMemo<Playground | null>(() => {
     const game = loaded?.entry?.playground ?? null;
     return game ? personalizeDeep(game, NAMELESS_LEARNER) : null;
   }, [loaded]);
   const source = full ?? SHIPPED;
-  const playable = useMemo<Playground | null>(
-    () => (full ? { ...full, rounds: full.rounds.slice(0, GUEST_ROUND_LIMIT) } : null),
-    [full],
-  );
+  const playable = useMemo<Playground | null>(() => {
+    if (!full) return null;
+    const rounds = full.rounds.slice(0, GUEST_ROUND_LIMIT).map((round) => ({
+      ...round,
+      pick: Math.min(GUEST_ROUND_PICK, round.pick ?? GUEST_ROUND_PICK),
+    }));
+    return { ...full, rounds };
+  }, [full]);
   const lockedRounds = useMemo(
     () => (source?.rounds.slice(GUEST_ROUND_LIMIT) ?? []).map((round) => ({ id: round.id, title: round.title })),
     [source],
@@ -101,10 +113,12 @@ function GuestPlayScreen() {
   const freeRounds = source?.rounds.slice(0, GUEST_ROUND_LIMIT) ?? [];
   const doneCount = freeRounds.filter((round) => done[round.id]).length;
   const allFreeDone = freeRounds.length > 0 && doneCount >= freeRounds.length;
-  const stage: Stage = chosen ?? defaultStage(allFreeDone, funnel.noteDone, funnel.quizDone);
+  const lessonDone = funnel.noteDone && funnel.quizDone;
+  const stage: Stage = chosen ?? defaultStage(allFreeDone, lessonDone);
   const resume = useMemo(() => (playable ? resumePoint(playable.rounds, done) : null), [playable, done]);
 
   const path = useMemo<GuestPath>(() => guestPath(doneCount, source), [source, doneCount]);
+  const tasteStep = useMemo(() => personalizeDeep(guestTasteStep(), NAMELESS_LEARNER), []);
 
   useEffect(() => {
     if (getDecodedTokenClient()) router.replace(MISSION_BASE);
@@ -115,7 +129,14 @@ function GuestPlayScreen() {
   }, []);
 
   useEffect(() => {
-    if (stage === "welcome" || stage === "note") preloadNotesSheet();
+    if (stage !== "note") return;
+    let active = true;
+    void loadNoteAudio([GUEST_LESSON_ID]).then((value) => {
+      if (active) setLessonAudio(value);
+    });
+    return () => {
+      active = false;
+    };
   }, [stage]);
 
   useEffect(() => {
@@ -138,13 +159,10 @@ function GuestPlayScreen() {
 
   const toWelcome = useCallback(() => setChosen("welcome"), []);
   const toNote = useCallback(() => setChosen("note"), []);
-  const toQuiz = useCallback(() => {
-    markGuestNoteDone();
-    funnelOnce("note_finished");
-    setChosen("quiz");
-  }, []);
-  const toGame = useCallback(() => {
+  const finishTasteLesson = useCallback(() => {
     markGuestQuizDone();
+    markDemoSubjectContinue();
+    funnelOnce("note_finished");
     funnelOnce("quiz_finished");
     setChosen("game");
   }, []);
@@ -155,18 +173,14 @@ function GuestPlayScreen() {
       <WelcomeCard
         lang={lang}
         path={path}
-        continuing={funnel.noteDone || funnel.quizDone || doneCount > 0}
+        continuing={lessonDone || doneCount > 0}
         onStart={() => {
           if (allFreeDone) {
             toValue();
             return;
           }
-          if (funnel.quizDone) {
-            toGame();
-            return;
-          }
-          if (funnel.noteDone) {
-            setChosen("quiz");
+          if (lessonDone) {
+            setChosen("game");
             return;
           }
           toNote();
@@ -175,23 +189,17 @@ function GuestPlayScreen() {
     );
   }
 
-  if (stage === "note" && GUEST_LESSON_ID) {
+  if (stage === "note") {
     return (
-      <LazyNotesSheet
-        stepId={GUEST_LESSON_ID}
-        chunkIds={[GUEST_NOTE_CHUNK_ID]}
-        includeIntro={false}
-        chatReveal
-        readTimeLabel={NOTES_UI.guestReadTime}
-        onClose={toWelcome}
-        action={{ label: NOTES_UI.checkNow, onClick: toQuiz }}
-        journey={<GuestJourneyStrip lang={lang} current="note" />}
+      <ChatLessonPlayer
+        step={tasteStep}
+        audio={lessonAudio}
+        onBack={toWelcome}
+        playAfterChunk={() => GUEST_PLAY_HANDOFF}
+        onOpenPlayHref={() => finishTasteLesson()}
+        onContinue={finishTasteLesson}
       />
     );
-  }
-
-  if (stage === "quiz") {
-    return <GuestCheckQuiz lang={lang} questions={CHECK_QUESTIONS} onDone={toGame} />;
   }
 
   if (stage === "value") {

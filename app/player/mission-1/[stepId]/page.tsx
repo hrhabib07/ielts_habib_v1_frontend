@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { MissionStepPage } from "@/src/features/learner/components/MissionPages";
 
@@ -12,5 +13,9 @@ type Params = { params: Promise<{ stepId: string }> };
 
 export default async function MissionOneStepPage({ params }: Params) {
   const { stepId } = await params;
-  return <MissionStepPage stepId={stepId} />;
+  return (
+    <Suspense fallback={null}>
+      <MissionStepPage stepId={stepId} />
+    </Suspense>
+  );
 }

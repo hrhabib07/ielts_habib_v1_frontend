@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +39,9 @@ export function GuestStickyDemoCta() {
           )}
           asChild
         >
-          <Link href={FREE_PLAY_HREF}>{copy.stickyCta}</Link>
+          <Link href={FREE_PLAY_HREF} className="group">
+            <PlayALittleCtaContent label={copy.stickyCta} size="sm" badge={false} />
+          </Link>
         </Button>
         <Button
           size="lg"

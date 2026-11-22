@@ -1,3 +1,4 @@
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 import type { UiLocale } from "@/src/lib/ui-locale";
 
 export const PRICING_PAGE_COPY: Record<
@@ -48,7 +49,7 @@ export const PRICING_PAGE_COPY: Record<
     priceSave: (saveLabel) => `${saveLabel} সাশ্রয়`,
     priceMeta: "90 দিন · 21টি লেভেল · Legacy Learner",
     cta: "90 দিনের অ্যাক্সেস নিন",
-    ctaDemo: "আগে ফ্রি গেইম খেলুন",
+    ctaDemo: PLAY_A_LITTLE.bn,
     legal: "হিডেন চার্জ নেই। পেমেন্ট bKash-এ। ৩০ নভেম্বর রাত 11:59 পর্যন্ত 90 দিন; এরপর 45 দিন। আজীবন নয়।",
     includesTitle: "এই পেমেন্টে যা খুলবে",
     includes: [
@@ -111,7 +112,7 @@ export const PRICING_PAGE_COPY: Record<
     priceSave: (saveLabel) => `Save ${saveLabel}`,
     priceMeta: "90 days · 21 levels · Legacy Learner",
     cta: "Get 90-day access",
-    ctaDemo: "Play the free games first",
+    ctaDemo: PLAY_A_LITTLE.en,
     legal: "No hidden fee. Pay with bKash. 90 days until 30 November 11:59 PM; then 45 days. Not lifetime.",
     includesTitle: "What this payment unlocks",
     includes: [

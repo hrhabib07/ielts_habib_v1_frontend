@@ -80,6 +80,17 @@ export const UI = {
     bn: `পার্ট ${n} / ${total}`,
   }),
   partDone: (n: number): Bilingual => ({ en: `Part ${n} done`, bn: `পার্ট ${n} শেষ` }),
+  /** Quiet teaser when a paired game is close (0 = after this note). Only show when ≤3. */
+  gameAfterThisNote: { en: "Game right after this note", bn: "এই নোটের ঠিক পরেই গেম" },
+  gameInOneNote: { en: "Game in 1 note", bn: "আর 1 নোট · তারপর গেম" },
+  gameInNotes: (n: number): Bilingual => ({
+    en: `Game in ${n} notes`,
+    bn: `আর ${n} নোট · তারপর গেম`,
+  }),
+  tapWordsForBangla: {
+    en: "Tap a word for Bangla",
+    bn: "বাংলা অর্থের জন্য শব্দে ট্যাপ করুন",
+  },
   lessonHidden: { en: "Lesson hidden while you answer", bn: "উত্তর দেওয়ার সময় লেখাটি লুকানো থাকবে" },
   readAgainClose: { en: "Read again (the question will close)", bn: "আবার পড়ুন (প্রশ্নটি বন্ধ হবে)" },
   readLessonAgain: { en: "Read the lesson again", bn: "লেখাটি আবার পড়ুন" },
@@ -190,8 +201,8 @@ export const UI = {
   partGames: { en: "Games", bn: "গেইম" },
   partLearnFirst: { en: "Learn first (recommended)", bn: "আগে শিখুন (আমাদের পরামর্শ)" },
   learnThenPlay: {
-    en: "You just learned it · now play it!",
-    bn: "এইমাত্র শিখলেন · এবার practically খেলে দেখুন!",
+    en: "You just learned it · play a little!",
+    bn: "এইমাত্র শিখলেন · এবার একটু খেলে দেখুন!",
   },
   inFullGame: { en: "In the full game", bn: "পুরো গেইমে আছে" },
   unlock: { en: "Unlock", bn: "আনলক করুন" },
@@ -226,7 +237,7 @@ export const UI = {
   }),
   letsGo: { en: "Let's go!", bn: "চলুন শুরু করি!" },
   mascotKeepGoing: { en: "You're doing great!", bn: "দারুণ এগোচ্ছেন!" },
-  stepCompleteTitle: { en: "Step complete!", bn: "ধাপ শেষ!" },
+  stepCompleteTitle: { en: "Lesson done · keep going!", bn: "লেসন শেষ · এগিয়ে যান!" },
   statPoints: { en: "Points", bn: "পয়েন্ট" },
   statAccuracy: { en: "Accuracy", bn: "নির্ভুলতা" },
   statTime: { en: "Time", bn: "সময়" },

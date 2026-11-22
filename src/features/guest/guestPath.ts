@@ -7,9 +7,9 @@ import type { GuestPath } from "./components/GuestScreens";
 import { guestRounds } from "./guestProgress";
 
 export const GUEST_GAME_ID = "level-1-playground-subject";
-/** Guests play one easy Subject round after a short note + check questions; the rest needs an account. */
+/** Guests play one easy Subject round after the same in-chat lesson taste; the rest needs an account. */
 export const GUEST_ROUND_LIMIT = 1;
-/** First Subject note chunk shown before the guest quiz (what a Subject is). */
+/** First Subject chunk (note + in-chat questions) shown in the free taste. */
 export const GUEST_NOTE_CHUNK_ID = "what-is-subject";
 /** Subject lesson id claimed after guest note + quiz so Learn-first is satisfied post-signup. */
 export const GUEST_LESSON_CLAIM_ID = "level-1-step-3-subject";

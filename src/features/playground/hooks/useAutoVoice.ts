@@ -31,7 +31,7 @@ export function setAutoVoice(on: boolean): void {
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
-/** Reads each new question aloud in English. On by default; remembered per browser. */
+/** Auto-reads game questions and note section titles. On by default; remembered per browser. */
 export function useAutoVoice(): boolean {
   return useSyncExternalStore(subscribe, read, () => true);
 }

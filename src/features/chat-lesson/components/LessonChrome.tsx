@@ -23,9 +23,11 @@ export function LessonHeader({
   onLanguageChange,
   onRestart,
   backHref,
+  onBack,
   demo = false,
 }: {
   backHref?: string;
+  onBack?: () => void;
   demo?: boolean;
   title: string;
   missionLabel: string;
@@ -38,18 +40,20 @@ export function LessonHeader({
   onRestart: () => void;
 }) {
   const pct = total === 0 ? 0 : Math.round((answered / total) * 100);
+  const backClass =
+    "flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800";
 
   return (
     <header className="shrink-0 border-b border-slate-200/80 bg-white">
       <div className="mx-auto flex w-full max-w-2xl items-center gap-3 px-4 pt-3">
         {backHref ? (
-          <Link
-            href={backHref}
-            aria-label="Back to level map"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
-          >
+          <Link href={backHref} aria-label="Back to level map" className={backClass}>
             <X className="size-5" aria-hidden />
           </Link>
+        ) : onBack ? (
+          <button type="button" onClick={onBack} aria-label="Close" className={backClass}>
+            <X className="size-5" aria-hidden />
+          </button>
         ) : null}
         <div
           className="h-3.5 flex-1 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200/70"

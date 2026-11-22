@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Star, Target, Zap, type LucideIcon } from "lucide-react";
 import { MissionZeroConfetti } from "@/src/components/demo/MissionZeroFx";
@@ -46,10 +46,13 @@ function useCountUp(target: number): number {
   return value;
 }
 
+const AUTO_NEXT_MS = 2200;
+
 /** After every game in a playground: stars, the score and XP, then the next game. */
 export function RoundWinCard({
   summary,
   number,
+  totalGames,
   lang,
   extras,
   nextTitle,
@@ -57,6 +60,8 @@ export function RoundWinCard({
 }: {
   summary: RoundSummary;
   number: number;
+  /** Games in this playground (for "Game 2 of 4"). */
+  totalGames: number;
   lang: LessonLanguage;
   extras: RoundWinExtras | null;
   /** Title of the game that comes next, shown above the button. */
@@ -66,10 +71,19 @@ export function RoundWinCard({
   const face = LANG_FACE[lang];
   const xpShown = useCountUp(summary.xp);
   const perfect = summary.total > 0 && summary.firstTry === summary.total;
+  const canAutoNext = Boolean(nextTitle) && !extras;
+  const onNextRef = useRef(onNext);
+  onNextRef.current = onNext;
 
   useEffect(() => {
     void playCelebrateSfx();
   }, []);
+
+  useEffect(() => {
+    if (!canAutoNext) return;
+    const timer = window.setTimeout(() => onNextRef.current(), AUTO_NEXT_MS);
+    return () => window.clearTimeout(timer);
+  }, [canAutoNext, number]);
 
   const stats: Stat[] = [
     {
@@ -107,7 +121,7 @@ export function RoundWinCard({
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.15 }}
           >
-            {pick(PG_UI.roundDone(number), lang)}
+            {pick(PG_UI.roundDoneLabel(number, Math.max(totalGames, number)), lang)}
           </motion.p>
           <motion.h1
             className={cn(face, "mt-2 text-3xl font-black text-slate-900")}
@@ -192,7 +206,9 @@ export function RoundWinCard({
           {nextTitle ? (
             <p className={cn(face, "flex items-center justify-center gap-1.5 text-xs font-bold text-slate-500")}>
               <ArrowRight className="size-3.5" aria-hidden />
-              {pick(PG_UI.nextUp(pick(nextTitle, lang)), lang)}
+              {canAutoNext
+                ? pick(PG_UI.autoNextHint, lang)
+                : pick(PG_UI.nextUp(pick(nextTitle, lang)), lang)}
             </p>
           ) : null}
           {extras?.actions ?? (
@@ -206,7 +222,9 @@ export function RoundWinCard({
                 lang === "en" ? "uppercase tracking-wide" : "text-[17px]",
               )}
             >
-              {pick(PG_UI.nextGame, lang)}
+              {nextTitle
+                ? pick(PG_UI.nextUp(pick(nextTitle, lang)), lang)
+                : pick(PG_UI.nextGame, lang)}
             </button>
           )}
         </div>

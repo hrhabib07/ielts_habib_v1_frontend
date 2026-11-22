@@ -161,6 +161,100 @@ export interface AdminEnglishInspection {
   missions: AdminInspectionMission[];
 }
 
+export type AdminV2StopStatus =
+  | "completed"
+  | "current"
+  | "upcoming"
+  | "locked";
+
+export type AdminV2RoundStatus = "completed" | "in_progress" | "not_started";
+
+export interface AdminV2RoundProgress {
+  id: string;
+  title: string;
+  status: AdminV2RoundStatus;
+  score: number | null;
+  max: number | null;
+}
+
+export interface AdminV2StopProgress {
+  id: string;
+  title: string;
+  kind: "lesson" | "playground" | "final_test";
+  lessonId: string | null;
+  playgroundId: string | null;
+  free: boolean;
+  status: AdminV2StopStatus;
+  lessonDone: boolean;
+  playgroundDone: boolean;
+  lessonScore: { score: number; max: number; completedAt: string } | null;
+  playgroundScore: { score: number; max: number; completedAt: string } | null;
+  tasteDone: boolean;
+  rounds: AdminV2RoundProgress[];
+}
+
+export interface AdminV2Focus {
+  stopId: string;
+  title: string;
+  kind: AdminV2StopProgress["kind"];
+  locationLabel: string;
+  lessonId: string | null;
+  playgroundId: string | null;
+  activeRoundId: string | null;
+  activeRoundTitle: string | null;
+}
+
+export interface AdminV2AnswerRow {
+  gameKey: string;
+  roundId: string;
+  itemId: string;
+  outcome: "correct" | "wrong" | "revealed";
+  attempt: number;
+  ms: number;
+  review: boolean;
+  picked: string | null;
+  answeredAt: string;
+}
+
+export interface AdminV2SkillRow {
+  gameKey: string;
+  roundId: string;
+  seen: number;
+  firstTry: number;
+  wrong: number;
+  status: "new" | "practice" | "better" | "strong";
+}
+
+export interface AdminV2Inspection {
+  levelKey: string;
+  title: string;
+  lastActiveAt: string | null;
+  focus: AdminV2Focus | null;
+  stats: {
+    stopsDone: number;
+    stopsTotal: number;
+    lessonsDone: number;
+    lessonsTotal: number;
+    gamesDone: number;
+    gamesTotal: number;
+    percent: number;
+  };
+  stops: AdminV2StopProgress[];
+  finalTest: {
+    official: {
+      score: number;
+      max: number;
+      submittedAt: string;
+      timedOut: boolean;
+    } | null;
+    inProgress: boolean;
+    practiceBest: number | null;
+    practiceCount: number;
+  };
+  recentAnswers: AdminV2AnswerRow[];
+  skills: AdminV2SkillRow[];
+}
+
 export interface AdminStudentEnglishProgress {
   user: {
     _id: string;
@@ -196,6 +290,8 @@ export interface AdminStudentEnglishProgress {
     percent: number;
   };
   inspection?: AdminEnglishInspection;
+  /** English Fundamentals v2 · primary progress for admin. */
+  v2?: AdminV2Inspection;
 }
 
 export async function listAdminEnglishStudents(params?: {

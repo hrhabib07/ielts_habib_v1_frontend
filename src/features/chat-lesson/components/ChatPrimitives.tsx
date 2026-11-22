@@ -97,12 +97,29 @@ function renderTokens(tokens: RichToken[], active: number | null, strongClassNam
 const GLOSS_OPEN_EVENT = "gamlish-gloss-open";
 
 /** A tappable English word or phrase that shows its Bangla meaning in a small bubble. */
-function GlossWord({ id, meaning, children }: { id: string; meaning: string; children: ReactNode }) {
+function GlossWord({
+  id,
+  meaning,
+  focus = false,
+  children,
+}: {
+  id: string;
+  meaning: string;
+  focus?: boolean;
+  children: ReactNode;
+}) {
   const [open, setOpen] = useState(false);
+  const [tip, setTip] = useState<{ left: number; top: number } | null>(null);
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (!open) return;
+    const place = () => {
+      const box = ref.current?.getBoundingClientRect();
+      if (!box) return;
+      setTip({ left: box.left + box.width / 2, top: box.top });
+    };
+    place();
     const onOtherOpen = (event: Event) => {
       if ((event as CustomEvent<string>).detail !== id) setOpen(false);
     };
@@ -111,9 +128,13 @@ function GlossWord({ id, meaning, children }: { id: string; meaning: string; chi
     };
     window.addEventListener(GLOSS_OPEN_EVENT, onOtherOpen);
     document.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
     return () => {
       window.removeEventListener(GLOSS_OPEN_EVENT, onOtherOpen);
       document.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
     };
   }, [open, id]);
 
@@ -123,7 +144,7 @@ function GlossWord({ id, meaning, children }: { id: string; meaning: string; chi
   };
 
   return (
-    <span ref={ref} className="relative inline-block">
+    <span ref={ref} className="relative inline">
       <button
         type="button"
         onClick={() => (open ? setOpen(false) : show())}
@@ -134,24 +155,29 @@ function GlossWord({ id, meaning, children }: { id: string; meaning: string; chi
           if (event.pointerType === "mouse") setOpen(false);
         }}
         aria-expanded={open}
+        aria-label={`${meaning}`}
         className={cn(
-          "cursor-pointer rounded-[4px] underline decoration-accent/40 decoration-dotted decoration-2 underline-offset-[5px] transition-colors hover:bg-accent/10",
-          open && "bg-accent/10 decoration-accent",
+          "cursor-pointer rounded-[5px] px-0.5 transition-colors",
+          focus
+            ? "bg-amber-100/90 font-extrabold text-slate-900 underline decoration-amber-500 decoration-2 underline-offset-[5px] ring-1 ring-amber-300/80 hover:bg-amber-200/90"
+            : "underline decoration-sky-400/70 decoration-dotted decoration-2 underline-offset-[5px] hover:bg-sky-50",
+          open && (focus ? "bg-amber-200 ring-amber-400" : "bg-sky-100 decoration-sky-600"),
         )}
       >
         {children}
       </button>
       <AnimatePresence>
-        {open ? (
+        {open && tip ? (
           <motion.span
             role="tooltip"
-            className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2.5 -translate-x-1/2"
+            className="pointer-events-none fixed z-[80] -translate-x-1/2 -translate-y-full"
+            style={{ left: tip.left, top: tip.top - 10 }}
             initial={{ opacity: 0, y: 6, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 500, damping: 28 }}
           >
-            <span className="relative block whitespace-nowrap rounded-xl border-2 border-slate-200 bg-white px-3 py-1.5 font-bengali text-[15px] font-semibold tracking-normal text-slate-800 shadow-lg">
+            <span className="relative block max-w-[min(80vw,16rem)] whitespace-normal rounded-xl border-2 border-slate-200 bg-white px-3 py-1.5 text-center font-bengali text-[15px] font-semibold leading-snug tracking-normal text-slate-800 shadow-lg">
               {meaning}
               <span className="absolute left-1/2 top-full -mt-[5px] size-2.5 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-slate-200 bg-white" />
             </span>
@@ -189,7 +215,12 @@ export function SpokenText({
     <>
       {groupGlossUnits(tokens, glosses).map((unit, i) =>
         unit.gloss ? (
-          <GlossWord key={i} id={`${speechId}:${i}`} meaning={unit.gloss.bn}>
+          <GlossWord
+            key={i}
+            id={`${speechId}:${i}`}
+            meaning={unit.gloss.bn}
+            focus={Boolean(unit.gloss.focus)}
+          >
             {renderTokens(unit.tokens, active, strongClassName)}
           </GlossWord>
         ) : (

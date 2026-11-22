@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { GamlishNavBrand } from "@/src/components/shared/GamlishNavBrand";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { UiLanguageToggle } from "@/src/components/shared/UiLanguageToggle";
 import { useGuestLandingLocaleState } from "@/src/hooks/useGuestLandingLocaleState";
 import { useSiteShellCopy } from "@/src/hooks/useLocalizedCopy";
@@ -94,7 +95,9 @@ export function GuestLandingNavBar({
                 : cn("text-white", LANDING_CTA_CLASS),
             )}
           >
-            {testCopy.navPrimary}
+            <span className="group inline-flex items-center">
+              <PlayALittleCtaContent label={testCopy.navPrimary} size="sm" badge={false} />
+            </span>
           </Link>
         </div>
 
@@ -126,7 +129,9 @@ export function GuestLandingNavBar({
                       LANDING_CTA_CLASS,
                     )}
                   >
-                    {testCopy.navPrimary}
+                    <span className="group inline-flex w-full items-center justify-center">
+                      <PlayALittleCtaContent label={testCopy.navPrimary} size="sm" badge={false} />
+                    </span>
                   </Link>
                   {isConversionLanding ? (
                     <button

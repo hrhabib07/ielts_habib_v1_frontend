@@ -1,4 +1,5 @@
 import type { Bilingual } from "@/src/features/chat-lesson/types";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 
 /** Welcome, mini-lesson, value, name and Bhaiya/Apu screens. */
 export const GUEST_UI = {
@@ -6,15 +7,15 @@ export const GUEST_UI = {
   welcomeTag: { en: "The Game of English", bn: "ইংরেজি শেখার গেইম" },
   welcomeLevel: { en: "Level 1", bn: "লেভেল 1" },
   welcomeLine: (topic: Bilingual): Bilingual => ({
-    en: `Level 1 starts with ${topic.en}. First a short note, then a game.`,
-    bn: `লেভেল 1 শুরু হবে ${topic.bn} দিয়ে। আগে ছোট নোট, তারপর গেইম।`,
+    en: `Level 1 starts with ${topic.en}. Learn in chat, then play a game.`,
+    bn: `লেভেল 1 শুরু হবে ${topic.bn} দিয়ে। চ্যাটে শিখুন, তারপর গেইম খেলুন।`,
   }),
   gameLabel: (n: number): Bilingual => ({ en: `Game ${n}`, bn: `গেইম ${n}` }),
   easy: { en: "Easy", bn: "সহজ" },
   harder: { en: "Harder", bn: "কঠিন" },
   quickFacts: () => [
-    { emoji: "📘", text: { en: "1 short note", bn: "1টি ছোট নোট" } },
-    { emoji: "❓", text: { en: "1-2 quick checks", bn: "1-2টি ছোট প্রশ্ন" } },
+    { emoji: "📘", text: { en: "1 short lesson in chat", bn: "চ্যাটে 1টি ছোট লেসন" } },
+    { emoji: "❓", text: { en: "Questions inside the note", bn: "নোটের ভিতরেই প্রশ্ন" } },
     { emoji: "🎮", text: { en: "1 free game", bn: "1টি ফ্রি গেইম" } },
   ],
   startHere: { en: "Start here", bn: "এখান থেকে শুরু" },
@@ -28,20 +29,20 @@ export const GUEST_UI = {
   languageHint: { en: "Tap to change language", bn: "ভাষা বদলাতে ট্যাপ করুন" },
   login: { en: "Log in", bn: "লগইন" },
   moreTopics: (n: number): Bilingual => ({ en: `+${n}`, bn: `+${n}` }),
-  play: { en: "Start free", bn: "ফ্রি শুরু করুন" },
+  play: { ...PLAY_A_LITTLE },
   continueMini: { en: "Continue", bn: "চালিয়ে যান" },
   learnFirst: { en: "Learn Subject first", bn: "আগে Subject শিখে নিন" },
   recommended: { en: "Recommended", bn: "আমাদের পরামর্শ" },
   haveAccount: { en: "I already have an account", bn: "আমার আগে থেকেই অ্যাকাউন্ট আছে" },
   guestName: { en: "Guest player", bn: "গেস্ট প্লেয়ার" },
 
-  miniPathNote: { en: "Note", bn: "নোট" },
+  miniPathNote: { en: "Lesson", bn: "লেসন" },
   miniPathCheck: { en: "Check", bn: "প্রশ্ন" },
   miniPathGame: { en: "Game", bn: "গেইম" },
   comingSoon: { en: "Soon", bn: "শীঘ্রই" },
   miniPathLine: {
-    en: "Learn one idea, check it, then play.",
-    bn: "একটি ধারণা শিখুন, প্রশ্ন দিন, তারপর গেইম খেলুন।",
+    en: "Same as the real app: note + questions in chat, then a game.",
+    bn: "আসল অ্যাপের মতো: চ্যাটে নোট + প্রশ্ন, তারপর গেইম।",
   },
 
   checkTitle: { en: "Quick check", bn: "ছোট পরীক্ষা" },
@@ -53,8 +54,8 @@ export const GUEST_UI = {
   checkPick: { en: "Your answer", bn: "উত্তর বেছে নিন" },
   checkNext: { en: "Next question", bn: "পরের প্রশ্ন" },
   checkToGame: {
-    en: "You just learned it · now play it!",
-    bn: "এইমাত্র শিখলেন · এবার practically খেলে দেখুন!",
+    en: "You just learned it · play a little!",
+    bn: "এইমাত্র শিখলেন · এবার একটু খেলে দেখুন!",
   },
   checkWrong: { en: "Try again", bn: "আবার চেষ্টা করুন" },
   checkCorrect: { en: "Correct!", bn: "সঠিক!" },

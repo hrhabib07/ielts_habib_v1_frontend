@@ -8,6 +8,7 @@ import { PRICING_PAGE_COPY } from "@/src/lib/pricing-page-copy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { MonthlyOfferStory } from "@/src/components/pricing/MonthlyOfferStory";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
@@ -101,9 +102,9 @@ export function PricingPageHero({
         </Button>
         <Link
           href={FREE_PLAY_HREF}
-          className="mt-3 block text-center text-base font-semibold text-foreground/75 underline-offset-4 hover:underline"
+          className="group mt-3 flex items-center justify-center text-base font-semibold text-foreground/75 underline-offset-4 hover:underline"
         >
-          {copy.ctaDemo}
+          <PlayALittleCtaContent label={copy.ctaDemo} size="sm" badge={false} />
         </Link>
         <p className="mt-4 text-center text-sm leading-relaxed text-foreground/65">
           {copy.legal}

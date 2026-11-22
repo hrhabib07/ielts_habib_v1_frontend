@@ -39,6 +39,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AdminStudentV2Progress } from "@/src/features/admin/students/AdminStudentV2Progress";
 
 const FILTERS: { id: AdminStudentListFilter; label: string }[] = [
   { id: "all", label: "All" },
@@ -237,11 +238,7 @@ function decisionHint(
   listRow?: AdminStudentListItem | null,
 ): string {
   const payment = detail.access?.paymentLabel ?? detail.user.marketingPaymentStatus;
-  const focus = detail.inspection?.focus ?? null;
-  const current = detail.map.camps
-    .flatMap((camp) => camp.missions)
-    .find((m) => m.status === "in_progress") ??
-    detail.map.camps.flatMap((camp) => camp.missions).find((m) => m.status === "available");
+  const focus = detail.v2?.focus ?? null;
 
   if (payment === "pending") {
     return "Decision: verify bKash / TrxID, then unlock or reject payment.";
@@ -253,17 +250,13 @@ function decisionHint(
   }
   if (listRow?.condition === "stuck" || (listRow?.idleDays ?? 0) >= 3) {
     return focus
-      ? `Decision: nudge on ${focus.missionTitle}. Stuck at ${focus.locationLabel}.`
-      : current
-        ? `Decision: nudge them on ${current.title}. They stalled mid-mission.`
-        : "Decision: nudge them to reopen English Foundations.";
+      ? `Decision: nudge on ${focus.title}. Stuck at ${focus.locationLabel}.`
+      : "Decision: nudge them to reopen Level 1 (English Fundamentals v2).";
   }
   if (detail.stats.completedMissions === 0 && detail.stats.inProgressMissions > 0) {
     return focus
-      ? `Decision: help finish ${focus.missionTitle}. Now at ${focus.locationLabel}.`
-      : current
-        ? `Decision: help them finish ${current.title} (still early).`
-        : "Decision: help them complete the first mission.";
+      ? `Decision: help finish ${focus.title}. Now at ${focus.locationLabel}.`
+      : "Decision: help them complete Start Here / Subject.";
   }
   if (payment === "unpaid" && detail.stats.completedMissions >= 2) {
     return "Decision: they are learning. Soft offer / pricing timing may convert.";
@@ -271,7 +264,7 @@ function decisionHint(
   if (detail.access?.premiumLabel === "live") {
     return focus
       ? `Decision: paid learner. Watch pace at ${focus.locationLabel}.`
-      : "Decision: paid learner. Watch mission pace and support if stuck.";
+      : "Decision: paid learner. Watch Level 1 pace and support if stuck.";
   }
   return focus
     ? `Decision: monitor. Currently at ${focus.locationLabel}.`
@@ -484,7 +477,6 @@ export default function AdminUsersPage() {
   const [detail, setDetail] = useState<AdminStudentEnglishProgress | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [unlocking, setUnlocking] = useState(false);
-  const [expandedMissionId, setExpandedMissionId] = useState<string | null>(null);
 
   const loadList = useCallback(
     async (
@@ -525,17 +517,9 @@ export default function AdminUsersPage() {
     setSelectedId(userId);
     setLoadingDetail(true);
     setError(null);
-    setExpandedMissionId(null);
     try {
       const data = await getAdminStudentEnglishProgress(userId);
       setDetail(data);
-      const focusSlug = data?.inspection?.focus?.missionSlug;
-      const focusMission =
-        data?.inspection?.missions.find((m) => m.slug === focusSlug) ??
-        data?.inspection?.missions.find((m) => m.status === "in_progress") ??
-        data?.inspection?.missions.find((m) => m.status === "available") ??
-        null;
-      setExpandedMissionId(focusMission?.id ?? null);
     } catch {
       setError("Could not load student progress.");
       setDetail(null);
@@ -562,57 +546,7 @@ export default function AdminUsersPage() {
   const selectedListRow = items.find((row) => row._id === selectedId) ?? null;
 
   if (selectedId) {
-    const inspection = detail?.inspection ?? null;
-    const focus = inspection?.focus ?? null;
-    const focusMission =
-      inspection?.missions.find((m) => m.slug === focus?.missionSlug) ??
-      inspection?.missions.find((m) => m.status === "in_progress") ??
-      inspection?.missions.find((m) => m.status === "available") ??
-      null;
-    const focusStage =
-      focusMission?.stages.find((s) => s.status === "current") ??
-      focusMission?.stages.find((s) => s.order === focus?.stageOrder) ??
-      null;
-    const mapMissions = detail?.map.camps.flatMap((camp) => camp.missions) ?? [];
-    const fallbackMission =
-      mapMissions.find((m) => m.status === "in_progress") ??
-      mapMissions.find((m) => m.status === "available") ??
-      null;
-    const focusStages = focusMission
-      ? {
-          done: focusMission.stages.filter((s) => s.status === "completed").length,
-          total: Math.max(1, focusMission.stages.length),
-          percent:
-            focusMission.status === "completed"
-              ? 100
-              : Math.min(
-                  100,
-                  Math.round(
-                    (focusMission.stages.filter((s) => s.status === "completed").length /
-                      Math.max(1, focusMission.stages.length)) *
-                      100,
-                  ),
-                ),
-          label: focus?.locationLabel ?? stageProgress({
-            ...focusMission,
-            campId: "",
-            stageCount: focusMission.stages.length,
-          } as AdminMissionState).label,
-        }
-      : fallbackMission
-        ? stageProgress(fallbackMission)
-        : null;
-
-    const missionsByCamp = new Map<string, AdminInspectionMission[]>();
-    if (detail && inspection) {
-      for (const camp of detail.map.camps) {
-        const campMissionIds = new Set(camp.missions.map((m) => m.id));
-        missionsByCamp.set(
-          camp.id,
-          inspection.missions.filter((m) => campMissionIds.has(m.id)),
-        );
-      }
-    }
+    const v2 = detail?.v2 ?? null;
 
     return (
       <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
@@ -625,7 +559,6 @@ export default function AdminUsersPage() {
             onClick={() => {
               setSelectedId(null);
               setDetail(null);
-              setExpandedMissionId(null);
             }}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -675,14 +608,14 @@ export default function AdminUsersPage() {
                       <span className="inline-flex items-center gap-1">
                         <Clock3 className="h-3.5 w-3.5" aria-hidden />
                         {formatRelativeActive(
-                          selectedListRow?.lastActiveAt ?? inspection?.lastActiveAt ?? undefined,
+                          selectedListRow?.lastActiveAt ?? v2?.lastActiveAt ?? undefined,
                           selectedListRow?.idleDays,
                         )}
                       </span>
-                      {inspection?.lastActiveAt ? (
+                      {v2?.lastActiveAt ? (
                         <span>
                           Progress updated{" "}
-                          {new Date(inspection.lastActiveAt).toLocaleString()}
+                          {new Date(v2.lastActiveAt).toLocaleString()}
                         </span>
                       ) : null}
                     </div>
@@ -724,10 +657,12 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Mission progress
+                    Level 1 progress
                   </p>
                   <p className="mt-1 text-base font-black tabular-nums">
-                    {detail.stats.completedMissions}/{detail.stats.totalMissions} · {detail.stats.percent}%
+                    {v2
+                      ? `${v2.stats.stopsDone}/${v2.stats.stopsTotal} · ${v2.stats.percent}%`
+                      : `${detail.stats.completedMissions}/${detail.stats.totalMissions} · ${detail.stats.percent}%`}
                   </p>
                 </div>
                 <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
@@ -735,10 +670,7 @@ export default function AdminUsersPage() {
                     Exact location
                   </p>
                   <p className="mt-1 text-sm font-bold leading-snug">
-                    {focus?.locationLabel ??
-                      (fallbackMission
-                        ? `M${String(fallbackMission.order).padStart(2, "0")} · ${fallbackMission.title}`
-                        : "Not started")}
+                    {v2?.focus?.locationLabel ?? "Not started on v2"}
                   </p>
                 </div>
               </div>
@@ -777,143 +709,13 @@ export default function AdminUsersPage() {
               {error ? <p className="text-sm text-destructive">{error}</p> : null}
             </Card>
 
-            {focus && focusMission && focusStages ? (
-              <Card className="space-y-4 border-sky-500/30 p-6">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-black uppercase tracking-wider text-sky-700 dark:text-sky-300">
-                      Current focus
-                    </p>
-                    <h2 className="mt-1 text-lg font-bold">
-                      M{String(focus.missionOrder).padStart(2, "0")} · {focus.missionTitle}
-                    </h2>
-                    <p className="mt-1 text-sm font-semibold text-foreground">
-                      {focus.locationLabel}
-                    </p>
-                    {focus.questionLabel ? (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Working on: {focus.questionLabel}
-                      </p>
-                    ) : (
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {kindLabel(focus.stageKind)} stage
-                        {focus.evalType ? ` (${focus.evalType})` : ""}
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-xs font-bold",
-                        statusStyles(focus.missionStatus),
-                      )}
-                    >
-                      {statusLabel(focus.missionStatus)}
-                    </span>
-                    <p className="mt-2 text-xs font-semibold text-muted-foreground">
-                      XP {focus.xpEarned}
-                      {focus.questionTotal > 0
-                        ? ` · ${focus.questionsCorrect}/${focus.questionTotal} Q correct`
-                        : ""}
-                    </p>
-                  </div>
-                </div>
-                <div className="h-3 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-sky-600"
-                    style={{ width: `${focusStages.percent}%` }}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {focusMission.stages.map((stage) => (
-                    <span
-                      key={stage.order}
-                      className={cn(
-                        "inline-flex min-h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-xs font-black",
-                        stage.status === "completed"
-                          ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-800"
-                          : stage.status === "current"
-                            ? "border-sky-500/50 bg-sky-500/20 text-sky-900"
-                            : "border-border bg-muted/40 text-muted-foreground",
-                      )}
-                      title={stage.title}
-                    >
-                      {stage.order}
-                    </span>
-                  ))}
-                </div>
-                {focusStage && focusStage.questions.length > 0 ? (
-                  <div className="space-y-2 rounded-xl border border-sky-500/20 bg-sky-500/5 p-3">
-                    <p className="text-[11px] font-black uppercase tracking-wider text-sky-800 dark:text-sky-200">
-                      Stage {focusStage.order} questions
-                    </p>
-                    {focusStage.questions.map((question) => (
-                      <QuestionRow key={question.id} question={question} />
-                    ))}
-                  </div>
-                ) : null}
-              </Card>
+            {v2 ? (
+              <AdminStudentV2Progress v2={v2} />
             ) : (
               <Card className="p-6 text-sm text-muted-foreground">
-                No mission in progress yet. Learner has not started English Foundations.
+                Could not load English Fundamentals v2 progress for this learner.
               </Card>
             )}
-
-            {detail.map.camps.map((camp) => {
-              const campMissions =
-                missionsByCamp.get(camp.id) ??
-                camp.missions.map((mission) => ({
-                  id: mission.id,
-                  slug: mission.slug,
-                  order: mission.order,
-                  title: mission.title,
-                  status: mission.status,
-                  accessTier: mission.accessTier,
-                  isInspection: mission.isInspection,
-                  xpEarned: 0,
-                  bestScorePercent: null,
-                  currentStageOrder: mission.currentStageOrder,
-                  completedStageOrders: mission.completedStageOrders,
-                  updatedAt: null,
-                  stages: [],
-                }));
-              const campDone = campMissions.filter((m) => m.status === "completed").length;
-              return (
-                <Card key={camp.id} className="space-y-4 p-6">
-                  <div className="flex flex-wrap items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
-                        Camp {camp.order}
-                      </p>
-                      <h2 className="text-lg font-semibold">{camp.title}</h2>
-                      {camp.subtitle ? (
-                        <p className="text-sm text-muted-foreground">{camp.subtitle}</p>
-                      ) : null}
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Expand a mission to inspect each stage, lesson, and question.
-                      </p>
-                    </div>
-                    <p className="text-sm font-bold tabular-nums text-muted-foreground">
-                      {campDone}/{campMissions.length} missions
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    {campMissions.map((mission) => (
-                      <MissionInspectionCard
-                        key={mission.id}
-                        mission={mission}
-                        expanded={expandedMissionId === mission.id}
-                        onToggle={() =>
-                          setExpandedMissionId((prev) =>
-                            prev === mission.id ? null : mission.id,
-                          )
-                        }
-                      />
-                    ))}
-                  </div>
-                </Card>
-              );
-            })}
           </>
         ) : (
           <Card className="p-8 text-sm text-destructive">

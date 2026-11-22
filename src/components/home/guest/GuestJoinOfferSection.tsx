@@ -7,6 +7,7 @@ import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { useGuestHomeSectionsCopy } from "@/src/components/home/guest/useGuestHomeSectionsCopy";
 import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
@@ -120,7 +121,9 @@ export function GuestJoinOfferSection() {
               className="h-12 w-full max-w-md rounded-2xl border-2 text-base font-bold"
               asChild
             >
-              <Link href={FREE_PLAY_HREF}>{copy.ctaSecondary}</Link>
+              <Link href={FREE_PLAY_HREF} className="group">
+                <PlayALittleCtaContent label={copy.ctaSecondary} size="sm" badge={false} />
+              </Link>
             </Button>
           </div>
         </motion.div>

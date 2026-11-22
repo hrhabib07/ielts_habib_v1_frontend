@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { MissionStoreProvider, type MissionStore } from "@/src/features/chat-lesson/hooks/useMissionStore";
@@ -18,8 +18,14 @@ import { readMissionState, writeMissionState } from "@/src/features/learner/lib/
 import type { Learner } from "@/src/features/learner/lib/personalize";
 import { resizePhoto } from "@/src/features/learner/lib/resizePhoto";
 import { getDecodedTokenClient, hydrateAccessTokenFromCookie } from "@/src/lib/auth";
-import { clearGuestProgress, guestFunnel, guestProgress } from "@/src/features/guest/guestProgress";
-import { GUEST_LESSON_CLAIM_ID } from "@/src/features/guest/guestPath";
+import { SUBJECT_STEP } from "@/src/features/chat-lesson/content/subjectStep";
+import { seedLessonAfterChunk } from "@/src/features/chat-lesson/lib/lessonResume";
+import {
+  clearGuestProgress,
+  guestDemoTasteDone,
+  guestProgress,
+  markDemoSubjectContinue,
+} from "@/src/features/guest/guestProgress";
 import {
   claimChatMissionGuestResults,
   getChatMissionState,
@@ -40,6 +46,8 @@ import { cn } from "@/lib/utils";
 
 export { MISSION_BASE, missionHref } from "@/src/features/learner/lib/routes";
 const ANSWER_SAVE_DELAY_MS = 1500;
+/** After signup from the free taste, always open Start Here first (not Subject mid-stream). */
+const START_HERE_STEP_ID = "mission-1-step-1-intro";
 
 type EnabledState = Extract<ChatMissionState, { enabled: true }>;
 
@@ -51,7 +59,7 @@ export type MissionShellContext = {
   dismissPhotoPrompt: () => Promise<void>;
   paymentSubmitted: (latest: ChatMissionPaymentStatus | null) => void;
   freeClaimed: (freeAccessUntil: number) => void;
-  /** A playground the learner started as a guest: right after sign-up the map opens it at the next game. */
+  /** Right after sign-up: open this step once (Start Here when coming from the free taste). */
   resumeStepId: string | null;
   clearResume: () => void;
 };
@@ -150,28 +158,39 @@ export function MissionShell({
 
   const serverLoaded = fresh && state?.enabled === true;
   const [resumeStepId, setResumeStepId] = useState<string | null>(null);
+  const guestClaimed = useRef(false);
   useEffect(() => {
-    if (!serverLoaded) return;
+    if (!serverLoaded || !state?.enabled || guestClaimed.current) return;
     const progress = guestProgress();
-    const funnel = guestFunnel();
+    const demoTaste = guestDemoTasteDone();
     const partials = Object.fromEntries(Object.entries(progress).map(([id, p]) => [id, p.rounds]));
-    const results: Record<string, { score: number; max: number }> = {};
-    // Mini-lesson note + quiz count as the Subject lesson so Learn-first is satisfied after signup.
-    if (funnel.noteDone && funnel.quizDone) {
-      results[GUEST_LESSON_CLAIM_ID] = { score: 2, max: 2 };
+    const hasPartials = Object.keys(partials).length > 0;
+    if (!demoTaste && !hasPartials) return;
+
+    guestClaimed.current = true;
+
+    // Demo people: keep Subject lesson open (do not mark the whole lesson done).
+    // Park resume after the first Subject note chunk, then send them through Start Here first.
+    if (demoTaste) {
+      markDemoSubjectContinue();
+      seedLessonAfterChunk(SUBJECT_STEP, 0);
     }
-    if (Object.keys(partials).length === 0 && Object.keys(results).length === 0) return;
+
     clearGuestProgress();
-    void claimChatMissionGuestResults({ results, partials })
+
+    const introDone = Boolean(state.results[START_HERE_STEP_ID]);
+    if (!introDone) setResumeStepId(START_HERE_STEP_ID);
+
+    if (!hasPartials) return;
+
+    void claimChatMissionGuestResults({ results: {}, partials })
       .then((saved) => {
         setState((current) =>
           current?.enabled ? { ...current, results: saved.results, partials: saved.partials } : current,
         );
-        const next = Object.keys(saved.partials).find((id) => !saved.results[id] && partials[id]);
-        if (next) setResumeStepId(next);
       })
       .catch(() => undefined);
-  }, [serverLoaded]);
+  }, [serverLoaded, state]);
   const clearResume = useCallback(() => setResumeStepId(null), []);
 
   useEffect(() => () => answerSaver.cancel(), [answerSaver]);

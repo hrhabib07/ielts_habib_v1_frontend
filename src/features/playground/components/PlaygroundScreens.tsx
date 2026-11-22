@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { BookOpen, Check, Clock, Flame, Gamepad2, Globe2, RotateCcw, Star, Target, X, Zap, type LucideIcon } from "lucide-react";
+import { ArrowRight, BookOpen, Check, Clock, Flame, Gamepad2, Globe2, RotateCcw, Star, Target, X, Zap, type LucideIcon } from "lucide-react";
 import { MissionZeroConfetti } from "@/src/components/demo/MissionZeroFx";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { EN_FACE } from "@/src/features/chat-lesson/components/ChatPrimitives";
 import { formatPoints, starCount } from "@/src/features/chat-lesson/lib/format";
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
@@ -13,6 +14,7 @@ import { GameSettingsMenu } from "@/src/features/playground/components/GameSetti
 import { ROUND_ICONS } from "@/src/features/playground/components/roundIcons";
 import { PG_UI } from "@/src/features/playground/lib/copy";
 import type { CollectedLine, Playground } from "@/src/features/playground/types";
+import type { Bilingual } from "@/src/features/chat-lesson/types";
 import { useLearner } from "@/src/features/learner/LearnerContext";
 import { addressed } from "@/src/features/learner/lib/personalize";
 import { cn } from "@/lib/utils";
@@ -165,7 +167,11 @@ export function PlaygroundStart({
               lang === "en" && "uppercase tracking-wide",
             )}
           >
-            {pick(resuming ? PG_UI.startGame(resumeFrom + 1) : PG_UI.startCta, lang)}
+            {resuming ? (
+              pick(PG_UI.startGame(resumeFrom + 1), lang)
+            ) : (
+              <PlayALittleCtaContent label={pick(PG_UI.startCta, lang)} size="md" badge={false} />
+            )}
           </button>
         </div>
       </div>
@@ -185,6 +191,7 @@ export function PlaygroundComplete({
   lines,
   passed,
   lang,
+  nextBridge,
   onContinue,
   onReplay,
   onNotes,
@@ -198,6 +205,12 @@ export function PlaygroundComplete({
   lines: readonly CollectedLine[];
   passed: boolean;
   lang: LessonLanguage;
+  /** Next topic after a pass: Continue opens it instead of dumping to the map. */
+  nextBridge?: {
+    title: Bilingual;
+    topicsDone: number;
+    topicsTotal: number;
+  } | null;
   onContinue: () => void;
   onReplay: () => void;
   /** Not passed: the notes come first, then the replay. */
@@ -208,6 +221,8 @@ export function PlaygroundComplete({
   const stars = starCount(score, max);
   const accuracy = max === 0 ? 0 : Math.round((score / max) * 100);
   const passPct = Math.round(playground.passMark * 100);
+  const topicName = pick(playground.topic ?? playground.title, lang);
+  const nextName = nextBridge ? pick(nextBridge.title, lang) : null;
   const tiles: Tile[] = [
     {
       label: pick(PG_UI.statXp, lang),
@@ -256,11 +271,25 @@ export function PlaygroundComplete({
             <GamlishMascot mood={passed ? "happy" : "oops"} size="lg" />
           </motion.span>
           <h1 className={cn(face, "mt-5 text-3xl font-black sm:text-4xl", passed ? "text-accent" : "text-accent")}>
-            {pick(passed ? PG_UI.passedTitle : PG_UI.notPassedTitle, lang)}
+            {pick(
+              passed
+                ? nextBridge
+                  ? PG_UI.topicCleared(topicName)
+                  : PG_UI.passedTitle
+                : PG_UI.notPassedTitle,
+              lang,
+            )}
           </h1>
           <p className={cn(face, "mt-1 text-base font-bold text-slate-600 sm:text-lg")}>
-            {pick(passed ? addressed(PG_UI.headline[stars], learner) : PG_UI.passNeed(passPct), lang)}
+            {passed && nextBridge
+              ? pick(PG_UI.nextUp(nextName ?? ""), lang)
+              : pick(passed ? addressed(PG_UI.headline[stars], learner) : PG_UI.passNeed(passPct), lang)}
           </p>
+          {passed && nextBridge ? (
+            <p className={cn(face, "mt-2 text-xs font-bold text-slate-500")}>
+              {pick(PG_UI.topicsProgress(nextBridge.topicsDone, nextBridge.topicsTotal), lang)}
+            </p>
+          ) : null}
 
           <div className="mt-4 flex items-end justify-center gap-2" aria-label={`${stars} of 3 stars`}>
             {[1, 2, 3].map((n) => (
@@ -411,20 +440,30 @@ export function PlaygroundComplete({
                 lang === "en" ? "uppercase tracking-wide" : "text-[17px]",
               )}
             >
+              {passed && nextBridge ? <ArrowRight className="size-5" aria-hidden /> : null}
               {passed ? null : <RotateCcw className="size-5" aria-hidden />}
-              {pick(passed ? PG_UI.continue : PG_UI.playAgain, lang)}
-            </button>
-            <button
-              type="button"
-              onClick={passed ? onReplay : onContinue}
-              className={cn(
-                face,
-                "mx-auto flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-100",
+              {pick(
+                passed
+                  ? nextBridge
+                    ? PG_UI.startNextTopic(nextName ?? "")
+                    : PG_UI.continue
+                  : PG_UI.playAgain,
+                lang,
               )}
-            >
-              {passed ? <RotateCcw className="size-4" aria-hidden /> : null}
-              {pick(passed ? PG_UI.playAgain : PG_UI.backToMap, lang)}
             </button>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={passed ? onReplay : onContinue}
+                className={cn(
+                  face,
+                  "flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-100",
+                )}
+              >
+                {passed ? <RotateCcw className="size-4" aria-hidden /> : null}
+                {pick(passed ? PG_UI.playAgain : PG_UI.backToMap, lang)}
+              </button>
+            </div>
           </div>
         )}
       </div>

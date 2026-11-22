@@ -49,7 +49,7 @@ export function tokenizeRichText(input: string, startIndex = 0): RichToken[] {
   return tokens;
 }
 
-export type GlossUnit = { tokens: RichToken[]; gloss?: { text: string; bn: string } };
+export type GlossUnit = { tokens: RichToken[]; gloss?: { text: string; bn: string; focus?: boolean } };
 
 const normalizeWord = (word: string) => word.toLowerCase().replace(/[^\p{L}\p{N}\p{M}']/gu, "");
 

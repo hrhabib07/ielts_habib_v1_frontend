@@ -4,6 +4,7 @@
 } from "@/src/lib/guest-how-it-works-types";
 import { playersPlayingProofLine } from "@/src/lib/monthly-offer-copy";
 import { PLAYERS_PLAYING_PROOF_FLOOR } from "@/src/lib/demo-social-proof";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 
 export type {
   GuestHowGamlishWorksCopy,
@@ -149,12 +150,12 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       xpPop: "+XP",
       payoffLine: "You can do this too · Start now",
     },
-    ctaPrimary: "Start free",
-    ctaPrimarySub: "Short note · then one game · no account yet",
+    ctaPrimary: PLAY_A_LITTLE.en,
+    ctaPrimarySub: "Start in 1 minute · short note, then a game · no account yet",
     ctaSecondary: "How it works",
     ctaPreOrder: "Join as VIP",
     ctaPreOrderSub: "45-day full access · pay with bKash",
-    stickyCta: "Start free",
+    stickyCta: PLAY_A_LITTLE.en,
     stickyPreOrder: "VIP access",
     socialProofFallback: playersPlayingProofLine(PLAYERS_PLAYING_PROOF_FLOOR, "en"),
     socialProofLine: (n) =>
@@ -189,7 +190,7 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     campShowcaseSub:
       "Every camp unlocks a new level of English. Start free at Camp 1.",
     campLocked: "Locked",
-    campFreeStart: "Free Start",
+    campFreeStart: PLAY_A_LITTLE.en,
     finalCtaTitle: "Ready to start your adventure?",
     finalCtaSub: "Jump right into Level 01.",
     tryOne: {
@@ -272,12 +273,12 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
       xpPop: "+XP",
       payoffLine: "আপনিও পারবেন · এখনই শুরু করুন",
     },
-    ctaPrimary: "ফ্রি শুরু করুন",
-    ctaPrimarySub: "ছোট নোট · তারপর এক গেইম · এখনো অ্যাকাউন্ট লাগবে না",
+    ctaPrimary: PLAY_A_LITTLE.bn,
+    ctaPrimarySub: "1 মিনিটে শুরু · ছোট নোট, তারপর গেইম · অ্যাকাউন্ট লাগবে না",
     ctaSecondary: "কীভাবে কাজ করে",
     ctaPreOrder: "VIP হিসেবে যোগ দিন",
     ctaPreOrderSub: "45 দিনের পূর্ণ অ্যাক্সেস · bKash দিয়ে পেমেন্ট",
-    stickyCta: "ফ্রি শুরু করুন",
+    stickyCta: PLAY_A_LITTLE.bn,
     stickyPreOrder: "VIP অ্যাক্সেস",
     socialProofFallback: playersPlayingProofLine(PLAYERS_PLAYING_PROOF_FLOOR, "bn"),
     socialProofLine: (n) =>
@@ -313,7 +314,7 @@ export const GUEST_LANDING_COPY: Record<GuestLandingLocale, GuestLandingCopy> = 
     campShowcaseSub:
       "প্রতিটি ক্যাম্প আপনার ইংরেজির নতুন লেভেল আনলক করবে। ক্যাম্প 1 থেকে ফ্রি শুরু করুন।",
     campLocked: "লকড",
-    campFreeStart: "ফ্রি শুরু",
+    campFreeStart: PLAY_A_LITTLE.bn,
     finalCtaTitle: "অ্যাডভেঞ্চার শুরু করতে প্রস্তুত?",
     finalCtaSub: "সরাসরি Level 01-এ ঢুকে পড়ুন।",
     tryOne: {

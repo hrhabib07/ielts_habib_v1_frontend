@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -31,10 +31,11 @@ import { LessonFlagsProvider, useLessonFlags } from "@/src/features/chat-lesson/
 import { resetLabProgress, setUnlockAll, type StepResult } from "@/src/features/chat-lesson/hooks/useLabProgress";
 import { useMissionStore } from "@/src/features/chat-lesson/hooks/useMissionStore";
 import { useLearner } from "@/src/features/learner/LearnerContext";
-import { LEARNER_UI, PAY_UI } from "@/src/features/learner/lib/copy";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
+import { LEARNER_UI, MAP_GUIDE_UI, PAY_UI } from "@/src/features/learner/lib/copy";
 import { addressed, personalizeText, type Learner } from "@/src/features/learner/lib/personalize";
 import { setLessonLanguage, useLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
-import { formatPoints, starCount } from "@/src/features/chat-lesson/lib/format";
+import { starCount } from "@/src/features/chat-lesson/lib/format";
 import {
   FEEDBACK_UI,
   LANG_FACE,
@@ -45,8 +46,6 @@ import {
 } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual, ChatLessonLevel, LevelNode, LevelNodeIcon } from "@/src/features/chat-lesson/types";
 import { resetFinalTestRecord } from "@/src/features/final-test/hooks/useFinalTestRecord";
-import { LazyNotesSheet } from "@/src/features/notes/components/LazyNotesSheet";
-import { NOTES_UI } from "@/src/features/notes/copy";
 import { playCorrectEvalSfx, playSoftNotifySfx } from "@/src/lib/player-eval-sfx";
 import { cn } from "@/lib/utils";
 
@@ -243,18 +242,7 @@ function stopParts(stop: Stop): PathItem[] {
   return [stop.test, stop.lesson, ...stop.games].filter((item): item is PathItem => item !== undefined);
 }
 
-/** A fresh topic recommends its lesson first; once any game is played, the games lead. */
-function lessonFirst(stop: Stop): boolean {
-  return isOpen(stop.lesson) && !isDone(stop.lesson) && stop.games.length > 0 && !stop.games.some(isDone);
-}
-
-/** The first game of the topic the learner can open right now (only after Learn is done). */
-function playableGameHref(stop: Stop): string | null {
-  if (stop.lesson && isOpen(stop.lesson) && !isDone(stop.lesson)) return null;
-  return stop.games.find((game) => isOpen(game) && !game.paywalled)?.summary?.href ?? null;
-}
-
-/** The single "current" stop is the first unlocked one with a game (or test) still to win. */
+/** The single "current" stop is the first unlocked incomplete topic (one clear focus). */
 function stopStatuses(stops: readonly Stop[]): StopStatus[] {
   let currentAssigned = false;
   return stops.map((stop) => {
@@ -262,13 +250,25 @@ function stopStatuses(stops: readonly Stop[]): StopStatus[] {
     const entry = stop.test ?? stop.lesson ?? stop.games[0];
     if (!isOpen(entry)) return "locked";
     if (parts.every(isDone)) return "complete";
-    if (!stop.test && stop.games.length === 0) return "open";
     if (!currentAssigned) {
       currentAssigned = true;
       return "current";
     }
     return "open";
   });
+}
+
+/** One linear next link: test → unfinished lesson → unfinished game. */
+function primaryHrefOf(stop: Stop): string | null {
+  if (stop.test && isOpen(stop.test) && !isDone(stop.test)) return stop.test.summary?.href ?? null;
+  if (stop.lesson && isOpen(stop.lesson) && !isDone(stop.lesson)) return stop.lesson.summary?.href ?? null;
+  const game = stop.games.find((item) => isOpen(item) && !isDone(item));
+  return game?.summary?.href ?? stop.lesson?.summary?.href ?? stop.games[0]?.summary?.href ?? null;
+}
+
+/** Revisit a finished topic (lesson first, then test / first game). */
+function reopenHrefOf(stop: Stop): string | null {
+  return stop.lesson?.summary?.href ?? stop.test?.summary?.href ?? stop.games[0]?.summary?.href ?? null;
 }
 
 /** Topics are English terms the learner must know, so English leads and Bangla is a helper line. */
@@ -296,60 +296,33 @@ function arcPath(from: number, to: number): string {
   return `M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${RING_RADIUS} ${RING_RADIUS} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
 }
 
-type RingSegment = { key: string; from: number; to: number; className: string };
-
-/**
- * Left half = Learn, right half = Play (one piece per game). Finished pieces take the part colour,
- * unfinished ones stay a light track. Topics with a single part (Start Here) use one full circle.
- */
-function ringSegments(stop: Stop): RingSegment[] | null {
-  if (stop.test || !stop.lesson || stop.games.length === 0) return null;
-  const segments: RingSegment[] = [
-    {
-      key: "learn",
-      from: 180 + RING_GAP,
-      to: 360 - RING_GAP,
-      className: isDone(stop.lesson) ? "stroke-slate-400" : "stroke-slate-200",
-    },
-  ];
-  const span = 180 / stop.games.length;
-  stop.games.forEach((game, i) => {
-    segments.push({
-      key: game.node.id,
-      from: i * span + RING_GAP,
-      to: (i + 1) * span - RING_GAP,
-      className: isDone(game) ? "stroke-accent" : "stroke-slate-200",
-    });
-  });
-  return segments;
-}
-
-/** Shown only while a topic is unlocked and unfinished: finished and locked topics have no ring. */
+/** One quiet progress arc for unfinished topics (no Learn/Play split). */
 function ProgressRing({ stop }: { stop: Stop }) {
-  const segments = ringSegments(stop);
+  const parts = stopParts(stop);
+  if (parts.length === 0) return null;
+  const done = parts.filter(isDone).length;
+  const progress = done / parts.length;
+  const end = Math.max(RING_GAP, progress * 360 - RING_GAP);
+
   return (
     <svg viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`} className="pointer-events-none absolute inset-0 size-full" aria-hidden>
-      {segments ? (
-        segments.map((segment) => (
-          <path
-            key={segment.key}
-            d={arcPath(segment.from, segment.to)}
-            fill="none"
-            strokeWidth={RING_STROKE}
-            strokeLinecap="round"
-            className={cn("transition-colors duration-500", segment.className)}
-          />
-        ))
-      ) : (
-        <circle
-          cx={RING_CENTER}
-          cy={RING_CENTER}
-          r={RING_RADIUS}
+      <circle
+        cx={RING_CENTER}
+        cy={RING_CENTER}
+        r={RING_RADIUS}
+        fill="none"
+        strokeWidth={RING_STROKE}
+        className="stroke-slate-200"
+      />
+      {progress > 0 ? (
+        <path
+          d={arcPath(RING_GAP, end)}
           fill="none"
           strokeWidth={RING_STROKE}
-          className="stroke-slate-200"
+          strokeLinecap="round"
+          className="stroke-accent transition-colors duration-500"
         />
-      )}
+      ) : null}
     </svg>
   );
 }
@@ -381,7 +354,6 @@ function StopNode({
   const locked = status === "locked";
   const isTest = Boolean(stop.test);
   const inProgress = status === "current" || status === "open";
-  const nextIsPlay = !lessonFirst(stop) && stop.games.some((game) => !isDone(game));
   const partlyDone = stopParts(stop).some(isDone);
   const helper = titleHelper(stop.title, lang);
   const stars = status === "complete" && !isTest ? topicStars(stop) : null;
@@ -393,12 +365,15 @@ function StopNode({
           <span
             className={cn(
               LANG_FACE[lang],
-              "relative block animate-bounce whitespace-nowrap rounded-xl border-2 border-slate-200 bg-white px-3 py-1 text-xs font-black shadow-sm",
-              nextIsPlay ? "text-accent" : "text-slate-500",
+              "relative block animate-bounce whitespace-nowrap rounded-xl border-2 border-slate-200 bg-white px-3 py-1 text-xs font-black text-accent shadow-sm",
               lang === "en" && "uppercase tracking-wider",
             )}
           >
-            {pick(nextIsPlay ? UI.play : partlyDone ? UI.continueTopic : UI.start, lang)}
+            {partlyDone ? (
+              pick(MAP_GUIDE_UI.continueStep, lang)
+            ) : (
+              <PlayALittleCtaContent label={pick(MAP_GUIDE_UI.startStep, lang)} size="sm" badge={false} />
+            )}
             <span className="absolute -bottom-[7px] left-1/2 size-3 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-slate-200 bg-white" />
           </span>
         </span>
@@ -476,182 +451,6 @@ function topicStars(stop: Stop): number | null {
     .filter((result): result is StepResult => result !== undefined);
   if (scored.length === 0) return null;
   return Math.min(...scored.map((result) => starCount(result.score, result.max)));
-}
-
-function Stars({ result }: { result: StepResult }) {
-  const stars = starCount(result.score, result.max);
-  return (
-    <span className="flex items-center gap-0.5" aria-label={`${stars} of 3 stars`}>
-      {[1, 2, 3].map((n) => (
-        <Star
-          key={n}
-          className={cn("size-3", n <= stars ? "fill-amber-400 text-amber-400" : "fill-slate-200 text-slate-200")}
-          aria-hidden
-        />
-      ))}
-    </span>
-  );
-}
-
-function PartRow({
-  number,
-  item,
-  label,
-  detail,
-  tone,
-  isNext,
-  lang,
-  onClose,
-  checkoutHref = null,
-  learnHref = null,
-}: {
-  number: number;
-  item: PathItem;
-  label: Bilingual;
-  detail: Bilingual;
-  tone: "learn" | "play" | "test";
-  /** The one part to do next: highlighted, with the main button. */
-  isNext: boolean;
-  lang: LessonLanguage;
-  onClose: () => void;
-  /** Paid parts say why they are locked and link to the unlock step. */
-  checkoutHref?: string | null;
-  /** When set on a Play row, Learn is not done yet: Play routes to the lesson instead. */
-  learnHref?: string | null;
-}) {
-  const unlockHref = item.paywalled && !isDone(item) ? checkoutHref : null;
-  const face = LANG_FACE[lang];
-  const open = isOpen(item);
-  const done = isDone(item);
-  const needsLearn = Boolean(tone === "play" && learnHref && !done);
-  const Icon = tone === "learn" ? BookOpen : tone === "play" ? Gamepad2 : Trophy;
-  const action: Bilingual = needsLearn
-    ? UI.partLearnFirst
-    : tone === "learn"
-      ? done
-        ? UI.readAgain
-        : UI.start
-      : tone === "play"
-        ? done
-          ? UI.playAgain
-          : UI.play
-        : done
-          ? UI.viewResult
-          : UI.start;
-  const quiet = done && tone !== "test";
-  const href = needsLearn ? learnHref : item.summary?.href;
-
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-3 rounded-2xl p-3 transition-shadow",
-        done
-          ? "bg-emerald-50/70 ring-1 ring-emerald-100"
-          : tone === "learn"
-            ? "bg-slate-50 ring-1 ring-slate-200"
-            : tone === "play"
-              ? "bg-accent/5 ring-1 ring-accent/15"
-              : "bg-amber-50 ring-1 ring-amber-100",
-        isNext && (tone === "play" ? "ring-2 ring-accent" : tone === "learn" ? "ring-2 ring-slate-300" : "ring-2 ring-amber-400"),
-      )}
-    >
-      <span
-        className={cn(
-          "flex size-10 shrink-0 items-center justify-center rounded-xl text-white",
-          done
-            ? "bg-emerald-500"
-            : !open || needsLearn
-              ? "bg-slate-300"
-              : tone === "learn"
-                ? "bg-slate-400"
-                : tone === "play"
-                  ? "bg-accent"
-                  : "bg-amber-400",
-        )}
-      >
-        {done ? <Check className="size-5" strokeWidth={3} aria-hidden /> : <Icon className="size-5" aria-hidden />}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className={cn(face, "flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-slate-500")}>
-          <span className="truncate">
-            {number} · {pick(label, lang)}
-          </span>
-          {done ? (
-            <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-700">
-              ✓ {pick(UI.stopDone, lang)}
-            </span>
-          ) : isNext ? (
-            <span
-              className={cn(
-                "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] text-white",
-                tone === "play" ? "bg-accent" : tone === "learn" ? "bg-slate-500" : "bg-amber-500",
-              )}
-            >
-              {pick(UI.nextTag, lang)}
-            </span>
-          ) : null}
-        </p>
-        <p className={cn(face, "truncate text-sm font-bold text-slate-800")}>{pick(detail, lang)}</p>
-        {needsLearn ? (
-          <p className={cn(face, "mt-0.5 flex items-center gap-1 text-[11px] font-bold text-accent")}>
-            <BookOpen className="size-3" aria-hidden />
-            {pick(UI.learnThenPlay, lang)}
-          </p>
-        ) : null}
-        {unlockHref ? (
-          <p className={cn(face, "mt-0.5 flex items-center gap-1 text-[11px] font-bold text-amber-700")}>
-            <Lock className="size-3" aria-hidden />
-            {pick(UI.inFullGame, lang)}
-          </p>
-        ) : null}
-        {item.result ? (
-          <span className="mt-0.5 flex items-center gap-1.5">
-            <Stars result={item.result} />
-            <span className={cn(EN_FACE, "text-[11px] font-bold text-slate-500")}>
-              {formatPoints(item.result.score)}/{item.result.max}
-            </span>
-          </span>
-        ) : null}
-      </div>
-      {open && href ? (
-        <Link
-          href={href}
-          onClick={onClose}
-          className={cn(
-            face,
-            "shrink-0 rounded-xl text-xs transition-transform active:translate-y-0.5",
-            lang === "en" && "uppercase tracking-wide",
-            quiet
-              ? "bg-white px-3 py-1.5 font-bold text-slate-500 ring-1 ring-slate-200 hover:bg-slate-50"
-              : needsLearn
-                ? "border-b-4 border-slate-600 bg-slate-500 px-3.5 py-2 font-extrabold text-white active:border-b-2"
-                : cn(
-                    "border-b-4 px-3.5 py-2 font-extrabold text-white active:border-b-2",
-                    tone === "learn" ? "border-slate-600 bg-slate-500" : tone === "play" ? "border-primary bg-accent" : "border-amber-600 bg-amber-400",
-                  ),
-          )}
-        >
-          {pick(action, lang)}
-        </Link>
-      ) : unlockHref ? (
-        <Link
-          href={unlockHref}
-          onClick={onClose}
-          className={cn(
-            face,
-            "shrink-0 rounded-xl border-b-4 border-amber-600 bg-amber-400 px-3 py-2 text-xs font-extrabold text-white transition-transform active:translate-y-0.5 active:border-b-2",
-            lang === "en" && "uppercase tracking-wide",
-          )}
-        >
-          {pick(UI.unlock, lang)}
-        </Link>
-      ) : (
-        <span className="flex shrink-0 items-center text-slate-400">
-          <Lock className="size-3.5" aria-hidden />
-        </span>
-      )}
-    </div>
-  );
 }
 
 function PaywallBlock({
@@ -759,7 +558,6 @@ function StopCard({
   checkoutHref,
   onClose,
   onOpenStop,
-  onOpenNotes,
 }: {
   stop: Stop;
   status: StopStatus;
@@ -769,38 +567,34 @@ function StopCard({
   checkoutHref: string | null;
   onClose: () => void;
   onOpenStop: (id: string) => void;
-  onOpenNotes: (stepId: string, playHref: string | null) => void;
 }) {
   const face = LANG_FACE[lang];
   const helper = titleHelper(stop.title, lang);
   const parts = stopParts(stop);
-  const doneCount = parts.filter(isDone).length;
   const entry = stop.test ?? stop.lesson ?? stop.games[0];
   const paywalled = Boolean(entry?.paywalled);
-  const nextPart = (lessonFirst(stop) ? [stop.lesson] : [stop.test, ...stop.games, stop.lesson]).find(
-    (item): item is PathItem => item !== undefined && isOpen(item) && !isDone(item),
-  );
-  const notesStepId = stop.lesson && isOpen(stop.lesson) ? stop.lesson.node.stepId : undefined;
-  let number = 0;
+  const href = primaryHrefOf(stop);
+  const reopenHref = reopenHrefOf(stop);
+  const partlyDone = parts.some(isDone);
+  const cta = stop.test
+    ? partlyDone
+      ? UI.continueTopic
+      : UI.start
+    : partlyDone
+      ? MAP_GUIDE_UI.continueStep
+      : MAP_GUIDE_UI.startStep;
 
   return (
     <li className="relative z-30 w-full max-w-sm animate-in fade-in zoom-in-95 duration-150">
       <span className="absolute -top-2 left-1/2 size-4 -translate-x-1/2 rotate-45 bg-white ring-1 ring-slate-200" aria-hidden />
-      <div className="relative space-y-2.5 rounded-3xl bg-white p-4 shadow-xl ring-1 ring-slate-200">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            {entry?.summary ? (
-              <p className={cn(face, "text-[11px] font-black uppercase tracking-[0.14em] text-slate-400")}>
-                {localizeLabel(entry.summary.stepLabel, lang)}
-              </p>
-            ) : null}
-            <h3 className={cn(EN_FACE, "text-lg font-black leading-snug text-slate-900")}>{stop.title.en}</h3>
-            {helper ? <p className={cn(BN_FACE, "text-sm font-semibold text-slate-500")}>{helper}</p> : null}
-          </div>
-          {status !== "locked" && parts.length > 1 ? (
-            <span className={cn(face, "shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-black text-slate-600")}>
-              {pick(UI.stopProgress(doneCount, parts.length), lang)}
-            </span>
+      <div className="relative space-y-3 rounded-3xl bg-white p-4 shadow-xl ring-1 ring-slate-200">
+        <div className="min-w-0 text-center">
+          <h3 className={cn(EN_FACE, "text-lg font-black leading-snug text-slate-900")}>{stop.title.en}</h3>
+          {helper ? <p className={cn(BN_FACE, "text-sm font-semibold text-slate-500")}>{helper}</p> : null}
+          {stop.games.length > 0 && status !== "locked" && status !== "complete" ? (
+            <p className={cn(face, "mt-1.5 text-xs font-semibold text-sky-700")}>
+              {pick(MAP_GUIDE_UI.loopHint, lang)}
+            </p>
           ) : null}
         </div>
 
@@ -810,93 +604,47 @@ function StopCard({
 
         {paywalled && checkoutHref ? <PaywallBlock learner={learner} checkoutHref={checkoutHref} lang={lang} /> : null}
 
-        {!paywalled && status === "locked" && entry?.previousTitle && !isOpen(entry) ? (
-          <p className={cn(face, "flex items-center gap-1.5 rounded-2xl bg-slate-50 p-3 text-sm font-semibold text-slate-500")}>
+        {!paywalled && status === "locked" ? (
+          <p className={cn(face, "flex items-center justify-center gap-1.5 rounded-2xl bg-slate-50 p-3 text-sm font-semibold text-slate-500")}>
             <Lock className="size-4 shrink-0" aria-hidden />
-            {pick(UI.unlockAfter(pick(entry.previousTitle, lang)), lang)}
+            {pick(MAP_GUIDE_UI.lockedHint, lang)}
           </p>
         ) : null}
 
-        {stop.test?.summary ? (
-          <PartRow
-            number={++number}
-            item={stop.test}
-            label={UI.tagTest}
-            detail={
-              stop.test.result
-                ? UI.officialScore(formatPoints(stop.test.result.score), stop.test.result.max)
-                : UI.testSectionsAndQuestions(stop.test.summary.parts, stop.test.summary.questions)
-            }
-            tone="test"
-            isNext={nextPart === stop.test}
-            lang={lang}
-            onClose={onClose}
-          />
-        ) : null}
-
-        {stop.lesson?.summary ? (
-          <PartRow
-            number={++number}
-            item={stop.lesson}
-            label={stop.games.length > 0 && !isDone(stop.lesson) ? UI.partLearnFirst : UI.partLearn}
-            detail={UI.learnInfo(stop.lesson.summary.parts, stop.lesson.summary.questions)}
-            tone="learn"
-            isNext={nextPart === stop.lesson}
-            lang={lang}
-            onClose={onClose}
-          />
-        ) : null}
-
-        {stop.lesson &&
-        stop.games.length > 0 &&
-        isDone(stop.lesson) &&
-        stop.games.some((game) => !isDone(game)) &&
-        status !== "locked" ? (
-          <p className={cn(face, "rounded-2xl bg-accent/5 px-3 py-2 text-center text-xs font-bold text-accent ring-1 ring-accent/15")}>
-            {pick(UI.learnThenPlay, lang)}
-          </p>
-        ) : null}
-
-        {stop.games.map((game) =>
-          game.summary ? (
-            <PartRow
-              key={game.node.id}
-              number={++number}
-              item={game}
-              label={
-                stop.games.length > 1
-                  ? { en: `${UI.partPlay.en} · ${game.node.title.en}`, bn: `${UI.partPlay.bn} · ${game.node.title.bn}` }
-                  : UI.partPlay
-              }
-              detail={UI.playInfo(game.summary.parts, game.summary.questions, Math.round((game.summary.passMark ?? 0.8) * 100))}
-              tone="play"
-              isNext={nextPart === game}
-              lang={lang}
-              onClose={onClose}
-              checkoutHref={checkoutHref}
-              learnHref={
-                stop.lesson && !isDone(stop.lesson) ? stop.lesson.summary?.href ?? null : null
-              }
-            />
-          ) : null,
-        )}
-
-        {notesStepId ? (
-          <button
-            type="button"
-            onClick={() => onOpenNotes(notesStepId, playableGameHref(stop))}
+        {!paywalled && status !== "locked" && status !== "complete" && href ? (
+          <Link
+            href={href}
+            onClick={onClose}
             className={cn(
               face,
-              "flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold text-accent ring-1 ring-accent/20 transition-colors hover:bg-accent/5",
+              "group flex h-12 w-full items-center justify-center rounded-2xl border-b-4 border-primary bg-accent text-base font-black text-white transition-transform active:translate-y-0.5 active:border-b-2",
             )}
           >
-            <BookOpen className="size-3.5" aria-hidden />
-            {pick(UI.quickNotes, lang)}
-          </button>
+            {cta === MAP_GUIDE_UI.startStep || cta === UI.start ? (
+              <PlayALittleCtaContent label={pick(cta, lang)} size="sm" badge={false} />
+            ) : (
+              pick(cta, lang)
+            )}
+          </Link>
         ) : null}
 
-        {stop.games.length > 0 && status !== "locked" ? (
-          <p className={cn(face, "px-1 text-[11px] font-semibold text-slate-400")}>{pick(UI.neededForTest, lang)}</p>
+        {!paywalled && status === "complete" && reopenHref ? (
+          <Link
+            href={reopenHref}
+            onClick={onClose}
+            className={cn(
+              face,
+              "mx-auto flex w-fit items-center justify-center rounded-full px-3 py-1.5 text-xs font-bold text-accent ring-1 ring-accent/30 transition-colors hover:bg-accent/5",
+            )}
+          >
+            {pick(MAP_GUIDE_UI.openAgain, lang)}
+          </Link>
+        ) : null}
+
+        {status === "complete" && (stop.test || !next) ? (
+          <p className={cn(face, "text-center text-sm font-bold text-emerald-700")}>
+            ✓ {pick(MAP_GUIDE_UI.topicDone, lang)}
+          </p>
         ) : null}
       </div>
     </li>
@@ -907,36 +655,36 @@ function scrollToNode(nodeId: string): void {
   document.querySelector(`[data-node-id="${nodeId}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function LevelBanner({
+/** One sticky card: light progress + one next-step CTA. */
+function MapHeroCard({
   level,
   path,
+  stop,
   lang,
 }: {
   level: ChatLessonLevel;
   path: readonly PathItem[];
+  stop: Stop | null;
   lang: LessonLanguage;
 }) {
   const face = LANG_FACE[lang];
   const live = path.filter((item) => item.summary);
-  const lessons = live.filter((item) => itemKind(item) === "lesson");
-  const games = live.filter((item) => itemKind(item) === "playground");
-  const doneLessons = lessons.filter(isDone).length;
-  const doneGames = games.filter(isDone).length;
-  const total = lessons.length + games.length;
-  const pct = total === 0 ? 0 : Math.round(((doneLessons + doneGames) / total) * 100);
+  const done = live.filter(isDone).length;
+  const total = live.length;
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const href = stop ? primaryHrefOf(stop) : null;
+  const helper = stop ? titleHelper(stop.title, lang) : undefined;
+  const partlyDone = stop ? stopParts(stop).some(isDone) : false;
 
   return (
-    <section className="sticky top-2 z-20 overflow-hidden rounded-2xl border-b-4 border-primary bg-accent px-4 pb-3 pt-3 text-white shadow-lg shadow-primary/10">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className={cn(face, "text-[11px] font-black uppercase tracking-[0.16em] text-accent-foreground/80")}>
-            {localizeLabel(level.label, lang)}
-          </p>
-          <h1 className={cn(face, "mt-0.5 truncate text-lg font-black leading-snug")}>{level.title[lang]}</h1>
-        </div>
-        <span className={cn(EN_FACE, "shrink-0 rounded-full bg-white/20 px-2.5 py-1 text-xs font-black")}>{pct}%</span>
+    <section className="sticky top-2 z-20 overflow-hidden rounded-2xl border-b-4 border-primary bg-accent px-4 pb-3.5 pt-3 text-white shadow-lg shadow-primary/10">
+      <div className="flex items-center justify-between gap-3">
+        <p className={cn(face, "min-w-0 truncate text-[11px] font-black uppercase tracking-[0.14em] text-accent-foreground/85")}>
+          {localizeLabel(level.label, lang)}
+        </p>
+        <span className={cn(EN_FACE, "shrink-0 rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-black")}>{pct}%</span>
       </div>
-      <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-primary/40">
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary/40">
         <motion.div
           className="h-full rounded-full bg-amber-300"
           initial={false}
@@ -944,25 +692,39 @@ function LevelBanner({
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>
-      <div className={cn(face, "mt-2 flex items-center gap-4 text-[11px] font-bold text-accent-foreground")}>
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-white" aria-hidden />
-          {pick(UI.partLearn, lang)} {doneLessons}/{lessons.length}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-amber-300" aria-hidden />
-          {pick(UI.partPlay, lang)} {doneGames}/{games.length}
-        </span>
-      </div>
+
+      {stop && href ? (
+        <div className="mt-3">
+          <p className={cn(face, "text-[11px] font-black uppercase tracking-[0.14em] text-accent-foreground/80")}>
+            {pick(MAP_GUIDE_UI.nextLabel, lang)}
+          </p>
+          <h1 className={cn(EN_FACE, "mt-0.5 text-xl font-black leading-snug text-white")}>{stop.title.en}</h1>
+          {helper ? <p className={cn(BN_FACE, "text-sm font-semibold text-accent-foreground/90")}>{helper}</p> : null}
+          <Link
+            href={href}
+            className={cn(
+              face,
+              "group mt-3 flex h-11 w-full items-center justify-center rounded-2xl border-b-4 border-amber-600 bg-amber-400 text-base font-black text-slate-900 transition-transform active:translate-y-0.5 active:border-b-2",
+            )}
+          >
+            {partlyDone ? (
+              pick(MAP_GUIDE_UI.continueStep, lang)
+            ) : (
+              <PlayALittleCtaContent label={pick(MAP_GUIDE_UI.startStep, lang)} size="sm" badge={false} />
+            )}
+          </Link>
+        </div>
+      ) : (
+        <p className={cn(face, "mt-3 text-sm font-bold text-accent-foreground")}>
+          {pick(UI.stopProgress(done, total), lang)}
+        </p>
+      )}
     </section>
   );
 }
 
-/** The guide sits beside the path at a few points, opposite to where the path leans. */
-const MASCOT_AT: Readonly<Record<number, { side: "left" | "right"; line: Bilingual }>> = {
-  1: { side: "left", line: UI.letsGo },
-  4: { side: "right", line: UI.mascotKeepGoing },
-};
+/** Kept empty so the path stays one quiet line (no side chatter). */
+const MASCOT_AT: Readonly<Record<number, { side: "left" | "right"; line: Bilingual }>> = {};
 
 function Mascot({
   side,
@@ -1052,9 +814,6 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
   const lang = useLessonLanguage();
   const face = LANG_FACE[lang];
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [notes, setNotes] = useState<{ stepId: string; playHref: string | null } | null>(null);
-  const closeNotes = useCallback(() => setNotes(null), []);
-  const notesPlayHref = notes?.playHref ?? null;
 
   const path = useMemo(
     () => buildPath(level, summaries, store.results, store.unlockAll, store.isPaywalled),
@@ -1062,6 +821,10 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
   );
   const stops = useMemo(() => toStops(path), [path]);
   const statuses = useMemo(() => stopStatuses(stops), [stops]);
+  const currentStop = useMemo(() => {
+    const index = statuses.findIndex((status) => status === "current");
+    return index >= 0 ? stops[index] ?? null : null;
+  }, [statuses, stops]);
 
   const celebrateItem = celebrateStepId ? path.find((item) => item.node.stepId === celebrateStepId) : undefined;
   const celebrateIndex = celebrateItem ? stops.findIndex((stop) => stopParts(stop).includes(celebrateItem)) : -1;
@@ -1086,10 +849,9 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
         sub: nextStop && nextStop !== celebrateStop ? UI.nextTopic(nextStop.title.en) : UI.toastMoreSoon,
       };
     }
-    const lessonPending = celebrateStop.lesson !== undefined && !isDone(celebrateStop.lesson);
     return {
       title: itemKind(celebrateItem) === "playground" ? UI.gameDoneToast : UI.lessonDoneToast,
-      sub: lessonPending ? UI.learnToFinish(topic) : UI.playToFinish(topic),
+      sub: UI.continueTopic,
     };
   })();
 
@@ -1097,6 +859,12 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
     setSelectedId(id);
     window.setTimeout(() => scrollToNode(id), 60);
   };
+
+  useEffect(() => {
+    if (celebrateStepId || !currentStop) return;
+    const timer = window.setTimeout(() => scrollToNode(currentStop.id), 80);
+    return () => window.clearTimeout(timer);
+  }, [celebrateStepId, currentStop]);
 
   useEffect(() => {
     if (!celebrateStepId) return;
@@ -1168,7 +936,7 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
           </div>
         </div>
 
-        <LevelBanner level={level} path={path} lang={lang} />
+        <MapHeroCard level={level} path={path} stop={currentStop} lang={lang} />
 
         {selectedId ? (
           <button
@@ -1179,7 +947,7 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
           />
         ) : null}
 
-        <ol className="mt-12 flex flex-col items-center gap-5">
+        <ol className="mt-10 flex flex-col items-center gap-5">
           {stops.map((stop, i) => {
             const status = statuses[i] ?? "locked";
             const mascot = MASCOT_AT[i];
@@ -1199,7 +967,6 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
                 onSelect={() => setSelectedId((id) => (id === stop.id ? null : stop.id))}
                 onClose={() => setSelectedId(null)}
                 onOpenStop={openStop}
-                onOpenNotes={(stepId, playHref) => setNotes({ stepId, playHref })}
               />
             );
           })}
@@ -1208,13 +975,6 @@ function LevelMapScreen({ level, summaries, celebrateStepId, contentSource, back
         {store.testingTools ? <TestingTools unlockAll={store.unlockAll} contentSource={contentSource} /> : null}
       </div>
       <GuideSheets level={level} lang={lang} />
-      {notes ? (
-        <LazyNotesSheet
-          stepId={notes.stepId}
-          onClose={closeNotes}
-          action={notesPlayHref ? { label: NOTES_UI.playGame, onClick: () => router.push(notesPlayHref) } : undefined}
-        />
-      ) : null}
     </div>
   );
 }
@@ -1233,7 +993,6 @@ function StopRow({
   onSelect,
   onClose,
   onOpenStop,
-  onOpenNotes,
 }: {
   stop: Stop;
   status: StopStatus;
@@ -1248,7 +1007,6 @@ function StopRow({
   onSelect: () => void;
   onClose: () => void;
   onOpenStop: (id: string) => void;
-  onOpenNotes: (stepId: string, playHref: string | null) => void;
 }) {
   return (
     <>
@@ -1268,7 +1026,6 @@ function StopRow({
           checkoutHref={checkoutHref}
           onClose={onClose}
           onOpenStop={onOpenStop}
-          onOpenNotes={onOpenNotes}
         />
       ) : null}
     </>

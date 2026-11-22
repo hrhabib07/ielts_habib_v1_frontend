@@ -1,4 +1,5 @@
 import { GAMLISH_BRAND } from "@/src/lib/gamlish-brand";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 
 export type UserRole = "STUDENT" | "INSTRUCTOR" | "ADMIN";
 
@@ -12,7 +13,7 @@ export const BRAND = {
   tagline: GAMLISH_BRAND.taglineLine2,
   headline: GAMLISH_BRAND.heroLine,
   subheadline: GAMLISH_BRAND.metaDescription,
-  cta: "Mission 01 ফ্রি শুরু করো",
+  cta: PLAY_A_LITTLE.bn,
   heroSubtext: "খেলার ছলেই ইংরেজি শেখো। মিশন পার করলেই এগিয়ে যাও।",
 } as const;
 

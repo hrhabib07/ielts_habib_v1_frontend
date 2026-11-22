@@ -1,4 +1,5 @@
 import type { Bilingual } from "@/src/features/chat-lesson/types";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 
 export const NOTES_UI = {
   title: { en: "Quick notes", bn: "ছোট নোট" },
@@ -9,11 +10,11 @@ export const NOTES_UI = {
   close: { en: "Close notes", bn: "নোট বন্ধ করুন" },
   loading: { en: "Opening the notes", bn: "নোট খুলছে" },
   empty: { en: "Notes for this topic are coming soon.", bn: "এই টপিকের নোট শিগগিরই আসছে।" },
-  playNow: { en: "Play now", bn: "খেলা শুরু করুন" },
+  playNow: { ...PLAY_A_LITTLE },
   checkNow: { en: "Check what you learned", bn: "যা শিখেছেন, প্রশ্ন দিয়ে দেখুন" },
   backToGame: { en: "Back to the game", bn: "খেলায় ফিরে যান" },
   tryAgain: { en: "Try again", bn: "আবার চেষ্টা করুন" },
-  playGame: { en: "Play the game", bn: "গেইম খেলুন" },
+  playGame: { ...PLAY_A_LITTLE },
   done: { en: "Done", bn: "শেষ" },
   guestReadTime: {
     en: "About 1 min · first idea only",

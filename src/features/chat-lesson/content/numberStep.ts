@@ -70,9 +70,15 @@ export const NUMBER_STEP: ChatLessonStep = {
         {
           id: "q-number-girl",
           prompt: {
-            en: "In “The girl reads a book,” how many people does the Subject refer to?",
-            bn: "“The girl reads a book.” বাক্যটিতে Subject কতজন ব্যক্তিকে বোঝায়?",
+            en: "How many people does the Subject refer to?",
+            bn: "Subject কতজন ব্যক্তিকে বোঝায়?",
           },
+          sentence: "The girl reads a book.",
+          sentenceGlosses: [
+            { text: "The girl", bn: "মেয়েটি", focus: true },
+            { text: "reads", bn: "পড়ে" },
+            { text: "a book", bn: "একটি বই" },
+          ],
           options: options(
             ["One person", "একজন ব্যক্তি"],
             ["More than one person", "একাধিক ব্যক্তি"],
@@ -81,8 +87,8 @@ export const NUMBER_STEP: ChatLessonStep = {
           correctOptionId: "a",
           praise: PRAISE.correct,
           hint: {
-            en: "Look at “The girl”. Is it one girl or many?",
-            bn: "“The girl” দেখুন। একজন মেয়ে, নাকি অনেকজন?",
+            en: "Look at the highlighted Subject. Is it one girl or many?",
+            bn: "হাইলাইট করা Subject দেখুন। একজন মেয়ে, নাকি অনেকজন?",
           },
           explanation: {
             en: "“The girl” refers to one person.",
@@ -92,9 +98,15 @@ export const NUMBER_STEP: ChatLessonStep = {
         {
           id: "q-number-students",
           prompt: {
-            en: "In “The students learn English,” how many students does the Subject refer to?",
-            bn: "“The students learn English.” বাক্যটিতে Subject কতজন শিক্ষার্থীকে বোঝায়?",
+            en: "How many students does the Subject refer to?",
+            bn: "Subject কতজন শিক্ষার্থীকে বোঝায়?",
           },
+          sentence: "The students learn English.",
+          sentenceGlosses: [
+            { text: "The students", bn: "শিক্ষার্থীরা", focus: true },
+            { text: "learn", bn: "শেখে" },
+            { text: "English", bn: "ইংরেজি" },
+          ],
           options: options(
             ["One student", "একজন শিক্ষার্থী"],
             ["Three teachers", "তিনজন শিক্ষক"],
@@ -187,9 +199,15 @@ export const NUMBER_STEP: ChatLessonStep = {
         {
           id: "q-number-two-dogs",
           prompt: {
-            en: "What is the Number of the Subject in “Two dogs play in the garden”?",
-            bn: "“Two dogs play in the garden.” বাক্যটির Subject-এর Number কী?",
+            en: "What is the Number of the Subject?",
+            bn: "Subject-এর Number কী?",
           },
+          sentence: "Two dogs play in the garden.",
+          sentenceGlosses: [
+            { text: "Two dogs", bn: "দুটি কুকুর", focus: true },
+            { text: "play", bn: "খেলে" },
+            { text: "in the garden", bn: "বাগানে" },
+          ],
           options: options([SINGULAR.en, SINGULAR.bn], [PLURAL.en, PLURAL.bn]),
           englishOptions: true,
           correctOptionId: "b",
@@ -838,9 +856,15 @@ export const NUMBER_STEP: ChatLessonStep = {
         {
           id: "q-number-review-four-boys",
           prompt: {
-            en: "In “The four boys play football,” what is the Number of the Subject?",
-            bn: "“The four boys play football.” বাক্যটিতে Subject-এর Number কী?",
+            en: "What is the Number of the Subject?",
+            bn: "Subject-এর Number কী?",
           },
+          sentence: "The four boys play football.",
+          sentenceGlosses: [
+            { text: "The four boys", bn: "চারটি ছেলে", focus: true },
+            { text: "play", bn: "খেলে" },
+            { text: "football", bn: "ফুটবল" },
+          ],
           options: options([SINGULAR.en, SINGULAR.bn], [PLURAL.en, PLURAL.bn]),
           englishOptions: true,
           correctOptionId: "b",

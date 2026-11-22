@@ -1,4 +1,5 @@
 ﻿import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 import type { UiLocale } from "@/src/lib/ui-locale";
 
 export interface AboutFaqItem {
@@ -203,7 +204,7 @@ export const ABOUT_PAGE_COPY: Record<UiLocale, AboutPageCopy> = {
     founderLocation: "Sylhet, Bangladesh",
     ctaTitle: "Start Your First Mission Today",
     ctaBody: "Level 1 is free. Start playing in 60 seconds.",
-    ctaPrimary: "Start free trial",
+    ctaPrimary: PLAY_A_LITTLE.en,
     faqTitle: "Frequently Asked Questions",
     faq: [
       {
@@ -366,7 +367,7 @@ export const ABOUT_PAGE_COPY: Record<UiLocale, AboutPageCopy> = {
     founderLocation: "Sylhet, Bangladesh",
     ctaTitle: "আপনার প্রথম Mission আজই শুরু করুন",
     ctaBody: "লেভেল 1 ফ্রি · 60 সেকেন্ডেই খেলা শুরু করুন",
-    ctaPrimary: "ফ্রি ট্রায়াল শুরু করুন",
+    ctaPrimary: PLAY_A_LITTLE.bn,
     faqTitle: "Frequently Asked Questions (FAQ)",
     faq: [
       {

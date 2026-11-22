@@ -35,6 +35,7 @@ import {
 } from "@/src/lib/test-landing-copy";
 import { TestLandingMedia } from "@/src/components/home/test-landing/TestLandingMedia";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { cn } from "@/lib/utils";
 
 export function TestLandingGraduates() {
@@ -390,7 +391,9 @@ function GraduateStory({
           )}
           asChild
         >
-          <Link href={TEST_LANDING_PRIMARY_HREF}>{copy.ctaPrimary}</Link>
+          <Link href={TEST_LANDING_PRIMARY_HREF} className="group">
+            <PlayALittleCtaContent label={copy.ctaPrimary} size="sm" badge={false} />
+          </Link>
         </Button>
       </div>
     </div>

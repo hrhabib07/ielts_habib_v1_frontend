@@ -13,10 +13,13 @@ export type LessonListItem = {
 /**
  * Bangla meaning of an English word or phrase as used in one sentence ("play" can be খেলি or খেলে).
  * `text` is matched case-insensitively, ignoring punctuation; phrases win over single words.
+ * `focus` highlights a helper phrase (e.g. the Subject on a Number/Person question).
+ * Never put focus on the answer itself (do not highlight Subject on Subject-find questions).
  */
 export type WordGloss = {
   text: string;
   bn: string;
+  focus?: boolean;
 };
 
 /**

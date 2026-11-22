@@ -15,7 +15,7 @@ export const SKILL_LABEL: Record<SkillStatus, string> = {
   new: "Not played yet",
 };
 
-const SKILL_TONE: Record<SkillStatus, string> = {
+export const SKILL_TONE: Record<SkillStatus, string> = {
   strong: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   better: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
   practice: "bg-amber-500/10 text-amber-800 dark:text-amber-300",

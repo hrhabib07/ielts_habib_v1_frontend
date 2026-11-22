@@ -29,13 +29,26 @@ export function PartDivider({
   partNumber,
   partCount,
   lang,
+  gameInNotes = null,
 }: {
   chunk: LessonChunk;
   partNumber: number;
   partCount: number;
   lang: LessonLanguage;
+  /** Notes until next paired game: 0 = after this note. Null = hide teaser. */
+  gameInNotes?: number | null;
 }) {
   const face = LANG_FACE[lang];
+  const showGameTeaser = gameInNotes !== null && gameInNotes >= 0 && gameInNotes <= 3;
+  const gameLine =
+    gameInNotes === 0
+      ? UI.gameAfterThisNote
+      : gameInNotes === 1
+        ? UI.gameInOneNote
+        : gameInNotes !== null
+          ? UI.gameInNotes(gameInNotes)
+          : null;
+
   return (
     <div className="flex flex-col items-center gap-1.5 py-2 text-center animate-in fade-in duration-500">
       <span
@@ -47,6 +60,16 @@ export function PartDivider({
         {pick(UI.partOf(partNumber, partCount), lang)}
       </span>
       <h2 className={cn(face, "text-lg font-black text-slate-900")}>{chunk.title[lang]}</h2>
+      {showGameTeaser && gameLine ? (
+        <p
+          className={cn(
+            face,
+            "mt-0.5 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-800 ring-1 ring-amber-200/80",
+          )}
+        >
+          {pick(gameLine, lang)}
+        </p>
+      ) : null}
     </div>
   );
 }

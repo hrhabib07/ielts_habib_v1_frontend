@@ -148,6 +148,12 @@ type Props = {
   onExit?: () => void;
   /** Go straight to `onContinue` instead of the finish screen (the guest's games end on their own card). */
   skipFinishScreen?: boolean;
+  /** After a pass: show the next topic on the finish screen (Continue opens it via `onContinue`). */
+  nextBridge?: {
+    title: Bilingual;
+    topicsDone: number;
+    topicsTotal: number;
+  } | null;
 };
 
 const LEVEL_PATTERN = /level-(\d+)/;
@@ -199,6 +205,7 @@ function PlaygroundScreen({
   onRoundComplete,
   onExit,
   skipFinishScreen = false,
+  nextBridge = null,
 }: Props) {
   const [celebratedFor, setCelebratedFor] = useState(0);
   const mainRef = useRef<HTMLElement>(null);
@@ -707,6 +714,7 @@ function PlaygroundScreen({
         <RoundWinCard
           summary={roundSummary}
           number={state.round}
+          totalGames={games.length}
           lang={lang}
           extras={roundExtras?.(state.round, closeWinCard) ?? null}
           nextTitle={state.rounds[state.round]?.title ?? null}
@@ -761,6 +769,7 @@ function PlaygroundScreen({
           lines={state.collected}
           passed={passed}
           lang={lang}
+          nextBridge={passed ? nextBridge : null}
           onContinue={finish}
           onReplay={replay}
           onNotes={notesStepId ? () => openNotes("results") : undefined}

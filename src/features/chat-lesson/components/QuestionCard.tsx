@@ -15,7 +15,6 @@ import {
   optionTarget,
   questionTarget,
 } from "@/src/features/chat-lesson/lib/flagTargets";
-import { wordCount } from "@/src/features/chat-lesson/lib/format";
 import { questionSpeech } from "@/src/features/chat-lesson/lib/speechText";
 import {
   LANG_FACE,
@@ -116,19 +115,37 @@ export function QuestionCard({
             />
           </div>
           {question.sentence ? (
-            <p
+            <div
               className={cn(
                 EN_FACE,
-                "mt-3 whitespace-pre-line rounded-2xl border-2 border-dashed border-accent/20 bg-accent/5 px-4 py-3 text-center text-lg font-bold text-slate-900",
+                "mt-3 overflow-visible whitespace-pre-line rounded-2xl border-2 border-dashed border-accent/25 bg-accent/[0.06] px-4 py-3 text-center text-lg font-bold leading-relaxed text-slate-900",
               )}
             >
-              <SpokenText
-                text={question.sentence}
-                speechId={promptSpeechId}
-                startIndex={wordCount(question.prompt[lang])}
-                glosses={question.sentenceGlosses}
-              />
-            </p>
+              <div className="flex items-start justify-center gap-2">
+                <p className="min-w-0 flex-1">
+                  <SpokenText
+                    text={question.sentence}
+                    speechId={`${question.id}-sentence`}
+                    glosses={question.sentenceGlosses}
+                  />
+                </p>
+                <SpeakButton
+                  id={`${question.id}-sentence`}
+                  text={question.sentence}
+                  lang="en"
+                  className="mt-0.5"
+                />
+              </div>
+              {question.sentenceGlosses?.some((gloss) => gloss.focus) ? (
+                <p className={cn(face, "mt-2 text-[11px] font-semibold text-amber-800/90")}>
+                  {pick(UI.tapWordsForBangla, lang)}
+                </p>
+              ) : question.sentenceGlosses?.length ? (
+                <p className={cn(face, "mt-2 text-[11px] font-semibold text-slate-500")}>
+                  {pick(UI.tapWordsForBangla, lang)}
+                </p>
+              ) : null}
+            </div>
           ) : null}
           {question.sourceBn ? (
             <div className="mt-3 flex items-start gap-2 rounded-2xl bg-emerald-50 px-4 py-3 ring-1 ring-emerald-200">

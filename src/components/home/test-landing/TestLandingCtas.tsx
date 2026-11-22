@@ -2,9 +2,9 @@
 
 import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
-import { Play } from "lucide-react";
 import { usePrefersReducedMotion } from "@/src/hooks/usePrefersReducedMotion";
 import { Button } from "@/components/ui/button";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
 import {
   logLandingCtaClick,
@@ -92,15 +92,7 @@ export function TestLandingCtas({
             onPointerDown={onPointerDown}
             onClick={() => logLandingCtaClick(source)}
           >
-            <span className="relative z-10 inline-flex items-center justify-center gap-2.5">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] ring-1 ring-white/40 transition-transform duration-200 ease-out group-hover:scale-105 group-[.is-pressing]:scale-95 sm:size-9">
-                <Play
-                  className="size-4 translate-x-px fill-current transition-transform duration-200 ease-out group-hover:translate-x-0.5 sm:size-[1.125rem]"
-                  aria-hidden
-                />
-              </span>
-              <span>{copy.ctaPrimary}</span>
-            </span>
+            <PlayALittleCtaContent label={copy.ctaPrimary} size={size === "hero" ? "lg" : "md"} />
           </Link>
         </Button>
       </div>

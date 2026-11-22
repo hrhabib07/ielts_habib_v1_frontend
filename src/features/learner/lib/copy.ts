@@ -1,4 +1,5 @@
 import type { Bilingual } from "@/src/features/chat-lesson/types";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 
 /** Learner-facing copy for onboarding, photo, profile and payment. `{name}` is filled per learner. */
 export const LEARNER_UI = {
@@ -92,6 +93,17 @@ export const LEARNER_UI = {
     bn: "আপনি ফ্রি অংশ শেষ করেছেন। Person, Verb, Object, Word Order আর ফাইনাল টেস্ট চালিয়ে যেতে পুরো গেইম আনলক করুন।",
   },
   paywallCta: { en: "Unlock the full game", bn: "পুরো গেইম আনলক করুন" },
+
+  /** Shown only when this account continued from the free Subject taste. */
+  demoContinueTitle: {
+    en: "You already tried this note in the free demo.",
+    bn: "ফ্রি ডেমোতে এই নোটটি আপনি আগেই দেখেছেন।",
+  },
+  demoContinueBody: {
+    en: "Continue for new practice. Different questions are waiting.",
+    bn: "এগোন নতুন প্র্যাকটিসের জন্য। নতুন প্রশ্ন অপেক্ষা করছে।",
+  },
+  demoContinueCta: { en: "Continue", bn: "চালিয়ে যান" },
 
   notOpenTitle: { en: "Coming soon", bn: "শিগগিরই আসছে" },
   notOpenBody: {
@@ -451,10 +463,10 @@ export const PUBLIC_UI = {
     bn: `${total}টির মধ্যে ${done}টি লেভেল খেলেছেন`,
   }),
   editProfile: { en: "Edit my profile", bn: "আমার প্রোফাইল বদলান" },
-  playCta: { en: "Play Gamlish free", bn: "ফ্রিতে Gamlish খেলুন" },
+  playCta: { ...PLAY_A_LITTLE },
   playCtaSub: {
-    en: "Learn English grammar as a game. Level 1 starts easy.",
-    bn: "খেলার ছলে ইংরেজি গ্রামার শিখুন। লেভেল 1 শুরু হয় সহজ দিয়ে।",
+    en: "Start in 1 minute · Level 1 is free · no payment to begin",
+    bn: "1 মিনিটে শুরু · লেভেল 1 ফ্রি · শুরুতে পেমেন্ট লাগবে না",
   },
   privateNote: { en: "This profile is private.", bn: "এই প্রোফাইলটি প্রাইভেট।" },
   shareText: (name: string): string => `${name} is learning English on Gamlish 🎮`,
@@ -465,22 +477,46 @@ export const HOME_UI = {
   greetKnown: { en: "Welcome back, {name}!", bn: "{name}, আবার স্বাগতম!" },
   greetNew: { en: "Welcome to Gamlish!", bn: "Gamlish-এ আপনাকে স্বাগতম!" },
   sub: {
-    en: "Learn English the fun way, one level at a time.",
-    bn: "খেলার ছলে ইংরেজি শিখুন, এক লেভেল করে।",
+    en: "One clear step at a time.",
+    bn: "একটা পরিষ্কার ধাপ, একবারে।",
   },
-  levelOneTag: { en: "Level 1 · Camp 01", bn: "লেভেল 1 · ক্যাম্প 01" },
-  start: { en: "Start Level 1", bn: "লেভেল 1 শুরু করুন" },
-  continue: { en: "Continue", bn: "চালিয়ে যান" },
-  review: { en: "Review Level 1", bn: "লেভেল 1 আবার দেখুন" },
+  levelOneTag: { en: "Mission 1", bn: "মিশন 1" },
+  start: { en: "Start this step", bn: "এই ধাপ শুরু করুন" },
+  continue: { en: "Continue this step", bn: "এই ধাপ চালিয়ে যান" },
+  review: { en: "Open Mission 1 map", bn: "মিশন 1 ম্যাপ খুলুন" },
   progress: (done: number, total: number): Bilingual => ({
     en: `${done} of ${total} done`,
     bn: `${total}টির মধ্যে ${done}টি সম্পন্ন`,
   }),
-  nextLabel: { en: "Next lesson", bn: "পরের লেসন" },
-  complete: { en: "Level 1 complete!", bn: "লেভেল 1 সম্পন্ন!" },
+  nextLabel: { en: "Do this next", bn: "এখন এটি করুন" },
+  howItWorks: {
+    en: "Short note → play → next note",
+    bn: "ছোট নোট → খেলুন → পরের নোট",
+  },
+  complete: { en: "Mission 1 complete!", bn: "মিশন 1 সম্পন্ন!" },
   freeStart: { en: "Free to start", bn: "ফ্রি শুরু" },
   comingSoon: { en: "Coming soon", bn: "শিগগিরই আসছে" },
-  upcomingTitle: { en: "Levels 2-21", bn: "লেভেল 2-21" },
+  upcomingTitle: { en: "Later levels", bn: "পরের লেভেল" },
+  upcomingHint: {
+    en: "Levels 2-21 unlock after Mission 1.",
+    bn: "মিশন 1-এর পর লেভেল 2-21 আনলক হবে।",
+  },
   camp: { en: "Camp", bn: "ক্যাম্প" },
   level: { en: "Level", bn: "লেভেল" },
+} as const;
+
+/** Mission map · keep one decision in front of the learner. */
+export const MAP_GUIDE_UI = {
+  nextLabel: { en: "Your next step", bn: "আপনার পরের ধাপ" },
+  startStep: { ...PLAY_A_LITTLE },
+  continueStep: { en: "Continue", bn: "চালিয়ে যান" },
+  openStep: { en: "Open this step", bn: "এই ধাপ খুলুন" },
+  /** Quiet reopen for finished topics (map card secondary action). */
+  openAgain: { en: "Open again", bn: "আবার খুলুন" },
+  loopHint: {
+    en: "Short note → game → next note",
+    bn: "ছোট নোট → গেম → পরের নোট",
+  },
+  lockedHint: { en: "Finish the step above first", bn: "আগে উপরের ধাপ শেষ করুন" },
+  topicDone: { en: "Done", bn: "শেষ" },
 } as const;

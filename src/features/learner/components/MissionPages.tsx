@@ -246,6 +246,11 @@ function PaywallScreen({ ctx, won }: { ctx: MissionShellContext; won: boolean })
 function StepScreen({ ctx, stepId }: { ctx: MissionShellContext; stepId: string }) {
   const { isPaywalled } = useMissionStore();
   const router = useRouter();
+  const search = useSearchParams();
+  const interleaveOn =
+    search.get("interleave") === "1" && Boolean(search.get("round"));
+  const interleaveRound = search.get("round");
+  const interleaveReturn = search.get("returnStep");
   // Decided on arrival: winning the taste saves a result, which must not swap the finish screen away.
   const [tasteOnArrival] = useState(() => stepId === PERSON_GAME_ID && !ctx.state.results[PERSON_TASTE_ID]);
   const [justWon, setJustWon] = useState(false);
@@ -258,7 +263,8 @@ function StepScreen({ ctx, stepId }: { ctx: MissionShellContext; stepId: string 
   if (playground) {
     const lessonId = playground.playground.afterStepId;
     // Learn-first: open the matching lesson before any playground URL (deep links included).
-    if (lessonId && !ctx.state.results[lessonId]) {
+    // Interleaved note→game deep links are allowed mid-lesson.
+    if (lessonId && !ctx.state.results[lessonId] && !interleaveOn) {
       return <Redirect href={missionHref(lessonId)} />;
     }
   }
@@ -280,6 +286,22 @@ function StepScreen({ ctx, stepId }: { ctx: MissionShellContext; stepId: string 
   if (isPaywalled(stepId)) return <PaywallScreen ctx={ctx} won={false} />;
 
   if (playground) {
+    if (interleaveOn && interleaveRound && interleaveReturn) {
+      const lessonId =
+        playground.playground.afterStepId ?? interleaveReturn;
+      return (
+        <LabPlaygroundPlayer
+          playgroundId={stepId}
+          levelHref={MISSION_BASE}
+          trackAnswers
+          interleave={{
+            roundId: interleaveRound,
+            returnStepId: interleaveReturn,
+            lessonStepId: lessonId,
+          }}
+        />
+      );
+    }
     return <LabPlaygroundPlayer playgroundId={stepId} levelHref={MISSION_BASE} trackAnswers />;
   }
 

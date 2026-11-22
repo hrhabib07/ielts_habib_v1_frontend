@@ -9,6 +9,7 @@ import { GuestCampShowcase } from "@/src/components/home/guest/GuestCampShowcase
 import type { GuestHowItWorksStepIcon } from "@/src/lib/guest-how-it-works-types";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
 
@@ -99,7 +100,9 @@ export function GuestHowGamlishWorks() {
               )}
               asChild
             >
-              <Link href={FREE_PLAY_HREF}>{copy.ctaPrimary}</Link>
+              <Link href={FREE_PLAY_HREF} className="group">
+                <PlayALittleCtaContent label={copy.ctaPrimary} size="md" badge={false} />
+              </Link>
             </Button>
             <p className="mt-2 text-xs text-muted-foreground">{copy.ctaPrimarySub}</p>
             <Button

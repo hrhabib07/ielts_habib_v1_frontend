@@ -7,6 +7,7 @@ import {
   DOUBLE_DURATION_ENDS_AT,
   LEGACY_BADGE_ENDS_AT,
 } from "@/src/features/learner/lib/offer";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 
 /** One door: play Level 1 right away as a guest; saving with Google comes after the first games. */
 export const TEST_LANDING_PRIMARY_HREF = "/play";
@@ -116,8 +117,8 @@ export interface TestLandingCopy {
 export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
   bn: {
     testBanner: "",
-    navPrimary: "ফ্রি শুরু করুন",
-    navDemo: "ফ্রি শুরু করুন",
+    navPrimary: PLAY_A_LITTLE.bn,
+    navDemo: PLAY_A_LITTLE.bn,
     navFaq: "প্রশ্ন ও উত্তর",
     eyebrow: "Gamlish · The Game of English",
     headlineLine1: "গেইম খেলুন,",
@@ -130,8 +131,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     priceSave: `${TEST_LANDING_SAVE_PRICE} সাশ্রয়`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
     priceMeta: "45 দিন · 21টি লেভেল",
-    ctaPrimary: "ফ্রি শুরু করুন",
-    ctaTrust: "আগে ছোট নোট, তারপর গেইম। সাইন আপ ছাড়াই শুরু। কোনো পেমেন্ট লাগবে না।",
+    ctaPrimary: PLAY_A_LITTLE.bn,
+    ctaTrust: "1 মিনিটে শুরু · ছোট নোট, তারপর গেইম · সাইন আপ লাগবে না",
     heroCompareAlt:
       "Gamlish ছাড়া ইংরেজি দুর্বল ভিত্তির উপর দাঁড়ায়। Gamlish-এর সাথে একই ইংরেজি শক্ত ভিত্তির উপর মজবুত হয়।",
     heroFoundationLabel: "এখানে Gamlish কাজ করে",
@@ -139,8 +140,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "দুর্বল ভিত্তি",
     heroCompareWithTitle: "Gamlish নিয়ে",
     heroCompareWithSub: "শক্ত ভিত্তি",
-    stickyPrimary: "ফ্রি শুরু করুন",
-    stickySecondary: "ফ্রি শুরু করুন",
+    stickyPrimary: PLAY_A_LITTLE.bn,
+    stickySecondary: PLAY_A_LITTLE.bn,
     compareEyebrow: "কেন Gamlish",
     compareTitle: "গতানুগতিক ইংরেজি শেখা vs Gamlish",
     compareOld: "পুরনো নিয়ম",
@@ -253,8 +254,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
   },
   en: {
     testBanner: "",
-    navPrimary: "Start free",
-    navDemo: "Start free",
+    navPrimary: PLAY_A_LITTLE.en,
+    navDemo: PLAY_A_LITTLE.en,
     navFaq: "FAQ",
     eyebrow: "Gamlish · The Game of English",
     headlineLine1: "Play games,",
@@ -267,8 +268,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     priceSave: `Save ${TEST_LANDING_SAVE_PRICE}`,
     priceOff: `${TEST_LANDING_OFF_PERCENT}% OFF`,
     priceMeta: "45 days · 21 levels",
-    ctaPrimary: "Start free",
-    ctaTrust: "A short note, then a game. Start without signing up. No payment needed.",
+    ctaPrimary: PLAY_A_LITTLE.en,
+    ctaTrust: "Start in 1 minute · short note, then a game · no signup needed",
     heroCompareAlt:
       "Your English without Gamlish stands on a weak foundation. With Gamlish, the same English stands on a strong foundation.",
     heroFoundationLabel: "Gamlish works here",
@@ -276,8 +277,8 @@ export const TEST_LANDING_COPY: Record<GuestLandingLocale, TestLandingCopy> = {
     heroCompareWithoutSub: "Weak foundation",
     heroCompareWithTitle: "With Gamlish",
     heroCompareWithSub: "Strong foundation",
-    stickyPrimary: "Start free",
-    stickySecondary: "Start free",
+    stickyPrimary: PLAY_A_LITTLE.en,
+    stickySecondary: PLAY_A_LITTLE.en,
     compareEyebrow: "Why Gamlish",
     compareTitle: "Traditional English learning vs Gamlish",
     compareOld: "Old way",

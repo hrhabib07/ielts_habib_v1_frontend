@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { BookOpen, Compass, Play, X } from "lucide-react";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
+import { PLAY_A_LITTLE } from "@/src/lib/play-cta";
 import {
   EN_FACE,
   GuideMessageBubble,
@@ -19,7 +21,6 @@ import {
   type StepAudio,
 } from "@/src/features/chat-lesson/hooks/useLessonSpeech";
 import { readingDelayMs } from "@/src/features/chat-lesson/lib/format";
-import { messageSpeech } from "@/src/features/chat-lesson/lib/speechText";
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual, ChatLessonStep, LessonMessage } from "@/src/features/chat-lesson/types";
 import { useLearner } from "@/src/features/learner/LearnerContext";
@@ -141,7 +142,10 @@ function StaticNoteChunks({
               </div>
             </section>
           ) : null}
-          {step.chunks.map((chunk, i) => (
+          {step.chunks.map((chunk, i) => {
+            const titleSpeechId = `notes:${step.id}:title:${chunk.id}-${lang}`;
+            const titleText = pick(chunk.title, lang);
+            return (
             <section key={chunk.id} className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white p-4 sm:p-5">
               <h3 className={cn(face, "flex items-center gap-2.5 text-base font-black text-slate-900 sm:text-lg")}>
                 <span
@@ -152,7 +156,8 @@ function StaticNoteChunks({
                 >
                   {i + 1}
                 </span>
-                {pick(chunk.title, lang)}
+                <span className="min-w-0 flex-1">{titleText}</span>
+                <SpeakButton id={titleSpeechId} text={titleText} lang={lang} />
               </h3>
               <div className="mt-3 space-y-2.5">
                 {chunk.messages.map((message, j) => (
@@ -165,7 +170,8 @@ function StaticNoteChunks({
                 ))}
               </div>
             </section>
-          ))}
+            );
+          })}
         </section>
       ))}
     </>
@@ -259,6 +265,8 @@ function ChatRevealNotes({
         }
 
         if (item.kind === "chunkTitle") {
+          const titleSpeechId = `notes:${item.stepId}:title:${item.chunkId}-${lang}`;
+          const titleText = pick(item.title, lang);
           return (
             <motion.div
               key={`title:${item.chunkId}`}
@@ -276,7 +284,8 @@ function ChatRevealNotes({
                 >
                   {item.index + 1}
                 </span>
-                {pick(item.title, lang)}
+                <span className="min-w-0 flex-1">{titleText}</span>
+                <SpeakButton id={titleSpeechId} text={titleText} lang={lang} />
               </h3>
             </motion.div>
           );
@@ -322,8 +331,8 @@ function ChatRevealNotes({
 }
 
 /**
- * Soft drop chime always. Auto-voice (same toggle as games) reads the new bubble once.
- * Manual speaker buttons still work when auto-voice is off.
+ * Soft drop chime on every reveal. Auto-voice reads only the section title once
+ * (e.g. "Subject কী?"). Body notes stay silent until the learner taps Listen.
  */
 function RevealAutoSpeak({
   item,
@@ -334,7 +343,7 @@ function RevealAutoSpeak({
   lang: LessonLanguage;
   reduceMotion: boolean;
 }) {
-  const { speak, stop, unlock, canSpeak } = useLessonSpeech();
+  const { speak, unlock, canSpeak, speakingId } = useLessonSpeech();
   const autoVoice = useAutoVoice();
   const itemKey =
     item.kind === "message"
@@ -348,33 +357,24 @@ function RevealAutoSpeak({
     unlock();
     if (reduceMotion) return;
 
-    // Skip titles: short headings sounded choppy and stacked with the next bubble.
-    if (item.kind === "chunkTitle") {
-      if (!autoVoice) void playSoftNotifySfx();
-      return;
+    // Titles only: one short cue so the learner knows the topic. Never auto-read the note body.
+    if (item.kind === "chunkTitle" && autoVoice) {
+      const text = pick(item.title, lang);
+      const id = `notes-auto:${itemKey}-${lang}`;
+      if (!canSpeak(text, lang)) {
+        void playSoftNotifySfx();
+        return;
+      }
+      const timer = window.setTimeout(() => {
+        speak(id, text, lang);
+      }, 280);
+      return () => {
+        window.clearTimeout(timer);
+      };
     }
 
-    if (!autoVoice) {
-      stop();
-      // Light drop cue only; no overlapping TTS when auto-voice is off.
-      void playSoftNotifySfx();
-      return;
-    }
-
-    const text =
-      item.kind === "message"
-        ? messageSpeech(item.message, lang)
-        : pick(item.text, lang);
-    const id = `notes-auto:${itemKey}-${lang}`;
-    if (!canSpeak(text, lang)) return;
-
-    // Wait for the drop animation so we don't cut the previous line mid-word.
-    const timer = window.setTimeout(() => {
-      speak(id, text, lang);
-    }, 320);
-    return () => {
-      window.clearTimeout(timer);
-    };
+    // Intro / message bubbles: soft chime only. Never stop() / speak() here, or a title mid-play gets cut.
+    if (!speakingId) void playSoftNotifySfx();
     // Stable keys only: do not depend on `speak` identity.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemKey, lang, reduceMotion, autoVoice]);
@@ -519,8 +519,20 @@ export default function NotesSheet({
                 lang === "en" ? "uppercase tracking-wide" : "text-[17px]",
               )}
             >
-              {canContinue && action ? <Play className="size-5 fill-current" aria-hidden /> : null}
-              {pick(canContinue ? main.label : NOTES_UI.keepReading, lang)}
+              {canContinue && action ? (
+                main.label.en === PLAY_A_LITTLE.en ||
+                main.label.en === NOTES_UI.playNow.en ||
+                main.label.en === NOTES_UI.playGame.en ? (
+                  <PlayALittleCtaContent label={pick(main.label, lang)} size="md" badge={false} />
+                ) : (
+                  <>
+                    <Play className="size-5 fill-current" aria-hidden />
+                    {pick(main.label, lang)}
+                  </>
+                )
+              ) : (
+                pick(NOTES_UI.keepReading, lang)
+              )}
             </button>
           </div>
         </footer>

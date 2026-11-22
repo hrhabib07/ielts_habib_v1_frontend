@@ -14,30 +14,21 @@ import {
   Play,
   Pointer,
   ShieldCheck,
-} from "lucide-react";import { DEVICE_FLAGS, readFlag, writeFlag } from "@/src/features/learner/lib/deviceFlags";
+} from "lucide-react";
+import { DEVICE_FLAGS, readFlag, writeFlag } from "@/src/features/learner/lib/deviceFlags";
 import { ContinueWithGoogleButton } from "@/src/components/auth/ContinueWithGoogleButton";
 import { PaidLearnersProofChip } from "@/src/components/pricing/PaidLearnersProofChip";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { setLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
-import { EN_FACE, SpeakButton } from "@/src/features/chat-lesson/components/ChatPrimitives";
-import {
-  LessonSpeechProvider,
-  useLessonSpeech,
-} from "@/src/features/chat-lesson/hooks/useLessonSpeech";
-import { questionSpeech } from "@/src/features/chat-lesson/lib/speechText";
+import { EN_FACE } from "@/src/features/chat-lesson/components/ChatPrimitives";
 import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson/lib/uiCopy";
 import type { Bilingual } from "@/src/features/chat-lesson/types";
 import { GUEST_UI } from "@/src/features/guest/copy";
-import { GuestJourneyStrip } from "@/src/features/guest/components/GuestJourneyStrip";
 import { GamlishMascot } from "@/src/features/playground/components/GamlishMascot";
 import type { RoundWinExtras } from "@/src/features/playground/components/RoundWinCard";
-import { GameSettingsMenu } from "@/src/features/playground/components/GameSettingsMenu";
-import { useAutoVoice } from "@/src/features/playground/hooks/useAutoVoice";
-import { NudgeProvider, useNudge } from "@/src/features/playground/hooks/useNudge";
 import {
   playCelebrateSfx,
-  playCorrectEvalSfx,
   playUiClickSfx,
-  playWrongEvalSfx,
   primeEvalSfx,
 } from "@/src/lib/player-eval-sfx";
 import { cn } from "@/lib/utils";
@@ -306,7 +297,6 @@ function MiniLessonPreview({ lang }: { lang: LessonLanguage }) {
   const face = LANG_FACE[lang];
   const steps = [
     { label: GUEST_UI.miniPathNote, icon: BookOpen },
-    { label: GUEST_UI.miniPathCheck, icon: Check },
     { label: GUEST_UI.miniPathGame, icon: Play },
   ] as const;
   return (
@@ -347,9 +337,9 @@ export function WelcomeCard({
 }: {
   lang: LessonLanguage;
   path: GuestPath;
-  /** Start the forced mini-lesson: note → check → one game. */
+  /** Start the forced mini-lesson: in-chat note + questions → one game. */
   onStart: () => void;
-  /** Returning guest mid-funnel (note/quiz/game already started). */
+  /** Returning guest mid-funnel (lesson/game already started). */
   continuing?: boolean;
 }) {
   const face = LANG_FACE[lang];
@@ -391,8 +381,14 @@ export function WelcomeCard({
           animate={{ scale: [1, 1.02, 1] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Play className="size-5 fill-current" aria-hidden />
-          {pick(resuming ? GUEST_UI.continueMini : GUEST_UI.play, lang)}
+          {resuming ? (
+            <>
+              <Play className="size-5 fill-current" aria-hidden />
+              {pick(GUEST_UI.continueMini, lang)}
+            </>
+          ) : (
+            <PlayALittleCtaContent label={pick(GUEST_UI.play, lang)} size="md" badge={false} />
+          )}
         </motion.button>
       }
     >
@@ -454,291 +450,6 @@ export function guestSaveExtras({
   };
 }
 
-/** Same idle bounce as game chips: after a few quiet seconds the options jump to invite a tap. */
-function GuestCheckOption({
-  letter,
-  label,
-  labelFace,
-  selected,
-  tone,
-  nudgeIndex,
-  onClick,
-}: {
-  letter: string;
-  label: string;
-  labelFace: string;
-  selected: boolean;
-  tone: "idle" | "right" | "wrong";
-  nudgeIndex: number;
-  onClick: () => void;
-}) {
-  const nudgeRef = useNudge<HTMLButtonElement>(tone === "idle", nudgeIndex);
-
-  return (
-    <button
-      ref={nudgeRef}
-      type="button"
-      role="option"
-      aria-selected={selected}
-      disabled={tone === "right"}
-      onClick={() => {
-        void playUiClickSfx();
-        onClick();
-      }}
-      className={cn(
-        "group flex min-h-14 w-full items-center gap-3 rounded-2xl border-2 border-b-[5px] px-3.5 py-3 text-left text-base font-extrabold transition-all",
-        "active:translate-y-0.5 active:border-b-2 disabled:cursor-default",
-        tone === "right"
-          ? "border-emerald-600 bg-emerald-50 text-emerald-900 shadow-md shadow-emerald-600/10"
-          : tone === "wrong"
-            ? "border-rose-400 bg-rose-50 text-rose-800"
-            : "border-slate-300 bg-white text-slate-900 shadow-sm hover:border-accent/50 hover:bg-accent/[0.04] hover:shadow-md",
-      )}
-    >
-      <span
-        className={cn(
-          EN_FACE,
-          "flex size-9 shrink-0 items-center justify-center rounded-xl text-sm font-black transition-colors",
-          tone === "right"
-            ? "bg-emerald-600 text-white"
-            : tone === "wrong"
-              ? "bg-rose-500 text-white"
-              : "bg-slate-100 text-slate-600 group-hover:bg-accent/15 group-hover:text-accent",
-        )}
-        aria-hidden
-      >
-        {tone === "right" ? <Check className="size-4 stroke-[3]" /> : letter}
-      </span>
-      <span className={cn(labelFace, "min-w-0 flex-1")}>{label}</span>
-    </button>
-  );
-}
-
-function GuestQuizSpeech({
-  questionId,
-  text,
-  lang,
-}: {
-  questionId: string;
-  text: string;
-  lang: LessonLanguage;
-}) {
-  const { speak, stop, unlock, canSpeak } = useLessonSpeech();
-  const autoVoice = useAutoVoice();
-
-  useEffect(() => {
-    void primeEvalSfx();
-    unlock();
-    if (!autoVoice) {
-      stop();
-      return;
-    }
-    if (!canSpeak(text, lang)) return;
-    const timer = window.setTimeout(() => {
-      speak(`guest-quiz:${questionId}`, text, lang);
-    }, 200);
-    return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId, text, lang, autoVoice]);
-
-  return null;
-}
-
-/** 1-2 multiple-choice checks from the Subject note, before the free game round. */
-export function GuestCheckQuiz({
-  lang,
-  questions,
-  onDone,
-}: {
-  lang: LessonLanguage;
-  questions: readonly {
-    id: string;
-    prompt: Bilingual;
-    sentence?: string;
-    options: readonly { id: string; text: Bilingual }[];
-    correctOptionId: string;
-    hint: Bilingual;
-    /** English words being studied: always show the English option text. */
-    englishOptions?: boolean;
-  }[];
-  onDone: () => void;
-}) {
-  const face = LANG_FACE[lang];
-  const [index, setIndex] = useState(0);
-  const [picked, setPicked] = useState<string | null>(null);
-  const [wrong, setWrong] = useState(false);
-  /** Bumps on every tap so the idle nudge timer restarts like game chips. */
-  const [tapTick, setTapTick] = useState(0);
-  const question = questions[index];
-  const last = index >= questions.length - 1;
-
-  const submit = (optionId: string) => {
-    if (!question) return;
-    setTapTick((n) => n + 1);
-    if (optionId === question.correctOptionId) {
-      void playCorrectEvalSfx();
-      setWrong(false);
-      setPicked(optionId);
-      return;
-    }
-    void playWrongEvalSfx();
-    setWrong(true);
-    setPicked(optionId);
-  };
-
-  const advance = () => {
-    void playUiClickSfx();
-    if (!last) {
-      setIndex((n) => n + 1);
-      setPicked(null);
-      setWrong(false);
-      setTapTick(0);
-      return;
-    }
-    onDone();
-  };
-
-  if (!question) {
-    return null;
-  }
-
-  const correct = picked === question.correctOptionId;
-  const spoken = questionSpeech(
-    { prompt: question.prompt, sentence: question.sentence },
-    lang,
-  );
-  const autoVoice = useAutoVoice();
-
-  return (
-    <LessonSpeechProvider>
-      <GuestScreen
-        top={
-          <>
-            <HomePill lang={lang} />
-            <GameSettingsMenu lang={lang} autoVoice={autoVoice} />
-          </>
-        }
-        actions={
-          correct ? (
-            <motion.button
-              type="button"
-              onClick={advance}
-              className={cn(face, PRIMARY, "shadow-lg shadow-accent/25", bigText(lang))}
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Play className="size-5 fill-current" aria-hidden />
-              {pick(last ? GUEST_UI.checkToGame : GUEST_UI.checkNext, lang)}
-            </motion.button>
-          ) : (
-            <p className={cn(face, "py-2 text-center text-sm font-semibold text-slate-500")}>
-              {wrong ? pick(GUEST_UI.checkWrong, lang) : pick(GUEST_UI.checkSub, lang)}
-            </p>
-          )
-        }
-      >
-        <GuestJourneyStrip lang={lang} current="quiz" className="mb-4 text-left" />
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={question.id}
-            className="text-left"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ type: "spring", stiffness: 320, damping: 28 }}
-          >
-            <GuestQuizSpeech questionId={question.id} text={spoken} lang={lang} />
-
-            {/* Question + sentence bundled as one card so the ask is obvious */}
-            <section className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_28px_-18px_rgba(15,23,42,0.45)] ring-1 ring-slate-100">
-              <div className="border-b border-slate-100 bg-gradient-to-br from-accent/[0.07] to-white px-4 pb-4 pt-3.5">
-                <span
-                  className={cn(
-                    face,
-                    "inline-flex rounded-full bg-accent/10 px-2.5 py-0.5 text-[11px] font-black tracking-wide text-accent",
-                  )}
-                >
-                  {pick(GUEST_UI.checkTitle, lang)} · {index + 1}/{questions.length}
-                </span>
-                <div className="mt-2.5 flex items-start gap-2">
-                  <h1
-                    className={cn(
-                      face,
-                      "min-w-0 flex-1 font-black leading-snug text-slate-900",
-                      lang === "en" ? "text-xl" : "text-[1.35rem] leading-[1.55]",
-                    )}
-                  >
-                    {pick(question.prompt, lang)}
-                  </h1>
-                  <SpeakButton id={`guest-quiz-btn:${question.id}`} text={spoken} lang={lang} />
-                </div>
-              </div>
-
-              {question.sentence ? (
-                <div className="px-4 py-4">
-                  <p
-                    className={cn(
-                      face,
-                      "text-[10.5px] font-black uppercase tracking-[0.14em] text-accent/80",
-                    )}
-                  >
-                    {pick(GUEST_UI.checkSentence, lang)}
-                  </p>
-                  <div
-                    className={cn(
-                      EN_FACE,
-                      "mt-2 rounded-2xl border-2 border-dashed border-accent/25 bg-accent/[0.06] px-4 py-4 text-center text-[1.35rem] font-black leading-snug text-slate-900",
-                    )}
-                  >
-                    {question.sentence}
-                  </div>
-                </div>
-              ) : null}
-            </section>
-
-            <p className={cn(face, "mt-5 mb-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400")}>
-              {pick(GUEST_UI.checkPick, lang)}
-            </p>
-
-            <NudgeProvider active={!correct} resetKey={`${question.id}:${tapTick}`}>
-              <div className="grid gap-2.5" role="listbox" aria-label={pick(GUEST_UI.checkPick, lang)}>
-                {question.options.map((option, optionIndex) => {
-                  const isPicked = picked === option.id;
-                  const isRight = option.id === question.correctOptionId;
-                  const tone = correct && isRight ? "right" : isPicked && wrong ? "wrong" : "idle";
-
-                  return (
-                    <GuestCheckOption
-                      key={option.id}
-                      letter={String.fromCharCode(65 + optionIndex)}
-                      label={question.englishOptions ? option.text.en : pick(option.text, lang)}
-                      labelFace={question.englishOptions ? EN_FACE : face}
-                      selected={isPicked}
-                      tone={tone}
-                      nudgeIndex={optionIndex}
-                      onClick={() => submit(option.id)}
-                    />
-                  );
-                })}
-              </div>
-            </NudgeProvider>
-
-            {wrong && !correct ? (
-              <p className={cn(face, "mt-3 rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 ring-1 ring-amber-200")}>
-                {pick(question.hint, lang)}
-              </p>
-            ) : null}
-            {correct ? (
-              <p className={cn(face, "mt-3 text-sm font-black text-emerald-700")}>{pick(GUEST_UI.checkCorrect, lang)}</p>
-            ) : null}
-          </motion.div>
-        </AnimatePresence>
-      </GuestScreen>
-    </LessonSpeechProvider>
-  );
-}
-
 /**
  * After the free mini-lesson game: persuasive signup gate (progress + locked next + dual CTAs).
  * Progress stays in this browser until claim-guest copies it into the new account.
@@ -768,122 +479,125 @@ export function GuestValueCard({
   }, []);
 
   const phoneHref = `/register?next=${encodeURIComponent(returnTo)}`;
+  const startSignup = () => {
+    void playUiClickSfx();
+    onSignupStart?.();
+  };
 
   return (
-    <GuestScreen
-      top={<HomePill lang={lang} onNavigate={() => setExitOpen(true)} />}
-      actions={
-        <>
-          <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
-            <ContinueWithGoogleButton
-              returnTo={returnTo}
-              label={pick(GUEST_UI.valueCta, lang)}
-              onNavigate={() => {
-                void playUiClickSfx();
-                onSignupStart?.();
-              }}
-              className={cn(
-                face,
-                "h-14 w-full rounded-2xl border-2 border-b-4 border-accent/40 text-base font-black shadow-lg shadow-accent/15",
-                lang === "bn" && "text-[16px] leading-snug",
-              )}
-            />
-          </motion.div>
-          <Link
-            href={phoneHref}
-            onClick={() => {
-              void playUiClickSfx();
-              onSignupStart?.();
-            }}
-            className={cn(face, SECONDARY, "h-13", lang === "bn" && "text-[16px]")}
-          >
-            <Phone className="size-4" aria-hidden />
-            {pick(GUEST_UI.valuePhoneCta, lang)}
-          </Link>
-          <ul className={cn(face, "mt-1 grid gap-1.5 text-left text-[12px] font-bold text-slate-600")}>
-            {[GUEST_UI.valueTrustFree, GUEST_UI.valueTrustFast, GUEST_UI.valueTrustSave].map((line) => (
-              <li key={line.en} className="flex items-center gap-2">
-                <Check className="size-3.5 shrink-0 text-emerald-600" strokeWidth={3} aria-hidden />
-                {pick(line, lang)}
-              </li>
-            ))}
-          </ul>
-        </>
-      }
-    >
-      <GamlishMascot mood="happy" size="md" className="mx-auto" />
-      <span className={cn(face, "mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700")}>
-        <Check className="size-3.5" strokeWidth={3} aria-hidden />
-        {pick(GUEST_UI.valueBadge, lang)}
-      </span>
-      <h1 className={cn(face, "mt-2 text-[1.55rem] font-black leading-snug text-slate-900 sm:text-[1.7rem]")}>
-        {pick(GUEST_UI.valueTitle, lang)}
-      </h1>
+    <>
+      <GuestScreen
+        top={<HomePill lang={lang} onNavigate={() => setExitOpen(true)} />}
+        actions={
+          <>
+            <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
+              <ContinueWithGoogleButton
+                returnTo={returnTo}
+                label={pick(GUEST_UI.valueCta, lang)}
+                onNavigate={startSignup}
+                className={cn(
+                  face,
+                  "h-14 w-full rounded-2xl border-2 border-b-4 border-accent/40 text-base font-black shadow-lg shadow-accent/15",
+                  lang === "bn" && "text-[16px] leading-snug",
+                )}
+              />
+            </motion.div>
+            <Link
+              href={phoneHref}
+              onClick={startSignup}
+              className={cn(face, SECONDARY, "h-13", lang === "bn" && "text-[16px]")}
+            >
+              <Phone className="size-4" aria-hidden />
+              {pick(GUEST_UI.valuePhoneCta, lang)}
+            </Link>
+            <ul className={cn(face, "mt-1 grid gap-1.5 text-left text-[12px] font-bold text-slate-600")}>
+              {[GUEST_UI.valueTrustFree, GUEST_UI.valueTrustFast, GUEST_UI.valueTrustSave].map((line) => (
+                <li key={line.en} className="flex items-center gap-2">
+                  <Check className="size-3.5 shrink-0 text-emerald-600" strokeWidth={3} aria-hidden />
+                  {pick(line, lang)}
+                </li>
+              ))}
+            </ul>
+          </>
+        }
+      >
+        <GamlishMascot mood="happy" size="md" className="mx-auto" />
+        <span className={cn(face, "mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700")}>
+          <Check className="size-3.5" strokeWidth={3} aria-hidden />
+          {pick(GUEST_UI.valueBadge, lang)}
+        </span>
+        <h1 className={cn(face, "mt-2 text-[1.55rem] font-black leading-snug text-slate-900 sm:text-[1.7rem]")}>
+          {pick(GUEST_UI.valueTitle, lang)}
+        </h1>
 
-      <div className="mt-4 rounded-2xl border border-slate-200/80 bg-white px-3.5 py-3 text-left shadow-sm ring-1 ring-slate-100">
-        <div className="flex items-center justify-between gap-2">
-          <p className={cn(face, "text-xs font-black text-accent")}>{pick(GUEST_UI.valueLevelLabel, lang)}</p>
-          <p className={cn(face, "text-xs font-bold text-slate-500")}>
-            {pick(GUEST_UI.valueProgress(gamesDone, gamesTotal), lang)}
-          </p>
-        </div>
-        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-accent to-sky-500"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPct}%` }}
-            transition={{ type: "spring", stiffness: 120, damping: 18 }}
-          />
-        </div>
-      </div>
-
-      <p className={cn(face, "mt-3 text-[15px] font-bold leading-snug text-slate-600")}>
-        {pick(GUEST_UI.valueBody, lang)}
-      </p>
-
-      <div className="mt-4 overflow-hidden rounded-2xl border-2 border-dashed border-amber-300/80 bg-amber-50/80 p-3.5 text-left">
-        <p className={cn(face, "flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.12em] text-amber-800")}>
-          <Lock className="size-3.5" aria-hidden />
-          {pick(GUEST_UI.valueNextLabel, lang)}
-        </p>
-        <p className={cn(face, "mt-1.5 text-base font-black text-slate-900")}>
-          {pick(nextTitle, lang) || pick(GUEST_UI.valueNextFallback, lang)}
-        </p>
-        <div className="relative mt-3 h-16 overflow-hidden rounded-xl bg-white/70 ring-1 ring-amber-200/80">
-          <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent_20%,rgba(255,255,255,0.65)_50%,transparent_80%)] opacity-80" aria-hidden />
-          <div className="flex h-full items-center justify-center gap-2 blur-[2px]">
-            <span className="h-8 w-16 rounded-lg bg-slate-200" />
-            <span className="h-8 w-20 rounded-lg bg-accent/20" />
-            <span className="h-8 w-14 rounded-lg bg-slate-200" />
+        <div className="mt-4 rounded-2xl border border-slate-200/80 bg-white px-3.5 py-3 text-left shadow-sm ring-1 ring-slate-100">
+          <div className="flex items-center justify-between gap-2">
+            <p className={cn(face, "text-xs font-black text-accent")}>{pick(GUEST_UI.valueLevelLabel, lang)}</p>
+            <p className={cn(face, "text-xs font-bold text-slate-500")}>
+              {pick(GUEST_UI.valueProgress(gamesDone, gamesTotal), lang)}
+            </p>
           </div>
-          <span className="absolute inset-0 flex items-center justify-center">
-            <span className="flex size-9 items-center justify-center rounded-full bg-slate-900/80 text-white shadow-lg">
-              <Lock className="size-4" aria-hidden />
-            </span>
-          </span>
+          <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-accent to-sky-500"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ type: "spring", stiffness: 120, damping: 18 }}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="mt-4 flex justify-center">
-        <PaidLearnersProofChip variant="plain" className="justify-center" />
-      </div>
+        <p className={cn(face, "mt-3 text-[15px] font-bold leading-snug text-slate-600")}>
+          {pick(GUEST_UI.valueBody, lang)}
+        </p>
 
+        <div className="mt-4 overflow-hidden rounded-2xl border-2 border-dashed border-amber-300/80 bg-amber-50/80 p-3.5 text-left">
+          <p className={cn(face, "flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.12em] text-amber-800")}>
+            <Lock className="size-3.5" aria-hidden />
+            {pick(GUEST_UI.valueNextLabel, lang)}
+          </p>
+          <p className={cn(face, "mt-1.5 text-base font-black text-slate-900")}>
+            {pick(nextTitle, lang) || pick(GUEST_UI.valueNextFallback, lang)}
+          </p>
+          <div className="relative mt-3 h-16 overflow-hidden rounded-xl bg-white/70 ring-1 ring-amber-200/80">
+            <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent_20%,rgba(255,255,255,0.65)_50%,transparent_80%)] opacity-80" aria-hidden />
+            <div className="flex h-full items-center justify-center gap-2 blur-[2px]">
+              <span className="h-8 w-16 rounded-lg bg-slate-200" />
+              <span className="h-8 w-20 rounded-lg bg-accent/20" />
+              <span className="h-8 w-14 rounded-lg bg-slate-200" />
+            </div>
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="flex size-9 items-center justify-center rounded-full bg-slate-900/80 text-white shadow-lg">
+                <Lock className="size-4" aria-hidden />
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 flex justify-center">
+          <PaidLearnersProofChip variant="plain" className="justify-center" />
+        </div>
+      </GuestScreen>
+
+      {/* Outside GuestScreen: main uses `isolate`, which trapped the old dialog under the footer CTA. */}
       <AnimatePresence>
         {exitOpen ? (
           <motion.div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/45 p-4 sm:items-center"
+            className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/50 p-4 sm:items-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             role="dialog"
             aria-modal="true"
             aria-labelledby="guest-exit-title"
+            onClick={() => setExitOpen(false)}
           >
             <motion.div
               className="w-full max-w-sm rounded-3xl bg-white p-5 text-center shadow-2xl"
               initial={{ y: 24, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 16, opacity: 0 }}
+              onClick={(event) => event.stopPropagation()}
             >
               <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-accent/10 text-accent">
                 <Lock className="size-5" aria-hidden />
@@ -897,10 +611,7 @@ export function GuestValueCard({
               <ContinueWithGoogleButton
                 returnTo={returnTo}
                 label={pick(GUEST_UI.valueExitSave, lang)}
-                onNavigate={() => {
-                  void playUiClickSfx();
-                  onSignupStart?.();
-                }}
+                onNavigate={startSignup}
                 className={cn(face, "mt-4 h-12 w-full rounded-2xl border-2 border-b-4 border-accent/40 text-sm font-black")}
               />
               <Link
@@ -914,7 +625,7 @@ export function GuestValueCard({
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </GuestScreen>
+    </>
   );
 }
 

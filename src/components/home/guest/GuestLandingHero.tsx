@@ -13,6 +13,7 @@ import {
 } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
 import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 
 export function GuestLandingHero() {
@@ -85,7 +86,9 @@ export function GuestLandingHero() {
               )}
               asChild
             >
-              <Link href={FREE_PLAY_HREF}>{copy.ctaPrimary}</Link>
+              <Link href={FREE_PLAY_HREF} className="group">
+                <PlayALittleCtaContent label={copy.ctaPrimary} size="md" badge={false} />
+              </Link>
             </Button>
             <p className="text-sm text-foreground/75">
               {copy.ctaPrimarySub}

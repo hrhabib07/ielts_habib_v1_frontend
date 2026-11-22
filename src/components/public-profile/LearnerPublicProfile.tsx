@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { CalendarDays, Check, Flame, Gamepad2, Hand, Lock, MapPin, Pencil, Play, Share2, Trophy } from "lucide-react";
+import { CalendarDays, Check, Flame, Gamepad2, Hand, Lock, MapPin, Pencil, Share2, Trophy } from "lucide-react";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import { LegacyLearnerBadge, type LegacyBadgeView } from "@/src/components/profile/LegacyLearnerBadge";
+import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { useLessonLanguage } from "@/src/features/chat-lesson/hooks/useLessonLanguage";
 import { LANG_FACE, pick } from "@/src/features/chat-lesson/lib/uiCopy";
 import { LearnerAvatarImage } from "@/src/features/learner/components/LearnerAvatar";
@@ -351,12 +352,11 @@ export function LearnerPublicProfile({ initialProfile, handle }: { initialProfil
               href="/play"
               className={cn(
                 face,
-                "mt-4 flex h-12 items-center justify-center gap-2 rounded-2xl border-b-4 border-primary bg-accent text-base font-extrabold text-white transition-all hover:bg-accent/90 active:translate-y-0.5 active:border-b-2",
+                "group mt-4 flex h-12 items-center justify-center gap-2 rounded-2xl border-b-4 border-primary bg-accent text-base font-extrabold text-white transition-all hover:bg-accent/90 active:translate-y-0.5 active:border-b-2",
                 lang === "en" && "uppercase tracking-wide",
               )}
             >
-              <Play className="size-4 fill-current" aria-hidden />
-              {pick(PUBLIC_UI.playCta, lang)}
+              <PlayALittleCtaContent label={pick(PUBLIC_UI.playCta, lang)} size="sm" badge={false} />
             </Link>
           </motion.section>
         )}

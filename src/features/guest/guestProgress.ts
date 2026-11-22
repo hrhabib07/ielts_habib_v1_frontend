@@ -129,3 +129,50 @@ export function markGuestQuizDone(): void {
   if (current.quizDone) return;
   writeFunnel({ noteDone: true, quizDone: true, updatedAt: Date.now() });
 }
+
+const DEMO_CONTINUE_KEY = "gamlish-demo-subject-continue-v1";
+
+/** Set when a guest finished the free Subject taste, so post-login Subject can continue quietly. */
+export type DemoSubjectContinue = {
+  notePreviewDone: boolean;
+  updatedAt: number;
+};
+
+/** True only if this browser finished the guest note + check (not playground alone). */
+export function guestDemoTasteDone(): boolean {
+  const funnel = readFunnel();
+  return funnel.noteDone && funnel.quizDone;
+}
+
+export function markDemoSubjectContinue(): void {
+  try {
+    const payload: DemoSubjectContinue = { notePreviewDone: true, updatedAt: Date.now() };
+    window.localStorage.setItem(DEMO_CONTINUE_KEY, JSON.stringify(payload));
+  } catch {
+    return;
+  }
+}
+
+export function readDemoSubjectContinue(): DemoSubjectContinue | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DEMO_CONTINUE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as DemoSubjectContinue;
+    if (Date.now() - (parsed.updatedAt || 0) >= MAX_AGE_MS) {
+      window.localStorage.removeItem(DEMO_CONTINUE_KEY);
+      return null;
+    }
+    return parsed.notePreviewDone ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearDemoSubjectContinue(): void {
+  try {
+    window.localStorage.removeItem(DEMO_CONTINUE_KEY);
+  } catch {
+    return;
+  }
+}
