@@ -9,6 +9,7 @@ import { LANG_FACE, pick, type LessonLanguage } from "@/src/features/chat-lesson
 import type { Bilingual } from "@/src/features/chat-lesson/types";
 import { GuestScreen, PRIMARY_BUTTON, SECONDARY_BUTTON } from "@/src/features/guest/components/GuestScreens";
 import { GamlishMascot } from "@/src/features/playground/components/GamlishMascot";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { OFFER_UI } from "@/src/features/learner/lib/copy";
 import { earnsLegacyBadge, isDoubleDuration, offerDaysLeft } from "@/src/features/learner/lib/offer";
 import type { ChatMissionPayment } from "@/src/lib/api/chatMission";
@@ -78,6 +79,13 @@ export function OfferBox({ payment, lang }: { payment: ChatMissionPayment; lang:
           {pick(OFFER_UI.deadline(offerDaysLeft(payment.offer, now)), lang)}
         </span>
       </div>
+      <DoubleDurationUrgency
+        variant="compact"
+        tone="onDark"
+        locale={lang === "bn" ? "bn" : "en"}
+        showBuy={false}
+        className="relative mt-3"
+      />
     </div>
   );
 }

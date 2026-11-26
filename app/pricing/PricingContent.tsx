@@ -13,7 +13,6 @@ import { TEST_LANDING_GRADUATES } from "@/src/lib/test-landing-graduates";
 import {
   purchaseOfferCardTitle,
   purchaseOfferCompareLine,
-  purchaseOfferDeadlineLine,
   purchaseOfferIncludes,
 } from "@/src/lib/purchase-offer-copy";
 import {
@@ -21,6 +20,7 @@ import {
   PaymentApplicationStatusCard,
 } from "@/src/components/pricing/PaymentApplicationStatusCard";
 import { PricingFaqSection } from "@/src/components/pricing/PricingFaqSection";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
 import {
   LANDING_CTA_CLASS,
@@ -156,7 +156,6 @@ export function PricingContent({
       ? Math.round(((regular - price) / regular) * 100)
       : pricing.discountPercent;
   const includes = purchaseOfferIncludes(bn, pricing.durationDays);
-  const deadline = purchaseOfferDeadlineLine(bn, pricing.durationDays);
   const graduateStories = TEST_LANDING_GRADUATES.slice(0, 4);
   const liveStories = feedback.slice(0, 6);
   const canBuy = !hasPurchased && !blocked;
@@ -253,11 +252,6 @@ export function PricingContent({
                 <p className="mt-2 text-sm font-semibold text-sky-800 dark:text-sky-300">
                   {purchaseOfferCompareLine(bn, pricing.durationDays)}
                 </p>
-                {deadline ? (
-                  <p className="mt-1 text-xs font-medium text-amber-800 sm:text-sm dark:text-amber-300">
-                    {deadline}
-                  </p>
-                ) : null}
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                   {bn ? "একবার পেমেন্ট · পুরো অ্যাক্সেস" : "One payment · full access"}
                 </p>
@@ -276,13 +270,28 @@ export function PricingContent({
                   ))}
                 </ul>
 
-                <div className="mx-auto mt-8 flex w-full max-w-md flex-col gap-2.5">
-                  <Link
-                    href="/play"
+                <div className="mx-auto mt-6 w-full max-w-md text-left">
+                  <DoubleDurationUrgency
+                    variant="card"
+                    showBuy={false}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="mx-auto mt-4 flex w-full max-w-md flex-col gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleUpgrade}
                     className={cn(
                       LANDING_CTA_CLASS,
-                      "group inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-base font-bold",
+                      "inline-flex h-12 w-full items-center justify-center rounded-xl px-6 text-base font-black",
                     )}
+                  >
+                    {bn ? "এখনই কিনুন" : "Buy now"}
+                  </button>
+                  <Link
+                    href="/play"
+                    className="group inline-flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-base font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
                   >
                     <PlayALittleCtaContent
                       label={bn ? PLAY_A_LITTLE.bn : PLAY_A_LITTLE.en}
@@ -290,18 +299,11 @@ export function PricingContent({
                       badge={false}
                     />
                   </Link>
-                  <button
-                    type="button"
-                    onClick={handleUpgrade}
-                    className="inline-flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-base font-bold text-slate-800 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-                  >
-                    {bn ? "এখনই কিনুন" : "Buy now"}
-                  </button>
                 </div>
                 <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                   {bn
-                    ? "আগে খেলুন, পছন্দ হলে কিনুন · অথবা সরাসরি আনলক করুন"
-                    : "Play first, buy when you like it · or unlock now"}
+                    ? "30 নভেম্বরের মধ্যে কিনলে 90 দিন · পরে একই দামে 45 দিন"
+                    : "Buy by 30 Nov for 90 days · after that, same price for 45 days"}
                 </p>
               </div>
             </section>
@@ -400,27 +402,30 @@ export function PricingContent({
 
       {canBuy ? (
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/80 bg-white/95 p-3 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-950/95">
-          <div className="mx-auto flex w-full max-w-md gap-2">
-            <Link
-              href="/play"
-              className="group inline-flex h-12 flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            >
-              <PlayALittleCtaContent
-                label={bn ? PLAY_A_LITTLE.bn : PLAY_A_LITTLE.en}
-                size="sm"
-                badge={false}
-              />
-            </Link>
-            <button
-              type="button"
-              onClick={handleUpgrade}
-              className={cn(
-                LANDING_CTA_CLASS,
-                "inline-flex h-12 flex-[1.2] items-center justify-center rounded-xl text-sm font-bold",
-              )}
-            >
-              {bn ? `${formatBdt(price)} · কিনুন` : `${formatBdt(price)} · Buy`}
-            </button>
+          <div className="mx-auto w-full max-w-md space-y-2">
+            <DoubleDurationUrgency variant="sticky" showBuy={false} />
+            <div className="flex gap-2">
+              <Link
+                href="/play"
+                className="group inline-flex h-12 flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              >
+                <PlayALittleCtaContent
+                  label={bn ? PLAY_A_LITTLE.bn : PLAY_A_LITTLE.en}
+                  size="sm"
+                  badge={false}
+                />
+              </Link>
+              <button
+                type="button"
+                onClick={handleUpgrade}
+                className={cn(
+                  LANDING_CTA_CLASS,
+                  "inline-flex h-12 flex-[1.25] items-center justify-center rounded-xl text-sm font-black",
+                )}
+              >
+                {bn ? `${formatBdt(price)} · কিনুন` : `${formatBdt(price)} · Buy`}
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

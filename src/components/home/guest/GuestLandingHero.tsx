@@ -12,6 +12,7 @@ import {
   LANDING_EYEBROW_CLASS,
 } from "@/src/components/home/guest/guest-landing-theme";
 import { cn } from "@/lib/utils";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
 import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
@@ -106,8 +107,9 @@ export function GuestLandingHero() {
               {copy.ctaPreOrderSub}
             </p>
 
-            <div className="w-full max-w-sm lg:max-w-md">
+            <div className="w-full max-w-sm space-y-2 lg:max-w-md">
               <MonthlyOfferLive size="sm" className="mt-1" />
+              <DoubleDurationUrgency variant="compact" showBuy={false} />
             </div>
           </motion.div>
         </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useGuestLandingLocale } from "@/src/components/home/guest/GuestLandingLocale";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
 import { cn } from "@/lib/utils";
@@ -30,27 +31,30 @@ export function GuestStickyDemoCta() {
         visible ? "translate-y-0" : "translate-y-full",
       )}
     >
-      <div className="mx-auto flex max-w-lg gap-2">
-        <Button
-          size="lg"
-          className={cn(
-            "h-12 flex-1 rounded-2xl text-sm font-bold",
-            LANDING_CTA_CLASS,
-          )}
-          asChild
-        >
-          <Link href={FREE_PLAY_HREF} className="group">
-            <PlayALittleCtaContent label={copy.stickyCta} size="sm" badge={false} />
-          </Link>
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          className="h-12 flex-1 rounded-2xl border-2 border-amber-500/50 bg-amber-400/10 text-sm font-bold text-amber-950 hover:bg-amber-400/20 dark:border-amber-400/45 dark:text-amber-100"
-          asChild
-        >
-          <Link href="/pricing">{copy.stickyPreOrder}</Link>
-        </Button>
+      <div className="mx-auto w-full max-w-lg space-y-2">
+        <DoubleDurationUrgency variant="sticky" showBuy={false} />
+        <div className="flex gap-2">
+          <Button
+            size="lg"
+            variant="outline"
+            className="h-12 flex-1 rounded-2xl border-2 text-sm font-bold"
+            asChild
+          >
+            <Link href={FREE_PLAY_HREF} className="group">
+              <PlayALittleCtaContent label={copy.stickyCta} size="sm" badge={false} />
+            </Link>
+          </Button>
+          <Button
+            size="lg"
+            className={cn(
+              "h-12 flex-[1.2] rounded-2xl text-sm font-black",
+              LANDING_CTA_CLASS,
+            )}
+            asChild
+          >
+            <Link href="/pricing">{copy.stickyPreOrder}</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

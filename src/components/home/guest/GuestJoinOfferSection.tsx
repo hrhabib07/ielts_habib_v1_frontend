@@ -4,8 +4,8 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
-import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { useGuestHomeSectionsCopy } from "@/src/components/home/guest/useGuestHomeSectionsCopy";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
 import { PlayALittleCtaContent } from "@/src/components/shared/PlayALittleCtaContent";
 import { FREE_PLAY_HREF } from "@/src/lib/platform-config";
@@ -100,21 +100,16 @@ export function GuestJoinOfferSection() {
             {copy.whyNow}
           </p>
 
-          <div className="mx-auto mt-4 w-full max-w-md text-left">
+          <div className="mx-auto mt-4 w-full max-w-md space-y-3 text-left">
             <MonthlyOfferLive size="md" showPaidChip={false} />
+            <DoubleDurationUrgency
+              variant="card"
+              buyHref="/pricing"
+              showBuy
+            />
           </div>
 
           <div className="mt-5 flex w-full flex-col items-center gap-3">
-            <Button
-              size="lg"
-              className={cn(
-                "h-auto min-h-14 w-full max-w-md whitespace-normal rounded-2xl px-5 py-3.5 text-base font-black leading-snug",
-                LANDING_CTA_CLASS,
-              )}
-              asChild
-            >
-              <Link href="/register">{copy.ctaPrimary}</Link>
-            </Button>
             <Button
               size="lg"
               variant="outline"
@@ -124,6 +119,16 @@ export function GuestJoinOfferSection() {
               <Link href={FREE_PLAY_HREF} className="group">
                 <PlayALittleCtaContent label={copy.ctaSecondary} size="sm" badge={false} />
               </Link>
+            </Button>
+            <Button
+              size="lg"
+              variant="ghost"
+              className={cn(
+                "h-auto min-h-11 w-full max-w-md whitespace-normal rounded-2xl px-5 py-2.5 text-sm font-bold leading-snug",
+              )}
+              asChild
+            >
+              <Link href="/register">{copy.ctaPrimary}</Link>
             </Button>
           </div>
         </motion.div>

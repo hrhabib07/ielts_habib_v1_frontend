@@ -5,14 +5,12 @@ import { Check } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GUEST_EASE } from "@/src/components/home/guest/guest-landing-motion";
-import {
-  LANDING_CTA_CLASS,
-  LANDING_EYEBROW_CLASS,
-} from "@/src/components/home/guest/guest-landing-theme";
+import { LANDING_EYEBROW_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { TEST_LANDING_PRIMARY_HREF } from "@/src/lib/test-landing-copy";
 import { TestLandingPriceLine } from "@/src/components/home/test-landing/TestLandingPriceLine";
 import { useTestLandingCopy } from "@/src/components/home/test-landing/useTestLandingCopy";
 import { usePublicPricing } from "@/src/hooks/usePublicPricing";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { MonthlyOfferStory } from "@/src/components/pricing/MonthlyOfferStory";
 import { cn } from "@/lib/utils";
 
@@ -49,8 +47,9 @@ export function TestLandingOffer() {
             <TestLandingPriceLine align="card" />
           </div>
 
-          <div className="mt-5">
+          <div className="mt-5 space-y-3">
             <MonthlyOfferStory pricing={pricing} size="md" showPaidChip={false} />
+            <DoubleDurationUrgency variant="card" buyHref="/pricing" showBuy />
           </div>
 
           <ul className="mt-6 space-y-3">
@@ -67,9 +66,9 @@ export function TestLandingOffer() {
 
           <Button
             size="lg"
+            variant="outline"
             className={cn(
-              "mt-6 h-auto min-h-14 w-full whitespace-normal rounded-2xl px-5 py-3.5 text-base font-bold sm:text-lg",
-              LANDING_CTA_CLASS,
+              "mt-6 h-auto min-h-14 w-full whitespace-normal rounded-2xl border-2 px-5 py-3.5 text-base font-bold sm:text-lg",
             )}
             asChild
           >

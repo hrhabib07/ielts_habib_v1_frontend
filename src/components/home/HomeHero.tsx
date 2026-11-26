@@ -27,6 +27,7 @@ import {
   type ResolvedJourneyProgress,
 } from "@/src/lib/journeyVisualProgress";
 import { FoundingMemberBadge } from "@/src/components/founding-member/FoundingMemberBadge";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { MonthlyOfferLive } from "@/src/components/pricing/MonthlyOfferStory";
 import { useStudentSession } from "@/src/contexts/StudentSessionContext";
 
@@ -349,7 +350,15 @@ function BandHero({
           {isFoundingMember ? (
             <FoundingMemberBadge size="md" />
           ) : (
-            <MonthlyOfferLive className="max-w-md" size="sm" />
+            <div className="flex w-full max-w-md flex-col items-center gap-2">
+              <MonthlyOfferLive className="w-full" size="sm" />
+              <DoubleDurationUrgency
+                variant="compact"
+                buyHref="/checkout"
+                showBuy={false}
+                className="w-full text-left"
+              />
+            </div>
           )}
         </div>
 

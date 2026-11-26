@@ -5,6 +5,7 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatBdt } from "@/src/lib/api/pricing";
 import { usePublicPricing } from "@/src/hooks/usePublicPricing";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { MonthlyOfferStory } from "@/src/components/pricing/MonthlyOfferStory";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
@@ -55,59 +56,42 @@ export function SeasonalOfferHomeCard({ className }: { className?: string }) {
         <MonthlyOfferStory pricing={pricing} size="sm" className="mt-1" />
       </div>
 
-      <div className="flex items-center gap-3 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <p className="truncate text-sm font-bold leading-snug text-foreground">
-            {isBn ? "এখনই ফুল জার্নি অ্যাক্সেস নিন" : "Get Full Journey Access"}
-          </p>
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0" lang="en">
-            {showStrike ? (
-              <span className="font-sans text-xs font-medium text-muted-foreground line-through decoration-2">
-                {formatBdt(pricing.regularPriceBdt)}
+      <div className="space-y-2.5 px-3 py-2.5 sm:px-4 sm:py-3">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="min-w-0 flex-1 space-y-0.5">
+            <p className="truncate text-sm font-bold leading-snug text-foreground">
+              {isBn ? "এখনই ফুল জার্নি অ্যাক্সেস নিন" : "Get Full Journey Access"}
+            </p>
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0" lang="en">
+              {showStrike ? (
+                <span className="font-sans text-xs font-medium text-muted-foreground line-through decoration-2">
+                  {formatBdt(pricing.regularPriceBdt)}
+                </span>
+              ) : null}
+              <span className="font-sans text-xl font-black tracking-tight text-foreground sm:text-2xl">
+                {formatBdt(pricing.finalPriceBdt)}
               </span>
-            ) : null}
-            <span className="font-sans text-xl font-black tracking-tight text-foreground sm:text-2xl">
-              {formatBdt(pricing.finalPriceBdt)}
-            </span>
-            <span className="text-[10px] font-semibold text-muted-foreground">
-              {isBn ? "একবারের পেমেন্ট" : "one payment"}
-            </span>
+              <span className="text-[10px] font-semibold text-muted-foreground">
+                {isBn ? "একবারের পেমেন্ট" : "one payment"}
+              </span>
+            </div>
           </div>
-          <p className="text-[10px] leading-snug text-muted-foreground">
-            {isBn ? (
-              <>
-                <span lang="en" className="font-sans">
-                  45
-                </span>{" "}
-                দিনের অ্যাক্সেস · সাধারণত{" "}
-                <span lang="en" className="font-sans">
-                  21
-                </span>{" "}
-                মিশন শেষ করতে{" "}
-                <span lang="en" className="font-sans">
-                  21
-                </span>{" "}
-                দিন সময় লাগে
-              </>
-            ) : (
-              "45-day access · usually takes 21 days to finish 21 missions"
-            )}
-          </p>
-        </div>
 
-        <Button
-          asChild
-          size="sm"
-          className={cn(
-            "h-9 shrink-0 gap-1 rounded-full px-3 text-xs font-black",
-            "bg-amber-500 text-amber-950 hover:bg-amber-400",
-          )}
-        >
-          <Link href="/checkout">
-            <Sparkles className="h-3.5 w-3.5" />
-            {isBn ? "আনলক" : "Unlock"}
-          </Link>
-        </Button>
+          <Button
+            asChild
+            size="sm"
+            className={cn(
+              "h-9 shrink-0 gap-1 rounded-full px-3 text-xs font-black",
+              "bg-amber-500 text-amber-950 hover:bg-amber-400",
+            )}
+          >
+            <Link href="/checkout">
+              <Sparkles className="h-3.5 w-3.5" />
+              {isBn ? "আনলক" : "Unlock"}
+            </Link>
+          </Button>
+        </div>
+        <DoubleDurationUrgency variant="compact" showBuy={false} />
       </div>
     </div>
   );

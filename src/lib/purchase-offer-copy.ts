@@ -5,8 +5,32 @@
 
 export const PURCHASE_OFFER_NORMAL_DAYS = 45;
 export const PURCHASE_OFFER_BONUS_DAYS = 90;
-export const PURCHASE_OFFER_ENDS_LABEL_BN = "৩০ নভেম্বর ২০২৬";
+/** English digits on purpose · Bangla digits read poorly in tight UI. */
+export const PURCHASE_OFFER_ENDS_LABEL_BN = "30 নভেম্বর 2026";
 export const PURCHASE_OFFER_ENDS_LABEL_EN = "30 Nov 2026";
+
+export const DOUBLE_DURATION_URGENCY = {
+  title: {
+    en: "90-day offer ending soon",
+    bn: "90 দিনের অফার শেষ হতে যাচ্ছে",
+  },
+  loss: {
+    en: `Buy by 30 Nov for ${PURCHASE_OFFER_BONUS_DAYS} days · after that, same price for ${PURCHASE_OFFER_NORMAL_DAYS} days`,
+    bn: `30 নভেম্বরের মধ্যে কিনলে ${PURCHASE_OFFER_BONUS_DAYS} দিন · পরে একই দামে ${PURCHASE_OFFER_NORMAL_DAYS} দিন`,
+  },
+  lastDay: {
+    en: "Last day · 90-day access ends tonight",
+    bn: "শেষ দিন · আজ রাতেই 90 দিনের অফার শেষ",
+  },
+  buy: {
+    en: "Buy now",
+    bn: "এখনই কিনুন",
+  },
+  labels: {
+    en: { d: "d", h: "h", m: "m", s: "s" },
+    bn: { d: "দিন", h: "ঘণ্টা", m: "মিনিট", s: "সে." },
+  },
+} as const;
 
 export function purchaseOfferIncludes(bn: boolean, durationDays?: number): string[] {
   const isDouble =

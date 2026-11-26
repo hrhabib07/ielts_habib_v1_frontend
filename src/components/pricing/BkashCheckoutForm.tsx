@@ -17,10 +17,8 @@ import { requestPhoneOtp, verifyPhoneOtp } from "@/src/auth/api";
 import { submitSubscriptionRequest } from "@/src/lib/api/subscription";
 import { updateProfile } from "@/src/lib/api/profile";
 import { formatBdt, type PublicPricing } from "@/src/lib/api/pricing";
-import {
-  purchaseOfferCompareLine,
-  purchaseOfferDeadlineLine,
-} from "@/src/lib/purchase-offer-copy";
+import { purchaseOfferCompareLine } from "@/src/lib/purchase-offer-copy";
+import { DoubleDurationUrgency } from "@/src/components/pricing/DoubleDurationUrgency";
 import { LANDING_CTA_CLASS } from "@/src/components/home/guest/guest-landing-theme";
 import { useCheckoutCopy } from "@/src/hooks/useLocalizedCopy";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
@@ -498,7 +496,6 @@ export function BkashCheckoutForm({
   }
 
   const bn = locale === "bn";
-  const deadline = purchaseOfferDeadlineLine(bn, pricing.durationDays);
   const identityStep = hasExistingSession ? null : 2;
   const paymentStep = hasExistingSession ? 2 : 3;
 
@@ -544,9 +541,11 @@ export function BkashCheckoutForm({
           <p className="mt-2 text-sm font-semibold text-sky-800 dark:text-sky-300">
             {purchaseOfferCompareLine(bn, pricing.durationDays)}
           </p>
-          {deadline ? (
-            <p className="mt-1 text-xs font-medium text-amber-800 dark:text-amber-300">{deadline}</p>
-          ) : null}
+          <DoubleDurationUrgency
+            variant="compact"
+            showBuy={false}
+            className="mt-3 text-left"
+          />
         </div>
 
         <div className="space-y-3">
