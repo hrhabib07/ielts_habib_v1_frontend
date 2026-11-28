@@ -14,7 +14,38 @@ type Props = {
   tag?: ErrorTag;
   tipEn?: string;
   tipBn?: string;
+  meaningEn?: string;
+  meaningBn?: string;
+  showBangla?: boolean;
+  correctLabel?: string;
 };
+
+function MeaningBlock({
+  meaningEn,
+  meaningBn,
+  showBangla,
+}: {
+  meaningEn?: string;
+  meaningBn?: string;
+  showBangla?: boolean;
+}) {
+  if (!meaningEn && !(showBangla && meaningBn)) return null;
+  return (
+    <div className="rounded-2xl border-2 border-b-4 border-sky-200 bg-sky-50 px-3 py-2 text-left dark:border-sky-500/30 dark:bg-sky-500/10">
+      <p className="text-[10px] font-black uppercase tracking-wider text-sky-800 dark:text-sky-200">
+        Meaning
+      </p>
+      {meaningEn ? (
+        <p className="mt-1 text-sm font-bold text-slate-800 dark:text-slate-100">{meaningEn}</p>
+      ) : null}
+      {showBangla && meaningBn ? (
+        <p className="font-bengali mt-0.5 text-sm font-semibold text-slate-600 dark:text-slate-300">
+          {meaningBn}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 export function FeedbackPanel({
   correct,
@@ -24,6 +55,10 @@ export function FeedbackPanel({
   tag,
   tipEn,
   tipBn,
+  meaningEn,
+  meaningBn,
+  showBangla = true,
+  correctLabel = "Correct!",
 }: Props) {
   const reduceMotion = useReducedMotion();
 
@@ -32,9 +67,10 @@ export function FeedbackPanel({
       <motion.div
         initial={reduceMotion ? false : { scale: 0.92, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="rounded-3xl border-2 border-b-[5px] border-emerald-500/40 bg-emerald-50 px-4 py-4 text-center dark:bg-emerald-500/10"
+        className="space-y-3 rounded-3xl border-2 border-b-[5px] border-emerald-500/40 bg-emerald-50 px-4 py-4 text-center dark:bg-emerald-500/10"
       >
-        <p className="text-xl font-black text-emerald-800 dark:text-emerald-200">সঠিক!</p>
+        <p className="text-xl font-black text-emerald-800 dark:text-emerald-200">{correctLabel}</p>
+        <MeaningBlock meaningEn={meaningEn} meaningBn={meaningBn} showBangla={showBangla} />
       </motion.div>
     );
   }
@@ -91,9 +127,10 @@ export function FeedbackPanel({
         </div>
       ) : null}
       {tipEn ? <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{tipEn}</p> : null}
-      {tipBn ? (
+      {showBangla && tipBn ? (
         <p className="font-bengali text-sm font-semibold text-slate-600 dark:text-slate-300">{tipBn}</p>
       ) : null}
+      <MeaningBlock meaningEn={meaningEn} meaningBn={meaningBn} showBangla={showBangla} />
     </motion.div>
   );
 }

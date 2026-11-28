@@ -37,10 +37,11 @@ export function buildSession(
   pack: PackChoice,
   store: ProgressStore,
   now = Date.now(),
+  locale: "bn" | "en" = "bn",
 ): SessionItem[] {
   if (pack === "spellaloud") {
     const items = shuffle(getSpellAloudItems()).slice(0, SESSION_SIZE);
-    return items.map(spellAloudToSessionItem);
+    return items.map((item) => spellAloudToSessionItem(item, locale));
   }
 
   const pool = filterByPack(getReviewedWords(), pack);
@@ -86,24 +87,31 @@ export function buildSession(
   const items = ordered.slice(0, SESSION_SIZE).map((w, index) => {
     const useContext =
       index >= SESSION_SIZE - 2 && Boolean(w.ctx) && Boolean(w.form);
-    return wordToSessionItem(w, useContext ? "context" : "dictation");
+    return wordToSessionItem(w, useContext ? "context" : "dictation", locale);
   });
 
   // Ensure we still have something if pool is tiny.
   if (items.length === 0 && byId.size > 0) {
     return [...byId.values()]
       .slice(0, SESSION_SIZE)
-      .map((w) => wordToSessionItem(w, "dictation"));
+      .map((w) => wordToSessionItem(w, "dictation", locale));
   }
 
   return items;
 }
 
-export function buildWeakSession(store: ProgressStore): SessionItem[] {
+export function buildWeakSession(
+  store: ProgressStore,
+  locale: "bn" | "en" = "bn",
+): SessionItem[] {
   const pool = getReviewedWords();
   const ranked = pool
     .map((w) => ({ word: w, prog: store.words[w.id] }))
-    .filter((x) => x.prog)
+    .filter((x) => {
+      if (!x.prog) return false;
+      const errors = totalErrors(x.prog);
+      return x.prog.box <= 1 || errors > 0;
+    })
     .sort((a, b) => {
       const boxDiff = (a.prog?.box ?? 0) - (b.prog?.box ?? 0);
       if (boxDiff !== 0) return boxDiff;
@@ -113,9 +121,9 @@ export function buildWeakSession(store: ProgressStore): SessionItem[] {
     .map((x) => x.word);
 
   if (ranked.length === 0) {
-    return buildSession("mixed", store);
+    return buildSession("mixed", store, Date.now(), locale);
   }
-  return ranked.map((w) => wordToSessionItem(w, "dictation"));
+  return ranked.map((w) => wordToSessionItem(w, "dictation", locale));
 }
 
 export function packChoices(): Array<{ id: PackChoice; labelEn: string; labelBn: string }> {

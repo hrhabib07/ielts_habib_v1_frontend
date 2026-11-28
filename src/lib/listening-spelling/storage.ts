@@ -63,3 +63,11 @@ export function countPractised(store: ProgressStore): number {
 export function countDueToday(store: ProgressStore, now = Date.now()): number {
   return Object.values(store.words).filter((w) => w.nextDue <= now).length;
 }
+
+/** Weak = low box or any recorded errors. */
+export function countWeakWords(store: ProgressStore): number {
+  return Object.values(store.words).filter((w) => {
+    const errors = Object.values(w.errorCounts).reduce((a, b) => a + (b ?? 0), 0);
+    return w.box <= 1 || errors > 0;
+  }).length;
+}

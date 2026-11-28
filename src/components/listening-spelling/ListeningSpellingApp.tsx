@@ -42,6 +42,7 @@ import {
 import {
   countDueToday,
   countPractised,
+  countWeakWords,
   getWordProgress,
   loadProgress,
   saveProgress,
@@ -55,6 +56,7 @@ import type {
   SessionItem,
   SessionMode,
 } from "@/src/lib/listening-spelling/types";
+import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
 
 type Screen = "home" | "session" | "result";
@@ -66,6 +68,7 @@ type ItemOutcome = {
   tag?: ErrorTag;
 };
 
+/** Sit below SiteNavBar (h-14 / sm:h-16) so content is not hidden. */
 function Shell({
   children,
   actions,
@@ -76,9 +79,9 @@ function Shell({
   top?: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-background">
+    <div className="fixed inset-x-0 bottom-0 top-14 z-40 flex flex-col bg-background sm:top-16">
       {top ? (
-        <div className="absolute inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),0.75rem)]">
+        <div className="absolute inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 pt-3">
           {top}
         </div>
       ) : null}
@@ -87,7 +90,7 @@ function Shell({
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(circle_at_1px_1px,rgba(30,58,138,0.1)_1px,transparent_0)] bg-[length:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent)]"
         />
-        <div className={cn("mx-auto my-auto w-full max-w-md pb-6", top ? "pt-16" : "pt-8")}>
+        <div className={cn("mx-auto my-auto w-full max-w-md pb-6", top ? "pt-14" : "pt-6")}>
           {children}
         </div>
       </main>
@@ -102,6 +105,8 @@ function Shell({
 
 export function ListeningSpellingApp() {
   const reduceMotion = useReducedMotion();
+  const { locale } = useUiLocale();
+  const bn = locale === "bn";
   const [screen, setScreen] = useState<Screen>("home");
   const [mode, setMode] = useState<SessionMode>("practice");
   const [pack, setPack] = useState<PackChoice>("mixed");
@@ -149,6 +154,7 @@ export function ListeningSpellingApp() {
   const playsAllowed = mode === "exam" ? PLAYS_EXAM : Number.POSITIVE_INFINITY;
   const practised = useMemo(() => countPractised(store), [store]);
   const dueToday = useMemo(() => countDueToday(store), [store]);
+  const weakCount = useMemo(() => countWeakWords(store), [store]);
   const progressPct = queue.length ? Math.round((index / queue.length) * 100) : 0;
 
   function persist(next: ProgressStore) {
@@ -157,7 +163,9 @@ export function ListeningSpellingApp() {
   }
 
   function startSession(nextPack: PackChoice, weak = false) {
-    const items = weak ? buildWeakSession(store) : buildSession(nextPack, store);
+    const items = weak
+      ? buildWeakSession(store, locale)
+      : buildSession(nextPack, store, Date.now(), locale);
     if (items.length === 0) return;
     setPack(nextPack);
     setQueue(items);
@@ -384,25 +392,35 @@ export function ListeningSpellingApp() {
   }
 
   if (screen === "home") {
+    const weakLabel =
+      weakCount > 0
+        ? bn
+          ? `Weak words (${weakCount})`
+          : `Weak words (${weakCount})`
+        : bn
+          ? "Weak words · এখনো নেই"
+          : "Weak words · none yet";
+
     return (
       <Shell
         actions={
           <>
             <button type="button" onClick={() => startSession(pack)} className={PRIMARY_BUTTON}>
-              শুরু করুন
+              {bn ? "শুরু করুন" : "Start"}
             </button>
             <button
               type="button"
               onClick={() => startSession("mixed", true)}
-              className={SECONDARY_BUTTON}
+              disabled={weakCount === 0}
+              className={cn(SECONDARY_BUTTON, weakCount === 0 && "opacity-50")}
             >
-              Weak words
+              {weakLabel}
             </button>
           </>
         }
       >
         <motion.div
-          className="text-center"
+          className={cn("text-center", bn && "font-bengali")}
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 28 }}
@@ -414,37 +432,49 @@ export function ListeningSpellingApp() {
           <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50">
             IELTS Listening Spelling
           </h1>
-          <p className="font-bengali mt-1 text-lg font-bold text-slate-700 dark:text-slate-200">
-            শুনে সঠিক বানান লিখুন
+          <p className="mt-1 text-lg font-bold text-slate-700 dark:text-slate-200">
+            {bn ? "শুনে সঠিক বানান লিখুন" : "Hear it. Hold it. Spell it."}
           </p>
-          <p className="font-bengali mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            Listening-এ শুনেও ভুল বানানে মার্ক কাটে। এই মিশনে শুনুন, মনে রাখুন, লিখুন।
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            {bn
+              ? "Listening-এ শুনেও ভুল বানানে মার্ক কাটে। এই মিশনে শুনুন, মনে রাখুন, লিখুন। অর্থ চেকের পরে দেখাবে।"
+              : "Wrong spelling costs Listening marks even when you heard the word. Meanings appear after you answer."}
           </p>
           <p className="mt-2 text-xs font-semibold text-slate-500">
             British preferred · American accepted
           </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
-              <p className="text-2xl font-black tabular-nums text-slate-900 dark:text-white">
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white px-2 py-3 dark:border-slate-700 dark:bg-slate-900">
+              <p className="text-xl font-black tabular-nums text-slate-900 dark:text-white sm:text-2xl">
                 {practised}
               </p>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
                 practised
               </p>
             </div>
-            <div className="rounded-3xl border-2 border-b-[5px] border-amber-300 bg-amber-50 px-3 py-3 dark:bg-amber-500/10">
-              <p className="text-2xl font-black tabular-nums text-amber-950 dark:text-amber-100">
+            <div className="rounded-3xl border-2 border-b-[5px] border-amber-300 bg-amber-50 px-2 py-3 dark:bg-amber-500/10">
+              <p className="text-xl font-black tabular-nums text-amber-950 dark:text-amber-100 sm:text-2xl">
                 {dueToday}
               </p>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800/80 dark:text-amber-200/80">
-                due today
+              <p className="text-[10px] font-bold uppercase tracking-wide text-amber-800/80 dark:text-amber-200/80">
+                due
+              </p>
+            </div>
+            <div className="rounded-3xl border-2 border-b-[5px] border-orange-300 bg-orange-50 px-2 py-3 dark:bg-orange-500/10">
+              <p className="text-xl font-black tabular-nums text-orange-950 dark:text-orange-100 sm:text-2xl">
+                {weakCount}
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-orange-800/80 dark:text-orange-200/80">
+                weak
               </p>
             </div>
           </div>
 
-          <p className="font-bengali mt-4 rounded-2xl border-2 border-b-4 border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
-            ভালো ফলাফলের জন্য ফোনের অটো-সাজেশন/অটোকারেক্ট বন্ধ রাখুন।
+          <p className="mt-4 rounded-2xl border-2 border-b-4 border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+            {bn
+              ? "ভালো ফলাফলের জন্য ফোনের অটো-সাজেশন/অটোকারেক্ট বন্ধ রাখুন।"
+              : "Turn off auto-correct / suggestions for better results."}
           </p>
 
           <div className="mt-5 grid grid-cols-2 gap-2">
@@ -459,8 +489,8 @@ export function ListeningSpellingApp() {
               )}
             >
               <p className="text-sm font-black">Practice</p>
-              <p className="font-bengali mt-1 text-[11px] font-semibold text-slate-500">
-                আবার শোনা যাবে
+              <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                {bn ? "আবার শোনা যাবে" : "Replay allowed"}
               </p>
             </button>
             <button
@@ -474,8 +504,8 @@ export function ListeningSpellingApp() {
               )}
             >
               <p className="text-sm font-black">Exam</p>
-              <p className="font-bengali mt-1 text-[11px] font-semibold text-slate-500">
-                একবারই শোনা যাবে
+              <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                {bn ? "একবারই শোনা যাবে" : "One play only"}
               </p>
             </button>
           </div>
@@ -493,14 +523,14 @@ export function ListeningSpellingApp() {
                     : "border-slate-200 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100",
                 )}
               >
-                <p className="font-bengali text-sm font-black">{p.labelBn}</p>
+                <p className="text-sm font-black">{bn ? p.labelBn : p.labelEn}</p>
                 <p
                   className={cn(
                     "text-[11px] font-semibold",
                     pack === p.id ? "text-white/80" : "text-slate-500",
                   )}
                 >
-                  {p.labelEn}
+                  {bn ? p.labelEn : p.labelBn}
                 </p>
               </button>
             ))}
@@ -527,14 +557,19 @@ export function ListeningSpellingApp() {
         actions={
           <>
             <button type="button" onClick={() => startSession(pack)} className={PRIMARY_BUTTON}>
-              Practise again
+              {bn ? "আবার প্র্যাকটিস" : "Practise again"}
             </button>
             <button
               type="button"
               onClick={() => startSession("mixed", true)}
-              className={SECONDARY_BUTTON}
+              disabled={weakCount === 0}
+              className={cn(SECONDARY_BUTTON, weakCount === 0 && "opacity-50")}
             >
-              Weak words
+              {weakCount > 0
+                ? `Weak words (${weakCount})`
+                : bn
+                  ? "Weak words · এখনো নেই"
+                  : "Weak words · none yet"}
             </button>
             <button type="button" onClick={copyResult} className={SECONDARY_BUTTON}>
               Copy my result
@@ -664,11 +699,11 @@ export function ListeningSpellingApp() {
             onClick={phase === "fixonce" ? submitFixOnce : submitAnswer}
             className={PRIMARY_BUTTON}
           >
-            চেক করুন
+            {bn ? "চেক করুন" : "Check"}
           </button>
         ) : phase === "feedback" && lastResult && !lastResult.correct ? (
           <button type="button" onClick={continueAfterWrong} className={PRIMARY_BUTTON}>
-            সঠিক বানানটি একবার লিখুন
+            {bn ? "সঠিক বানানটি একবার লিখুন" : "Type the correct spelling once"}
           </button>
         ) : null
       }
@@ -680,12 +715,21 @@ export function ListeningSpellingApp() {
             <span className="inline-flex rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-accent">
               {current.packLabel}
             </span>
-            <p className="font-bengali mt-1.5 text-sm font-bold leading-snug text-slate-800 dark:text-slate-100">
+            <p
+              className={cn(
+                "mt-1.5 text-sm font-bold leading-snug text-slate-800 dark:text-slate-100",
+                bn && "font-bengali",
+              )}
+            >
               {current.kind === "context" && current.form
                 ? current.form
                 : current.kind === "spellaloud"
-                  ? "Listen letter by letter, then type."
-                  : "শুনুন, মনে রাখুন, তারপর লিখুন।"}
+                  ? bn
+                    ? "অক্ষরগুলো শুনুন, তারপর লিখুন।"
+                    : "Listen letter by letter, then type."
+                  : bn
+                    ? "শুনুন, মনে রাখুন, তারপর লিখুন।"
+                    : "Listen, remember, then type."}
             </p>
           </div>
         </div>
@@ -712,7 +756,9 @@ export function ListeningSpellingApp() {
 
         {phase === "hold" ? (
           <div className="mt-8">
-            <p className="font-bengali text-base font-black text-accent">মনে রাখুন...</p>
+            <p className={cn("text-base font-black text-accent", bn && "font-bengali")}>
+              {bn ? "মনে রাখুন..." : "Remember..."}
+            </p>
             <div className="mt-3 flex justify-center gap-2">
               {Array.from({ length: Math.max(holdLeft, 1) }).map((_, i) => (
                 <motion.span
@@ -753,13 +799,19 @@ export function ListeningSpellingApp() {
               tag={lastResult.tag}
               tipEn={current.tipEn}
               tipBn={current.tipBn}
+              meaningEn={current.meaningEn}
+              meaningBn={current.meaningBn}
+              showBangla={bn}
+              correctLabel={bn ? "সঠিক!" : "Correct!"}
             />
           </div>
         ) : null}
 
         {phase === "listen" ? (
-          <p className="font-bengali mt-8 text-sm font-semibold text-slate-500">
-            শুনুন ট্যাপ করুন · বানান লুকানো থাকবে
+          <p className={cn("mt-8 text-sm font-semibold text-slate-500", bn && "font-bengali")}>
+            {bn
+              ? "শুনুন ট্যাপ করুন · বানান লুকানো থাকবে"
+              : "Tap Listen · spelling stays hidden"}
           </p>
         ) : null}
       </div>

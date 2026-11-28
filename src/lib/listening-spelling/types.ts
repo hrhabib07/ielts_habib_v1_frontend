@@ -26,6 +26,10 @@ export type SpellingWord = {
   wrong: Array<[string, ErrorTag]>;
   tipEn: string;
   tipBn: string;
+  /** Simple English gloss · shown after the learner answers. */
+  meaningEn?: string;
+  /** Bangla gloss · shown after answer when locale is bn. */
+  meaningBn?: string;
   ctx?: string;
   form?: string;
   audio?: string;
@@ -53,6 +57,8 @@ export type SessionItem = {
   accept: string[];
   tipEn: string;
   tipBn: string;
+  meaningEn?: string;
+  meaningBn?: string;
   packLabel: string;
   wrong: Array<[string, ErrorTag]>;
   ctx?: string;
