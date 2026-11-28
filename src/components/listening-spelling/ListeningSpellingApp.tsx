@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
+import { X } from "lucide-react";
 import {
   EXAM_HOLD_SECONDS,
   GAMLISH_URL,
@@ -13,6 +15,11 @@ import {
 import { FeedbackPanel } from "@/src/components/listening-spelling/FeedbackPanel";
 import { PlayButton } from "@/src/components/listening-spelling/PlayButton";
 import { SpellingInput } from "@/src/components/listening-spelling/SpellingInput";
+import {
+  PRIMARY_BUTTON,
+  SECONDARY_BUTTON,
+} from "@/src/features/guest/components/GuestScreens";
+import { GamlishMascot } from "@/src/features/playground/components/GamlishMascot";
 import { checkAnswer } from "@/src/lib/listening-spelling/check";
 import { classifyError } from "@/src/lib/listening-spelling/classify";
 import { ERROR_TAG_BN, ERROR_TAG_EN_TIP } from "@/src/lib/listening-spelling/labels";
@@ -25,7 +32,13 @@ import {
   buildWeakSession,
   packChoices,
 } from "@/src/lib/listening-spelling/session";
-import { cancelSpeech, speakSpellAloud, speakWord } from "@/src/lib/listening-spelling/speech";
+import {
+  NORMAL_RATE,
+  SLOW_RATE,
+  cancelSpeech,
+  speakSpellAloud,
+  speakWord,
+} from "@/src/lib/listening-spelling/speech";
 import {
   countDueToday,
   countPractised,
@@ -44,8 +57,8 @@ import type {
 } from "@/src/lib/listening-spelling/types";
 import { cn } from "@/lib/utils";
 
-type Screen = "home" | "session" | "result" | "weak";
-
+type Screen = "home" | "session" | "result";
+type Phase = "listen" | "hold" | "type" | "feedback" | "fixonce";
 type ItemOutcome = {
   id: string;
   lemma: string;
@@ -53,9 +66,42 @@ type ItemOutcome = {
   tag?: ErrorTag;
 };
 
-type Phase = "listen" | "hold" | "type" | "feedback" | "fixonce";
+function Shell({
+  children,
+  actions,
+  top,
+}: {
+  children: React.ReactNode;
+  actions?: React.ReactNode;
+  top?: React.ReactNode;
+}) {
+  return (
+    <div className="fixed inset-0 z-40 flex flex-col bg-background">
+      {top ? (
+        <div className="absolute inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),0.75rem)]">
+          {top}
+        </div>
+      ) : null}
+      <main className="relative isolate flex min-h-0 flex-1 flex-col overflow-y-auto bg-gradient-to-b from-accent/[0.08] via-background to-background px-5">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(circle_at_1px_1px,rgba(30,58,138,0.1)_1px,transparent_0)] bg-[length:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent)]"
+        />
+        <div className={cn("mx-auto my-auto w-full max-w-md pb-6", top ? "pt-16" : "pt-8")}>
+          {children}
+        </div>
+      </main>
+      {actions ? (
+        <div className="shrink-0 border-t-2 border-slate-100 bg-white px-5 pb-[max(env(safe-area-inset-bottom),1rem)] pt-3 dark:border-slate-800 dark:bg-slate-950">
+          <div className="mx-auto flex w-full max-w-md flex-col gap-2">{actions}</div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 export function ListeningSpellingApp() {
+  const reduceMotion = useReducedMotion();
   const [screen, setScreen] = useState<Screen>("home");
   const [mode, setMode] = useState<SessionMode>("practice");
   const [pack, setPack] = useState<PackChoice>("mixed");
@@ -67,7 +113,7 @@ export function ListeningSpellingApp() {
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("listen");
   const [answer, setAnswer] = useState("");
-  const [speaking, setSpeaking] = useState(false);
+  const [speaking, setSpeaking] = useState<"normal" | "slow" | null>(null);
   const [playsUsed, setPlaysUsed] = useState(0);
   const [holdLeft, setHoldLeft] = useState(0);
   const [lastResult, setLastResult] = useState<{
@@ -80,15 +126,15 @@ export function ListeningSpellingApp() {
   const [outcomes, setOutcomes] = useState<ItemOutcome[]>([]);
   const [requeuedIds, setRequeuedIds] = useState<Set<string>>(new Set());
   const [inRetryRound, setInRetryRound] = useState(false);
-  const [firstAttemptScore, setFirstAttemptScore] = useState(0);
   const [sessionTotal, setSessionTotal] = useState(10);
+  const [mascotMood, setMascotMood] = useState<"idle" | "happy" | "oops">("idle");
+  const [moodKey, setMoodKey] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const holdTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const loaded = loadProgress();
-    setStore(loaded);
+    setStore(loadProgress());
     setHydrated(true);
   }, []);
 
@@ -101,9 +147,9 @@ export function ListeningSpellingApp() {
 
   const current = queue[index] ?? null;
   const playsAllowed = mode === "exam" ? PLAYS_EXAM : Number.POSITIVE_INFINITY;
-  const canReplay = mode === "practice" && playsUsed > 0 && playsUsed < 99;
   const practised = useMemo(() => countPractised(store), [store]);
   const dueToday = useMemo(() => countDueToday(store), [store]);
+  const progressPct = queue.length ? Math.round((index / queue.length) * 100) : 0;
 
   function persist(next: ProgressStore) {
     setStore(next);
@@ -124,33 +170,33 @@ export function ListeningSpellingApp() {
     setOutcomes([]);
     setRequeuedIds(new Set());
     setInRetryRound(false);
-    setFirstAttemptScore(0);
     setSessionTotal(items.length);
+    setMascotMood("idle");
+    setMoodKey((k) => k + 1);
     setScreen("session");
     setNoBritishNotice(false);
     track("session_started", { pack: nextPack, mode, weak, count: items.length });
   }
 
-  async function playCurrent() {
+  async function playCurrent(rate: number, kind: "normal" | "slow") {
     if (!current) return;
     if (mode === "exam" && playsUsed >= PLAYS_EXAM) return;
-    setSpeaking(true);
+    setSpeaking(kind);
     try {
       let result;
       if (current.kind === "spellaloud" && current.spoken) {
-        result = await speakSpellAloud(current.spoken);
+        result = await speakSpellAloud(current.spoken, rate);
       } else {
         const text =
           current.kind === "context" && current.ctx ? current.ctx : current.lemma;
-        result = await speakWord({ text, audioPath: current.audio });
+        result = await speakWord({ text, audioPath: current.audio, rate });
       }
       if (!result.usedBritish && !result.usedFile) setNoBritishNotice(true);
-      track("replay_used", { id: current.id, plays: playsUsed + 1 });
-      const nextPlays = playsUsed + 1;
-      setPlaysUsed(nextPlays);
+      track("replay_used", { id: current.id, plays: playsUsed + 1, kind });
+      setPlaysUsed((p) => p + 1);
       beginHoldAfterAudio();
     } finally {
-      setSpeaking(false);
+      setSpeaking(null);
     }
   }
 
@@ -191,12 +237,7 @@ export function ListeningSpellingApp() {
     }
 
     const isFirstPass = !inRetryRound && !outcomes.some((o) => o.id === current.id);
-    track("word_answered", {
-      id: current.id,
-      correct: checked.correct,
-      tag,
-      mode,
-    });
+    track("word_answered", { id: current.id, correct: checked.correct, tag, mode });
 
     if (isFirstPass) {
       const nextStore = checked.correct
@@ -216,7 +257,6 @@ export function ListeningSpellingApp() {
           ...(tag ? { tag } : {}),
         },
       ]);
-      if (checked.correct) setFirstAttemptScore((s) => s + 1);
     }
 
     setLastResult({
@@ -226,19 +266,21 @@ export function ListeningSpellingApp() {
       normalizedAnswer: checked.normalizedAnswer,
       displayTarget: checked.displayTarget,
     });
+    setMascotMood(checked.correct ? "happy" : "oops");
+    setMoodKey((k) => k + 1);
 
     if (checked.correct) {
       setPhase("feedback");
-      window.setTimeout(() => goNext(true), 700);
+      window.setTimeout(() => goNext(true), 900);
       return;
     }
-
     setPhase("feedback");
   }
 
   function continueAfterWrong() {
     setAnswer("");
     setPhase("fixonce");
+    setMascotMood("idle");
     window.setTimeout(() => inputRef.current?.focus(), 30);
   }
 
@@ -246,7 +288,6 @@ export function ListeningSpellingApp() {
     if (!current || phase !== "fixonce") return;
     const checked = checkAnswer(current, answer);
     if (!checked.correct) {
-      // Keep them until they type it once correctly.
       setLastResult({
         correct: false,
         tag: lastResult?.tag,
@@ -254,8 +295,12 @@ export function ListeningSpellingApp() {
         normalizedAnswer: checked.normalizedAnswer,
         displayTarget: checked.displayTarget,
       });
+      setMascotMood("oops");
+      setMoodKey((k) => k + 1);
       return;
     }
+    setMascotMood("happy");
+    setMoodKey((k) => k + 1);
     goNext(false);
   }
 
@@ -280,6 +325,8 @@ export function ListeningSpellingApp() {
     setPlaysUsed(0);
     setLastResult(null);
     setPhase("listen");
+    setMascotMood("idle");
+    setMoodKey((k) => k + 1);
   }
 
   function finishOrRetry(finalQueue: SessionItem[]) {
@@ -297,16 +344,13 @@ export function ListeningSpellingApp() {
           setPlaysUsed(0);
           setLastResult(null);
           setPhase("listen");
+          setMascotMood("idle");
           return;
         }
       }
     }
-    track("session_completed", {
-      score: firstAttemptScore,
-      total: sessionTotal,
-      mode,
-      pack,
-    });
+    const score = outcomes.filter((o) => o.correctFirst).length;
+    track("session_completed", { score, total: sessionTotal, mode, pack });
     setScreen("result");
   }
 
@@ -323,341 +367,402 @@ export function ListeningSpellingApp() {
     const lines = [
       `Gamlish Listening Spelling: ${score}/${total}`,
       ...top.map(([tag]) => `- ${ERROR_TAG_BN[tag]} · ${ERROR_TAG_EN_TIP[tag]}`),
-      missed.length
-        ? `Missed: ${missed.map((m) => m.lemma).join(", ")}`
-        : "Missed: none",
+      missed.length ? `Missed: ${missed.map((m) => m.lemma).join(", ")}` : "Missed: none",
     ];
     void navigator.clipboard?.writeText(lines.join("\n"));
   }
 
   if (!hydrated) {
     return (
-      <div className="mx-auto flex min-h-[50vh] max-w-md items-center justify-center px-4">
-        <div className="h-10 w-40 animate-pulse rounded-xl bg-muted" />
-      </div>
+      <Shell>
+        <div className="flex flex-col items-center gap-3 py-16">
+          <GamlishMascot mood="idle" size="lg" />
+          <div className="h-4 w-32 animate-pulse rounded-full bg-slate-200" />
+        </div>
+      </Shell>
     );
   }
 
-  if (screen === "home" || screen === "weak") {
+  if (screen === "home") {
     return (
-      <div className="mx-auto w-full max-w-md px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 font-bengali">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-300">
-          Free tool · No login
-        </p>
-        <h1 className="mt-2 text-2xl font-black tracking-tight text-foreground">
-          IELTS Listening Spelling
-        </h1>
-        <p className="mt-1 text-base font-bold text-foreground/85">
-          শুনে সঠিক বানান লিখুন
-        </p>
-        <p className="mt-3 text-sm leading-relaxed text-foreground/75">
-          Listening-এ শুনেও ভুল বানানে মার্ক কাটে। এই টুল সেই বানান ঠিক করতে সাহায্য করে।
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-foreground/75">
-          British preferred · American variants accepted
-        </p>
-        <p className="mt-3 rounded-xl bg-amber-400/10 px-3 py-2 text-xs font-semibold text-amber-950 dark:text-amber-100">
-          ভালো ফলাফলের জন্য ফোনের অটো-সাজেশন/অটোকারেক্ট বন্ধ রাখুন।
-        </p>
+      <Shell
+        actions={
+          <>
+            <button type="button" onClick={() => startSession(pack)} className={PRIMARY_BUTTON}>
+              শুরু করুন
+            </button>
+            <button
+              type="button"
+              onClick={() => startSession("mixed", true)}
+              className={SECONDARY_BUTTON}
+            >
+              Weak words
+            </button>
+          </>
+        }
+      >
+        <motion.div
+          className="text-center"
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 28 }}
+        >
+          <GamlishMascot mood="idle" size="lg" className="mx-auto" />
+          <p className="mt-4 text-[11px] font-black uppercase tracking-[0.16em] text-accent">
+            Free mission · No login
+          </p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50">
+            IELTS Listening Spelling
+          </h1>
+          <p className="font-bengali mt-1 text-lg font-bold text-slate-700 dark:text-slate-200">
+            শুনে সঠিক বানান লিখুন
+          </p>
+          <p className="font-bengali mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Listening-এ শুনেও ভুল বানানে মার্ক কাটে। এই মিশনে শুনুন, মনে রাখুন, লিখুন।
+          </p>
+          <p className="mt-2 text-xs font-semibold text-slate-500">
+            British preferred · American accepted
+          </p>
 
-        <div className="mt-5 grid grid-cols-2 gap-2 text-center">
-          <div className="rounded-2xl border border-border/60 bg-card px-3 py-3">
-            <p className="text-2xl font-black tabular-nums">{practised}</p>
-            <p className="text-xs font-semibold text-foreground/65">practised</p>
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <div className="rounded-3xl border-2 border-b-[5px] border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-900">
+              <p className="text-2xl font-black tabular-nums text-slate-900 dark:text-white">
+                {practised}
+              </p>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                practised
+              </p>
+            </div>
+            <div className="rounded-3xl border-2 border-b-[5px] border-amber-300 bg-amber-50 px-3 py-3 dark:bg-amber-500/10">
+              <p className="text-2xl font-black tabular-nums text-amber-950 dark:text-amber-100">
+                {dueToday}
+              </p>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-amber-800/80 dark:text-amber-200/80">
+                due today
+              </p>
+            </div>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-card px-3 py-3">
-            <p className="text-2xl font-black tabular-nums">{dueToday}</p>
-            <p className="text-xs font-semibold text-foreground/65">due today</p>
-          </div>
-        </div>
 
-        <div className="mt-5 space-y-2">
-          <p className="text-sm font-bold">Mode</p>
-          <div className="grid grid-cols-2 gap-2">
+          <p className="font-bengali mt-4 rounded-2xl border-2 border-b-4 border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+            ভালো ফলাফলের জন্য ফোনের অটো-সাজেশন/অটোকারেক্ট বন্ধ রাখুন।
+          </p>
+
+          <div className="mt-5 grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => setMode("practice")}
               className={cn(
-                "rounded-2xl border px-3 py-3 text-left",
+                "rounded-3xl border-2 border-b-[5px] px-3 py-3 text-left transition-all active:translate-y-0.5 active:border-b-2",
                 mode === "practice"
-                  ? "border-sky-500 bg-sky-500/10"
-                  : "border-border bg-card",
+                  ? "border-accent bg-accent/10"
+                  : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900",
               )}
             >
               <p className="text-sm font-black">Practice</p>
-              <p className="mt-1 text-[11px] text-foreground/65">Practice: আবার শোনা যাবে</p>
+              <p className="font-bengali mt-1 text-[11px] font-semibold text-slate-500">
+                আবার শোনা যাবে
+              </p>
             </button>
             <button
               type="button"
               onClick={() => setMode("exam")}
               className={cn(
-                "rounded-2xl border px-3 py-3 text-left",
+                "rounded-3xl border-2 border-b-[5px] px-3 py-3 text-left transition-all active:translate-y-0.5 active:border-b-2",
                 mode === "exam"
-                  ? "border-sky-500 bg-sky-500/10"
-                  : "border-border bg-card",
+                  ? "border-accent bg-accent/10"
+                  : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900",
               )}
             >
               <p className="text-sm font-black">Exam</p>
-              <p className="mt-1 text-[11px] text-foreground/65">Exam: একবারই শোনা যাবে</p>
+              <p className="font-bengali mt-1 text-[11px] font-semibold text-slate-500">
+                একবারই শোনা যাবে
+              </p>
             </button>
           </div>
-        </div>
 
-        <div className="mt-5 space-y-2">
-          <p className="text-sm font-bold">Pack</p>
-          <div className="grid gap-2">
+          <div className="mt-4 space-y-2 text-left">
             {packChoices().map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => setPack(p.id)}
                 className={cn(
-                  "rounded-2xl border px-3 py-3 text-left",
-                  pack === p.id ? "border-sky-500 bg-sky-500/10" : "border-border bg-card",
+                  "w-full rounded-2xl border-2 border-b-4 px-3 py-2.5 text-left transition-all active:translate-y-0.5 active:border-b-2",
+                  pack === p.id
+                    ? "border-accent bg-accent text-white"
+                    : "border-slate-200 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100",
                 )}
               >
-                <p className="text-sm font-black">{p.labelBn}</p>
-                <p className="text-xs text-foreground/65">{p.labelEn}</p>
+                <p className="font-bengali text-sm font-black">{p.labelBn}</p>
+                <p
+                  className={cn(
+                    "text-[11px] font-semibold",
+                    pack === p.id ? "text-white/80" : "text-slate-500",
+                  )}
+                >
+                  {p.labelEn}
+                </p>
               </button>
             ))}
           </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => startSession(pack)}
-          className="mt-6 inline-flex h-14 w-full items-center justify-center rounded-2xl bg-sky-600 text-base font-black text-white"
-        >
-          শুরু করুন
-        </button>
-        <button
-          type="button"
-          onClick={() => startSession("mixed", true)}
-          className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-card text-sm font-bold"
-        >
-          Weak words
-        </button>
-      </div>
+        </motion.div>
+      </Shell>
     );
   }
 
   if (screen === "result") {
-    const firstPass = outcomes;
-    const score = firstPass.filter((o) => o.correctFirst).length;
-    const total = Math.max(sessionTotal, firstPass.length);
-    const missed = firstPass.filter((o) => !o.correctFirst);
+    const score = outcomes.filter((o) => o.correctFirst).length;
+    const total = Math.max(sessionTotal, outcomes.length);
+    const missed = outcomes.filter((o) => !o.correctFirst);
     const tagCounts = new Map<ErrorTag, number>();
     for (const o of missed) {
       if (!o.tag) continue;
       tagCounts.set(o.tag, (tagCounts.get(o.tag) ?? 0) + 1);
     }
     const top = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2);
+    const passed = score >= Math.ceil(total * 0.7);
 
     return (
-      <div className="mx-auto w-full max-w-md px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 font-bengali">
-        <h2 className="text-2xl font-black">Result</h2>
-        <p className="mt-2 text-4xl font-black tabular-nums">
-          {score}/{total}
-        </p>
-
-        {top.length > 0 ? (
-          <div className="mt-5 space-y-2">
-            <p className="text-sm font-bold">Top error types</p>
-            {top.map(([tag]) => (
-              <div key={tag} className="rounded-2xl border border-border bg-card px-3 py-3">
-                <p className="text-sm font-black">{ERROR_TAG_BN[tag]}</p>
-                <p className="mt-1 text-xs text-foreground/70">{ERROR_TAG_EN_TIP[tag]}</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-4 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-            No spelling errors on first attempt.
+      <Shell
+        actions={
+          <>
+            <button type="button" onClick={() => startSession(pack)} className={PRIMARY_BUTTON}>
+              Practise again
+            </button>
+            <button
+              type="button"
+              onClick={() => startSession("mixed", true)}
+              className={SECONDARY_BUTTON}
+            >
+              Weak words
+            </button>
+            <button type="button" onClick={copyResult} className={SECONDARY_BUTTON}>
+              Copy my result
+            </button>
+            <button
+              type="button"
+              onClick={() => setScreen("home")}
+              className="py-2 text-sm font-bold text-slate-500"
+            >
+              Home
+            </button>
+          </>
+        }
+      >
+        <div className="text-center">
+          <GamlishMascot mood={passed ? "happy" : "oops"} size="lg" className="mx-auto" />
+          <h2 className="mt-4 text-2xl font-black text-slate-900 dark:text-slate-50">
+            Round result
+          </h2>
+          <p className="mt-2 text-5xl font-black tabular-nums text-accent">
+            {score}/{total}
           </p>
-        )}
 
-        {missed.length > 0 ? (
-          <div className="mt-5">
-            <p className="text-sm font-bold">Missed words</p>
-            <ul className="mt-2 space-y-1">
-              {missed.map((m) => (
-                <li key={m.id} className="font-sans text-sm font-semibold">
-                  {m.lemma}
-                </li>
+          {top.length > 0 ? (
+            <div className="mt-5 space-y-2 text-left">
+              <p className="text-xs font-black uppercase tracking-wider text-slate-500">
+                Top traps
+              </p>
+              {top.map(([tag]) => (
+                <div
+                  key={tag}
+                  className="rounded-3xl border-2 border-b-[5px] border-orange-200 bg-orange-50 px-3 py-3 dark:border-orange-400/30 dark:bg-orange-500/10"
+                >
+                  <p className="font-bengali text-sm font-black">{ERROR_TAG_BN[tag]}</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    {ERROR_TAG_EN_TIP[tag]}
+                  </p>
+                </div>
               ))}
-            </ul>
-          </div>
-        ) : null}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm font-bold text-emerald-700 dark:text-emerald-300">
+              Clean first-attempt spelling.
+            </p>
+          )}
 
-        <div className="mt-6 grid gap-2">
-          <button
-            type="button"
-            onClick={() => startSession(pack)}
-            className="h-12 rounded-2xl bg-sky-600 text-sm font-black text-white"
+          {missed.length > 0 ? (
+            <div className="mt-5 text-left">
+              <p className="text-xs font-black uppercase tracking-wider text-slate-500">
+                Missed words
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {missed.map((m) => (
+                  <span
+                    key={m.id}
+                    className="rounded-xl border-2 border-b-4 border-slate-200 bg-white px-2.5 py-1 font-sans text-sm font-bold dark:border-slate-700 dark:bg-slate-900"
+                  >
+                    {m.lemma}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <Link
+            href={GAMLISH_URL}
+            className="mt-8 inline-block text-sm font-bold text-accent underline-offset-2 hover:underline"
           >
-            Practise again
-          </button>
-          <button
-            type="button"
-            onClick={() => startSession("mixed", true)}
-            className="h-12 rounded-2xl border border-border bg-card text-sm font-bold"
-          >
-            Weak words
-          </button>
-          <button
-            type="button"
-            onClick={copyResult}
-            className="h-12 rounded-2xl border border-border bg-card text-sm font-bold"
-          >
-            Copy my result
-          </button>
-          <button
-            type="button"
-            onClick={() => setScreen("home")}
-            className="h-11 text-sm font-semibold text-foreground/70"
-          >
-            Home
-          </button>
+            Gamlish-এ আরও ইংরেজি শিখুন
+          </Link>
         </div>
-
-        <Link
-          href={GAMLISH_URL}
-          className="mt-8 block text-center text-sm font-semibold text-sky-700 underline-offset-2 hover:underline dark:text-sky-300"
-        >
-          Gamlish-এ আরও ইংরেজি শিখুন
-        </Link>
-      </div>
+      </Shell>
     );
   }
 
-  // Session screen
   if (!current) {
     return (
-      <div className="mx-auto max-w-md px-4 py-10 text-center">
-        <p>No items.</p>
-        <button type="button" className="mt-4 font-bold" onClick={() => setScreen("home")}>
-          Home
-        </button>
-      </div>
+      <Shell
+        actions={
+          <button type="button" onClick={() => setScreen("home")} className={PRIMARY_BUTTON}>
+            Home
+          </button>
+        }
+      >
+        <p className="text-center font-bold">No items.</p>
+      </Shell>
     );
   }
 
+  const examLocked = mode === "exam" && playsUsed >= playsAllowed;
+
   return (
-    <div className="mx-auto w-full max-w-md px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5 font-bengali">
-      <div className="flex items-center justify-between gap-2 text-xs font-bold text-foreground/65">
-        <button type="button" onClick={() => setScreen("home")} className="underline-offset-2 hover:underline">
-          Exit
-        </button>
-        <p>
-          {Math.min(index + 1, queue.length)}/{queue.length}
-          {inRetryRound ? " · retry" : ""}
-        </p>
-        <p className="uppercase tracking-wide">{mode}</p>
-      </div>
-
-      <div className="mt-4 inline-flex rounded-full border border-border bg-card px-3 py-1 text-xs font-bold">
-        {current.packLabel}
-      </div>
-
-      {current.kind === "context" && current.form ? (
-        <p className="mt-4 text-sm font-bold text-foreground/80">{current.form}</p>
-      ) : (
-        <p className="mt-4 text-sm font-semibold text-foreground/70">
-          {current.kind === "spellaloud"
-            ? "Listen carefully, then type what you heard."
-            : "শুনুন, মনে রাখুন, তারপর লিখুন।"}
-        </p>
-      )}
-
-      <div className="mt-6 flex flex-col items-center gap-3">
-        <PlayButton
-          onPlay={() => void playCurrent()}
-          speaking={speaking}
-          disabled={mode === "exam" && playsUsed >= playsAllowed}
-          label={playsUsed === 0 ? "শুনুন" : "আবার শুনুন"}
-        />
-        {mode === "practice" && canReplay ? (
-          <p className="text-xs text-foreground/60">Replay allowed in Practice</p>
-        ) : null}
-        {mode === "exam" && playsUsed >= 1 ? (
-          <p className="text-xs font-semibold text-rose-700 dark:text-rose-300">
-            Exam: একবারই শোনা যাবে
-          </p>
-        ) : null}
-        {noBritishNotice ? (
-          <p className="text-center text-xs text-amber-800 dark:text-amber-200">
-            আপনার ফোনে ব্রিটিশ ভয়েস নেই; অন্য ইংরেজি ভয়েসে শোনানো হচ্ছে।
-          </p>
-        ) : null}
-      </div>
-
-      {phase === "hold" ? (
-        <div className="mt-8 text-center">
-          <p className="text-sm font-bold">মনে রাখুন...</p>
-          <div className="mt-3 flex justify-center gap-2">
-            {Array.from({ length: Math.max(holdLeft, 1) }).map((_, i) => (
-              <span
-                key={i}
-                className="h-2.5 w-2.5 rounded-full bg-sky-500"
-                aria-hidden
+    <Shell
+      top={
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              cancelSpeech();
+              setScreen("home");
+            }}
+            aria-label="Exit"
+            className="flex size-9 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          >
+            <X className="size-4" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <div className="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+              <motion.div
+                className="h-full rounded-full bg-accent"
+                animate={{ width: `${Math.max(8, progressPct)}%` }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               />
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {(phase === "type" || phase === "fixonce") && (
-        <div className="mt-8 space-y-3">
-          {phase === "fixonce" ? (
-            <p className="text-sm font-bold text-foreground">
-              সঠিক বানানটি একবার লিখুন
+            </div>
+            <p className="mt-1 text-center text-[11px] font-black uppercase tracking-wide text-slate-500">
+              {Math.min(index + 1, queue.length)}/{queue.length}
+              {inRetryRound ? " · retry" : ""} · {mode}
             </p>
-          ) : null}
-          <SpellingInput
-            ref={inputRef}
-            value={answer}
-            onChange={setAnswer}
-            onSubmit={phase === "fixonce" ? submitFixOnce : submitAnswer}
-            placeholder="Type here"
-          />
+          </div>
+          <span className="w-9" aria-hidden />
+        </>
+      }
+      actions={
+        phase === "type" || phase === "fixonce" ? (
           <button
             type="button"
             onClick={phase === "fixonce" ? submitFixOnce : submitAnswer}
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-foreground text-sm font-black text-background"
+            className={PRIMARY_BUTTON}
           >
             চেক করুন
           </button>
+        ) : phase === "feedback" && lastResult && !lastResult.correct ? (
+          <button type="button" onClick={continueAfterWrong} className={PRIMARY_BUTTON}>
+            সঠিক বানানটি একবার লিখুন
+          </button>
+        ) : null
+      }
+    >
+      <div className="text-center">
+        <div className="mx-auto flex items-start justify-center gap-3">
+          <GamlishMascot mood={mascotMood} moodKey={moodKey} size="md" />
+          <div className="relative min-w-0 flex-1 rounded-2xl rounded-bl-md border-2 border-b-4 border-slate-200 bg-white px-3.5 py-2.5 text-left shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <span className="inline-flex rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-accent">
+              {current.packLabel}
+            </span>
+            <p className="font-bengali mt-1.5 text-sm font-bold leading-snug text-slate-800 dark:text-slate-100">
+              {current.kind === "context" && current.form
+                ? current.form
+                : current.kind === "spellaloud"
+                  ? "Listen letter by letter, then type."
+                  : "শুনুন, মনে রাখুন, তারপর লিখুন।"}
+            </p>
+          </div>
         </div>
-      )}
 
-      {phase === "feedback" && lastResult ? (
-        <div className="mt-6 space-y-3">
-          <FeedbackPanel
-            correct={lastResult.correct}
-            answer={answer}
-            target={lastResult.displayTarget}
-            firstMismatch={lastResult.firstMismatch}
-            tag={lastResult.tag}
-            tipEn={current.tipEn}
-            tipBn={current.tipBn}
+        <div className="mt-8">
+          <PlayButton
+            onPlayNormal={() => void playCurrent(NORMAL_RATE, "normal")}
+            onPlaySlow={() => void playCurrent(SLOW_RATE, "slow")}
+            speaking={speaking}
+            disabled={examLocked || speaking !== null}
+            showReplayHint={mode === "practice" && playsUsed > 0}
           />
-          {!lastResult.correct ? (
-            <button
-              type="button"
-              onClick={continueAfterWrong}
-              className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-sky-600 text-sm font-black text-white"
-            >
-              পরের শব্দ
-            </button>
+          {examLocked ? (
+            <p className="font-bengali mt-2 text-xs font-bold text-orange-700 dark:text-orange-300">
+              Exam: একবারই শোনা যাবে
+            </p>
+          ) : null}
+          {noBritishNotice ? (
+            <p className="font-bengali mt-2 text-xs font-semibold text-amber-800 dark:text-amber-200">
+              আপনার ফোনে ব্রিটিশ ভয়েস নেই; অন্য ইংরেজি ভয়েসে শোনানো হচ্ছে।
+            </p>
           ) : null}
         </div>
-      ) : null}
 
-      {phase === "listen" ? (
-        <p className="mt-8 text-center text-sm text-foreground/60">
-          Tap শুনুন to start. Letters stay hidden.
-        </p>
-      ) : null}
-    </div>
+        {phase === "hold" ? (
+          <div className="mt-8">
+            <p className="font-bengali text-base font-black text-accent">মনে রাখুন...</p>
+            <div className="mt-3 flex justify-center gap-2">
+              {Array.from({ length: Math.max(holdLeft, 1) }).map((_, i) => (
+                <motion.span
+                  key={i}
+                  className="h-3 w-3 rounded-full bg-accent"
+                  animate={reduceMotion ? undefined : { scale: [1, 1.25, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {(phase === "type" || phase === "fixonce") && (
+          <div className="mt-8 space-y-3 text-left">
+            {phase === "fixonce" ? (
+              <p className="font-bengali text-center text-sm font-black text-slate-700 dark:text-slate-200">
+                সঠিক বানানটি একবার লিখুন
+              </p>
+            ) : null}
+            <SpellingInput
+              ref={inputRef}
+              value={answer}
+              onChange={setAnswer}
+              onSubmit={phase === "fixonce" ? submitFixOnce : submitAnswer}
+              placeholder="Type the spelling"
+            />
+          </div>
+        )}
+
+        {phase === "feedback" && lastResult ? (
+          <div className="mt-6 text-left">
+            <FeedbackPanel
+              correct={lastResult.correct}
+              answer={answer}
+              target={lastResult.displayTarget}
+              firstMismatch={lastResult.firstMismatch}
+              tag={lastResult.tag}
+              tipEn={current.tipEn}
+              tipBn={current.tipBn}
+            />
+          </div>
+        ) : null}
+
+        {phase === "listen" ? (
+          <p className="font-bengali mt-8 text-sm font-semibold text-slate-500">
+            শুনুন ট্যাপ করুন · বানান লুকানো থাকবে
+          </p>
+        ) : null}
+      </div>
+    </Shell>
   );
 }

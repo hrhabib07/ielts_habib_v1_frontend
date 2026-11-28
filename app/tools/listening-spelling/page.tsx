@@ -22,9 +22,5 @@ export const metadata: Metadata = {
 };
 
 export default function ListeningSpellingPage() {
-  return (
-    <main className="min-h-[calc(100dvh-4rem)] bg-[radial-gradient(120%_70%_at_50%_-10%,rgba(14,165,233,0.14),transparent_50%)]">
-      <ListeningSpellingApp />
-    </main>
-  );
+  return <ListeningSpellingApp />;
 }

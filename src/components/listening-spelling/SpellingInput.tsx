@@ -41,7 +41,7 @@ export const SpellingInput = forwardRef<HTMLInputElement, Props>(
         data-form-type="other"
         placeholder={placeholder}
         className={cn(
-          "h-14 w-full rounded-2xl border border-border bg-background px-4 text-[16px] font-semibold tracking-wide text-foreground outline-none ring-sky-500/40 focus:ring-2 disabled:opacity-50",
+          "h-14 w-full rounded-2xl border-2 border-b-4 border-dashed border-accent/35 bg-accent/5 px-4 text-[16px] font-bold tracking-wide text-accent outline-none transition-colors placeholder:font-semibold placeholder:text-accent/35 focus:border-solid focus:border-accent focus:bg-white disabled:opacity-50 sm:text-xl",
           className,
         )}
       />
