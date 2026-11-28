@@ -68,7 +68,7 @@ type ItemOutcome = {
   tag?: ErrorTag;
 };
 
-/** Sit below SiteNavBar (h-14 / sm:h-16) so content is not hidden. */
+/** Full-screen play shell · site nav/footer are hidden via isImmersivePlayerPath. */
 function Shell({
   children,
   actions,
@@ -79,9 +79,9 @@ function Shell({
   top?: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 top-14 z-40 flex flex-col bg-background sm:top-16">
+    <div className="fixed inset-0 z-40 flex flex-col bg-background">
       {top ? (
-        <div className="absolute inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 pt-3">
+        <div className="absolute inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),0.75rem)]">
           {top}
         </div>
       ) : null}
@@ -90,7 +90,7 @@ function Shell({
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(circle_at_1px_1px,rgba(30,58,138,0.1)_1px,transparent_0)] bg-[length:22px_22px] [mask-image:linear-gradient(to_bottom,black,transparent)]"
         />
-        <div className={cn("mx-auto my-auto w-full max-w-md pb-6", top ? "pt-14" : "pt-6")}>
+        <div className={cn("mx-auto my-auto w-full max-w-md pb-6", top ? "pt-16" : "pt-8")}>
           {children}
         </div>
       </main>
@@ -144,7 +144,10 @@ export function ListeningSpellingApp() {
   }, []);
 
   useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
+      document.body.style.overflow = prevOverflow;
       cancelSpeech();
       if (holdTimerRef.current) window.clearInterval(holdTimerRef.current);
     };

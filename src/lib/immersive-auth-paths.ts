@@ -29,6 +29,8 @@ export function isImmersivePlayerPath(pathname: string | null): boolean {
     pathname === "/player/mission-one-lab" ||
     pathname === "/player/mission-one-lab-test" ||
     pathname === "/player/mission-zero-test" ||
+    pathname === "/tools/listening-spelling" ||
+    pathname.startsWith("/tools/listening-spelling/") ||
     /^\/player\/missions\/[^/]+\/stage\/[^/]+\/?$/.test(pathname)
   );
 }
