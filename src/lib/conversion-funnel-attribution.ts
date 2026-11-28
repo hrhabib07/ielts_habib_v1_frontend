@@ -7,6 +7,7 @@ export type ConversionFunnelSource =
   | "meta_ad"
   | "organic_fb"
   | "youtube"
+  | "ai"
   | "direct"
   | "other";
 
@@ -45,6 +46,15 @@ function classifySource(
   if (isMetaUtm && isPaid) return "meta_ad";
   if (isMetaUtm || isMetaHost) return "organic_fb";
   if (/^(youtube|yt)$/.test(src) || /youtube\.|youtu\.be/.test(host)) return "youtube";
+  const isAiUtm =
+    /^(chatgpt|openai|gpt|claude|anthropic|gemini|bard|perplexity|pplx|copilot|you|phind|ai|llm)$/.test(
+      src,
+    ) || /^(ai|llm|assistant)$/.test(medium);
+  const isAiHost =
+    /chatgpt\.|chat\.openai\.|claude\.ai|anthropic\.|gemini\.google\.|bard\.google\.|perplexity\.|copilot\.microsoft\.|you\.com|phind\./.test(
+      host,
+    );
+  if (isAiUtm || isAiHost) return "ai";
   if (!src && !host) return "direct";
   return "other";
 }

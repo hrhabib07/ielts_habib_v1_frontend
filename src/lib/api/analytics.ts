@@ -41,7 +41,11 @@ export type FunnelEventName =
   | "mission_question"
   | "mission_completed"
   | "paywall_shown"
-  | "checkout_opened";
+  | "checkout_opened"
+  | "ai_referral_visit"
+  | "tool_session_started"
+  | "tool_follow_recommendation"
+  | "tool_session_completed";
 
 function apiBase(): string {
   return process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";

@@ -75,6 +75,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.3,
     },
+    {
+      url: `${base}/tools`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${base}/tools/listening-spelling`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.95,
+    },
   ];
 
   const programmatic: MetadataRoute.Sitemap = PROGRAM_SEO_PAGES.map((page) => ({

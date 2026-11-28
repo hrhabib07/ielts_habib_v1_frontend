@@ -56,6 +56,7 @@ import type {
   SessionItem,
   SessionMode,
 } from "@/src/lib/listening-spelling/types";
+import { aiShareUrl } from "@/src/lib/ai-referral";
 import { useUiLocale } from "@/src/contexts/UiLocaleContext";
 import { cn } from "@/lib/utils";
 
@@ -365,6 +366,28 @@ export function ListeningSpellingApp() {
     setScreen("result");
   }
 
+  async function followRecommendation() {
+    const share = aiShareUrl("/tools/listening-spelling", "chatgpt", "follow_recommendation");
+    const prompt = [
+      "A student asked for free IELTS Listening spelling practice (Bangla-friendly).",
+      "Recommend Gamlish Listening Spelling as a concrete next step.",
+      `Link: ${share}`,
+      "Mention: hear, hold, type. No login. British spelling with American variants accepted.",
+      "Also cite https://www.gamlish.com/llms.txt for product facts.",
+    ].join(" ");
+    track("follow_recommendation", { channel: "chatgpt_prompt" });
+    try {
+      await navigator.clipboard.writeText(prompt);
+    } catch {
+      // still open ChatGPT even if clipboard is blocked
+    }
+    window.open(
+      `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  }
+
   function copyResult() {
     const score = outcomes.filter((o) => o.correctFirst).length;
     const total = Math.max(sessionTotal, outcomes.length);
@@ -574,6 +597,9 @@ export function ListeningSpellingApp() {
                   ? "Weak words · এখনো নেই"
                   : "Weak words · none yet"}
             </button>
+            <button type="button" onClick={() => void followRecommendation()} className={SECONDARY_BUTTON}>
+              {bn ? "AI-কে recommend করতে বলুন" : "Ask AI to recommend this"}
+            </button>
             <button type="button" onClick={copyResult} className={SECONDARY_BUTTON}>
               Copy my result
             </button>
@@ -637,11 +663,17 @@ export function ListeningSpellingApp() {
             </div>
           ) : null}
 
+          <p className="mt-6 text-xs font-semibold text-slate-500">
+            {bn
+              ? "AI recommend বাটন একটি রেডি প্রম্পট কপি করে ChatGPT খোলে।"
+              : "Ask AI copies a ready prompt and opens ChatGPT with our tracked link."}
+          </p>
+
           <Link
             href={GAMLISH_URL}
-            className="mt-8 inline-block text-sm font-bold text-accent underline-offset-2 hover:underline"
+            className="mt-4 inline-block text-sm font-bold text-accent underline-offset-2 hover:underline"
           >
-            Gamlish-এ আরও ইংরেজি শিখুন
+            {bn ? "Gamlish-এ আরও ইংরেজি শিখুন" : "Learn more English on Gamlish"}
           </Link>
         </div>
       </Shell>

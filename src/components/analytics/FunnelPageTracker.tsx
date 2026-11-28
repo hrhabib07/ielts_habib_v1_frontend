@@ -12,6 +12,8 @@ const TRACKED_PATHS = new Set([
   "/register",
   "/login",
   "/checkout",
+  "/tools",
+  "/tools/listening-spelling",
 ]);
 
 /**
@@ -38,7 +40,11 @@ export function FunnelPageTracker() {
             ? "landing_test"
             : pathname === "/checkout"
               ? "checkout"
-              : pathname.replace(/^\//, "") || "home",
+              : pathname === "/tools"
+                ? "tools_hub"
+                : pathname === "/tools/listening-spelling"
+                  ? "listening_spelling"
+                  : pathname.replace(/^\//, "") || "home",
     });
   }, [pathname]);
 

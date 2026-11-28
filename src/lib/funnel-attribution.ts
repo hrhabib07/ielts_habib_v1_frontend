@@ -17,12 +17,26 @@ function classifyTrafficSource(
 ): TrafficSourceBucket {
   const src = (utmSource ?? "").toLowerCase();
   if (/facebook|fb|meta|instagram|ig/.test(src)) return "fb_ads";
+  if (
+    /chatgpt|openai|gpt|claude|anthropic|gemini|bard|perplexity|pplx|copilot|phind|^ai$|^llm$/.test(
+      src,
+    )
+  ) {
+    return "campaign";
+  }
   if (src) return "campaign";
   const ref = (referrer ?? "").trim();
   if (!ref) return "direct";
   try {
     const host = new URL(ref).hostname.toLowerCase();
     if (/facebook|fb\.com|instagram|meta\.com/.test(host)) return "fb_ads";
+    if (
+      /chatgpt\.|chat\.openai\.|claude\.ai|anthropic\.|gemini\.google\.|perplexity\.|copilot\.microsoft\.|you\.com|phind\./.test(
+        host,
+      )
+    ) {
+      return "campaign";
+    }
   } catch {
     /* ignore bad referrer */
   }

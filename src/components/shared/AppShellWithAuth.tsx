@@ -7,6 +7,7 @@ import { DocumentScrollGuard } from "@/src/components/shared/DocumentScrollGuard
 import { ScholarshipAppShell } from "@/src/components/scholarship/ScholarshipAppShell";
 import { FunnelPageTracker } from "@/src/components/analytics/FunnelPageTracker";
 import { ConversionFunnelBoot } from "@/src/components/analytics/ConversionFunnelBoot";
+import { AiReferralTracker } from "@/src/components/analytics/AiReferralTracker";
 import { MetaPageViewTracker } from "@/src/components/analytics/MetaPageViewTracker";
 import { MetaPurchaseFlusher } from "@/src/components/analytics/MetaPurchaseFlusher";
 import { MicroTelemetryBoot } from "@/src/components/analytics/MicroTelemetryBoot";
@@ -39,6 +40,9 @@ export async function AppShellWithAuth({
       </ScholarshipAppShell>
       <Suspense fallback={null}>
         <ConversionFunnelBoot />
+      </Suspense>
+      <Suspense fallback={null}>
+        <AiReferralTracker />
       </Suspense>
       <Suspense fallback={null}>
         <FunnelPageTracker />

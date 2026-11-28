@@ -157,6 +157,23 @@ export function EnglishAdminHome() {
           </Card>
         </Link>
 
+        <Link href="/dashboard/admin/ai-referrals">
+          <Card className="h-full p-5 transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
+                <Cpu className="h-5 w-5 text-violet-700 dark:text-violet-300" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">AI recommendations</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Track ChatGPT / Claude / Perplexity visits and tool follow-ups
+                </p>
+              </div>
+              <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Card>
+        </Link>
+
         <Link href="/dashboard/admin/english">
           <Card className="h-full p-5 transition-shadow hover:shadow-md">
             <div className="flex items-start gap-3">

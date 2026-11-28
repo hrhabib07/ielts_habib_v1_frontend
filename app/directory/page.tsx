@@ -103,6 +103,26 @@ export default function DirectoryPage() {
           </li>
           <li>
             <Link
+              href="/tools"
+              className="text-base font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Free tools hub
+            </Link>
+            <p className="mt-1 text-sm text-muted-foreground">{origin}/tools</p>
+          </li>
+          <li>
+            <Link
+              href="/tools/listening-spelling"
+              className="text-base font-medium text-primary underline-offset-4 hover:underline"
+            >
+              IELTS Listening Spelling (free)
+            </Link>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {origin}/tools/listening-spelling
+            </p>
+          </li>
+          <li>
+            <Link
               href="/founding-members"
               className="text-base font-medium text-primary underline-offset-4 hover:underline"
             >

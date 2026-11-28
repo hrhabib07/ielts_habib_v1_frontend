@@ -30,6 +30,7 @@ export type ConversionFunnelSource =
   | "meta_ad"
   | "organic_fb"
   | "youtube"
+  | "ai"
   | "direct"
   | "other"
   | "all";
