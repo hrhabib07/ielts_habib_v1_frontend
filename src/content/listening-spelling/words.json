@@ -1,0 +1,2324 @@
+[
+  {
+    "id": "wednesday",
+    "lemma": "Wednesday",
+    "pack": "days",
+    "d": 2,
+    "wrong": [
+      [
+        "wensday",
+        "silent_letter"
+      ],
+      [
+        "wednsday",
+        "phonetic_guess"
+      ],
+      [
+        "wendsday",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "Say it as WED-NES-DAY when you spell it. The first d is silent in speech but must be written.",
+    "tipBn": "বানানের সময় WED-NES-DAY ভাবুন। প্রথম d উচ্চারণে শোনা যায় না, কিন্তু লিখতে হবে।",
+    "ctx": "The class is on Wednesday afternoon.",
+    "form": "Day:",
+    "reviewed": true
+  },
+  {
+    "id": "thursday",
+    "lemma": "Thursday",
+    "pack": "days",
+    "d": 2,
+    "wrong": [
+      [
+        "thrusday",
+        "phonetic_guess"
+      ],
+      [
+        "tursday",
+        "phonetic_guess"
+      ],
+      [
+        "thursdey",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "THURS-day: T-H-U-R-S. The vowel comes before the r.",
+    "tipBn": "",
+    "ctx": "The meeting is on Thursday morning.",
+    "form": "Day:",
+    "reviewed": true
+  },
+  {
+    "id": "saturday",
+    "lemma": "Saturday",
+    "pack": "days",
+    "d": 2,
+    "wrong": [
+      [
+        "saterday",
+        "phonetic_guess"
+      ],
+      [
+        "satarday",
+        "phonetic_guess"
+      ],
+      [
+        "saturdy",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "SATUR-day, like the planet Saturn plus day.",
+    "tipBn": "",
+    "ctx": "The trip is on Saturday.",
+    "form": "Day:",
+    "reviewed": true
+  },
+  {
+    "id": "february",
+    "lemma": "February",
+    "pack": "days",
+    "d": 3,
+    "wrong": [
+      [
+        "febuary",
+        "skipped_letter"
+      ],
+      [
+        "feburary",
+        "skipped_letter"
+      ],
+      [
+        "febrary",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "Feb + ruary. The r comes straight after the b.",
+    "tipBn": "Feb + ruary। b-এর ঠিক পরেই r আসে।",
+    "ctx": "The course starts in February.",
+    "form": "Start month:",
+    "reviewed": true
+  },
+  {
+    "id": "august",
+    "lemma": "August",
+    "pack": "days",
+    "d": 2,
+    "wrong": [
+      [
+        "agust",
+        "skipped_letter"
+      ],
+      [
+        "augest",
+        "phonetic_guess"
+      ],
+      [
+        "augast",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "AU-gust: starts with A-U, then g-u-s-t.",
+    "tipBn": "",
+    "ctx": "The exam is in August.",
+    "form": "Month:",
+    "reviewed": true
+  },
+  {
+    "id": "fortnight",
+    "lemma": "fortnight",
+    "pack": "days",
+    "d": 3,
+    "wrong": [
+      [
+        "fortnite",
+        "phonetic_guess"
+      ],
+      [
+        "fourtnight",
+        "phonetic_guess"
+      ],
+      [
+        "forthnight",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "fort-night = fourteen nights (two weeks). Night keeps its gh.",
+    "tipBn": "fort-night = চৌদ্দ রাত (দুই সপ্তাহ)। night-এ gh আছে।",
+    "ctx": "The booking is for a fortnight.",
+    "form": "Length of stay:",
+    "reviewed": true
+  },
+  {
+    "id": "midnight",
+    "lemma": "midnight",
+    "pack": "days",
+    "d": 1,
+    "wrong": [
+      [
+        "midnite",
+        "phonetic_guess"
+      ],
+      [
+        "mid night",
+        "format"
+      ],
+      [
+        "midnigth",
+        "slip"
+      ]
+    ],
+    "tipEn": "One word: mid + night, with gh.",
+    "tipBn": "",
+    "ctx": "The library closes at midnight.",
+    "form": "Closing time:",
+    "reviewed": true
+  },
+  {
+    "id": "century",
+    "lemma": "century",
+    "pack": "days",
+    "d": 2,
+    "wrong": [
+      [
+        "sentury",
+        "phonetic_guess"
+      ],
+      [
+        "centurey",
+        "vowel_cluster"
+      ],
+      [
+        "centuary",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Starts with C (not S): cent-ury, like cent = 100.",
+    "tipBn": "",
+    "ctx": "The building is from the nineteenth century.",
+    "form": "Period:",
+    "reviewed": true
+  },
+  {
+    "id": "accommodation",
+    "lemma": "accommodation",
+    "pack": "home",
+    "d": 3,
+    "wrong": [
+      [
+        "accomodation",
+        "double_letter"
+      ],
+      [
+        "acommodation",
+        "double_letter"
+      ],
+      [
+        "accomadation",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Double c, double m: ACCOMMODATION.",
+    "tipBn": "দুটি c, দুটি m: ACCOMMODATION।",
+    "ctx": "We offer student accommodation near the campus.",
+    "form": "Type of housing:",
+    "reviewed": true
+  },
+  {
+    "id": "landlord",
+    "lemma": "landlord",
+    "pack": "home",
+    "d": 1,
+    "wrong": [
+      [
+        "landlard",
+        "vowel_cluster"
+      ],
+      [
+        "lanlord",
+        "skipped_letter"
+      ],
+      [
+        "landlod",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "land + lord.",
+    "tipBn": "",
+    "ctx": "Please contact the landlord.",
+    "form": "Contact:",
+    "reviewed": true
+  },
+  {
+    "id": "tenant",
+    "lemma": "tenant",
+    "pack": "home",
+    "d": 1,
+    "wrong": [
+      [
+        "tennant",
+        "double_letter"
+      ],
+      [
+        "tenent",
+        "vowel_cluster"
+      ],
+      [
+        "tenat",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "ten + ant: one n in the middle.",
+    "tipBn": "",
+    "ctx": "The tenant pays the rent monthly.",
+    "form": "Person:",
+    "reviewed": true
+  },
+  {
+    "id": "neighbourhood",
+    "lemma": "neighbourhood",
+    "pack": "home",
+    "d": 3,
+    "accept": [
+      "neighborhood"
+    ],
+    "wrong": [
+      [
+        "neighbourhod",
+        "skipped_letter"
+      ],
+      [
+        "nieghbourhood",
+        "vowel_cluster"
+      ],
+      [
+        "neigbourhood",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "British spelling has OUR: neighbOURhood. The American neighborhood is also accepted.",
+    "tipBn": "ব্রিটিশ বানানে our: neighbOURhood। neighborhood-ও গ্রহণযোগ্য।",
+    "ctx": "It is a quiet neighbourhood.",
+    "form": "Area:",
+    "reviewed": true
+  },
+  {
+    "id": "suburb",
+    "lemma": "suburb",
+    "pack": "home",
+    "d": 2,
+    "wrong": [
+      [
+        "subburb",
+        "double_letter"
+      ],
+      [
+        "suberb",
+        "vowel_cluster"
+      ],
+      [
+        "subarb",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "sub + urb: one b only.",
+    "tipBn": "",
+    "ctx": "The flat is in a suburb of Manchester.",
+    "form": "Location:",
+    "reviewed": true
+  },
+  {
+    "id": "dormitory",
+    "lemma": "dormitory",
+    "pack": "home",
+    "d": 3,
+    "wrong": [
+      [
+        "dormatory",
+        "vowel_cluster"
+      ],
+      [
+        "dormitry",
+        "skipped_letter"
+      ],
+      [
+        "dormitary",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "dor-mi-TOR-y: ends with -ory.",
+    "tipBn": "",
+    "ctx": "Students live in the dormitory.",
+    "form": "Housing:",
+    "reviewed": true
+  },
+  {
+    "id": "bungalow",
+    "lemma": "bungalow",
+    "pack": "home",
+    "d": 2,
+    "wrong": [
+      [
+        "bungalo",
+        "skipped_letter"
+      ],
+      [
+        "bungelow",
+        "vowel_cluster"
+      ],
+      [
+        "bungalou",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "bung-a-LOW: ends with -low.",
+    "tipBn": "",
+    "ctx": "They live in a small bungalow.",
+    "form": "Type of house:",
+    "reviewed": true
+  },
+  {
+    "id": "refrigerator",
+    "lemma": "refrigerator",
+    "pack": "home",
+    "d": 3,
+    "wrong": [
+      [
+        "refridgerator",
+        "phonetic_guess"
+      ],
+      [
+        "refrigarator",
+        "vowel_cluster"
+      ],
+      [
+        "refrigirator",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "re-FRIG-erator: just g, not dge.",
+    "tipBn": "refriGerator: dge নয়, শুধু g।",
+    "ctx": "The kitchen has a refrigerator.",
+    "form": "Appliance:",
+    "reviewed": true
+  },
+  {
+    "id": "insurance",
+    "lemma": "insurance",
+    "pack": "home",
+    "d": 2,
+    "wrong": [
+      [
+        "insurence",
+        "vowel_cluster"
+      ],
+      [
+        "insuarance",
+        "vowel_cluster"
+      ],
+      [
+        "insurrance",
+        "double_letter"
+      ]
+    ],
+    "tipEn": "insur + ANCE: the ending is -ance.",
+    "tipBn": "insurANCE: শেষে -ance।",
+    "ctx": "You need to pay for insurance.",
+    "form": "Extra cost:",
+    "reviewed": true
+  },
+  {
+    "id": "reservation",
+    "lemma": "reservation",
+    "pack": "home",
+    "d": 3,
+    "wrong": [
+      [
+        "resevation",
+        "skipped_letter"
+      ],
+      [
+        "reserveation",
+        "vowel_cluster"
+      ],
+      [
+        "reservasion",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "reserve loses its final e: reserv + ation.",
+    "tipBn": "",
+    "ctx": "I would like to make a reservation.",
+    "form": "Request:",
+    "reviewed": true
+  },
+  {
+    "id": "cheque",
+    "lemma": "cheque",
+    "pack": "money",
+    "d": 3,
+    "accept": [
+      "check"
+    ],
+    "wrong": [
+      [
+        "chek",
+        "phonetic_guess"
+      ],
+      [
+        "cheq",
+        "skipped_letter"
+      ],
+      [
+        "chequ",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "British bank cheque ends in -QUE. The American check is also accepted.",
+    "tipBn": "ব্যাংকের cheque-এ que থাকে। American 'check'-ও গ্রহণযোগ্য।",
+    "ctx": "You can pay by cheque.",
+    "form": "Payment method:",
+    "reviewed": true
+  },
+  {
+    "id": "deposit",
+    "lemma": "deposit",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "diposit",
+        "vowel_cluster"
+      ],
+      [
+        "deposite",
+        "vowel_cluster"
+      ],
+      [
+        "depossit",
+        "double_letter"
+      ]
+    ],
+    "tipEn": "de + posit: ends in -it, no e.",
+    "tipBn": "",
+    "ctx": "The deposit is two hundred pounds.",
+    "form": "Payment:",
+    "reviewed": true
+  },
+  {
+    "id": "mortgage",
+    "lemma": "mortgage",
+    "pack": "money",
+    "d": 3,
+    "wrong": [
+      [
+        "morgage",
+        "silent_letter"
+      ],
+      [
+        "mortage",
+        "silent_letter"
+      ],
+      [
+        "mortgege",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "The t is silent in speech but it is there: MORT-GAGE.",
+    "tipBn": "t উচ্চারণে শোনা যায় না, তবু লিখতে হবে: MORTGAGE।",
+    "ctx": "They applied for a mortgage.",
+    "form": "Loan type:",
+    "reviewed": true
+  },
+  {
+    "id": "voucher",
+    "lemma": "voucher",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "vaucher",
+        "vowel_cluster"
+      ],
+      [
+        "vouchar",
+        "vowel_cluster"
+      ],
+      [
+        "voucer",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "v-OU-cher: ou, then ch.",
+    "tipBn": "",
+    "ctx": "You will receive a gift voucher.",
+    "form": "Prize:",
+    "reviewed": true
+  },
+  {
+    "id": "counterfeit",
+    "lemma": "counterfeit",
+    "pack": "money",
+    "d": 3,
+    "wrong": [
+      [
+        "counterfiet",
+        "vowel_cluster"
+      ],
+      [
+        "counterfit",
+        "vowel_cluster"
+      ],
+      [
+        "counterfeight",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "counter + FEIT: e before i here.",
+    "tipBn": "",
+    "ctx": "The shop found counterfeit money.",
+    "form": "Problem:",
+    "reviewed": true
+  },
+  {
+    "id": "purchase",
+    "lemma": "purchase",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "purchese",
+        "vowel_cluster"
+      ],
+      [
+        "purchas",
+        "skipped_letter"
+      ],
+      [
+        "perchase",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "PUR-chase: starts with pur, ends with -chase.",
+    "tipBn": "",
+    "ctx": "Keep the receipt as proof of purchase.",
+    "form": "Keep:",
+    "reviewed": true
+  },
+  {
+    "id": "withdraw",
+    "lemma": "withdraw",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "withdrow",
+        "phonetic_guess"
+      ],
+      [
+        "widthdraw",
+        "slip"
+      ],
+      [
+        "withdrawl",
+        "other"
+      ]
+    ],
+    "tipEn": "with + draw. Not -ow, not -wl.",
+    "tipBn": "",
+    "ctx": "You can withdraw cash at the machine.",
+    "form": "Service:",
+    "reviewed": true
+  },
+  {
+    "id": "income",
+    "lemma": "income",
+    "pack": "money",
+    "d": 1,
+    "wrong": [
+      [
+        "incom",
+        "skipped_letter"
+      ],
+      [
+        "incomme",
+        "double_letter"
+      ]
+    ],
+    "tipEn": "in + come: ends with e.",
+    "tipBn": "",
+    "ctx": "What is your monthly income?",
+    "form": "Question:",
+    "reviewed": true
+  },
+  {
+    "id": "debt",
+    "lemma": "debt",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "det",
+        "silent_letter"
+      ],
+      [
+        "dept",
+        "phonetic_guess"
+      ],
+      [
+        "dett",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "The b is silent but must be written: DEBT.",
+    "tipBn": "b নীরব, কিন্তু লিখতে হবে: DEBT।",
+    "ctx": "The student is in debt.",
+    "form": "Problem:",
+    "reviewed": true
+  },
+  {
+    "id": "guarantee",
+    "lemma": "guarantee",
+    "pack": "money",
+    "d": 3,
+    "wrong": [
+      [
+        "garantee",
+        "silent_letter"
+      ],
+      [
+        "guarentee",
+        "vowel_cluster"
+      ],
+      [
+        "gaurantee",
+        "slip"
+      ]
+    ],
+    "tipEn": "GUAR-an-TEE: u comes after g.",
+    "tipBn": "GUA-RAN-TEE। g-এর পরে u আছে।",
+    "ctx": "There is a one-year guarantee.",
+    "form": "Offer:",
+    "reviewed": true
+  },
+  {
+    "id": "interest",
+    "lemma": "interest",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "intrest",
+        "skipped_letter"
+      ],
+      [
+        "interst",
+        "skipped_letter"
+      ],
+      [
+        "intrerest",
+        "extra_letter"
+      ]
+    ],
+    "tipEn": "inter + est: write all three syllables, in-ter-est.",
+    "tipBn": "",
+    "ctx": "The interest rate is two percent.",
+    "form": "Rate:",
+    "reviewed": true
+  },
+  {
+    "id": "library",
+    "lemma": "library",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "libary",
+        "skipped_letter"
+      ],
+      [
+        "librery",
+        "vowel_cluster"
+      ],
+      [
+        "lybrary",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "L-I-B-R-A-R-Y: two r's with an a between them.",
+    "tipBn": "L-I-B-R-A-R-Y: দুটি r, মাঝে a।",
+    "ctx": "The library opens at nine.",
+    "form": "Place:",
+    "reviewed": true
+  },
+  {
+    "id": "lecture",
+    "lemma": "lecture",
+    "pack": "uni",
+    "d": 1,
+    "wrong": [
+      [
+        "lecter",
+        "phonetic_guess"
+      ],
+      [
+        "lechure",
+        "phonetic_guess"
+      ],
+      [
+        "lectur",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "lect + ure: ends with e.",
+    "tipBn": "",
+    "ctx": "The lecture is in Room four.",
+    "form": "Event:",
+    "reviewed": true
+  },
+  {
+    "id": "supervisor",
+    "lemma": "supervisor",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "supervisior",
+        "vowel_cluster"
+      ],
+      [
+        "superviser",
+        "vowel_cluster"
+      ],
+      [
+        "supervizor",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "super + vis + OR: ends with -or.",
+    "tipBn": "",
+    "ctx": "Please meet your supervisor.",
+    "form": "Meet:",
+    "reviewed": true
+  },
+  {
+    "id": "dissertation",
+    "lemma": "dissertation",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "disertation",
+        "double_letter"
+      ],
+      [
+        "dissatation",
+        "vowel_cluster"
+      ],
+      [
+        "dissertasion",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "DIS-SER-TA-TION: double s after di.",
+    "tipBn": "DIS-SER-TA-TION: শুরুতে পরপর দুটি s।",
+    "ctx": "The dissertation is due in May.",
+    "form": "Assignment:",
+    "reviewed": true
+  },
+  {
+    "id": "faculty",
+    "lemma": "faculty",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "facalty",
+        "vowel_cluster"
+      ],
+      [
+        "facultey",
+        "vowel_cluster"
+      ],
+      [
+        "faculity",
+        "extra_letter"
+      ]
+    ],
+    "tipEn": "fac + ul + ty: faculty.",
+    "tipBn": "",
+    "ctx": "She works in the Faculty of Science.",
+    "form": "Department:",
+    "reviewed": true
+  },
+  {
+    "id": "handout",
+    "lemma": "handout",
+    "pack": "uni",
+    "d": 1,
+    "accept": [
+      "hand-out"
+    ],
+    "wrong": [
+      [
+        "hanout",
+        "skipped_letter"
+      ],
+      [
+        "handaut",
+        "vowel_cluster"
+      ],
+      [
+        "hand out",
+        "format"
+      ]
+    ],
+    "tipEn": "One word: hand + out.",
+    "tipBn": "",
+    "ctx": "Collect the handout at the door.",
+    "form": "Collect:",
+    "reviewed": true
+  },
+  {
+    "id": "deadline",
+    "lemma": "deadline",
+    "pack": "uni",
+    "d": 1,
+    "wrong": [
+      [
+        "deadlin",
+        "skipped_letter"
+      ],
+      [
+        "dedline",
+        "vowel_cluster"
+      ],
+      [
+        "deadlien",
+        "slip"
+      ]
+    ],
+    "tipEn": "dead + line.",
+    "tipBn": "",
+    "ctx": "The deadline is Friday.",
+    "form": "Important:",
+    "reviewed": true
+  },
+  {
+    "id": "attendance",
+    "lemma": "attendance",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "attendence",
+        "vowel_cluster"
+      ],
+      [
+        "attandance",
+        "vowel_cluster"
+      ],
+      [
+        "atendance",
+        "double_letter"
+      ]
+    ],
+    "tipEn": "att + end + ANCE: double t, ends -ance.",
+    "tipBn": "attendANCE: শেষে -ance।",
+    "ctx": "Attendance is compulsory.",
+    "form": "Rule:",
+    "reviewed": true
+  },
+  {
+    "id": "assessment",
+    "lemma": "assessment",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "assesment",
+        "double_letter"
+      ],
+      [
+        "asessment",
+        "double_letter"
+      ],
+      [
+        "assessmant",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Double s, double s: a-SS-e-SS-ment.",
+    "tipBn": "",
+    "ctx": "The assessment is a short essay.",
+    "form": "Task:",
+    "reviewed": true
+  },
+  {
+    "id": "laboratory",
+    "lemma": "laboratory",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "labratory",
+        "skipped_letter"
+      ],
+      [
+        "laboratry",
+        "skipped_letter"
+      ],
+      [
+        "laboratary",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "lab + or + a + tory: laboratory.",
+    "tipBn": "",
+    "ctx": "The experiment is in the laboratory.",
+    "form": "Place:",
+    "reviewed": true
+  },
+  {
+    "id": "certificate",
+    "lemma": "certificate",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "certifcate",
+        "skipped_letter"
+      ],
+      [
+        "sertificate",
+        "phonetic_guess"
+      ],
+      [
+        "certeficate",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "cert + if + icate: starts with C.",
+    "tipBn": "",
+    "ctx": "You will receive a certificate.",
+    "form": "Award:",
+    "reviewed": true
+  },
+  {
+    "id": "questionnaire",
+    "lemma": "questionnaire",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "questionaire",
+        "double_letter"
+      ],
+      [
+        "questionnair",
+        "skipped_letter"
+      ],
+      [
+        "quesionnaire",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "question + naire: double n.",
+    "tipBn": "questioNNaire: দুটি n।",
+    "ctx": "Please complete the questionnaire.",
+    "form": "Task:",
+    "reviewed": true
+  },
+  {
+    "id": "stationery",
+    "lemma": "stationery",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "stationary",
+        "homophone"
+      ],
+      [
+        "stationerry",
+        "double_letter"
+      ],
+      [
+        "stasionery",
+        "phonetic_guess"
+      ]
+    ],
+    "tipEn": "stationERy (envelopes, paper) vs stationAry (not moving): E for envelope.",
+    "tipBn": "stationERy = খাম-কাগজ (envelope)। stationAry মানে স্থির।",
+    "ctx": "The shop sells stationery.",
+    "form": "Goods:",
+    "reviewed": true
+  },
+  {
+    "id": "knowledge",
+    "lemma": "knowledge",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "knowlege",
+        "skipped_letter"
+      ],
+      [
+        "nowledge",
+        "silent_letter"
+      ],
+      [
+        "knowledg",
+        "skipped_letter"
+      ]
+    ],
+    "tipEn": "The k is silent but is there: KNOW + LEDGE.",
+    "tipBn": "শুরুতে k নীরব: KNOWLEDGE।",
+    "ctx": "The test checks your knowledge.",
+    "form": "Test:",
+    "reviewed": true
+  },
+  {
+    "id": "weekend",
+    "lemma": "weekend",
+    "pack": "days",
+    "d": 1,
+    "wrong": [
+      [
+        "wekend",
+        "skipped_letter"
+      ],
+      [
+        "weekende",
+        "extra_letter"
+      ],
+      [
+        "waekend",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "midday",
+    "lemma": "midday",
+    "pack": "days",
+    "d": 1,
+    "wrong": [
+      [
+        "miday",
+        "skipped_letter"
+      ],
+      [
+        "middaye",
+        "extra_letter"
+      ],
+      [
+        "madday",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "decade",
+    "lemma": "decade",
+    "pack": "days",
+    "d": 2,
+    "wrong": [
+      [
+        "decad",
+        "skipped_letter"
+      ],
+      [
+        "decadee",
+        "extra_letter"
+      ],
+      [
+        "dacade",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "millennium",
+    "lemma": "millennium",
+    "pack": "days",
+    "d": 3,
+    "wrong": [
+      [
+        "milenium",
+        "skipped_letter"
+      ],
+      [
+        "millenniume",
+        "extra_letter"
+      ],
+      [
+        "mallennium",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "full-time",
+    "lemma": "full-time",
+    "pack": "days",
+    "d": 2,
+    "wrong": [
+      [
+        "ful-time",
+        "skipped_letter"
+      ],
+      [
+        "full-timee",
+        "extra_letter"
+      ],
+      [
+        "fall-time",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "part-time",
+    "lemma": "part-time",
+    "pack": "days",
+    "d": 2,
+    "wrong": [
+      [
+        "part-tim",
+        "skipped_letter"
+      ],
+      [
+        "part-timee",
+        "extra_letter"
+      ],
+      [
+        "part-time",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "apartment",
+    "lemma": "apartment",
+    "pack": "home",
+    "d": 1,
+    "wrong": [
+      [
+        "apartmen",
+        "skipped_letter"
+      ],
+      [
+        "apartmente",
+        "extra_letter"
+      ],
+      [
+        "apartment",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "chimney",
+    "lemma": "chimney",
+    "pack": "home",
+    "d": 2,
+    "wrong": [
+      [
+        "chimne",
+        "skipped_letter"
+      ],
+      [
+        "chimneye",
+        "extra_letter"
+      ],
+      [
+        "chamney",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "basement",
+    "lemma": "basement",
+    "pack": "home",
+    "d": 1,
+    "wrong": [
+      [
+        "basemen",
+        "skipped_letter"
+      ],
+      [
+        "basemente",
+        "extra_letter"
+      ],
+      [
+        "basement",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "microwave",
+    "lemma": "microwave",
+    "pack": "home",
+    "d": 2,
+    "wrong": [
+      [
+        "microwav",
+        "skipped_letter"
+      ],
+      [
+        "microwavee",
+        "extra_letter"
+      ],
+      [
+        "macrowave",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "condominium",
+    "lemma": "condominium",
+    "pack": "home",
+    "d": 3,
+    "wrong": [
+      [
+        "condominiu",
+        "skipped_letter"
+      ],
+      [
+        "condominiume",
+        "extra_letter"
+      ],
+      [
+        "candominium",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "hostel",
+    "lemma": "hostel",
+    "pack": "home",
+    "d": 1,
+    "wrong": [
+      [
+        "hoste",
+        "skipped_letter"
+      ],
+      [
+        "hostele",
+        "extra_letter"
+      ],
+      [
+        "hastel",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "suite",
+    "lemma": "suite",
+    "pack": "home",
+    "d": 2,
+    "wrong": [
+      [
+        "suit",
+        "skipped_letter"
+      ],
+      [
+        "suitee",
+        "extra_letter"
+      ],
+      [
+        "saite",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "lease",
+    "lemma": "lease",
+    "pack": "home",
+    "d": 1,
+    "wrong": [
+      [
+        "leas",
+        "skipped_letter"
+      ],
+      [
+        "leasee",
+        "extra_letter"
+      ],
+      [
+        "laase",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "semi-detached-house",
+    "lemma": "semi-detached house",
+    "pack": "home",
+    "d": 3,
+    "wrong": [
+      [
+        "semi-detached hous",
+        "skipped_letter"
+      ],
+      [
+        "semi-detached housee",
+        "extra_letter"
+      ],
+      [
+        "sami-detached house",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "terraced-house",
+    "lemma": "terraced house",
+    "pack": "home",
+    "d": 3,
+    "wrong": [
+      [
+        "teraced house",
+        "skipped_letter"
+      ],
+      [
+        "terraced housee",
+        "extra_letter"
+      ],
+      [
+        "tarraced house",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "annual-fee",
+    "lemma": "annual fee",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "anual fe",
+        "skipped_letter"
+      ],
+      [
+        "annual feee",
+        "extra_letter"
+      ],
+      [
+        "annual fee",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "partial-refund",
+    "lemma": "partial refund",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "partial refun",
+        "skipped_letter"
+      ],
+      [
+        "partial refunde",
+        "extra_letter"
+      ],
+      [
+        "partial refund",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "non-refundable",
+    "lemma": "non-refundable",
+    "pack": "money",
+    "d": 3,
+    "wrong": [
+      [
+        "non-refundabl",
+        "skipped_letter"
+      ],
+      [
+        "non-refundablee",
+        "extra_letter"
+      ],
+      [
+        "nan-refundable",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "grace-period",
+    "lemma": "grace period",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "grace perio",
+        "skipped_letter"
+      ],
+      [
+        "grace periode",
+        "extra_letter"
+      ],
+      [
+        "grace period",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "bank-statement",
+    "lemma": "bank statement",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "bank statemen",
+        "skipped_letter"
+      ],
+      [
+        "bank statemente",
+        "extra_letter"
+      ],
+      [
+        "bank statement",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "current-account",
+    "lemma": "current account",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "curent acount",
+        "skipped_letter"
+      ],
+      [
+        "current accounte",
+        "extra_letter"
+      ],
+      [
+        "carrent account",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "budget-deficit",
+    "lemma": "budget deficit",
+    "pack": "money",
+    "d": 3,
+    "wrong": [
+      [
+        "budget defici",
+        "skipped_letter"
+      ],
+      [
+        "budget deficite",
+        "extra_letter"
+      ],
+      [
+        "badget deficit",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "credit-card",
+    "lemma": "credit card",
+    "pack": "money",
+    "d": 1,
+    "wrong": [
+      [
+        "credit car",
+        "skipped_letter"
+      ],
+      [
+        "credit carde",
+        "extra_letter"
+      ],
+      [
+        "cradit card",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "tuition-fees",
+    "lemma": "tuition fees",
+    "pack": "money",
+    "d": 2,
+    "wrong": [
+      [
+        "tuition fes",
+        "skipped_letter"
+      ],
+      [
+        "tuition feese",
+        "extra_letter"
+      ],
+      [
+        "taition fees",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "coupon",
+    "lemma": "coupon",
+    "pack": "money",
+    "d": 1,
+    "wrong": [
+      [
+        "coupo",
+        "skipped_letter"
+      ],
+      [
+        "coupone",
+        "extra_letter"
+      ],
+      [
+        "caupon",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "tutor",
+    "lemma": "tutor",
+    "pack": "uni",
+    "d": 1,
+    "wrong": [
+      [
+        "tuto",
+        "skipped_letter"
+      ],
+      [
+        "tutore",
+        "extra_letter"
+      ],
+      [
+        "tator",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "commencement",
+    "lemma": "commencement",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "comencement",
+        "skipped_letter"
+      ],
+      [
+        "commencemente",
+        "extra_letter"
+      ],
+      [
+        "cammencement",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "leaflet",
+    "lemma": "leaflet",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "leafle",
+        "skipped_letter"
+      ],
+      [
+        "leaflete",
+        "extra_letter"
+      ],
+      [
+        "laaflet",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "diploma",
+    "lemma": "diploma",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "diplom",
+        "skipped_letter"
+      ],
+      [
+        "diplomae",
+        "extra_letter"
+      ],
+      [
+        "daploma",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "placement-test",
+    "lemma": "placement test",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "placement tes",
+        "skipped_letter"
+      ],
+      [
+        "placement teste",
+        "extra_letter"
+      ],
+      [
+        "placement test",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "proofreading",
+    "lemma": "proofreading",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "profreading",
+        "skipped_letter"
+      ],
+      [
+        "proofreadinge",
+        "extra_letter"
+      ],
+      [
+        "praofreading",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "registrar-s-office",
+    "lemma": "registrar's office",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "registrar's ofice",
+        "skipped_letter"
+      ],
+      [
+        "registrar's officee",
+        "extra_letter"
+      ],
+      [
+        "ragistrar's office",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "textbook",
+    "lemma": "textbook",
+    "pack": "uni",
+    "d": 1,
+    "wrong": [
+      [
+        "textbok",
+        "skipped_letter"
+      ],
+      [
+        "textbooke",
+        "extra_letter"
+      ],
+      [
+        "taxtbook",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "vocabulary",
+    "lemma": "vocabulary",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "vocabular",
+        "skipped_letter"
+      ],
+      [
+        "vocabularye",
+        "extra_letter"
+      ],
+      [
+        "vacabulary",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "bachelor-s-degree",
+    "lemma": "bachelor's degree",
+    "pack": "uni",
+    "d": 3,
+    "wrong": [
+      [
+        "bachelor's degre",
+        "skipped_letter"
+      ],
+      [
+        "bachelor's degreee",
+        "extra_letter"
+      ],
+      [
+        "bachelor's degree",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "experiment",
+    "lemma": "experiment",
+    "pack": "uni",
+    "d": 2,
+    "wrong": [
+      [
+        "experimen",
+        "skipped_letter"
+      ],
+      [
+        "experimente",
+        "extra_letter"
+      ],
+      [
+        "axperiment",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "feedback",
+    "lemma": "feedback",
+    "pack": "uni",
+    "d": 1,
+    "wrong": [
+      [
+        "fedback",
+        "skipped_letter"
+      ],
+      [
+        "feedbacke",
+        "extra_letter"
+      ],
+      [
+        "faedback",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "accountant",
+    "lemma": "accountant",
+    "pack": "jobs",
+    "d": 2,
+    "wrong": [
+      [
+        "acountant",
+        "skipped_letter"
+      ],
+      [
+        "accountante",
+        "extra_letter"
+      ],
+      [
+        "accountant",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "receptionist",
+    "lemma": "receptionist",
+    "pack": "jobs",
+    "d": 3,
+    "wrong": [
+      [
+        "receptionis",
+        "skipped_letter"
+      ],
+      [
+        "receptioniste",
+        "extra_letter"
+      ],
+      [
+        "raceptionist",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "psychologist",
+    "lemma": "psychologist",
+    "pack": "jobs",
+    "d": 3,
+    "wrong": [
+      [
+        "psychologis",
+        "skipped_letter"
+      ],
+      [
+        "psychologiste",
+        "extra_letter"
+      ],
+      [
+        "psychalogist",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "secretary",
+    "lemma": "secretary",
+    "pack": "jobs",
+    "d": 2,
+    "wrong": [
+      [
+        "secretar",
+        "skipped_letter"
+      ],
+      [
+        "secretarye",
+        "extra_letter"
+      ],
+      [
+        "sacretary",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "architect",
+    "lemma": "architect",
+    "pack": "jobs",
+    "d": 2,
+    "wrong": [
+      [
+        "architec",
+        "skipped_letter"
+      ],
+      [
+        "architecte",
+        "extra_letter"
+      ],
+      [
+        "architect",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "vacancy",
+    "lemma": "vacancy",
+    "pack": "jobs",
+    "d": 2,
+    "wrong": [
+      [
+        "vacanc",
+        "skipped_letter"
+      ],
+      [
+        "vacancye",
+        "extra_letter"
+      ],
+      [
+        "vacancy",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "freelance",
+    "lemma": "freelance",
+    "pack": "jobs",
+    "d": 2,
+    "wrong": [
+      [
+        "frelance",
+        "skipped_letter"
+      ],
+      [
+        "freelancee",
+        "extra_letter"
+      ],
+      [
+        "fraelance",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "curriculum-vitae",
+    "lemma": "curriculum vitae",
+    "pack": "jobs",
+    "d": 3,
+    "wrong": [
+      [
+        "curiculum vitae",
+        "skipped_letter"
+      ],
+      [
+        "curriculum vitaee",
+        "extra_letter"
+      ],
+      [
+        "carriculum vitae",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "vegetarian",
+    "lemma": "vegetarian",
+    "pack": "health",
+    "d": 2,
+    "wrong": [
+      [
+        "vegetaria",
+        "skipped_letter"
+      ],
+      [
+        "vegetariane",
+        "extra_letter"
+      ],
+      [
+        "vagetarian",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "vitamin",
+    "lemma": "vitamin",
+    "pack": "health",
+    "d": 1,
+    "wrong": [
+      [
+        "vitami",
+        "skipped_letter"
+      ],
+      [
+        "vitamine",
+        "extra_letter"
+      ],
+      [
+        "vatamin",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "carbohydrates",
+    "lemma": "carbohydrates",
+    "pack": "health",
+    "d": 3,
+    "wrong": [
+      [
+        "carbohydrate",
+        "skipped_letter"
+      ],
+      [
+        "carbohydratese",
+        "extra_letter"
+      ],
+      [
+        "carbohydrates",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "yoghurt",
+    "lemma": "yoghurt",
+    "pack": "health",
+    "d": 2,
+    "wrong": [
+      [
+        "yoghur",
+        "skipped_letter"
+      ],
+      [
+        "yoghurte",
+        "extra_letter"
+      ],
+      [
+        "yaghurt",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "protein",
+    "lemma": "protein",
+    "pack": "health",
+    "d": 1,
+    "wrong": [
+      [
+        "protei",
+        "skipped_letter"
+      ],
+      [
+        "proteine",
+        "extra_letter"
+      ],
+      [
+        "pratein",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "nursery",
+    "lemma": "nursery",
+    "pack": "health",
+    "d": 2,
+    "wrong": [
+      [
+        "nurser",
+        "skipped_letter"
+      ],
+      [
+        "nurserye",
+        "extra_letter"
+      ],
+      [
+        "narsery",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "treatment",
+    "lemma": "treatment",
+    "pack": "health",
+    "d": 2,
+    "wrong": [
+      [
+        "treatmen",
+        "skipped_letter"
+      ],
+      [
+        "treatmente",
+        "extra_letter"
+      ],
+      [
+        "traatment",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  },
+  {
+    "id": "medicine",
+    "lemma": "medicine",
+    "pack": "health",
+    "d": 2,
+    "wrong": [
+      [
+        "medicin",
+        "skipped_letter"
+      ],
+      [
+        "medicinee",
+        "extra_letter"
+      ],
+      [
+        "madicine",
+        "vowel_cluster"
+      ]
+    ],
+    "tipEn": "Check the spelling carefully. British form preferred.",
+    "tipBn": "",
+    "reviewed": false
+  }
+]

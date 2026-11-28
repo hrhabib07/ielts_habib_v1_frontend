@@ -1,0 +1,163 @@
+[
+  {
+    "id": "name-atkinson",
+    "type": "name",
+    "answer": "Atkinson",
+    "spoken": "A T K I N S O N",
+    "accept": []
+  },
+  {
+    "id": "name-mackenzie",
+    "type": "name",
+    "answer": "Mackenzie",
+    "spoken": "M A C K E N Z I E",
+    "accept": []
+  },
+  {
+    "id": "name-hargreaves",
+    "type": "name",
+    "answer": "Hargreaves",
+    "spoken": "H A R G R E A V E S",
+    "accept": []
+  },
+  {
+    "id": "name-pemberton",
+    "type": "name",
+    "answer": "Pemberton",
+    "spoken": "P E M B E R T O N",
+    "accept": []
+  },
+  {
+    "id": "name-wyndham",
+    "type": "name",
+    "answer": "Wyndham",
+    "spoken": "W Y N D H A M",
+    "accept": []
+  },
+  {
+    "id": "name-thackeray",
+    "type": "name",
+    "answer": "Thackeray",
+    "spoken": "T H A C K E R A Y",
+    "accept": []
+  },
+  {
+    "id": "name-fitzgerald",
+    "type": "name",
+    "answer": "Fitzgerald",
+    "spoken": "F I T Z G E R A L D",
+    "accept": []
+  },
+  {
+    "id": "name-rothwell",
+    "type": "name",
+    "answer": "Rothwell",
+    "spoken": "R O T H W E L L",
+    "accept": []
+  },
+  {
+    "id": "pc-m14",
+    "type": "postcode",
+    "answer": "M14 5TQ",
+    "spoken": "M 1 4 5 T Q",
+    "accept": ["M145TQ", "m14 5tq"]
+  },
+  {
+    "id": "pc-ls6",
+    "type": "postcode",
+    "answer": "LS6 2JB",
+    "spoken": "L S 6 2 J B",
+    "accept": ["LS62JB", "ls6 2jb"]
+  },
+  {
+    "id": "pc-b15",
+    "type": "postcode",
+    "answer": "B15 3DE",
+    "spoken": "B 1 5 3 D E",
+    "accept": ["B153DE", "b15 3de"]
+  },
+  {
+    "id": "pc-ng7",
+    "type": "postcode",
+    "answer": "NG7 2RD",
+    "spoken": "N G 7 2 R D",
+    "accept": ["NG72RD", "ng7 2rd"]
+  },
+  {
+    "id": "num-thirteen",
+    "type": "number",
+    "answer": "13",
+    "spoken": "thirteen",
+    "accept": []
+  },
+  {
+    "id": "num-thirty",
+    "type": "number",
+    "answer": "30",
+    "spoken": "thirty",
+    "accept": []
+  },
+  {
+    "id": "num-fifteen",
+    "type": "number",
+    "answer": "15",
+    "spoken": "fifteen",
+    "accept": []
+  },
+  {
+    "id": "num-fifty",
+    "type": "number",
+    "answer": "50",
+    "spoken": "fifty",
+    "accept": []
+  },
+  {
+    "id": "num-seventeen",
+    "type": "number",
+    "answer": "17",
+    "spoken": "seventeen",
+    "accept": []
+  },
+  {
+    "id": "num-seventy",
+    "type": "number",
+    "answer": "70",
+    "spoken": "seventy",
+    "accept": []
+  },
+  {
+    "id": "num-nineteen",
+    "type": "number",
+    "answer": "19",
+    "spoken": "nineteen",
+    "accept": []
+  },
+  {
+    "id": "num-ninety",
+    "type": "number",
+    "answer": "90",
+    "spoken": "ninety",
+    "accept": []
+  },
+  {
+    "id": "price-1450",
+    "type": "price",
+    "answer": "14.50",
+    "spoken": "fourteen pounds fifty",
+    "accept": ["£14.50", "14.50"]
+  },
+  {
+    "id": "price-60",
+    "type": "price",
+    "answer": "60",
+    "spoken": "sixty pounds",
+    "accept": ["£60", "60"]
+  },
+  {
+    "id": "price-1999",
+    "type": "price",
+    "answer": "19.99",
+    "spoken": "nineteen ninety-nine",
+    "accept": ["£19.99", "19.99"]
+  }
+]
