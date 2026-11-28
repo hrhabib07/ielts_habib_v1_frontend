@@ -81,6 +81,14 @@ export function Footer({ initialUser = null }: FooterProps) {
               </li>
               <li>
                 <Link
+                  href="/tools/listening-spelling"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Listening Spelling
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/about"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >

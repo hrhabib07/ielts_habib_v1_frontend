@@ -95,6 +95,12 @@ export function GuestLandingFooter({
           <p>{shell.footerRights(year)}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             <Link
+              href="/tools/listening-spelling"
+              className="font-semibold text-sky-800 transition-colors hover:text-foreground dark:text-sky-300"
+            >
+              Listening Spelling
+            </Link>
+            <Link
               href="/pricing"
               className="font-semibold text-amber-800 transition-colors hover:text-foreground dark:text-amber-300"
             >
